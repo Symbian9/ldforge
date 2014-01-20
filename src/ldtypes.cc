@@ -24,6 +24,7 @@
 #include "history.h"
 #include "gldraw.h"
 #include "colors.h"
+#include "gldata.h"
 
 cfg (String, ld_defaultname, "");
 cfg (String, ld_defaultuser, "");

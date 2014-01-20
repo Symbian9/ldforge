@@ -36,6 +36,7 @@
 #include "dialogs.h"
 #include "addObjectDialog.h"
 #include "messagelog.h"
+#include "gldata.h"
 #include "primitives.h"
 #include "misc/ringFinder.h"
 #include "moc_gldraw.cpp"
@@ -108,9 +109,6 @@ const struct LDGLAxis
 	{ QColor (80,  192,   0), Vertex (0, 10000, 0) }, // Y
 	{ QColor (0,   160, 192), Vertex (0, 0, 10000) }, // Z
 };
-
-static bool g_glInvert = false;
-static QList<int> g_warnedColors;
 
 // =============================================================================
 //
@@ -245,11 +243,13 @@ void GLRenderer::initializeGL()
 	setBackground();
 
 	glLineWidth (gl_linethickness);
+	glLineStipple (1, 0x6666);
 
 	setAutoFillBackground (false);
 	setMouseTracking (true);
 	setFocusPolicy (Qt::WheelFocus);
-	compileAllObjects();
+	
+	g_vertexCompiler.compileFile();
 }
 
 // =============================================================================
@@ -282,105 +282,7 @@ void GLRenderer::setBackground()
 }
 
 // =============================================================================
-//
-void GLRenderer::setObjectColor (LDObject* obj, const ListType list)
-{
-	QColor qcol;
-
-	if (!obj->isColored())
-		return;
-
-	if (list == GL::PickList)
-	{
-		// Make the color by the object's ID if we're picking, so we can make the
-		// ID again from the color we get from the picking results. Be sure to use
-		// the top level parent's index since we want a subfile's children point
-		// to the subfile itself.
-		long i = obj->topLevelParent()->getID();
-
-		// Calculate a color based from this index. This method caters for
-		// 16777216 objects. I don't think that'll be exceeded anytime soon. :)
-		// ATM biggest is 53588.dat with 12600 lines.
-		double r = (i / 0x10000) % 0x100,
-			   g = (i / 0x100) % 0x100,
-			   b = i % 0x100;
-
-		qglColor (QColor (r, g, b));
-		return;
-	}
-
-	if ((list == BFCFrontList || list == BFCBackList) &&
-		obj->getType() != LDObject::ELine &&
-		obj->getType() != LDObject::ECondLine)
-	{
-		if (list == GL::BFCFrontList)
-			qcol = QColor (40, 192, 0);
-		else
-			qcol = QColor (224, 0, 0);
-	}
-	else
-	{
-		if (obj->getColor() == maincolor)
-			qcol = getMainColor();
-		else
-		{
-			LDColor* col = getColor (obj->getColor());
-
-			if (col)
-				qcol = col->faceColor;
-		}
-
-		if (obj->getColor() == edgecolor)
-		{
-			LDColor* col;
-
-			if (!gl_blackedges && obj->getParent() && (col = getColor (obj->getParent()->getColor())))
-				qcol = col->edgeColor;
-			else
-				qcol = (m_darkbg == false) ? Qt::black : Qt::white;
-		}
-
-		if (qcol.isValid() == false)
-		{
-			// The color was unknown. Use main color to make the object at least
-			// not appear pitch-black.
-			if (obj->getColor() != edgecolor)
-				qcol = getMainColor();
-
-			// Warn about the unknown colors, but only once.
-			for (int i : g_warnedColors)
-				if (obj->getColor() == i)
-					return;
-
-			log ("%1: Unknown color %2!\n", __func__, obj->getColor());
-			g_warnedColors << obj->getColor();
-			return;
-		}
-	}
-
-	int r = qcol.red(),
-		 g = qcol.green(),
-		 b = qcol.blue(),
-		 a = qcol.alpha();
-
-	if (obj->topLevelParent()->isSelected())
-	{
-		// Brighten it up for the select list.
-		QColor selcolor (gl_selectcolor);
-		r = (r + selcolor.red()) / 2;
-		g = (g + selcolor.green()) / 2;
-		b = (b + selcolor.blue()) / 2;
-	}
-
-	glColor4f (
-		((double) r) / 255.0f,
-		((double) g) / 255.0f,
-		((double) b) / 255.0f,
-		((double) a) / 255.0f);
-}
-
-// =============================================================================
-//
+// -----------------------------------------------------------------------------
 void GLRenderer::refresh()
 {
 	update();
@@ -388,10 +290,10 @@ void GLRenderer::refresh()
 }
 
 // =============================================================================
-//
+// -----------------------------------------------------------------------------
 void GLRenderer::hardRefresh()
 {
-	compileAllObjects();
+	g_vertexCompiler.compileFile();
 	refresh();
 
 	glLineWidth (gl_linethickness);
@@ -462,39 +364,29 @@ void GLRenderer::drawGLScene()
 		glRotatef (rot (Z), 0.0f, 0.0f, 1.0f);
 	}
 
-	const GL::ListType list = (!isDrawOnly() && isPicking()) ? PickList : NormalList;
+	// Draw the VAOs now
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glEnableClientState (GL_COLOR_ARRAY);
+	glDisableClientState (GL_NORMAL_ARRAY);
 
-	if (gl_colorbfc && !isPicking() && !isDrawOnly())
-	{
+	if (gl_colorbfc) {
 		glEnable (GL_CULL_FACE);
-
-		for (LDObject* obj : getFile()->getObjects())
-		{
-			if (obj->isHidden())
-				continue;
-
-			glCullFace (GL_BACK);
-			glCallList (obj->glLists[BFCFrontList]);
-
-			glCullFace (GL_FRONT);
-			glCallList (obj->glLists[BFCBackList]);
-		}
-
+		glCullFace (GL_CCW);
+	} else
 		glDisable (GL_CULL_FACE);
-	}
-	else
+
+	drawVAOs ((isPicking() ? PickArray : gl_colorbfc ? BFCArray : MainArray), GL_TRIANGLES);
+	drawVAOs ((isPicking() ? EdgePickArray : EdgeArray), GL_LINES);
+
+	// Draw conditional lines. Note that conditional lines are drawn into
+	// EdgePickArray in the picking scene, so when picking, don't do anything
+	// here.
+	if (!isPicking())
 	{
-		for (LDObject* obj : getFile()->getObjects())
-		{
-			if (obj->isHidden())
-				continue;
-
-			glCallList (obj->glLists[list]);
-		}
+		glEnable (GL_LINE_STIPPLE);
+		drawVAOs (CondEdgeArray, GL_LINES);
+		glDisable (GL_LINE_STIPPLE);
 	}
-
-	if (gl_axes && !isPicking() && !isDrawOnly())
-		glCallList (m_axeslist);
 
 	glPopMatrix();
 	glMatrixMode (GL_MODELVIEW);
@@ -503,6 +395,15 @@ void GLRenderer::drawGLScene()
 
 // =============================================================================
 //
+void GLRenderer::drawVAOs (VAOType arrayType, GLenum type)
+{
+	const VertexCompiler::Array* array = g_vertexCompiler.getMergedBuffer (arrayType);
+	glVertexPointer (3, GL_FLOAT, sizeof (VertexCompiler::Vertex), &array->data()[0].x);
+	glColorPointer (4, GL_UNSIGNED_BYTE, sizeof (VertexCompiler::Vertex), &array->data()[0].color);
+	glDrawArrays (type, 0, array->writtenSize() / sizeof (VertexCompiler::Vertex));
+}
+
+// =============================================================================
 // This converts a 2D point on the screen to a 3D point in the model. If 'snap'
 // is true, the 3D point will snap to the current grid.
 //
@@ -897,127 +798,7 @@ void GLRenderer::drawBlip (QPainter& paint, QPoint pos) const
 //
 void GLRenderer::compileAllObjects()
 {
-	if (!getFile())
-		return;
-
-	// Compiling all is a big job, use a busy cursor
-	setCursor (Qt::BusyCursor);
-
-	m_knownVerts.clear();
-
-	for (LDObject* obj : getFile()->getObjects())
-		compileObject (obj);
-
-	// Compile axes
-	glDeleteLists (m_axeslist, 1);
-	m_axeslist = glGenLists (1);
-	glNewList (m_axeslist, GL_COMPILE);
-	glBegin (GL_LINES);
-
-	for (const LDGLAxis& ax : g_GLAxes)
-	{
-		qglColor (ax.col);
-		compileVertex (ax.vert);
-		compileVertex (-ax.vert);
-	}
-
-	glEnd();
-	glEndList();
-
-	setCursor (Qt::ArrowCursor);
-}
-
-// =============================================================================
-//
-void GLRenderer::compileSubObject (LDObject* obj, const GLenum gltype)
-{
-	glBegin (gltype);
-
-	const int numverts = (obj->getType() != LDObject::ECondLine) ? obj->vertices() : 2;
-
-	if (g_glInvert == false)
-		for (int i = 0; i < numverts; ++i)
-			compileVertex (obj->getVertex (i));
-	else
-		for (int i = numverts - 1; i >= 0; --i)
-			compileVertex (obj->getVertex (i));
-
-	glEnd();
-}
-
-// =============================================================================
-//
-void GLRenderer::compileList (LDObject* obj, const GLRenderer::ListType list)
-{
-	setObjectColor (obj, list);
-
-	switch (obj->getType())
-	{
-		case LDObject::ELine:
-		{
-			compileSubObject (obj, GL_LINES);
-		} break;
-
-		case LDObject::ECondLine:
-		{
-			// Draw conditional lines with a dash pattern - however, use a full
-			// line when drawing a pick list to make selecting them easier.
-			if (list != GL::PickList)
-			{
-				glLineStipple (1, 0x6666);
-				glEnable (GL_LINE_STIPPLE);
-			}
-
-			compileSubObject (obj, GL_LINES);
-
-			glDisable (GL_LINE_STIPPLE);
-		} break;
-
-		case LDObject::ETriangle:
-		{
-			compileSubObject (obj, GL_TRIANGLES);
-		} break;
-
-		case LDObject::EQuad:
-		{
-			compileSubObject (obj, GL_QUADS);
-		} break;
-
-		case LDObject::ESubfile:
-		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
-			LDObjectList objs;
-
-			objs = ref->inlineContents (LDSubfile::DeepCacheInline | LDSubfile::RendererInline);
-			bool oldinvert = g_glInvert;
-
-			if (ref->getTransform().getDeterminant() < 0)
-				g_glInvert = !g_glInvert;
-
-			LDObject* prev = ref->prev();
-
-			if (prev && prev->getType() == LDObject::EBFC && static_cast<LDBFC*> (prev)->type == LDBFC::InvertNext)
-				g_glInvert = !g_glInvert;
-
-			for (LDObject* obj : objs)
-			{
-				compileList (obj, list);
-				obj->deleteSelf();
-			}
-
-			g_glInvert = oldinvert;
-		} break;
-
-		default:
-			break;
-	}
-}
-
-// =============================================================================
-//
-void GLRenderer::compileVertex (const Vertex& vrt)
-{
-	glVertex3d (vrt[X], -vrt[Y], -vrt[Z]);
+	g_vertexCompiler.compileFile();
 }
 
 // =============================================================================
@@ -1473,6 +1254,7 @@ void GLRenderer::setEditMode (EditMode const& a)
 void GLRenderer::setFile (LDDocument* const& a)
 {
 	m_File = a;
+	g_vertexCompiler.setFile (a);
 
 	if (a != null)
 	{
@@ -1743,24 +1525,10 @@ static QList<Vertex> getVertices (LDObject* obj)
 }
 
 // =============================================================================
-//
+// -----------------------------------------------------------------------------
 void GLRenderer::compileObject (LDObject* obj)
 {
-	deleteLists (obj);
-
-	for (const GL::ListType listType : g_glListTypes)
-	{
-		if (isDrawOnly() && listType != GL::NormalList)
-			continue;
-
-		GLuint list = glGenLists (1);
-		glNewList (list, GL_COMPILE);
-
-		obj->glLists[listType] = list;
-		compileList (obj, listType);
-
-		glEndList();
-	}
+	g_vertexCompiler.stageForCompilation (obj);
 
 	// Mark in known vertices of this object
 	QList<Vertex> verts = getVertices (obj);

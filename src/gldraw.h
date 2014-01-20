@@ -115,6 +115,17 @@ class GLRenderer : public QGLWidget
 			BFCBackList
 		};
 
+		enum VAOType
+		{
+			MainArray,
+			EdgeArray,
+			CondEdgeArray,
+			BFCArray,
+			PickArray,
+			EdgePickArray,
+			NumArrays
+		};
+
 		// CameraIcon::img is a heap-allocated QPixmap because otherwise it gets
 		// initialized before program gets to main() and constructs a QApplication
 		// and Qt doesn't like that.
@@ -245,8 +256,16 @@ class GLRenderer : public QGLWidget
 		// Convert a 2D point to a 3D point
 		Vertex         coordconv2_3 (const QPoint& pos2d, bool snap) const;
 
+<<<<<<< HEAD
+		// Draw a VAO array
+		void           drawVAOs (VAOType arrayType, GLenum type);
+
+		// Determine which color to draw text with
+		QColor         getTextPen() const;
+=======
 		// Convert a 3D point to a 2D point
 		QPoint         coordconv3_2 (const Vertex& pos3d) const;
+>>>>>>> 5c835eb
 
 		// Perform object selection
 		void           pick (int mouseX, int mouseY);
