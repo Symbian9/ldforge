@@ -24,6 +24,7 @@
 #include "EditHistory.h"
 #include "GLRenderer.h"
 #include "Colors.h"
+#include "GLCompiler.h"
 
 cfg (String, ld_defaultname, "");
 cfg (String, ld_defaultuser, "");
