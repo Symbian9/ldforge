@@ -22,7 +22,9 @@
 #include "Macros.h"
 #include "LDObject.h"
 #include "Document.h"
+#include "GLShared.h"
 
+class GLCompiler;
 class MessageManager;
 class QDialogButtonBox;
 class RadioGroup;
@@ -147,10 +149,10 @@ class GLRenderer : public QGLWidget
 		void           compileAllObjects();
 		void           drawGLScene();
 		void           endDraw (bool accept);
+		void           forgetObject (LDObject* obj);
 		Axis           getCameraAxis (bool y, EFixedCamera camid = (EFixedCamera) - 1);
 		const char*    getCameraName() const;
 		double         getDepthValue() const;
-		QColor         getMainColor();
 		LDGLOverlay&   getOverlay (int newcam);
 		uchar*         getScreencap (int& w, int& h);
 		void           hardRefresh();
@@ -169,6 +171,7 @@ class GLRenderer : public QGLWidget
 		void           zoomAllToFit();
 
 		static void    deleteLists (LDObject* obj);
+		static QColor  getMainColor();
 
 	protected:
 		void           contextMenuEvent (QContextMenuEvent* ev);
@@ -214,6 +217,7 @@ class GLRenderer : public QGLWidget
 		Vertex						m_rectverts[4];
 		QColor						m_bgcolor;
 		QList<Vertex>				m_knownVerts;
+		GLCompiler*					m_compiler;
 
 		void           addDrawnVertex (Vertex m_hoverpos);
 		LDOverlay*     findOverlayObject (EFixedCamera cam);
@@ -242,6 +246,12 @@ class GLRenderer : public QGLWidget
 
 		// Convert a 2D point to a 3D point
 		Vertex         coordconv2_3 (const QPoint& pos2d, bool snap) const;
+
+		// Draw a VBO array
+		void           drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
+
+		// Determine which color to draw text with
+		QColor         getTextPen() const;
 
 		// Convert a 3D point to a 2D point
 		QPoint         coordconv3_2 (const Vertex& pos3d) const;
@@ -294,6 +304,7 @@ class GLRenderer : public QGLWidget
 
 	private slots:
 		void           slot_toolTipTimer();
+		void initializeAxes();
 };
 
 // Alias for short namespaces

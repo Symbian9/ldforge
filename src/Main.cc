@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
+#include <QDate>
 #include "MainWindow.h"
 #include "Document.h"
 #include "Misc.h"
