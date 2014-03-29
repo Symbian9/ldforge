@@ -21,11 +21,13 @@
 #include "main.h"
 #include "ldObject.h"
 #include "editHistory.h"
+#include "glShared.h"
 
 class History;
 class OpenProgressDialog;
 class LDDocumentPointer;
 struct LDGLData;
+class GLCompiler;
 
 namespace LDPaths
 {
@@ -66,6 +68,7 @@ class LDDocument : public QObject
 		PROPERTY (public,	bool,			isImplicit,		setImplicit,		STOCK_WRITE)
 		PROPERTY (public,	long,			savePosition,	setSavePosition,	STOCK_WRITE)
 		PROPERTY (public,	int,			tabIndex,		setTabIndex,		STOCK_WRITE)
+		PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,	STOCK_WRITE)
 
 	public:
 		LDDocument();
@@ -78,7 +81,8 @@ class LDDocument : public QObject
 		QString getDisplayName();
 		const LDObjectList& getSelection() const;
 		bool hasUnsavedChanges() const; // Does this document have unsaved changes?
-		LDObjectList inlineContents (LDSubfile::InlineFlags flags);
+		void initializeGLData();
+		LDObjectList inlineContents (bool deep, bool renderinline);
 		void insertObj (int pos, LDObject* obj);
 		int getObjectCount() const;
 		LDObject* getObject (int pos) const;
@@ -88,6 +92,7 @@ class LDDocument : public QObject
 		void setObject (int idx, LDObject* obj);
 		void addReference (LDDocumentPointer* ptr);
 		void removeReference (LDDocumentPointer* ptr);
+		QList<LDPolygon> inlinePolygons();
 
 		inline LDDocument& operator<< (LDObject* obj)
 		{
@@ -145,9 +150,9 @@ class LDDocument : public QObject
 		LDObjectList			m_sel;
 		LDGLData*				m_gldata;
 
-		// If set to true, next inline of this document discards the cache and
-		// re-builds it.
-		bool					m_needsCache;
+		// If set to true, next polygon inline of this document discards the
+		// stored polygon data and re-builds it.
+		bool					m_needsGLReInit;
 
 		static LDDocument*		m_curdoc;
 };

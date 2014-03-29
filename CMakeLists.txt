@@ -33,6 +33,7 @@ set (LDForgeSources
 	src/editHistory.cc
 	src/extPrograms.cc
 	src/glRenderer.cc
+	src/glCompiler.cc
 	src/ldConfig.cc
 	src/ldDocument.cc
 	src/ldObject.cc
@@ -69,6 +70,7 @@ set (LDForgeHeaders
 	src/colorSelector.h
 	src/configDialog.h
 	src/glRenderer.h
+	src/glCompiler.h
 	src/configuration.h
 	src/mainWindow.h
 	src/editHistory.h

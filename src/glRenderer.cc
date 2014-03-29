@@ -16,12 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/glu.h>
+#include <GL/glext.h>
 #include <QGLWidget>
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 #include <QInputDialog>
 #include <QToolTip>
+#include <qtextdocument.h>
 #include <QTimer>
 #include <GL/glu.h>
 
@@ -38,6 +42,7 @@
 #include "messageLog.h"
 #include "primitives.h"
 #include "misc/ringFinder.h"
+#include "glCompiler.h"
 
 static const LDFixedCameraInfo g_FixedCameras[6] =
 {
@@ -61,7 +66,6 @@ static const Matrix g_circleDrawMatrixTemplates[3] =
 cfg (String,	gl_bgcolor,				"#FFFFFF")
 cfg (String,	gl_maincolor,			"#A0A0A0")
 cfg (Float,		gl_maincolor_alpha,		1.0)
-cfg (String,	gl_selectcolor,			"#0080FF")
 cfg (Int,		gl_linethickness,		2)
 cfg (Bool,		gl_colorbfc,			false)
 cfg (Int,		gl_camera,				GLRenderer::EFreeCamera)
@@ -96,37 +100,40 @@ const GL::EFixedCamera g_Cameras[7] =
 	GL::EFreeCamera
 };
 
-// Definitions for visual axes, drawn on the screen
-const struct LDGLAxis
+struct LDGLAxis
 {
 	const QColor col;
 	const Vertex vert;
-} g_GLAxes[3] =
+};
+
+// Definitions for visual axes, drawn on the screen
+static const LDGLAxis g_GLAxes[3] =
 {
 	{ QColor (255,   0,   0), Vertex (10000, 0, 0) }, // X
 	{ QColor (80,  192,   0), Vertex (0, 10000, 0) }, // Y
 	{ QColor (0,   160, 192), Vertex (0, 0, 10000) }, // Z
 };
 
-static bool g_glInvert = false;
-static QList<int> g_warnedColors;
+static GLuint g_GLAxes_VBO;
+static GLuint g_GLAxes_ColorVBO;
 
 // =============================================================================
 //
 GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 {
 	m_isPicking = m_rangepick = false;
-	m_camera = (GL::EFixedCamera) gl_camera;
+	m_camera = (EFixedCamera) gl_camera;
 	m_drawToolTip = false;
 	m_editMode = ESelectMode;
 	m_rectdraw = false;
 	m_panning = false;
+	m_compiler = new GLCompiler;
 	setDocument (null);
 	setDrawOnly (false);
 	setMessageLog (null);
 	m_width = m_height = -1;
 	m_hoverpos = g_origin;
-
+	m_compiler = new GLCompiler;
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
@@ -157,6 +164,8 @@ GLRenderer::~GLRenderer()
 
 	for (CameraIcon& info : m_cameraIcons)
 		delete info.img;
+
+	delete m_compiler;
 }
 
 // =============================================================================
@@ -242,13 +251,46 @@ void GLRenderer::resetAllAngles()
 void GLRenderer::initializeGL()
 {
 	setBackground();
-
 	glLineWidth (gl_linethickness);
-
+	glLineStipple (1, 0x6666);
 	setAutoFillBackground (false);
 	setMouseTracking (true);
 	setFocusPolicy (Qt::WheelFocus);
-	compileAllObjects();
+	compiler()->initialize();
+	initializeAxes();
+}
+
+// =============================================================================
+//
+void GLRenderer::initializeAxes()
+{
+	float axesdata[18];
+	float colordata[18];
+	memset (axesdata, 0, sizeof axesdata);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			axesdata[(i * 6) + j] = g_GLAxes[i].vert.getCoordinate (j);
+			axesdata[(i * 6) + 3 + j] = -g_GLAxes[i].vert.getCoordinate (j);
+		}
+
+		for (int j = 0; j < 2; ++j)
+		{
+			colordata[(i * 6) + (j * 3) + 0] = g_GLAxes[i].col.red();
+			colordata[(i * 6) + (j * 3) + 1] = g_GLAxes[i].col.green();
+			colordata[(i * 6) + (j * 3) + 2] = g_GLAxes[i].col.blue();
+		}
+	}
+
+	glGenBuffers (1, &g_GLAxes_VBO);
+	glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+	glBufferData (GL_ARRAY_BUFFER, sizeof axesdata, axesdata, GL_STATIC_DRAW);
+	glGenBuffers (1, &g_GLAxes_ColorVBO);
+	glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_ColorVBO);
+	glBufferData (GL_ARRAY_BUFFER, sizeof colordata, colordata, GL_STATIC_DRAW);
+	glBindBuffer (GL_ARRAY_BUFFER, 0);
 }
 
 // =============================================================================
@@ -282,104 +324,6 @@ void GLRenderer::setBackground()
 
 // =============================================================================
 //
-void GLRenderer::setObjectColor (LDObject* obj, const ListType list)
-{
-	QColor qcol;
-
-	if (!obj->isColored())
-		return;
-
-	if (list == GL::PickList)
-	{
-		// Make the color by the object's ID if we're picking, so we can make the
-		// ID again from the color we get from the picking results. Be sure to use
-		// the top level parent's index since we want a subfile's children point
-		// to the subfile itself.
-		long i = obj->topLevelParent()->id();
-
-		// Calculate a color based from this index. This method caters for
-		// 16777216 objects. I don't think that'll be exceeded anytime soon. :)
-		// ATM biggest is 53588.dat with 12600 lines.
-		double r = (i / 0x10000) % 0x100,
-			   g = (i / 0x100) % 0x100,
-			   b = i % 0x100;
-
-		qglColor (QColor (r, g, b));
-		return;
-	}
-
-	if ((list == BFCFrontList || list == BFCBackList) &&
-		obj->type() != LDObject::ELine &&
-		obj->type() != LDObject::ECondLine)
-	{
-		if (list == GL::BFCFrontList)
-			qcol = QColor (40, 192, 0);
-		else
-			qcol = QColor (224, 0, 0);
-	}
-	else
-	{
-		if (obj->color() == maincolor)
-			qcol = getMainColor();
-		else
-		{
-			LDColor* col = ::getColor (obj->color());
-
-			if (col)
-				qcol = col->faceColor;
-		}
-
-		if (obj->color() == edgecolor)
-		{
-			LDColor* col;
-
-			if (!gl_blackedges && obj->parent() && (col = ::getColor (obj->parent()->color())))
-				qcol = col->edgeColor;
-			else
-				qcol = (m_darkbg == false) ? Qt::black : Qt::white;
-		}
-
-		if (qcol.isValid() == false)
-		{
-			// The color was unknown. Use main color to make the object at least
-			// not appear pitch-black.
-			if (obj->color() != edgecolor)
-				qcol = getMainColor();
-
-			// Warn about the unknown colors, but only once.
-			for (int i : g_warnedColors)
-				if (obj->color() == i)
-					return;
-
-			print ("%1: Unknown color %2!\n", __func__, obj->color());
-			g_warnedColors << obj->color();
-			return;
-		}
-	}
-
-	int r = qcol.red(),
-		 g = qcol.green(),
-		 b = qcol.blue(),
-		 a = qcol.alpha();
-
-	if (obj->topLevelParent()->isSelected())
-	{
-		// Brighten it up for the select list.
-		QColor selcolor (gl_selectcolor);
-		r = (r + selcolor.red()) / 2;
-		g = (g + selcolor.green()) / 2;
-		b = (b + selcolor.blue()) / 2;
-	}
-
-	glColor4f (
-		((double) r) / 255.0f,
-		((double) g) / 255.0f,
-		((double) b) / 255.0f,
-		((double) a) / 255.0f);
-}
-
-// =============================================================================
-//
 void GLRenderer::refresh()
 {
 	update();
@@ -390,10 +334,9 @@ void GLRenderer::refresh()
 //
 void GLRenderer::hardRefresh()
 {
-	compileAllObjects();
+	compiler()->compileDocument (getCurrentDocument());
 	refresh();
-
-	glLineWidth (gl_linethickness);
+	glLineWidth (gl_linethickness); // TODO: ...?
 }
 
 // =============================================================================
@@ -425,7 +368,7 @@ void GLRenderer::drawGLScene()
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable (GL_DEPTH_TEST);
 
-	if (m_camera != EFreeCamera)
+	if (camera() != EFreeCamera)
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
@@ -434,7 +377,7 @@ void GLRenderer::drawGLScene()
 		glOrtho (-m_virtWidth, m_virtWidth, -m_virtHeight, m_virtHeight, -100.0f, 100.0f);
 		glTranslatef (pan (X), pan (Y), 0.0f);
 
-		if (m_camera != EFrontCamera && m_camera != EBackCamera)
+		if (camera() != EFrontCamera && camera() != EBackCamera)
 		{
 			glRotatef (90.0f, g_FixedCameras[camera()].glrotate[0],
 				g_FixedCameras[camera()].glrotate[1],
@@ -442,7 +385,7 @@ void GLRenderer::drawGLScene()
 		}
 
 		// Back camera needs to be handled differently
-		if (m_camera == GLRenderer::EBackCamera)
+		if (camera() == EBackCamera)
 		{
 			glRotatef (180.0f, 1.0f, 0.0f, 0.0f);
 			glRotatef (180.0f, 0.0f, 0.0f, 1.0f);
@@ -461,47 +404,86 @@ void GLRenderer::drawGLScene()
 		glRotatef (rot (Z), 0.0f, 0.0f, 1.0f);
 	}
 
-	const GL::ListType list = (!isDrawOnly() && isPicking()) ? PickList : NormalList;
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glEnableClientState (GL_COLOR_ARRAY);
 
-	if (gl_colorbfc && !isPicking() && !isDrawOnly())
+	if (isPicking())
 	{
-		glEnable (GL_CULL_FACE);
-
-		for (LDObject* obj : document()->objects())
-		{
-			if (obj->isHidden())
-				continue;
-
-			glCullFace (GL_BACK);
-			glCallList (obj->glLists[BFCFrontList]);
-
-			glCullFace (GL_FRONT);
-			glCallList (obj->glLists[BFCBackList]);
-		}
-
-		glDisable (GL_CULL_FACE);
+		drawVBOs (VBOSF_Triangles, VBOCM_PickColors, GL_TRIANGLES);
+		drawVBOs (VBOSF_Quads, VBOCM_PickColors, GL_QUADS);
+		drawVBOs (VBOSF_Lines, VBOCM_PickColors, GL_LINES);
+		drawVBOs (VBOSF_CondLines, VBOCM_PickColors, GL_LINES);
 	}
 	else
 	{
-		for (LDObject* obj : document()->objects())
+		if (gl_colorbfc)
 		{
-			if (obj->isHidden())
-				continue;
+			glEnable (GL_CULL_FACE);
+			glCullFace (GL_BACK);
+			drawVBOs (VBOSF_Triangles, VBOCM_BFCFrontColors, GL_TRIANGLES);
+			drawVBOs (VBOSF_Quads, VBOCM_BFCFrontColors, GL_QUADS);
+			glCullFace (GL_FRONT);
+			drawVBOs (VBOSF_Triangles, VBOCM_BFCBackColors, GL_TRIANGLES);
+			drawVBOs (VBOSF_Quads, VBOCM_BFCBackColors, GL_QUADS);
+			glDisable (GL_CULL_FACE);
+		}
+		else
+		{
+			drawVBOs (VBOSF_Triangles, VBOCM_NormalColors, GL_TRIANGLES);
+			drawVBOs (VBOSF_Quads, VBOCM_NormalColors, GL_QUADS);
+		}
 
-			glCallList (obj->glLists[list]);
+		drawVBOs (VBOSF_Lines, VBOCM_NormalColors, GL_LINES);
+		drawVBOs (VBOSF_CondLines, VBOCM_NormalColors, GL_LINES);
+
+		if (gl_axes)
+		{
+			glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+			glVertexPointer (3, GL_FLOAT, 0, NULL);
+			glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+			glColorPointer (3, GL_FLOAT, 0, NULL);
+			glDrawArrays (GL_LINES, 0, 6);
+			checkGLError();
 		}
 	}
 
-	if (gl_axes && !isPicking() && !isDrawOnly())
-		glCallList (m_axeslist);
-
 	glPopMatrix();
+	glBindBuffer (GL_ARRAY_BUFFER, 0);
+	glDisableClientState (GL_VERTEX_ARRAY);
+	glDisableClientState (GL_COLOR_ARRAY);
+	checkGLError();
+	glDisable (GL_CULL_FACE);
 	glMatrixMode (GL_MODELVIEW);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 }
 
 // =============================================================================
 //
+void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
+{
+	int surfacenum = m_compiler->vboNumber (surface, VBOCM_Surfaces);
+	int colornum = m_compiler->vboNumber (surface, colors);
+
+	m_compiler->prepareVBO (surfacenum);
+	m_compiler->prepareVBO (colornum);
+	GLuint surfacevbo = m_compiler->vbo (surfacenum);
+	GLuint colorvbo = m_compiler->vbo (colornum);
+	GLsizei count = m_compiler->vboCount (surfacevbo);
+
+	if (count > 0)
+	{
+		glBindBuffer (GL_ARRAY_BUFFER, surfacevbo);
+		glVertexPointer (3, GL_FLOAT, 0, null);
+		checkGLError();
+		glBindBuffer (GL_ARRAY_BUFFER, colorvbo);
+		glColorPointer (4, GL_FLOAT, 0, null);
+		checkGLError();
+		glDrawArrays (type, 0, count);
+		checkGLError();
+	}
+}
+
+// =============================================================================
 // This converts a 2D point on the screen to a 3D point in the model. If 'snap'
 // is true, the 3D point will snap to the current grid.
 //
@@ -510,7 +492,7 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 	assert (camera() != EFreeCamera);
 
 	Vertex pos3d;
-	const LDFixedCameraInfo* cam = &g_FixedCameras[m_camera];
+	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
 	const Axis axisX = cam->axisX;
 	const Axis axisY = cam->axisY;
 	const int negXFac = cam->negX ? -1 : 1,
@@ -547,7 +529,7 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d) const
 {
 	GLfloat m[16];
-	const LDFixedCameraInfo* cam = &g_FixedCameras[m_camera];
+	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
 	const Axis axisX = cam->axisX;
 	const Axis axisY = cam->axisY;
 	const int negXFac = cam->negX ? -1 : 1,
@@ -593,15 +575,27 @@ void GLRenderer::paintEvent (QPaintEvent* ev)
 	if (isDrawOnly())
 		return;
 
-	if (m_camera != EFreeCamera && !isPicking())
+#ifndef RELEASE
+	if (isPicking() == false)
+	{
+		QString text = format ("Rotation: (%1, %2, %3)\nPanning: (%4, %5), Zoom: %6",
+			rot(X), rot(Y), rot(Z), pan(X), pan(Y), zoom());
+		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
+
+		paint.drawText ((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
+			textSize.height(), Qt::AlignCenter, text);
+	}
+#endif
+
+	if (camera() != EFreeCamera && !isPicking())
 	{
 		// Paint the overlay image if we have one
-		const LDGLOverlay& overlay = currentDocumentData().overlays[m_camera];
+		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
 
 		if (overlay.img != null)
 		{
-			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[m_camera].v0),
-					   v1 = coordconv3_2 (currentDocumentData().overlays[m_camera].v1);
+			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
+					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
 
 			QRect targRect (v0.x(), v0.y(), abs (v1.x() - v0.x()), abs (v1.y() - v0.y())),
 				  srcRect (0, 0, overlay.img->width(), overlay.img->height());
@@ -890,133 +884,6 @@ void GLRenderer::drawBlip (QPainter& paint, QPoint pos) const
 	paint.setPen (pen);
 	paint.setBrush (QColor (64, 192, 0));
 	paint.drawEllipse (pos.x() - blipsize / 2, pos.y() - blipsize / 2, blipsize, blipsize);
-}
-
-// =============================================================================
-//
-void GLRenderer::compileAllObjects()
-{
-	if (!document())
-		return;
-
-	// Compiling all is a big job, use a busy cursor
-	setCursor (Qt::BusyCursor);
-
-	m_knownVerts.clear();
-
-	for (LDObject* obj : document()->objects())
-		compileObject (obj);
-
-	// Compile axes
-	glDeleteLists (m_axeslist, 1);
-	m_axeslist = glGenLists (1);
-	glNewList (m_axeslist, GL_COMPILE);
-	glBegin (GL_LINES);
-
-	for (const LDGLAxis& ax : g_GLAxes)
-	{
-		qglColor (ax.col);
-		compileVertex (ax.vert);
-		compileVertex (-ax.vert);
-	}
-
-	glEnd();
-	glEndList();
-
-	setCursor (Qt::ArrowCursor);
-}
-
-// =============================================================================
-//
-void GLRenderer::compileSubObject (LDObject* obj, const GLenum gltype)
-{
-	glBegin (gltype);
-
-	const int numverts = (obj->type() != LDObject::ECondLine) ? obj->vertices() : 2;
-
-	if (g_glInvert == false)
-		for (int i = 0; i < numverts; ++i)
-			compileVertex (obj->vertex (i));
-	else
-		for (int i = numverts - 1; i >= 0; --i)
-			compileVertex (obj->vertex (i));
-
-	glEnd();
-}
-
-// =============================================================================
-//
-void GLRenderer::compileList (LDObject* obj, const GLRenderer::ListType list)
-{
-	setObjectColor (obj, list);
-
-	switch (obj->type())
-	{
-		case LDObject::ELine:
-		{
-			compileSubObject (obj, GL_LINES);
-		} break;
-
-		case LDObject::ECondLine:
-		{
-			// Draw conditional lines with a dash pattern - however, use a full
-			// line when drawing a pick list to make selecting them easier.
-			if (list != GL::PickList)
-			{
-				glLineStipple (1, 0x6666);
-				glEnable (GL_LINE_STIPPLE);
-			}
-
-			compileSubObject (obj, GL_LINES);
-
-			glDisable (GL_LINE_STIPPLE);
-		} break;
-
-		case LDObject::ETriangle:
-		{
-			compileSubObject (obj, GL_TRIANGLES);
-		} break;
-
-		case LDObject::EQuad:
-		{
-			compileSubObject (obj, GL_QUADS);
-		} break;
-
-		case LDObject::ESubfile:
-		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
-			LDObjectList objs;
-
-			objs = ref->inlineContents (LDSubfile::DeepCacheInline | LDSubfile::RendererInline);
-			bool oldinvert = g_glInvert;
-
-			if (ref->transform().getDeterminant() < 0)
-				g_glInvert = !g_glInvert;
-
-			LDObject* prev = ref->previous();
-
-			if (prev && prev->type() == LDObject::EBFC && static_cast<LDBFC*> (prev)->statement() == LDBFC::InvertNext)
-				g_glInvert = !g_glInvert;
-
-			for (LDObject* obj : objs)
-			{
-				compileList (obj, list);
-				obj->destroy();
-			}
-
-			g_glInvert = oldinvert;
-		} break;
-
-		default:
-			break;
-	}
-}
-
-// =============================================================================
-//
-void GLRenderer::compileVertex (const Vertex& vrt)
-{
-	glVertex3d (vrt[X], -vrt[Y], -vrt[Z]);
 }
 
 // =============================================================================
@@ -1375,8 +1242,8 @@ void GLRenderer::pick (int mouseX, int mouseY)
 	{
 		qint32 idx =
 			(*(pixelptr + 0) * 0x10000) +
-			(*(pixelptr + 1) * 0x00100) +
-			(*(pixelptr + 2) * 0x00001);
+			(*(pixelptr + 1) * 0x100) +
+			*(pixelptr + 2);
 		pixelptr += 4;
 
 		if (idx == 0xFFFFFF)
@@ -1441,7 +1308,7 @@ void GLRenderer::setEditMode (EditMode const& a)
 		case ECircleMode:
 		{
 			// Cannot draw into the free camera - use top instead.
-			if (m_camera == EFreeCamera)
+			if (camera() == EFreeCamera)
 				setCamera (ETopCamera);
 
 			// Disable the context menu - we need the right mouse button
@@ -1711,7 +1578,7 @@ double GLRenderer::getCircleDrawDist (int pos) const
 //
 void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 {
-	const LDFixedCameraInfo* cam = &g_FixedCameras[m_camera];
+	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
 	relX = cam->axisX;
 	relY = cam->axisY;
 }
@@ -1726,10 +1593,11 @@ static QList<Vertex> getVertices (LDObject* obj)
 	{
 		for (int i = 0; i < obj->vertices(); ++i)
 			verts << obj->vertex (i);
-	} elif (obj->type() == LDObject::ESubfile)
+	}
+	elif (obj->type() == LDObject::ESubfile)
 	{
 		LDSubfile* ref = static_cast<LDSubfile*> (obj);
-		LDObjectList objs = ref->inlineContents (LDSubfile::DeepCacheInline);
+		LDObjectList objs = ref->inlineContents (true, false);
 
 		for (LDObject* obj : objs)
 		{
@@ -1745,28 +1613,23 @@ static QList<Vertex> getVertices (LDObject* obj)
 //
 void GLRenderer::compileObject (LDObject* obj)
 {
-	deleteLists (obj);
-
-	for (const GL::ListType listType : g_glListTypes)
-	{
-		if (isDrawOnly() && listType != GL::NormalList)
-			continue;
-
-		GLuint list = glGenLists (1);
-		glNewList (list, GL_COMPILE);
-
-		obj->glLists[listType] = list;
-		compileList (obj, listType);
-
-		glEndList();
-	}
+	compiler()->stageForCompilation (obj);
 
 	// Mark in known vertices of this object
+	/*
 	QList<Vertex> verts = getVertices (obj);
 	m_knownVerts << verts;
 	removeDuplicates (m_knownVerts);
+	*/
 
 	obj->setGLInit (true);
+}
+
+// =============================================================================
+//
+void GLRenderer::forgetObject (LDObject* obj)
+{
+	compiler()->dropObject (obj);
 }
 
 // =============================================================================
@@ -1794,7 +1657,7 @@ void GLRenderer::slot_toolTipTimer()
 	// We come here if the cursor has stayed in one place for longer than a
 	// a second. Check if we're holding it over a camera icon - if so, draw
 	// a tooltip.
-for (CameraIcon & icon : m_cameraIcons)
+	for (CameraIcon & icon : m_cameraIcons)
 	{
 		if (icon.destRect.contains (m_pos))
 		{
@@ -1808,24 +1671,10 @@ for (CameraIcon & icon : m_cameraIcons)
 
 // =============================================================================
 //
-void GLRenderer::deleteLists (LDObject* obj)
-{
-	// Delete the lists but only if they have been initialized
-	if (!obj->isGLInit())
-		return;
-
-	for (const GL::ListType listType : g_glListTypes)
-		glDeleteLists (obj->glLists[listType], 1);
-
-	obj->setGLInit (false);
-}
-
-// =============================================================================
-//
 Axis GLRenderer::getCameraAxis (bool y, GLRenderer::EFixedCamera camid)
 {
 	if (camid == (GL::EFixedCamera) - 1)
-		camid = m_camera;
+		camid = camera();
 
 	const LDFixedCameraInfo* cam = &g_FixedCameras[camid];
 	return (y) ? cam->axisY : cam->axisX;
@@ -1841,6 +1690,7 @@ bool GLRenderer::setupOverlay (EFixedCamera cam, QString file, int x, int y, int
 	if (img->isNull())
 	{
 		critical (tr ("Failed to load overlay image!"));
+		currentDocumentData().overlays[cam].invalid = true;
 		delete img;
 		return false;
 	}
@@ -1853,6 +1703,7 @@ bool GLRenderer::setupOverlay (EFixedCamera cam, QString file, int x, int y, int
 	info.ox = x;
 	info.oy = y;
 	info.img = img;
+	info.invalid = false;
 
 	if (info.lw == 0)
 		info.lw = (info.lh * img->width()) / img->height();
@@ -1872,11 +1723,11 @@ bool GLRenderer::setupOverlay (EFixedCamera cam, QString file, int x, int y, int
 
 	// Set alpha of all pixels to 0.5
 	for (long i = 0; i < img->width(); ++i)
-		for (long j = 0; j < img->height(); ++j)
-		{
-			uint32 pixel = img->pixel (i, j);
-			img->setPixel (i, j, 0x80000000 | (pixel & 0x00FFFFFF));
-		}
+	for (long j = 0; j < img->height(); ++j)
+	{
+		uint32 pixel = img->pixel (i, j);
+		img->setPixel (i, j, 0x80000000 | (pixel & 0x00FFFFFF));
+	}
 
 	updateOverlayObjects();
 	return true;
@@ -1940,9 +1791,12 @@ void GLRenderer::zoomNotch (bool inward)
 //
 void GLRenderer::zoomToFit()
 {
+	print ("zooming %1 to fit..\n", camera());
+	zoom() = 30.0f;
+
 	if (document() == null || m_width == -1 || m_height == -1)
 	{
-		zoom() = 30.0f;
+		print ("document is invalid!\n");
 		return;
 	}
 
@@ -1984,21 +1838,22 @@ void GLRenderer::zoomToFit()
 			if (imgdata[i] != white || imgdata[((h - 1) * w) + i] != white)
 			{
 				filled = true;
-				goto endOfLoop;
+				break;
 			}
 		}
 
 		// Left and right edges
-		for (int i = 0; i < h; ++i)
+		if (filled == false)
 		{
-			if (imgdata[i * w] != white || imgdata[(i * w) + w - 1] != white)
+			for (int i = 0; i < h; ++i)
 			{
-				filled = true;
-				goto endOfLoop;
+				if (imgdata[i * w] != white || imgdata[(i * w) + w - 1] != white)
+				{
+					filled = true;
+					break;
+				}
 			}
 		}
-
-endOfLoop:
 
 		delete[] cap;
 
@@ -2033,6 +1888,7 @@ endOfLoop:
 
 	setBackground();
 	setPicking (false);
+	print ("zoom to fit done.\n");
 }
 
 // =============================================================================
@@ -2140,7 +1996,7 @@ void GLRenderer::initOverlaysFromObjects()
 			delete meta.img;
 			meta.img = null;
 		}
-		elif (ovlobj && (!meta.img || meta.fname != ovlobj->fileName()))
+		elif (ovlobj && (meta.img == null || meta.fname != ovlobj->fileName()) && meta.invalid == false)
 			setupOverlay (cam, ovlobj->fileName(), ovlobj->x(),
 				ovlobj->y(), ovlobj->width(), ovlobj->height());
 	}
@@ -2158,7 +2014,7 @@ void GLRenderer::updateOverlayObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (!meta.img && ovlobj)
+		if (meta.img == null && ovlobj != null)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
 			LDObject* nextobj = ovlobj->next();
@@ -2169,7 +2025,8 @@ void GLRenderer::updateOverlayObjects()
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
 			ovlobj->destroy();
-		} elif (meta.img && !ovlobj)
+		}
+		elif (meta.img != null && ovlobj == null)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.

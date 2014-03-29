@@ -22,7 +22,9 @@
 #include "macros.h"
 #include "ldObject.h"
 #include "ldDocument.h"
+#include "glShared.h"
 
+class GLCompiler;
 class MessageManager;
 class QDialogButtonBox;
 class RadioGroup;
@@ -49,6 +51,7 @@ struct LDGLOverlay
 					lh;
 	QString			fname;
 	QImage*			img;
+	bool			invalid;
 };
 
 struct LDFixedCameraInfo
@@ -77,12 +80,23 @@ struct LDGLData
 
 	LDGLData()
 	{
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 7; ++i)
 		{
-			overlays[i].img = null;
-			depthValues[i] = 0.0f;
+			if (i < 6)
+			{
+				overlays[i].img = null;
+				overlays[i].invalid = false;
+				depthValues[i] = 0.0f;
+			}
+
+			zoom[i] = 30.0;
+			panX[i] = 0.0;
+			panY[i] = 0.0;
 		}
 
+		rotX = 0;
+		rotY = 0;
+		rotZ = 0;
 		init = false;
 	}
 };
@@ -119,10 +133,10 @@ class GLRenderer : public QGLWidget
 		// and Qt doesn't like that.
 		struct CameraIcon
 		{
-			QPixmap*			img;
-			QRect				srcRect,
-								destRect,
-								selRect;
+			QPixmap*		img;
+			QRect			srcRect,
+							destRect,
+							selRect;
 			EFixedCamera	cam;
 		};
 
@@ -132,6 +146,7 @@ class GLRenderer : public QGLWidget
 		PROPERTY (private,	bool,				isPicking,	setPicking,		STOCK_WRITE)
 		PROPERTY (public,	LDDocument*,		document,	setDocument,	CUSTOM_WRITE)
 		PROPERTY (public,	EditMode,			editMode,	setEditMode,	CUSTOM_WRITE)
+		PROPERTY (private,	GLCompiler*,		compiler,	setCompiler,	STOCK_WRITE)
 
 	public:
 		GLRenderer (QWidget* parent = null);
@@ -144,13 +159,12 @@ class GLRenderer : public QGLWidget
 
 		void           clearOverlay();
 		void           compileObject (LDObject* obj);
-		void           compileAllObjects();
 		void           drawGLScene();
 		void           endDraw (bool accept);
+		void           forgetObject (LDObject* obj);
 		Axis           getCameraAxis (bool y, EFixedCamera camid = (EFixedCamera) - 1);
 		const char*    getCameraName() const;
 		double         getDepthValue() const;
-		QColor         getMainColor();
 		LDGLOverlay&   getOverlay (int newcam);
 		uchar*         getScreencap (int& w, int& h);
 		void           hardRefresh();
@@ -169,6 +183,7 @@ class GLRenderer : public QGLWidget
 		void           zoomAllToFit();
 
 		static void    deleteLists (LDObject* obj);
+		static QColor  getMainColor();
 
 	protected:
 		void           contextMenuEvent (QContextMenuEvent* ev);
@@ -243,6 +258,12 @@ class GLRenderer : public QGLWidget
 		// Convert a 2D point to a 3D point
 		Vertex         coordconv2_3 (const QPoint& pos2d, bool snap) const;
 
+		// Draw a VBO array
+		void           drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
+
+		// Determine which color to draw text with
+		QColor         getTextPen() const;
+
 		// Convert a 3D point to a 2D point
 		QPoint         coordconv3_2 (const Vertex& pos3d) const;
 
@@ -294,6 +315,7 @@ class GLRenderer : public QGLWidget
 
 	private slots:
 		void           slot_toolTipTimer();
+		void initializeAxes();
 };
 
 // Alias for short namespaces

@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #include "main.h"
 #include "ldObject.h"
 #include "ldDocument.h"
@@ -24,6 +25,7 @@
 #include "editHistory.h"
 #include "glRenderer.h"
 #include "colors.h"
+#include "glCompiler.h"
 
 cfg (String, ld_defaultname, "");
 cfg (String, ld_defaultuser, "");
@@ -269,7 +271,7 @@ void LDObject::destroy()
 		document()->forgetObject (this);
 
 	// Delete the GL lists
-	GL::deleteLists (this);
+	g_win->R()->forgetObject (this);
 
 	// Remove this object from the list of LDObjects
 	g_LDObjects.removeOne (this);
@@ -318,10 +320,10 @@ static void transformObject (LDObject* obj, Matrix transform, Vertex pos, int pa
 }
 
 // =============================================================================
-//
-LDObjectList LDSubfile::inlineContents (InlineFlags flags)
+// -----------------------------------------------------------------------------
+LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 {
-	LDObjectList objs = fileInfo()->inlineContents (flags);
+	LDObjectList objs = fileInfo()->inlineContents (deep, render);
 
 	// Transform the objects
 	for (LDObject* obj : objs)
@@ -336,6 +338,45 @@ LDObjectList LDSubfile::inlineContents (InlineFlags flags)
 
 // =============================================================================
 //
+LDPolygon* LDObject::getPolygon()
+{
+	Type ot = type();
+	int num =
+		(ot == LDObject::ELine)		?	2 :
+		(ot == LDObject::ETriangle)	?	3 :
+		(ot == LDObject::EQuad)		?	4 :
+		(ot == LDObject::ECondLine)	?	5 :
+										0;
+	if (num == 0)
+		return null;
+
+	LDPolygon* data = new LDPolygon;
+	data->id = id();
+	data->num = num;
+	data->color = color();
+	data->origin = origin();
+
+	for (int i = 0; i < data->numVertices(); ++i)
+		data->vertices[i] = vertex (i);
+
+	return data;
+}
+
+// =============================================================================
+//
+QList<LDPolygon> LDSubfile::inlinePolygons()
+{
+	QList<LDPolygon> data = fileInfo()->inlinePolygons();
+
+	for (LDPolygon& entry : data)
+		for (int i = 0; i < entry.numVertices(); ++i)
+			entry.vertices[i].transform (transform(), position());
+
+	return data;
+}
+
+// =============================================================================
+// -----------------------------------------------------------------------------
 long LDObject::lineNumber() const
 {
 	assert (document() != null);
@@ -646,6 +687,7 @@ QString LDOverlay::asText() const
 void LDOverlay::invert() {}
 
 // =============================================================================
+//
 // Hook the set accessors of certain properties to this changeProperty function.
 // It takes care of history management so we can capture low-level changes, this
 // makes history stuff work out of the box.
@@ -657,14 +699,17 @@ template<class T> static void changeProperty (LDObject* obj, T* ptr, const T& va
 	if (*ptr == val)
 		return;
 
-	if (obj->document() && (idx = obj->lineNumber()) != -1)
+	if (obj->document() != null && (idx = obj->lineNumber()) != -1)
 	{
 		QString before = obj->asText();
 		*ptr = val;
 		QString after = obj->asText();
 
 		if (before != after)
+		{
 			obj->document()->addToHistory (new EditHistory (idx, before, after));
+			g_win->R()->compileObject (obj);
+		}
 	}
 	else
 		*ptr = val;
@@ -821,5 +866,28 @@ LDObject* LDObject::createCopy() const
 	*/
 
 	LDObject* copy = parseLine (asText());
+
+	if (origin().isEmpty() == false)
+		copy->setOrigin (origin());
+	elif (document() != null)
+		copy->setOrigin (document()->getDisplayName() + ":" + QString::number (lineNumber()));
+
 	return copy;
 }
+
+// =============================================================================
+//
+void LDSubfile::setFileInfo (const LDDocumentPointer& a)
+{
+	m_fileInfo = a;
+
+	// If it's an immediate subfile reference (i.e. this subfile belongs in an
+	// explicit file), we need to pre-compile the GL polygons for the document
+	// if they don't exist already.
+	if (a != null &&
+		a->isImplicit() == false &&
+		a->polygonData().isEmpty())
+	{
+		a->initializeGLData();
+	}
+};
