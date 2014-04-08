@@ -19,7 +19,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDir>
+#include <QTime>
 #include <QApplication>
+
 #include "main.h"
 #include "configuration.h"
 #include "ldDocument.h"
@@ -29,6 +31,7 @@
 #include "dialogs.h"
 #include "glRenderer.h"
 #include "misc/invokeLater.h"
+#include "glCompiler.h"
 
 cfg (String, io_ldpath, "");
 cfg (List, io_recentfiles, {});
@@ -128,6 +131,7 @@ LDDocument::LDDocument() :
 	setTabIndex (-1);
 	setHistory (new History);
 	history()->setDocument (this);
+	m_needsGLReInit = true;
 }
 
 // =============================================================================
@@ -144,11 +148,7 @@ LDDocument::~LDDocument()
 	for (LDObject* obj : objects())
 		obj->destroy();
 
-	// Clear the cache as well
-	for (LDObject* obj : cache())
-		obj->destroy();
-
-	delete m_history;
+	delete history();
 	delete m_gldata;
 
 	// If we just closed the current file, we need to set the current
@@ -1073,6 +1073,7 @@ int LDDocument::addObject (LDObject* obj)
 #endif
 
 	obj->setDocument (this);
+	g_win->R()->compileObject (obj);
 	return getObjectCount() - 1;
 }
 
@@ -1092,6 +1093,7 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
+	g_win->R()->compileObject (obj);
 
 #ifdef DEBUG
 	if (!isImplicit())
@@ -1142,6 +1144,7 @@ void LDDocument::setObject (int idx, LDObject* obj)
 	m_objects[idx]->unselect();
 	m_objects[idx]->setDocument (null);
 	obj->setDocument (this);
+	g_win->R()->compileObject (obj);
 	m_objects[idx] = obj;
 }
 
@@ -1199,81 +1202,76 @@ QString LDDocument::getDisplayName()
 
 // =============================================================================
 //
-LDObjectList LDDocument::inlineContents (LDSubfile::InlineFlags flags)
+void LDDocument::initializeGLData()
+{
+	print (getDisplayName() + ": Initializing GL data");
+	LDObjectList objs = inlineContents (true, true);
+
+	for (LDObject* obj : objs)
+	{
+		assert (obj->type() != LDObject::ESubfile);
+		LDPolygon* data = obj->getPolygon();
+
+		if (data != null)
+		{
+			m_polygonData << *data;
+			delete data;
+		}
+
+		obj->destroy();
+	}
+
+	m_needsGLReInit = false;
+}
+
+// =============================================================================
+//
+QList<LDPolygon> LDDocument::inlinePolygons()
+{
+	if (m_needsGLReInit == true)
+		initializeGLData();
+
+	return polygonData();
+}
+
+// =============================================================================
+// -----------------------------------------------------------------------------
+LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 {
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (gl_logostuds && (flags & LDSubfile::RendererInline))
+	if (gl_logostuds && renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();
 
-		if (name() == "stud.dat" && g_logoedStud)
-			return g_logoedStud->inlineContents (flags);
-		elif (name() == "stud2.dat" && g_logoedStud2)
-			return g_logoedStud2->inlineContents (flags);
+		if (name() == "stud.dat" && g_logoedStud != null)
+			return g_logoedStud->inlineContents (deep, renderinline);
+		elif (name() == "stud2.dat" && g_logoedStud2 != null)
+			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 
 	LDObjectList objs, objcache;
 
-	bool deep = flags & LDSubfile::DeepInline,
-		 doCache = flags & LDSubfile::CacheInline;
-
-	if (m_needsCache)
+	for (LDObject* obj : objects())
 	{
-		m_cache.clear();
-		doCache = true;
-	}
+		// Skip those without scemantic meaning
+		if (!obj->isScemantic())
+			continue;
 
-	// If we have this cached, just create a copy of that
-	if (deep && cache().isEmpty() == false)
-	{
-		for (LDObject* obj : cache())
-			objs << obj->createCopy();
-	}
-	else
-	{
-		if (!deep)
-			doCache = false;
-
-		for (LDObject* obj : objects())
+		// Got another sub-file reference, inline it if we're deep-inlining. If not,
+		// just add it into the objects normally. Yay, recursion!
+		if (deep == true && obj->type() == LDObject::ESubfile)
 		{
-			// Skip those without scemantic meaning
-			if (!obj->isScemantic())
-				continue;
+			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDObjectList otherobjs = ref->inlineContents (deep, renderinline);
 
-			// Got another sub-file reference, inline it if we're deep-inlining. If not,
-			// just add it into the objects normally. Also, we only cache immediate
-			// subfiles and this is not one. Yay, recursion!
-			if (deep && obj->type() == LDObject::ESubfile)
-			{
-				LDSubfile* ref = static_cast<LDSubfile*> (obj);
-
-				// We only want to cache immediate subfiles, so shed the caching
-				// flag when recursing deeper in hierarchy.
-				LDObjectList otherobjs = ref->inlineContents (flags & ~ (LDSubfile::CacheInline));
-
-				for (LDObject* otherobj : otherobjs)
-				{
-					// Cache this object, if desired
-					if (doCache)
-						objcache << otherobj->createCopy();
-
-					objs << otherobj;
-				}
-			}
-			else
-			{
-				if (doCache)
-					objcache << obj->createCopy();
-
-				objs << obj->createCopy();
-			}
+			for (LDObject* otherobj : otherobjs)
+				objs << otherobj;
 		}
-
-		if (doCache)
-			setCache (objcache);
+		else
+			objs << obj->createCopy();
 	}
 
 	return objs;
@@ -1309,6 +1307,7 @@ void LDDocument::setCurrent (LDDocument* f)
 		g_win->updateTitle();
 		g_win->R()->setDocument (f);
 		g_win->R()->repaint();
+		g_win->R()->compiler()->needMerge();
 		print ("Changed file to %1", f->getDisplayName());
 	}
 }
