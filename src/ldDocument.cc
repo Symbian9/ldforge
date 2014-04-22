@@ -19,7 +19,9 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDir>
+#include <QTime>
 #include <QApplication>
+
 #include "main.h"
 #include "configuration.h"
 #include "ldDocument.h"
@@ -29,6 +31,7 @@
 #include "dialogs.h"
 #include "glRenderer.h"
 #include "misc/invokeLater.h"
+#include "glCompiler.h"
 
 cfg (String, io_ldpath, "");
 cfg (List, io_recentfiles, {});
@@ -121,6 +124,7 @@ namespace LDPaths
 // =============================================================================
 //
 LDDocument::LDDocument() :
+	m_flags (0),
 	m_gldata (new LDGLData)
 {
 	setImplicit (true);
@@ -128,6 +132,7 @@ LDDocument::LDDocument() :
 	setTabIndex (-1);
 	setHistory (new History);
 	history()->setDocument (this);
+	m_needsReCache = true;
 }
 
 // =============================================================================
@@ -137,18 +142,14 @@ LDDocument::~LDDocument()
 	// Remove this file from the list of files. This MUST be done FIRST, otherwise
 	// a ton of other functions will think this file is still valid when it is not!
 	g_loadedFiles.removeOne (this);
-
+	m_flags |= DOCF_IsBeingDestroyed;
 	m_history->setIgnoring (true);
 
 	// Clear everything from the model
 	for (LDObject* obj : objects())
 		obj->destroy();
 
-	// Clear the cache as well
-	for (LDObject* obj : cache())
-		obj->destroy();
-
-	delete m_history;
+	delete history();
 	delete m_gldata;
 
 	// If we just closed the current file, we need to set the current
@@ -471,7 +472,7 @@ LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok)
 
 // =============================================================================
 //
-LDDocument* openDocument (QString path, bool search)
+LDDocument* openDocument (QString path, bool search, bool implicit)
 {
 	// Convert the file name to lowercase since some parts contain uppercase
 	// file names. I'll assume here that the library will always use lowercase
@@ -497,6 +498,7 @@ LDDocument* openDocument (QString path, bool search)
 		return null;
 
 	LDDocument* load = new LDDocument;
+	load->setImplicit (implicit);
 	load->setFullPath (fullpath);
 	load->setName (LDDocument::shortenName (load->fullPath()));
 	dprint ("name: %1 (%2)", load->name(), load->fullPath());
@@ -671,7 +673,7 @@ void openMainFile (QString path)
 		return;
 	}
 
-	LDDocument* file = openDocument (path, false);
+	LDDocument* file = openDocument (path, false, false);
 
 	if (not file)
 	{
@@ -1024,7 +1026,7 @@ LDDocument* getDocument (QString filename)
 
 	// If it's not loaded, try open it
 	if (not doc)
-		doc = openDocument (filename, true);
+		doc = openDocument (filename, true, true);
 
 	return doc;
 }
@@ -1066,9 +1068,7 @@ int LDDocument::addObject (LDObject* obj)
 {
 	history()->add (new AddHistory (objects().size(), obj));
 	m_objects << obj;
-
-	if (obj->type() == LDObject::EVertex)
-		m_vertices << obj;
+	addKnownVerticesOf (obj);
 
 #ifdef DEBUG
 	if (not isImplicit())
@@ -1076,6 +1076,7 @@ int LDDocument::addObject (LDObject* obj)
 #endif
 
 	obj->setDocument (this);
+	g_win->R()->compileObject (obj);
 	return getObjectCount() - 1;
 }
 
@@ -1095,11 +1096,61 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
+	g_win->R()->compileObject (obj);
+	addKnownVerticesOf (obj);
 
 #ifdef DEBUG
 	if (not isImplicit())
 		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
 #endif
+}
+
+// =============================================================================
+//
+void LDDocument::addKnownVerticesOf (LDObject* obj)
+{
+	if (isImplicit())
+		return;
+
+	if (obj->type() == LDObject::ESubfile)
+	{
+		LDSubfile* ref = static_cast<LDSubfile*> (obj);
+
+		for (Vertex vrt : ref->fileInfo()->inlineVertices())
+		{
+			vrt.transform (ref->transform(), ref->position());
+			addKnownVertexReference (vrt);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < obj->vertices(); ++i)
+			addKnownVertexReference (obj->vertex (i));
+	}
+}
+
+// =============================================================================
+//
+void LDDocument::removeKnownVerticesOf (LDObject* obj)
+{
+	if (isImplicit())
+		return;
+
+	if (obj->type() == LDObject::ESubfile)
+	{
+		LDSubfile* ref = static_cast<LDSubfile*> (obj);
+
+		for (Vertex vrt : ref->fileInfo()->inlineVertices())
+		{
+			vrt.transform (ref->transform(), ref->position());
+			removeKnownVertexReference (vrt);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < obj->vertices(); ++i)
+			removeKnownVertexReference (obj->vertex (i));
+	}
 }
 
 // =============================================================================
@@ -1110,11 +1161,52 @@ void LDDocument::forgetObject (LDObject* obj)
 	obj->unselect();
 	assert (m_objects[idx] == obj);
 
-	if (not history()->isIgnoring())
+	if (not isImplicit() && not (flags() & DOCF_IsBeingDestroyed))
+	{
 		history()->add (new DelHistory (idx, obj));
+		removeKnownVerticesOf (obj);
+	}
 
 	m_objects.removeAt (idx);
 	obj->setDocument (null);
+}
+
+// =============================================================================
+//
+void LDDocument::vertexChanged (const Vertex& a, const Vertex& b)
+{
+	removeKnownVertexReference (a);
+	addKnownVertexReference (b);
+}
+
+// =============================================================================
+//
+void LDDocument::addKnownVertexReference (const Vertex& a)
+{
+	if (isImplicit())
+		return;
+
+	auto it = m_vertices.find (a);
+
+	if (it == m_vertices.end())
+		m_vertices[a] = 1;
+	else
+		++it.value();
+}
+
+// =============================================================================
+//
+void LDDocument::removeKnownVertexReference (const Vertex& a)
+{
+	if (isImplicit())
+		return;
+
+	auto it = m_vertices.find (a);
+	assert (it != m_vertices.end());
+
+	// If there's no more references to a given vertex, it is to be removed.
+	if (--it.value() == 0)
+		m_vertices.erase (it);
 }
 
 // =============================================================================
@@ -1142,9 +1234,12 @@ void LDDocument::setObject (int idx, LDObject* obj)
 		*m_history << new EditHistory (idx, oldcode, newcode);
 	}
 
+	removeKnownVerticesOf (m_objects[idx]);
 	m_objects[idx]->unselect();
 	m_objects[idx]->setDocument (null);
 	obj->setDocument (this);
+	addKnownVerticesOf (obj);
+	g_win->R()->compileObject (obj);
 	m_objects[idx] = obj;
 }
 
@@ -1202,81 +1297,81 @@ QString LDDocument::getDisplayName()
 
 // =============================================================================
 //
-LDObjectList LDDocument::inlineContents (LDSubfile::InlineFlags flags)
+void LDDocument::initializeCachedData()
+{
+	if (not m_needsReCache)
+		return;
+
+	LDObjectList objs = inlineContents (true, true);
+	m_storedVertices.clear();
+
+	for (LDObject* obj : objs)
+	{
+		assert (obj->type() != LDObject::ESubfile);
+		LDPolygon* data = obj->getPolygon();
+
+		if (data != null)
+		{
+			m_polygonData << *data;
+			delete data;
+		}
+
+		for (int i = 0; i < obj->vertices(); ++i)
+			m_storedVertices << obj->vertex (i);
+
+		obj->destroy();
+	}
+
+	removeDuplicates (m_storedVertices);
+	m_needsReCache = false;
+}
+
+// =============================================================================
+//
+QList<LDPolygon> LDDocument::inlinePolygons()
+{
+	initializeCachedData();
+	return polygonData();
+}
+
+// =============================================================================
+// -----------------------------------------------------------------------------
+LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 {
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (gl_logostuds && (flags & LDSubfile::RendererInline))
+	if (gl_logostuds && renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();
 
-		if (name() == "stud.dat" && g_logoedStud)
-			return g_logoedStud->inlineContents (flags);
-		elif (name() == "stud2.dat" && g_logoedStud2)
-			return g_logoedStud2->inlineContents (flags);
+		if (name() == "stud.dat" && g_logoedStud != null)
+			return g_logoedStud->inlineContents (deep, renderinline);
+		elif (name() == "stud2.dat" && g_logoedStud2 != null)
+			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 
 	LDObjectList objs, objcache;
 
-	bool deep = flags & LDSubfile::DeepInline,
-		 doCache = flags & LDSubfile::CacheInline;
-
-	if (m_needsCache)
+	for (LDObject* obj : objects())
 	{
-		m_cache.clear();
-		doCache = true;
-	}
+		// Skip those without scemantic meaning
+		if (not obj->isScemantic())
+			continue;
 
-	// If we have this cached, just create a copy of that
-	if (deep && not cache().isEmpty())
-	{
-		for (LDObject* obj : cache())
-			objs << obj->createCopy();
-	}
-	else
-	{
-		if (not deep)
-			doCache = false;
-
-		for (LDObject* obj : objects())
+		// Got another sub-file reference, inline it if we're deep-inlining. If not,
+		// just add it into the objects normally. Yay, recursion!
+		if (deep == true && obj->type() == LDObject::ESubfile)
 		{
-			// Skip those without scemantic meaning
-			if (not obj->isScemantic())
-				continue;
+			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDObjectList otherobjs = ref->inlineContents (deep, renderinline);
 
-			// Got another sub-file reference, inline it if we're deep-inlining. If not,
-			// just add it into the objects normally. Also, we only cache immediate
-			// subfiles and this is not one. Yay, recursion!
-			if (deep && obj->type() == LDObject::ESubfile)
-			{
-				LDSubfile* ref = static_cast<LDSubfile*> (obj);
-
-				// We only want to cache immediate subfiles, so shed the caching
-				// flag when recursing deeper in hierarchy.
-				LDObjectList otherobjs = ref->inlineContents (flags & ~ (LDSubfile::CacheInline));
-
-				for (LDObject* otherobj : otherobjs)
-				{
-					// Cache this object, if desired
-					if (doCache)
-						objcache << otherobj->createCopy();
-
-					objs << otherobj;
-				}
-			}
-			else
-			{
-				if (doCache)
-					objcache << obj->createCopy();
-
-				objs << obj->createCopy();
-			}
+			for (LDObject* otherobj : otherobjs)
+				objs << otherobj;
 		}
-
-		if (doCache)
-			setCache (objcache);
+		else
+			objs << obj->createCopy();
 	}
 
 	return objs;
@@ -1311,7 +1406,7 @@ void LDDocument::setCurrent (LDDocument* f)
 		g_win->buildObjList();
 		g_win->updateTitle();
 		g_win->R()->setDocument (f);
-		g_win->R()->repaint();
+		g_win->R()->compiler()->needMerge();
 		print ("Changed file to %1", f->getDisplayName());
 	}
 }
@@ -1356,8 +1451,8 @@ void loadLogoedStuds()
 	delete g_logoedStud;
 	delete g_logoedStud2;
 
-	g_logoedStud = openDocument ("stud-logo.dat", true);
-	g_logoedStud2 = openDocument ("stud2-logo.dat", true);
+	g_logoedStud = openDocument ("stud-logo.dat", true, true);
+	g_logoedStud2 = openDocument ("stud2-logo.dat", true, true);
 
 	print (LDDocument::tr ("Logoed studs loaded.\n"));
 }
@@ -1443,4 +1538,12 @@ void LDDocument::removeReference (LDDocumentPointer* ptr)
 
 	if (references().isEmpty())
 		invokeLater (closeUnused);
+}
+
+// =============================================================================
+//
+QList<Vertex> LDDocument::inlineVertices()
+{
+	initializeCachedData();
+	return m_storedVertices;
 }

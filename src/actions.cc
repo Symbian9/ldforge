@@ -35,6 +35,7 @@
 #include "primitives.h"
 #include "radioGroup.h"
 #include "colors.h"
+#include "glCompiler.h"
 #include "ui_newpart.h"
 
 extern_cfg (Bool,		gl_wireframe);
@@ -43,6 +44,7 @@ extern_cfg (String,	ld_defaultname);
 extern_cfg (String,	ld_defaultuser);
 extern_cfg (Int,		ld_defaultlicense);
 extern_cfg (Bool,		gl_drawangles);
+extern_cfg (Bool,		gl_randomcolors)
 
 // =============================================================================
 //
@@ -471,7 +473,6 @@ DEFINE_ACTION (InsertRaw, 0)
 
 		getCurrentDocument()->insertObj (idx, obj);
 		obj->select();
-		R()->compileObject (obj);
 		idx++;
 	}
 
@@ -847,9 +848,7 @@ DEFINE_ACTION (SubfileSelection, 0)
 			obj->destroy();
 
 		// Compile all objects in the new subfile
-		for (LDObject* obj : doc->objects())
-			R()->compileObject (obj);
-
+		R()->compiler()->compileDocument (doc);
 		g_loadedFiles << doc;
 
 		// Add a reference to the new subfile to where the selection was
@@ -859,7 +858,6 @@ DEFINE_ACTION (SubfileSelection, 0)
 		ref->setPosition (g_origin);
 		ref->setTransform (g_identity);
 		getCurrentDocument()->insertObj (refidx, ref);
-		R()->compileObject (ref);
 
 		// Refresh stuff
 		updateDocumentList();
@@ -870,4 +868,10 @@ DEFINE_ACTION (SubfileSelection, 0)
 		// Failed to save.
 		delete doc;
 	}
+}
+
+DEFINE_ACTION (RandomColors, CTRL_SHIFT (R))
+{
+	gl_randomcolors = not gl_randomcolors;
+	R()->refresh();
 }

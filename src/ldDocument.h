@@ -21,11 +21,13 @@
 #include "main.h"
 #include "ldObject.h"
 #include "editHistory.h"
+#include "glShared.h"
 
 class History;
 class OpenProgressDialog;
 class LDDocumentPointer;
 struct LDGLData;
+class GLCompiler;
 
 namespace LDPaths
 {
@@ -37,6 +39,17 @@ namespace LDPaths
 	QString parts();
 	QString getError();
 }
+
+//
+// Flags for LDDocument
+//
+enum LDDocumentFlag
+{
+	DOCF_IsBeingDestroyed = (1 << 0),
+};
+
+Q_DECLARE_FLAGS (LDDocumentFlags, LDDocumentFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS (LDDocumentFlags)
 
 // =============================================================================
 //
@@ -53,19 +66,22 @@ class LDDocument : public QObject
 {
 	public:
 		using ReferenceList = QList<LDDocumentPointer*>;
+		using KnownVertexMap = QMap<Vertex, int>;
 
 		Q_OBJECT
 		PROPERTY (public,	QString,		name,			setName,			STOCK_WRITE)
 		PROPERTY (private,	LDObjectList,	objects, 		setObjects,			STOCK_WRITE)
 		PROPERTY (private,	LDObjectList,	cache, 			setCache,			STOCK_WRITE)
 		PROPERTY (private,	History*,		history,		setHistory,			STOCK_WRITE)
-		PROPERTY (private,	LDObjectList,	vertices,		setVertices,		STOCK_WRITE)
+		PROPERTY (private,	KnownVertexMap,	vertices,		setVertices,		STOCK_WRITE)
 		PROPERTY (private,	ReferenceList,	references,		setReferences,		STOCK_WRITE)
 		PROPERTY (public,	QString,		fullPath,		setFullPath,		STOCK_WRITE)
 		PROPERTY (public,	QString,		defaultName,	setDefaultName,		STOCK_WRITE)
 		PROPERTY (public,	bool,			isImplicit,		setImplicit,		STOCK_WRITE)
 		PROPERTY (public,	long,			savePosition,	setSavePosition,	STOCK_WRITE)
 		PROPERTY (public,	int,			tabIndex,		setTabIndex,		STOCK_WRITE)
+		PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,	STOCK_WRITE)
+		PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,		STOCK_WRITE)
 
 	public:
 		LDDocument();
@@ -78,7 +94,8 @@ class LDDocument : public QObject
 		QString getDisplayName();
 		const LDObjectList& getSelection() const;
 		bool hasUnsavedChanges() const; // Does this document have unsaved changes?
-		LDObjectList inlineContents (LDSubfile::InlineFlags flags);
+		void initializeCachedData();
+		LDObjectList inlineContents (bool deep, bool renderinline);
 		void insertObj (int pos, LDObject* obj);
 		int getObjectCount() const;
 		LDObject* getObject (int pos) const;
@@ -88,6 +105,11 @@ class LDDocument : public QObject
 		void setObject (int idx, LDObject* obj);
 		void addReference (LDDocumentPointer* ptr);
 		void removeReference (LDDocumentPointer* ptr);
+		QList<LDPolygon> inlinePolygons();
+		void vertexChanged (const Vertex& a, const Vertex& b);
+		void addKnownVerticesOf(LDObject* obj);
+		void removeKnownVerticesOf (LDObject* sub);
+		QList<Vertex> inlineVertices();
 
 		inline LDDocument& operator<< (LDObject* obj)
 		{
@@ -144,12 +166,16 @@ class LDDocument : public QObject
 	private:
 		LDObjectList			m_sel;
 		LDGLData*				m_gldata;
+		QList<Vertex>			m_storedVertices;
 
-		// If set to true, next inline of this document discards the cache and
-		// re-builds it.
-		bool					m_needsCache;
+		// If set to true, next polygon inline of this document discards the
+		// stored polygon data and re-builds it.
+		bool					m_needsReCache;
 
 		static LDDocument*		m_curdoc;
+
+		void addKnownVertexReference (const Vertex& a);
+		void removeKnownVertexReference (const Vertex& a);
 };
 
 inline LDDocument* getCurrentDocument()
@@ -168,7 +194,7 @@ LDDocument* findDocument (QString name);
 
 // Opens the given file and parses the LDraw code within. Returns a pointer
 // to the opened file or null on error.
-LDDocument* openDocument (QString path, bool search);
+LDDocument* openDocument (QString path, bool search, bool implicit);
 
 // Opens the given file and returns a pointer to it, potentially looking in /parts and /p
 QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
