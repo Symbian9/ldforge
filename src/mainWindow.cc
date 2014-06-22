@@ -271,7 +271,7 @@ void MainWindow::updateTitle()
 #endif // DEBUG
 
 	if (commitTimeString()[0] != '\0')
-		title += format (" (%1)", commitTimeString());
+		title += format (" (%1)", QString::fromUtf8 (commitTimeString()));
 
 	setWindowTitle (title);
 }

@@ -14,7 +14,7 @@ option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct color
 get_target_property (UPDATEREVISION_EXE updaterevision LOCATION)
 
 add_custom_target (revision_check ALL
-    COMMAND ${UPDATEREVISION_EXE} gitinfo.h
+    COMMAND ${UPDATEREVISION_EXE} ${CMAKE_SOURCE_DIR} hginfo.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS updaterevision)
 

@@ -22,8 +22,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "version.h"
-#include "gitinfo.h"
+#include "hginfo.h"
 
 char g_versionString[64] = {'\0'};
 char g_fullVersionString[256] = {'\0'};
@@ -51,8 +52,8 @@ const char* fullVersionString()
 {
 	if (g_fullVersionString[0] == '\0')
 	{
-#if BUILD_ID != BUILD_RELEASE
-		strcpy (g_fullVersionString, GIT_DESCRIPTION);
+#if BUILD_ID != BUILD_RELEASE && defined (SVN_REVISION_STRING)
+		strcpy (g_fullVersionString, SVN_REVISION_STRING);
 #else
 		sprintf (g_fullVersionString, "v%s", versionString());
 #endif
@@ -65,9 +66,12 @@ const char* fullVersionString()
 //
 const char* commitTimeString()
 {
-#ifdef GIT_TIME
+#ifdef SVN_REVISION_NUMBER
 	if (g_buildTime[0] == '\0')
-		strcpy (g_buildTime, GIT_TIME);
+	{
+		time_t timestamp = SVN_REVISION_NUMBER;
+		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y %T", localtime (&timestamp));
+	}
 #endif
 
 	return g_buildTime;
