@@ -21,6 +21,8 @@
 
 RingFinder g_RingFinder;
 
+RingFinder::RingFinder() {}
+
 // =============================================================================
 //
 bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolution)
@@ -104,9 +106,16 @@ bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolut
 	return true;
 }
 
-// =============================================================================
-// Main function. Call this with r0 and r1. If this returns true, use bestSolution
-// for the solution that was presented.
+//
+// This is the main algorithm of the ring finder. It tries to use math
+// to find the one ring between r0 and r1. If it fails (the ring number
+// is non-integral), it finds an intermediate radius (ceil of the ring
+// number times scale) and splits the radius at this point, calling this
+// function again to try find the rings between r0 - r and r - r1.
+//
+// This does not always yield into usable results. If at some point r ==
+// r0 or r == r1, there is no hope of finding the rings, at least with
+// this algorithm, as it would fall into an infinite recursion.
 //
 bool RingFinder::findRings (double r0, double r1)
 {
@@ -131,7 +140,18 @@ bool RingFinder::findRings (double r0, double r1)
 	return (m_bestSolution != null);
 }
 
-// =============================================================================
+//
+// Compares this solution with @other and determines which
+// one is superior.
+//
+// A solution is considered superior if solution has less
+// components than the other one. If both solution have an
+// equal amount components, the solution with a lesser maximum
+// ring number is found superior, as such solutions should
+// yield less new primitives and cleaner definitions.
+//
+// The solution which is found superior to every other solution
+// will be the one returned by RingFinder::bestSolution().
 //
 bool RingFinder::Solution::isSuperiorTo (const Solution* other) const
 {
