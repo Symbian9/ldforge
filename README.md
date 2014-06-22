@@ -8,6 +8,7 @@ the LDraw code of individual objects, drawing overlays of part photos and provid
 commonly used utilities.
 
 Features:
+
 * List view ala MLCAD with multi-selection. One object per line, one line per object. Items not colored main or edge color (16/24) have their color reflected in the list view for identifying.
 * Support for multiple open files (development version only)
 * Parse error recovery, if a line/object cannot be parsed properly it will be displayed as an errorneous object. This object can be selected and its contents edited and have it reparsed, so you can fix these errors within LDForge.
