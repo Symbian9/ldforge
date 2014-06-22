@@ -122,17 +122,42 @@ bool RingFinder::findRings (double r0, double r1)
 	m_solutions.clear();
 	Solution sol;
 
+	// If we're dealing with fractional radii, try upscale them into integral
+	// ones. This should yield in more reliable and more optimized results.
+	// For instance, using r0=1.5, r1=3.5 causes the algorithm to fail but
+	// r0=3, r1=7 (scaled up by 2) yields a 2-component solution. We can then
+	// downscale the radii back by dividing the scale fields of the solution
+	// components.
+	double scale = 1.0;
+
+	if (not isZero (scale = r0 - floor (r0)) || not isZero (scale = r1 - floor (r1)))
+	{
+		double r0f = r0 / scale;
+		double r1f = r1 / scale;
+
+		if (qFuzzyCompare (floor (r0f), r0f) && qFuzzyCompare (floor (r1f), r1f))
+		{
+			r0 = r0f;
+			r1 = r1f;
+		}
+	}
+
 	// Recurse in and try find solutions.
 	findRingsRecursor (r0, r1, sol);
+
+	// If we had upscaled our radii, downscale back now.
+	if (scale != 1.0)
+	{
+		for (Solution& sol : m_solutions)
+			sol.scaleComponents (scale);
+	}
 
 	// Compare the solutions and find the best one. The solution class has an operator>
 	// overload to compare two solutions.
 	m_bestSolution = null;
 
-	for (QVector<Solution>::iterator solp = m_solutions.begin(); solp != m_solutions.end(); ++solp)
+	for (Solution const& sol : m_solutions)
 	{
-		const Solution& sol = *solp;
-
 		if (m_bestSolution == null || sol.isSuperiorTo (m_bestSolution))
 			m_bestSolution = &sol;
 	}
@@ -186,4 +211,10 @@ bool RingFinder::Solution::isSuperiorTo (const Solution* other) const
 	// just say this one is better, at this point it does not matter which
 	// one is chosen.
 	return true;
+}
+
+void RingFinder::Solution::scaleComponents (double scale)
+{
+	for (Component& cmp : m_components)
+		cmp.scale *= scale;
 }

@@ -41,6 +41,7 @@ public:
 	public:
 		inline void addComponent (const Component& a);
 		inline const QVector<Component>& getComponents() const;
+		void scaleComponents (double scale);
 		bool isSuperiorTo (const Solution* other) const;
 
 	private:
