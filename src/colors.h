@@ -43,22 +43,14 @@ public: \
 
 class LDColor;
 
-class LDColorData
+struct LDColorData
 {
-protected:
 	QString _name;
 	QString _hexcode;
 	QColor _faceColor;
 	QColor _edgeColor;
 	qint32 _index;
-	friend class LDConfigParser;
-	friend class LDColor;
-	friend void initColors();
-
-public:
-	LDColorData(){}
 };
-
 
 class LDColor : public QSharedPointer<LDColorData>
 {

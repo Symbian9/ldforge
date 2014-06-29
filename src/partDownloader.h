@@ -86,43 +86,43 @@ public slots:
 
 // =============================================================================
 //
+enum PartDownloadRequestState
+{
+	DLRQ_Requesting,
+	DLRQ_Downloading,
+	DLRQ_Finished,
+	DLRQ_Failed,
+};
+
 class PartDownloadRequest : public QObject
 {
-	public:
-		enum EState
-		{
-			ERequesting,
-			EDownloading,
-			EFinished,
-			EFailed,
-		};
+public:
+	Q_OBJECT
+	PROPERTY (public,	int,						tableRow,		setTableRow,		STOCK_WRITE)
+	PROPERTY (private,	PartDownloadRequestState,	state,			setState,			STOCK_WRITE)
+	PROPERTY (private,	PartDownloader*,			prompt,			setPrompt,			STOCK_WRITE)
+	PROPERTY (private,	QString,					url,			setURL,				STOCK_WRITE)
+	PROPERTY (private,	QString,					destinaton,		setDestination,		STOCK_WRITE)
+	PROPERTY (private,	QString,					filePath,		setFilePath,		STOCK_WRITE)
+	PROPERTY (private,	QNetworkAccessManager*,		networkManager,	setNetworkManager,	STOCK_WRITE)
+	PROPERTY (private,	QNetworkReply*,				networkReply,	setNetworkReply,	STOCK_WRITE)
+	PROPERTY (private,	bool,						isFirstUpdate,	setFirstUpdate,		STOCK_WRITE)
+	PROPERTY (private,	int64,						numBytesRead,	setNumBytesRead,	STOCK_WRITE)
+	PROPERTY (private,	int64,						numBytesTotal,	setNumBytesTotal,	STOCK_WRITE)
+	PROPERTY (private,	bool,						isPrimary,		setPrimary,			STOCK_WRITE)
+	PROPERTY (private,	QFile*,						filePointer,	setFilePointer,		STOCK_WRITE)
 
-		Q_OBJECT
-		PROPERTY (public,	int,					tableRow,		setTableRow,		STOCK_WRITE)
-		PROPERTY (private,	EState,					state,			setState,			STOCK_WRITE)
-		PROPERTY (private,	PartDownloader*,		prompt,			setPrompt,			STOCK_WRITE)
-		PROPERTY (private,	QString,				url,			setURL,				STOCK_WRITE)
-		PROPERTY (private,	QString,				destinaton,		setDestination,		STOCK_WRITE)
-		PROPERTY (private,	QString,				filePath,		setFilePath,		STOCK_WRITE)
-		PROPERTY (private,	QNetworkAccessManager*,	networkManager,	setNetworkManager,	STOCK_WRITE)
-		PROPERTY (private,	QNetworkReply*,			networkReply,	setNetworkReply,	STOCK_WRITE)
-		PROPERTY (private,	bool,					isFirstUpdate,	setFirstUpdate,		STOCK_WRITE)
-		PROPERTY (private,	int64,					numBytesRead,	setNumBytesRead,	STOCK_WRITE)
-		PROPERTY (private,	int64,					numBytesTotal,	setNumBytesTotal,	STOCK_WRITE)
-		PROPERTY (private,	bool,					isPrimary,		setPrimary,			STOCK_WRITE)
-		PROPERTY (private,	QFile*,					filePointer,	setFilePointer,		STOCK_WRITE)
+public:
+	explicit PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent);
+	PartDownloadRequest (const PartDownloadRequest&) = delete;
+	virtual ~PartDownloadRequest();
+	void updateToTable();
+	bool isFinished() const;
+	void operator= (const PartDownloadRequest&) = delete;
 
-	public:
-		explicit PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent);
-		PartDownloadRequest (const PartDownloadRequest&) = delete;
-		virtual ~PartDownloadRequest();
-		void updateToTable();
-		bool isFinished() const;
-		void operator= (const PartDownloadRequest&) = delete;
-
-	public slots:
-		void downloadFinished();
-		void readyRead();
-		void downloadProgress (qint64 recv, qint64 total);
-		void abort();
+public slots:
+	void downloadFinished();
+	void readyRead();
+	void downloadProgress (qint64 recv, qint64 total);
+	void abort();
 };

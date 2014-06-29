@@ -120,10 +120,10 @@ Matrix::Matrix (double fillval)
 
 // =============================================================================
 //
-Matrix::Matrix (const std::initializer_list< double >& vals)
+Matrix::Matrix (const std::initializer_list<double>& vals)
 {
 	assert (vals.size() == 9);
-	memcpy (&m_vals[0], & (*vals.begin()), sizeof m_vals);
+	memcpy (&m_vals[0], vals.begin(), sizeof m_vals);
 }
 
 // =============================================================================
@@ -133,7 +133,7 @@ void Matrix::dump() const
 	for (int i = 0; i < 3; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
-			print ("%1\t", m_vals[ (i * 3) + j]);
+			print ("%1\t", m_vals[i * 3 + j]);
 
 		print ("\n");
 	}
@@ -203,8 +203,10 @@ double Matrix::getDeterminant() const
 bool Matrix::operator== (const Matrix& other) const
 {
 	for (int i = 0; i < 9; ++i)
+	{
 		if (value (i) != other[i])
 			return false;
+	}
 
 	return true;
 }
@@ -222,7 +224,7 @@ void LDBoundingBox::calculateFromCurrentDocument()
 {
 	reset();
 
-	if (not getCurrentDocument())
+	if (getCurrentDocument() == null)
 		return;
 
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
