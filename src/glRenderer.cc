@@ -78,6 +78,9 @@ CFGENTRY (Bool,		drawLineLengths,			true)
 CFGENTRY (Bool,		drawAngles,					false)
 CFGENTRY (Bool,		randomColors,				false)
 CFGENTRY (Bool,		highlightObjectBelowCursor,	true)
+CFGENTRY (Bool,		drawSurfaces,				true)
+CFGENTRY (Bool,		drawEdgeLines,				true)
+CFGENTRY (Bool,		drawConditionalLines,		true)
 
 // argh
 const char* g_CameraNames[7] =
@@ -480,6 +483,14 @@ void GLRenderer::drawGLScene()
 //
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
+	// Filter this through some configuration options
+	if (((surface == VBOSF_Quads || surface == VBOSF_Triangles) && cfg::drawSurfaces == false) ||
+		(surface == VBOSF_Lines && cfg::drawEdgeLines == false) ||
+		(surface == VBOSF_CondLines && cfg::drawConditionalLines == false))
+	{
+		return;
+	}
+
 	int surfacenum = m_compiler->vboNumber (surface, VBOCM_Surfaces);
 	int colornum = m_compiler->vboNumber (surface, colors);
 	m_compiler->prepareVBO (surfacenum);

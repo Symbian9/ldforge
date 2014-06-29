@@ -45,6 +45,9 @@ EXTERN_CFGENTRY (String,	defaultUser);
 EXTERN_CFGENTRY (Int,		defaultLicense);
 EXTERN_CFGENTRY (Bool,		drawAngles);
 EXTERN_CFGENTRY (Bool,		randomColors)
+EXTERN_CFGENTRY (Bool,		drawSurfaces)
+EXTERN_CFGENTRY (Bool,		drawEdgeLines)
+EXTERN_CFGENTRY (Bool,		drawConditionalLines)
 
 // =============================================================================
 //
@@ -908,4 +911,25 @@ void MainWindow::slot_actionOpenSubfiles()
 
 		ref->fileInfo()->setImplicit (false);
 	}
+}
+
+void MainWindow::slot_actionDrawSurfaces()
+{
+	cfg::drawSurfaces = not cfg::drawSurfaces;
+	updateActions();
+	update();
+}
+
+void MainWindow::slot_actionDrawEdgeLines()
+{
+	cfg::drawEdgeLines = not cfg::drawEdgeLines;
+	updateActions();
+	update();
+}
+
+void MainWindow::slot_actionDrawConditionalLines()
+{
+	cfg::drawConditionalLines = not cfg::drawConditionalLines;
+	updateActions();
+	update();
 }

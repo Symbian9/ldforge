@@ -273,6 +273,9 @@ public slots:
 	void slot_actionRandomColors();
 	void slot_actionOpenSubfiles();
 	void slot_actionSplitLines();
+	void slot_actionDrawSurfaces();
+	void slot_actionDrawEdgeLines();
+	void slot_actionDrawConditionalLines();
 
 protected:
 	void closeEvent (QCloseEvent* ev);

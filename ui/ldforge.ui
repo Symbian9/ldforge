@@ -48,7 +48,7 @@
            <x>0</x>
            <y>0</y>
            <width>233</width>
-           <height>436</height>
+           <height>418</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>233</width>
-           <height>436</height>
+           <width>98</width>
+           <height>95</height>
           </rect>
          </property>
          <attribute name="label">
@@ -112,7 +112,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>25</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -160,6 +160,10 @@
     <addaction name="actionBFCView"/>
     <addaction name="actionDrawAngles"/>
     <addaction name="actionRandomColors"/>
+    <addaction name="separator"/>
+    <addaction name="actionDrawSurfaces"/>
+    <addaction name="actionDrawEdgeLines"/>
+    <addaction name="actionDrawConditionalLines"/>
     <addaction name="separator"/>
     <addaction name="actionSetOverlay"/>
     <addaction name="actionClearOverlay"/>
@@ -1546,6 +1550,39 @@
   <action name="actionSplitLines">
    <property name="text">
     <string>Split Lines...</string>
+   </property>
+  </action>
+  <action name="actionDrawSurfaces">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw surfaces</string>
+   </property>
+   <property name="toolTip">
+    <string>Render surfaces (i.e. quads and triangles) on the viewport.</string>
+   </property>
+  </action>
+  <action name="actionDrawEdgeLines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw edgelines</string>
+   </property>
+   <property name="toolTip">
+    <string>Render edgelines on the viewport</string>
+   </property>
+  </action>
+  <action name="actionDrawConditionalLines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw conditional lines</string>
+   </property>
+   <property name="toolTip">
+    <string>Render conditional lines on the viewport.</string>
    </property>
   </action>
  </widget>

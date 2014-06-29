@@ -65,6 +65,9 @@ EXTERN_CFGENTRY (Bool,		drawWireframe);
 EXTERN_CFGENTRY (Bool,		bfcRedGreenView);
 EXTERN_CFGENTRY (Bool,		drawAngles);
 EXTERN_CFGENTRY (Bool,		randomColors);
+EXTERN_CFGENTRY (Bool,		drawSurfaces)
+EXTERN_CFGENTRY (Bool,		drawEdgeLines)
+EXTERN_CFGENTRY (Bool,		drawConditionalLines)
 
 // =============================================================================
 //
@@ -100,10 +103,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	m_quickColors = quickColorsFromConfig();
 	slot_selectionChanged();
 	setStatusBar (new QStatusBar);
-	ui->actionAxes->setChecked (cfg::drawAxes);
-	ui->actionWireframe->setChecked (cfg::drawWireframe);
-	ui->actionBFCView->setChecked (cfg::bfcRedGreenView);
-	ui->actionRandomColors->setChecked (cfg::randomColors);
+	updateActions();
 
 	// Connect all actions and save default sequences
 	applyToActions ([&](QAction* act)
@@ -964,14 +964,22 @@ for (LDObjectPtr obj : *f)
 //
 void MainWindow::updateActions()
 {
-	History* his = getCurrentDocument()->history();
-	int pos = his->position();
-	ui->actionUndo->setEnabled (pos != -1);
-	ui->actionRedo->setEnabled (pos < (long) his->getSize() - 1);
+	if (getCurrentDocument() != null && getCurrentDocument()->history() != null)
+	{
+		History* his = getCurrentDocument()->history();
+		int pos = his->position();
+		ui->actionUndo->setEnabled (pos != -1);
+		ui->actionRedo->setEnabled (pos < (long) his->getSize() - 1);
+	}
+
+	ui->actionWireframe->setChecked (cfg::drawWireframe);
 	ui->actionAxes->setChecked (cfg::drawAxes);
 	ui->actionBFCView->setChecked (cfg::bfcRedGreenView);
 	ui->actionRandomColors->setChecked (cfg::randomColors);
 	ui->actionDrawAngles->setChecked (cfg::drawAngles);
+	ui->actionDrawSurfaces->setChecked (cfg::drawSurfaces);
+	ui->actionDrawEdgeLines->setChecked (cfg::drawEdgeLines);
+	ui->actionDrawConditionalLines->setChecked (cfg::drawConditionalLines);
 }
 
 // =============================================================================
