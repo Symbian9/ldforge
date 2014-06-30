@@ -199,3 +199,84 @@ extern const Vertex g_origin; // Vertex at (0, 0, 0)
 extern const Matrix g_identity; // Identity matrix
 
 static const double pi = 3.14159265358979323846;
+
+
+// =============================================================================
+// Plural expression
+template<class T> static inline const char* plural (T n)
+{
+	return (n != 1) ? "s" : "";
+}
+
+// =============================================================================
+// Templated clamp
+template<class T> static inline T clamp (T a, T min, T max)
+{
+	return (a > max) ? max : (a < min) ? min : a;
+}
+
+// Templated minimum
+template<class T> static inline T min (T a, T b)
+{
+	return (a < b) ? a : b;
+}
+
+// Templated maximum
+template<class T> static inline T max (T a, T b)
+{
+	return (a > b) ? a : b;
+}
+
+// Templated absolute value
+template<class T> static inline T abs (T a)
+{
+	return (a >= 0) ? a : -a;
+}
+
+template<class T> inline bool isZero (T a)
+{
+	return abs<T> (a) < 0.0001;
+}
+
+template<class T> inline bool isInteger (T a)
+{
+	return isZero (a - (int) a);
+}
+
+template<class T> void removeDuplicates (QList<T>& a)
+{
+	std::sort (a.begin(), a.end());
+	a.erase (std::unique (a.begin(), a.end()), a.end());
+}
+
+inline QString utf16 (const char16_t* a)
+{
+	if (Q_LIKELY (sizeof(char16_t) == sizeof(unsigned short)))
+		return QString::fromUtf16 (reinterpret_cast<const unsigned short*> (a));
+
+	QVector<unsigned short> data;
+
+	for (const char16_t* ap = &a[0]; *ap != '\u0000'; ++ap)
+		data << *ap;
+
+	data << '\u0000';
+	return QString::fromUtf16 (data.constData());
+}
+
+//
+// Returns true if first arg is equal to any of the other args
+//
+template<typename T, typename Arg, typename... Args>
+bool eq (T const& a, Arg const& arg, Args const&... args)
+{
+	if (a == arg)
+		return true;
+
+	return eq (a, args...);
+}
+
+template<typename T>
+bool eq (T const&)
+{
+	return false;
+}

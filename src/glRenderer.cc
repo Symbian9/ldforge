@@ -484,7 +484,7 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if (((surface == VBOSF_Quads || surface == VBOSF_Triangles) && cfg::drawSurfaces == false) ||
+	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) && cfg::drawSurfaces == false) ||
 		(surface == VBOSF_Lines && cfg::drawEdgeLines == false) ||
 		(surface == VBOSF_CondLines && cfg::drawConditionalLines == false))
 	{

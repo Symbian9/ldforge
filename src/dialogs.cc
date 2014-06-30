@@ -222,7 +222,7 @@ void LDrawPathDialog::slot_findPath()
 {
 	QString newpath = QFileDialog::getExistingDirectory (this, "Find LDraw Path");
 
-	if (newpath.length() > 0 && newpath != filename())
+	if (not newpath.isEmpty())
 	{
 		setPath (newpath);
 		slot_tryConfigure();

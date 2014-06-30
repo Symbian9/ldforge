@@ -140,11 +140,12 @@ void PartDownloader::modifyDestination (QString& dest) const
 
 	// If the part starts with s\ or s/, then use parts/s/. Same goes with
 	// 48\ and p/48/.
-	if (dest.left (2) == "s\\" || dest.left (2) == "s/")
+	if (eq (dest.left (2), "s\\", "s/"))
 	{
 		dest.remove (0, 2);
 		dest.prepend ("parts/s/");
-	} elif (dest.left (3) == "48\\" || dest.left (3) == "48/")
+	}
+	elif (eq (dest.left (3), "48\\", "48/"))
 	{
 		dest.remove (0, 3);
 		dest.prepend ("p/48/");
@@ -173,7 +174,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 		dest.prepend ("parts/s/");
 	elif (QRegExp (partRegex).exactMatch (dest))
 		dest.prepend ("parts/");
-	elif (dest.left (6) != "parts/" && dest.left (2) != "p/")
+	elif (not dest.startsWith ("parts/") && not dest.startsWith ("p/"))
 		dest.prepend ("p/");
 }
 
@@ -518,7 +519,7 @@ void PartDownloadRequest::readyRead()
 //
 bool PartDownloadRequest::isFinished() const
 {
-	return state() == DLRQ_Finished || state() == DLRQ_Failed;
+	return eq (state(), DLRQ_Finished, DLRQ_Failed);
 }
 
 // =============================================================================
