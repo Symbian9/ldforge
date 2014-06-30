@@ -146,12 +146,12 @@ void simplify (int& numer, int& denom)
 	{
 		repeat = false;
 
-		for (int x = 0; x < NUM_PRIMES; x++)
+		for (int x = 0; x < countof (primes); x++)
 		{
-			const int prime = g_primes[NUM_PRIMES - x - 1];
+			int const prime = primes[x];
 
-			if (numer <= prime || denom <= prime)
-				continue;
+			if (numer < prime && denom < prime)
+				break;
 
 			if ((numer % prime == 0) && (denom % prime == 0))
 			{
@@ -161,8 +161,7 @@ void simplify (int& numer, int& denom)
 				break;
 			}
 		}
-	}
-	while (repeat);
+	} while (repeat);
 }
 
 // =============================================================================
