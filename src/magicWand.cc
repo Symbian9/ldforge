@@ -64,7 +64,10 @@ void MagicWand::doMagic (LDObjectPtr obj, MagicWand::MagicType type)
 	if (obj == null)
 	{
 		if (type == Set)
+		{
 			getCurrentDocument()->clearSelection();
+			g_win->buildObjList();
+		}
 
 		return;
 	}
