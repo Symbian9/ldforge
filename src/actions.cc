@@ -606,6 +606,13 @@ void MainWindow::slot_actionModeCircle()
 
 // =============================================================================
 //
+void MainWindow::slot_actionModeMagicWand()
+{
+ 	R()->setEditMode (EMagicWandMode);
+}
+
+// =============================================================================
+//
 void MainWindow::slot_actionDrawAngles()
 {
 	cfg::drawAngles = not cfg::drawAngles;

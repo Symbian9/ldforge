@@ -451,6 +451,7 @@
    <addaction name="actionModeSelect"/>
    <addaction name="actionModeDraw"/>
    <addaction name="actionModeCircle"/>
+   <addaction name="actionModeMagicWand"/>
   </widget>
   <widget class="QToolBar" name="colorToolbar">
    <property name="windowTitle">
@@ -922,9 +923,6 @@
   <action name="actionSetDrawDepth">
    <property name="text">
     <string>Set Draw Depth</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+3</string>
    </property>
   </action>
   <action name="actionSetColor">
@@ -1479,6 +1477,9 @@
    <property name="text">
     <string>Circle Mode</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
   </action>
   <action name="actionVisibilityHide">
    <property name="icon">
@@ -1583,6 +1584,21 @@
    </property>
    <property name="toolTip">
     <string>Render conditional lines on the viewport.</string>
+   </property>
+  </action>
+  <action name="actionModeMagicWand">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/mode-magicwand.png</normaloff>:/icons/mode-magicwand.png</iconset>
+   </property>
+   <property name="text">
+    <string>Magic wand</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
    </property>
   </action>
  </widget>

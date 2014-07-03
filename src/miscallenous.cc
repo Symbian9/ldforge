@@ -146,9 +146,9 @@ void simplify (int& numer, int& denom)
 	{
 		repeat = false;
 
-		for (int x = 0; x < countof (primes); x++)
+		for (int x = 0; x < countof (g_primes); x++)
 		{
-			int const prime = primes[x];
+			int const prime = g_primes[x];
 
 			if (numer < prime && denom < prime)
 				break;

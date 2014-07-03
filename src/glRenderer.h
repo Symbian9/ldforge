@@ -32,12 +32,14 @@ class QDoubleSpinBox;
 class QSpinBox;
 class QLineEdit;
 class QTimer;
+class MagicWand;
 
 enum EditMode
 {
 	ESelectMode,
 	EDrawMode,
 	ECircleMode,
+	EMagicWandMode,
 };
 
 //
@@ -230,6 +232,7 @@ private:
 	bool					m_rectdraw;
 	Vertex					m_rectverts[4];
 	QColor					m_bgcolor;
+	MagicWand*				m_wand;
 
 	void					addDrawnVertex (Vertex m_hoverpos);
 	void					calcCameraIcons();
@@ -247,6 +250,7 @@ private:
 	inline double&			pan (Axis ax);
 	inline const double&	pan (Axis ax) const;
 	void					pick (int mouseX, int mouseY);
+	LDObjectPtr				pickOneObject (int mouseX, int mouseY);
 	inline double&			rot (Axis ax);
 	void					updateRectVerts();
 	inline double&			zoom();

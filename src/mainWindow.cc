@@ -694,6 +694,7 @@ void MainWindow::updateEditModeActions()
 	ui->actionModeSelect->setChecked (mode == ESelectMode);
 	ui->actionModeDraw->setChecked (mode == EDrawMode);
 	ui->actionModeCircle->setChecked (mode == ECircleMode);
+	ui->actionModeMagicWand->setChecked (mode == EMagicWandMode);
 }
 
 // =============================================================================

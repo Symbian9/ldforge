@@ -43,6 +43,7 @@
 #include "primitives.h"
 #include "misc/ringFinder.h"
 #include "glCompiler.h"
+#include "magicWand.h"
 
 static const LDFixedCameraInfo g_FixedCameras[6] =
 {
@@ -132,6 +133,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	m_thickBorderPen = QPen (QColor (0, 0, 0, 208), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	m_thinBorderPen = m_thickBorderPen;
 	m_thinBorderPen.setWidth (1);
+	m_wand = null;
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
@@ -1028,6 +1030,19 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 				}
 				break;
 			}
+
+			case EMagicWandMode:
+			{
+				MagicWand::MagicType wandtype = MagicWand::Set;
+
+				if (m_keymods & Qt::ShiftModifier)
+					wandtype = MagicWand::Additive;
+				elif (m_keymods & Qt::ControlModifier)
+					wandtype = MagicWand::Subtractive;
+				
+				m_wand->doMagic (pickOneObject (ev->x(), ev->y()), wandtype);
+				break;
+			}
 		}
 
 		m_rangepick = false;
@@ -1335,15 +1350,43 @@ void GLRenderer::pick (int mouseX, int mouseY)
 	repaint();
 }
 
+//
+// Simpler version of GLRenderer::pick which simply picks whatever object on the screen
+//
+LDObjectPtr GLRenderer::pickOneObject (int mouseX, int mouseY)
+{
+	uchar pixel[4];
+	makeCurrent();
+	setPicking (true);
+	drawGLScene();
+	glReadPixels (mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+	LDObjectPtr obj = LDObject::fromID ((pixel[0] * 0x10000) + (pixel[1] * 0x100) + pixel[2]);
+	setPicking (false);
+	repaint();
+	return obj;
+}
+
 // =============================================================================
 //
 void GLRenderer::setEditMode (EditMode const& a)
 {
+	if (m_editMode == a)
+		return;
+
 	m_editMode = a;
+
+	if (a == EMagicWandMode)
+		m_wand = new MagicWand;
+	else
+	{
+		delete m_wand;
+		m_wand = null;
+	}
 
 	switch (a)
 	{
 		case ESelectMode:
+		case EMagicWandMode:
 		{
 			unsetCursor();
 			setContextMenuPolicy (Qt::DefaultContextMenu);
@@ -1607,6 +1650,7 @@ void GLRenderer::endDraw (bool accept)
 		} break;
 
 		case ESelectMode:
+		case EMagicWandMode:
 		{
 			// this shouldn't happen
 			assert (false);

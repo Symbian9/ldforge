@@ -39,6 +39,7 @@ set (LDFORGE_SOURCES
 	src/ldConfig.cc
 	src/ldDocument.cc
 	src/ldObject.cc
+	src/magicWand.cc
 	src/main.cc
 	src/mainWindow.cc
 	src/messageLog.cc
@@ -75,6 +76,7 @@ set (LDFORGE_HEADERS
 	src/mainWindow.h
 	src/editHistory.h
 	src/format.h
+	src/magicWand.h
 )
 
 set (LDFORGE_FORMS

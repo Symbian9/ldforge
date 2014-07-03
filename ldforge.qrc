@@ -31,6 +31,7 @@
 	<file>./icons/checkerboard.png</file>
 	<file>./icons/colorcursor.png</file>
 	<file>./icons/colorselect.png</file>
+	<file>./icons/colors.txt</file>
 	<file>./icons/comment.png</file>
 	<file>./icons/condline.png</file>
 	<file>./icons/copy.png</file>
@@ -69,6 +70,8 @@
 	<file>./icons/mode-angle.png</file>
 	<file>./icons/mode-circle.png</file>
 	<file>./icons/mode-draw.png</file>
+	<file>./icons/mode-line.png</file>
+	<file>./icons/mode-magicwand.png</file>
 	<file>./icons/mode-select.png</file>
 	<file>./icons/move-x-neg.png</file>
 	<file>./icons/move-x-pos.png</file>

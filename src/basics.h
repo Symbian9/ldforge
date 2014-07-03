@@ -243,7 +243,8 @@ template<class T> inline bool isInteger (T a)
 	return isZero (a - (int) a);
 }
 
-template<class T> void removeDuplicates (QList<T>& a)
+template<typename T>
+void removeDuplicates (T& a)
 {
 	std::sort (a.begin(), a.end());
 	a.erase (std::unique (a.begin(), a.end()), a.end());
