@@ -837,7 +837,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		for (CameraIcon& info : m_cameraIcons)
 		{
 			// Don't draw the free camera icon when in draw mode
-			if (&info == &m_cameraIcons[EFreeCamera] && editMode() != ESelectMode)
+			if (&info == &m_cameraIcons[EFreeCamera] && not eq (editMode(), ESelectMode, EMagicWandMode))
 				continue;
 
 			paint.drawPixmap (info.destRect, *info.img, info.srcRect);
