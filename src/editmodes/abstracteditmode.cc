@@ -1,3 +1,4 @@
+#include <QMouseEvent>
 #include <stdexcept>
 #include "abstracteditmode.h"
 #include "selectmode.h"
@@ -5,9 +6,12 @@
 #include "circlemode.h"
 #include "magicwandmode.h"
 #include "../mainWindow.h"
+#include "../glRenderer.h"
 
 AbstractEditMode::AbstractEditMode (GLRenderer* renderer) :
 	_renderer (renderer) {}
+
+AbstractEditMode::~AbstractEditMode() {}
 
 AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditModeType type)
 {

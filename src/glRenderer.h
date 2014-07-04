@@ -173,7 +173,12 @@ public:
 	void					initGLData();
 	void					initOverlaysFromObjects();
 	QPen					linePen() const;
+	bool					mouseHasMoved() const;
+	QPoint const&			mousePosition() const;
 	void					needZoomToFit();
+	void					pick (int mouseX, int mouseY, bool additive);
+	void					pick (QRect const& range, bool additive);
+	LDObjectPtr				pickOneObject (int mouseX, int mouseY);
 	Vertex const&			position3D() const;
 	void					refresh();
 	void					resetAngles();
@@ -219,8 +224,7 @@ private:
 							m_panning;
 	QPoint					m_mousePosition,
 							m_globalpos;
-	QPen					m_thickBorderPen,
-							m_thinBorderPen;
+	QPen					m_thinBorderPen;
 	ECamera					m_camera,
 							m_toolTipCamera;
 	GLuint					m_axeslist;
@@ -237,8 +241,6 @@ private:
 	LDOverlayPtr			findOverlayObject (ECamera cam);
 	inline double&			pan (Axis ax);
 	inline const double&	pan (Axis ax) const;
-	void					pick (int mouseX, int mouseY);
-	LDObjectPtr				pickOneObject (int mouseX, int mouseY);
 	inline double&			rot (Axis ax);
 	inline double&			zoom();
 	void					zoomToFit();

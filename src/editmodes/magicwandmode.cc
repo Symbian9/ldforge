@@ -20,6 +20,7 @@
 #include "magicwandmode.h"
 #include "../ldDocument.h"
 #include "../mainWindow.h"
+#include "../glRenderer.h"
 
 MagicWandMode::MagicWandMode (GLRenderer* renderer) :
 	Super (renderer)
@@ -37,11 +38,6 @@ MagicWandMode::MagicWandMode (GLRenderer* renderer) :
 EditModeType MagicWandMode::type() const
 {
 	return EditModeType::MagicWand;
-}
-
-bool MagicWandMode::allowFreeCamera() const
-{
-	return true;
 }
 
 void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundaries, QVector<LDObjectPtr>& candidates)
@@ -202,13 +198,18 @@ bool MagicWandMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	MagicType wandtype = MagicWandMode::Set;
+	if (data.releasedButtons & Qt::LeftButton)
+	{
+		MagicType wandtype = MagicWandMode::Set;
 
-	if (data.keymods & Qt::ShiftModifier)
-		wandtype = MagicWandMode::Additive;
-	elif (data.keymods & Qt::ControlModifier)
-		wandtype = MagicWandMode::Subtractive;
-	
-	doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);
-	return true;
+		if (data.keymods & Qt::ShiftModifier)
+			wandtype = MagicWandMode::Additive;
+		elif (data.keymods & Qt::ControlModifier)
+			wandtype = MagicWandMode::Subtractive;
+
+		doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);
+		return true;
+	}
+
+	return false;
 }

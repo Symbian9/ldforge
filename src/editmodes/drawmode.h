@@ -15,5 +15,6 @@ public:
 	virtual bool mouseMoved (QMouseEvent*) override;
 
 private:
+	void endDraw();
 	void updateRectVerts();
 };

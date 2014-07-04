@@ -40,8 +40,9 @@
 #include "addObjectDialog.h"
 #include "messageLog.h"
 #include "glCompiler.h"
+#include "primitives.h"
 
-static const LDFixedCameraInfo g_FixedCameras[6] =
+static const LDFixedCamera g_FixedCameras[6] =
 {
 	{{  1,  0, 0 }, X, Z, false, false, false }, // top
 	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
@@ -104,7 +105,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	m_isPicking = false;
 	m_camera = (ECamera) cfg::camera;
 	m_drawToolTip = false;
-	m_editmode = AbstractEditMode::createByType (EditModeType::Select);
+	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
 	m_compiler = new GLCompiler (this);
 	setDrawOnly (false);
@@ -114,8 +115,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	m_isCameraMoving = false;
-	m_thickBorderPen = QPen (QColor (0, 0, 0, 208), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-	m_thinBorderPen = m_thickBorderPen;
+	m_thinBorderPen = QPen (QColor (0, 0, 0, 208), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	m_thinBorderPen.setWidth (1);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
@@ -143,6 +143,7 @@ GLRenderer::~GLRenderer()
 		delete info.img;
 
 	delete m_compiler;
+	delete m_editmode;
 }
 
 // =============================================================================
@@ -693,23 +694,6 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			y += metrics.height();
 		}
 	}
-
-	// If we're range-picking, draw a rectangle encompassing the selection area.
-	if (m_rangepick && not isPicking() && m_totalmove >= 10)
-	{
-		int x0 = m_rangeStart.x(),
-			y0 = m_rangeStart.y(),
-			x1 = m_mousePosition.x(),
-			y1 = m_mousePosition.y();
-
-		QRect rect (x0, y0, x1 - x0, y1 - y0);
-		QColor fillColor = (m_addpick ? "#40FF00" : "#00CCFF");
-		fillColor.setAlphaF (0.2f);
-
-		paint.setPen (m_thickBorderPen);
-		paint.setBrush (QBrush (fillColor));
-		paint.drawRect (rect);
-	}
 }
 
 // =============================================================================
@@ -739,9 +723,7 @@ void GLRenderer::clampAngle (double& angle) const
 //
 void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 {
-	const bool wasLeft = (m_lastButtons & Qt::LeftButton) && not (ev->buttons() & Qt::LeftButton),
-	   wasRight = (m_lastButtons & Qt::RightButton) && not (ev->buttons() & Qt::RightButton),
-	   wasMid = (m_lastButtons & Qt::MidButton) && not (ev->buttons() & Qt::MidButton);
+	const bool wasLeft = (m_lastButtons & Qt::LeftButton) && not (ev->buttons() & Qt::LeftButton);
 
 	Qt::MouseButtons releasedbuttons = m_lastButtons & ~ev->buttons();
 
@@ -751,7 +733,7 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 	if (wasLeft)
 	{
 		// Check if we selected a camera icon
-		if (m_totalmove < 10)
+		if (not mouseHasMoved())
 		{
 			for (CameraIcon & info : m_cameraIcons)
 			{
@@ -762,18 +744,18 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 				}
 			}
 		}
+	}
 
-		if (not isDrawOnly())
-		{
-			AbstractEditMode::MouseEventData data;
-			data.ev = ev;
-			data.mouseMoved = m_totalmove >= 10;
-			data.keymods = m_keymods;
-			data.releasedButtons = releasedbuttons;
+	if (not isDrawOnly())
+	{
+		AbstractEditMode::MouseEventData data;
+		data.ev = ev;
+		data.mouseMoved = mouseHasMoved();
+		data.keymods = m_keymods;
+		data.releasedButtons = releasedbuttons;
 
-			if (m_editmode->mouseReleased (data))
-				goto end;
-		}
+		if (m_editmode->mouseReleased (data))
+			goto end;
 	}
 
 end:
@@ -796,30 +778,33 @@ void GLRenderer::mousePressEvent (QMouseEvent* ev)
 //
 void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
-	int dx = ev->x() - m_mousePosition.x();
-	int dy = ev->y() - m_mousePosition.y();
-	m_totalmove += abs (dx) + abs (dy);
-	setCameraMoving (false);
-
-	const bool left = ev->buttons() & Qt::LeftButton,
-			   mid = ev->buttons() & Qt::MidButton,
-			   shift = ev->modifiers() & Qt::ShiftModifier;
-
-	if (mid || (left && shift))
+	if (not m_editmode->mouseMoved (ev))
 	{
-		pan (X) += 0.03f * dx * (zoom() / 7.5f);
-		pan (Y) -= 0.03f * dy * (zoom() / 7.5f);
-		m_panning = true;
-		setCameraMoving (true);
-	}
-	elif (left && not m_rangepick && camera() == EFreeCamera)
-	{
-		rot (X) = rot (X) + dy;
-		rot (Y) = rot (Y) + dx;
+		int dx = ev->x() - m_mousePosition.x();
+		int dy = ev->y() - m_mousePosition.y();
+		m_totalmove += abs (dx) + abs (dy);
+		setCameraMoving (false);
 
-		clampAngle (rot (X));
-		clampAngle (rot (Y));
-		setCameraMoving (true);
+		const bool left = ev->buttons() & Qt::LeftButton,
+				mid = ev->buttons() & Qt::MidButton,
+				shift = ev->modifiers() & Qt::ShiftModifier;
+
+		if (mid || (left && shift))
+		{
+			pan (X) += 0.03f * dx * (zoom() / 7.5f);
+			pan (Y) -= 0.03f * dy * (zoom() / 7.5f);
+			m_panning = true;
+			setCameraMoving (true);
+		}
+		elif (left && camera() == EFreeCamera)
+		{
+			rot (X) = rot (X) + dy;
+			rot (Y) = rot (Y) + dx;
+
+			clampAngle (rot (X));
+			clampAngle (rot (Y));
+			setCameraMoving (true);
+		}
 	}
 
 	// Start the tool tip timer
@@ -833,7 +818,6 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 	// Calculate 3d position of the cursor
 	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : g_origin;
 
-	m_editmode->mouseMoved (ev);
 	highlightCursorObject();
 	update();
 	ev->accept();
@@ -898,12 +882,19 @@ void GLRenderer::setCamera (const ECamera cam)
 
 // =============================================================================
 //
-void GLRenderer::pick (int mouseX, int mouseY)
+void GLRenderer::pick (int mouseX, int mouseY, bool additive)
+{
+	pick (QRect (mouseX, mouseY, mouseX + 1, mouseY + 1), additive);
+}
+
+// =============================================================================
+//
+void GLRenderer::pick (QRect const& range, bool additive)
 {
 	makeCurrent();
 
 	// Clear the selection if we do not wish to add to it.
-	if (not m_addpick)
+	if (not additive)
 	{
 		LDObjectList oldsel = selection();
 		getCurrentDocument()->clearSelection();
@@ -916,29 +907,10 @@ void GLRenderer::pick (int mouseX, int mouseY)
 	setPicking (true);
 	drawGLScene();
 
-	int x0 = mouseX,
-		  y0 = mouseY;
-	int x1, y1;
-
-	// Determine how big an area to read - with range picking, we pick by
-	// the area given, with single pixel picking, we use an 1 x 1 area.
-	if (m_rangepick)
-	{
-		x1 = m_rangeStart.x();
-		y1 = m_rangeStart.y();
-	}
-	else
-	{
-		x1 = x0 + 1;
-		y1 = y0 + 1;
-	}
-
-	// x0 and y0 must be less than x1 and y1, respectively.
-	if (x0 > x1)
-		qSwap (x0, x1);
-
-	if (y0 > y1)
-		qSwap (y0, y1);
+	int x0 = range.left();
+	int y0 = range.top();
+	int x1 = range.right();
+	int y1 = range.bottom();
 
 	// Clamp the values to ensure they're within bounds
 	x0 = max (0, x0);
@@ -982,7 +954,7 @@ void GLRenderer::pick (int mouseX, int mouseY)
 
 		// If this is an additive single pick and the object is currently selected,
 		// we remove it from selection instead.
-		if (not m_rangepick && m_addpick)
+		if (range.isNull() && additive)
 		{
 			if (obj->isSelected())
 			{
@@ -1008,7 +980,6 @@ void GLRenderer::pick (int mouseX, int mouseY)
 		compileObject (removedObj);
 
 	setPicking (false);
-	m_rangepick = false;
 	repaint();
 }
 
@@ -1036,7 +1007,7 @@ void GLRenderer::setEditMode (EditModeType a)
 		return;
 
 	delete m_editmode;
-	m_editmode = AbstractEditMode::createByType (a);
+	m_editmode = AbstractEditMode::createByType (this, a);
 
 	// If we cannot use the free camera, use the top one instead.
 	if (camera() == EFreeCamera && not m_editmode->allowFreeCamera())
@@ -1625,7 +1596,17 @@ Vertex const& GLRenderer::position3D() const
 	return m_position3D;
 }
 
-LDFixedCamera const& GLRenderer::getFixedCamera (ECamera cam)
+LDFixedCamera const& GLRenderer::getFixedCamera (ECamera cam) const
 {
 	return g_FixedCameras[cam];
+}
+
+bool GLRenderer::mouseHasMoved() const
+{
+	return m_totalmove < 10;
+}
+
+QPoint const& GLRenderer::mousePosition() const
+{
+	return m_mousePosition;
 }

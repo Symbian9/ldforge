@@ -1,9 +1,11 @@
 #include <QPainter>
+#include <QMouseEvent>
 #include "drawmode.h"
 #include "../ldObject.h"
+#include "../glRenderer.h"
 
-CFGENTRY (Bool,		drawLineLengths,			true)
-CFGENTRY (Bool,		drawAngles,					false)
+CFGENTRY (Bool, drawLineLengths, true)
+CFGENTRY (Bool, drawAngles, false)
 
 DrawMode::DrawMode (GLRenderer* renderer) :
 	Super (renderer),
@@ -19,7 +21,7 @@ void DrawMode::render (QPainter& painter) const
 	QPoint poly[4];
 	Vertex poly3d[4];
 	int numverts = 4;
-	QFontMetrics metrics (QFont());
+	QFontMetrics metrics = QFontMetrics (QFont());
 
 	// Calculate polygon data
 	if (not _rectdraw)
@@ -27,7 +29,7 @@ void DrawMode::render (QPainter& painter) const
 		numverts = _drawedVerts.size() + 1;
 		int i = 0;
 
-		for (Vertex& vert : _drawedVerts)
+		for (Vertex const& vert : _drawedVerts)
 			poly3d[i++] = vert;
 
 		// Draw the cursor vertex as the last one in the list.
@@ -41,7 +43,7 @@ void DrawMode::render (QPainter& painter) const
 		// Get vertex information from m_rectverts
 		if (_drawedVerts.size() > 0)
 			for (int i = 0; i < numverts; ++i)
-				poly3d[i] = m_rectverts[i];
+				poly3d[i] = _rectverts[i];
 		else
 			poly3d[0] = renderer()->position3D();
 	}
@@ -114,7 +116,7 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 	{
 		if (vert == pos)
 		{
-			endDraw (true);
+			endDraw();
 			return true;
 		}
 	}
@@ -127,32 +129,37 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (_rectdraw)
+	if (data.releasedButtons & Qt::LeftButton)
 	{
-		if (_drawedVerts.size() == 2)
+		if (_rectdraw)
 		{
-			endDraw (true);
-			return true;
+			if (_drawedVerts.size() == 2)
+			{
+				endDraw();
+				return true;
+			}
 		}
-	}
-	else
-	{
-		// If we have 4 verts, stop drawing.
-		if (_drawedVerts.size() >= 4)
+		else
 		{
-			endDraw (true);
-			return;
+			// If we have 4 verts, stop drawing.
+			if (_drawedVerts.size() >= 4)
+			{
+				endDraw();
+				return true;
+			}
+
+			if (_drawedVerts.isEmpty())
+			{
+				_rectdraw = (data.ev->modifiers() & Qt::ShiftModifier);
+				updateRectVerts();
+			}
 		}
 
-		if (_drawedVerts.isEmpty())
-		{
-			_rectdraw = (ev->modifiers() & Qt::ShiftModifier);
-			updateRectVerts();
-		}
+		addDrawnVertex (renderer()->position3D());
+		return true;
 	}
 
-	addDrawnVertex (renderer()->position3D());
-	return true;
+	return false;
 }
 
 //
@@ -161,6 +168,7 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 bool DrawMode::mouseMoved (QMouseEvent*)
 {
 	updateRectVerts();
+	return false;
 }
 
 void DrawMode::updateRectVerts()
@@ -171,7 +179,7 @@ void DrawMode::updateRectVerts()
 	if (_drawedVerts.isEmpty())
 	{
 		for (int i = 0; i < 4; ++i)
-			m_rectverts[i] = renderer()->position3D();
+			_rectverts[i] = renderer()->position3D();
 
 		return;
 	}
@@ -184,16 +192,16 @@ void DrawMode::updateRectVerts()
 			   localz = (Axis) (3 - localx - localy);
 
 	for (int i = 0; i < 4; ++i)
-		m_rectverts[i].setCoordinate (localz, renderer()->getDepthValue());
+		_rectverts[i].setCoordinate (localz, renderer()->getDepthValue());
 
-	m_rectverts[0].setCoordinate (localx, v0[localx]);
-	m_rectverts[0].setCoordinate (localy, v0[localy]);
-	m_rectverts[1].setCoordinate (localx, v1[localx]);
-	m_rectverts[1].setCoordinate (localy, v0[localy]);
-	m_rectverts[2].setCoordinate (localx, v1[localx]);
-	m_rectverts[2].setCoordinate (localy, v1[localy]);
-	m_rectverts[3].setCoordinate (localx, v0[localx]);
-	m_rectverts[3].setCoordinate (localy, v1[localy]);
+	_rectverts[0].setCoordinate (localx, v0[localx]);
+	_rectverts[0].setCoordinate (localy, v0[localy]);
+	_rectverts[1].setCoordinate (localx, v1[localx]);
+	_rectverts[1].setCoordinate (localy, v0[localy]);
+	_rectverts[2].setCoordinate (localx, v1[localx]);
+	_rectverts[2].setCoordinate (localy, v1[localy]);
+	_rectverts[3].setCoordinate (localx, v0[localx]);
+	_rectverts[3].setCoordinate (localy, v1[localy]);
 }
 
 void DrawMode::endDraw()
@@ -209,7 +217,7 @@ void DrawMode::endDraw()
 		updateRectVerts();
 
 		for (int i = 0; i < quad->numVertices(); ++i)
-			quad->setVertex (i, m_rectverts[i]);
+			quad->setVertex (i, _rectverts[i]);
 
 		quad->setColor (maincolor());
 		objs << quad;

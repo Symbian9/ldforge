@@ -1,6 +1,9 @@
 #include <QMouseEvent>
-#include "../glRenderer.h"
 #include "selectmode.h"
+#include "../glRenderer.h"
+#include "../addObjectDialog.h"
+#include "../mainWindow.h"
+#include "../glRenderer.h"
 
 SelectMode::SelectMode (GLRenderer* renderer) :
 	Super (renderer) {}
@@ -10,21 +13,58 @@ EditModeType SelectMode::type() const
 	return EditModeType::Select;
 }
 
+
+void SelectMode::render (QPainter& painter) const
+{
+	// If we're range-picking, draw a rectangle encompassing the selection area.
+	if (_rangepick && not renderer()->mouseHasMoved())
+	{
+		int x0 = _rangeStart.x(),
+			y0 = _rangeStart.y(),
+			x1 = renderer()->mousePosition().x(),
+			y1 = renderer()->mousePosition().y();
+
+		QRect rect (x0, y0, x1 - x0, y1 - y0);
+		QColor fillColor = (_addpick ? "#40FF00" : "#00CCFF");
+		fillColor.setAlphaF (0.2f);
+		painter.setPen (QPen (QColor (0, 0, 0, 208), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+		painter.setBrush (QBrush (fillColor));
+		painter.drawRect (rect);
+	}
+}
+
 bool SelectMode::mouseReleased (MouseEventData const& data)
 {
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (not data.mouseMoved)
+	if (data.releasedButtons & Qt::LeftButton)
+	{
+		if (not data.mouseMoved)
+			_rangepick = false;
+
+		if (not _rangepick)
+			_addpick = (data.keymods & Qt::ControlModifier);
+
+		if (not data.mouseMoved || _rangepick)
+		{
+			QRect area;
+			int const mx = data.ev->x();
+			int const my = data.ev->y();
+
+			if (not _rangepick)
+				area = QRect (mx, my, mx + 1, my + 1);
+			else
+				area = QRect (_rangeStart.x(), _rangeStart.y(), mx, my);
+
+			renderer()->pick (area, _addpick);
+		}
+
 		_rangepick = false;
+		return true;
+	}
 
-	if (not _rangepick)
-		_addpick = (data.keymods & Qt::ControlModifier);
-
-	if (not data.mouseMoved || _rangepick)
-		renderer()->pick (data.ev->x(), data.ev->y());
-
-	_rangepick = false;
+	return false;
 }
 
 bool SelectMode::mousePressed (QMouseEvent* ev)
@@ -63,4 +103,9 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	}
 
 	return false;
+}
+
+bool SelectMode::mouseMoved (QMouseEvent*)
+{
+	return not _rangepick;
 }

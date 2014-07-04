@@ -5,9 +5,15 @@
 #include "../ldDocument.h"
 #include "../misc/ringFinder.h"
 #include "../primitives.h"
+#include "../glRenderer.h"
 
 CircleMode::CircleMode (GLRenderer* renderer) :
 	Super (renderer) {}
+
+EditModeType CircleMode::type() const
+{
+	return EditModeType::Circle;
+}
 
 double CircleMode::getCircleDrawDist (int pos) const
 {
@@ -150,7 +156,7 @@ void CircleMode::buildCircle()
 
 void CircleMode::render (QPainter& painter) const
 {
-	QFontMetrics const metrics (QFont());
+	QFontMetrics metrics = QFontMetrics (QFont());
 
 	// If we have not specified the center point of the circle yet, preview it on the screen.
 	if (_drawedVerts.isEmpty())
@@ -223,14 +229,14 @@ void CircleMode::render (QPainter& painter) const
 
 		// Draw the circles
 		painter.setBrush (Qt::NoBrush);
-		painter.setPen (renderer()->getLinePen());
+		painter.setPen (renderer()->linePen());
 		painter.drawPolygon (QPolygon (circlepoints));
 		painter.drawPolygon (QPolygon (circle2points));
 
 		// Draw the current radius in the middle of the circle.
 		QPoint origin = renderer()->coordconv3_2 (_drawedVerts[0]);
 		QString label = QString::number (dist0);
-		painter.setPen (renderer()->getTextPen());
+		painter.setPen (renderer()->textPen());
 		painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
 
 		if (_drawedVerts.size() >= 2)
@@ -246,11 +252,15 @@ bool CircleMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (_drawedVerts.size() < 3)
+	if (data.releasedButtons & Qt::LeftButton)
 	{
-		addDrawnVertex (renderer()->position3D());
-		return;
+		if (_drawedVerts.size() < 3)
+			addDrawnVertex (renderer()->position3D());
+		else
+			buildCircle();
+
+		return true;
 	}
 
-	buildCircle();
+	return false;
 }

@@ -37,6 +37,7 @@
 #include "colors.h"
 #include "glCompiler.h"
 #include "ui_newpart.h"
+#include "editmodes/abstracteditmode.h"
 
 EXTERN_CFGENTRY (Bool,		drawWireframe);
 EXTERN_CFGENTRY (Bool,		bfcRedGreenView);
@@ -587,28 +588,28 @@ void MainWindow::slot_actionClearOverlay()
 //
 void MainWindow::slot_actionModeSelect()
 {
-	R()->setEditMode (ESelectMode);
+	R()->setEditMode (EditModeType::Select);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionModeDraw()
 {
-	R()->setEditMode (EDrawMode);
+	R()->setEditMode (EditModeType::Draw);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionModeCircle()
 {
-	R()->setEditMode (ECircleMode);
+	R()->setEditMode (EditModeType::Circle);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionModeMagicWand()
 {
- 	R()->setEditMode (EMagicWandMode);
+ 	R()->setEditMode (EditModeType::MagicWand);
 }
 
 // =============================================================================

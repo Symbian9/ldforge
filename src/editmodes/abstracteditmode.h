@@ -1,9 +1,9 @@
 #pragma once
 #include "../main.h"
-#include "../glRenderer.h"
 
 class QPainter;
 class GLRenderer;
+class QMouseEvent;
 
 enum class EditModeType
 {
@@ -16,7 +16,6 @@ enum class EditModeType
 class AbstractEditMode
 {
 	GLRenderer* _renderer;
-	QBrush		_polybrush;
 
 public:
 	struct MouseEventData
@@ -28,16 +27,16 @@ public:
 	};
 
 	AbstractEditMode (GLRenderer* renderer);
+	virtual ~AbstractEditMode();
 
 	virtual bool			allowFreeCamera() const = 0;
-	virtual void			render (QPainter& painter) const {};
+	virtual void			render (QPainter&) const {};
 	GLRenderer*				renderer() const;
 	virtual EditModeType	type() const = 0;
 	virtual bool			mousePressed (QMouseEvent*) { return false; }
 	virtual bool			mouseReleased (MouseEventData const&) { return false; }
 	virtual bool			mouseDoubleClicked (QMouseEvent*) { return false; }
 	virtual bool			mouseMoved (QMouseEvent*) { return false; }
-	void					finishDraw (LDObjectList& objs);
 
 	static AbstractEditMode* createByType (GLRenderer* renderer, EditModeType type);
 };
@@ -47,10 +46,12 @@ public:
 //
 class AbstractDrawMode : public AbstractEditMode
 {
-	QList<Vertex>			_drawedVerts;
-	Vertex					m_rectverts[4];
-
 	DEFINE_CLASS (AbstractDrawMode, AbstractEditMode)
+
+protected:
+	QList<Vertex>			_drawedVerts;
+	Vertex					_rectverts[4];
+	QBrush					_polybrush;
 
 public:
 	AbstractDrawMode (GLRenderer* renderer);
@@ -62,6 +63,7 @@ public:
 
 	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
 	void addDrawnVertex (const Vertex& pos);
+	void finishDraw (LDObjectList& objs);
 
 	virtual bool preAddVertex (Vertex const&)
 	{
