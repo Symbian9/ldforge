@@ -6,18 +6,18 @@
 #include "../glRenderer.h"
 
 SelectMode::SelectMode (GLRenderer* renderer) :
-	Super (renderer) {}
+	Super (renderer),
+	_rangepick (false) {}
 
 EditModeType SelectMode::type() const
 {
 	return EditModeType::Select;
 }
 
-
 void SelectMode::render (QPainter& painter) const
 {
 	// If we're range-picking, draw a rectangle encompassing the selection area.
-	if (_rangepick && not renderer()->mouseHasMoved())
+	if (_rangepick)
 	{
 		int x0 = _rangeStart.x(),
 			y0 = _rangeStart.y(),
@@ -53,9 +53,17 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 			int const my = data.ev->y();
 
 			if (not _rangepick)
-				area = QRect (mx, my, mx + 1, my + 1);
+			{
+				area = QRect (mx, my, 1, 1);
+			}
 			else
-				area = QRect (_rangeStart.x(), _rangeStart.y(), mx, my);
+			{
+				int const x = min (_rangeStart.x(), mx);
+				int const y = min (_rangeStart.y(), my);
+				int const width = abs (_rangeStart.x() - mx);
+				int const height = abs (_rangeStart.y() - my);
+				area = QRect (x, y, width, height);
+			}
 
 			renderer()->pick (area, _addpick);
 		}
@@ -105,7 +113,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	return false;
 }
 
-bool SelectMode::mouseMoved (QMouseEvent*)
+bool SelectMode::mouseMoved (QMouseEvent* ev)
 {
-	return not _rangepick;
+	return _rangepick;
 }

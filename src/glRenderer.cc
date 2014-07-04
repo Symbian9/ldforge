@@ -778,13 +778,13 @@ void GLRenderer::mousePressEvent (QMouseEvent* ev)
 //
 void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
+	int dx = ev->x() - m_mousePosition.x();
+	int dy = ev->y() - m_mousePosition.y();
+	m_totalmove += abs (dx) + abs (dy);
+	setCameraMoving (false);
+
 	if (not m_editmode->mouseMoved (ev))
 	{
-		int dx = ev->x() - m_mousePosition.x();
-		int dy = ev->y() - m_mousePosition.y();
-		m_totalmove += abs (dx) + abs (dy);
-		setCameraMoving (false);
-
 		const bool left = ev->buttons() & Qt::LeftButton,
 				mid = ev->buttons() & Qt::MidButton,
 				shift = ev->modifiers() & Qt::ShiftModifier;
@@ -909,8 +909,8 @@ void GLRenderer::pick (QRect const& range, bool additive)
 
 	int x0 = range.left();
 	int y0 = range.top();
-	int x1 = range.right();
-	int y1 = range.bottom();
+	int x1 = x0 + range.width();
+	int y1 = y0 + range.height();
 
 	// Clamp the values to ensure they're within bounds
 	x0 = max (0, x0);
@@ -954,7 +954,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 
 		// If this is an additive single pick and the object is currently selected,
 		// we remove it from selection instead.
-		if (range.isNull() && additive)
+		if (additive)
 		{
 			if (obj->isSelected())
 			{
@@ -1603,7 +1603,7 @@ LDFixedCamera const& GLRenderer::getFixedCamera (ECamera cam) const
 
 bool GLRenderer::mouseHasMoved() const
 {
-	return m_totalmove < 10;
+	return m_totalmove >= 10;
 }
 
 QPoint const& GLRenderer::mousePosition() const

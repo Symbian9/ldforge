@@ -198,7 +198,7 @@ bool MagicWandMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (data.releasedButtons & Qt::LeftButton)
+	if (data.releasedButtons & Qt::LeftButton && not data.mouseMoved)
 	{
 		MagicType wandtype = MagicWandMode::Set;
 
