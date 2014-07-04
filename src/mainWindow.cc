@@ -50,6 +50,7 @@
 #include "configuration.h"
 #include "ui_ldforge.h"
 #include "primitives.h"
+#include "editmodes/abstracteditmode.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
@@ -690,11 +691,11 @@ void MainWindow::deleteByColor (LDColor color)
 //
 void MainWindow::updateEditModeActions()
 {
-	const EditMode mode = R()->editMode();
-	ui->actionModeSelect->setChecked (mode == ESelectMode);
-	ui->actionModeDraw->setChecked (mode == EDrawMode);
-	ui->actionModeCircle->setChecked (mode == ECircleMode);
-	ui->actionModeMagicWand->setChecked (mode == EMagicWandMode);
+	const EditModeType mode = R()->currentEditModeType();
+	ui->actionModeSelect->setChecked (mode == EditModeType::Select);
+	ui->actionModeDraw->setChecked (mode == EditModeType::Draw);
+	ui->actionModeCircle->setChecked (mode == EditModeType::Circle);
+	ui->actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
 }
 
 // =============================================================================

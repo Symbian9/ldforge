@@ -55,15 +55,6 @@ static const LDFixedCameraInfo g_FixedCameras[6] =
 	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
 };
 
-// Matrix templates for circle drawing. 2 is substituted with
-// the scale value, 1 is inverted to -1 if needed.
-static const Matrix g_circleDrawMatrixTemplates[3] =
-{
-	{ 2, 0, 0, 0, 1, 0, 0, 0, 2 },
-	{ 2, 0, 0, 0, 0, 2, 0, 1, 0 },
-	{ 0, 1, 0, 2, 0, 0, 0, 0, 2 },
-};
-
 CFGENTRY (String,	backgroundColor,			"#FFFFFF")
 CFGENTRY (String,	mainColor,					"#A0A0A0")
 CFGENTRY (Float,	mainColorAlpha,				1.0)
@@ -75,8 +66,6 @@ CFGENTRY (Bool,		drawAxes,					false)
 CFGENTRY (Bool,		drawWireframe,				false)
 CFGENTRY (Bool,		useLogoStuds,				false)
 CFGENTRY (Bool,		antiAliasedLines,			true)
-CFGENTRY (Bool,		drawLineLengths,			true)
-CFGENTRY (Bool,		drawAngles,					false)
 CFGENTRY (Bool,		randomColors,				false)
 CFGENTRY (Bool,		highlightObjectBelowCursor,	true)
 CFGENTRY (Bool,		drawSurfaces,				true)
@@ -116,11 +105,10 @@ static GLuint g_GLAxes_ColorVBO;
 //
 GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 {
-	m_isPicking = m_rangepick = false;
+	m_isPicking = false;
 	m_camera = (ECamera) cfg::camera;
 	m_drawToolTip = false;
-	m_editMode = ESelectMode;
-	m_rectdraw = false;
+	m_editmode = AbstractEditMode::createByType (EditModeType::Select);
 	m_panning = false;
 	m_compiler = new GLCompiler (this);
 	setDrawOnly (false);
@@ -133,7 +121,6 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	m_thickBorderPen = QPen (QColor (0, 0, 0, 208), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	m_thinBorderPen = m_thickBorderPen;
 	m_thinBorderPen.setWidth (1);
-	m_wand = null;
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
@@ -523,7 +510,7 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 	assert (camera() != EFreeCamera);
 
 	Vertex pos3d;
-	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
+	const LDFixedCamera* cam = &g_FixedCameras[camera()];
 	const Axis axisX = cam->axisX;
 	const Axis axisY = cam->axisY;
 	const int negXFac = cam->negX ? -1 : 1,
@@ -560,7 +547,7 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d) const
 {
 	GLfloat m[16];
-	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
+	const LDFixedCamera* cam = &g_FixedCameras[camera()];
 	const Axis axisX = cam->axisX;
 	const Axis axisY = cam->axisY;
 	const int negXFac = cam->negX ? -1 : 1,
@@ -583,6 +570,19 @@ QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d) const
 	return QPoint (rx, -ry);
 }
 
+QPen GLRenderer::textPen() const
+{
+	return QPen (m_darkbg ? Qt::white : Qt::black);
+}
+
+QPen GLRenderer::linePen() const
+{
+	QPen linepen (m_thinBorderPen);
+	linepen.setWidth (2);
+	linepen.setColor (luma (m_bgcolor) < 40 ? Qt::white : Qt::black);
+	return linepen;
+}
+
 // =============================================================================
 //
 void GLRenderer::paintEvent (QPaintEvent*)
@@ -593,8 +593,6 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	initGLData();
 	drawGLScene();
 
-	const QPen textpen (m_darkbg ? Qt::white : Qt::black);
-	const QBrush polybrush (QColor (64, 192, 0, 128));
 	QPainter paint (this);
 	QFontMetrics metrics = QFontMetrics (QFont());
 	paint.setRenderHint (QPainter::HighQualityAntialiasing);
@@ -609,13 +607,13 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		QString text = format ("Rotation: (%1, %2, %3)\nPanning: (%4, %5), Zoom: %6",
 			rot(X), rot(Y), rot(Z), pan(X), pan(Y), zoom());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
-		paint.setPen (textpen);
+		paint.setPen (textPen());
 		paint.drawText ((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
 			textSize.height(), Qt::AlignCenter, text);
 	}
 #endif
 
-	if (camera() != EFreeCamera && !isPicking())
+	if (camera() != EFreeCamera && not isPicking())
 	{
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
@@ -634,210 +632,26 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		QString text = format (tr ("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
 		QFontMetrics metrics = QFontMetrics (font());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
-		paint.setPen (textpen);
+		paint.setPen (textPen());
 		paint.drawText (m_width - textSize.width(), m_height - 16, textSize.width(),
 			textSize.height(), Qt::AlignCenter, text);
-
-		QPen linepen = m_thinBorderPen;
-		linepen.setWidth (2);
-		linepen.setColor (luma (m_bgcolor) < 40 ? Qt::white : Qt::black);
-
-		// Mode-specific rendering
-		if (editMode() == EDrawMode)
-		{
-			QPoint poly[4];
-			Vertex poly3d[4];
-			int numverts = 4;
-
-			// Calculate polygon data
-			if (not m_rectdraw)
-			{
-				numverts = m_drawedVerts.size() + 1;
-				int i = 0;
-
-				for (Vertex& vert : m_drawedVerts)
-					poly3d[i++] = vert;
-
-				// Draw the cursor vertex as the last one in the list.
-				if (numverts <= 4)
-					poly3d[i] = m_position3D;
-				else
-					numverts = 4;
-			}
-			else
-			{
-				// Get vertex information from m_rectverts
-				if (m_drawedVerts.size() > 0)
-					for (int i = 0; i < numverts; ++i)
-						poly3d[i] = m_rectverts[i];
-				else
-					poly3d[0] = m_position3D;
-			}
-
-			// Convert to 2D
-			for (int i = 0; i < numverts; ++i)
-				poly[i] = coordconv3_2 (poly3d[i]);
-
-			if (numverts > 0)
-			{
-				// Draw the polygon-to-be
-				paint.setBrush (polybrush);
-				paint.drawPolygon (poly, numverts);
-
-				// Draw vertex blips
-				for (int i = 0; i < numverts; ++i)
-				{
-					QPoint& blip = poly[i];
-					paint.setPen (linepen);
-					drawBlip (paint, blip);
-
-					// Draw their coordinates
-					paint.setPen (textpen);
-					paint.drawText (blip.x(), blip.y() - 8, poly3d[i].toString (true));
-				}
-
-				// Draw line lenghts and angle info if appropriate
-				if (numverts >= 2)
-				{
-					int numlines = (m_drawedVerts.size() == 1) ? 1 : m_drawedVerts.size() + 1;
-					paint.setPen (textpen);
-
-					for (int i = 0; i < numlines; ++i)
-					{
-						const int j = (i + 1 < numverts) ? i + 1 : 0;
-						const int h = (i - 1 >= 0) ? i - 1 : numverts - 1;
-
-						if (cfg::drawLineLengths)
-						{
-							const QString label = QString::number ((poly3d[j] - poly3d[i]).length());
-							QPoint origin = QLineF (poly[i], poly[j]).pointAt (0.5).toPoint();
-							paint.drawText (origin, label);
-						}
-
-						if (cfg::drawAngles)
-						{
-							QLineF l0 (poly[h], poly[i]),
-								l1 (poly[i], poly[j]);
-
-							double angle = 180 - l0.angleTo (l1);
-
-							if (angle < 0)
-								angle = 180 - l1.angleTo (l0);
-
-							QString label = QString::number (angle) + QString::fromUtf8 (QByteArray ("\302\260"));
-							QPoint pos = poly[i];
-							pos.setY (pos.y() + metrics.height());
-
-							paint.drawText (pos, label);
-						}
-					}
-				}
-			}
-		}
-		elif (editMode() == ECircleMode)
-		{
-			// If we have not specified the center point of the circle yet, preview it on the screen.
-			if (m_drawedVerts.isEmpty())
-				drawBlip (paint, coordconv3_2 (m_position3D));
-			else
-			{
-				QVector<Vertex> verts, verts2;
-				const double dist0 = getCircleDrawDist (0),
-					dist1 = (m_drawedVerts.size() >= 2) ? getCircleDrawDist (1) : -1;
-				const int segs = g_lores;
-				const double angleUnit = (2 * pi) / segs;
-				Axis relX, relY;
-				QVector<QPoint> ringpoints, circlepoints, circle2points;
-
-				getRelativeAxes (relX, relY);
-
-				// Calculate the preview positions of vertices
-				for (int i = 0; i < segs; ++i)
-				{
-					Vertex v = g_origin;
-					v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist0));
-					v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist0));
-					verts << v;
-
-					if (dist1 != -1)
-					{
-						v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist1));
-						v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist1));
-						verts2 << v;
-					}
-				}
-
-				int i = 0;
-				for (const Vertex& v : verts + verts2)
-				{
-					// Calculate the 2D point of the vertex
-					QPoint point = coordconv3_2 (v);
-
-					// Draw a green blip at where it is
-					drawBlip (paint, point);
-
-					// Add it to the list of points for the green ring fill.
-					ringpoints << point;
-
-					// Also add the circle points to separate lists
-					if (i < verts.size())
-						circlepoints << point;
-					else
-						circle2points << point;
-
-					++i;
-				}
-
-				// Insert the first point as the seventeenth one so that
-				// the ring polygon is closed properly.
-				if (ringpoints.size() >= 16)
-					ringpoints.insert (16, ringpoints[0]);
-
-				// Same for the outer ring. Note that the indices are offset by 1
-				// because of the insertion done above bumps the values.
-				if (ringpoints.size() >= 33)
-					ringpoints.insert (33, ringpoints[17]);
-
-				// Draw the ring
-				paint.setBrush ((m_drawedVerts.size() >= 2) ? polybrush : Qt::NoBrush);
-				paint.setPen (Qt::NoPen);
-				paint.drawPolygon (QPolygon (ringpoints));
-
-				// Draw the circles
-				paint.setBrush (Qt::NoBrush);
-				paint.setPen (linepen);
-				paint.drawPolygon (QPolygon (circlepoints));
-				paint.drawPolygon (QPolygon (circle2points));
-
-				{ // Draw the current radius in the middle of the circle.
-					QPoint origin = coordconv3_2 (m_drawedVerts[0]);
-					QString label = QString::number (dist0);
-					paint.setPen (textpen);
-					paint.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
-
-					if (m_drawedVerts.size() >= 2)
-					{
-						label = QString::number (dist1);
-						paint.drawText (origin.x() - (metrics.width (label) / 2), origin.y() + metrics.height(), label);
-					}
-				}
-			}
-		}
 	}
 
-	// Camera icons
 	if (not isPicking())
 	{
+		// Draw edit mode HUD
+		m_editmode->render (paint);
+
 		// Draw a background for the selected camera
 		paint.setPen (m_thinBorderPen);
 		paint.setBrush (QBrush (QColor (0, 128, 160, 128)));
 		paint.drawRect (m_cameraIcons[camera()].selRect);
 
-		// Draw the actual icons
+		// Draw the camera icons
 		for (CameraIcon& info : m_cameraIcons)
 		{
 			// Don't draw the free camera icon when in draw mode
-			if (&info == &m_cameraIcons[EFreeCamera] && not eq (editMode(), ESelectMode, EMagicWandMode))
+			if (&info == &m_cameraIcons[EFreeCamera] && not m_editmode->allowFreeCamera())
 				continue;
 
 			paint.drawPixmap (info.destRect, *info.img, info.srcRect);
@@ -851,7 +665,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 
 			QString label;
 			label = format (formatstr, tr (g_CameraNames[camera()]));
-			paint.setPen (textpen);
+			paint.setPen (textPen());
 			paint.drawText (QPoint (margin, height() - (margin + metrics.descent())), label);
 		}
 
@@ -873,7 +687,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	{
 		int y = 0;
 		const int margin = 2;
-		QColor penColor = textpen.color();
+		QColor penColor = textPen().color();
 
 		for (const MessageManager::Line& line : messageLog()->getLines())
 		{
@@ -927,31 +741,13 @@ void GLRenderer::clampAngle (double& angle) const
 
 // =============================================================================
 //
-void GLRenderer::addDrawnVertex (Vertex pos)
-{
-	// If we picked an already-existing vertex, stop drawing
-	if (editMode() == EDrawMode)
-	{
-		for (Vertex& vert : m_drawedVerts)
-		{
-			if (vert == pos)
-			{
-				endDraw (true);
-				return;
-			}
-		}
-	}
-
-	m_drawedVerts << pos;
-}
-
-// =============================================================================
-//
 void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 {
 	const bool wasLeft = (m_lastButtons & Qt::LeftButton) && not (ev->buttons() & Qt::LeftButton),
 	   wasRight = (m_lastButtons & Qt::RightButton) && not (ev->buttons() & Qt::RightButton),
 	   wasMid = (m_lastButtons & Qt::MidButton) && not (ev->buttons() & Qt::MidButton);
+
+	Qt::MouseButtons releasedbuttons = m_lastButtons & ~ev->buttons();
 
 	if (m_panning)
 		m_panning = false;
@@ -959,7 +755,7 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 	if (wasLeft)
 	{
 		// Check if we selected a camera icon
-		if (not m_rangepick)
+		if (m_totalmove < 10)
 		{
 			for (CameraIcon & info : m_cameraIcons)
 			{
@@ -971,35 +767,21 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 			}
 		}
 
+		if (not isDrawOnly())
+		{
+			AbstractEditMode::MouseEventData data;
+			data.ev = ev;
+			data.mouseMoved = m_totalmove >= 10;
+			data.keymods = m_keymods;
+			data.releasedButtons = releasedbuttons;
+			m_editmode->mouseReleased (data);
+		}
+
 		switch (editMode())
 		{
 			case EDrawMode:
 			{
-				if (m_rectdraw)
-				{
-					if (m_drawedVerts.size() == 2)
-					{
-						endDraw (true);
-						return;
-					}
-				}
-				else
-				{
-					// If we have 4 verts, stop drawing.
-					if (m_drawedVerts.size() >= 4)
-					{
-						endDraw (true);
-						return;
-					}
-
-					if (m_drawedVerts.isEmpty() && ev->modifiers() & Qt::ShiftModifier)
-					{
-						m_rectdraw = true;
-						updateRectVerts();
-					}
-				}
-
-				addDrawnVertex (m_position3D);
+				
 				break;
 			}
 
@@ -1014,35 +796,6 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 				addDrawnVertex (m_position3D);
 				break;
 			}
-
-			case ESelectMode:
-			{
-				if (not isDrawOnly())
-				{
-					if (m_totalmove < 10)
-						m_rangepick = false;
-
-					if (not m_rangepick)
-						m_addpick = (m_keymods & Qt::ControlModifier);
-
-					if (m_totalmove < 10 || m_rangepick)
-						pick (ev->x(), ev->y());
-				}
-				break;
-			}
-
-			case EMagicWandMode:
-			{
-				MagicWand::MagicType wandtype = MagicWand::Set;
-
-				if (m_keymods & Qt::ShiftModifier)
-					wandtype = MagicWand::Additive;
-				elif (m_keymods & Qt::ControlModifier)
-					wandtype = MagicWand::Subtractive;
-				
-				m_wand->doMagic (pickOneObject (ev->x(), ev->y()), wandtype);
-				break;
-			}
 		}
 
 		m_rangepick = false;
@@ -1050,55 +803,7 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 
 	if (wasMid && editMode() != ESelectMode && m_drawedVerts.size() < 4 && m_totalmove < 10)
 	{
-		// Find the closest vertex to our cursor
-		double			minimumDistance = 1024.0;
-		const Vertex*	closest = null;
-		Vertex			cursorPosition = coordconv2_3 (m_mousePosition, false);
-		QPoint			cursorPosition2D (m_mousePosition);
-		const Axis		relZ = getRelativeZ();
-		QList<Vertex>	vertices;
-
-		for (auto it = document()->vertices().begin(); it != document()->vertices().end(); ++it)
-			vertices << it.key();
-
-		// Sort the vertices in order of distance to camera
-		std::sort (vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
-		{
-			if (g_FixedCameras[camera()].negatedDepth)
-				return a[relZ] > b[relZ];
-
-			return a[relZ] < b[relZ];
-		});
-
-		for (const Vertex& vrt : vertices)
-		{
-			// If the vertex in 2d space is very close to the cursor then we use
-			// it regardless of depth.
-			QPoint vect2d = coordconv3_2 (vrt) - cursorPosition2D;
-			const double distance2DSquared = std::pow (vect2d.x(), 2) + std::pow (vect2d.y(), 2);
-			if (distance2DSquared < 16.0 * 16.0)
-			{
-				closest = &vrt;
-				break;
-			}
-
-			// Check if too far away from the cursor.
-			if (distance2DSquared > 64.0 * 64.0)
-				continue;
-
-			// Not very close to the cursor. Compare using true distance,
-			// including depth.
-			const double distanceSquared = (vrt - cursorPosition).lengthSquared();
-
-			if (distanceSquared < minimumDistance)
-			{
-				minimumDistance = distanceSquared;
-				closest = &vrt;
-			}
-		}
-
-		if (closest != null)
-			addDrawnVertex (*closest);
+		
 	}
 
 	if (wasRight && not m_drawedVerts.isEmpty())
@@ -1120,16 +825,6 @@ end:
 void GLRenderer::mousePressEvent (QMouseEvent* ev)
 {
 	m_totalmove = 0;
-
-	if (ev->modifiers() & Qt::ControlModifier)
-	{
-		m_rangepick = true;
-		m_rangeStart.setX (ev->x());
-		m_rangeStart.setY (ev->y());
-		m_addpick = (m_keymods & Qt::AltModifier);
-		ev->accept();
-	}
-
 	m_lastButtons = ev->buttons();
 }
 
@@ -1229,6 +924,10 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 //
 void GLRenderer::setCamera (const ECamera cam)
 {
+	// The edit mode may forbid the free camera.
+	if (cam == EFreeCamera && not m_editmode->allowFreeCamera())
+		return;
+
 	m_camera = cam;
 	cfg::camera = (int) cam;
 	g_win->updateEditModeActions();
@@ -1368,58 +1067,27 @@ LDObjectPtr GLRenderer::pickOneObject (int mouseX, int mouseY)
 
 // =============================================================================
 //
-void GLRenderer::setEditMode (EditMode const& a)
+void GLRenderer::setEditMode (EditModeType a)
 {
-	if (m_editMode == a)
+	if (m_editmode != null && m_editmode->type() == a)
 		return;
 
-	m_editMode = a;
+	delete m_editmode;
+	m_editmode = AbstractEditMode::createByType (a);
 
-	if (a == EMagicWandMode)
-		m_wand = new MagicWand;
-	else
-	{
-		delete m_wand;
-		m_wand = null;
-	}
-
-	switch (a)
-	{
-		case ESelectMode:
-		case EMagicWandMode:
-		{
-			unsetCursor();
-			setContextMenuPolicy (Qt::DefaultContextMenu);
-		} break;
-
-		case EDrawMode:
-		case ECircleMode:
-		{
-			// Cannot draw into the free camera - use top instead.
-			if (camera() == EFreeCamera)
-				setCamera (ETopCamera);
-
-			// Disable the context menu - we need the right mouse button
-			// for removing vertices.
-			setContextMenuPolicy (Qt::NoContextMenu);
-
-			// Use the crosshair cursor when drawing.
-			setCursor (Qt::CrossCursor);
-
-			// Clear the selection when beginning to draw.
-			LDObjectList priorsel = selection();
-			getCurrentDocument()->clearSelection();
-
-			for (LDObjectPtr obj : priorsel)
-				compileObject (obj);
-
-			g_win->updateSelection();
-			m_drawedVerts.clear();
-		} break;
-	}
+	// If we cannot use the free camera, use the top one instead.
+	if (camera() == EFreeCamera && not m_editmode->allowFreeCamera())
+		setCamera (ETopCamera);
 
 	g_win->updateEditModeActions();
 	update();
+}
+
+// =============================================================================
+//
+EditModeType GLRenderer::currentEditModeType() const
+{
+	return m_editmode->type();
 }
 
 // =============================================================================
@@ -1463,23 +1131,6 @@ void GLRenderer::setPicking (const bool& a)
 		// Restore line thickness
 		glLineWidth (cfg::lineThickness);
 	}
-}
-
-// =============================================================================
-//
-Matrix GLRenderer::getCircleDrawMatrix (double scale)
-{
-	Matrix transform = g_circleDrawMatrixTemplates[camera() % 3];
-
-	for (int i = 0; i < 9; ++i)
-	{
-		if (transform[i] == 2)
-			transform[i] = scale;
-		elif (transform[i] == 1 && camera() >= 3)
-			transform[i] = -1;
-	}
-
-	return transform;
 }
 
 // =============================================================================
@@ -1676,22 +1327,9 @@ void GLRenderer::endDraw (bool accept)
 
 // =============================================================================
 //
-double GLRenderer::getCircleDrawDist (int pos) const
-{
-	assert (m_drawedVerts.size() >= pos + 1);
-	Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] : coordconv2_3 (m_mousePosition, false);
-	Axis relX, relY;
-	getRelativeAxes (relX, relY);
-	double dx = m_drawedVerts[0][relX] - v1[relX];
-	double dy = m_drawedVerts[0][relY] - v1[relY];
-	return Grid::snap (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
-}
-
-// =============================================================================
-//
 void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 {
-	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
+	const LDFixedCamera* cam = &g_FixedCameras[camera()];
 	relX = cam->axisX;
 	relY = cam->axisY;
 }
@@ -1700,7 +1338,7 @@ void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 //
 Axis GLRenderer::getRelativeZ() const
 {
-	const LDFixedCameraInfo* cam = &g_FixedCameras[camera()];
+	const LDFixedCamera* cam = &g_FixedCameras[camera()];
 	return (Axis) (3 - cam->axisX - cam->axisY);
 }
 
@@ -1788,7 +1426,7 @@ Axis GLRenderer::getCameraAxis (bool y, ECamera camid)
 	if (camid == (ECamera) -1)
 		camid = camera();
 
-	const LDFixedCameraInfo* cam = &g_FixedCameras[camid];
+	const LDFixedCamera* cam = &g_FixedCameras[camid];
 	return (y) ? cam->axisY : cam->axisX;
 }
 
@@ -2254,4 +1892,14 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		g_win->R()->refresh();
 		ev->acceptProposedAction();
 	}
+}
+
+Vertex const& GLRenderer::position3D() const
+{
+	return m_position3D;
+}
+
+LDFixedCamera const& GLRenderer::getFixedCamera (ECamera cam)
+{
+	return g_FixedCameras[cam];
 }

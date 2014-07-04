@@ -1485,6 +1485,9 @@ void LDDocument::clearSelection()
 		removeFromSelection (obj);
 
 	assert (m_sel.isEmpty());
+
+	if (self() == getCurrentDocument())
+		g_win->buildObjList();
 }
 
 // =============================================================================

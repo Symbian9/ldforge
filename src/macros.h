@@ -63,6 +63,11 @@ ACCESS:															\
 #define readAccess(A) inline decltype(_##A) A() const { return _##A; }
 #define writeAccess(A,B) inline void B (decltype(_##A) const& a) const { _##A = a; }
 
+#define DEFINE_CLASS(SELF, SUPER) \
+public: \
+	using Self = SELF; \
+	using Super = SUPER;
+
 // =============================================================================
 //
 #define elif(A) else if (A)

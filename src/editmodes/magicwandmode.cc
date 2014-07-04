@@ -16,12 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "main.h"
-#include "magicWand.h"
-#include "ldDocument.h"
-#include "mainWindow.h"
+#include <QMouseEvent>
+#include "magicwandmode.h"
+#include "../ldDocument.h"
+#include "../mainWindow.h"
 
-MagicWand::MagicWand()
+MagicWandMode::MagicWandMode (GLRenderer* renderer) :
+	Super (renderer)
 {
 	// Get vertex<->object data
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
@@ -33,7 +34,17 @@ MagicWand::MagicWand()
 	}
 }
 
-void MagicWand::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundaries, QVector<LDObjectPtr>& candidates)
+EditModeType MagicWandMode::type() const
+{
+	return EditModeType::MagicWand;
+}
+
+bool MagicWandMode::allowFreeCamera() const
+{
+	return true;
+}
+
+void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundaries, QVector<LDObjectPtr>& candidates)
 {
 	// All boundaries obviously share vertices with the object, therefore they're all in the list
 	// of candidates.
@@ -59,7 +70,7 @@ void MagicWand::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundari
 	}
 }
 
-void MagicWand::doMagic (LDObjectPtr obj, MagicWand::MagicType type)
+void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 {
 	if (obj == null)
 	{
@@ -184,4 +195,16 @@ void MagicWand::doMagic (LDObjectPtr obj, MagicWand::MagicType type)
 
 	if (type != InternalRecursion)
 		g_win->buildObjList();
+}
+
+void MagicWandMode::mouseReleased (MouseEventData const& data)
+{
+	MagicType wandtype = MagicWandMode::Set;
+
+	if (data.keymods & Qt::ShiftModifier)
+		wandtype = MagicWandMode::Additive;
+	elif (data.keymods & Qt::ControlModifier)
+		wandtype = MagicWandMode::Subtractive;
+	
+	doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);
 }

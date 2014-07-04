@@ -23,6 +23,7 @@
 #include "ldObject.h"
 #include "ldDocument.h"
 #include "glShared.h"
+#include "editmodes/abstracteditmode.h"
 
 class GLCompiler;
 class MessageManager;
@@ -32,15 +33,7 @@ class QDoubleSpinBox;
 class QSpinBox;
 class QLineEdit;
 class QTimer;
-class MagicWand;
-
-enum EditMode
-{
-	ESelectMode,
-	EDrawMode,
-	ECircleMode,
-	EMagicWandMode,
-};
+class MagicWandMode;
 
 //
 // Meta for overlays
@@ -58,7 +51,7 @@ struct LDGLOverlay
 	bool			invalid;
 };
 
-struct LDFixedCameraInfo
+struct LDFixedCamera
 {
 	const char		glrotate[3];
 	const Axis		axisX,
@@ -150,7 +143,6 @@ public:
 	PROPERTY (public,	MessageManager*,	messageLog, 	setMessageLog,		STOCK_WRITE)
 	PROPERTY (private,	bool,				isPicking,		setPicking,			CUSTOM_WRITE)
 	PROPERTY (public,	LDDocumentPtr,		document,		setDocument,		CUSTOM_WRITE)
-	PROPERTY (public,	EditMode,			editMode,		setEditMode,		CUSTOM_WRITE)
 	PROPERTY (private,	GLCompiler*,		compiler,		setCompiler,		STOCK_WRITE)
 	PROPERTY (public,	LDObjectWeakPtr,	objectAtCursor,	setObjectAtCursor,	STOCK_WRITE)
 	PROPERTY (private,	bool,				isCameraMoving,	setCameraMoving,	STOCK_WRITE)
@@ -162,26 +154,37 @@ public:
 	inline ECamera			camera() const;
 	void					clearOverlay();
 	void					compileObject (LDObjectPtr obj);
+	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
+	QPoint					coordconv3_2 (const Vertex& pos3d) const;
+	EditModeType			currentEditModeType() const;
+	void					drawBlip (QPainter& paint, QPoint pos) const;
 	void					drawGLScene();
 	void					endDraw (bool accept);
 	void					forgetObject (LDObjectPtr obj);
 	Axis					getCameraAxis (bool y, ECamera camid = (ECamera) -1);
 	const char*				getCameraName() const;
 	double					getDepthValue() const;
+	LDFixedCamera const&	getFixedCamera (ECamera cam) const;
+	void					getRelativeAxes (Axis& relX, Axis& relY) const;
+	Axis					getRelativeZ() const;
 	LDGLOverlay&			getOverlay (int newcam);
 	uchar*					getScreencap (int& w, int& h);
 	void					hardRefresh();
 	void					highlightCursorObject();
 	void					initGLData();
 	void					initOverlaysFromObjects();
+	QPen					linePen() const;
 	void					needZoomToFit();
+	Vertex const&			position3D() const;
 	void					refresh();
 	void					resetAngles();
 	void					resetAllAngles();
 	void					setBackground();
 	void					setCamera (const ECamera cam);
 	void					setDepthValue (double depth);
+	void					setEditMode (EditModeType type);
 	bool					setupOverlay (ECamera cam, QString file, int x, int y, int w, int h);
+	QPen					textPen() const;
 	void					updateOverlayObjects();
 	void					zoomNotch (bool inward);
 
@@ -212,14 +215,11 @@ private:
 	double					m_virtWidth,
 							m_virtHeight;
 	bool					m_darkbg,
-							m_rangepick,
-							m_addpick,
 							m_drawToolTip,
 							m_screencap,
 							m_panning;
 	QPoint					m_mousePosition,
-							m_globalpos,
-							m_rangeStart;
+							m_globalpos;
 	QPen					m_thickBorderPen,
 							m_thinBorderPen;
 	ECamera					m_camera,
@@ -228,25 +228,14 @@ private:
 	int						m_width,
 							m_height,
 							m_totalmove;
-	QList<Vertex>			m_drawedVerts;
-	bool					m_rectdraw;
-	Vertex					m_rectverts[4];
 	QColor					m_bgcolor;
-	MagicWand*				m_wand;
+	AbstractEditMode*		m_editmode;
 
-	void					addDrawnVertex (Vertex m_hoverpos);
 	void					calcCameraIcons();
 	void					clampAngle (double& angle) const;
 	inline LDGLData&		currentDocumentData() const;
-	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
-	QPoint					coordconv3_2 (const Vertex& pos3d) const;
-	void					drawBlip (QPainter& paint, QPoint pos) const;
 	void					drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
 	LDOverlayPtr			findOverlayObject (ECamera cam);
-	double					getCircleDrawDist (int pos) const;
-	Matrix					getCircleDrawMatrix (double scale);
-	void					getRelativeAxes (Axis& relX, Axis& relY) const;
-	Axis					getRelativeZ() const;
 	inline double&			pan (Axis ax);
 	inline const double&	pan (Axis ax) const;
 	void					pick (int mouseX, int mouseY);
