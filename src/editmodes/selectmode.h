@@ -12,5 +12,6 @@ public:
 	SelectMode (GLRenderer* renderer);
 
 	virtual bool mouseReleased (MouseEventData const& data) override;
+	virtual bool mouseDoubleClicked (QMouseEvent* ev);
 	virtual EditModeType type() const override;
 };

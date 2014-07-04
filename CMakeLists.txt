@@ -39,7 +39,6 @@ set (LDFORGE_SOURCES
 	src/ldConfig.cc
 	src/ldDocument.cc
 	src/ldObject.cc
-	src/magicWand.cc
 	src/main.cc
 	src/mainWindow.cc
 	src/messageLog.cc
@@ -48,6 +47,11 @@ set (LDFORGE_SOURCES
 	src/primitives.cc
 	src/radioGroup.cc
 	src/version.cc
+	src/editmodes/abstracteditmode.cc
+	src/editmodes/circlemode.cc
+	src/editmodes/drawmode.cc
+	src/editmodes/magicwandmode.cc
+	src/editmodes/selectmode.cc
 )
 
 set (LDFORGE_HEADERS
@@ -76,7 +80,11 @@ set (LDFORGE_HEADERS
 	src/mainWindow.h
 	src/editHistory.h
 	src/format.h
-	src/magicWand.h
+	src/editmodes/abstracteditmode.h
+	src/editmodes/circlemode.h
+	src/editmodes/drawmode.h
+	src/editmodes/magicwandmode.h
+	src/editmodes/selectmode.h
 )
 
 set (LDFORGE_FORMS

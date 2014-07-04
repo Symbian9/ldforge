@@ -42,7 +42,7 @@ AbstractDrawMode::AbstractDrawMode (GLRenderer* renderer) :
 	getCurrentDocument()->clearSelection();
 
 	g_win->updateSelection();
-	m_drawedVerts.clear();
+	_drawedVerts.clear();
 }
 
 AbstractSelectMode::AbstractSelectMode (GLRenderer* renderer) :
@@ -59,7 +59,7 @@ void AbstractDrawMode::addDrawnVertex (Vertex const& pos)
 	if (preAddVertex (pos))
 		return;
 
-	m_drawedVerts << pos;
+	_drawedVerts << pos;
 }
 
 bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
@@ -67,7 +67,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (data.releasedButtons & Qt::MidButton)
+	if ((data.releasedButtons & Qt::MidButton) && (_drawedVerts.size() < 4) && (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
 		double			minimumDistance = 1024.0;
@@ -75,10 +75,14 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		Vertex			cursorPosition = renderer()->coordconv2_3 (data.ev->pos(), false);
 		QPoint			cursorPosition2D (data.ev->pos());
 		const Axis		relZ = renderer()->getRelativeZ();
-		QList<Vertex>	vertices;
+		QVector<Vertex>	vertices;
 
-		for (auto it = renderer()->document()->vertices().begin(); it != renderer()->document()->vertices().end(); ++it)
+		for (auto it = renderer()->document()->vertices().begin();
+			it != renderer()->document()->vertices().end();
+			++it)
+		{
 			vertices << it.key();
+		}
 
 		// Sort the vertices in order of distance to camera
 		std::sort (vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
@@ -122,5 +126,30 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		return true;
 	}
 
+	if ((data.releasedButtons & Qt::RightButton) && (not _drawedVerts.isEmpty()))
+	{
+		// Remove the last vertex
+		_drawedVerts.removeLast();
+
+		return true;
+	}
+
 	return false;
+}
+
+void AbstractDrawMode::finishDraw (LDObjectList& objs)
+{
+	if (objs.size() > 0)
+	{
+		for (LDObjectPtr obj : objs)
+		{
+			renderer()->document()->addObject (obj);
+			renderer()->compileObject (obj);
+		}
+
+		g_win->refresh();
+		g_win->endAction();
+	}
+
+	_drawedVerts.clear();
 }

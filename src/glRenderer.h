@@ -159,7 +159,6 @@ public:
 	EditModeType			currentEditModeType() const;
 	void					drawBlip (QPainter& paint, QPoint pos) const;
 	void					drawGLScene();
-	void					endDraw (bool accept);
 	void					forgetObject (LDObjectPtr obj);
 	Axis					getCameraAxis (bool y, ECamera camid = (ECamera) -1);
 	const char*				getCameraName() const;
@@ -241,7 +240,6 @@ private:
 	void					pick (int mouseX, int mouseY);
 	LDObjectPtr				pickOneObject (int mouseX, int mouseY);
 	inline double&			rot (Axis ax);
-	void					updateRectVerts();
 	inline double&			zoom();
 	void					zoomToFit();
 	void					zoomAllToFit();

@@ -27,19 +27,39 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 	_rangepick = false;
 }
 
-bool SelectMode::mousePressed (MouseEventData const& data)
+bool SelectMode::mousePressed (QMouseEvent* ev)
 {
-	if (Super::mousePressed (data))
+	if (Super::mousePressed (ev))
 		return true;
 
-	if (data.ev->modifiers() & Qt::ControlModifier)
+	if (ev->modifiers() & Qt::ControlModifier)
 	{
 		_rangepick = true;
-		_rangeStart.setX (data.ev->x());
-		_rangeStart.setY (data.ev->y());
-		_addpick = (data.keymods & Qt::AltModifier);
-		data.ev->accept();
+		_rangeStart.setX (ev->x());
+		_rangeStart.setY (ev->y());
+		_addpick = (ev->modifiers() & Qt::AltModifier);
 		return true;
+	}
+
+	return false;
+}
+
+bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
+{
+	if (Super::mouseDoubleClicked (ev))
+		return true;
+
+	if (ev->buttons() & Qt::LeftButton)
+	{
+		renderer()->document()->clearSelection();
+		LDObjectPtr obj = renderer()->pickOneObject (ev->x(), ev->y());
+
+		if (obj != null)
+		{
+			AddObjectDialog::staticDialog (obj->type(), obj);
+			g_win->endAction();
+			return true;
+		}
 	}
 
 	return false;

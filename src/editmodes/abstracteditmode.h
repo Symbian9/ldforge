@@ -33,8 +33,11 @@ public:
 	virtual void			render (QPainter& painter) const {};
 	GLRenderer*				renderer() const;
 	virtual EditModeType	type() const = 0;
-	virtual bool			mousePressed (MouseEventData const& data) { return false; }
-	virtual bool			mouseReleased (MouseEventData const& data) { return false; }
+	virtual bool			mousePressed (QMouseEvent*) { return false; }
+	virtual bool			mouseReleased (MouseEventData const&) { return false; }
+	virtual bool			mouseDoubleClicked (QMouseEvent*) { return false; }
+	virtual bool			mouseMoved (QMouseEvent*) { return false; }
+	void					finishDraw (LDObjectList& objs);
 
 	static AbstractEditMode* createByType (GLRenderer* renderer, EditModeType type);
 };
@@ -44,7 +47,7 @@ public:
 //
 class AbstractDrawMode : public AbstractEditMode
 {
-	QList<Vertex>			m_drawedVerts;
+	QList<Vertex>			_drawedVerts;
 	Vertex					m_rectverts[4];
 
 	DEFINE_CLASS (AbstractDrawMode, AbstractEditMode)

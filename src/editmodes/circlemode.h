@@ -13,4 +13,7 @@ public:
 	double getCircleDrawDist (int pos) const;
 	Matrix getCircleDrawMatrix (double scale);
 	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
+
+private:
+	void buildCircle();
 };

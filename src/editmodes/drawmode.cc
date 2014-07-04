@@ -1,5 +1,6 @@
 #include <QPainter>
 #include "drawmode.h"
+#include "../ldObject.h"
 
 CFGENTRY (Bool,		drawLineLengths,			true)
 CFGENTRY (Bool,		drawAngles,					false)
@@ -23,10 +24,10 @@ void DrawMode::render (QPainter& painter) const
 	// Calculate polygon data
 	if (not _rectdraw)
 	{
-		numverts = m_drawedVerts.size() + 1;
+		numverts = _drawedVerts.size() + 1;
 		int i = 0;
 
-		for (Vertex& vert : m_drawedVerts)
+		for (Vertex& vert : _drawedVerts)
 			poly3d[i++] = vert;
 
 		// Draw the cursor vertex as the last one in the list.
@@ -38,7 +39,7 @@ void DrawMode::render (QPainter& painter) const
 	else
 	{
 		// Get vertex information from m_rectverts
-		if (m_drawedVerts.size() > 0)
+		if (_drawedVerts.size() > 0)
 			for (int i = 0; i < numverts; ++i)
 				poly3d[i] = m_rectverts[i];
 		else
@@ -70,7 +71,7 @@ void DrawMode::render (QPainter& painter) const
 		// Draw line lenghts and angle info if appropriate
 		if (numverts >= 2)
 		{
-			int numlines = (m_drawedVerts.size() == 1) ? 1 : m_drawedVerts.size() + 1;
+			int numlines = (_drawedVerts.size() == 1) ? 1 : _drawedVerts.size() + 1;
 			painter.setPen (renderer()->textPen());
 
 			for (int i = 0; i < numlines; ++i)
@@ -109,7 +110,7 @@ void DrawMode::render (QPainter& painter) const
 bool DrawMode::preAddVertex (Vertex const& pos)
 {
 	// If we picked an already-existing vertex, stop drawing
-	for (Vertex& vert : m_drawedVerts)
+	for (Vertex& vert : _drawedVerts)
 	{
 		if (vert == pos)
 		{
@@ -128,7 +129,7 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 
 	if (_rectdraw)
 	{
-		if (m_drawedVerts.size() == 2)
+		if (_drawedVerts.size() == 2)
 		{
 			endDraw (true);
 			return true;
@@ -137,19 +138,123 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 	else
 	{
 		// If we have 4 verts, stop drawing.
-		if (m_drawedVerts.size() >= 4)
+		if (_drawedVerts.size() >= 4)
 		{
 			endDraw (true);
 			return;
 		}
 
-		if (m_drawedVerts.isEmpty() && ev->modifiers() & Qt::ShiftModifier)
+		if (_drawedVerts.isEmpty())
 		{
-			_rectdraw = true;
+			_rectdraw = (ev->modifiers() & Qt::ShiftModifier);
 			updateRectVerts();
 		}
 	}
 
 	addDrawnVertex (renderer()->position3D());
 	return true;
+}
+
+//
+// Update rect vertices when the mouse moves since the 3d position likely has changed
+//
+bool DrawMode::mouseMoved (QMouseEvent*)
+{
+	updateRectVerts();
+}
+
+void DrawMode::updateRectVerts()
+{
+	if (not _rectdraw)
+		return;
+
+	if (_drawedVerts.isEmpty())
+	{
+		for (int i = 0; i < 4; ++i)
+			m_rectverts[i] = renderer()->position3D();
+
+		return;
+	}
+
+	Vertex v0 = _drawedVerts[0],
+		   v1 = (_drawedVerts.size() >= 2) ? _drawedVerts[1] : renderer()->position3D();
+
+	const Axis localx = renderer()->getCameraAxis (false),
+			   localy = renderer()->getCameraAxis (true),
+			   localz = (Axis) (3 - localx - localy);
+
+	for (int i = 0; i < 4; ++i)
+		m_rectverts[i].setCoordinate (localz, renderer()->getDepthValue());
+
+	m_rectverts[0].setCoordinate (localx, v0[localx]);
+	m_rectverts[0].setCoordinate (localy, v0[localy]);
+	m_rectverts[1].setCoordinate (localx, v1[localx]);
+	m_rectverts[1].setCoordinate (localy, v0[localy]);
+	m_rectverts[2].setCoordinate (localx, v1[localx]);
+	m_rectverts[2].setCoordinate (localy, v1[localy]);
+	m_rectverts[3].setCoordinate (localx, v0[localx]);
+	m_rectverts[3].setCoordinate (localy, v1[localy]);
+}
+
+void DrawMode::endDraw()
+{
+	// Clean the selection and create the object
+	QList<Vertex>& verts = _drawedVerts;
+	LDObjectList objs;
+
+	if (_rectdraw)
+	{
+		LDQuadPtr quad (spawn<LDQuad>());
+
+		updateRectVerts();
+
+		for (int i = 0; i < quad->numVertices(); ++i)
+			quad->setVertex (i, m_rectverts[i]);
+
+		quad->setColor (maincolor());
+		objs << quad;
+	}
+	else
+	{
+		switch (verts.size())
+		{
+			case 1:
+			{
+				// 1 vertex - add a vertex object
+				LDVertexPtr obj = spawn<LDVertex>();
+				obj->pos = verts[0];
+				obj->setColor (maincolor());
+				objs << obj;
+				break;
+			}
+
+			case 2:
+			{
+				// 2 verts - make a line
+				LDLinePtr obj = spawn<LDLine> (verts[0], verts[1]);
+				obj->setColor (edgecolor());
+				objs << obj;
+				break;
+			}
+
+			case 3:
+			case 4:
+			{
+				LDObjectPtr obj = (verts.size() == 3) ?
+					static_cast<LDObjectPtr> (spawn<LDTriangle>()) :
+					static_cast<LDObjectPtr> (spawn<LDQuad>());
+
+				obj->setColor (maincolor());
+
+				for (int i = 0; i < verts.size(); ++i)
+					obj->setVertex (i, verts[i]);
+
+				objs << obj;
+				break;
+			}
+		}
+	}
+
+	finishDraw (objs);
+	_rectdraw = false;
 }

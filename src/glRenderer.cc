@@ -25,10 +25,9 @@
 #include <QContextMenuEvent>
 #include <QInputDialog>
 #include <QToolTip>
-#include <qtextdocument.h>
+#include <QTextDocument>
 #include <QTimer>
 #include <GL/glu.h>
-
 #include "main.h"
 #include "configuration.h"
 #include "ldDocument.h"
@@ -40,10 +39,7 @@
 #include "dialogs.h"
 #include "addObjectDialog.h"
 #include "messageLog.h"
-#include "primitives.h"
-#include "misc/ringFinder.h"
 #include "glCompiler.h"
-#include "magicWand.h"
 
 static const LDFixedCameraInfo g_FixedCameras[6] =
 {
@@ -780,20 +776,6 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 		}
 	}
 
-	if (wasMid && editMode() != ESelectMode && m_drawedVerts.size() < 4 && m_totalmove < 10)
-	{
-		
-	}
-
-	if (wasRight && not m_drawedVerts.isEmpty())
-	{
-		// Remove the last vertex
-		m_drawedVerts.removeLast();
-
-		if (m_drawedVerts.isEmpty())
-			m_rectdraw = false;
-	}
-
 end:
 	update();
 	m_totalmove = 0;
@@ -805,11 +787,13 @@ void GLRenderer::mousePressEvent (QMouseEvent* ev)
 {
 	m_totalmove = 0;
 	m_lastButtons = ev->buttons();
+
+	if (m_editmode->mousePressed (ev))
+		ev->accept();
 }
 
 // =============================================================================
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// =============================================================================
+//
 void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
 	int dx = ev->x() - m_mousePosition.x();
@@ -849,10 +833,10 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 	// Calculate 3d position of the cursor
 	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : g_origin;
 
-	// Update rect vertices since m_position3D may have changed
-	updateRectVerts();
+	m_editmode->mouseMoved (ev);
 	highlightCursorObject();
 	update();
+	ev->accept();
 }
 
 // =============================================================================
@@ -1110,198 +1094,6 @@ void GLRenderer::setPicking (const bool& a)
 		// Restore line thickness
 		glLineWidth (cfg::lineThickness);
 	}
-}
-
-// =============================================================================
-//
-void GLRenderer::endDraw (bool accept)
-{
-	(void) accept;
-
-	// Clean the selection and create the object
-	QList<Vertex>& verts = m_drawedVerts;
-	LDObjectList objs;
-
-	switch (editMode())
-	{
-		case EDrawMode:
-		{
-			if (m_rectdraw)
-			{
-				LDQuadPtr quad (spawn<LDQuad>());
-
-				// Copy the vertices from m_rectverts
-				updateRectVerts();
-
-				for (int i = 0; i < quad->numVertices(); ++i)
-					quad->setVertex (i, m_rectverts[i]);
-
-				quad->setColor (maincolor());
-				objs << quad;
-			}
-			else
-			{
-				switch (verts.size())
-				{
-					case 1:
-					{
-						// 1 vertex - add a vertex object
-						LDVertexPtr obj = spawn<LDVertex>();
-						obj->pos = verts[0];
-						obj->setColor (maincolor());
-						objs << obj;
-					} break;
-
-					case 2:
-					{
-						// 2 verts - make a line
-						LDLinePtr obj = spawn<LDLine> (verts[0], verts[1]);
-						obj->setColor (edgecolor());
-						objs << obj;
-					} break;
-
-					case 3:
-					case 4:
-					{
-						LDObjectPtr obj = (verts.size() == 3) ?
-							  static_cast<LDObjectPtr> (spawn<LDTriangle>()) :
-							  static_cast<LDObjectPtr> (spawn<LDQuad>());
-
-						obj->setColor (maincolor());
-
-						for (int i = 0; i < obj->numVertices(); ++i)
-							obj->setVertex (i, verts[i]);
-
-						objs << obj;
-					} break;
-				}
-			}
-		} break;
-
-		case ECircleMode:
-		{
-			const int segs = g_lores, divs = g_lores; // TODO: make customizable
-			double dist0 = getCircleDrawDist (0),
-				dist1 = getCircleDrawDist (1);
-			LDDocumentPtr refFile;
-			Matrix transform;
-			bool circleOrDisc = false;
-
-			if (dist1 < dist0)
-				std::swap<double> (dist0, dist1);
-
-			if (dist0 == dist1)
-			{
-				// If the radii are the same, there's no ring space to fill. Use a circle.
-				refFile = ::getDocument ("4-4edge.dat");
-				transform = getCircleDrawMatrix (dist0);
-				circleOrDisc = true;
-			}
-			elif (dist0 == 0 || dist1 == 0)
-			{
-				// If either radii is 0, use a disc.
-				refFile = ::getDocument ("4-4disc.dat");
-				transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
-				circleOrDisc = true;
-			}
-			elif (g_RingFinder.findRings (dist0, dist1))
-			{
-				// The ring finder found a solution, use that. Add the component rings to the file.
-				for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
-				{
-					// Get a ref file for this primitive. If we cannot find it in the
-					// LDraw library, generate it.
-					if ((refFile = ::getDocument (radialFileName (::Ring, g_lores, g_lores, cmp.num))) == null)
-					{
-						refFile = generatePrimitive (::Ring, g_lores, g_lores, cmp.num);
-						refFile->setImplicit (false);
-					}
-
-					LDSubfilePtr ref = spawn<LDSubfile>();
-					ref->setFileInfo (refFile);
-					ref->setTransform (getCircleDrawMatrix (cmp.scale));
-					ref->setPosition (m_drawedVerts[0]);
-					ref->setColor (maincolor());
-					objs << ref;
-				}
-			}
-			else
-			{
-				// Ring finder failed, last resort: draw the ring with quads
-				QList<QLineF> c0, c1;
-				Axis relX, relY, relZ;
-				getRelativeAxes (relX, relY);
-				relZ = (Axis) (3 - relX - relY);
-				double x0 = m_drawedVerts[0][relX],
-					y0 = m_drawedVerts[0][relY];
-
-				Vertex templ;
-				templ.setCoordinate (relX, x0);
-				templ.setCoordinate (relY, y0);
-				templ.setCoordinate (relZ, getDepthValue());
-
-				// Calculate circle coords
-				makeCircle (segs, divs, dist0, c0);
-				makeCircle (segs, divs, dist1, c1);
-
-				for (int i = 0; i < segs; ++i)
-				{
-					Vertex v0, v1, v2, v3;
-					v0 = v1 = v2 = v3 = templ;
-					v0.setCoordinate (relX, v0[relX] + c0[i].x1());
-					v0.setCoordinate (relY, v0[relY] + c0[i].y1());
-					v1.setCoordinate (relX, v1[relX] + c0[i].x2());
-					v1.setCoordinate (relY, v1[relY] + c0[i].y2());
-					v2.setCoordinate (relX, v2[relX] + c1[i].x2());
-					v2.setCoordinate (relY, v2[relY] + c1[i].y2());
-					v3.setCoordinate (relX, v3[relX] + c1[i].x1());
-					v3.setCoordinate (relY, v3[relY] + c1[i].y1());
-
-					LDQuadPtr quad (spawn<LDQuad> (v0, v1, v2, v3));
-					quad->setColor (maincolor());
-
-					// Ensure the quads always are BFC-front towards the camera
-					if (camera() % 3 <= 0)
-						quad->invert();
-
-					objs << quad;
-				}
-			}
-
-			if (circleOrDisc)
-			{
-				LDSubfilePtr ref = spawn<LDSubfile>();
-				ref->setFileInfo (refFile);
-				ref->setTransform (transform);
-				ref->setPosition (m_drawedVerts[0]);
-				ref->setColor (maincolor());
-				objs << ref;
-			}
-		} break;
-
-		case ESelectMode:
-		case EMagicWandMode:
-		{
-			// this shouldn't happen
-			assert (false);
-			return;
-		} break;
-	}
-
-	if (objs.size() > 0)
-	{
-		for (LDObjectPtr obj : objs)
-		{
-			document()->addObject (obj);
-			compileObject (obj);
-		}
-
-		g_win->refresh();
-		g_win->endAction();
-	}
-
-	m_drawedVerts.clear();
-	m_rectdraw = false;
 }
 
 // =============================================================================
@@ -1632,55 +1424,10 @@ void GLRenderer::zoomAllToFit()
 
 // =============================================================================
 //
-void GLRenderer::updateRectVerts()
-{
-	if (not m_rectdraw)
-		return;
-
-	if (m_drawedVerts.isEmpty())
-	{
-		for (int i = 0; i < 4; ++i)
-			m_rectverts[i] = m_position3D;
-
-		return;
-	}
-
-	Vertex v0 = m_drawedVerts[0],
-		   v1 = (m_drawedVerts.size() >= 2) ? m_drawedVerts[1] : m_position3D;
-
-	const Axis ax = getCameraAxis (false),
-			   ay = getCameraAxis (true),
-			   az = (Axis) (3 - ax - ay);
-
-	for (int i = 0; i < 4; ++i)
-		m_rectverts[i].setCoordinate (az, getDepthValue());
-
-	m_rectverts[0].setCoordinate (ax, v0[ax]);
-	m_rectverts[0].setCoordinate (ay, v0[ay]);
-	m_rectverts[1].setCoordinate (ax, v1[ax]);
-	m_rectverts[1].setCoordinate (ay, v0[ay]);
-	m_rectverts[2].setCoordinate (ax, v1[ax]);
-	m_rectverts[2].setCoordinate (ay, v1[ay]);
-	m_rectverts[3].setCoordinate (ax, v0[ax]);
-	m_rectverts[3].setCoordinate (ay, v1[ay]);
-}
-
-// =============================================================================
-//
 void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 {
-	if (not (ev->buttons() & Qt::LeftButton) || editMode() != ESelectMode)
-		return;
-
-	pick (ev->x(), ev->y());
-
-	if (selection().isEmpty())
-		return;
-
-	LDObjectPtr obj = selection().first();
-	AddObjectDialog::staticDialog (obj->type(), obj);
-	g_win->endAction();
-	ev->accept();
+	if (m_editmode->mouseDoubleClicked (ev))
+		ev->accept();
 }
 
 // =============================================================================
