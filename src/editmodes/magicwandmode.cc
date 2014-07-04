@@ -197,8 +197,11 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 		g_win->buildObjList();
 }
 
-void MagicWandMode::mouseReleased (MouseEventData const& data)
+bool MagicWandMode::mouseReleased (MouseEventData const& data)
 {
+	if (Super::mouseReleased (data))
+		return true;
+
 	MagicType wandtype = MagicWandMode::Set;
 
 	if (data.keymods & Qt::ShiftModifier)
@@ -207,4 +210,5 @@ void MagicWandMode::mouseReleased (MouseEventData const& data)
 		wandtype = MagicWandMode::Subtractive;
 	
 	doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);
+	return true;
 }

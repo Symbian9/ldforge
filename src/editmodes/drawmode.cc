@@ -121,14 +121,17 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 	return false;
 }
 
-void DrawMode::mouseReleased (MouseEventData const& data)
+bool DrawMode::mouseReleased (MouseEventData const& data)
 {
+	if (Super::mouseReleased (data))
+		return true;
+
 	if (_rectdraw)
 	{
 		if (m_drawedVerts.size() == 2)
 		{
 			endDraw (true);
-			return;
+			return true;
 		}
 	}
 	else
@@ -148,4 +151,5 @@ void DrawMode::mouseReleased (MouseEventData const& data)
 	}
 
 	addDrawnVertex (renderer()->position3D());
+	return true;
 }

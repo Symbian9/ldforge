@@ -10,6 +10,7 @@ public:
 	virtual void render (QPainter& painter) const override;
 	virtual EditModeType type() const override;
 
-	double					getCircleDrawDist (int pos) const;
-	Matrix					getCircleDrawMatrix (double scale);
+	double getCircleDrawDist (int pos) const;
+	Matrix getCircleDrawMatrix (double scale);
+	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
 };

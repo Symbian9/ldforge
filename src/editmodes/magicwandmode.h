@@ -42,7 +42,7 @@ public:
 	MagicWandMode (GLRenderer* renderer);
 	void doMagic (LDObjectPtr obj, MagicType type);
 	virtual EditModeType type() const override;
-	virtual void mouseReleased (MouseEventData const& data) override;
+	virtual bool mouseReleased (MouseEventData const& data) override;
 
 private:
 	void fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundaries, QVector<LDObjectPtr>& candidates);

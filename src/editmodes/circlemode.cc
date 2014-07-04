@@ -43,6 +43,8 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 
 void CircleMode::render (QPainter& painter) const
 {
+	QFontMetrics const metrics (QFont());
+
 	// If we have not specified the center point of the circle yet, preview it on the screen.
 	if (m_drawedVerts.isEmpty())
 	{
@@ -121,7 +123,7 @@ void CircleMode::render (QPainter& painter) const
 		// Draw the current radius in the middle of the circle.
 		QPoint origin = renderer()->coordconv3_2 (m_drawedVerts[0]);
 		QString label = QString::number (dist0);
-		painter.setPen (textpen);
+		painter.setPen (renderer()->getTextPen());
 		painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
 
 		if (m_drawedVerts.size() >= 2)
@@ -130,4 +132,18 @@ void CircleMode::render (QPainter& painter) const
 				origin.y() + metrics.height(), QString::number (dist1));
 		}
 	}
+}
+
+bool CircleMode::mouseReleased (MouseEventData const& data)
+{
+	if (Super::mouseReleased (data))
+		return true;
+
+	if (m_drawedVerts.size() < 3)
+	{
+		addDrawnVertex (m_position3D);
+		return;
+	}
+
+	Super::mouseReleased (data);
 }

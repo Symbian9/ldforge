@@ -11,6 +11,6 @@ class SelectMode : public AbstractSelectMode
 public:
 	SelectMode (GLRenderer* renderer);
 
-	virtual void mouseReleased (MouseEventData const& data) override;
+	virtual bool mouseReleased (MouseEventData const& data) override;
 	virtual EditModeType type() const override;
 };

@@ -10,8 +10,11 @@ EditModeType SelectMode::type() const
 	return EditModeType::Select;
 }
 
-void SelectMode::mouseReleased (MouseEventData const& data)
+bool SelectMode::mouseReleased (MouseEventData const& data)
 {
+	if (Super::mouseReleased (data))
+		return true;
+
 	if (not data.mouseMoved)
 		_rangepick = false;
 
@@ -20,10 +23,15 @@ void SelectMode::mouseReleased (MouseEventData const& data)
 
 	if (not data.mouseMoved || _rangepick)
 		renderer()->pick (data.ev->x(), data.ev->y());
+
+	_rangepick = false;
 }
 
-void SelectMode::mousePressed (MouseEventData const& data)
+bool SelectMode::mousePressed (MouseEventData const& data)
 {
+	if (Super::mousePressed (data))
+		return true;
+
 	if (data.ev->modifiers() & Qt::ControlModifier)
 	{
 		_rangepick = true;
@@ -31,5 +39,8 @@ void SelectMode::mousePressed (MouseEventData const& data)
 		_rangeStart.setY (data.ev->y());
 		_addpick = (data.keymods & Qt::AltModifier);
 		data.ev->accept();
+		return true;
 	}
+
+	return false;
 }

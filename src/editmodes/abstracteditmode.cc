@@ -62,8 +62,11 @@ void AbstractDrawMode::addDrawnVertex (Vertex const& pos)
 	m_drawedVerts << pos;
 }
 
-virtual void AbstractDrawMode::mouseReleased (MouseEventData const& data)
+bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 {
+	if (Super::mouseReleased (data))
+		return true;
+
 	if (data.releasedButtons & Qt::MidButton)
 	{
 		// Find the closest vertex to our cursor

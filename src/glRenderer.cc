@@ -774,31 +774,10 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 			data.mouseMoved = m_totalmove >= 10;
 			data.keymods = m_keymods;
 			data.releasedButtons = releasedbuttons;
-			m_editmode->mouseReleased (data);
+
+			if (m_editmode->mouseReleased (data))
+				goto end;
 		}
-
-		switch (editMode())
-		{
-			case EDrawMode:
-			{
-				
-				break;
-			}
-
-			case ECircleMode:
-			{
-				if (m_drawedVerts.size() == 3)
-				{
-					endDraw (true);
-					return;
-				}
-
-				addDrawnVertex (m_position3D);
-				break;
-			}
-		}
-
-		m_rangepick = false;
 	}
 
 	if (wasMid && editMode() != ESelectMode && m_drawedVerts.size() < 4 && m_totalmove < 10)
