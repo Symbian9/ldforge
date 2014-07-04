@@ -18,11 +18,11 @@
 
 #include <QMouseEvent>
 #include <stdexcept>
-#include "abstracteditmode.h"
-#include "selectmode.h"
-#include "drawmode.h"
-#include "circlemode.h"
-#include "magicwandmode.h"
+#include "abstractEditMode.h"
+#include "selectMode.h"
+#include "drawMode.h"
+#include "circleMode.h"
+#include "magicWandMode.h"
 #include "../mainWindow.h"
 #include "../glRenderer.h"
 

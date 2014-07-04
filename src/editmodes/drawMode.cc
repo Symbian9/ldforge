@@ -18,7 +18,7 @@
 
 #include <QPainter>
 #include <QMouseEvent>
-#include "drawmode.h"
+#include "drawMode.h"
 #include "../ldObject.h"
 #include "../glRenderer.h"
 

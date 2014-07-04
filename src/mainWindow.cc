@@ -50,7 +50,7 @@
 #include "configuration.h"
 #include "ui_ldforge.h"
 #include "primitives.h"
-#include "editmodes/abstracteditmode.h"
+#include "editmodes/abstractEditMode.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;

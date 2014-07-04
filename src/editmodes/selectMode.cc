@@ -17,7 +17,7 @@
  */
 
 #include <QMouseEvent>
-#include "selectmode.h"
+#include "selectMode.h"
 #include "../glRenderer.h"
 #include "../addObjectDialog.h"
 #include "../mainWindow.h"
@@ -131,7 +131,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	return false;
 }
 
-bool SelectMode::mouseMoved (QMouseEvent* ev)
+bool SelectMode::mouseMoved (QMouseEvent*)
 {
 	return _rangepick;
 }

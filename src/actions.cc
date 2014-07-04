@@ -37,7 +37,7 @@
 #include "colors.h"
 #include "glCompiler.h"
 #include "ui_newpart.h"
-#include "editmodes/abstracteditmode.h"
+#include "editmodes/abstractEditMode.h"
 
 EXTERN_CFGENTRY (Bool,		drawWireframe);
 EXTERN_CFGENTRY (Bool,		bfcRedGreenView);

@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "abstracteditmode.h"
+#include "abstractEditMode.h"
 #include "../basics.h"
 #include <QMap>
 #include <QVector>

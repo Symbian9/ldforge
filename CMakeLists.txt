@@ -47,11 +47,11 @@ set (LDFORGE_SOURCES
 	src/primitives.cc
 	src/radioGroup.cc
 	src/version.cc
-	src/editmodes/abstracteditmode.cc
-	src/editmodes/circlemode.cc
-	src/editmodes/drawmode.cc
-	src/editmodes/magicwandmode.cc
-	src/editmodes/selectmode.cc
+	src/editmodes/abstractEditMode.cc
+	src/editmodes/circleMode.cc
+	src/editmodes/drawMode.cc
+	src/editmodes/magicWandMode.cc
+	src/editmodes/selectMode.cc
 )
 
 set (LDFORGE_HEADERS
@@ -80,11 +80,11 @@ set (LDFORGE_HEADERS
 	src/mainWindow.h
 	src/editHistory.h
 	src/format.h
-	src/editmodes/abstracteditmode.h
-	src/editmodes/circlemode.h
-	src/editmodes/drawmode.h
-	src/editmodes/magicwandmode.h
-	src/editmodes/selectmode.h
+	src/editmodes/abstractEditMode.h
+	src/editmodes/circleMode.h
+	src/editmodes/drawMode.h
+	src/editmodes/magicWandMode.h
+	src/editmodes/selectMode.h
 )
 
 set (LDFORGE_FORMS

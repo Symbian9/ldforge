@@ -17,7 +17,7 @@
  */
 
 #include <QPainter>
-#include "circlemode.h"
+#include "circleMode.h"
 #include "../miscallenous.h"
 #include "../ldObject.h"
 #include "../ldDocument.h"

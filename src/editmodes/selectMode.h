@@ -16,23 +16,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "abstracteditmode.h"
+#pragma once
+#include "abstractEditMode.h"
 
-class DrawMode : public AbstractDrawMode
+class SelectMode : public AbstractSelectMode
 {
-	DEFINE_CLASS (DrawMode, AbstractDrawMode)
-	bool _rectdraw;
+	QPoint _rangeStart;
+	bool _rangepick;
+	bool _addpick;
+
+	DEFINE_CLASS (SelectMode, AbstractSelectMode)
 
 public:
-	DrawMode (GLRenderer* renderer);
+	SelectMode (GLRenderer* renderer);
 
 	virtual void render (QPainter& painter) const override;
-	virtual EditModeType type() const override;
-	virtual bool preAddVertex (Vertex const& pos) override;
+	virtual bool mousePressed (QMouseEvent* ev);
 	virtual bool mouseReleased (MouseEventData const& data) override;
+	virtual bool mouseDoubleClicked (QMouseEvent* ev);
 	virtual bool mouseMoved (QMouseEvent*) override;
-
-private:
-	void endDraw();
-	void updateRectVerts();
+	virtual EditModeType type() const override;
 };

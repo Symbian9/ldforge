@@ -23,7 +23,7 @@
 #include "ldObject.h"
 #include "ldDocument.h"
 #include "glShared.h"
-#include "editmodes/abstracteditmode.h"
+#include "editmodes/abstractEditMode.h"
 
 class GLCompiler;
 class MessageManager;

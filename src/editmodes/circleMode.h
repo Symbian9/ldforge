@@ -16,7 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "abstracteditmode.h"
+#pragma once
+#include "abstractEditMode.h"
 
 class CircleMode : public AbstractDrawMode
 {
