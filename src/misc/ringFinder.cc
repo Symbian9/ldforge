@@ -141,6 +141,10 @@ bool RingFinder::findRings (double r0, double r1)
 			r1 = r1f;
 		}
 	}
+	else
+	{
+		scale = 1.0;
+	}
 
 	// Recurse in and try find solutions.
 	findRingsRecursor (r0, r1, sol);
