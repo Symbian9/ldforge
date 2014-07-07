@@ -290,3 +290,20 @@ double getCoordinate (const Vertex& a, Axis ax)
 	assert (false);
 	return 0.0;
 }
+
+
+// =============================================================================
+//
+QString prettyFileSize (qint64 size)
+{
+	QString result;
+
+	if (size < 1024)
+		return QString::number (size) + " bytes";
+	else if (size < (1024 * 1024))
+		return QString::number ((double) size / 1024, 'f', 1) + " Kb";
+	else if (size < (1024 * 1024 * 1024))
+		return QString::number ((double) size / (1024 * 1024), 'f', 1) + " Mb";
+	else
+		return QString::number ((double) size / (1024 * 1024 * 1024), 'f', 1) + " Gb";
+}

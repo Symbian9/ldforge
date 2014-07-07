@@ -44,6 +44,7 @@ void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
 
 double getCoordinate (const Vertex& a, Axis ax);
 QString join (QList< StringFormatArg > vals, QString delim = " ");
+QString prettyFileSize (qint64 size);
 
 // Grid stuff
 struct gridinfo

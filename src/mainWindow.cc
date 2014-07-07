@@ -717,6 +717,7 @@ void MainWindow::slot_editObject (QListWidgetItem* listitem)
 bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 {
 	QString path = doc->fullPath();
+	int64 savesize;
 
 	if (saveAs || path.isEmpty())
 	{
@@ -738,12 +739,12 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 		}
 	}
 
-	if (doc->save (path))
+	if (doc->save (path, &savesize))
 	{
 		if (doc == getCurrentDocument())
 			updateTitle();
 
-		print ("Saved to %1.", path);
+		print ("Saved to %1 (%2)", path, prettyFileSize (savesize));
 
 		// Add it to recent files
 		addRecentFile (path);

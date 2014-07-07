@@ -95,7 +95,7 @@ public:
 	void insertObj (int pos, LDObjectPtr obj);
 	int getObjectCount() const;
 	LDObjectPtr getObject (int pos) const;
-	bool save (QString path = ""); // Saves this file to disk.
+	bool save (QString path = "", int64* sizeptr = null); // Saves this file to disk.
 	void swapObjects (LDObjectPtr one, LDObjectPtr other);
 	bool isSafeToClose(); // Perform safety checks. Do this before closing any files!
 	void setObject (int idx, LDObjectPtr obj);

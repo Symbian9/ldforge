@@ -654,10 +654,9 @@ void addRecentFile (QString path)
 	// If this file already is in the list, pop it out.
 	if (idx != -1)
 	{
-		if (rfiles.size() == 1)
-			return; // only recent file - abort and do nothing
+		if (idx == rfiles.size() - 1)
+			return; // first recent file - abort and do nothing
 
-		// Pop it out.
 		rfiles.removeAt (idx);
 	}
 
@@ -738,13 +737,13 @@ void openMainFile (QString path)
 
 // =============================================================================
 //
-bool LDDocument::save (QString savepath)
+bool LDDocument::save (QString path, int64* sizeptr)
 {
 	if (isImplicit())
 		return false;
 
-	if (not savepath.length())
-		savepath = fullPath();
+	if (not path.length())
+		path = fullPath();
 
 	// If the second object in the list holds the file name, update that now.
 	LDObjectPtr nameObject = getObject (1);
@@ -755,7 +754,7 @@ bool LDDocument::save (QString savepath)
 
 		if (nameComment->text().left (6) == "Name: ")
 		{
-			QString newname = shortenName (savepath);
+			QString newname = shortenName (path);
 			nameComment->setText (format ("Name: %1", newname));
 			g_win->buildObjList();
 		}
@@ -763,12 +762,21 @@ bool LDDocument::save (QString savepath)
 
 	QByteArray data;
 
+	if (sizeptr != null)
+		*sizeptr = 0;
+
 	// File is open, now save the model to it. Note that LDraw requires files to
 	// have DOS line endings, so we terminate the lines with \r\n.
 	for (LDObjectPtr obj : objects())
-		data.append ((obj->asText() + "\r\n").toUtf8());
+	{
+		QByteArray subdata ((obj->asText() + "\r\n").toUtf8());
+		data.append (subdata);
 
-	QFile f (savepath);
+		if (sizeptr != null)
+			*sizeptr += subdata.size();
+	}
+
+	QFile f (path);
 
 	if (not f.open (QIODevice::WriteOnly))
 		return false;
@@ -778,8 +786,8 @@ bool LDDocument::save (QString savepath)
 
 	// We have successfully saved, update the save position now.
 	setSavePosition (history()->position());
-	setFullPath (savepath);
-	setName (shortenName (savepath));
+	setFullPath (path);
+	setName (shortenName (path));
 
 	g_win->updateDocumentListItem (self().toStrongRef());
 	g_win->updateTitle();
