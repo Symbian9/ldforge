@@ -126,6 +126,8 @@ namespace LDPaths
 LDDocument::LDDocument (LDDocumentPtr* selfptr) :
 	m_isImplicit (true),
 	m_flags (0),
+	_verticesOutdated (true),
+	_needVertexMerge (true),
 	m_gldata (new LDGLData)
 {
 	*selfptr = LDDocumentPtr (this);
@@ -1094,7 +1096,7 @@ int LDDocument::addObject (LDObjectPtr obj)
 {
 	history()->add (new AddHistory (objects().size(), obj));
 	m_objects << obj;
-	addKnownVerticesOf (obj);
+	addKnownVertices (obj);
 
 #ifdef DEBUG
 	if (not isImplicit())
@@ -1108,11 +1110,13 @@ int LDDocument::addObject (LDObjectPtr obj)
 
 // =============================================================================
 //
-void LDDocument::addObjects (const LDObjectList objs)
+void LDDocument::addObjects (const LDObjectList& objs)
 {
 	for (LDObjectPtr obj : objs)
-		if (obj)
+	{
+		if (obj != null)
 			addObject (obj);
+	}
 }
 
 // =============================================================================
@@ -1123,7 +1127,7 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
 	g_win->R()->compileObject (obj);
-	addKnownVerticesOf (obj);
+	
 
 #ifdef DEBUG
 	if (not isImplicit())
@@ -1133,50 +1137,17 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 
 // =============================================================================
 //
-void LDDocument::addKnownVerticesOf (LDObjectPtr obj)
+void LDDocument::addKnownVertices (LDObjectPtr obj)
 {
-	if (isImplicit())
-		return;
+	auto it = _objectVertices.find (obj);
 
-	if (obj->type() == OBJ_Subfile)
-	{
-		LDSubfilePtr ref = obj.staticCast<LDSubfile>();
-
-		for (Vertex vrt : ref->fileInfo()->inlineVertices())
-		{
-			vrt.transform (ref->transform(), ref->position());
-			addKnownVertexReference (vrt);
-		}
-	}
+	if (it == _objectVertices.end())
+		it = _objectVertices.insert (obj, QVector<Vertex>());
 	else
-	{
-		for (int i = 0; i < obj->numVertices(); ++i)
-			addKnownVertexReference (obj->vertex (i));
-	}
-}
+		it->clear();
 
-// =============================================================================
-//
-void LDDocument::removeKnownVerticesOf (LDObjectPtr obj)
-{
-	if (isImplicit())
-		return;
-
-	if (obj->type() == OBJ_Subfile)
-	{
-		LDSubfilePtr ref = obj.staticCast<LDSubfile>();
-
-		for (Vertex vrt : ref->fileInfo()->inlineVertices())
-		{
-			vrt.transform (ref->transform(), ref->position());
-			removeKnownVertexReference (vrt);
-		}
-	}
-	else
-	{
-		for (int i = 0; i < obj->numVertices(); ++i)
-			removeKnownVertexReference (obj->vertex (i));
-	}
+	obj->getVertices (*it);
+	needVertexMerge();
 }
 
 // =============================================================================
@@ -1190,49 +1161,11 @@ void LDDocument::forgetObject (LDObjectPtr obj)
 	if (not isImplicit() && not (flags() & DOCF_IsBeingDestroyed))
 	{
 		history()->add (new DelHistory (idx, obj));
-		removeKnownVerticesOf (obj);
+		_objectVertices.remove (obj);
 	}
 
 	m_objects.removeAt (idx);
 	obj->setDocument (LDDocumentPtr());
-}
-
-// =============================================================================
-//
-void LDDocument::vertexChanged (const Vertex& a, const Vertex& b)
-{
-	removeKnownVertexReference (a);
-	addKnownVertexReference (b);
-}
-
-// =============================================================================
-//
-void LDDocument::addKnownVertexReference (const Vertex& a)
-{
-	if (isImplicit())
-		return;
-
-	auto it = m_vertices.find (a);
-
-	if (it == m_vertices.end())
-		m_vertices[a] = 1;
-	else
-		++it.value();
-}
-
-// =============================================================================
-//
-void LDDocument::removeKnownVertexReference (const Vertex& a)
-{
-	if (isImplicit())
-		return;
-
-	auto it = m_vertices.find (a);
-	assert (it != m_vertices.end());
-
-	// If there's no more references to a given vertex, it is to be removed.
-	if (--it.value() == 0)
-		m_vertices.erase (it);
 }
 
 // =============================================================================
@@ -1262,20 +1195,15 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 		*m_history << new EditHistory (idx, oldcode, newcode);
 	}
 
-	removeKnownVerticesOf (m_objects[idx]);
+	_objectVertices.remove (m_objects[idx]);
 	m_objects[idx]->deselect();
 	m_objects[idx]->setDocument (LDDocumentPtr());
 	obj->setDocument (this);
-	addKnownVerticesOf (obj);
+	addKnownVertices (obj);
 	g_win->R()->compileObject (obj);
 	m_objects[idx] = obj;
+	needVertexMerge();
 }
-
-// =============================================================================
-//
-// Close all documents we don't need anymore
-//
-void LDDocument::closeUnused() {}
 
 // =============================================================================
 //
@@ -1318,28 +1246,51 @@ QString LDDocument::getDisplayName()
 //
 void LDDocument::initializeCachedData()
 {
-	if (not m_needsReCache)
-		return;
-
-	m_storedVertices.clear();
-
-	for (LDObjectPtr obj : inlineContents (true, true))
+	if (m_needsReCache)
 	{
-		assert (obj->type() != OBJ_Subfile);
-		LDPolygon* data = obj->getPolygon();
+		_vertices.clear();
 
-		if (data != null)
+		for (LDObjectPtr obj : inlineContents (true, true))
 		{
-			m_polygonData << *data;
-			delete data;
+			assert (obj->type() != OBJ_Subfile);
+			LDPolygon* data = obj->getPolygon();
+
+			if (data != null)
+			{
+				m_polygonData << *data;
+				delete data;
+			}
 		}
 
-		for (int i = 0; i < obj->numVertices(); ++i)
-			m_storedVertices << obj->vertex (i);
+		m_needsReCache = false;
 	}
 
-	removeDuplicates (m_storedVertices);
-	m_needsReCache = false;
+	if (_verticesOutdated)
+	{
+		_objectVertices.clear();
+
+		for (LDObjectPtr obj : inlineContents (true, false))
+			addKnownVertices (obj);
+
+		mergeVertices();
+		_verticesOutdated = false;
+	}
+
+	if (_needVertexMerge)
+		mergeVertices();
+}
+
+// =============================================================================
+//
+void LDDocument::mergeVertices()
+{
+	_vertices.clear();
+
+	for (QVector<Vertex> const& verts : _objectVertices)
+		_vertices << verts;
+
+	removeDuplicates (_vertices);
+	_needVertexMerge = false;
 }
 
 // =============================================================================
@@ -1529,8 +1480,18 @@ QString LDDocument::shortenName (QString a) // [static]
 
 // =============================================================================
 //
-QList<Vertex> LDDocument::inlineVertices()
+QVector<Vertex> const& LDDocument::inlineVertices()
 {
 	initializeCachedData();
-	return m_storedVertices;
+	return _vertices;
+}
+
+void LDDocument::redoVertices()
+{
+	_verticesOutdated = true;
+}
+
+void LDDocument::needVertexMerge()
+{
+	_needVertexMerge = true;
 }

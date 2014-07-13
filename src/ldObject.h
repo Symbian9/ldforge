@@ -120,6 +120,8 @@ public:
 	// Removes this object from selection
 	void						deselect();
 
+	virtual void				getVertices (QVector<Vertex>& verts) const;
+
 	// Does this object have a matrix and position? (see LDMatrixObject)
 	virtual bool				hasMatrix() const = 0;
 
@@ -441,6 +443,7 @@ public:
 	// Inlines this subfile.
 	LDObjectList inlineContents (bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
+	virtual void getVertices (QVector<Vertex>& verts) const override;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS (LDSubfile::InlineFlags)
@@ -565,6 +568,7 @@ class LDVertex : public LDObject
 
 public:
 	Vertex pos;
+	virtual void getVertices (QVector<Vertex>& verts) const override;
 };
 
 using LDVertexPtr = QSharedPointer<LDVertex>;

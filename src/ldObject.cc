@@ -811,6 +811,7 @@ static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
 		{
 			obj->document().toStrongRef()->addToHistory (new EditHistory (idx, before, after));
 			g_win->R()->compileObject (obj);
+			getCurrentDocument()->redoVertices();
 		}
 	}
 	else
@@ -835,9 +836,6 @@ const Vertex& LDObject::vertex (int i) const
 //
 void LDObject::setVertex (int i, const Vertex& vert)
 {
-	if (document() != null)
-		document().toStrongRef()->vertexChanged (m_coords[i], vert);
-
 	changeProperty (self(), &m_coords[i], vert);
 }
 
@@ -846,14 +844,7 @@ void LDObject::setVertex (int i, const Vertex& vert)
 void LDMatrixObject::setPosition (const Vertex& a)
 {
 	LDObjectPtr ref = linkPointer().toStrongRef();
-
-	if (ref->document() != null)
-		ref->document().toStrongRef()->removeKnownVerticesOf (ref);
-
 	changeProperty (ref, &m_position, a);
-
-	if (ref->document() != null)
-		ref->document().toStrongRef()->addKnownVerticesOf (ref);
 }
 
 // =============================================================================
@@ -861,14 +852,7 @@ void LDMatrixObject::setPosition (const Vertex& a)
 void LDMatrixObject::setTransform (const Matrix& val)
 {
 	LDObjectPtr ref = linkPointer().toStrongRef();
-
-	if (ref->document() != null)
-		ref->document().toStrongRef()->removeKnownVerticesOf (ref);
-
 	changeProperty (ref, &m_transform, val);
-
-	if (ref->document() != null)
-		ref->document().toStrongRef()->addKnownVerticesOf (ref);
 }
 
 // =============================================================================
@@ -931,9 +915,6 @@ LDObjectPtr LDObject::createCopy() const
 //
 void LDSubfile::setFileInfo (const LDDocumentPtr& a)
 {
-	if (document() != null)
-		document().toStrongRef()->removeKnownVerticesOf (self());
-
 	m_fileInfo = a;
 
 	// If it's an immediate subfile reference (i.e. this subfile belongs in an
@@ -945,7 +926,20 @@ void LDSubfile::setFileInfo (const LDDocumentPtr& a)
 	{
 		a->initializeCachedData();
 	}
-
-	if (document() != null)
-		document().toStrongRef()->addKnownVerticesOf (self());
 };
+
+void LDObject::getVertices (QVector<Vertex>& verts) const
+{
+	for (int i = 0; i < numVertices(); ++i)
+		verts << vertex (i);
+}
+
+void LDSubfile::getVertices (QVector<Vertex>& verts) const
+{
+	verts << fileInfo()->inlineVertices();
+}
+
+void LDVertex::getVertices (QVector<Vertex>& verts) const
+{
+	verts.append (pos);
+}
