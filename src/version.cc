@@ -53,9 +53,9 @@ const char* fullVersionString()
 	if (g_fullVersionString[0] == '\0')
 	{
 #if BUILD_ID != BUILD_RELEASE && defined (SVN_REVISION_STRING)
-		strcpy (g_fullVersionString, SVN_REVISION_STRING);
+		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, versionString());
 #else
-		sprintf (g_fullVersionString, "v%s", versionString());
+		sprintf (g_fullVersionString, "%s", versionString());
 #endif
 	}
 
