@@ -59,13 +59,13 @@ LDColor edgecolor()
 
 void LDColor::addLDConfigColor (qint32 index, LDColor color)
 {
-	assert (index >= 0 && index < countof (g_LDConfigColors));
+	assert (index >= 0 and index < countof (g_LDConfigColors));
 	g_LDConfigColors[index] = color;
 }
 
 LDColor LDColor::fromIndex (qint32 index)
 {
-	if (index < countof (g_LDConfigColors) && g_LDConfigColors[index] != null)
+	if (index < countof (g_LDConfigColors) and g_LDConfigColors[index] != null)
 		return g_LDConfigColors[index];
 
 	if (index > 0x2000000)

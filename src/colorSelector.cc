@@ -119,7 +119,7 @@ void ColorSelector::drawScene()
 		numtext->setDefaultTextColor ((luma (col) < 80) ? Qt::white : Qt::black);
 		numtext->setPos (x, y);
 
-		if (selection() && i == selection().index())
+		if (selection() and i == selection().index())
 		{
 			auto curspic = m_scene->addPixmap (getIcon ("colorcursor"));
 			curspic->setPos (x, y);
@@ -159,7 +159,7 @@ void ColorSelector::drawColorInfo()
 
 #ifdef TRANSPARENT_DIRECT_COLORS
 	ui->transparentDirectColor->setEnabled (selection().isDirect());
-	ui->transparentDirectColor->setChecked (selection().isDirect() && selection().faceColor().alphaF() < 1.0);
+	ui->transparentDirectColor->setChecked (selection().isDirect() and selection().faceColor().alphaF() < 1.0);
 #else
 	ui->transparentDirectColor->setChecked (false);
 	ui->transparentDirectColor->setEnabled (false);
@@ -174,11 +174,11 @@ void ColorSelector::resizeEvent (QResizeEvent*)
 	// currently selected color. We cannot do this in the constructor because the
 	// height is not set properly there. Though don't do this if we selected a
 	// direct color.
-	if (m_firstResize && selection().index() >= numLDConfigColors())
+	if (m_firstResize and selection().index() >= numLDConfigColors())
 	{
 		int visibleColors = (ui->viewport->height() / g_squareSize) * g_numColumns;
 
-		if (selection() && selection().index() >= visibleColors)
+		if (selection() and selection().index() >= visibleColors)
 		{
 			int y = (selection().index() / g_numColumns) * g_squareSize;
 			ui->viewport->verticalScrollBar()->setValue (y);
@@ -236,7 +236,7 @@ void ColorSelector::chooseDirectColor()
 //
 void ColorSelector::transparentCheckboxClicked()
 {
-	if (selection() == null || not selection().isDirect())
+	if (selection() == null or not selection().isDirect())
 		return;
 
 	selectDirectColor (selection().faceColor());
@@ -248,7 +248,7 @@ bool ColorSelector::selectColor (LDColor& val, LDColor defval, QWidget* parent)
 {
 	ColorSelector dlg (defval, parent);
 
-	if (dlg.exec() && dlg.selection() != null)
+	if (dlg.exec() and dlg.selection() != null)
 	{
 		val = dlg.selection();
 		return true;

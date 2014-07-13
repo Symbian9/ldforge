@@ -89,7 +89,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if ((data.releasedButtons & Qt::MidButton) && (_drawedVerts.size() < 4) && (not data.mouseMoved))
+	if ((data.releasedButtons & Qt::MidButton) and (_drawedVerts.size() < 4) and (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
 		double			minimumDistance = 1024.0;
@@ -141,7 +141,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		return true;
 	}
 
-	if ((data.releasedButtons & Qt::RightButton) && (not _drawedVerts.isEmpty()))
+	if ((data.releasedButtons & Qt::RightButton) and (not _drawedVerts.isEmpty()))
 	{
 		// Remove the last vertex
 		_drawedVerts.removeLast();

@@ -52,7 +52,7 @@ const char* fullVersionString()
 {
 	if (g_fullVersionString[0] == '\0')
 	{
-#if BUILD_ID != BUILD_RELEASE && defined (SVN_REVISION_STRING)
+#if BUILD_ID != BUILD_RELEASE and defined (SVN_REVISION_STRING)
 		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, versionString());
 #else
 		sprintf (g_fullVersionString, "%s", versionString());

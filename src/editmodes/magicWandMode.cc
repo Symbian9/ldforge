@@ -46,7 +46,7 @@ void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boun
 	// of candidates.
 	for (auto it = candidates.begin(); it != candidates.end(); ++it)
 	{
-		if (not eq ((*it)->type(), OBJ_Line, OBJ_CondLine) || (*it)->vertex (0) == (*it)->vertex (1))
+		if (not eq ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
 			continue;
 
 		int matches = 0;
@@ -130,10 +130,10 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 			// If we're doing this on lines, we need exact type match. Surface types (quads and
 			// triangles) can be mixed. Also don't consider self a candidate, and don't consider
 			// objects we have already processed.
-			if ((candidate == obj) ||
-				(candidate->color() != obj->color()) ||
-				(_selection.contains (candidate)) ||
-				(matchesneeded == 1 && (candidate->type() != objtype)) ||
+			if ((candidate == obj) or
+				(candidate->color() != obj->color()) or
+				(_selection.contains (candidate)) or
+				(matchesneeded == 1 and (candidate->type() != objtype)) or
 				((candidate->numVertices() > 2) ^ (matchesneeded == 2)))
 			{
 				throw 0;
@@ -160,7 +160,7 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 			// Check if a boundary gets in between the objects.
 			for (auto boundary : boundaries)
 			{
-				if (eq (matches[0], std::get<0> (boundary), std::get<1> (boundary)) &&
+				if (eq (matches[0], std::get<0> (boundary), std::get<1> (boundary)) and
 					eq (matches[1], std::get<0> (boundary), std::get<1> (boundary)))
 				{
 					throw 0;
@@ -203,7 +203,7 @@ bool MagicWandMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if (data.releasedButtons & Qt::LeftButton && not data.mouseMoved)
+	if (data.releasedButtons & Qt::LeftButton and not data.mouseMoved)
 	{
 		MagicType wandtype = MagicWandMode::Set;
 

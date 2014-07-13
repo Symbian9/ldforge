@@ -64,7 +64,7 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 		if (not _rangepick)
 			_addpick = (data.keymods & Qt::ControlModifier);
 
-		if (not data.mouseMoved || _rangepick)
+		if (not data.mouseMoved or _rangepick)
 		{
 			QRect area;
 			int const mx = data.ev->x();

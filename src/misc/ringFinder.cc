@@ -78,7 +78,7 @@ bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolut
 			Solution sol = currentSolution;
 
 			m_stack++;
-			bool res = findRingsRecursor (r0, r, sol) && findRingsRecursor (r, r1, sol);
+			bool res = findRingsRecursor (r0, r, sol) and findRingsRecursor (r, r1, sol);
 			m_stack--;
 
 			if (res)
@@ -130,12 +130,12 @@ bool RingFinder::findRings (double r0, double r1)
 	// components.
 	double scale = 1.0;
 
-	if (not isZero (scale = r0 - floor (r0)) || not isZero (scale = r1 - floor (r1)))
+	if (not isZero (scale = r0 - floor (r0)) or not isZero (scale = r1 - floor (r1)))
 	{
 		double r0f = r0 / scale;
 		double r1f = r1 / scale;
 
-		if (qFuzzyCompare (floor (r0f), r0f) && qFuzzyCompare (floor (r1f), r1f))
+		if (qFuzzyCompare (floor (r0f), r0f) and qFuzzyCompare (floor (r1f), r1f))
 		{
 			r0 = r0f;
 			r1 = r1f;
@@ -162,7 +162,7 @@ bool RingFinder::findRings (double r0, double r1)
 
 	for (Solution const& sol : m_solutions)
 	{
-		if (m_bestSolution == null || sol.isSuperiorTo (m_bestSolution))
+		if (m_bestSolution == null or sol.isSuperiorTo (m_bestSolution))
 			m_bestSolution = &sol;
 	}
 

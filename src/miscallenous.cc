@@ -150,10 +150,10 @@ void simplify (int& numer, int& denom)
 		{
 			int const prime = g_primes[x];
 
-			if (numer < prime && denom < prime)
+			if (numer < prime and denom < prime)
 				break;
 
-			if ((numer % prime == 0) && (denom % prime == 0))
+			if ((numer % prime == 0) and (denom % prime == 0))
 			{
 				numer /= prime;
 				denom /= prime;
@@ -256,7 +256,7 @@ QString join (QList<StringFormatArg> vals, QString delim)
 //
 void roundToDecimals (double& a, int decimals)
 {
-	assert (decimals >= 0 && decimals < (signed) (sizeof g_e10 / sizeof *g_e10));
+	assert (decimals >= 0 and decimals < (signed) (sizeof g_e10 / sizeof *g_e10));
 	a = round (a * g_e10[decimals]) / g_e10[decimals];
 }
 

@@ -253,7 +253,7 @@ void MainWindow::updateTitle()
 		title += ": ";
 		title += getCurrentDocument()->getDisplayName();
 
-		if (getCurrentDocument()->getObjectCount() > 0 &&
+		if (getCurrentDocument()->getObjectCount() > 0 and
 			getCurrentDocument()->getObject (0)->type() == OBJ_Comment)
 		{
 			// Append title
@@ -410,8 +410,8 @@ void MainWindow::buildObjList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		elif (cfg::colorizeObjectsList && obj->isColored() &&
-			obj->color() != null && obj->color() != maincolor() && obj->color() != edgecolor())
+		elif (cfg::colorizeObjectsList and obj->isColored() and
+			obj->color() != null and obj->color() != maincolor() and obj->color() != edgecolor())
 		{
 			// If the object isn't in the main or edge color, draw this
 			// list entry in said color.
@@ -442,7 +442,7 @@ void MainWindow::scrollToSelection()
 //
 void MainWindow::slot_selectionChanged()
 {
-	if (g_isSelectionLocked == true || getCurrentDocument() == null)
+	if (g_isSelectionLocked == true or getCurrentDocument() == null)
 		return;
 
 	LDObjectList priorSelection = selection();
@@ -575,7 +575,7 @@ LDColor MainWindow::getSelectedColor()
 		if (not obj->isColored())
 			continue; // doesn't use color
 
-		if (result != null && obj->color() != result)
+		if (result != null and obj->color() != result)
 			return null; // No consensus in object color
 
 		if (result == null)
@@ -623,7 +623,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 
 	QMenu* contextMenu = new QMenu;
 
-	if (single && singleObj->type() != OBJ_Empty)
+	if (single and singleObj->type() != OBJ_Empty)
 	{
 		contextMenu->addAction (ui->actionEdit);
 		contextMenu->addSeparator();
@@ -677,7 +677,7 @@ void MainWindow::deleteByColor (LDColor color)
 
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
 	{
-		if (not obj->isColored() || obj->color() != color)
+		if (not obj->isColored() or obj->color() != color)
 			continue;
 
 		objs << obj;
@@ -719,7 +719,7 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 	QString path = doc->fullPath();
 	int64 savesize;
 
-	if (saveAs || path.isEmpty())
+	if (saveAs or path.isEmpty())
 	{
 		QString name = doc->defaultName();
 
@@ -845,7 +845,7 @@ void makeColorComboBox (QComboBox* box)
 
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
 	{
-		if (not obj->isColored() || obj->color() == null)
+		if (not obj->isColored() or obj->color() == null)
 			continue;
 
 		if (counts.find (obj->color()) == counts.end())
@@ -941,7 +941,7 @@ void MainWindow::changeCurrentFile()
 
 	// If we picked the same file we're currently on, we don't need to do
 	// anything.
-	if (f == null || f == getCurrentDocument())
+	if (f == null or f == getCurrentDocument())
 		return;
 
 	LDDocument::setCurrent (f);
@@ -967,7 +967,7 @@ for (LDObjectPtr obj : *f)
 //
 void MainWindow::updateActions()
 {
-	if (getCurrentDocument() != null && getCurrentDocument()->history() != null)
+	if (getCurrentDocument() != null and getCurrentDocument()->history() != null)
 	{
 		History* his = getCurrentDocument()->history();
 		int pos = his->position();

@@ -180,7 +180,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 	{
 		// The color was unknown. Use main color to make the polygon at least
 		// not appear pitch-black.
-		if (poly.num != 2 && poly.num != 5)
+		if (poly.num != 2 and poly.num != 5)
 			qcol = GLRenderer::getMainColor();
 		else
 			qcol = Qt::black;
@@ -280,7 +280,7 @@ void GLCompiler::prepareVBO (int vbonum)
 	{
 		if (it.key() == null)
 			it = m_objectInfo.erase (it);
-		elif (it.key().toStrongRef()->document() == getCurrentDocument() && not it.key().toStrongRef()->isHidden())
+		elif (it.key().toStrongRef()->document() == getCurrentDocument() and not it.key().toStrongRef()->isHidden())
 			vbodata += it->data[vbonum];
 	}
 
@@ -313,7 +313,7 @@ void GLCompiler::compileObject (LDObjectPtr obj)
 {
 //	print ("Compile %1\n", g_objectOrigins[obj]);
 
-	if (obj == null || obj->document() == null || obj->document().toStrongRef()->isImplicit())
+	if (obj == null or obj->document() == null or obj->document().toStrongRef()->isImplicit())
 		return;
 
 	ObjectVBOInfo info;

@@ -154,7 +154,7 @@ void OverlayDialog::slot_help()
 
 void OverlayDialog::slot_dimensionsChanged()
 {
-	bool enable = (ui->width->value() != 0) || (ui->height->value() != 0);
+	bool enable = (ui->width->value() != 0) or (ui->height->value() != 0);
 	ui->buttonBox->button (QDialogButtonBox::Ok)->setEnabled (enable);
 }
 

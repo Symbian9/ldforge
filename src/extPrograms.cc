@@ -120,7 +120,7 @@ static bool checkProgPath (const extprog prog)
 
 	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (g_extProgNames[prog]);
 
-	if (dlg->exec() && not dlg->getPath().isEmpty())
+	if (dlg->exec() and not dlg->getPath().isEmpty())
 	{
 		path = dlg->getPath();
 		return true;
@@ -221,7 +221,7 @@ void writeColorGroup (LDColor color, QString fname)
 
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
 	{
-		if (not obj->isColored() || obj->color() != color)
+		if (not obj->isColored() or obj->color() != color)
 			continue;
 
 		objects << obj;
@@ -364,7 +364,7 @@ void MainWindow::slot_actionYtruder()
 	QString inDATName, outDATName;
 
 	// Make temp files for the input and output files
-	if (not mkTempFile (indat, inDATName) || not mkTempFile (outdat, outDATName))
+	if (not mkTempFile (indat, inDATName) or not mkTempFile (outdat, outDATName))
 		return;
 
 	// Compose the command-line arguments
@@ -408,7 +408,7 @@ void MainWindow::slot_actionRectifier()
 	QString inDATName, outDATName;
 
 	// Make temp files for the input and output files
-	if (not mkTempFile (indat, inDATName) || not mkTempFile (outdat, outDATName))
+	if (not mkTempFile (indat, inDATName) or not mkTempFile (outdat, outDATName))
 		return;
 
 	// Compose arguments
@@ -481,10 +481,10 @@ void MainWindow::slot_actionIntersector()
 	QTemporaryFile indat, cutdat, outdat, outdat2, edgesdat;
 	QString inDATName, cutDATName, outDATName, outDAT2Name, edgesDATName;
 
-	if (not mkTempFile (indat, inDATName) ||
-		not mkTempFile (cutdat, cutDATName) ||
-		not mkTempFile (outdat, outDATName) ||
-		not mkTempFile (outdat2, outDAT2Name) ||
+	if (not mkTempFile (indat, inDATName) or
+		not mkTempFile (cutdat, cutDATName) or
+		not mkTempFile (outdat, outDATName) or
+		not mkTempFile (outdat2, outDAT2Name) or
 		not mkTempFile (edgesdat, edgesDATName))
 	{
 		return;
@@ -522,10 +522,10 @@ void MainWindow::slot_actionIntersector()
 
 	insertOutput (outDATName, false, {inCol});
 
-	if (repeatInverse && runUtilityProcess (Intersector, cfg::intersectorPath, argv_inverse))
+	if (repeatInverse and runUtilityProcess (Intersector, cfg::intersectorPath, argv_inverse))
 		insertOutput (outDAT2Name, false, {cutCol});
 
-	if (ui.cb_edges->isChecked() && checkProgPath (Isecalc) &&
+	if (ui.cb_edges->isChecked() and checkProgPath (Isecalc) and
 		runUtilityProcess (Isecalc, cfg::isecalcPath, join ( {inDATName, cutDATName, edgesDATName})))
 	{
 		insertOutput (edgesDATName, false, {});
@@ -569,8 +569,8 @@ void MainWindow::slot_actionCoverer()
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 
-	if (not mkTempFile (in1dat, in1DATName) ||
-		not mkTempFile (in2dat, in2DATName) ||
+	if (not mkTempFile (in1dat, in1DATName) or
+		not mkTempFile (in2dat, in2DATName) or
 		not mkTempFile (outdat, outDATName))
 	{
 		return;
@@ -635,8 +635,8 @@ void MainWindow::slot_actionIsecalc()
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 
-	if (not mkTempFile (in1dat, in1DATName) ||
-		not mkTempFile (in2dat, in2DATName) ||
+	if (not mkTempFile (in1dat, in1DATName) or
+		not mkTempFile (in2dat, in2DATName) or
 		not mkTempFile (outdat, outDATName))
 	{
 		return;
@@ -674,7 +674,7 @@ void MainWindow::slot_actionEdger2()
 	QTemporaryFile in, out;
 	QString inName, outName;
 
-	if (not mkTempFile (in, inName) || not mkTempFile (out, outName))
+	if (not mkTempFile (in, inName) or not mkTempFile (out, outName))
 		return;
 
 	int unmatched = ui.unmatched->currentIndex();

@@ -360,7 +360,7 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (cfg::drawWireframe && not isPicking())
+	if (cfg::drawWireframe and not isPicking())
 		glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -375,7 +375,7 @@ void GLRenderer::drawGLScene()
 		glOrtho (-m_virtWidth, m_virtWidth, -m_virtHeight, m_virtHeight, -100.0f, 100.0f);
 		glTranslatef (pan (X), pan (Y), 0.0f);
 
-		if (camera() != EFrontCamera && camera() != EBackCamera)
+		if (camera() != EFrontCamera and camera() != EBackCamera)
 		{
 			glRotatef (90.0f, g_FixedCameras[camera()].glrotate[0],
 				g_FixedCameras[camera()].glrotate[1],
@@ -470,9 +470,9 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) && cfg::drawSurfaces == false) ||
-		(surface == VBOSF_Lines && cfg::drawEdgeLines == false) ||
-		(surface == VBOSF_CondLines && cfg::drawConditionalLines == false))
+	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::drawSurfaces == false) or
+		(surface == VBOSF_Lines and cfg::drawEdgeLines == false) or
+		(surface == VBOSF_CondLines and cfg::drawConditionalLines == false))
 	{
 		return;
 	}
@@ -610,7 +610,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	}
 #endif
 
-	if (camera() != EFreeCamera && not isPicking())
+	if (camera() != EFreeCamera and not isPicking())
 	{
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
@@ -648,7 +648,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		for (CameraIcon& info : m_cameraIcons)
 		{
 			// Don't draw the free camera icon when in draw mode
-			if (&info == &m_cameraIcons[EFreeCamera] && not m_editmode->allowFreeCamera())
+			if (&info == &m_cameraIcons[EFreeCamera] and not m_editmode->allowFreeCamera())
 				continue;
 
 			paint.drawPixmap (info.destRect, *info.img, info.srcRect);
@@ -723,7 +723,7 @@ void GLRenderer::clampAngle (double& angle) const
 //
 void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 {
-	const bool wasLeft = (m_lastButtons & Qt::LeftButton) && not (ev->buttons() & Qt::LeftButton);
+	const bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (ev->buttons() & Qt::LeftButton);
 
 	Qt::MouseButtons releasedbuttons = m_lastButtons & ~ev->buttons();
 
@@ -789,14 +789,14 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 				mid = ev->buttons() & Qt::MidButton,
 				shift = ev->modifiers() & Qt::ShiftModifier;
 
-		if (mid || (left && shift))
+		if (mid or (left and shift))
 		{
 			pan (X) += 0.03f * dx * (zoom() / 7.5f);
 			pan (Y) -= 0.03f * dy * (zoom() / 7.5f);
 			m_panning = true;
 			setCameraMoving (true);
 		}
-		elif (left && camera() == EFreeCamera)
+		elif (left and camera() == EFreeCamera)
 		{
 			rot (X) = rot (X) + dy;
 			rot (Y) = rot (Y) + dx;
@@ -872,7 +872,7 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 void GLRenderer::setCamera (const ECamera cam)
 {
 	// The edit mode may forbid the free camera.
-	if (cam == EFreeCamera && not m_editmode->allowFreeCamera())
+	if (cam == EFreeCamera and not m_editmode->allowFreeCamera())
 		return;
 
 	m_camera = cam;
@@ -1003,14 +1003,14 @@ LDObjectPtr GLRenderer::pickOneObject (int mouseX, int mouseY)
 //
 void GLRenderer::setEditMode (EditModeType a)
 {
-	if (m_editmode != null && m_editmode->type() == a)
+	if (m_editmode != null and m_editmode->type() == a)
 		return;
 
 	delete m_editmode;
 	m_editmode = AbstractEditMode::createByType (this, a);
 
 	// If we cannot use the free camera, use the top one instead.
-	if (camera() == EFreeCamera && not m_editmode->allowFreeCamera())
+	if (camera() == EFreeCamera and not m_editmode->allowFreeCamera())
 		setCamera (ETopCamera);
 
 	g_win->updateEditModeActions();
@@ -1285,7 +1285,7 @@ void GLRenderer::zoomToFit()
 {
 	zoom() = 30.0f;
 
-	if (document() == null || m_width == -1 || m_height == -1)
+	if (document() == null or m_width == -1 or m_height == -1)
 		return;
 
 	bool lastfilled = false;
@@ -1304,7 +1304,7 @@ void GLRenderer::zoomToFit()
 
 	while (--runaway)
 	{
-		if (zoom() > 10000.0 || zoom() < 0.0)
+		if (zoom() > 10000.0 or zoom() < 0.0)
 		{
 			// Obviously, there's nothing to draw if we get here.
 			// Default to 30.0f and break out.
@@ -1323,7 +1323,7 @@ void GLRenderer::zoomToFit()
 		// Check the top and bottom rows
 		for (int i = 0; i < w; ++i)
 		{
-			if (imgdata[i] != white || imgdata[((h - 1) * w) + i] != white)
+			if (imgdata[i] != white or imgdata[((h - 1) * w) + i] != white)
 			{
 				filled = true;
 				break;
@@ -1335,7 +1335,7 @@ void GLRenderer::zoomToFit()
 		{
 			for (int i = 0; i < h; ++i)
 			{
-				if (imgdata[i * w] != white || imgdata[(i * w) + w - 1] != white)
+				if (imgdata[i * w] != white or imgdata[(i * w) + w - 1] != white)
 				{
 					filled = true;
 					break;
@@ -1357,7 +1357,7 @@ void GLRenderer::zoomToFit()
 		{
 			// If this run filled the screen and the last one did not, the
 			// last run had ideal zoom - zoom a bit back and we should reach it.
-			if (filled && not lastfilled)
+			if (filled and not lastfilled)
 			{
 				zoomNotch (false);
 				break;
@@ -1365,7 +1365,7 @@ void GLRenderer::zoomToFit()
 
 			// If this run did not fill the screen and the last one did, we've
 			// now reached ideal zoom so we're done here.
-			if (not filled && lastfilled)
+			if (not filled and lastfilled)
 				break;
 
 			inward = not filled;
@@ -1409,7 +1409,7 @@ LDOverlayPtr GLRenderer::findOverlayObject (ECamera cam)
 	{
 		LDOverlayPtr ovlobj = obj.dynamicCast<LDOverlay>();
 
-		if (ovlobj != null && obj.staticCast<LDOverlay>()->camera() == cam)
+		if (ovlobj != null and obj.staticCast<LDOverlay>()->camera() == cam)
 			return ovlobj;
 	}
 
@@ -1430,13 +1430,13 @@ void GLRenderer::initOverlaysFromObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlayPtr ovlobj = findOverlayObject (cam);
 
-		if (ovlobj == null && meta.img != null)
+		if (ovlobj == null and meta.img != null)
 		{
 			delete meta.img;
 			meta.img = null;
 		}
-		elif (ovlobj != null &&
-			(meta.img == null || meta.fname != ovlobj->fileName()) &&
+		elif (ovlobj != null and
+			(meta.img == null or meta.fname != ovlobj->fileName()) and
 			not meta.invalid)
 		{
 			setupOverlay (cam, ovlobj->fileName(), ovlobj->x(),
@@ -1457,19 +1457,19 @@ void GLRenderer::updateOverlayObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlayPtr ovlobj = findOverlayObject (cam);
 
-		if (meta.img == null && ovlobj != null)
+		if (meta.img == null and ovlobj != null)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
 			LDObjectPtr nextobj = ovlobj->next();
 
-			if (nextobj && nextobj->type() == OBJ_Empty)
+			if (nextobj and nextobj->type() == OBJ_Empty)
 				nextobj->destroy();
 
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
 			ovlobj->destroy();
 		}
-		elif (meta.img != null && ovlobj == null)
+		elif (meta.img != null and ovlobj == null)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
@@ -1509,7 +1509,7 @@ void GLRenderer::updateOverlayObjects()
 			}
 		}
 
-		if (meta.img != null && ovlobj != null)
+		if (meta.img != null and ovlobj != null)
 		{
 			ovlobj->setCamera (cam);
 			ovlobj->setFileName (meta.fname);
@@ -1528,14 +1528,14 @@ void GLRenderer::updateOverlayObjects()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not cfg::highlightObjectBelowCursor && objectAtCursor() == null)
+	if (not cfg::highlightObjectBelowCursor and objectAtCursor() == null)
 		return;
 
 	LDObjectWeakPtr newObject;
 	LDObjectWeakPtr oldObject = objectAtCursor();
 	qint32 newIndex;
 
-	if (isCameraMoving() || not cfg::highlightObjectBelowCursor)
+	if (isCameraMoving() or not cfg::highlightObjectBelowCursor)
 	{
 		newIndex = 0;
 	}
@@ -1569,13 +1569,13 @@ void GLRenderer::highlightCursorObject()
 
 void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
 {
-	if (g_win != null && ev->source() == g_win->getPrimitivesTree() && g_win->getPrimitivesTree()->currentItem() != null)
+	if (g_win != null and ev->source() == g_win->getPrimitivesTree() and g_win->getPrimitivesTree()->currentItem() != null)
 		ev->acceptProposedAction();
 }
 
 void GLRenderer::dropEvent (QDropEvent* ev)
 {
-	if (g_win != null && ev->source() == g_win->getPrimitivesTree())
+	if (g_win != null and ev->source() == g_win->getPrimitivesTree())
 	{
 		QString primName = static_cast<SubfileListItem*> (g_win->getPrimitivesTree()->currentItem())->primitive()->name;
 		LDSubfilePtr ref = spawn<LDSubfile>();

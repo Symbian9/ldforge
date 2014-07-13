@@ -306,12 +306,12 @@ void PrimitiveCategory::loadCategories()
 		if (line.endsWith ("\n"))
 			line.chop (1);
 
-		if (line.length() == 0 || line[0] == '#')
+		if (line.length() == 0 or line[0] == '#')
 			continue;
 
 		if ((colon = line.indexOf (":")) == -1)
 		{
-			if (cat && cat->isValidToInclude())
+			if (cat and cat->isValidToInclude())
 				g_PrimitiveCategories << cat;
 
 			cat = new PrimitiveCategory (line);
@@ -475,7 +475,7 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 				objs << quad;
 
-				if (type == Cylinder || type == Cone)
+				if (type == Cylinder or type == Cone)
 					condLineSegs << i;
 			} break;
 
@@ -510,7 +510,7 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 	// If this is not a full circle, we need a conditional line at the other
 	// end, too.
-	if (segs < divs && condLineSegs.size() != 0)
+	if (segs < divs and condLineSegs.size() != 0)
 		condLineSegs << segs;
 
 	for (int i : condLineSegs)
@@ -577,7 +577,7 @@ QString radialFileName (PrimitiveType type, int segs, int divs, int num)
 	QString prefix = (divs == g_lores) ? "" : format ("%1/", divs);
 	QString frac = format ("%1-%2", numer, denom);
 	QString root = g_radialNameRoots[type];
-	QString numstr = (type == Ring || type == Cone) ? format ("%1", num) : "";
+	QString numstr = (type == Ring or type == Cone) ? format ("%1", num) : "";
 
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
@@ -601,7 +601,7 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 	if (frac.indexOf (".") == -1)
 		frac += ".0";
 
-	if (type == Ring || type == Cone)
+	if (type == Ring or type == Cone)
 	{
 		QString spacing =
 			(num < 10) ? "  " :
@@ -682,7 +682,7 @@ void PrimitivePrompt::hiResToggled (bool on)
 
 	// If the current value is 16 and we switch to hi-res, default the
 	// spinbox to 48.
-	if (on && ui->sb_segs->value() == g_lores)
+	if (on and ui->sb_segs->value() == g_lores)
 		ui->sb_segs->setValue (g_hires);
 }
 

@@ -33,7 +33,7 @@ History::History() :
 //
 void History::undo()
 {
-	if (m_changesets.isEmpty() || position() == -1)
+	if (m_changesets.isEmpty() or position() == -1)
 		return;
 
 	// Don't take the changes done here as actual edits to the document

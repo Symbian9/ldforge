@@ -397,7 +397,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 		ui->quickColorList->addItem (item);
 		quickColorItems << item;
 
-		if (sel && &entry == sel)
+		if (sel and &entry == sel)
 		{
 			ui->quickColorList->setCurrentItem (item);
 			ui->quickColorList->scrollToItem (item);
@@ -477,7 +477,7 @@ void ConfigDialog::slot_moveColor()
 	int idx = getItemRow (item, quickColorItems);
 	int dest = up ? (idx - 1) : (idx + 1);
 
-	if (dest < 0 || dest >= quickColorItems.size())
+	if (dest < 0 or dest >= quickColorItems.size())
 		return; // destination out of bounds
 
 	LDQuickColor tmp = quickColors[dest];

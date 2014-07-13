@@ -56,7 +56,7 @@ void LDConfigParser::parseLDConfig()
 	{
 		QString line = QString::fromUtf8 (fp->readLine());
 
-		if (line.isEmpty() || line[0] != '0')
+		if (line.isEmpty() or line[0] != '0')
 			continue; // empty or illogical
 
 		line.remove ('\r');
@@ -69,8 +69,8 @@ void LDConfigParser::parseLDConfig()
 		QString name, facename, edgename, valuestr;
 
 		// Check 0 !COLOUR, parse the name
-		if (not pars.tokenCompare (0, "0") ||
-			not pars.tokenCompare (1, "!COLOUR") ||
+		if (not pars.tokenCompare (0, "0") or
+			not pars.tokenCompare (1, "!COLOUR") or
 			not pars.getToken (name, 2))
 		{
 			continue;
@@ -87,18 +87,18 @@ void LDConfigParser::parseLDConfig()
 		bool ok;
 		code = valuestr.toShort (&ok);
 
-		if (not ok || code < 0 || code >= 512)
+		if (not ok or code < 0 or code >= 512)
 			continue;
 
 		// VALUE and EDGE tags
-		if (not parseLDConfigTag (pars, "VALUE", facename) || not parseLDConfigTag (pars, "EDGE", edgename))
+		if (not parseLDConfigTag (pars, "VALUE", facename) or not parseLDConfigTag (pars, "EDGE", edgename))
 			continue;
 
 		// Ensure that our colors are correct
 		QColor faceColor (facename),
 			edgeColor (edgename);
 
-		if (not faceColor.isValid() || not edgeColor.isValid())
+		if (not faceColor.isValid() or not edgeColor.isValid())
 			continue;
 
 		// Parse alpha if given.

@@ -461,7 +461,7 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 		const long idx = obj->lineNumber(),
 				   target = idx + (up ? -1 : 1);
 
-		if ((up && idx == 0) || (not up && idx == (long) file->objects().size() - 1l))
+		if ((up and idx == 0) or (not up and idx == (long) file->objects().size() - 1l))
 		{
 			// One of the objects hit the extrema. If this happens, this should be the first
 			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
@@ -517,7 +517,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 		QString noun = format ("%1%2", typeName (objType), plural (count));
 
 		// Plural of "vertex" is "vertices", correct that
-		if (objType == OBJ_Vertex && count != 1)
+		if (objType == OBJ_Vertex and count != 1)
 			noun = "vertices";
 
 		text += format ("%1 %2", count, noun);
@@ -573,7 +573,7 @@ bool LDObject::previousIsInvertnext (LDBFCPtr& ptr)
 {
 	LDObjectPtr prev (previous());
 
-	if (prev != null && prev->type() == OBJ_BFC && prev.staticCast<LDBFC>()->statement() == LDBFC::InvertNext)
+	if (prev != null and prev->type() == OBJ_BFC and prev.staticCast<LDBFC>()->statement() == LDBFC::InvertNext)
 	{
 		ptr = prev.staticCast<LDBFC>();
 		return true;
@@ -675,13 +675,13 @@ void LDSubfile::invert()
 		{
 			Vertex const& vrt = obj->vertex (i);
 
-			if (axisSet & (1 << X) && vrt.x() != 0.0)
+			if (axisSet & (1 << X) and vrt.x() != 0.0)
 				axisSet &= ~(1 << X);
 
-			if (axisSet & (1 << Y) && vrt.y() != 0.0)
+			if (axisSet & (1 << Y) and vrt.y() != 0.0)
 				axisSet &= ~(1 << Y);
 
-			if (axisSet & (1 << Z) && vrt.z() != 0.0)
+			if (axisSet & (1 << Z) and vrt.z() != 0.0)
 				axisSet &= ~(1 << Z);
 		}
 
@@ -715,7 +715,7 @@ void LDSubfile::invert()
 	{
 		LDBFCPtr bfc = previous().dynamicCast<LDBFC>();
 
-		if (not bfc.isNull() && bfc->statement() == LDBFC::InvertNext)
+		if (not bfc.isNull() and bfc->statement() == LDBFC::InvertNext)
 		{
 			// This is prefixed with an invertnext, thus remove it.
 			bfc->destroy();
@@ -801,7 +801,7 @@ static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
 	if (*ptr == val)
 		return;
 
-	if (obj->document() != null && (idx = obj->lineNumber()) != -1)
+	if (obj->document() != null and (idx = obj->lineNumber()) != -1)
 	{
 		QString before = obj->asText();
 		*ptr = val;
@@ -920,8 +920,8 @@ void LDSubfile::setFileInfo (const LDDocumentPtr& a)
 	// If it's an immediate subfile reference (i.e. this subfile belongs in an
 	// explicit file), we need to pre-compile the GL polygons for the document
 	// if they don't exist already.
-	if (a != null &&
-		a->isImplicit() == false &&
+	if (a != null and
+		a->isImplicit() == false and
 		a->polygonData().isEmpty())
 	{
 		a->initializeCachedData();

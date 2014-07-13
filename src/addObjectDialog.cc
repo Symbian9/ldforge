@@ -132,7 +132,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 		if (obj != null)
 			_color = obj->color();
 		else
-			_color = (type == OBJ_CondLine || type == OBJ_Line) ? edgecolor() : maincolor();
+			_color = (type == OBJ_CondLine or type == OBJ_Line) ? edgecolor() : maincolor();
 
 		pb_color = new QPushButton;
 		setButtonBackground (pb_color, _color);
@@ -291,7 +291,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 	setlocale (LC_ALL, "C");
 
 	// FIXME: Redirect to Edit Raw
-	if (obj && obj->type() == OBJ_Error)
+	if (obj and obj->type() == OBJ_Error)
 		return;
 
 	if (type == OBJ_Empty)
@@ -301,7 +301,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 	Matrix transform = g_identity;
 	AddObjectDialog dlg (type, obj);
 
-	assert (obj == null || obj->type() == type);
+	assert (obj == null or obj->type() == type);
 
 	if (dlg.exec() == QDialog::Rejected)
 		return;

@@ -42,7 +42,7 @@ void PartDownloader::staticBegin()
 {
 	QString path = getDownloadPath();
 
-	if (path.isEmpty() || not QDir (path).exists())
+	if (path.isEmpty() or not QDir (path).exists())
 	{
 		critical (PartDownloader::tr ("You need to specify a valid path for "
 			"downloaded files in the configuration to download paths."));
@@ -133,7 +133,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 		// typo in the .dat extension.
 		const int dotpos = dest.lastIndexOf (".");
 
-		if (dotpos != -1 && dotpos >= dest.length() - 4)
+		if ((dotpos != -1) and (dotpos >= dest.length() - 4))
 			dest.chop (dest.length() - dotpos);
 
 		dest += ".dat";
@@ -175,7 +175,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 		dest.prepend ("parts/s/");
 	elif (QRegExp (partRegex).exactMatch (dest))
 		dest.prepend ("parts/");
-	elif (not dest.startsWith ("parts/") && not dest.startsWith ("p/"))
+	elif (not dest.startsWith ("parts/") and not dest.startsWith ("p/"))
 		dest.prepend ("p/");
 }
 
@@ -289,7 +289,7 @@ void PartDownloader::checkIfFinished()
 		g_win->R()->resetAngles();
 	}
 
-	if (cfg::autoCloseDownloadDialog && not failed)
+	if (cfg::autoCloseDownloadDialog and not failed)
 	{
 		// Close automatically if desired.
 		accept();
@@ -419,7 +419,7 @@ void PartDownloadRequest::downloadFinished()
 {
 	if (networkReply()->error() != QNetworkReply::NoError)
 	{
-		if (isPrimary() && not prompt()->isAborted())
+		if (isPrimary() and not prompt()->isAborted())
 			critical (networkReply()->errorString());
 
 		setState (DLRQ_Failed);
@@ -460,7 +460,7 @@ void PartDownloadRequest::downloadFinished()
 	{
 		LDErrorPtr err = obj.dynamicCast<LDError>();
 
-		if (err == null || err->fileReferenced().isEmpty())
+		if ((err == null) or (err->fileReferenced().isEmpty()))
 			continue;
 
 		QString dest = err->fileReferenced();

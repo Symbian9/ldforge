@@ -192,7 +192,7 @@ void LDDocument::setImplicit (bool const& a)
 
 				LDSubfilePtr ref = obj.toStrongRef().dynamicCast<LDSubfile>();
 
-				if (ref != null && ref->fileInfo() == self())
+				if (ref != null and ref->fileInfo() == self())
 					count++;
 			}
 		}
@@ -202,7 +202,7 @@ void LDDocument::setImplicit (bool const& a)
 
 		// If the current document just became implicit (e.g. it was 'closed'),
 		// we need to get a new current document.
-		if (current() == self() && isImplicit())
+		if (current() == self() and isImplicit())
 		{
 			if (explicitDocuments().isEmpty())
 				newFile();
@@ -225,7 +225,7 @@ LDDocumentPtr findDocument (QString name)
 {
 	for (LDDocumentWeakPtr file : g_allDocuments)
 	{
-		if (file != null && file.toStrongRef()->name() == name)
+		if (file != null and file.toStrongRef()->name() == name)
 			return file.toStrongRef();
 	}
 
@@ -295,7 +295,7 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 
 			for (QString s : g_specialSubdirectories)
 			{
-				if ((proptop == s && reltop != s) || (reltop == s && proptop != s))
+				if ((proptop == s and reltop != s) or (reltop == s and proptop != s))
 				{
 					bogus = true;
 					break;
@@ -408,14 +408,14 @@ void LDFileLoader::work (int i)
 	// Parse up to 300 lines per iteration
 	int max = i + 300;
 
-	for (; i < max && i < (int) lines().size(); ++i)
+	for (; i < max and i < (int) lines().size(); ++i)
 	{
 		QString line = lines()[i];
 
 		// Trim the trailing newline
 		QChar c;
 
-		while (line.endsWith ("\n") || line.endsWith ("\r"))
+		while (line.endsWith ("\n") or line.endsWith ("\r"))
 			line.chop (1);
 
 		LDObjectPtr obj = parseLine (line);
@@ -699,7 +699,7 @@ void openMainFile (QString path)
 
 	// We cannot open this file if the document this would replace is not
 	// safe to close.
-	if (documentToReplace != null && not documentToReplace->isSafeToClose())
+	if (documentToReplace != null and not documentToReplace->isSafeToClose())
 		return;
 
 	g_loadingMainFile = true;
@@ -755,7 +755,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	// If the second object in the list holds the file name, update that now.
 	LDObjectPtr nameObject = getObject (1);
 
-	if (nameObject != null && nameObject->type() == OBJ_Comment)
+	if (nameObject != null and nameObject->type() == OBJ_Comment)
 	{
 		LDCommentPtr nameComment = nameObject.staticCast<LDComment>();
 
@@ -838,7 +838,7 @@ static void checkTokenNumbers (const QStringList& tokens, int min, int max)
 				tokens[i].toDouble (&ok);
 
 				// Also check scientific notation, e.g. 7.99361e-15
-				if (not ok && not scient.exactMatch (tokens[i]))
+				if (not ok and not scient.exactMatch (tokens[i]))
 				{
 					throw QString (format ("Token #%1 was `%2`, expected a number (matched length: %3)",
 						(i + 1), tokens[i], scient.matchedLength()));
@@ -887,7 +887,7 @@ LDObjectPtr parseLine (QString line)
 			return spawn<LDEmpty>();
 		}
 
-		if (tokens[0].length() != 1 || not tokens[0][0].isDigit())
+		if (tokens[0].length() != 1 or not tokens[0][0].isDigit())
 			throw QString ("Illogical line code");
 
 		int num = tokens[0][0].digitValue();
@@ -901,7 +901,7 @@ LDObjectPtr parseLine (QString line)
 				QString commentTextSimplified (commentText.simplified());
 
 				// Handle BFC statements
-				if (tokens.size() > 2 && tokens[1] == "BFC")
+				if (tokens.size() > 2 and tokens[1] == "BFC")
 				{
 					for (int i = 0; i < LDBFC::NumStatements; ++i)
 						if (commentTextSimplified == format ("BFC %1", LDBFC::k_statementStrings [i]))
@@ -918,7 +918,7 @@ LDObjectPtr parseLine (QString line)
 						return spawn<LDBFC> (LDBFC::NoClip);
 				}
 
-				if (tokens.size() > 2 && tokens[1] == "!LDFORGE")
+				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
 				{
 					// Handle LDForge-specific types, they're embedded into comments too
 					if (tokens[2] == "VERTEX")
@@ -1163,7 +1163,7 @@ void LDDocument::forgetObject (LDObjectPtr obj)
 	obj->deselect();
 	assert (m_objects[idx] == obj);
 
-	if (not isImplicit() && not (flags() & DOCF_IsBeingDestroyed))
+	if (not isImplicit() and not (flags() & DOCF_IsBeingDestroyed))
 	{
 		history()->add (new DelHistory (idx, obj));
 		_objectVertices.remove (obj);
@@ -1190,7 +1190,7 @@ bool safeToCloseAll()
 //
 void LDDocument::setObject (int idx, LDObjectPtr obj)
 {
-	assert (idx >= 0 && idx < m_objects.size());
+	assert (idx >= 0 and idx < m_objects.size());
 
 	// Mark this change to history
 	if (not m_history->isIgnoring())
@@ -1231,7 +1231,7 @@ int LDDocument::getObjectCount() const
 //
 bool LDDocument::hasUnsavedChanges() const
 {
-	return not isImplicit() && history()->position() != savePosition();
+	return not isImplicit() and history()->position() != savePosition();
 }
 
 // =============================================================================
@@ -1313,14 +1313,14 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (cfg::useLogoStuds && renderinline)
+	if (cfg::useLogoStuds and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();
 
-		if (name() == "stud.dat" && g_logoedStud != null)
+		if (name() == "stud.dat" and g_logoedStud != null)
 			return g_logoedStud->inlineContents (deep, renderinline);
-		elif (name() == "stud2.dat" && g_logoedStud2 != null)
+		elif (name() == "stud2.dat" and g_logoedStud2 != null)
 			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 
@@ -1334,7 +1334,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
-		if (deep == true && obj->type() == OBJ_Subfile)
+		if (deep == true and obj->type() == OBJ_Subfile)
 		{
 			for (LDObjectPtr otherobj : obj.staticCast<LDSubfile>()->inlineContents (deep, renderinline))
 				objs << otherobj;
@@ -1363,12 +1363,12 @@ void LDDocument::setCurrent (LDDocumentPtr f)
 {
 	// Implicit files were loaded for caching purposes and must never be set
 	// current.
-	if (f != null && f->isImplicit())
+	if (f != null and f->isImplicit())
 		return;
 
 	g_currentDocument = f;
 
-	if (g_win && f)
+	if (g_win and f)
 	{
 		// A ton of stuff needs to be updated
 		g_win->updateDocumentListItem (f);
@@ -1393,9 +1393,9 @@ int LDDocument::countExplicitFiles()
 // =============================================================================
 void LDDocument::closeInitialFile()
 {
-	if (g_explicitDocuments.size() == 2 &&
-		g_explicitDocuments[0]->name().isEmpty() &&
-		not g_explicitDocuments[1]->name().isEmpty() &&
+	if (g_explicitDocuments.size() == 2 and
+		g_explicitDocuments[0]->name().isEmpty() and
+		not g_explicitDocuments[1]->name().isEmpty() and
 		not g_explicitDocuments[0]->hasUnsavedChanges())
 	{
 		g_explicitDocuments[0]->dismiss();
@@ -1406,7 +1406,7 @@ void LDDocument::closeInitialFile()
 //
 void loadLogoedStuds()
 {
-	if (g_logoedStud && g_logoedStud2)
+	if (g_logoedStud and g_logoedStud2)
 		return;
 
 	g_logoedStud = openDocument ("stud-logo.dat", true, true);
@@ -1464,7 +1464,7 @@ void LDDocument::swapObjects (LDObjectPtr one, LDObjectPtr other)
 {
 	int a = m_objects.indexOf (one);
 	int b = m_objects.indexOf (other);
-	assert (a != b && a != -1 && b != -1);
+	assert (a != b and a != -1 and b != -1);
 	m_objects[b] = one;
 	m_objects[a] = other;
 	addToHistory (new SwapHistory (one->id(), other->id()));

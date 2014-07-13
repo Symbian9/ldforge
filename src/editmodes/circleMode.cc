@@ -61,7 +61,7 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 	{
 		if (transform[i] == 2)
 			transform[i] = scale;
-		elif (transform[i] == 1 && renderer()->camera() >= 3)
+		elif (transform[i] == 1 and renderer()->camera() >= 3)
 			transform[i] = -1;
 	}
 
@@ -88,7 +88,7 @@ void CircleMode::buildCircle()
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
-	elif (dist0 == 0 || dist1 == 0)
+	elif (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
 		refFile = getDocument ("4-4disc.dat");
@@ -159,7 +159,7 @@ void CircleMode::buildCircle()
 		}
 	}
 
-	if (circleOrDisc && refFile != null)
+	if (circleOrDisc and refFile != null)
 	{
 		LDSubfilePtr ref = spawn<LDSubfile>();
 		ref->setFileInfo (refFile);

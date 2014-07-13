@@ -105,7 +105,7 @@ void MessageManager::tick()
 		changed |= lineChanged;
 	}
 
-	if (changed && renderer())
+	if (changed and renderer())
 		renderer()->update();
 }
 

@@ -354,7 +354,7 @@ void MainWindow::slot_actionSelectByType()
 			continue;
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
-		if (type == OBJ_Subfile && not subfilenames.contains (obj.staticCast<LDSubfile>()->fileInfo()->name()))
+		if (type == OBJ_Subfile and not subfilenames.contains (obj.staticCast<LDSubfile>()->fileInfo()->name()))
 			continue;
 
 		obj->select();
@@ -511,7 +511,7 @@ void MainWindow::slot_actionScreenshot()
 	QString fname = QFileDialog::getSaveFileName (g_win, "Save Screencap", defaultname,
 				"PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;All Files (*.*)");
 
-	if (not fname.isEmpty() && not img.save (fname))
+	if (not fname.isEmpty() and not img.save (fname))
 		critical (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
 
 	delete[] imgdata;
@@ -719,7 +719,7 @@ void MainWindow::slot_actionJumpTo()
 	int idx = QInputDialog::getInt (null, "Go to line", "Go to line:", defval,
 		1, getCurrentDocument()->getObjectCount(), 1, &ok);
 
-	if (not ok || (obj = getCurrentDocument()->getObject (idx - 1)) == null)
+	if (not ok or (obj = getCurrentDocument()->getObject (idx - 1)) == null)
 		return;
 
 	getCurrentDocument()->clearSelection();
@@ -781,7 +781,7 @@ void MainWindow::slot_actionSubfileSelection()
 		QString text = format (tr ("The directory <b>%1</b> is suggested for "
 			"subfiles. This directory does not exist, create it?"), desiredPath);
 
-		if (QDir (desiredPath).exists() || confirm (title, text))
+		if (QDir (desiredPath).exists() or confirm (title, text))
 		{
 			subdirname = desiredPath;
 			QDir().mkpath (subdirname);
@@ -819,7 +819,7 @@ void MainWindow::slot_actionSubfileSelection()
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + basename (parentpath) + "s" + digits + ".dat";
-		} while (findDocument ("s\\" + basename (fullsubname)) != null || QFile (fullsubname).exists());
+		} while (findDocument ("s\\" + basename (fullsubname)) != null or QFile (fullsubname).exists());
 	}
 
 	// Determine the BFC winding type used in the main document - it is to
@@ -831,7 +831,7 @@ void MainWindow::slot_actionSubfileSelection()
 
 		LDBFC::Statement a = obj.staticCast<LDBFC>()->statement();
 
-		if (a == LDBFC::CertifyCCW || a == LDBFC::CertifyCW || a == LDBFC::NoCertify)
+		if (a == LDBFC::CertifyCCW or a == LDBFC::CertifyCW or a == LDBFC::NoCertify)
 		{
 			bfctype = a;
 			break;
@@ -914,7 +914,7 @@ void MainWindow::slot_actionOpenSubfiles()
 	{
 		LDSubfilePtr ref = obj.dynamicCast<LDSubfile>();
 
-		if (ref == null || not ref->fileInfo()->isImplicit())
+		if (ref == null or not ref->fileInfo()->isImplicit())
 			continue;
 
 		ref->fileInfo()->setImplicit (false);

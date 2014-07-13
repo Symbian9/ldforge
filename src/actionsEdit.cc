@@ -127,7 +127,7 @@ static void doInline (bool deep)
 		// inlined contents.
 		long idx = obj->lineNumber();
 
-		if (idx == -1 || obj->type() != OBJ_Subfile)
+		if (idx == -1 or obj->type() != OBJ_Subfile)
 			continue;
 
 		LDObjectList objs = obj.staticCast<LDSubfile>()->inlineContents (deep, false);
@@ -258,7 +258,7 @@ void MainWindow::slot_actionBorders()
 	{
 		const LDObjectType type = obj->type();
 
-		if (type != OBJ_Quad && type != OBJ_Triangle)
+		if (type != OBJ_Quad and type != OBJ_Triangle)
 			continue;
 
 		LDLinePtr lines[4];
@@ -605,8 +605,8 @@ void MainWindow::slot_actionReplaceCoords()
 
 			v.apply ([&](Axis ax, double& coord)
 			{
-				if (not sel.contains (ax) ||
-					(not any && coord != search))
+				if (not sel.contains (ax) or
+					(not any and coord != search))
 				{
 					return;
 				}
@@ -688,7 +688,7 @@ static bool isColorUsed (LDColor color)
 {
 	for (LDObjectPtr obj : getCurrentDocument()->objects())
 	{
-		if (obj->isColored() && obj->color() == color)
+		if (obj->isColored() and obj->color() == color)
 			return true;
 	}
 
@@ -702,7 +702,7 @@ void MainWindow::slot_actionAutocolor()
 	int colnum = 0;
 	LDColor color;
 
-	for (colnum = 0; colnum < numLDConfigColors() && ((color = LDColor::fromIndex (colnum)) == null || isColorUsed (color)); colnum++)
+	for (colnum = 0; colnum < numLDConfigColors() and ((color = LDColor::fromIndex (colnum)) == null or isColorUsed (color)); colnum++)
 		;
 
 	if (colnum >= numLDConfigColors())
@@ -751,15 +751,15 @@ void MainWindow::slot_actionAddHistoryLine()
 
 	// Find a spot to place the new comment
 	for (obj = getCurrentDocument()->getObject (0);
-		obj != null && obj->next() != null && not obj->next()->isScemantic();
+		obj != null and obj->next() != null and not obj->next()->isScemantic();
 		obj = obj->next())
 	{
 		LDCommentPtr comm = obj.dynamicCast<LDComment>();
 
-		if (comm != null && comm->text().startsWith ("!HISTORY "))
+		if (comm != null and comm->text().startsWith ("!HISTORY "))
 			ishistory = true;
 
-		if (prevIsHistory && not ishistory)
+		if (prevIsHistory and not ishistory)
 		{
 			// Last line was history, this isn't, thus insert the new history
 			// line here.
@@ -774,7 +774,7 @@ void MainWindow::slot_actionAddHistoryLine()
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
-	if (obj && obj->next() && obj->next()->isScemantic())
+	if (obj and obj->next() and obj->next()->isScemantic())
 		getCurrentDocument()->insertObj (idx, LDEmptyPtr (spawn<LDEmpty>()));
 
 	buildObjList();
@@ -794,7 +794,7 @@ void MainWindow::slot_actionSplitLines()
 
 	for (LDObjectPtr obj : selection())
 	{
-		if (obj->type() != OBJ_Line && obj->type() != OBJ_CondLine)
+		if (obj->type() != OBJ_Line and obj->type() != OBJ_CondLine)
 			continue;
 
 		QVector<LDObjectPtr> newsegs;
