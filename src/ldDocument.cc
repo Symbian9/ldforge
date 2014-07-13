@@ -184,10 +184,15 @@ void LDDocument::setImplicit (bool const& a)
 			g_explicitDocuments.removeOne (self().toStrongRef());
 			print ("Closed %1", name());
 			int count = 0;
-			for (LDObjectPtr obj : g_allObjects)
+
+			for (LDObjectWeakPtr obj : g_allObjects)
 			{
-				LDSubfilePtr ref = obj.dynamicCast<LDSubfile>();
-				if (ref && ref->fileInfo() == self())
+				if (obj == null)
+					continue;
+
+				LDSubfilePtr ref = obj.toStrongRef().dynamicCast<LDSubfile>();
+
+				if (ref != null && ref->fileInfo() == self())
 					count++;
 			}
 		}
@@ -218,10 +223,10 @@ QList<LDDocumentPtr> const& LDDocument::explicitDocuments()
 //
 LDDocumentPtr findDocument (QString name)
 {
-	for (LDDocumentPtr file : g_allDocuments)
+	for (LDDocumentWeakPtr file : g_allDocuments)
 	{
-		if (file->name() == name)
-			return file;
+		if (file != null && file.toStrongRef()->name() == name)
+			return file.toStrongRef();
 	}
 
 	return LDDocumentPtr();
@@ -273,12 +278,12 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 	// in the immediate vicinity of a current model to override stock LDraw stuff.
 	QString reltop = basename (dirname (relpath));
 
-	for (LDDocumentPtr doc : g_allDocuments)
+	for (LDDocumentWeakPtr doc : g_allDocuments)
 	{
-		if (doc->fullPath().isEmpty())
+		if (doc == null)
 			continue;
 
-		QString partpath = format ("%1/%2", dirname (doc->fullPath()), relpath);
+		QString partpath = format ("%1/%2", dirname (doc.toStrongRef()->fullPath()), relpath);
 		QFile f (partpath);
 
 		if (f.exists())
