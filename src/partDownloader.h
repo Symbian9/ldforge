@@ -71,7 +71,7 @@ public:
 
 	void			downloadFile (QString dest, QString url, bool primary);
 	QPushButton*	getButton (Button i);
-	QString			getURL() const;
+	QString			getURL();
 	Source			getSource() const;
 	void			modifyDestination (QString& dest) const;
 

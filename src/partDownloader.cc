@@ -95,7 +95,7 @@ PartDownloader::~PartDownloader()
 
 // =============================================================================
 //
-QString PartDownloader::getURL() const
+QString PartDownloader::getURL()
 {
 	const Source src = getSource();
 	QString dest;
@@ -105,6 +105,7 @@ QString PartDownloader::getURL() const
 		case PartsTracker:
 			dest = interface()->fname->text();
 			modifyDestination (dest);
+			interface()->fname->setText (dest);
 			return g_unofficialLibraryURL + dest;
 
 		case CustomURL:
