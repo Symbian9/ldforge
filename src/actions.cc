@@ -600,6 +600,13 @@ void MainWindow::slot_actionModeDraw()
 
 // =============================================================================
 //
+void MainWindow::slot_actionModeRectangle()
+{
+	R()->setEditMode (EditModeType::Rectangle);
+}
+
+// =============================================================================
+//
 void MainWindow::slot_actionModeCircle()
 {
 	R()->setEditMode (EditModeType::Circle);

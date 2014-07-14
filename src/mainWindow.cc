@@ -694,6 +694,7 @@ void MainWindow::updateEditModeActions()
 	const EditModeType mode = R()->currentEditModeType();
 	ui->actionModeSelect->setChecked (mode == EditModeType::Select);
 	ui->actionModeDraw->setChecked (mode == EditModeType::Draw);
+	ui->actionModeRectangle->setChecked (mode == EditModeType::Rectangle);
 	ui->actionModeCircle->setChecked (mode == EditModeType::Circle);
 	ui->actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
 }

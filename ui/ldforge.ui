@@ -48,7 +48,7 @@
            <x>0</x>
            <y>0</y>
            <width>233</width>
-           <height>418</height>
+           <height>426</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>95</height>
+           <width>99</width>
+           <height>99</height>
           </rect>
          </property>
          <attribute name="label">
@@ -112,7 +112,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>30</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -450,6 +450,7 @@
    </attribute>
    <addaction name="actionModeSelect"/>
    <addaction name="actionModeDraw"/>
+   <addaction name="actionModeRectangle"/>
    <addaction name="actionModeCircle"/>
    <addaction name="actionModeMagicWand"/>
   </widget>
@@ -1478,7 +1479,7 @@
     <string>Circle Mode</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+3</string>
+    <string>Ctrl+4</string>
    </property>
   </action>
   <action name="actionVisibilityHide">
@@ -1598,7 +1599,22 @@
     <string>Magic wand</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+4</string>
+    <string>Ctrl+5</string>
+   </property>
+  </action>
+  <action name="actionModeRectangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/mode-rectangle.png</normaloff>:/icons/mode-rectangle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rectangle Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
    </property>
   </action>
  </widget>

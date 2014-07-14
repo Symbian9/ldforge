@@ -27,6 +27,7 @@ enum class EditModeType
 {
 	Select,
 	Draw,
+	Rectangle,
 	Circle,
 	MagicWand,
 };
@@ -68,7 +69,6 @@ class AbstractDrawMode : public AbstractEditMode
 
 protected:
 	QList<Vertex>			_drawedVerts;
-	Vertex					_rectverts[4];
 	QBrush					_polybrush;
 
 public:
@@ -81,7 +81,8 @@ public:
 
 	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
 	void addDrawnVertex (const Vertex& pos);
-	void finishDraw (LDObjectList& objs);
+	void finishDraw (const LDObjectList& objs);
+	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withangles) const;
 
 	virtual bool preAddVertex (Vertex const&)
 	{

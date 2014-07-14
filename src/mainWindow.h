@@ -218,6 +218,7 @@ public slots:
 	void slot_actionSelectByType();
 	void slot_actionModeDraw();
 	void slot_actionModeSelect();
+	void slot_actionModeRectangle();
 	void slot_actionModeCircle();
 	void slot_actionModeMagicWand();
 	void slot_actionSetDrawDepth();

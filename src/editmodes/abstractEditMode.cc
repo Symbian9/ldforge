@@ -21,10 +21,14 @@
 #include "abstractEditMode.h"
 #include "selectMode.h"
 #include "drawMode.h"
+#include "rectangleMode.h"
 #include "circleMode.h"
 #include "magicWandMode.h"
 #include "../mainWindow.h"
 #include "../glRenderer.h"
+
+CFGENTRY (Bool, drawLineLengths, true)
+CFGENTRY (Bool, drawAngles, false)
 
 AbstractEditMode::AbstractEditMode (GLRenderer* renderer) :
 	_renderer (renderer) {}
@@ -37,6 +41,7 @@ AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditMode
 	{
 		case EditModeType::Select: return new SelectMode (renderer);
 		case EditModeType::Draw: return new DrawMode (renderer);
+		case EditModeType::Rectangle: return new RectangleMode (renderer);
 		case EditModeType::Circle: return new CircleMode (renderer);
 		case EditModeType::MagicWand: return new MagicWandMode (renderer);
 	}
@@ -152,7 +157,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	return false;
 }
 
-void AbstractDrawMode::finishDraw (LDObjectList& objs)
+void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 {
 	if (objs.size() > 0)
 	{
@@ -167,4 +172,66 @@ void AbstractDrawMode::finishDraw (LDObjectList& objs)
 	}
 
 	_drawedVerts.clear();
+}
+
+void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withangles) const
+{
+	QVector<QPoint> poly (poly3d.size());
+	QFontMetrics metrics = QFontMetrics (QFont());
+
+	// Convert to 2D
+	for (int i = 0; i < poly3d.size(); ++i)
+		poly[i] = renderer()->coordconv3_2 (poly3d[i]);
+
+	// Draw the polygon-to-be
+	painter.setBrush (_polybrush);
+	painter.drawPolygon (QPolygonF (poly));
+
+	// Draw vertex blips
+	for (int i = 0; i < poly3d.size(); ++i)
+	{
+		QPoint& blip = poly[i];
+		painter.setPen (renderer()->linePen());
+		renderer()->drawBlip (painter, blip);
+
+		// Draw their coordinates
+		painter.setPen (renderer()->textPen());
+		painter.drawText (blip.x(), blip.y() - 8, poly3d[i].toString (true));
+	}
+
+	// Draw line lenghts and angle info if appropriate
+	if (poly3d.size() >= 2)
+	{
+		painter.setPen (renderer()->textPen());
+
+		for (int i = 0; i < poly3d.size(); ++i)
+		{
+			const int j = (i + 1) % poly3d.size();
+			const int h = (i - 1 >= 0) ? (i - 1) : (poly3d.size() - 1);
+
+			if (cfg::drawLineLengths)
+			{
+				const QString label = QString::number ((poly3d[j] - poly3d[i]).length());
+				QPoint origin = QLineF (poly[i], poly[j]).pointAt (0.5).toPoint();
+				painter.drawText (origin, label);
+			}
+
+			if (withangles and cfg::drawAngles)
+			{
+				QLineF l0 (poly[h], poly[i]),
+					l1 (poly[i], poly[j]);
+
+				double angle = 180 - l0.angleTo (l1);
+
+				if (angle < 0)
+					angle = 180 - l1.angleTo (l0);
+
+				QString label = QString::number (angle) + QString::fromUtf8 (QByteArray ("\302\260"));
+				QPoint pos = poly[i];
+				pos.setY (pos.y() + metrics.height());
+
+				painter.drawText (pos, label);
+			}
+		}
+	}
 }
