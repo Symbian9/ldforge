@@ -25,7 +25,6 @@
 #include "dialogs.h"
 #include "ldDocument.h"
 #include "ui_rotpoint.h"
-#include "misc/ringFinder.cc"
 
 // Prime number table.
 const int g_primes[NUM_PRIMES] =

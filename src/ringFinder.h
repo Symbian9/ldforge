@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "../main.h"
+#include "main.h"
 
 //
 // Implements a ring finding algorithm. It is passed two radii and it tries to

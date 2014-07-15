@@ -46,6 +46,7 @@ set (LDFORGE_SOURCES
 	src/partDownloader.cc
 	src/primitives.cc
 	src/radioGroup.cc
+	src/ringFinder.cc
 	src/version.cc
 	src/editmodes/abstractEditMode.cc
 	src/editmodes/circleMode.cc
@@ -59,7 +60,7 @@ set (LDFORGE_HEADERS
 	src/macros.h
 	src/crashCatcher.h
 	src/colors.h
-	src/misc/ringFinder.h
+	src/ringFinder.h
 	src/ldDocument.h
 	src/addObjectDialog.h
 	src/ldConfig.h

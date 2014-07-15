@@ -21,7 +21,7 @@
 #include "../miscallenous.h"
 #include "../ldObject.h"
 #include "../ldDocument.h"
-#include "../misc/ringFinder.h"
+#include "../ringFinder.h"
 #include "../primitives.h"
 #include "../glRenderer.h"
 
