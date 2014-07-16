@@ -1,10 +1,13 @@
 ######################################################################
-# CMake file for LDForge.
-# The original QMake file was created on Sat Sep 22 17:29:49 2012
+#
+#	CMake file for LDForge.
+#	The original QMake file was created on Sat Sep 22 17:29:49 2012
+#
 ######################################################################
 
 project (ldforge)
 add_subdirectory (updaterevision)
+add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
 find_package (Qt4 REQUIRED)
 find_package (OpenGL REQUIRED)
@@ -12,11 +15,12 @@ find_package (OpenGL REQUIRED)
 option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct colors" OFF)
 
 get_target_property (UPDATEREVISION_EXE updaterevision LOCATION)
+get_target_property (CODEGEN_EXE codegen LOCATION)
 
 add_custom_target (revision_check ALL
-    COMMAND ${UPDATEREVISION_EXE} ${CMAKE_SOURCE_DIR} hginfo.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS updaterevision)
+	COMMAND ${UPDATEREVISION_EXE} ${CMAKE_SOURCE_DIR} hginfo.h
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+	DEPENDS updaterevision)
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -116,6 +120,11 @@ set (LDFORGE_FORMS
 	ui/ytruder.ui
 )
 
+add_custom_target (codegeneration ALL
+	COMMAND ${CODEGEN_EXE} ${LDFORGE_SOURCES} ${CMAKE_BINARY_DIR}/configuration.inc
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	DEPENDS codegen)
+
 set (LDFORGE_RESOURCES ldforge.qrc)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
@@ -159,5 +168,5 @@ target_link_libraries (ldforge
 	${OPENGL_LIBRARIES}
 )
 
-add_dependencies (ldforge revision_check)
+add_dependencies (ldforge revision_check codegeneration)
 install (TARGETS ldforge RUNTIME DESTINATION bin)

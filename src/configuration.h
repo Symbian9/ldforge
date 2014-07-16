@@ -25,21 +25,12 @@
 
 class QSettings;
 
-#define CFGENTRY(T, NAME, DEFAULT) \
-	namespace cfg \
-	{ \
-		ConfigEntry::T##Type NAME; \
-		T##ConfigEntry config_##NAME (&NAME, #NAME, DEFAULT); \
-	}
-
-#define EXTERN_CFGENTRY(T, NAME) \
-	namespace cfg \
-	{ \
-		extern ConfigEntry::T##Type NAME; \
-	}
+#define CFGENTRY(T, NAME, DEFAULT) namespace cfg { ConfigEntry::T##Type NAME; }
+#define EXTERN_CFGENTRY(T, NAME) namespace cfg { extern ConfigEntry::T##Type NAME; }
 
 namespace Config
 {
+	void init();
 	bool load();
 	bool save();
 	void reset();
@@ -80,10 +71,6 @@ public:
 	virtual void		loadFromVariant (const QVariant& val) = 0;
 	virtual void		resetValue() = 0;
 	virtual QVariant	toVariant() const = 0;
-
-
-protected:
-	static void addToArray (ConfigEntry* ptr);
 };
 
 // =============================================================================
@@ -96,7 +83,6 @@ public:																				\
 		m_valueptr (valueptr),														\
 		m_default (def)																\
 	{																				\
-		ConfigEntry::addToArray (this);												\
 		*m_valueptr = def;															\
 	}																				\
 																					\

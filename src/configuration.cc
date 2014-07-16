@@ -31,6 +31,8 @@
 #include "miscallenous.h"
 #include "mainWindow.h"
 #include "ldDocument.h"
+#include "glRenderer.h"
+#include "configuration.inc"
 
 #ifdef _WIN32
 # define EXTENSION ".ini"
@@ -40,13 +42,23 @@
 
 #define MAX_CONFIG 512
 
-ConfigEntry*						g_configPointers[MAX_CONFIG];
-static int							g_cfgPointerCursor = 0;
 static QMap<QString, ConfigEntry*>	g_configsByName;
 static QList<ConfigEntry*>			g_configs;
 
 ConfigEntry::ConfigEntry (QString name) :
 	m_name (name) {}
+
+void Config::init()
+{
+	setupConfigurationLists();
+	print ("Configuration initialized with %1 entries\n", g_configs.size());
+}
+
+static void initConfigurationEntry (ConfigEntry* entry)
+{
+	g_configs << entry;
+	g_configsByName[entry->name()] = entry;
+}
 
 //
 // Load the configuration from file
@@ -54,17 +66,15 @@ ConfigEntry::ConfigEntry (QString name) :
 bool Config::load()
 {
 	QSettings* settings = settingsObject();
-	print ("config::load: Loading configuration file from %1\n", settings->fileName());
+	print ("Loading configuration file from %1\n", settings->fileName());
 
-	for (ConfigEntry* cfg : g_configPointers)
+	for (ConfigEntry* cfg : g_configs)
 	{
 		if (cfg == null)
 			break;
 
 		QVariant val = settings->value (cfg->name(), cfg->getDefaultAsVariant());
 		cfg->loadFromVariant (val);
-		g_configsByName[cfg->name()] = cfg;
-		g_configs << cfg;
 	}
 
 	if (g_win != null)
@@ -133,20 +143,6 @@ QSettings* Config::settingsObject()
 {
 	QString path = qApp->applicationDirPath() + "/" UNIXNAME EXTENSION;
 	return new QSettings (path, QSettings::IniFormat);
-}
-
-//
-// We cannot just add config objects to a list or vector because that would rely
-// on the vector's c-tor being called before the configs' c-tors. With global
-// variables we cannot assume that, therefore we need to use a C-style array here.
-//
-void ConfigEntry::addToArray (ConfigEntry* ptr)
-{
-	if (g_cfgPointerCursor == 0)
-		memset (g_configPointers, 0, sizeof g_configPointers);
-
-	assert (g_cfgPointerCursor < MAX_CONFIG);
-	g_configPointers[g_cfgPointerCursor++] = ptr;
 }
 
 template<typename T>

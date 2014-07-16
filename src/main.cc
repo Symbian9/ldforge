@@ -50,6 +50,7 @@ int main (int argc, char* argv[])
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
 	initCrashCatcher();
+	Config::init();
 
 	// Load or create the configuration
 	if (not Config::load())
