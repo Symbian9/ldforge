@@ -255,23 +255,22 @@ inline bool operator< (LDObjectWeakPtr a, LDObjectWeakPtr b)
 // and thus not used directly other than as a common storage point for matrices
 // and vertices.
 //
-// The link pointer is a pointer to this object's LDObject self - since this is
-// multiple-derived in, static_cast or dynamic_cast won't budge here.
-//
 // In 0.1-alpha, there was a separate 'radial' type which had a position and
 // matrix as well. Even though right now only LDSubfile uses this, I'm keeping
 // this class distinct in case I get new extension ideas. :)
 //
-class LDMatrixObject
+class LDMatrixObject : public LDObject
 {
-	PROPERTY (public,	LDObjectWeakPtr,	linkPointer,	setLinkPointer,	STOCK_WRITE)
 	PROPERTY (public,	Matrix,				transform,		setTransform,	CUSTOM_WRITE)
+	Vertex m_position;
 
 public:
-	LDMatrixObject() :
+	LDMatrixObject (LDObjectPtr* selfptr) :
+		LDObject (selfptr),
 		m_position (g_origin) {}
 
-	LDMatrixObject (const Matrix& transform, const Vertex& pos) :
+	LDMatrixObject (LDObjectPtr* selfptr, const Matrix& transform, const Vertex& pos) :
+		LDObject (selfptr),
 		m_transform (transform),
 		m_position (pos) {}
 
@@ -295,9 +294,6 @@ public:
 	}
 
 	void setPosition (const Vertex& a);
-
-private:
-	Vertex m_position;
 };
 
 using LDMatrixObjectPtr = QSharedPointer<LDMatrixObject>;
@@ -418,7 +414,7 @@ using LDBFCWeakPtr = QWeakPointer<LDBFC>;
 //
 // Represents a single code-1 subfile reference.
 //
-class LDSubfile : public LDObject, public LDMatrixObject
+class LDSubfile : public LDMatrixObject
 {
 	LDOBJ (Subfile)
 	LDOBJ_NAME (subfile)

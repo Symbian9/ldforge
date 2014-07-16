@@ -58,10 +58,7 @@ LDObject::LDObject (LDObjectPtr* selfptr) :
 }
 
 LDSubfile::LDSubfile (LDObjectPtr* selfptr) :
-	LDObject (selfptr)
-{
-	setLinkPointer (self());
-}
+	LDMatrixObject (selfptr) {}
 
 LDOBJ_DEFAULT_CTOR (LDEmpty, LDObject)
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
@@ -843,16 +840,14 @@ void LDObject::setVertex (int i, const Vertex& vert)
 //
 void LDMatrixObject::setPosition (const Vertex& a)
 {
-	LDObjectPtr ref = linkPointer().toStrongRef();
-	changeProperty (ref, &m_position, a);
+	changeProperty (self(), &m_position, a);
 }
 
 // =============================================================================
 //
 void LDMatrixObject::setTransform (const Matrix& val)
 {
-	LDObjectPtr ref = linkPointer().toStrongRef();
-	changeProperty (ref, &m_transform, val);
+	changeProperty (self(), &m_transform, val);
 }
 
 // =============================================================================
