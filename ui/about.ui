@@ -64,7 +64,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Copyright (C) 2013, 2014 Santeri Piippo</string>
+      <string>Copyright (C) 2013, 2014 Teemu Piippo</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

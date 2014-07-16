@@ -1,6 +1,6 @@
 /*
  *  LDForge: LDraw parts authoring CAD
- *  Copyright (C) 2013, 2014 Santeri Piippo
+ *  Copyright (C) 2013, 2014 Teemu Piippo
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -361,7 +361,7 @@ AboutDialog::AboutDialog (QWidget* parent, Qt::WindowFlags f) :
 // =============================================================================
 void AboutDialog::slot_mail()
 {
-	QDesktopServices::openUrl (QUrl ("mailto:Santeri Piippo <arezey@gmail.com>?subject=LDForge"));
+	QDesktopServices::openUrl (QUrl ("mailto:Teemu Piippo <arezey@gmail.com>?subject=LDForge"));
 }
 
 // =============================================================================
