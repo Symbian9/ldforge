@@ -664,7 +664,7 @@ void LDSubfile::invert()
 
 	// Check whether subfile is flat
 	int axisSet = (1 << X) | (1 << Y) | (1 << Z);
-	LDObjectList objs = inlineContents (true, false);
+	LDObjectList objs = fileInfo()->inlineContents (true, false);
 
 	for (LDObjectPtr obj : objs)
 	{
