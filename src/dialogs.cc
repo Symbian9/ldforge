@@ -255,7 +255,7 @@ void LDrawPathDialog::slot_tryConfigure()
 // =============================================================================
 void LDrawPathDialog::slot_accept()
 {
-	Config::save();
+	Config::Save();
 	accept();
 }
 

@@ -598,9 +598,9 @@ using LDOverlayPtr = QSharedPointer<LDOverlay>;
 using LDOverlayWeakPtr = QWeakPointer<LDOverlay>;
 
 // Other common LDraw stuff
-static const QString g_CALicense ("!LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt");
-static const QString g_nonCALicense ("!LICENSE Not redistributable : see NonCAreadme.txt");
-static const int g_lores = 16;
-static const int g_hires = 48;
+static const QString CALicenseText ("!LICENSE Redistributable under CCAL version 2.0 : "
+	"see CAreadme.txt");
+static const int LowResolution = 16;
+static const int HighResolution = 48;
 
-QString getLicenseText (int id);
+QString PreferredLicenseText();

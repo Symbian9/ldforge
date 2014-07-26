@@ -118,7 +118,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	updateRecentFilesMenu();
 	updateColorToolbar();
 	updateTitle();
-	loadShortcuts (Config::settingsObject());
+	loadShortcuts (Config::SettingsObject());
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
 }
@@ -598,7 +598,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 
 	// Save the configuration before leaving so that, for instance, grid choice
 	// is preserved across instances.
-	Config::save();
+	Config::Save();
 
 	ev->accept();
 }

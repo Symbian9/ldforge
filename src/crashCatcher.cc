@@ -29,23 +29,24 @@
 #endif
 
 // Is the crash catcher active now?
-static bool g_crashCatcherActive = false;
+static bool IsCrashCatcherActive = false;
 
 // If an assertion failed, what was it?
-static QString g_assertionFailure;
+static QString AssertionFailureText;
 
 // List of signals to catch and crash on
-static QList<int> g_signalsToCatch ({
+static QList<int> SignalsToCatch ({
 	SIGSEGV, // segmentation fault
 	SIGABRT, // abort() calls
 	SIGFPE, // floating point exceptions (e.g. division by zero)
 	SIGILL, // illegal instructions
 });
 
+// -------------------------------------------------------------------------------------------------
 //
 //	Removes the signal handler from SIGABRT and then aborts.
 //
-static void finalAbort()
+static void FinalAbort()
 {
 	struct sigaction sighandler;
 	sighandler.sa_handler = SIG_DFL;
@@ -54,23 +55,23 @@ static void finalAbort()
 	abort();
 }
 
-// =============================================================================
+// -------------------------------------------------------------------------------------------------
 //
-static void handleCrash (int sig)
+static void HandleCrash (int sig)
 {
 	printf ("!! Caught signal %d, launching gdb\n", sig);
 
-	if (g_crashCatcherActive)
+	if (IsCrashCatcherActive)
 	{
 		printf ("Caught signal while crash catcher is active! Execution cannot continue.\n");
-		finalAbort();
+		FinalAbort();
 	}
 
-	const pid_t pid = getpid();
+	pid_t const pid (getpid());
 	QProcess proc;
 	QTemporaryFile commandsFile;
 
-	g_crashCatcherActive = true;
+	IsCrashCatcherActive = true;
 
 	if (commandsFile.open())
 	{
@@ -91,67 +92,62 @@ static void handleCrash (int sig)
 #endif
 
 	proc.waitForFinished (1000);
-	QString output = QString (proc.readAllStandardOutput());
-	QString err = QString (proc.readAllStandardError());
+	QString output (proc.readAllStandardOutput());
+	QString err (proc.readAllStandardError());
 	QFile f (UNIXNAME "-crash.log");
 
 	if (f.open (QIODevice::WriteOnly))
 	{
 		fprint (f, format ("=== Program crashed with signal %1 ===\n\n%2"
-			"GDB stdout:\n%3\n"
-			"GDB stderr:\n%4\n",
-			sig, (not g_assertionFailure.isEmpty()) ? g_assertionFailure + "\n\n" : "", output, err));
+			"GDB stdout:\n%3\nGDB stderr:\n%4\n", sig,
+			(not AssertionFailureText.isEmpty()) ? AssertionFailureText + "\n\n" : "",
+			output, err));
 		f.close();
 	}
 
-	if (g_assertionFailure.isEmpty())
-	{
-		printf ("Crashlog written to " UNIXNAME "-crash.log. Aborting.\n");
-	}
-	else
-	{
-		printf ("Assertion failed: \"%s\". Backtrace written to " UNIXNAME "-crash.log.\n",
-			qPrintable (g_assertionFailure));
-	}
+	if (not AssertionFailureText.isEmpty())
+		printf ("Assertion failed: \"%s\".\n", qPrintable (AssertionFailureText));
 
-	finalAbort();
+	printf ("Backtrace written to " UNIXNAME "-crash.log. Aborting.\n");
+	FinalAbort();
 }
 
+// -------------------------------------------------------------------------------------------------
 //
 //	Initializes the crash catcher.
 //
-void initCrashCatcher()
+void InitCrashCatcher()
 {
 	struct sigaction sighandler;
-	sighandler.sa_handler = &handleCrash;
+	sighandler.sa_handler = &HandleCrash;
 	sighandler.sa_flags = 0;
 	sigemptyset (&sighandler.sa_mask);
 
-	for (int sig : g_signalsToCatch)
+	for (int sig : SignalsToCatch)
 	{
 		if (sigaction (sig, &sighandler, null) == -1)
 		{
 			fprint (stderr, "Couldn't set signal handler %1: %2", sig, strerror (errno));
-			g_signalsToCatch.removeOne (sig);
+			SignalsToCatch.removeOne (sig);
 		}
 	}
 
-	print ("Crash catcher hooked to signals: %1\n", g_signalsToCatch);
+	print ("Crash catcher hooked to signals: %1\n", SignalsToCatch);
 }
 
 #endif // #ifdef __unix__
 
-// =============================================================================
+// -------------------------------------------------------------------------------------------------
 //
-// This function must be readily available in both Windows and Linux. We display
-// the bomb box straight in Windows while in Linux we let abort() trigger the
-// signal handler, which will cause the usual bomb box with GDB diagnostics.
-// Said prompt will embed the assertion failure information.
+// This function catches an assertion failure. It must be readily available in both Windows and
+// Linux. We display the bomb box straight in Windows while in Linux we let abort() trigger
+// the signal handler, which will cause the usual bomb box with GDB diagnostics. Said prompt will
+// embed the assertion failure information.
 //
 void assertionFailure (const char* file, int line, const char* funcname, const char* expr)
 {
 #ifdef __unix__
-	g_assertionFailure = format ("%1:%2: %3: %4", file, line, funcname, expr);
+	AssertionFailureText = format ("%1:%2: %3: %4", file, line, funcname, expr);
 #else
 	bombBox (format (
 		"<p><b>File</b>: <tt>%1</tt><br />"

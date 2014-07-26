@@ -55,7 +55,7 @@ PrimitiveScanner* getActivePrimitiveScanner()
 void loadPrimitives()
 {
 	// Try to load prims.cfg
-	QFile conf (Config::filepath ("prims.cfg"));
+	QFile conf (Config::FilePath ("prims.cfg"));
 
 	if (not conf.open (QIODevice::ReadOnly))
 	{
@@ -164,7 +164,7 @@ void PrimitiveScanner::work()
 	if (m_i == m_files.size())
 	{
 		// Done with primitives, now save to a config file
-		QString path = Config::filepath ("prims.cfg");
+		QString path = Config::FilePath ("prims.cfg");
 		QFile conf (path);
 
 		if (not conf.open (QIODevice::WriteOnly | QIODevice::Text))
@@ -283,7 +283,7 @@ void PrimitiveCategory::loadCategories()
 		delete cat;
 
 	g_PrimitiveCategories.clear();
-	QString path = Config::dirpath() + "primregexps.cfg";
+	QString path = Config::DirectoryPath() + "primregexps.cfg";
 
 	if (not QFile::exists (path))
 		path = ":/data/primitive-categories.cfg";
@@ -574,7 +574,7 @@ QString radialFileName (PrimitiveType type, int segs, int divs, int num)
 	}
 
 	// Compose some general information: prefix, fraction, root, ring number
-	QString prefix = (divs == g_lores) ? "" : format ("%1/", divs);
+	QString prefix = (divs == LowResolution) ? "" : format ("%1/", divs);
 	QString frac = format ("%1-%2", numer, denom);
 	QString root = g_radialNameRoots[type];
 	QString numstr = (type == Ring or type == Cone) ? format ("%1", num) : "";
@@ -613,7 +613,7 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 		descr = format ("%1 %2", primitiveTypeName (type), frac);
 
 	// Prepend "Hi-Res" if 48/ primitive.
-	if (divs == g_hires)
+	if (divs == HighResolution)
 		descr.insert (0, "Hi-Res ");
 
 	LDDocumentPtr f = LDDocument::createNew();
@@ -624,7 +624,7 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 
 	if (not cfg::defaultName.isEmpty())
 	{
-		license = getLicenseText (cfg::defaultLicense);
+		license = PreferredLicenseText();
 		author = format ("%1 [%2]", cfg::defaultName, cfg::defaultUser);
 	}
 
@@ -633,7 +633,8 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 	objs << spawn<LDComment> (descr)
 		 << spawn<LDComment> (format ("Name: %1", name))
 		 << spawn<LDComment> (format ("Author: %1", author))
-		 << spawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", divs == g_hires ? "48_" : ""))
+		 << spawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", divs == HighResolution ? 
+"48_" : ""))
 		 << spawn<LDComment> (license)
 		 << spawn<LDEmpty>()
 		 << spawn<LDBFC> (BFCStatement::CertifyCCW)
@@ -678,12 +679,12 @@ PrimitivePrompt::~PrimitivePrompt()
 //
 void PrimitivePrompt::hiResToggled (bool on)
 {
-	ui->sb_segs->setMaximum (on ? g_hires : g_lores);
+	ui->sb_segs->setMaximum (on ? HighResolution : LowResolution);
 
 	// If the current value is 16 and we switch to hi-res, default the
 	// spinbox to 48.
-	if (on and ui->sb_segs->value() == g_lores)
-		ui->sb_segs->setValue (g_hires);
+	if (on and ui->sb_segs->value() == LowResolution)
+		ui->sb_segs->setValue (HighResolution);
 }
 
 // =============================================================================
@@ -696,7 +697,7 @@ void MainWindow::slot_actionMakePrimitive()
 		return;
 
 	int segs = dlg->ui->sb_segs->value();
-	int divs = dlg->ui->cb_hires->isChecked() ? g_hires : g_lores;
+	int divs = dlg->ui->cb_hires->isChecked() ? HighResolution : LowResolution;
 	int num = dlg->ui->sb_ringnum->value();
 	PrimitiveType type =
 		dlg->ui->rb_circle->isChecked()   ? Circle :

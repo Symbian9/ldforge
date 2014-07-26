@@ -42,33 +42,33 @@
 
 #define MAX_CONFIG 512
 
-static QMap<QString, ConfigEntry*>	g_configsByName;
-static QList<ConfigEntry*>			g_configs;
+static QMap<QString, AbstractConfigEntry*>	EntriesByName;
+static QList<AbstractConfigEntry*>			ConfigurationEntries;
 
-ConfigEntry::ConfigEntry (QString name) :
+AbstractConfigEntry::AbstractConfigEntry (QString name) :
 	m_name (name) {}
 
-void Config::init()
+void Config::Initialize()
 {
-	setupConfigurationLists();
-	print ("Configuration initialized with %1 entries\n", g_configs.size());
+	SetupConfigurationLists();
+	print ("Configuration initialized with %1 entries\n", ConfigurationEntries.size());
 }
 
-static void initConfigurationEntry (ConfigEntry* entry)
+static void InitConfigurationEntry (AbstractConfigEntry* entry)
 {
-	g_configs << entry;
-	g_configsByName[entry->name()] = entry;
+	ConfigurationEntries << entry;
+	EntriesByName[entry->name()] = entry;
 }
 
 //
 // Load the configuration from file
 //
-bool Config::load()
+bool Config::Load()
 {
-	QSettings* settings = settingsObject();
+	QSettings* settings = SettingsObject();
 	print ("Loading configuration file from %1\n", settings->fileName());
 
-	for (ConfigEntry* cfg : g_configs)
+	for (AbstractConfigEntry* cfg : ConfigurationEntries)
 	{
 		if (cfg == null)
 			break;
@@ -87,11 +87,11 @@ bool Config::load()
 //
 // Save the configuration to disk
 //
-bool Config::save()
+bool Config::Save()
 {
-	QSettings* settings = settingsObject();
+	QSettings* settings = SettingsObject();
 
-	for (ConfigEntry* cfg : g_configs)
+	for (AbstractConfigEntry* cfg : ConfigurationEntries)
 	{
 		if (not cfg->isDefault())
 			settings->setValue (cfg->name(), cfg->toVariant());
@@ -111,26 +111,26 @@ bool Config::save()
 //
 // Reset configuration to defaults.
 //
-void Config::reset()
+void Config::ResetToDefaults()
 {
-	for (ConfigEntry* cfg : g_configs)
+	for (AbstractConfigEntry* cfg : ConfigurationEntries)
 		cfg->resetValue();
 }
 
 //
 // Where is the configuration file located at?
 //
-QString Config::filepath (QString file)
+QString Config::FilePath (QString file)
 {
-	return Config::dirpath() + DIRSLASH + file;
+	return Config::DirectoryPath() + DIRSLASH + file;
 }
 
 //
 // Directory of the configuration file.
 //
-QString Config::dirpath()
+QString Config::DirectoryPath()
 {
-	QSettings* settings = settingsObject();
+	QSettings* settings = SettingsObject();
 	QString result = dirname (settings->fileName());
 	delete settings;
 	return result;
@@ -139,21 +139,21 @@ QString Config::dirpath()
 //
 // Accessor to the settings object
 //
-QSettings* Config::settingsObject()
+QSettings* Config::SettingsObject()
 {
 	QString path = qApp->applicationDirPath() + "/" UNIXNAME EXTENSION;
 	return new QSettings (path, QSettings::IniFormat);
 }
 
 template<typename T>
-T* getConfigByName (QString name, ConfigEntry::Type type)
+static T* GetConfigByName (QString name, AbstractConfigEntry::Type type)
 {
-	auto it = g_configsByName.find (name);
+	auto it = EntriesByName.find (name);
 
-	if (it == g_configsByName.end())
+	if (it == EntriesByName.end())
 		return null;
 
-	ConfigEntry* cfg = it.value();
+	AbstractConfigEntry* cfg = it.value();
 
 	if (cfg->getType() != type)
 	{
@@ -169,7 +169,7 @@ T* getConfigByName (QString name, ConfigEntry::Type type)
 #define IMPLEMENT_CONFIG(NAME)												\
 	NAME##ConfigEntry* NAME##ConfigEntry::getByName (QString name)			\
 	{																		\
-		return getConfigByName<NAME##ConfigEntry> (name, E##NAME##Type);	\
+		return GetConfigByName<NAME##ConfigEntry> (name, E##NAME##Type);	\
 	}
 
 IMPLEMENT_CONFIG (Int)

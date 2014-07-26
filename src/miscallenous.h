@@ -50,8 +50,8 @@ QString prettyFileSize (qint64 size);
 struct gridinfo
 {
 	const char*				name;
-	ConfigEntry::FloatType*	coordsnap;
-	ConfigEntry::FloatType*	anglesnap;
+	AbstractConfigEntry::FloatType*	coordsnap;
+	AbstractConfigEntry::FloatType*	anglesnap;
 };
 
 EXTERN_CFGENTRY (Int, grid);

@@ -161,12 +161,16 @@ int main (int argc, char* argv[])
 			os << "EXTERN_CFGENTRY (" << it->type << ", " << it->name << ")" << endl;
 
 		os << endl;
-		os << "static void initConfigurationEntry (ConfigEntry* entry);" << endl;
-		os << "static void setupConfigurationLists()" << endl;
+		os << "static void InitConfigurationEntry (AbstractConfigEntry* entry);" << endl;
+		os << "static void SetupConfigurationLists()" << endl;
 		os << "{" << endl;
 
 		for (vector<entry_type>::const_iterator it = entries.begin(); it != entries.end(); ++it)
-			os << "\tinitConfigurationEntry (new " << it->type << "ConfigEntry (&cfg::" << it->name << ", \"" << it->name << "\", " << it->defvalue << "));" << endl;
+		{
+			os << "\tInitConfigurationEntry (new " << it->type << "ConfigEntry (&cfg::" <<
+				it->name << ", \"" << it->name << "\", " << it->defvalue << "));" << endl;
+		}
+
 		os << "}" << endl;
 
 		cout << "Wrote configuration options list to " << argv[argc - 1] << "." << endl;

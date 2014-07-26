@@ -56,7 +56,7 @@ EXTERN_CFGENTRY (Bool, useLogoStuds);
 EXTERN_CFGENTRY (Bool,	drawLineLengths);
 EXTERN_CFGENTRY (String, defaultName);
 EXTERN_CFGENTRY (String, defaultUser);
-EXTERN_CFGENTRY (Int, defaultLicense);
+EXTERN_CFGENTRY (Bool, UseCALicense);
 EXTERN_CFGENTRY (String, selectColorBlend);
 EXTERN_CFGENTRY (String, ytruderPath);
 EXTERN_CFGENTRY (String, rectifierPath);
@@ -178,7 +178,7 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 
 	ui->m_profileName->setText (cfg::defaultName);
 	ui->m_profileUsername->setText (cfg::defaultUser);
-	ui->m_profileLicense->setCurrentIndex (cfg::defaultLicense);
+	ui->UseCALicense->setChecked (cfg::UseCALicense);
 	ui->gridCoarseCoordinateSnap->setValue (cfg::gridCoarseCoordinateSnap);
 	ui->gridCoarseAngleSnap->setValue (cfg::gridCoarseAngleSnap);
 	ui->gridMediumCoordinateSnap->setValue (cfg::gridMediumCoordinateSnap);
@@ -295,7 +295,7 @@ void ConfigDialog::applySettings()
 	cfg::drawLineLengths = ui->linelengths->isChecked();
 	cfg::defaultUser = ui->m_profileUsername->text();
 	cfg::defaultName = ui->m_profileName->text();
-	cfg::defaultLicense = ui->m_profileLicense->currentIndex();
+	cfg::UseCALicense = ui->UseCALicense->isChecked();
 	cfg::antiAliasedLines = ui->m_aa->isChecked();
 	cfg::highlightObjectBelowCursor = ui->highlightObjectBelowCursor->isChecked();
 	cfg::roundPosition = ui->roundPosition->value();
@@ -329,7 +329,7 @@ void ConfigDialog::applySettings()
 		item->action()->setShortcut (item->sequence());
 	}
 
-	Config::save();
+	Config::Save();
 	reloadAllSubfiles();
 	loadLogoedStuds();
 	g_win->R()->setBackground();

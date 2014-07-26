@@ -27,9 +27,9 @@
 #include "colors.h"
 #include "glCompiler.h"
 
-CFGENTRY (String, defaultName, "");
-CFGENTRY (String, defaultUser, "");
-CFGENTRY (Int, defaultLicense, 0);
+CFGENTRY (String,	defaultName, "");
+CFGENTRY (String,	defaultUser, "");
+CFGENTRY (Bool,		UseCALicense, true);
 
 // List of all LDObjects
 QMap<long, LDObjectWeakPtr>	g_allObjects;
@@ -887,22 +887,9 @@ void LDObject::deselect()
 
 // =============================================================================
 //
-QString getLicenseText (int id)
+QString PreferredLicenseText()
 {
-	switch (id)
-	{
-		case 0:
-			return g_CALicense;
-
-		case 1:
-			return g_nonCALicense;
-
-		case 2:
-			return "";
-	}
-
-	assert (false);
-	return "";
+	return (cfg::UseCALicense ? CALicenseText : "");
 }
 
 // =============================================================================

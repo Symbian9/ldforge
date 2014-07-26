@@ -675,7 +675,7 @@ void addRecentFile (QString path)
 	// Add the file
 	rfiles << path;
 
-	Config::save();
+	Config::Save();
 	g_win->updateRecentFilesMenu();
 }
 

@@ -25,21 +25,21 @@
 
 class QSettings;
 
-#define CFGENTRY(T, NAME, DEFAULT) namespace cfg { ConfigEntry::T##Type NAME; }
-#define EXTERN_CFGENTRY(T, NAME) namespace cfg { extern ConfigEntry::T##Type NAME; }
+#define CFGENTRY(T, NAME, DEFAULT) namespace cfg { AbstractConfigEntry::T##Type NAME; }
+#define EXTERN_CFGENTRY(T, NAME) namespace cfg { extern AbstractConfigEntry::T##Type NAME; }
 
 namespace Config
 {
-	void init();
-	bool load();
-	bool save();
-	void reset();
-	QString dirpath();
-	QString filepath (QString file);
-	QSettings* settingsObject();
+	void Initialize();
+	bool Load();
+	bool Save();
+	void ResetToDefaults();
+	QString DirectoryPath();
+	QString FilePath (QString file);
+	QSettings* SettingsObject();
 }
 
-class ConfigEntry
+class AbstractConfigEntry
 {
 	PROPERTY (private, QString, name, setName, STOCK_WRITE)
 
@@ -63,7 +63,7 @@ public:
 	using ListType			= QList<QVariant>;
 	using VertexType		= Vertex;
 
-	ConfigEntry (QString name);
+	AbstractConfigEntry (QString name);
 
 	virtual QVariant	getDefaultAsVariant() const = 0;
 	virtual Type		getType() const = 0;
@@ -73,13 +73,12 @@ public:
 	virtual QVariant	toVariant() const = 0;
 };
 
-// =============================================================================
 #define IMPLEMENT_CONFIG(NAME)														\
 public:																				\
-	using ValueType = ConfigEntry::NAME##Type;										\
+	using ValueType = AbstractConfigEntry::NAME##Type;								\
 																					\
 	NAME##ConfigEntry (ValueType* valueptr, QString name, ValueType def) :			\
-		ConfigEntry (name),															\
+		AbstractConfigEntry (name),													\
 		m_valueptr (valueptr),														\
 		m_default (def)																\
 	{																				\
@@ -96,9 +95,9 @@ public:																				\
 		*m_valueptr = val;															\
 	}																				\
 																					\
-	virtual ConfigEntry::Type getType() const										\
+	virtual AbstractConfigEntry::Type getType() const								\
 	{																				\
-		return ConfigEntry::E##NAME##Type;											\
+		return AbstractConfigEntry::E##NAME##Type;									\
 	}																				\
 																					\
 	virtual void resetValue()														\
@@ -137,39 +136,37 @@ private:																			\
 	ValueType*	m_valueptr;															\
 	ValueType	m_default;
 
-// =============================================================================
-//
-class IntConfigEntry : public ConfigEntry
+class IntConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (Int)
 };
 
-class StringConfigEntry : public ConfigEntry
+class StringConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (String)
 };
 
-class FloatConfigEntry : public ConfigEntry
+class FloatConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (Float)
 };
 
-class BoolConfigEntry : public ConfigEntry
+class BoolConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (Bool)
 };
 
-class KeySequenceConfigEntry : public ConfigEntry
+class KeySequenceConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (KeySequence)
 };
 
-class ListConfigEntry : public ConfigEntry
+class ListConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (List)
 };
 
-class VertexConfigEntry : public ConfigEntry
+class VertexConfigEntry : public AbstractConfigEntry
 {
 	IMPLEMENT_CONFIG (Vertex)
 };

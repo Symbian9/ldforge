@@ -43,7 +43,7 @@ EXTERN_CFGENTRY (Bool,		drawWireframe);
 EXTERN_CFGENTRY (Bool,		bfcRedGreenView);
 EXTERN_CFGENTRY (String,	defaultName);
 EXTERN_CFGENTRY (String,	defaultUser);
-EXTERN_CFGENTRY (Int,		defaultLicense);
+EXTERN_CFGENTRY (Bool,		UseCALicense);
 EXTERN_CFGENTRY (Bool,		drawAngles);
 EXTERN_CFGENTRY (Bool,		randomColors)
 EXTERN_CFGENTRY (Bool,		drawSurfaces)
@@ -64,26 +64,7 @@ void MainWindow::slot_actionNew()
 		authortext.append (format (" [%1]", cfg::defaultUser));
 
 	ui.le_author->setText (authortext);
-
-	switch (cfg::defaultLicense)
-	{
-		case 0:
-			ui.rb_license_ca->setChecked (true);
-			break;
-
-		case 1:
-			ui.rb_license_nonca->setChecked (true);
-			break;
-
-		case 2:
-			ui.rb_license_none->setChecked (true);
-			break;
-
-		default:
-			QMessageBox::warning (null, "Warning",
-				format ("Unknown ld_defaultlicense value %1!", cfg::defaultLicense));
-			break;
-	}
+	ui.caLicense->setChecked (cfg::UseCALicense);
 
 	if (dlg->exec() == QDialog::Rejected)
 		return;
@@ -93,10 +74,7 @@ void MainWindow::slot_actionNew()
 	BFCStatement const bfctype = ui.rb_bfc_ccw->isChecked() ? BFCStatement::CertifyCCW
 							   : ui.rb_bfc_cw->isChecked()  ? BFCStatement::CertifyCW
 							   : BFCStatement::NoCertify;
-
-	QString const license =
-		ui.rb_license_ca->isChecked()    ? g_CALicense :
-		ui.rb_license_nonca->isChecked() ? g_nonCALicense : "";
+	QString const license = ui.caLicense->isChecked() ? CALicenseText : "";
 
 	LDObjectList objs;
 	objs << spawn<LDComment> (ui.le_title->text());
@@ -754,7 +732,7 @@ void MainWindow::slot_actionSubfileSelection()
 	LDCommentPtr	titleobj (getCurrentDocument()->getObject (0).dynamicCast<LDComment>());
 
 	// License text for the subfile
-	QString			license (getLicenseText (cfg::defaultLicense));
+	QString			license (PreferredLicenseText());
 
 	// LDraw code body of the new subfile (i.e. code of the selection)
 	QStringList		code;

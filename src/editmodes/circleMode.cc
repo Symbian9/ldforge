@@ -71,7 +71,7 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 void CircleMode::buildCircle()
 {
 	LDObjectList objs;
-	const int segs = g_lores, divs = g_lores; // TODO: make customizable
+	const int segs = LowResolution, divs = LowResolution; // TODO: make customizable
 	double dist0 = getCircleDrawDist (0),
 		dist1 = getCircleDrawDist (1);
 	LDDocumentPtr refFile;
@@ -102,9 +102,10 @@ void CircleMode::buildCircle()
 		{
 			// Get a ref file for this primitive. If we cannot find it in the
 			// LDraw library, generate it.
-			if ((refFile = ::getDocument (radialFileName (::Ring, g_lores, g_lores, cmp.num))) == null)
+			if ((refFile = ::getDocument (radialFileName (::Ring, LowResolution, LowResolution, 
+cmp.num))) == null)
 			{
-				refFile = generatePrimitive (::Ring, g_lores, g_lores, cmp.num);
+				refFile = generatePrimitive (::Ring, LowResolution, LowResolution, cmp.num);
 				refFile->setImplicit (false);
 			}
 
@@ -186,7 +187,7 @@ void CircleMode::render (QPainter& painter) const
 		QVector<Vertex> verts, verts2;
 		const double dist0 = getCircleDrawDist (0),
 			dist1 = (_drawedVerts.size() >= 2) ? getCircleDrawDist (1) : -1;
-		const int segs = g_lores;
+		const int segs = LowResolution;
 		const double angleUnit = (2 * pi) / segs;
 		Axis relX, relY;
 		QVector<QPoint> ringpoints, circlepoints, circle2points;

@@ -49,15 +49,15 @@ int main (int argc, char* argv[])
 	QApplication app (argc, argv);
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
-	initCrashCatcher();
-	Config::init();
+	InitCrashCatcher();
+	Config::Initialize();
 
 	// Load or create the configuration
-	if (not Config::load())
+	if (not Config::Load())
 	{
 		print ("Creating configuration file...\n");
 
-		if (Config::save())
+		if (Config::Save())
 			print ("Configuration file successfully created.\n");
 		else
 			critical ("Failed to create configuration file!\n");
@@ -76,7 +76,7 @@ int main (int argc, char* argv[])
 	{
 		(new ConfigDialog (ConfigDialog::ProfileTab))->exec();
 		cfg::firstStart = false;
-		Config::save();
+		Config::Save();
 	}
 
 	return app.exec();

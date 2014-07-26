@@ -20,7 +20,7 @@
 #include "main.h"
 
 #ifdef __unix__
-void initCrashCatcher();
+void InitCrashCatcher();
 #else // ifdef __unix__
-# define initCrashCatcher()
+# define InitCrashCatcher()
 #endif // ifdef __unix__
