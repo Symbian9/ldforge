@@ -636,7 +636,7 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 		 << spawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", divs == g_hires ? "48_" : ""))
 		 << spawn<LDComment> (license)
 		 << spawn<LDEmpty>()
-		 << spawn<LDBFC> (LDBFC::CertifyCCW)
+		 << spawn<LDBFC> (BFCStatement::CertifyCCW)
 		 << spawn<LDEmpty>();
 
 	f->addObjects (objs);

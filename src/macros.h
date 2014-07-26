@@ -115,6 +115,17 @@ public: \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
 	inline T operator-- (T& a, int) { T result = a; a = (T) ((int) a - 1); return result; }
 
+#define FOR_ENUM_NAME_HELPER(LINE) enum_iterator_ ## LINE
+#define FOR_ENUM_NAME(LINE) FOR_ENUM_NAME_HELPER(LINE)
+
+#define for_enum(ENUM, NAME) \
+	for (std::underlying_type<ENUM>::type FOR_ENUM_NAME (__LINE__) = \
+		std::underlying_type<ENUM>::type (ENUM::FirstValue); \
+		FOR_ENUM_NAME (__LINE__) < std::underlying_type<ENUM>::type (ENUM::NumValues); \
+		++FOR_ENUM_NAME (__LINE__)) \
+	for (ENUM NAME = ENUM (FOR_ENUM_NAME (__LINE__)); NAME != ENUM::NumValues; \
+		NAME = ENUM::NumValues)
+
 // =============================================================================
 #ifdef IN_IDE_PARSER // KDevelop workarounds:
 # error IN_IDE_PARSER is defined (this code is only for KDevelop workarounds)

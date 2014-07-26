@@ -90,11 +90,11 @@ void MainWindow::slot_actionNew()
 
 	newFile();
 
-	const LDBFC::Statement bfctype =
-		ui.rb_bfc_ccw->isChecked() ? LDBFC::CertifyCCW :
-		ui.rb_bfc_cw->isChecked()  ? LDBFC::CertifyCW : LDBFC::NoCertify;
+	BFCStatement const bfctype = ui.rb_bfc_ccw->isChecked() ? BFCStatement::CertifyCCW
+							   : ui.rb_bfc_cw->isChecked()  ? BFCStatement::CertifyCW
+							   : BFCStatement::NoCertify;
 
-	const QString license =
+	QString const license =
 		ui.rb_license_ca->isChecked()    ? g_CALicense :
 		ui.rb_license_nonca->isChecked() ? g_nonCALicense : "";
 
@@ -110,9 +110,7 @@ void MainWindow::slot_actionNew()
 	objs << spawn<LDEmpty>();
 	objs << spawn<LDBFC> (bfctype);
 	objs << spawn<LDEmpty>();
-
 	getCurrentDocument()->addObjects (objs);
-
 	doFullRefresh();
 }
 
@@ -741,22 +739,22 @@ void MainWindow::slot_actionSubfileSelection()
 	if (selection().size() == 0)
 		return;
 
-	QString			parentpath = getCurrentDocument()->fullPath();
+	QString			parentpath (getCurrentDocument()->fullPath());
 
 	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
-	LDBFC::Statement		bfctype = LDBFC::NoCertify;
+	BFCStatement	bfctype (BFCStatement::NoCertify);
 
 	// Dirname of the new subfile
-	QString			subdirname = dirname (parentpath);
+	QString			subdirname (dirname (parentpath));
 
 	// Title of the new subfile
 	QString			subtitle;
 
 	// Comment containing the title of the parent document
-	LDCommentPtr	titleobj = getCurrentDocument()->getObject (0).dynamicCast<LDComment>();
+	LDCommentPtr	titleobj (getCurrentDocument()->getObject (0).dynamicCast<LDComment>());
 
 	// License text for the subfile
-	QString			license = getLicenseText (cfg::defaultLicense);
+	QString			license (getLicenseText (cfg::defaultLicense));
 
 	// LDraw code body of the new subfile (i.e. code of the selection)
 	QStringList		code;
@@ -765,7 +763,7 @@ void MainWindow::slot_actionSubfileSelection()
 	QString			fullsubname;
 
 	// Where to insert the subfile reference?
-	int				refidx = selection()[0]->lineNumber();
+	int				refidx (selection()[0]->lineNumber());
 
 	// Determine title of subfile
 	if (titleobj != null)
@@ -836,9 +834,9 @@ void MainWindow::slot_actionSubfileSelection()
 		if (obj->type() != OBJ_BFC)
 			continue;
 
-		LDBFC::Statement a = obj.staticCast<LDBFC>()->statement();
+		BFCStatement a = obj.staticCast<LDBFC>()->statement();
 
-		if (a == LDBFC::CertifyCCW or a == LDBFC::CertifyCW or a == LDBFC::NoCertify)
+		if (eq (a, BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
 		{
 			bfctype = a;
 			break;

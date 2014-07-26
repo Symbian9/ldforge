@@ -191,7 +191,7 @@ QString LDEmpty::asText() const
 
 // =============================================================================
 //
-const char* LDBFC::k_statementStrings[] =
+const char* LDBFC::StatementStrings[] =
 {
 	"CERTIFY CCW",
 	"CCW",
@@ -207,7 +207,7 @@ const char* LDBFC::k_statementStrings[] =
 
 QString LDBFC::asText() const
 {
-	return format ("0 BFC %1", LDBFC::k_statementStrings[m_statement]);
+	return format ("0 BFC %1", StatementStrings[int (m_statement)]);
 }
 
 // =============================================================================
@@ -391,12 +391,12 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 LDPolygon* LDObject::getPolygon()
 {
 	LDObjectType ot = type();
-	int num =
-		(ot == OBJ_Line)		?	2 :
-		(ot == OBJ_Triangle)	?	3 :
-		(ot == OBJ_Quad)		?	4 :
-		(ot == OBJ_CondLine)	?	5 :
-										0;
+	int num = (ot == OBJ_Line)		? 2
+			: (ot == OBJ_Triangle)	? 3
+			: (ot == OBJ_Quad)		? 4
+			: (ot == OBJ_CondLine)	? 5
+			: 0;
+
 	if (num == 0)
 		return null;
 
@@ -418,8 +418,10 @@ QList<LDPolygon> LDSubfile::inlinePolygons()
 	QList<LDPolygon> data = fileInfo()->inlinePolygons();
 
 	for (LDPolygon& entry : data)
+	{
 		for (int i = 0; i < entry.numVertices(); ++i)
 			entry.vertices[i].transform (transform(), position());
+	}
 
 	return data;
 }
@@ -431,8 +433,10 @@ long LDObject::lineNumber() const
 	assert (document() != null);
 
 	for (int i = 0; i < document().toStrongRef()->getObjectCount(); ++i)
+	{
 		if (document().toStrongRef()->getObject (i) == this)
 			return i;
+	}
 
 	return -1;
 }
@@ -445,9 +449,9 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 		return;
 
 	// If we move down, we need to iterate the array in reverse order.
-	const long start = up ? 0 : (objs.size() - 1);
-	const long end = up ? objs.size() : -1;
-	const long incr = up ? 1 : -1;
+	long const start = up ? 0 : (objs.size() - 1);
+	long const end = up ? objs.size() : -1;
+	long const incr = up ? 1 : -1;
 	LDObjectList objsToCompile;
 	LDDocumentPtr file = objs[0]->document();
 
@@ -455,8 +459,8 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 	{
 		LDObjectPtr obj = objs[i];
 
-		const long idx = obj->lineNumber(),
-				   target = idx + (up ? -1 : 1);
+		long const idx = obj->lineNumber();
+		long const target = idx + (up ? -1 : 1);
 
 		if ((up and idx == 0) or (not up and idx == (long) file->objects().size() - 1l))
 		{
@@ -502,8 +506,10 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 		int count = 0;
 
 		for (LDObjectPtr obj : objs)
+		{
 			if (obj->type() == objType)
 				count++;
+		}
 
 		if (count == 0)
 			continue;
@@ -570,7 +576,8 @@ bool LDObject::previousIsInvertnext (LDBFCPtr& ptr)
 {
 	LDObjectPtr prev (previous());
 
-	if (prev != null and prev->type() == OBJ_BFC and prev.staticCast<LDBFC>()->statement() == LDBFC::InvertNext)
+	if (prev != null and prev->type() == OBJ_BFC and
+		prev.staticCast<LDBFC>()->statement() == BFCStatement::InvertNext)
 	{
 		ptr = prev.staticCast<LDBFC>();
 		return true;
@@ -712,7 +719,7 @@ void LDSubfile::invert()
 	{
 		LDBFCPtr bfc = previous().dynamicCast<LDBFC>();
 
-		if (not bfc.isNull() and bfc->statement() == LDBFC::InvertNext)
+		if (not bfc.isNull() and bfc->statement() == BFCStatement::InvertNext)
 		{
 			// This is prefixed with an invertnext, thus remove it.
 			bfc->destroy();
@@ -721,7 +728,7 @@ void LDSubfile::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document().toStrongRef()->insertObj (idx, spawn<LDBFC> (LDBFC::InvertNext));
+	document().toStrongRef()->insertObj (idx, spawn<LDBFC> (BFCStatement::InvertNext));
 }
 
 // =============================================================================

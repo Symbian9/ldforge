@@ -423,7 +423,8 @@ void LDFileLoader::work (int i)
 		// Check for parse errors and warn about tthem
 		if (obj->type() == OBJ_Error)
 		{
-			print ("Couldn't parse line #%1: %2", progress() + 1, obj.staticCast<LDError>()->reason());
+			print ("Couldn't parse line #%1: %2",
+				progress() + 1, obj.staticCast<LDError>()->reason());
 
 			if (warnings() != null)
 				(*warnings())++;
@@ -575,7 +576,7 @@ LDDocumentPtr openDocument (QString path, bool search, bool implicit, LDDocument
 //
 bool LDDocument::isSafeToClose()
 {
-	typedef QMessageBox msgbox;
+	using msgbox = QMessageBox;
 	setlocale (LC_ALL, "C");
 
 	// If we have unsaved changes, warn and give the option of saving.
@@ -827,24 +828,26 @@ static void checkTokenNumbers (const QStringList& tokens, int min, int max)
 
 	for (int i = min; i <= max; ++i)
 	{
+		// Check for floating point
+		tokens[i].toDouble (&ok);
+		if (ok)
+			return;
+
 		// Check hex
 		if (tokens[i].startsWith ("0x"))
 		{
 			tokens[i].mid (2).toInt (&ok, 16);
 
-			if (not ok)
-			{
-				// Check for floating point
-				tokens[i].toDouble (&ok);
-
-				// Also check scientific notation, e.g. 7.99361e-15
-				if (not ok and not scient.exactMatch (tokens[i]))
-				{
-					throw QString (format ("Token #%1 was `%2`, expected a number (matched length: %3)",
-						(i + 1), tokens[i], scient.matchedLength()));
-				}
-			}
+			if (ok)
+				return;
 		}
+
+		// Check scientific notation, e.g. 7.99361e-15
+		if (scient.exactMatch (tokens[i]))
+			return;
+
+		throw QString (format ("Token #%1 was `%2`, expected a number (matched length: %3)",
+			(i + 1), tokens[i], scient.matchedLength()));
 	}
 }
 
@@ -903,19 +906,24 @@ LDObjectPtr parseLine (QString line)
 				// Handle BFC statements
 				if (tokens.size() > 2 and tokens[1] == "BFC")
 				{
-					for (int i = 0; i < LDBFC::NumStatements; ++i)
-						if (commentTextSimplified == format ("BFC %1", LDBFC::k_statementStrings [i]))
-							return spawn<LDBFC> ((LDBFC::Statement) i);
+					for_enum (BFCStatement, i)
+					{
+						if (commentTextSimplified == format ("BFC %1",
+							LDBFC::StatementStrings[int (i)]))
+						{
+							return spawn<LDBFC> (i);
+						}
+					}
 
 					// MLCAD is notorious for stuffing these statements in parts it
 					// creates. The above block only handles valid statements, so we
 					// need to handle MLCAD-style invertnext, clip and noclip separately.
 					if (commentTextSimplified == "BFC CERTIFY INVERTNEXT")
-						return spawn<LDBFC> (LDBFC::InvertNext);
+						return spawn<LDBFC> (BFCStatement::InvertNext);
 					elif (commentTextSimplified == "BFC CERTIFY CLIP")
-						return spawn<LDBFC> (LDBFC::Clip);
+						return spawn<LDBFC> (BFCStatement::Clip);
 					elif (commentTextSimplified == "BFC CERTIFY NOCLIP")
-						return spawn<LDBFC> (LDBFC::NoClip);
+						return spawn<LDBFC> (BFCStatement::NoClip);
 				}
 
 				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
@@ -929,7 +937,8 @@ LDObjectPtr parseLine (QString line)
 
 						LDVertexPtr obj = spawn<LDVertex>();
 						obj->setColor (LDColor::fromIndex (stringToNumber (tokens[3])));
-						obj->pos.apply ([&](Axis ax, double& value) { value = tokens[4 + ax].toDouble(); });
+						obj->pos.apply ([&](Axis ax, double& value)
+							{ value = tokens[4 + ax].toDouble(); });
 						return obj;
 					}
 					elif (tokens[2] == "OVERLAY")

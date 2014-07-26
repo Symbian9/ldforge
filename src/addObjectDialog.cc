@@ -82,13 +82,13 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 		{
 			rb_bfcType = new RadioGroup ("Statement", {}, 0, Qt::Vertical);
 
-			for (int i = 0; i < LDBFC::NumStatements; ++i)
+			for_enum (BFCStatement, i)
 			{
 				// Separate these in two columns
-				if (i == LDBFC::NumStatements / 2)
+				if (int (i) == int (BFCStatement::NumValues) / 2)
 					rb_bfcType->rowBreak();
 
-				rb_bfcType->addButton (LDBFC::k_statementStrings[i]);
+				rb_bfcType->addButton (LDBFC::StatementStrings[int (i)]);
 			}
 
 			if (obj)
@@ -355,7 +355,8 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 		case OBJ_BFC:
 		{
 			LDBFCPtr bfc = initObj<LDBFC> (obj);
-			bfc->setStatement ((LDBFC::Statement) dlg.rb_bfcType->value());
+			assert (within (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
+			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 
 		case OBJ_Vertex:

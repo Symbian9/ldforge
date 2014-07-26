@@ -373,7 +373,7 @@ void MainWindow::buildObjList()
 
 			case OBJ_BFC:
 			{
-				descr = LDBFC::k_statementStrings[obj.staticCast<LDBFC>()->statement()];
+				descr = LDBFC::StatementStrings[int (obj.staticCast<LDBFC>()->statement())];
 				break;
 			}
 

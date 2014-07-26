@@ -244,6 +244,12 @@ template<class T> inline bool isInteger (T a)
 }
 
 template<typename T>
+inline bool within (T a, T b, T c)
+{
+	return a >= b and a <= c;
+}
+
+template<typename T>
 void removeDuplicates (T& a)
 {
 	std::sort (a.begin(), a.end());

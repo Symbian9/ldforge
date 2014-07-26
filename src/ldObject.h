@@ -371,39 +371,41 @@ using LDCommentWeakPtr = QWeakPointer<LDComment>;
 //
 // Represents a 0 BFC statement in the LDraw code.
 //
+enum class BFCStatement
+{
+	CertifyCCW,
+	CCW,
+	CertifyCW,
+	CW,
+	NoCertify,
+	InvertNext,
+	Clip,
+	ClipCCW,
+	ClipCW,
+	NoClip,
+
+	NumValues,
+	FirstValue = CertifyCCW
+};
+
 class LDBFC : public LDObject
 {
 public:
-	enum Statement
-	{
-		CertifyCCW,
-		CCW,
-		CertifyCW,
-		CW,
-		NoCertify,
-		InvertNext,
-		Clip,
-		ClipCCW,
-		ClipCW,
-		NoClip,
-		NumStatements
-	};
-
 	LDOBJ (BFC)
 	LDOBJ_NAME (bfc)
 	LDOBJ_VERTICES (0)
 	LDOBJ_UNCOLORED
-	LDOBJ_CUSTOM_SCEMANTIC { return (statement() == InvertNext); }
+	LDOBJ_CUSTOM_SCEMANTIC { return (statement() == BFCStatement::InvertNext); }
 	LDOBJ_NO_MATRIX
-	PROPERTY (public, Statement, statement, setStatement, STOCK_WRITE)
+	PROPERTY (public, BFCStatement, statement, setStatement, STOCK_WRITE)
 
 public:
-	LDBFC (LDObjectPtr* selfptr, const LDBFC::Statement type) :
+	LDBFC (LDObjectPtr* selfptr, const BFCStatement type) :
 		LDObject (selfptr),
 		m_statement (type) {}
 
 	// Statement strings
-	static const char* k_statementStrings[];
+	static const char* StatementStrings[];
 };
 
 using LDBFCPtr = QSharedPointer<LDBFC>;
