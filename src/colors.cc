@@ -68,7 +68,7 @@ LDColor LDColor::fromIndex (qint32 index)
 	if (index < countof (g_LDConfigColors) and g_LDConfigColors[index] != null)
 		return g_LDConfigColors[index];
 
-	if (index > 0x2000000)
+	if (index >= 0x2000000)
 	{
 		// Direct color
 		QColor col;
@@ -76,7 +76,7 @@ LDColor LDColor::fromIndex (qint32 index)
 		col.setGreen ((index & 0x000FF00) >> 8);
 		col.setBlue (index & 0x00000FF);
 
-		if (index > 0x3000000)
+		if (index >= 0x3000000)
 			col.setAlpha (128);
 
 		LDColorData* color = new LDColorData;
