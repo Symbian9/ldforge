@@ -55,20 +55,20 @@
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
 
-CFGENTRY (Bool, colorizeObjectsList, true);
-CFGENTRY (String, quickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15");
-CFGENTRY (Bool, listImplicitFiles, false);
-EXTERN_CFGENTRY (List,		recentFiles);
-EXTERN_CFGENTRY (Bool,		drawAxes);
-EXTERN_CFGENTRY (String,		mainColor);
-EXTERN_CFGENTRY (Float,		mainColorAlpha);
-EXTERN_CFGENTRY (Bool,		drawWireframe);
-EXTERN_CFGENTRY (Bool,		bfcRedGreenView);
-EXTERN_CFGENTRY (Bool,		drawAngles);
-EXTERN_CFGENTRY (Bool,		randomColors);
-EXTERN_CFGENTRY (Bool,		drawSurfaces)
-EXTERN_CFGENTRY (Bool,		drawEdgeLines)
-EXTERN_CFGENTRY (Bool,		drawConditionalLines)
+CFGENTRY (Bool, ColorizeObjectsList, true);
+CFGENTRY (String, QuickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15");
+CFGENTRY (Bool, ListImplicitFiles, false);
+EXTERN_CFGENTRY (List, RecentFiles);
+EXTERN_CFGENTRY (Bool, DrawAxes);
+EXTERN_CFGENTRY (String, MainColor);
+EXTERN_CFGENTRY (Float, MainColorAlpha);
+EXTERN_CFGENTRY (Bool, DrawWireframe);
+EXTERN_CFGENTRY (Bool, BfcRedGreenView);
+EXTERN_CFGENTRY (Bool, DrawAngles);
+EXTERN_CFGENTRY (Bool, RandomColors);
+EXTERN_CFGENTRY (Bool, DrawSurfaces)
+EXTERN_CFGENTRY (Bool, DrawEdgeLines)
+EXTERN_CFGENTRY (Bool, DrawConditionalLines)
 
 // =============================================================================
 //
@@ -166,7 +166,7 @@ for (QAction * recent : m_recentFiles)
 
 	QAction* first = null;
 
-	for (const QVariant& it : cfg::recentFiles)
+	for (const QVariant& it : cfg::RecentFiles)
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (getIcon ("open-recent"), file, this);
@@ -184,7 +184,7 @@ QList<LDQuickColor> quickColorsFromConfig()
 {
 	QList<LDQuickColor> colors;
 
-	for (QString colorname : cfg::quickColorToolbar.split (":"))
+	for (QString colorname : cfg::QuickColorToolbar.split (":"))
 	{
 		if (colorname == "|")
 			colors << LDQuickColor::getSeparator();
@@ -236,9 +236,9 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	ui->actionGridCoarse->setChecked (cfg::grid == Grid::Coarse);
-	ui->actionGridMedium->setChecked (cfg::grid == Grid::Medium);
-	ui->actionGridFine->setChecked (cfg::grid == Grid::Fine);
+	ui->actionGridCoarse->setChecked (cfg::Grid == Grid::Coarse);
+	ui->actionGridMedium->setChecked (cfg::Grid == Grid::Medium);
+	ui->actionGridFine->setChecked (cfg::Grid == Grid::Fine);
 }
 
 // =============================================================================
@@ -410,7 +410,7 @@ void MainWindow::buildObjList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		elif (cfg::colorizeObjectsList and obj->isColored() and
+		elif (cfg::ColorizeObjectsList and obj->isColored() and
 			obj->color() != null and obj->color() != maincolor() and obj->color() != edgecolor())
 		{
 			// If the object isn't in the main or edge color, draw this
@@ -823,8 +823,8 @@ QIcon makeColorIcon (LDColor colinfo, const int size)
 	if (colinfo == maincolor())
 	{
 		// Use the user preferences for main color here
-		col = cfg::mainColor;
-		col.setAlphaF (cfg::mainColorAlpha);
+		col = cfg::MainColor;
+		col.setAlphaF (cfg::MainColorAlpha);
 	}
 
 	// Paint the icon border
@@ -976,14 +976,14 @@ void MainWindow::updateActions()
 		ui->actionRedo->setEnabled (pos < (long) his->getSize() - 1);
 	}
 
-	ui->actionWireframe->setChecked (cfg::drawWireframe);
-	ui->actionAxes->setChecked (cfg::drawAxes);
-	ui->actionBFCView->setChecked (cfg::bfcRedGreenView);
-	ui->actionRandomColors->setChecked (cfg::randomColors);
-	ui->actionDrawAngles->setChecked (cfg::drawAngles);
-	ui->actionDrawSurfaces->setChecked (cfg::drawSurfaces);
-	ui->actionDrawEdgeLines->setChecked (cfg::drawEdgeLines);
-	ui->actionDrawConditionalLines->setChecked (cfg::drawConditionalLines);
+	ui->actionWireframe->setChecked (cfg::DrawWireframe);
+	ui->actionAxes->setChecked (cfg::DrawAxes);
+	ui->actionBFCView->setChecked (cfg::BfcRedGreenView);
+	ui->actionRandomColors->setChecked (cfg::RandomColors);
+	ui->actionDrawAngles->setChecked (cfg::DrawAngles);
+	ui->actionDrawSurfaces->setChecked (cfg::DrawSurfaces);
+	ui->actionDrawEdgeLines->setChecked (cfg::DrawEdgeLines);
+	ui->actionDrawConditionalLines->setChecked (cfg::DrawConditionalLines);
 }
 
 // =============================================================================

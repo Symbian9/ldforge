@@ -51,39 +51,39 @@ enum extprog
 
 // =============================================================================
 //
-CFGENTRY (String, isecalcPath, "");
-CFGENTRY (String, intersectorPath, "");
-CFGENTRY (String, covererPath, "");
-CFGENTRY (String, ytruderPath, "");
-CFGENTRY (String, rectifierPath, "");
-CFGENTRY (String, edger2Path, "");
+CFGENTRY (String, IsecalcPath, "");
+CFGENTRY (String, IntersectorPath, "");
+CFGENTRY (String, CovererPath, "");
+CFGENTRY (String, YtruderPath, "");
+CFGENTRY (String, RectifierPath, "");
+CFGENTRY (String, Edger2Path, "");
 
 QString* const g_extProgPaths[] =
 {
-	&cfg::isecalcPath,
-	&cfg::intersectorPath,
-	&cfg::covererPath,
-	&cfg::ytruderPath,
-	&cfg::rectifierPath,
-	&cfg::edger2Path,
+	&cfg::IsecalcPath,
+	&cfg::IntersectorPath,
+	&cfg::CovererPath,
+	&cfg::YtruderPath,
+	&cfg::RectifierPath,
+	&cfg::Edger2Path,
 };
 
 #ifndef _WIN32
-CFGENTRY (Bool, isecalcUsesWine, false);
-CFGENTRY (Bool, intersectorUsesWine, false);
-CFGENTRY (Bool, covererUsesWine, false);
-CFGENTRY (Bool, ytruderUsesWine, false);
-CFGENTRY (Bool, rectifierUsesWine, false);
-CFGENTRY (Bool, edger2UsesWine, false);
+CFGENTRY (Bool, IsecalcUsesWine, false);
+CFGENTRY (Bool, IntersectorUsesWine, false);
+CFGENTRY (Bool, CovererUsesWine, false);
+CFGENTRY (Bool, YtruderUsesWine, false);
+CFGENTRY (Bool, RectifierUsesWine, false);
+CFGENTRY (Bool, Edger2UsesWine, false);
 
 bool* const g_extProgWine[] =
 {
-	&cfg::isecalcUsesWine,
-	&cfg::intersectorUsesWine,
-	&cfg::covererUsesWine,
-	&cfg::ytruderUsesWine,
-	&cfg::rectifierUsesWine,
-	&cfg::edger2UsesWine,
+	&cfg::IsecalcUsesWine,
+	&cfg::IntersectorUsesWine,
+	&cfg::CovererUsesWine,
+	&cfg::YtruderUsesWine,
+	&cfg::RectifierUsesWine,
+	&cfg::Edger2UsesWine,
 };
 #endif // _WIN32
 
@@ -381,7 +381,7 @@ void MainWindow::slot_actionYtruder()
 
 	writeSelection (inDATName);
 
-	if (not runUtilityProcess (Ytruder, cfg::ytruderPath, argv))
+	if (not runUtilityProcess (Ytruder, cfg::YtruderPath, argv))
 		return;
 
 	insertOutput (outDATName, false, {});
@@ -426,7 +426,7 @@ void MainWindow::slot_actionRectifier()
 
 	writeSelection (inDATName);
 
-	if (not runUtilityProcess (Rectifier, cfg::rectifierPath, argv))
+	if (not runUtilityProcess (Rectifier, cfg::RectifierPath, argv))
 		return;
 
 	insertOutput (outDATName, true, {});
@@ -517,16 +517,16 @@ void MainWindow::slot_actionIntersector()
 	writeColorGroup (inCol, inDATName);
 	writeColorGroup (cutCol, cutDATName);
 
-	if (not runUtilityProcess (Intersector, cfg::intersectorPath, argv_normal))
+	if (not runUtilityProcess (Intersector, cfg::IntersectorPath, argv_normal))
 		return;
 
 	insertOutput (outDATName, false, {inCol});
 
-	if (repeatInverse and runUtilityProcess (Intersector, cfg::intersectorPath, argv_inverse))
+	if (repeatInverse and runUtilityProcess (Intersector, cfg::IntersectorPath, argv_inverse))
 		insertOutput (outDAT2Name, false, {cutCol});
 
 	if (ui.cb_edges->isChecked() and checkProgPath (Isecalc) and
-		runUtilityProcess (Isecalc, cfg::isecalcPath, join ( {inDATName, cutDATName, edgesDATName})))
+		runUtilityProcess (Isecalc, cfg::IsecalcPath, join ( {inDATName, cutDATName, edgesDATName})))
 	{
 		insertOutput (edgesDATName, false, {});
 	}
@@ -590,7 +590,7 @@ void MainWindow::slot_actionCoverer()
 	writeColorGroup (in1Col, in1DATName);
 	writeColorGroup (in2Col, in2DATName);
 
-	if (not runUtilityProcess (Coverer, cfg::covererPath, argv))
+	if (not runUtilityProcess (Coverer, cfg::CovererPath, argv))
 		return;
 
 	insertOutput (outDATName, false, {});
@@ -651,7 +651,7 @@ void MainWindow::slot_actionIsecalc()
 
 	writeColorGroup (in1Col, in1DATName);
 	writeColorGroup (in2Col, in2DATName);
-	runUtilityProcess (Isecalc, cfg::isecalcPath, argv);
+	runUtilityProcess (Isecalc, cfg::IsecalcPath, argv);
 	insertOutput (outDATName, false, {});
 }
 
@@ -698,7 +698,7 @@ void MainWindow::slot_actionEdger2()
 
 	writeSelection (inName);
 
-	if (not runUtilityProcess (Edger2, cfg::edger2Path, argv))
+	if (not runUtilityProcess (Edger2, cfg::Edger2Path, argv))
 		return;
 
 	insertOutput (outName, true, {});

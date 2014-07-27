@@ -45,9 +45,9 @@ static const GLErrorInfo g_GLErrors[] =
 	{ GL_STACK_OVERFLOW,				"The operation would have caused an overflow" },
 };
 
-CFGENTRY (String, selectColorBlend, "#0080FF")
-EXTERN_CFGENTRY (Bool, blackEdges);
-EXTERN_CFGENTRY (String, backgroundColor);
+CFGENTRY (String, SelectColorBlend, "#0080FF")
+EXTERN_CFGENTRY (Bool, BlackEdges);
+EXTERN_CFGENTRY (String, BackgroundColor);
 
 static QList<int>		g_warnedColors;
 static const QColor		g_BFCFrontColor (64, 192, 80);
@@ -164,7 +164,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 			}
 			elif (poly.color == edgeColorIndex)
 			{
-				qcol = luma (QColor (cfg::backgroundColor)) > 40 ? Qt::black : Qt::white;
+				qcol = luma (QColor (cfg::BackgroundColor)) > 40 ? Qt::black : Qt::white;
 			}
 			else
 			{
@@ -204,7 +204,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 
 	if (blendAlpha != 0.0)
 	{
-		QColor selcolor (cfg::selectColorBlend);
+		QColor selcolor (cfg::SelectColorBlend);
 		double denom = blendAlpha + 1.0;
 		qcol.setRed ((qcol.red() + (selcolor.red() * blendAlpha)) / denom);
 		qcol.setGreen ((qcol.green() + (selcolor.green() * blendAlpha)) / denom);

@@ -27,8 +27,8 @@
 #include "../mainWindow.h"
 #include "../glRenderer.h"
 
-CFGENTRY (Bool, drawLineLengths, true)
-CFGENTRY (Bool, drawAngles, false)
+CFGENTRY (Bool, DrawLineLengths, true)
+CFGENTRY (Bool, DrawAngles, false)
 
 AbstractEditMode::AbstractEditMode (GLRenderer* renderer) :
 	_renderer (renderer) {}
@@ -209,14 +209,14 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			const int j = (i + 1) % poly3d.size();
 			const int h = (i - 1 >= 0) ? (i - 1) : (poly3d.size() - 1);
 
-			if (cfg::drawLineLengths)
+			if (cfg::DrawLineLengths)
 			{
 				const QString label = QString::number ((poly3d[j] - poly3d[i]).length());
 				QPoint origin = QLineF (poly[i], poly[j]).pointAt (0.5).toPoint();
 				painter.drawText (origin, label);
 			}
 
-			if (withangles and cfg::drawAngles)
+			if (withangles and cfg::DrawAngles)
 			{
 				QLineF l0 (poly[h], poly[i]),
 					l1 (poly[i], poly[j]);

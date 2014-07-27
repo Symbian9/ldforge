@@ -40,7 +40,7 @@ static QString g_versionString, g_fullVersionString;
 const Vertex g_origin (0.0f, 0.0f, 0.0f);
 const Matrix g_identity ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
-CFGENTRY (Bool, firstStart, true);
+CFGENTRY (Bool, FirstStart, true);
 
 // =============================================================================
 //
@@ -72,10 +72,10 @@ int main (int argc, char* argv[])
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
-	if (cfg::firstStart)
+	if (cfg::FirstStart)
 	{
 		(new ConfigDialog (ConfigDialog::ProfileTab))->exec();
-		cfg::firstStart = false;
+		cfg::FirstStart = false;
 		Config::Save();
 	}
 

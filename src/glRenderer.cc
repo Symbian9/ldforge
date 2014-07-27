@@ -52,22 +52,22 @@ static const LDFixedCamera g_FixedCameras[6] =
 	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
 };
 
-CFGENTRY (String,	backgroundColor,			"#FFFFFF")
-CFGENTRY (String,	mainColor,					"#A0A0A0")
-CFGENTRY (Float,	mainColorAlpha,				1.0)
-CFGENTRY (Int,		lineThickness,				2)
-CFGENTRY (Bool,		bfcRedGreenView,			false)
-CFGENTRY (Int,		camera,						EFreeCamera)
-CFGENTRY (Bool,		blackEdges,					false)
-CFGENTRY (Bool,		drawAxes,					false)
-CFGENTRY (Bool,		drawWireframe,				false)
-CFGENTRY (Bool,		useLogoStuds,				false)
-CFGENTRY (Bool,		antiAliasedLines,			true)
-CFGENTRY (Bool,		randomColors,				false)
-CFGENTRY (Bool,		highlightObjectBelowCursor,	true)
-CFGENTRY (Bool,		drawSurfaces,				true)
-CFGENTRY (Bool,		drawEdgeLines,				true)
-CFGENTRY (Bool,		drawConditionalLines,		true)
+CFGENTRY (String, BackgroundColor,			"#FFFFFF")
+CFGENTRY (String, MainColor,					"#A0A0A0")
+CFGENTRY (Float, MainColorAlpha,				1.0)
+CFGENTRY (Int, LineThickness,				2)
+CFGENTRY (Bool, BfcRedGreenView,			false)
+CFGENTRY (Int, Camera,						EFreeCamera)
+CFGENTRY (Bool, BlackEdges,					false)
+CFGENTRY (Bool, DrawAxes,					false)
+CFGENTRY (Bool, DrawWireframe,				false)
+CFGENTRY (Bool, UseLogoStuds,				false)
+CFGENTRY (Bool, AntiAliasedLines,			true)
+CFGENTRY (Bool, RandomColors,				false)
+CFGENTRY (Bool, HighlightObjectBelowCursor,	true)
+CFGENTRY (Bool, DrawSurfaces,				true)
+CFGENTRY (Bool, DrawEdgeLines,				true)
+CFGENTRY (Bool, DrawConditionalLines,		true)
 
 // argh
 const char* g_CameraNames[7] =
@@ -103,7 +103,7 @@ static GLuint g_GLAxes_ColorVBO;
 GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 {
 	m_isPicking = false;
-	m_camera = (ECamera) cfg::camera;
+	m_camera = (ECamera) cfg::Camera;
 	m_drawToolTip = false;
 	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
@@ -186,7 +186,7 @@ void GLRenderer::initGLData()
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_MULTISAMPLE);
 
-	if (cfg::antiAliasedLines)
+	if (cfg::AntiAliasedLines)
 	{
 		glEnable (GL_LINE_SMOOTH);
 		glEnable (GL_POLYGON_SMOOTH);
@@ -237,7 +237,7 @@ void GLRenderer::resetAllAngles()
 void GLRenderer::initializeGL()
 {
 	setBackground();
-	glLineWidth (cfg::lineThickness);
+	glLineWidth (cfg::LineThickness);
 	glLineStipple (1, 0x6666);
 	setAutoFillBackground (false);
 	setMouseTracking (true);
@@ -283,12 +283,12 @@ void GLRenderer::initializeAxes()
 //
 QColor GLRenderer::getMainColor()
 {
-	QColor col (cfg::mainColor);
+	QColor col (cfg::MainColor);
 
 	if (not col.isValid())
 		return QColor (0, 0, 0);
 
-	col.setAlpha (cfg::mainColorAlpha * 255.f);
+	col.setAlpha (cfg::MainColorAlpha * 255.f);
 	return col;
 }
 
@@ -302,7 +302,7 @@ void GLRenderer::setBackground()
 		return;
 	}
 
-	QColor col (cfg::backgroundColor);
+	QColor col (cfg::BackgroundColor);
 
 	if (not col.isValid())
 		return;
@@ -328,7 +328,7 @@ void GLRenderer::hardRefresh()
 {
 	compiler()->compileDocument (getCurrentDocument());
 	refresh();
-	glLineWidth (cfg::lineThickness); // TODO: ...?
+	glLineWidth (cfg::LineThickness); // TODO: ...?
 }
 
 // =============================================================================
@@ -360,7 +360,7 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (cfg::drawWireframe and not isPicking())
+	if (cfg::DrawWireframe and not isPicking())
 		glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -414,7 +414,7 @@ void GLRenderer::drawGLScene()
 	}
 	else
 	{
-		if (cfg::bfcRedGreenView)
+		if (cfg::BfcRedGreenView)
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
@@ -427,7 +427,7 @@ void GLRenderer::drawGLScene()
 		}
 		else
 		{
-			if (cfg::randomColors)
+			if (cfg::RandomColors)
 			{
 				drawVBOs (VBOSF_Triangles, VBOCM_RandomColors, GL_TRIANGLES);
 				drawVBOs (VBOSF_Quads, VBOCM_RandomColors, GL_QUADS);
@@ -444,7 +444,7 @@ void GLRenderer::drawGLScene()
 		drawVBOs (VBOSF_CondLines, VBOCM_NormalColors, GL_LINES);
 		glDisable (GL_LINE_STIPPLE);
 
-		if (cfg::drawAxes)
+		if (cfg::DrawAxes)
 		{
 			glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
@@ -470,9 +470,9 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::drawSurfaces == false) or
-		(surface == VBOSF_Lines and cfg::drawEdgeLines == false) or
-		(surface == VBOSF_CondLines and cfg::drawConditionalLines == false))
+	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
+		(surface == VBOSF_Lines and cfg::DrawEdgeLines == false) or
+		(surface == VBOSF_CondLines and cfg::DrawConditionalLines == false))
 	{
 		return;
 	}
@@ -876,7 +876,7 @@ void GLRenderer::setCamera (const ECamera cam)
 		return;
 
 	m_camera = cam;
-	cfg::camera = (int) cam;
+	cfg::Camera = (int) cam;
 	g_win->updateEditModeActions();
 }
 
@@ -1056,14 +1056,14 @@ void GLRenderer::setPicking (const bool& a)
 		glDisable (GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth (max<double> (cfg::lineThickness, 6.5));
+		glLineWidth (max<double> (cfg::LineThickness, 6.5));
 	}
 	else
 	{
 		glEnable (GL_DITHER);
 
 		// Restore line thickness
-		glLineWidth (cfg::lineThickness);
+		glLineWidth (cfg::LineThickness);
 	}
 }
 
@@ -1528,14 +1528,14 @@ void GLRenderer::updateOverlayObjects()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not cfg::highlightObjectBelowCursor and objectAtCursor() == null)
+	if (not cfg::HighlightObjectBelowCursor and objectAtCursor() == null)
 		return;
 
 	LDObjectWeakPtr newObject;
 	LDObjectWeakPtr oldObject = objectAtCursor();
 	qint32 newIndex;
 
-	if (isCameraMoving() or not cfg::highlightObjectBelowCursor)
+	if (isCameraMoving() or not cfg::HighlightObjectBelowCursor)
 	{
 		newIndex = 0;
 	}

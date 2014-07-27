@@ -36,11 +36,11 @@
 #include "ui_flip.h"
 #include "ui_addhistoryline.h"
 
-EXTERN_CFGENTRY (String, defaultUser)
+EXTERN_CFGENTRY (String, DefaultUser)
 
-CFGENTRY (Int,	roundPosition,		3)
-CFGENTRY (Int,	roundMatrix,		4)
-CFGENTRY (Int,	splitLinesSegments, 5)
+CFGENTRY (Int, RoundPosition,		3)
+CFGENTRY (Int, RoundMatrix,		4)
+CFGENTRY (Int, SplitLinesSegments, 5)
 
 // =============================================================================
 //
@@ -531,8 +531,8 @@ void MainWindow::slot_actionRoundCoordinates()
 			Matrix t = mo->transform();
 
 			// Note: matrix values are to be rounded to 4 decimals.
-			v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::roundPosition); });
-			applyToMatrix (t, [](int, double& a) { roundToDecimals (a, cfg::roundMatrix); });
+			v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::RoundPosition); });
+			applyToMatrix (t, [](int, double& a) { roundToDecimals (a, cfg::RoundMatrix); });
 
 			mo->setPosition (v);
 			mo->setTransform (t);
@@ -543,7 +543,7 @@ void MainWindow::slot_actionRoundCoordinates()
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
-				v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::roundPosition); });
+				v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::RoundPosition); });
 				obj->setVertex (i, v);
 				num += 3;
 			}
@@ -734,7 +734,7 @@ void MainWindow::slot_actionAddHistoryLine()
 	QDialog* dlg = new QDialog;
 	Ui_AddHistoryLine* ui = new Ui_AddHistoryLine;
 	ui->setupUi (dlg);
-	ui->m_username->setText (cfg::defaultUser);
+	ui->m_username->setText (cfg::DefaultUser);
 	ui->m_date->setDate (QDate::currentDate());
 	ui->m_comment->setFocus();
 
@@ -784,13 +784,13 @@ void MainWindow::slot_actionAddHistoryLine()
 void MainWindow::slot_actionSplitLines()
 {
 	bool ok;
-	int segments = QInputDialog::getInt (g_win, APPNAME, "Amount of segments:", cfg::splitLinesSegments, 0,
+	int segments = QInputDialog::getInt (g_win, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,
 		std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
 		return;
 
-	cfg::splitLinesSegments = segments;
+	cfg::SplitLinesSegments = segments;
 
 	for (LDObjectPtr obj : selection())
 	{

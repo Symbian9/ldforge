@@ -39,16 +39,16 @@
 #include "ui_newpart.h"
 #include "editmodes/abstractEditMode.h"
 
-EXTERN_CFGENTRY (Bool,		drawWireframe);
-EXTERN_CFGENTRY (Bool,		bfcRedGreenView);
-EXTERN_CFGENTRY (String,	defaultName);
-EXTERN_CFGENTRY (String,	defaultUser);
-EXTERN_CFGENTRY (Bool,		UseCALicense);
-EXTERN_CFGENTRY (Bool,		drawAngles);
-EXTERN_CFGENTRY (Bool,		randomColors)
-EXTERN_CFGENTRY (Bool,		drawSurfaces)
-EXTERN_CFGENTRY (Bool,		drawEdgeLines)
-EXTERN_CFGENTRY (Bool,		drawConditionalLines)
+EXTERN_CFGENTRY (Bool, DrawWireframe);
+EXTERN_CFGENTRY (Bool, BfcRedGreenView);
+EXTERN_CFGENTRY (String, DefaultName);
+EXTERN_CFGENTRY (String, DefaultUser);
+EXTERN_CFGENTRY (Bool, UseCALicense);
+EXTERN_CFGENTRY (Bool, DrawAngles);
+EXTERN_CFGENTRY (Bool, RandomColors)
+EXTERN_CFGENTRY (Bool, DrawSurfaces)
+EXTERN_CFGENTRY (Bool, DrawEdgeLines)
+EXTERN_CFGENTRY (Bool, DrawConditionalLines)
 
 // =============================================================================
 //
@@ -58,10 +58,10 @@ void MainWindow::slot_actionNew()
 	Ui::NewPartUI ui;
 	ui.setupUi (dlg);
 
-	QString authortext = cfg::defaultName;
+	QString authortext = cfg::DefaultName;
 
-	if (not cfg::defaultUser.isEmpty())
-		authortext.append (format (" [%1]", cfg::defaultUser));
+	if (not cfg::DefaultUser.isEmpty())
+		authortext.append (format (" [%1]", cfg::DefaultUser));
 
 	ui.le_author->setText (authortext);
 	ui.caLicense->setChecked (cfg::UseCALicense);
@@ -344,19 +344,19 @@ void MainWindow::slot_actionSelectByType()
 //
 void MainWindow::slot_actionGridCoarse()
 {
-	cfg::grid = Grid::Coarse;
+	cfg::Grid = Grid::Coarse;
 	updateGridToolBar();
 }
 
 void MainWindow::slot_actionGridMedium()
 {
-	cfg::grid = Grid::Medium;
+	cfg::Grid = Grid::Medium;
 	updateGridToolBar();
 }
 
 void MainWindow::slot_actionGridFine()
 {
-	cfg::grid = Grid::Fine;
+	cfg::Grid = Grid::Fine;
 	updateGridToolBar();
 }
 
@@ -495,10 +495,10 @@ void MainWindow::slot_actionScreenshot()
 
 // =============================================================================
 //
-EXTERN_CFGENTRY (Bool, drawAxes);
+EXTERN_CFGENTRY (Bool, DrawAxes);
 void MainWindow::slot_actionAxes()
 {
-	cfg::drawAxes = not cfg::drawAxes;
+	cfg::DrawAxes = not cfg::DrawAxes;
 	updateActions();
 	R()->update();
 }
@@ -536,7 +536,7 @@ void MainWindow::slot_actionVisibilityReveal()
 //
 void MainWindow::slot_actionWireframe()
 {
-	cfg::drawWireframe = not cfg::drawWireframe;
+	cfg::DrawWireframe = not cfg::DrawWireframe;
 	R()->refresh();
 }
 
@@ -599,7 +599,7 @@ void MainWindow::slot_actionModeMagicWand()
 //
 void MainWindow::slot_actionDrawAngles()
 {
-	cfg::drawAngles = not cfg::drawAngles;
+	cfg::DrawAngles = not cfg::DrawAngles;
 	R()->refresh();
 }
 
@@ -679,10 +679,10 @@ void MainWindow::slot_actionScanPrimitives()
 //
 void MainWindow::slot_actionBFCView()
 {
-	cfg::bfcRedGreenView = not cfg::bfcRedGreenView;
+	cfg::BfcRedGreenView = not cfg::BfcRedGreenView;
 
-	if (cfg::bfcRedGreenView)
-		cfg::randomColors = false;
+	if (cfg::BfcRedGreenView)
+		cfg::RandomColors = false;
 
 	updateActions();
 	R()->refresh();
@@ -834,7 +834,7 @@ void MainWindow::slot_actionSubfileSelection()
 	LDObjectList objs;
 	objs << spawn<LDComment> (subtitle);
 	objs << spawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
-	objs << spawn<LDComment> (format ("Author: %1 [%2]", cfg::defaultName, cfg::defaultUser));
+	objs << spawn<LDComment> (format ("Author: %1 [%2]", cfg::DefaultName, cfg::DefaultUser));
 	objs << spawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
 
 	if (not license.isEmpty())
@@ -882,10 +882,10 @@ void MainWindow::slot_actionSubfileSelection()
 
 void MainWindow::slot_actionRandomColors()
 {
-	cfg::randomColors = not cfg::randomColors;
+	cfg::RandomColors = not cfg::RandomColors;
 
-	if (cfg::randomColors)
-		cfg::bfcRedGreenView = false;
+	if (cfg::RandomColors)
+		cfg::BfcRedGreenView = false;
 
 	updateActions();
 	R()->refresh();
@@ -906,21 +906,21 @@ void MainWindow::slot_actionOpenSubfiles()
 
 void MainWindow::slot_actionDrawSurfaces()
 {
-	cfg::drawSurfaces = not cfg::drawSurfaces;
+	cfg::DrawSurfaces = not cfg::DrawSurfaces;
 	updateActions();
 	update();
 }
 
 void MainWindow::slot_actionDrawEdgeLines()
 {
-	cfg::drawEdgeLines = not cfg::drawEdgeLines;
+	cfg::DrawEdgeLines = not cfg::DrawEdgeLines;
 	updateActions();
 	update();
 }
 
 void MainWindow::slot_actionDrawConditionalLines()
 {
-	cfg::drawConditionalLines = not cfg::drawConditionalLines;
+	cfg::DrawConditionalLines = not cfg::DrawConditionalLines;
 	updateActions();
 	update();
 }

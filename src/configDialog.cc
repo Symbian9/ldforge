@@ -39,46 +39,46 @@
 #include "glRenderer.h"
 #include "ui_config.h"
 
-EXTERN_CFGENTRY (String, backgroundColor);
-EXTERN_CFGENTRY (String, mainColor);
-EXTERN_CFGENTRY (Bool, colorizeObjectsList);
-EXTERN_CFGENTRY (Bool, bfcRedGreenView);
-EXTERN_CFGENTRY (Float, mainColorAlpha);
-EXTERN_CFGENTRY (Int, lineThickness);
-EXTERN_CFGENTRY (String, quickColorToolbar);
-EXTERN_CFGENTRY (Bool, blackEdges);
-EXTERN_CFGENTRY (Bool, antiAliasedLines);
-EXTERN_CFGENTRY (Bool, listImplicitFiles);
-EXTERN_CFGENTRY (String, downloadFilePath);
-EXTERN_CFGENTRY (Bool, guessDownloadPaths);
-EXTERN_CFGENTRY (Bool, autoCloseDownloadDialog);
-EXTERN_CFGENTRY (Bool, useLogoStuds);
-EXTERN_CFGENTRY (Bool,	drawLineLengths);
-EXTERN_CFGENTRY (String, defaultName);
-EXTERN_CFGENTRY (String, defaultUser);
+EXTERN_CFGENTRY (String, BackgroundColor);
+EXTERN_CFGENTRY (String, MainColor);
+EXTERN_CFGENTRY (Bool, ColorizeObjectsList);
+EXTERN_CFGENTRY (Bool, BfcRedGreenView);
+EXTERN_CFGENTRY (Float, MainColorAlpha);
+EXTERN_CFGENTRY (Int, LineThickness);
+EXTERN_CFGENTRY (String, QuickColorToolbar);
+EXTERN_CFGENTRY (Bool, BlackEdges);
+EXTERN_CFGENTRY (Bool, AntiAliasedLines);
+EXTERN_CFGENTRY (Bool, ListImplicitFiles);
+EXTERN_CFGENTRY (String, DownloadFilePath);
+EXTERN_CFGENTRY (Bool, GuessDownloadPaths);
+EXTERN_CFGENTRY (Bool, AutoCloseDownloadDialog);
+EXTERN_CFGENTRY (Bool, UseLogoStuds);
+EXTERN_CFGENTRY (Bool, DrawLineLengths);
+EXTERN_CFGENTRY (String, DefaultName);
+EXTERN_CFGENTRY (String, DefaultUser);
 EXTERN_CFGENTRY (Bool, UseCALicense);
-EXTERN_CFGENTRY (String, selectColorBlend);
-EXTERN_CFGENTRY (String, ytruderPath);
-EXTERN_CFGENTRY (String, rectifierPath);
-EXTERN_CFGENTRY (String, intersectorPath);
-EXTERN_CFGENTRY (String, covererPath);
-EXTERN_CFGENTRY (String, isecalcPath);
-EXTERN_CFGENTRY (String, edger2Path);
-EXTERN_CFGENTRY (Bool, ytruderUsesWine);
-EXTERN_CFGENTRY (Bool, rectifierUsesWine);
-EXTERN_CFGENTRY (Bool, intersectorUsesWine);
-EXTERN_CFGENTRY (Bool, covererUsesWine);
-EXTERN_CFGENTRY (Bool, isecalcUsesWine);
-EXTERN_CFGENTRY (Bool, edger2UsesWine);
-EXTERN_CFGENTRY (Float,	gridCoarseCoordinateSnap);
-EXTERN_CFGENTRY (Float,	gridCoarseAngleSnap);
-EXTERN_CFGENTRY (Float, gridMediumCoordinateSnap);
-EXTERN_CFGENTRY (Float,	gridMediumAngleSnap);
-EXTERN_CFGENTRY (Float,	gridFineCoordinateSnap);
-EXTERN_CFGENTRY (Float,	gridFineAngleSnap);
-EXTERN_CFGENTRY (Bool, highlightObjectBelowCursor)
-EXTERN_CFGENTRY (Int, roundPosition)
-EXTERN_CFGENTRY (Int, roundMatrix)
+EXTERN_CFGENTRY (String, SelectColorBlend);
+EXTERN_CFGENTRY (String, YtruderPath);
+EXTERN_CFGENTRY (String, RectifierPath);
+EXTERN_CFGENTRY (String, IntersectorPath);
+EXTERN_CFGENTRY (String, CovererPath);
+EXTERN_CFGENTRY (String, IsecalcPath);
+EXTERN_CFGENTRY (String, Edger2Path);
+EXTERN_CFGENTRY (Bool, YtruderUsesWine);
+EXTERN_CFGENTRY (Bool, RectifierUsesWine);
+EXTERN_CFGENTRY (Bool, IntersectorUsesWine);
+EXTERN_CFGENTRY (Bool, CovererUsesWine);
+EXTERN_CFGENTRY (Bool, IsecalcUsesWine);
+EXTERN_CFGENTRY (Bool, Edger2UsesWine);
+EXTERN_CFGENTRY (Float, GridCoarseCoordinateSnap);
+EXTERN_CFGENTRY (Float, GridCoarseAngleSnap);
+EXTERN_CFGENTRY (Float, GridMediumCoordinateSnap);
+EXTERN_CFGENTRY (Float, GridMediumAngleSnap);
+EXTERN_CFGENTRY (Float, GridFineCoordinateSnap);
+EXTERN_CFGENTRY (Float, GridFineAngleSnap);
+EXTERN_CFGENTRY (Bool, HighlightObjectBelowCursor)
+EXTERN_CFGENTRY (Int, RoundPosition)
+EXTERN_CFGENTRY (Int, RoundMatrix)
 
 const char* g_extProgPathFilter =
 #ifdef _WIN32
@@ -100,9 +100,10 @@ static struct LDExtProgInfo
 } g_LDExtProgInfo[] =
 {
 #ifndef _WIN32
-# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::LOWNAME##Path, null, null, &cfg::LOWNAME##UsesWine, null },
+# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::NAME##Path, null, null, \
+	&cfg::NAME##UsesWine, null },
 #else
-# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::LOWNAME##Path, null, null, null, null },
+# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::NAME##Path, null, null, null, null },
 #endif
 	EXTPROG (Ytruder, ytruder)
 	EXTPROG (Rectifier, rectifier)
@@ -123,30 +124,30 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 	ui->setupUi (this);
 
 	// Interface tab
-	setButtonBackground (ui->backgroundColorButton, cfg::backgroundColor);
+	setButtonBackground (ui->backgroundColorButton, cfg::BackgroundColor);
 	connect (ui->backgroundColorButton, SIGNAL (clicked()),
 			 this, SLOT (slot_setGLBackground()));
 
-	setButtonBackground (ui->mainColorButton, cfg::mainColor);
+	setButtonBackground (ui->mainColorButton, cfg::MainColor);
 	connect (ui->mainColorButton, SIGNAL (clicked()),
 			 this, SLOT (slot_setGLForeground()));
 
-	setButtonBackground (ui->selColorButton, cfg::selectColorBlend);
+	setButtonBackground (ui->selColorButton, cfg::SelectColorBlend);
 	connect (ui->selColorButton, SIGNAL (clicked()),
 			 this, SLOT (slot_setGLSelectColor()));
 
-	ui->mainColorAlpha->setValue (cfg::mainColorAlpha * 10.0f);
-	ui->lineThickness->setValue (cfg::lineThickness);
-	ui->colorizeObjects->setChecked (cfg::colorizeObjectsList);
-	ui->colorBFC->setChecked (cfg::bfcRedGreenView);
-	ui->blackEdges->setChecked (cfg::blackEdges);
-	ui->m_aa->setChecked (cfg::antiAliasedLines);
-	ui->implicitFiles->setChecked (cfg::listImplicitFiles);
-	ui->m_logostuds->setChecked (cfg::useLogoStuds);
-	ui->linelengths->setChecked (cfg::drawLineLengths);
+	ui->mainColorAlpha->setValue (cfg::MainColorAlpha * 10.0f);
+	ui->lineThickness->setValue (cfg::LineThickness);
+	ui->colorizeObjects->setChecked (cfg::ColorizeObjectsList);
+	ui->colorBFC->setChecked (cfg::BfcRedGreenView);
+	ui->blackEdges->setChecked (cfg::BlackEdges);
+	ui->m_aa->setChecked (cfg::AntiAliasedLines);
+	ui->implicitFiles->setChecked (cfg::ListImplicitFiles);
+	ui->m_logostuds->setChecked (cfg::UseLogoStuds);
+	ui->linelengths->setChecked (cfg::DrawLineLengths);
 
-	ui->roundPosition->setValue (cfg::roundPosition);
-	ui->roundMatrix->setValue (cfg::roundMatrix);
+	ui->roundPosition->setValue (cfg::RoundPosition);
+	ui->roundMatrix->setValue (cfg::RoundMatrix);
 
 	g_win->applyToActions ([&](QAction* act)
 	{
@@ -171,21 +172,21 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 	connect (ui->quickColor_moveDown, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
 	connect (ui->quickColor_clear, SIGNAL (clicked()), this, SLOT (slot_clearColors()));
 
-	ui->downloadPath->setText (cfg::downloadFilePath);
-	ui->guessNetPaths->setChecked (cfg::guessDownloadPaths);
-	ui->autoCloseNetPrompt->setChecked (cfg::autoCloseDownloadDialog);
+	ui->downloadPath->setText (cfg::DownloadFilePath);
+	ui->guessNetPaths->setChecked (cfg::GuessDownloadPaths);
+	ui->autoCloseNetPrompt->setChecked (cfg::AutoCloseDownloadDialog);
 	connect (ui->findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
 
-	ui->m_profileName->setText (cfg::defaultName);
-	ui->m_profileUsername->setText (cfg::defaultUser);
+	ui->m_profileName->setText (cfg::DefaultName);
+	ui->m_profileUsername->setText (cfg::DefaultUser);
 	ui->UseCALicense->setChecked (cfg::UseCALicense);
-	ui->gridCoarseCoordinateSnap->setValue (cfg::gridCoarseCoordinateSnap);
-	ui->gridCoarseAngleSnap->setValue (cfg::gridCoarseAngleSnap);
-	ui->gridMediumCoordinateSnap->setValue (cfg::gridMediumCoordinateSnap);
-	ui->gridMediumAngleSnap->setValue (cfg::gridMediumAngleSnap);
-	ui->gridFineCoordinateSnap->setValue (cfg::gridFineCoordinateSnap);
-	ui->gridFineAngleSnap->setValue (cfg::gridFineAngleSnap);
-	ui->highlightObjectBelowCursor->setChecked (cfg::highlightObjectBelowCursor);
+	ui->gridCoarseCoordinateSnap->setValue (cfg::GridCoarseCoordinateSnap);
+	ui->gridCoarseAngleSnap->setValue (cfg::GridCoarseAngleSnap);
+	ui->gridMediumCoordinateSnap->setValue (cfg::GridMediumCoordinateSnap);
+	ui->gridMediumAngleSnap->setValue (cfg::GridMediumAngleSnap);
+	ui->gridFineCoordinateSnap->setValue (cfg::GridFineCoordinateSnap);
+	ui->gridFineAngleSnap->setValue (cfg::GridFineAngleSnap);
+	ui->highlightObjectBelowCursor->setChecked (cfg::HighlightObjectBelowCursor);
 
 	initExtProgs();
 	selectPage (deftab);
@@ -282,36 +283,36 @@ void ConfigDialog::initExtProgs()
 void ConfigDialog::applySettings()
 {
 	// Apply configuration
-	cfg::colorizeObjectsList = ui->colorizeObjects->isChecked();
-	cfg::bfcRedGreenView = ui->colorBFC->isChecked();
-	cfg::blackEdges = ui->blackEdges->isChecked();
-	cfg::mainColorAlpha = ((double) ui->mainColorAlpha->value()) / 10.0;
-	cfg::lineThickness = ui->lineThickness->value();
-	cfg::listImplicitFiles = ui->implicitFiles->isChecked();
-	cfg::downloadFilePath = ui->downloadPath->text();
-	cfg::guessDownloadPaths = ui->guessNetPaths->isChecked();
-	cfg::autoCloseDownloadDialog = ui->autoCloseNetPrompt->isChecked();
-	cfg::useLogoStuds = ui->m_logostuds->isChecked();
-	cfg::drawLineLengths = ui->linelengths->isChecked();
-	cfg::defaultUser = ui->m_profileUsername->text();
-	cfg::defaultName = ui->m_profileName->text();
+	cfg::ColorizeObjectsList = ui->colorizeObjects->isChecked();
+	cfg::BfcRedGreenView = ui->colorBFC->isChecked();
+	cfg::BlackEdges = ui->blackEdges->isChecked();
+	cfg::MainColorAlpha = ((double) ui->mainColorAlpha->value()) / 10.0;
+	cfg::LineThickness = ui->lineThickness->value();
+	cfg::ListImplicitFiles = ui->implicitFiles->isChecked();
+	cfg::DownloadFilePath = ui->downloadPath->text();
+	cfg::GuessDownloadPaths = ui->guessNetPaths->isChecked();
+	cfg::AutoCloseDownloadDialog = ui->autoCloseNetPrompt->isChecked();
+	cfg::UseLogoStuds = ui->m_logostuds->isChecked();
+	cfg::DrawLineLengths = ui->linelengths->isChecked();
+	cfg::DefaultUser = ui->m_profileUsername->text();
+	cfg::DefaultName = ui->m_profileName->text();
 	cfg::UseCALicense = ui->UseCALicense->isChecked();
-	cfg::antiAliasedLines = ui->m_aa->isChecked();
-	cfg::highlightObjectBelowCursor = ui->highlightObjectBelowCursor->isChecked();
-	cfg::roundPosition = ui->roundPosition->value();
-	cfg::roundMatrix = ui->roundMatrix->value();
+	cfg::AntiAliasedLines = ui->m_aa->isChecked();
+	cfg::HighlightObjectBelowCursor = ui->highlightObjectBelowCursor->isChecked();
+	cfg::RoundPosition = ui->roundPosition->value();
+	cfg::RoundMatrix = ui->roundMatrix->value();
 
 	// Rebuild the quick color toolbar
 	g_win->setQuickColors (quickColors);
-	cfg::quickColorToolbar = quickColorString();
+	cfg::QuickColorToolbar = quickColorString();
 
 	// Set the grid settings
-	cfg::gridCoarseCoordinateSnap = ui->gridCoarseCoordinateSnap->value();
-	cfg::gridCoarseAngleSnap = ui->gridCoarseAngleSnap->value();
-	cfg::gridMediumCoordinateSnap = ui->gridMediumCoordinateSnap->value();
-	cfg::gridMediumAngleSnap = ui->gridMediumAngleSnap->value();
-	cfg::gridFineCoordinateSnap = ui->gridFineCoordinateSnap->value();
-	cfg::gridFineAngleSnap = ui->gridFineAngleSnap->value();
+	cfg::GridCoarseCoordinateSnap = ui->gridCoarseCoordinateSnap->value();
+	cfg::GridCoarseAngleSnap = ui->gridCoarseAngleSnap->value();
+	cfg::GridMediumCoordinateSnap = ui->gridMediumCoordinateSnap->value();
+	cfg::GridMediumAngleSnap = ui->gridMediumAngleSnap->value();
+	cfg::GridFineCoordinateSnap = ui->gridFineCoordinateSnap->value();
+	cfg::GridFineAngleSnap = ui->gridFineAngleSnap->value();
 
 	// Ext program settings
 	for (const LDExtProgInfo& info : g_LDExtProgInfo)
@@ -532,21 +533,21 @@ void ConfigDialog::pickColor (QString& conf, QPushButton* button)
 //
 void ConfigDialog::slot_setGLBackground()
 {
-	pickColor (cfg::backgroundColor, ui->backgroundColorButton);
+	pickColor (cfg::BackgroundColor, ui->backgroundColorButton);
 }
 
 //
 //
 void ConfigDialog::slot_setGLForeground()
 {
-	pickColor (cfg::mainColor, ui->mainColorButton);
+	pickColor (cfg::MainColor, ui->mainColorButton);
 }
 
 //
 //
 void ConfigDialog::slot_setGLSelectColor()
 {
-	pickColor (cfg::selectColorBlend, ui->selColorButton);
+	pickColor (cfg::SelectColorBlend, ui->selColorButton);
 }
 
 //

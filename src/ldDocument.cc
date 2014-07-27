@@ -32,10 +32,10 @@
 #include "glRenderer.h"
 #include "glCompiler.h"
 
-CFGENTRY (String,			ldrawPath, "")
-CFGENTRY (List,				recentFiles, {})
-EXTERN_CFGENTRY (String,	downloadFilePath)
-EXTERN_CFGENTRY (Bool,		useLogoStuds)
+CFGENTRY (String, LDrawPath, "")
+CFGENTRY (List, RecentFiles, {})
+EXTERN_CFGENTRY (String, DownloadFilePath)
+EXTERN_CFGENTRY (Bool, UseLogoStuds)
 
 static bool g_loadingMainFile = false;
 static const int g_maxRecentFiles = 10;
@@ -62,14 +62,14 @@ namespace LDPaths
 
 	void initPaths()
 	{
-		if (not tryConfigure (cfg::ldrawPath))
+		if (not tryConfigure (cfg::LDrawPath))
 		{
 			LDrawPathDialog dlg (false);
 
 			if (not dlg.exec())
 				exit (0);
 
-			cfg::ldrawPath = dlg.filename();
+			cfg::LDrawPath = dlg.filename();
 		}
 	}
 
@@ -311,7 +311,7 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 		return relpath;
 
 	// Try with just the LDraw path first
-	fullPath = format ("%1" DIRSLASH "%2", cfg::ldrawPath, relpath);
+	fullPath = format ("%1" DIRSLASH "%2", cfg::LDrawPath, relpath);
 
 	if (QFile::exists (fullPath))
 		return fullPath;
@@ -320,7 +320,7 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 	{
 		// Look in sub-directories: parts and p. Also look in net_downloadpath, since that's
 		// where we download parts from the PT to.
-		for (const QString& topdir : QList<QString> ({ cfg::ldrawPath, cfg::downloadFilePath }))
+		for (const QString& topdir : QList<QString> ({ cfg::LDrawPath, cfg::DownloadFilePath }))
 		{
 			for (const QString& subdir : QList<QString> ({ "parts", "p" }))
 			{
@@ -656,7 +656,7 @@ void newFile()
 //
 void addRecentFile (QString path)
 {
-	auto& rfiles = cfg::recentFiles;
+	auto& rfiles = cfg::RecentFiles;
 	int idx = rfiles.indexOf (path);
 
 	// If this file already is in the list, pop it out.
@@ -1322,7 +1322,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (cfg::useLogoStuds and renderinline)
+	if (cfg::UseLogoStuds and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();
