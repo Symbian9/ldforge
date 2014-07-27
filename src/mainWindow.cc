@@ -55,17 +55,17 @@
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
 
-CFGENTRY (Bool, ColorizeObjectsList, true);
-CFGENTRY (String, QuickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15");
-CFGENTRY (Bool, ListImplicitFiles, false);
-EXTERN_CFGENTRY (List, RecentFiles);
-EXTERN_CFGENTRY (Bool, DrawAxes);
-EXTERN_CFGENTRY (String, MainColor);
-EXTERN_CFGENTRY (Float, MainColorAlpha);
-EXTERN_CFGENTRY (Bool, DrawWireframe);
-EXTERN_CFGENTRY (Bool, BFCRedGreenView);
-EXTERN_CFGENTRY (Bool, DrawAngles);
-EXTERN_CFGENTRY (Bool, RandomColors);
+CFGENTRY (Bool, ColorizeObjectsList, true)
+CFGENTRY (String, QuickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
+CFGENTRY (Bool, ListImplicitFiles, false)
+EXTERN_CFGENTRY (List, RecentFiles)
+EXTERN_CFGENTRY (Bool, DrawAxes)
+EXTERN_CFGENTRY (String, MainColor)
+EXTERN_CFGENTRY (Float, MainColorAlpha)
+EXTERN_CFGENTRY (Bool, DrawWireframe)
+EXTERN_CFGENTRY (Bool, BFCRedGreenView)
+EXTERN_CFGENTRY (Bool, DrawAngles)
+EXTERN_CFGENTRY (Bool, RandomColors)
 EXTERN_CFGENTRY (Bool, DrawSurfaces)
 EXTERN_CFGENTRY (Bool, DrawEdgeLines)
 EXTERN_CFGENTRY (Bool, DrawConditionalLines)

@@ -40,7 +40,7 @@ static QString g_versionString, g_fullVersionString;
 const Vertex g_origin (0.0f, 0.0f, 0.0f);
 const Matrix g_identity ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
-CFGENTRY (Bool, FirstStart, true);
+CFGENTRY (Bool, FirstStart, true)
 
 // =============================================================================
 //

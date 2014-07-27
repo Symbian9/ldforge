@@ -39,16 +39,17 @@
 #include "ui_newpart.h"
 #include "editmodes/abstractEditMode.h"
 
-EXTERN_CFGENTRY (Bool, DrawWireframe);
-EXTERN_CFGENTRY (Bool, BFCRedGreenView);
-EXTERN_CFGENTRY (String, DefaultName);
-EXTERN_CFGENTRY (String, DefaultUser);
-EXTERN_CFGENTRY (Bool, UseCALicense);
-EXTERN_CFGENTRY (Bool, DrawAngles);
+EXTERN_CFGENTRY (Bool, DrawWireframe)
+EXTERN_CFGENTRY (Bool, BFCRedGreenView)
+EXTERN_CFGENTRY (String, DefaultName)
+EXTERN_CFGENTRY (String, DefaultUser)
+EXTERN_CFGENTRY (Bool, UseCALicense)
+EXTERN_CFGENTRY (Bool, DrawAngles)
 EXTERN_CFGENTRY (Bool, RandomColors)
 EXTERN_CFGENTRY (Bool, DrawSurfaces)
 EXTERN_CFGENTRY (Bool, DrawEdgeLines)
 EXTERN_CFGENTRY (Bool, DrawConditionalLines)
+EXTERN_CFGENTRY (Bool, DrawAxes)
 
 // =============================================================================
 //
@@ -495,7 +496,6 @@ void MainWindow::slot_actionScreenshot()
 
 // =============================================================================
 //
-EXTERN_CFGENTRY (Bool, DrawAxes);
 void MainWindow::slot_actionAxes()
 {
 	cfg::DrawAxes = not cfg::DrawAxes;

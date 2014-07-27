@@ -31,9 +31,9 @@ QList<Primitive> g_primitives;
 static PrimitiveScanner* g_activeScanner = null;
 PrimitiveCategory* g_unmatched = null;
 
-EXTERN_CFGENTRY (String, DefaultName);
-EXTERN_CFGENTRY (String, DefaultUser);
-EXTERN_CFGENTRY (Int, DefaultLicense);
+EXTERN_CFGENTRY (String, DefaultName)
+EXTERN_CFGENTRY (String, DefaultUser)
+EXTERN_CFGENTRY (Int, DefaultLicense)
 
 static const QStringList g_radialNameRoots =
 {

@@ -45,7 +45,7 @@
 #include "ui_bombbox.h"
 
 extern const char* g_extProgPathFilter;
-EXTERN_CFGENTRY (String, LDrawPath);
+EXTERN_CFGENTRY (String, LDrawPath)
 
 // =============================================================================
 // =============================================================================

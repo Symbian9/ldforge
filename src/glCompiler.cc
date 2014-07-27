@@ -46,8 +46,8 @@ static const GLErrorInfo g_GLErrors[] =
 };
 
 CFGENTRY (String, SelectColorBlend, "#0080FF")
-EXTERN_CFGENTRY (Bool, BlackEdges);
-EXTERN_CFGENTRY (String, BackgroundColor);
+EXTERN_CFGENTRY (Bool, BlackEdges)
+EXTERN_CFGENTRY (String, BackgroundColor)
 
 static QList<int>		g_warnedColors;
 static const QColor		g_BFCFrontColor (64, 192, 80);

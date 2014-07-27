@@ -30,9 +30,9 @@
 #include "glRenderer.h"
 #include "configDialog.h"
 
-CFGENTRY (String, DownloadFilePath,	"");
-CFGENTRY (Bool, GuessDownloadPaths,	true);
-CFGENTRY (Bool, AutoCloseDownloadDialog,		true);
+CFGENTRY (String, DownloadFilePath, "")
+CFGENTRY (Bool, GuessDownloadPaths, true)
+CFGENTRY (Bool, AutoCloseDownloadDialog, true)
 
 const QString g_unofficialLibraryURL ("http://ldraw.org/library/unofficial/");
 

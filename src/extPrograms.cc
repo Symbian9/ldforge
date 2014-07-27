@@ -51,12 +51,12 @@ enum extprog
 
 // =============================================================================
 //
-CFGENTRY (String, IsecalcPath, "");
-CFGENTRY (String, IntersectorPath, "");
-CFGENTRY (String, CovererPath, "");
-CFGENTRY (String, YtruderPath, "");
-CFGENTRY (String, RectifierPath, "");
-CFGENTRY (String, Edger2Path, "");
+CFGENTRY (String, IsecalcPath, "")
+CFGENTRY (String, IntersectorPath, "")
+CFGENTRY (String, CovererPath, "")
+CFGENTRY (String, YtruderPath, "")
+CFGENTRY (String, RectifierPath, "")
+CFGENTRY (String, Edger2Path, "")
 
 QString* const g_extProgPaths[] =
 {
@@ -69,12 +69,12 @@ QString* const g_extProgPaths[] =
 };
 
 #ifndef _WIN32
-CFGENTRY (Bool, IsecalcUsesWine, false);
-CFGENTRY (Bool, IntersectorUsesWine, false);
-CFGENTRY (Bool, CovererUsesWine, false);
-CFGENTRY (Bool, YtruderUsesWine, false);
-CFGENTRY (Bool, RectifierUsesWine, false);
-CFGENTRY (Bool, Edger2UsesWine, false);
+CFGENTRY (Bool, IsecalcUsesWine, false)
+CFGENTRY (Bool, IntersectorUsesWine, false)
+CFGENTRY (Bool, CovererUsesWine, false)
+CFGENTRY (Bool, YtruderUsesWine, false)
+CFGENTRY (Bool, RectifierUsesWine, false)
+CFGENTRY (Bool, Edger2UsesWine, false)
 
 bool* const g_extProgWine[] =
 {

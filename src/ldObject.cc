@@ -27,9 +27,9 @@
 #include "colors.h"
 #include "glCompiler.h"
 
-CFGENTRY (String, DefaultName, "");
-CFGENTRY (String, DefaultUser, "");
-CFGENTRY (Bool,		UseCALicense, true);
+CFGENTRY (String, DefaultName, "")
+CFGENTRY (String, DefaultUser, "")
+CFGENTRY (Bool, UseCALicense, true)
 
 // List of all LDObjects
 QMap<long, LDObjectWeakPtr>	g_allObjects;

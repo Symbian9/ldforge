@@ -35,8 +35,8 @@
 static const int g_numColumns = 16;
 static const int g_squareSize = 32;
 
-EXTERN_CFGENTRY (String, MainColor);
-EXTERN_CFGENTRY (Float, MainColorAlpha);
+EXTERN_CFGENTRY (String, MainColor)
+EXTERN_CFGENTRY (Float, MainColorAlpha)
 
 // =============================================================================
 //

@@ -54,7 +54,7 @@ struct gridinfo
 	AbstractConfigEntry::FloatType*	anglesnap;
 };
 
-EXTERN_CFGENTRY (Int, Grid);
+EXTERN_CFGENTRY (Int, Grid)
 static const int g_numGrids = 3;
 extern const gridinfo g_gridInfo[3];
 

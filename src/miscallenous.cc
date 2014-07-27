@@ -99,15 +99,15 @@ static const long g_e10[] =
 //
 // Grid stuff
 //
-CFGENTRY (Int, Grid,					Grid::Medium);
-CFGENTRY (Float, GridCoarseCoordinateSnap,		5.0f);
-CFGENTRY (Float, GridCoarseAngleSnap,		45.0f);
-CFGENTRY (Float, GridMediumCoordinateSnap,		1.0f);
-CFGENTRY (Float, GridMediumAngleSnap,		22.5f);
-CFGENTRY (Float, GridFineCoordinateSnap,			0.1f);
-CFGENTRY (Float, GridFineAngleSnap,		7.5f);
-CFGENTRY (Int, RotationPointType,			0);
-CFGENTRY (Vertex, CustomRotationPoint,	g_origin);
+CFGENTRY (Int, Grid, Grid::Medium)
+CFGENTRY (Float, GridCoarseCoordinateSnap, 5.0f)
+CFGENTRY (Float, GridCoarseAngleSnap, 45.0f)
+CFGENTRY (Float, GridMediumCoordinateSnap, 1.0f)
+CFGENTRY (Float, GridMediumAngleSnap, 22.5f)
+CFGENTRY (Float, GridFineCoordinateSnap, 0.1f)
+CFGENTRY (Float, GridFineAngleSnap, 7.5f)
+CFGENTRY (Int, RotationPointType, 0)
+CFGENTRY (Vertex, CustomRotationPoint, g_origin)
 
 const gridinfo g_gridInfo[3] =
 {
