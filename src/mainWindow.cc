@@ -63,7 +63,7 @@ EXTERN_CFGENTRY (Bool, DrawAxes);
 EXTERN_CFGENTRY (String, MainColor);
 EXTERN_CFGENTRY (Float, MainColorAlpha);
 EXTERN_CFGENTRY (Bool, DrawWireframe);
-EXTERN_CFGENTRY (Bool, BfcRedGreenView);
+EXTERN_CFGENTRY (Bool, BFCRedGreenView);
 EXTERN_CFGENTRY (Bool, DrawAngles);
 EXTERN_CFGENTRY (Bool, RandomColors);
 EXTERN_CFGENTRY (Bool, DrawSurfaces)
@@ -978,7 +978,7 @@ void MainWindow::updateActions()
 
 	ui->actionWireframe->setChecked (cfg::DrawWireframe);
 	ui->actionAxes->setChecked (cfg::DrawAxes);
-	ui->actionBFCView->setChecked (cfg::BfcRedGreenView);
+	ui->actionBFCView->setChecked (cfg::BFCRedGreenView);
 	ui->actionRandomColors->setChecked (cfg::RandomColors);
 	ui->actionDrawAngles->setChecked (cfg::DrawAngles);
 	ui->actionDrawSurfaces->setChecked (cfg::DrawSurfaces);

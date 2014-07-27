@@ -61,11 +61,11 @@ public:
 private:
 	Ui_ConfigUI* ui;
 	QList<QListWidgetItem*> quickColorItems;
+	QMap<QPushButton*, QColor> _buttonColors;
 
 	void applySettings();
 	void addShortcut (QAction* act);
 	void setButtonBackground (QPushButton* button, QString value);
-	void pickColor (QString& conf, QPushButton* button);
 	void updateQuickColorList (LDQuickColor* sel = null);
 	void setShortcutText (ShortcutListItem* item);
 	int getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& haystack);
@@ -73,11 +73,10 @@ private:
 	QListWidgetItem* getSelectedQuickColor();
 	QList<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
+	void _applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func);
 
 private slots:
-	void slot_setGLBackground();
-	void slot_setGLForeground();
-	void slot_setGLSelectColor();
+	void setButtonColor();
 	void slot_setShortcut();
 	void slot_resetShortcut();
 	void slot_clearShortcut();

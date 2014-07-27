@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>717</width>
-    <height>419</height>
+    <width>644</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,7 +79,7 @@
      <item>
       <widget class="QStackedWidget" name="m_pages">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_3">
         <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -88,174 +88,198 @@
            <property name="title">
             <string>Interface</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
+           <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
-             <layout class="QFormLayout" name="formLayout">
-              <property name="fieldGrowthPolicy">
-               <enum>QFormLayout::ExpandingFieldsGrow</enum>
-              </property>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label">
-                <property name="whatsThis">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Main color:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="mainColorButton">
-                <property name="whatsThis">
-                 <string>This color is used for the main color.</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../ldforge.qrc">
-                  <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_3">
-                <property name="whatsThis">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Main color alpha:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QSlider" name="mainColorAlpha">
-                <property name="whatsThis">
-                 <string>Opacity of main color in the viewport.</string>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>10</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="tickPosition">
-                 <enum>QSlider::TicksAbove</enum>
-                </property>
-                <property name="tickInterval">
-                 <number>1</number>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="selectedColorLabel">
-                <property name="text">
-                 <string>Selected Color</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QPushButton" name="selColorButton">
-                <property name="whatsThis">
-                 <string>This color is used for the main color.</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../ldforge.qrc">
-                  <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_2">
-                <property name="whatsThis">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Background:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QPushButton" name="backgroundColorButton">
-                <property name="whatsThis">
-                 <string>This is the background color for the viewport.</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="../ldforge.qrc">
-                  <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QFormLayout" name="formLayout_2">
-              <property name="fieldGrowthPolicy">
-               <enum>QFormLayout::ExpandingFieldsGrow</enum>
-              </property>
-              <item row="0" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
                <layout class="QHBoxLayout" name="horizontalLayout">
                 <item>
-                 <widget class="QSlider" name="lineThickness">
-                  <property name="whatsThis">
-                   <string>How thick lines should be drawn in the viewport.</string>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>8</number>
-                  </property>
+                 <spacer name="horizontalSpacer_2">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
-                  <property name="tickPosition">
-                   <enum>QSlider::TicksAbove</enum>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
                   </property>
-                  <property name="tickInterval">
-                   <number>1</number>
+                 </spacer>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="formLayout">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_2">
+                    <property name="whatsThis">
+                     <string/>
+                    </property>
+                    <property name="text">
+                     <string>Background color</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QPushButton" name="configBackgroundColor">
+                    <property name="whatsThis">
+                     <string>This is the background color for the viewport.</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../ldforge.qrc">
+                      <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label">
+                    <property name="whatsThis">
+                     <string/>
+                    </property>
+                    <property name="text">
+                     <string>Main color</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QPushButton" name="configMainColor">
+                    <property name="whatsThis">
+                     <string>This color is used for the main color.</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../ldforge.qrc">
+                      <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="selectedColorLabel">
+                    <property name="text">
+                     <string>Selected color</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QPushButton" name="configSelectColorBlend">
+                    <property name="whatsThis">
+                     <string>This color is used for the main color.</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../ldforge.qrc">
+                      <normaloff>:/icons/colorselect.png</normaloff>:/icons/colorselect.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_3">
+                    <property name="whatsThis">
+                     <string/>
+                    </property>
+                    <property name="text">
+                     <string>Main color alpha</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QDoubleSpinBox" name="configMainColorAlpha">
+                    <property name="maximum">
+                     <double>1.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>1.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_5">
+                    <property name="whatsThis">
+                     <string/>
+                    </property>
+                    <property name="text">
+                     <string>Line thickness</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QSlider" name="configLineThickness">
+                    <property name="whatsThis">
+                     <string>How thick lines should be drawn in the viewport.</string>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>8</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="tickPosition">
+                     <enum>QSlider::TicksAbove</enum>
+                    </property>
+                    <property name="tickInterval">
+                     <number>1</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
-                 </widget>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_5">
-                <property name="whatsThis">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Line thickness:</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_11">
-                <item>
-                 <widget class="QCheckBox" name="blackEdges">
-                  <property name="whatsThis">
-                   <string>Makes all edgelines appear black. If this is not set, edge lines take their color as defined in LDConfig.ldr.</string>
+               <layout class="QGridLayout" name="gridLayout_3">
+                <item row="0" column="0">
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QCheckBox" name="configAntiAliasedLines">
                   <property name="text">
-                   <string>Black edges</string>
+                   <string>Anti-aliased lines</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="colorBFC">
+                <item row="1" column="2">
+                 <widget class="QCheckBox" name="configDrawLineLengths">
+                  <property name="text">
+                   <string>Display line lenghts when drawing</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QCheckBox" name="configBFCRedGreenView">
                   <property name="whatsThis">
                    <string>Polygons' front sides become green and back sides red.</string>
                   </property>
@@ -264,8 +288,8 @@
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="colorizeObjects">
+                <item row="2" column="1">
+                 <widget class="QCheckBox" name="configColorizeObjectsList">
                   <property name="whatsThis">
                    <string>Makes colored objects (non-16 and 24) appear colored in the list view. A red triangle will, for instance, have its entry written in red text. This can be useful to locate colored objects.</string>
                   </property>
@@ -274,40 +298,38 @@
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="m_aa">
+                <item row="0" column="1">
+                 <widget class="QCheckBox" name="configBlackEdges">
+                  <property name="whatsThis">
+                   <string>Makes all edgelines appear black. If this is not set, edge lines take their color as defined in LDConfig.ldr.</string>
+                  </property>
                   <property name="text">
-                   <string>Anti-aliased lines</string>
+                   <string>Black edges</string>
                   </property>
                  </widget>
                 </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_12">
-                <item>
-                 <widget class="QCheckBox" name="m_logostuds">
+                <item row="1" column="3">
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QCheckBox" name="configUseLogoStuds">
                   <property name="text">
                    <string>Use logoed studs</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="linelengths">
-                  <property name="text">
-                   <string>Display line lenghts when drawing</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="implicitFiles">
-                  <property name="text">
-                   <string>List implicitly loaded files</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="highlightObjectBelowCursor">
+                <item row="2" column="2">
+                 <widget class="QCheckBox" name="configHighlightObjectBelowCursor">
                   <property name="text">
                    <string>Highlight object below cursor</string>
                   </property>
@@ -338,25 +360,51 @@
               <layout class="QVBoxLayout" name="verticalLayout_9">
                <item>
                 <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="0" column="0">
+                 <item row="0" column="1">
                   <widget class="QLabel" name="label_17">
                    <property name="text">
                     <string>Position decimals:</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QSpinBox" name="roundPosition"/>
+                 <item row="0" column="2">
+                  <widget class="QSpinBox" name="configRoundPosition"/>
                  </item>
-                 <item row="1" column="0">
+                 <item row="1" column="1">
                   <widget class="QLabel" name="label_18">
                    <property name="text">
                     <string>Matrix decimals:</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QSpinBox" name="roundMatrix"/>
+                 <item row="1" column="2">
+                  <widget class="QSpinBox" name="configRoundMatrix"/>
+                 </item>
+                 <item row="0" column="0">
+                  <spacer name="horizontalSpacer_5">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="0" column="3">
+                  <spacer name="horizontalSpacer_6">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                 </layout>
                </item>
@@ -390,36 +438,73 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <layout class="QFormLayout" name="formLayout_3">
-              <property name="fieldGrowthPolicy">
-               <enum>QFormLayout::ExpandingFieldsGrow</enum>
-              </property>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_7">
-                <property name="text">
-                 <string>Name:</string>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="m_profileName"/>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>Username:</string>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
                 </property>
-               </widget>
+               </spacer>
               </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="m_profileUsername"/>
-              </item>
-              <item row="3" column="1">
-               <widget class="QCheckBox" name="UseCALicense">
-                <property name="text">
-                 <string>Use CA license</string>
+              <item>
+               <layout class="QFormLayout" name="formLayout_3">
+                <property name="fieldGrowthPolicy">
+                 <enum>QFormLayout::ExpandingFieldsGrow</enum>
                 </property>
-               </widget>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_7">
+                  <property name="text">
+                   <string>Name:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="configDefaultName">
+                  <property name="minimumSize">
+                   <size>
+                    <width>250</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_8">
+                  <property name="text">
+                   <string>Username:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QLineEdit" name="configDefaultUser"/>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QCheckBox" name="configUseCALicense">
+                  <property name="text">
+                   <string>Use CA license</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -650,22 +735,35 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,1,1">
-              <item row="0" column="2">
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="3" column="4">
+               <widget class="QDoubleSpinBox" name="configGridFineAngleSnap">
+                <property name="suffix">
+                 <string>°</string>
+                </property>
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="maximum">
+                 <double>360.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
                <widget class="QLabel" name="label_15">
                 <property name="text">
                  <string>Coordinate snap</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="3">
+              <item row="0" column="4">
                <widget class="QLabel" name="label_16">
                 <property name="text">
                  <string>Angle snap</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
+              <item row="1" column="1">
                <widget class="QLabel" name="label_6">
                 <property name="text">
                  <string/>
@@ -675,15 +773,15 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="1" column="2">
                <widget class="QLabel" name="label_12">
                 <property name="text">
                  <string>Coarse</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
-               <widget class="QDoubleSpinBox" name="gridCoarseCoordinateSnap">
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="configGridCoarseCoordinateSnap">
                 <property name="suffix">
                  <string> LDU</string>
                 </property>
@@ -695,8 +793,8 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="1" column="3">
-               <widget class="QDoubleSpinBox" name="gridCoarseAngleSnap">
+              <item row="1" column="4">
+               <widget class="QDoubleSpinBox" name="configGridCoarseAngleSnap">
                 <property name="suffix">
                  <string>°</string>
                 </property>
@@ -708,7 +806,7 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="2" column="1">
                <widget class="QLabel" name="label_10">
                 <property name="text">
                  <string/>
@@ -718,15 +816,15 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="2" column="2">
                <widget class="QLabel" name="label_13">
                 <property name="text">
                  <string>Medium</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="2">
-               <widget class="QDoubleSpinBox" name="gridMediumCoordinateSnap">
+              <item row="2" column="3">
+               <widget class="QDoubleSpinBox" name="configGridMediumCoordinateSnap">
                 <property name="suffix">
                  <string> LDU</string>
                 </property>
@@ -738,8 +836,8 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="2" column="3">
-               <widget class="QDoubleSpinBox" name="gridMediumAngleSnap">
+              <item row="2" column="4">
+               <widget class="QDoubleSpinBox" name="configGridMediumAngleSnap">
                 <property name="suffix">
                  <string>°</string>
                 </property>
@@ -751,7 +849,7 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="3" column="1">
                <widget class="QLabel" name="label_11">
                 <property name="text">
                  <string/>
@@ -761,15 +859,15 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="3" column="2">
                <widget class="QLabel" name="label_14">
                 <property name="text">
                  <string>Fine</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="2">
-               <widget class="QDoubleSpinBox" name="gridFineCoordinateSnap">
+              <item row="3" column="3">
+               <widget class="QDoubleSpinBox" name="configGridFineCoordinateSnap">
                 <property name="suffix">
                  <string> LDU</string>
                 </property>
@@ -781,18 +879,31 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="3" column="3">
-               <widget class="QDoubleSpinBox" name="gridFineAngleSnap">
-                <property name="suffix">
-                 <string>°</string>
+              <item row="1" column="0">
+               <spacer name="horizontalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="decimals">
-                 <number>3</number>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
                 </property>
-                <property name="maximum">
-                 <double>360.000000000000000</double>
+               </spacer>
+              </item>
+              <item row="1" column="5">
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>
@@ -861,7 +972,7 @@ Under Linux, you can also set the programs to be launched with Wine, so you can 
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="downloadPath"/>
+               <widget class="QLineEdit" name="configDownloadFilePath"/>
               </item>
               <item>
                <widget class="QPushButton" name="findDownloadPath">
@@ -877,7 +988,7 @@ Under Linux, you can also set the programs to be launched with Wine, so you can 
              </layout>
             </item>
             <item>
-             <widget class="QCheckBox" name="guessNetPaths">
+             <widget class="QCheckBox" name="configGuessDownloadPaths">
               <property name="whatsThis">
                <string>&lt;p&gt;When this is set, LDForge tries to adjust and correct part paths based on the input. A full path given to the download prompt should be of form &lt;tt&gt;&quot;&amp;lt;dir&amp;gt;/&amp;lt;file&amp;gt;.dat&quot;&lt;/tt&gt; - with this set, input can be automatically completed.&lt;/p&gt;
 
@@ -895,7 +1006,7 @@ Under Linux, you can also set the programs to be launched with Wine, so you can 
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="autoCloseNetPrompt">
+             <widget class="QCheckBox" name="configAutoCloseDownloadDialog">
               <property name="whatsThis">
                <string>If this is set, LDForge will close the download prompt after everything has been downloaded. The prompt will not be closed if a download has failed.</string>
               </property>

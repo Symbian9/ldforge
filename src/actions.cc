@@ -40,7 +40,7 @@
 #include "editmodes/abstractEditMode.h"
 
 EXTERN_CFGENTRY (Bool, DrawWireframe);
-EXTERN_CFGENTRY (Bool, BfcRedGreenView);
+EXTERN_CFGENTRY (Bool, BFCRedGreenView);
 EXTERN_CFGENTRY (String, DefaultName);
 EXTERN_CFGENTRY (String, DefaultUser);
 EXTERN_CFGENTRY (Bool, UseCALicense);
@@ -679,9 +679,9 @@ void MainWindow::slot_actionScanPrimitives()
 //
 void MainWindow::slot_actionBFCView()
 {
-	cfg::BfcRedGreenView = not cfg::BfcRedGreenView;
+	cfg::BFCRedGreenView = not cfg::BFCRedGreenView;
 
-	if (cfg::BfcRedGreenView)
+	if (cfg::BFCRedGreenView)
 		cfg::RandomColors = false;
 
 	updateActions();
@@ -885,7 +885,7 @@ void MainWindow::slot_actionRandomColors()
 	cfg::RandomColors = not cfg::RandomColors;
 
 	if (cfg::RandomColors)
-		cfg::BfcRedGreenView = false;
+		cfg::BFCRedGreenView = false;
 
 	updateActions();
 	R()->refresh();

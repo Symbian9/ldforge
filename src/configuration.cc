@@ -145,6 +145,20 @@ QSettings* Config::SettingsObject()
 	return new QSettings (path, QSettings::IniFormat);
 }
 
+//
+// Accessor to entry list
+//
+QList<AbstractConfigEntry*> const& Config::AllConfigEntries()
+{
+	return ConfigurationEntries;
+}
+
+AbstractConfigEntry* Config::FindByName (QString const& name)
+{
+	auto it = EntriesByName.find (name);
+	return (it != EntriesByName.end()) ? *it : null;
+}
+
 template<typename T>
 static T* GetConfigByName (QString name, AbstractConfigEntry::Type type)
 {

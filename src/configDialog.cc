@@ -39,46 +39,19 @@
 #include "glRenderer.h"
 #include "ui_config.h"
 
-EXTERN_CFGENTRY (String, BackgroundColor);
-EXTERN_CFGENTRY (String, MainColor);
-EXTERN_CFGENTRY (Bool, ColorizeObjectsList);
-EXTERN_CFGENTRY (Bool, BfcRedGreenView);
-EXTERN_CFGENTRY (Float, MainColorAlpha);
-EXTERN_CFGENTRY (Int, LineThickness);
-EXTERN_CFGENTRY (String, QuickColorToolbar);
-EXTERN_CFGENTRY (Bool, BlackEdges);
-EXTERN_CFGENTRY (Bool, AntiAliasedLines);
-EXTERN_CFGENTRY (Bool, ListImplicitFiles);
-EXTERN_CFGENTRY (String, DownloadFilePath);
-EXTERN_CFGENTRY (Bool, GuessDownloadPaths);
-EXTERN_CFGENTRY (Bool, AutoCloseDownloadDialog);
-EXTERN_CFGENTRY (Bool, UseLogoStuds);
-EXTERN_CFGENTRY (Bool, DrawLineLengths);
-EXTERN_CFGENTRY (String, DefaultName);
-EXTERN_CFGENTRY (String, DefaultUser);
-EXTERN_CFGENTRY (Bool, UseCALicense);
-EXTERN_CFGENTRY (String, SelectColorBlend);
-EXTERN_CFGENTRY (String, YtruderPath);
-EXTERN_CFGENTRY (String, RectifierPath);
-EXTERN_CFGENTRY (String, IntersectorPath);
-EXTERN_CFGENTRY (String, CovererPath);
-EXTERN_CFGENTRY (String, IsecalcPath);
-EXTERN_CFGENTRY (String, Edger2Path);
-EXTERN_CFGENTRY (Bool, YtruderUsesWine);
-EXTERN_CFGENTRY (Bool, RectifierUsesWine);
-EXTERN_CFGENTRY (Bool, IntersectorUsesWine);
-EXTERN_CFGENTRY (Bool, CovererUsesWine);
-EXTERN_CFGENTRY (Bool, IsecalcUsesWine);
-EXTERN_CFGENTRY (Bool, Edger2UsesWine);
-EXTERN_CFGENTRY (Float, GridCoarseCoordinateSnap);
-EXTERN_CFGENTRY (Float, GridCoarseAngleSnap);
-EXTERN_CFGENTRY (Float, GridMediumCoordinateSnap);
-EXTERN_CFGENTRY (Float, GridMediumAngleSnap);
-EXTERN_CFGENTRY (Float, GridFineCoordinateSnap);
-EXTERN_CFGENTRY (Float, GridFineAngleSnap);
-EXTERN_CFGENTRY (Bool, HighlightObjectBelowCursor)
-EXTERN_CFGENTRY (Int, RoundPosition)
-EXTERN_CFGENTRY (Int, RoundMatrix)
+EXTERN_CFGENTRY (String, YtruderPath)
+EXTERN_CFGENTRY (String, RectifierPath)
+EXTERN_CFGENTRY (String, IntersectorPath)
+EXTERN_CFGENTRY (String, CovererPath)
+EXTERN_CFGENTRY (String, IsecalcPath)
+EXTERN_CFGENTRY (String, Edger2Path)
+EXTERN_CFGENTRY (Bool, YtruderUsesWine)
+EXTERN_CFGENTRY (Bool, RectifierUsesWine)
+EXTERN_CFGENTRY (Bool, IntersectorUsesWine)
+EXTERN_CFGENTRY (Bool, CovererUsesWine)
+EXTERN_CFGENTRY (Bool, IsecalcUsesWine)
+EXTERN_CFGENTRY (Bool, Edger2UsesWine)
+EXTERN_CFGENTRY (String, QuickColorToolbar)
 
 const char* g_extProgPathFilter =
 #ifdef _WIN32
@@ -123,31 +96,47 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 	ui = new Ui_ConfigUI;
 	ui->setupUi (this);
 
-	// Interface tab
-	setButtonBackground (ui->backgroundColorButton, cfg::BackgroundColor);
-	connect (ui->backgroundColorButton, SIGNAL (clicked()),
-			 this, SLOT (slot_setGLBackground()));
+	// Set defaults
+	_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	{
+		QVariant value (conf->toVariant());
+		QLineEdit* le;
+		QSpinBox* spinbox;
+		QDoubleSpinBox* doublespinbox;
+		QSlider* slider;
+		QCheckBox* checkbox;
+		QPushButton* button;
 
-	setButtonBackground (ui->mainColorButton, cfg::MainColor);
-	connect (ui->mainColorButton, SIGNAL (clicked()),
-			 this, SLOT (slot_setGLForeground()));
-
-	setButtonBackground (ui->selColorButton, cfg::SelectColorBlend);
-	connect (ui->selColorButton, SIGNAL (clicked()),
-			 this, SLOT (slot_setGLSelectColor()));
-
-	ui->mainColorAlpha->setValue (cfg::MainColorAlpha * 10.0f);
-	ui->lineThickness->setValue (cfg::LineThickness);
-	ui->colorizeObjects->setChecked (cfg::ColorizeObjectsList);
-	ui->colorBFC->setChecked (cfg::BfcRedGreenView);
-	ui->blackEdges->setChecked (cfg::BlackEdges);
-	ui->m_aa->setChecked (cfg::AntiAliasedLines);
-	ui->implicitFiles->setChecked (cfg::ListImplicitFiles);
-	ui->m_logostuds->setChecked (cfg::UseLogoStuds);
-	ui->linelengths->setChecked (cfg::DrawLineLengths);
-
-	ui->roundPosition->setValue (cfg::RoundPosition);
-	ui->roundMatrix->setValue (cfg::RoundMatrix);
+		if ((le = qobject_cast<QLineEdit*> (wdg)) != null)
+		{
+			le->setText (value.toString());
+		}
+		elif ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
+		{
+			spinbox->setValue (value.toInt());
+		}
+		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
+		{
+			doublespinbox->setValue (value.toDouble());
+		}
+		elif ((slider = qobject_cast<QSlider*> (wdg)) != null)
+		{
+			slider->setValue (value.toInt());
+		}
+		elif ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
+		{
+			checkbox->setChecked (value.toBool());
+		}
+		elif ((button = qobject_cast<QPushButton*> (wdg)) != null)
+		{
+			setButtonBackground (button, value.toString());
+			connect (button, SIGNAL (clicked()), this, SLOT (setButtonColor()));
+		}
+		else
+		{
+			print ("Unknown widget of type %1\n", wdg->metaObject()->className());
+		}
+	});
 
 	g_win->applyToActions ([&](QAction* act)
 	{
@@ -156,14 +145,13 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 
 	ui->shortcutsList->setSortingEnabled (true);
 	ui->shortcutsList->sortItems();
-
+	quickColors = quickColorsFromConfig();
+	updateQuickColorList();
+	initExtProgs();
+	selectPage (deftab);
 	connect (ui->shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
 	connect (ui->shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
 	connect (ui->shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
-
-	quickColors = quickColorsFromConfig();
-	updateQuickColorList();
-
 	connect (ui->quickColor_add, SIGNAL (clicked()), this, SLOT (slot_setColor()));
 	connect (ui->quickColor_remove, SIGNAL (clicked()), this, SLOT (slot_delColor()));
 	connect (ui->quickColor_edit, SIGNAL (clicked()), this, SLOT (slot_setColor()));
@@ -171,34 +159,11 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 	connect (ui->quickColor_moveUp, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
 	connect (ui->quickColor_moveDown, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
 	connect (ui->quickColor_clear, SIGNAL (clicked()), this, SLOT (slot_clearColors()));
-
-	ui->downloadPath->setText (cfg::DownloadFilePath);
-	ui->guessNetPaths->setChecked (cfg::GuessDownloadPaths);
-	ui->autoCloseNetPrompt->setChecked (cfg::AutoCloseDownloadDialog);
 	connect (ui->findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
-
-	ui->m_profileName->setText (cfg::DefaultName);
-	ui->m_profileUsername->setText (cfg::DefaultUser);
-	ui->UseCALicense->setChecked (cfg::UseCALicense);
-	ui->gridCoarseCoordinateSnap->setValue (cfg::GridCoarseCoordinateSnap);
-	ui->gridCoarseAngleSnap->setValue (cfg::GridCoarseAngleSnap);
-	ui->gridMediumCoordinateSnap->setValue (cfg::GridMediumCoordinateSnap);
-	ui->gridMediumAngleSnap->setValue (cfg::GridMediumAngleSnap);
-	ui->gridFineCoordinateSnap->setValue (cfg::GridFineCoordinateSnap);
-	ui->gridFineAngleSnap->setValue (cfg::GridFineAngleSnap);
-	ui->highlightObjectBelowCursor->setChecked (cfg::HighlightObjectBelowCursor);
-
-	initExtProgs();
-	selectPage (deftab);
-
 	connect (ui->buttonBox, SIGNAL (clicked (QAbstractButton*)),
 		this, SLOT (buttonClicked (QAbstractButton*)));
-
-	connect (ui->m_pages, SIGNAL (currentChanged (int)),
-		this, SLOT (selectPage (int)));
-
-	connect (ui->m_pagelist, SIGNAL (currentRowChanged (int)),
-		this, SLOT (selectPage (int)));
+	connect (ui->m_pages, SIGNAL (currentChanged (int)), this, SLOT (selectPage (int)));
+	connect (ui->m_pagelist, SIGNAL (currentRowChanged (int)), this, SLOT (selectPage (int)));
 }
 
 //
@@ -277,42 +242,63 @@ void ConfigDialog::initExtProgs()
 	ui->extProgs->setLayout (pathsLayout);
 }
 
+void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
+{
+	// Apply configuration
+	for (QWidget* wdg : findChildren<QWidget*>())
+	{
+		if (not wdg->objectName().startsWith ("config"))
+			continue;
+
+		QString confname (wdg->objectName().mid (strlen ("config")));
+		AbstractConfigEntry* conf (Config::FindByName (confname));
+
+		if (conf == null)
+		{
+			print ("Couldn't find configuration entry named %1", confname);
+			continue;
+		}
+
+		func (wdg, conf);
+	}
+}
+
 //
 // Set the settings based on widget data.
 //
 void ConfigDialog::applySettings()
 {
-	// Apply configuration
-	cfg::ColorizeObjectsList = ui->colorizeObjects->isChecked();
-	cfg::BfcRedGreenView = ui->colorBFC->isChecked();
-	cfg::BlackEdges = ui->blackEdges->isChecked();
-	cfg::MainColorAlpha = ((double) ui->mainColorAlpha->value()) / 10.0;
-	cfg::LineThickness = ui->lineThickness->value();
-	cfg::ListImplicitFiles = ui->implicitFiles->isChecked();
-	cfg::DownloadFilePath = ui->downloadPath->text();
-	cfg::GuessDownloadPaths = ui->guessNetPaths->isChecked();
-	cfg::AutoCloseDownloadDialog = ui->autoCloseNetPrompt->isChecked();
-	cfg::UseLogoStuds = ui->m_logostuds->isChecked();
-	cfg::DrawLineLengths = ui->linelengths->isChecked();
-	cfg::DefaultUser = ui->m_profileUsername->text();
-	cfg::DefaultName = ui->m_profileName->text();
-	cfg::UseCALicense = ui->UseCALicense->isChecked();
-	cfg::AntiAliasedLines = ui->m_aa->isChecked();
-	cfg::HighlightObjectBelowCursor = ui->highlightObjectBelowCursor->isChecked();
-	cfg::RoundPosition = ui->roundPosition->value();
-	cfg::RoundMatrix = ui->roundMatrix->value();
+	_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	{
+		QVariant value (conf->toVariant());
+		QLineEdit* le;
+		QSpinBox* spinbox;
+		QDoubleSpinBox* doublespinbox;
+		QSlider* slider;
+		QCheckBox* checkbox;
+		QPushButton* button;
+
+		if ((le = qobject_cast<QLineEdit*> (wdg)) != null)
+			value = le->text();
+		elif ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
+			value = spinbox->value();
+		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
+			value = doublespinbox->value();
+		elif ((slider = qobject_cast<QSlider*> (wdg)) != null)
+			value = slider->value();
+		elif ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
+			value = checkbox->isChecked();
+		elif ((button = qobject_cast<QPushButton*> (wdg)) != null)
+			value = _buttonColors[button];
+		else
+			print ("Unknown widget of type %1\n", wdg->metaObject()->className());
+
+		conf->loadFromVariant (value);
+	});
 
 	// Rebuild the quick color toolbar
 	g_win->setQuickColors (quickColors);
 	cfg::QuickColorToolbar = quickColorString();
-
-	// Set the grid settings
-	cfg::GridCoarseCoordinateSnap = ui->gridCoarseCoordinateSnap->value();
-	cfg::GridCoarseAngleSnap = ui->gridCoarseAngleSnap->value();
-	cfg::GridMediumCoordinateSnap = ui->gridMediumCoordinateSnap->value();
-	cfg::GridMediumAngleSnap = ui->gridMediumAngleSnap->value();
-	cfg::GridFineCoordinateSnap = ui->gridFineCoordinateSnap->value();
-	cfg::GridFineAngleSnap = ui->gridFineAngleSnap->value();
 
 	// Ext program settings
 	for (const LDExtProgInfo& info : g_LDExtProgInfo)
@@ -343,17 +329,18 @@ void ConfigDialog::applySettings()
 //
 void ConfigDialog::buttonClicked (QAbstractButton* button)
 {
-	typedef QDialogButtonBox QDDB;
 	QDialogButtonBox* dbb = ui->buttonBox;
 
-	if (button == dbb->button (QDDB::Ok))
+	if (button == dbb->button (QDialogButtonBox::Ok))
 	{
 		applySettings();
 		accept();
-	} elif (button == dbb->button (QDDB::Apply))
+	}
+	elif (button == dbb->button (QDialogButtonBox::Apply))
 	{
 		applySettings();
-	} elif (button == dbb->button (QDDB::Cancel))
+	}
+	elif (button == dbb->button (QDialogButtonBox::Cancel))
 	{
 		reject();
 	}
@@ -376,7 +363,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 
 		if (entry.isSeparator())
 		{
-			item->setText ("--------");
+			item->setText ("<hr />");
 			item->setIcon (getIcon ("empty"));
 		}
 		else
@@ -436,7 +423,9 @@ void ConfigDialog::slot_setColor()
 		return;
 
 	if (entry)
+	{
 		entry->setColor (val);
+	}
 	else
 	{
 		LDQuickColor entry (val, null);
@@ -510,44 +499,28 @@ void ConfigDialog::slot_clearColors()
 
 //
 //
-// Pick a color and set the appropriate configuration option.
-//
-void ConfigDialog::pickColor (QString& conf, QPushButton* button)
+void ConfigDialog::setButtonColor()
 {
-	QColor col = QColorDialog::getColor (QColor (conf));
+	QPushButton* button = qobject_cast<QPushButton*> (sender());
+
+	if (button == null)
+	{
+		print ("setButtonColor: null sender!\n");
+		return;
+	}
+
+	QColor col = QColorDialog::getColor (_buttonColors[button]);
 
 	if (col.isValid())
 	{
-		int r = col.red(),
-			g = col.green(),
-			b = col.blue();
+		int r = col.red();
+		int g = col.green();
+		int b = col.blue();
 
 		QString colname;
 		colname.sprintf ("#%.2X%.2X%.2X", r, g, b);
-		conf = colname;
 		setButtonBackground (button, colname);
 	}
-}
-
-//
-//
-void ConfigDialog::slot_setGLBackground()
-{
-	pickColor (cfg::BackgroundColor, ui->backgroundColorButton);
-}
-
-//
-//
-void ConfigDialog::slot_setGLForeground()
-{
-	pickColor (cfg::MainColor, ui->mainColorButton);
-}
-
-//
-//
-void ConfigDialog::slot_setGLSelectColor()
-{
-	pickColor (cfg::SelectColorBlend, ui->selColorButton);
 }
 
 //
@@ -558,6 +531,7 @@ void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 	button->setIcon (getIcon ("colorselect"));
 	button->setAutoFillBackground (true);
 	button->setStyleSheet (format ("background-color: %1", value));
+	_buttonColors[button] = QColor (value);
 }
 
 //
@@ -677,7 +651,9 @@ void ConfigDialog::slot_setExtProgPath()
 void ConfigDialog::slot_findDownloadFolder()
 {
 	QString dpath = QFileDialog::getExistingDirectory();
-	ui->downloadPath->setText (dpath);
+
+	if (not dpath.isEmpty())
+		ui->configDownloadFilePath->setText (dpath);
 }
 
 //

@@ -56,7 +56,7 @@ CFGENTRY (String, BackgroundColor,			"#FFFFFF")
 CFGENTRY (String, MainColor,					"#A0A0A0")
 CFGENTRY (Float, MainColorAlpha,				1.0)
 CFGENTRY (Int, LineThickness,				2)
-CFGENTRY (Bool, BfcRedGreenView,			false)
+CFGENTRY (Bool, BFCRedGreenView,			false)
 CFGENTRY (Int, Camera,						EFreeCamera)
 CFGENTRY (Bool, BlackEdges,					false)
 CFGENTRY (Bool, DrawAxes,					false)
@@ -414,7 +414,7 @@ void GLRenderer::drawGLScene()
 	}
 	else
 	{
-		if (cfg::BfcRedGreenView)
+		if (cfg::BFCRedGreenView)
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
