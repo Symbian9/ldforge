@@ -904,7 +904,7 @@ LDObjectPtr LDObject::createCopy() const
 //
 void LDSubfile::setFileInfo (const LDDocumentPtr& a)
 {
-	m_fileInfo = a;
+	changeProperty (self(), &m_fileInfo, a);
 
 	// If it's an immediate subfile reference (i.e. this subfile belongs in an
 	// explicit file), we need to pre-compile the GL polygons for the document
