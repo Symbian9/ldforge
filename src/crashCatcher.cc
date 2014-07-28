@@ -16,17 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef __unix__
-
 #include <QProcess>
 #include <QTemporaryFile>
 #include <unistd.h>
 #include <signal.h>
 #include "crashCatcher.h"
-
-#ifdef Q_OS_LINUX
-# include <sys/prctl.h>
-#endif
+#include "dialogs.h"
+ 
+#ifdef __unix__
+# ifdef Q_OS_LINUX
+#  include <sys/prctl.h>
+# endif
 
 // Is the crash catcher active now?
 static bool IsCrashCatcherActive = false;

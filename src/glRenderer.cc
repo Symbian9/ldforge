@@ -97,6 +97,7 @@ static const LDGLAxis g_GLAxes[3] =
 
 static GLuint g_GLAxes_VBO;
 static GLuint g_GLAxes_ColorVBO;
+static bool RendererInitialized (false);
 
 // =============================================================================
 //
@@ -236,6 +237,7 @@ void GLRenderer::resetAllAngles()
 //
 void GLRenderer::initializeGL()
 {
+	initializeOpenGLFunctions();
 	setBackground();
 	glLineWidth (cfg::LineThickness);
 	glLineStipple (1, 0x6666);
@@ -244,6 +246,7 @@ void GLRenderer::initializeGL()
 	setFocusPolicy (Qt::WheelFocus);
 	compiler()->initialize();
 	initializeAxes();
+	RendererInitialized = true;
 }
 
 // =============================================================================
@@ -319,16 +322,20 @@ void GLRenderer::setBackground()
 void GLRenderer::refresh()
 {
 	update();
-	swapBuffers();
+
+	if (isVisible())
+		swapBuffers();
 }
 
 // =============================================================================
 //
 void GLRenderer::hardRefresh()
 {
+	if (not RendererInitialized)
+		return;
+
 	compiler()->compileDocument (getCurrentDocument());
 	refresh();
-	glLineWidth (cfg::LineThickness); // TODO: ...?
 }
 
 // =============================================================================
@@ -541,7 +548,7 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 // Inverse operation for the above - convert a 3D position to a 2D screen
 // position. Don't ask me how this code manages to work, I don't even know.
 //
-QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d) const
+QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d)
 {
 	GLfloat m[16];
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
@@ -584,7 +591,7 @@ QPen GLRenderer::linePen() const
 //
 void GLRenderer::paintEvent (QPaintEvent*)
 {
-	makeCurrent();
+	doMakeCurrent();
 	m_virtWidth = zoom();
 	m_virtHeight = (m_height * m_virtWidth) / m_width;
 	initGLData();
@@ -841,7 +848,7 @@ void GLRenderer::keyReleaseEvent (QKeyEvent* ev)
 //
 void GLRenderer::wheelEvent (QWheelEvent* ev)
 {
-	makeCurrent();
+	doMakeCurrent();
 
 	zoomNotch (ev->delta() > 0);
 	zoom() = clamp (zoom(), 0.01, 10000.0);
@@ -891,7 +898,7 @@ void GLRenderer::pick (int mouseX, int mouseY, bool additive)
 //
 void GLRenderer::pick (QRect const& range, bool additive)
 {
-	makeCurrent();
+	doMakeCurrent();
 
 	// Clear the selection if we do not wish to add to it.
 	if (not additive)
@@ -989,7 +996,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 LDObjectPtr GLRenderer::pickOneObject (int mouseX, int mouseY)
 {
 	uchar pixel[4];
-	makeCurrent();
+	doMakeCurrent();
 	setPicking (true);
 	drawGLScene();
 	glReadPixels (mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
@@ -1609,4 +1616,13 @@ bool GLRenderer::mouseHasMoved() const
 QPoint const& GLRenderer::mousePosition() const
 {
 	return m_mousePosition;
+}
+
+void GLRenderer::doMakeCurrent()
+{
+	makeCurrent();
+
+#ifdef USE_QT5
+	initializeOpenGLFunctions();
+#endif
 }

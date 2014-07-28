@@ -71,18 +71,23 @@ QString PartDownloader::getDownloadPath()
 //
 PartDownloader::PartDownloader (QWidget* parent) : QDialog (parent)
 {
-	setInterface (new Ui_DownloadFrom);
-	interface()->setupUi (this);
-	interface()->fname->setFocus();
-	interface()->progress->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
+	setForm (new Ui_DownloadFrom);
+	form()->setupUi (this);
+	form()->fname->setFocus();
+
+#ifdef USE_QT5
+	form()->progress->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+#else
+	form()->progress->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
+#endif
 
 	setDownloadButton (new QPushButton (tr ("Download")));
-	interface()->buttonBox->addButton (downloadButton(), QDialogButtonBox::ActionRole);
+	form()->buttonBox->addButton (downloadButton(), QDialogButtonBox::ActionRole);
 	getButton (Abort)->setEnabled (false);
 
-	connect (interface()->source, SIGNAL (currentIndexChanged (int)),
+	connect (form()->source, SIGNAL (currentIndexChanged (int)),
 		this, SLOT (sourceChanged (int)));
-	connect (interface()->buttonBox, SIGNAL (clicked (QAbstractButton*)),
+	connect (form()->buttonBox, SIGNAL (clicked (QAbstractButton*)),
 		this, SLOT (buttonClicked (QAbstractButton*)));
 }
 
@@ -90,7 +95,7 @@ PartDownloader::PartDownloader (QWidget* parent) : QDialog (parent)
 //
 PartDownloader::~PartDownloader()
 {
-	delete interface();
+	delete form();
 }
 
 // =============================================================================
@@ -103,13 +108,13 @@ QString PartDownloader::getURL()
 	switch (src)
 	{
 		case PartsTracker:
-			dest = interface()->fname->text();
+			dest = form()->fname->text();
 			modifyDestination (dest);
-			interface()->fname->setText (dest);
+			form()->fname->setText (dest);
 			return g_unofficialLibraryURL + dest;
 
 		case CustomURL:
-			return interface()->fname->text();
+			return form()->fname->text();
 	}
 
 	// Shouldn't happen
@@ -183,7 +188,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 //
 PartDownloader::Source PartDownloader::getSource() const
 {
-	return (Source) interface()->source->currentIndex();
+	return (Source) form()->source->currentIndex();
 }
 
 // =============================================================================
@@ -191,9 +196,9 @@ PartDownloader::Source PartDownloader::getSource() const
 void PartDownloader::sourceChanged (int i)
 {
 	if (i == CustomURL)
-		interface()->fileNameLabel->setText (tr ("URL:"));
+		form()->fileNameLabel->setText (tr ("URL:"));
 	else
-		interface()->fileNameLabel->setText (tr ("File name:"));
+		form()->fileNameLabel->setText (tr ("File name:"));
 }
 
 // =============================================================================
@@ -213,7 +218,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 	}
 	elif (btn == getButton (Download))
 	{
-		QString dest = interface()->fname->text();
+		QString dest = form()->fname->text();
 		setPrimaryFile (LDDocumentPtr());
 		setAborted (false);
 
@@ -230,9 +235,9 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 		}
 
 		downloadButton()->setEnabled (false);
-		interface()->progress->setEnabled (true);
-		interface()->fname->setEnabled (false);
-		interface()->source->setEnabled (false);
+		form()->progress->setEnabled (true);
+		form()->fname->setEnabled (false);
+		form()->source->setEnabled (false);
 		downloadFile (dest, getURL(), true);
 		getButton (Close)->setEnabled (false);
 		getButton (Abort)->setEnabled (true);
@@ -244,7 +249,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 //
 void PartDownloader::downloadFile (QString dest, QString url, bool primary)
 {
-	const int row = interface()->progress->rowCount();
+	const int row = form()->progress->rowCount();
 
 	// Don't download files repeadetly.
 	if (filesToDownload().indexOf (dest) != -1)
@@ -254,7 +259,7 @@ void PartDownloader::downloadFile (QString dest, QString url, bool primary)
 	PartDownloadRequest* req = new PartDownloadRequest (url, dest, primary, this);
 	m_filesToDownload << dest;
 	m_requests << req;
-	interface()->progress->insertRow (row);
+	form()->progress->insertRow (row);
 	req->setTableRow (row);
 	req->updateToTable();
 }
@@ -312,10 +317,10 @@ QPushButton* PartDownloader::getButton (PartDownloader::Button i)
 			return downloadButton();
 
 		case Abort:
-			return qobject_cast<QPushButton*> (interface()->buttonBox->button (QDialogButtonBox::Abort));
+			return qobject_cast<QPushButton*> (form()->buttonBox->button (QDialogButtonBox::Abort));
 
 		case Close:
-			return qobject_cast<QPushButton*> (interface()->buttonBox->button (QDialogButtonBox::Close));
+			return qobject_cast<QPushButton*> (form()->buttonBox->button (QDialogButtonBox::Close));
 	}
 
 	return null;
@@ -365,7 +370,7 @@ void PartDownloadRequest::updateToTable()
 {
 	int const labelcol = PartDownloader::PartLabelColumn;
 	int const progcol = PartDownloader::ProgressColumn;
-	QTableWidget* table = prompt()->interface()->progress;
+	QTableWidget* table = prompt()->form()->progress;
 	QProgressBar* prog;
 
 	switch (state())

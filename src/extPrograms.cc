@@ -68,7 +68,6 @@ QString* const g_extProgPaths[] =
 	&cfg::Edger2Path,
 };
 
-#ifndef _WIN32
 CFGENTRY (Bool, IsecalcUsesWine, false)
 CFGENTRY (Bool, IntersectorUsesWine, false)
 CFGENTRY (Bool, CovererUsesWine, false)
@@ -85,7 +84,6 @@ bool* const g_extProgWine[] =
 	&cfg::RectifierUsesWine,
 	&cfg::Edger2UsesWine,
 };
-#endif // _WIN32
 
 const char* g_extProgNames[] =
 {
@@ -142,6 +140,8 @@ static QString processErrorString (extprog prog, QProcess& proc)
 #ifndef _WIN32
 			if (*g_extProgWine[prog])
 				wineblurb = "make sure Wine is installed and ";
+#else
+			(void) prog;
 #endif
 
 			return format ("Program failed to start, %1check your permissions", wineblurb);

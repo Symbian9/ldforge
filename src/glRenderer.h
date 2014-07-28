@@ -135,7 +135,11 @@ struct CameraIcon
 // and selection picking. The instance of GLRenderer is accessible as
 // g_win->R()
 //
+#ifdef USE_QT5
+class GLRenderer : public QGLWidget, protected QOpenGLFunctions
+#else
 class GLRenderer : public QGLWidget
+#endif
 {
 public:
 	Q_OBJECT
@@ -155,7 +159,7 @@ public:
 	void					clearOverlay();
 	void					compileObject (LDObjectPtr obj);
 	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
-	QPoint					coordconv3_2 (const Vertex& pos3d) const;
+	QPoint					coordconv3_2 (const Vertex& pos3d);
 	EditModeType			currentEditModeType() const;
 	void					drawBlip (QPainter& paint, QPoint pos) const;
 	void					drawGLScene();
@@ -238,6 +242,7 @@ private:
 	void					clampAngle (double& angle) const;
 	inline LDGLData&		currentDocumentData() const;
 	void					drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
+	void					doMakeCurrent();
 	LDOverlayPtr			findOverlayObject (ECamera cam);
 	inline double&			pan (Axis ax);
 	inline const double&	pan (Axis ax) const;

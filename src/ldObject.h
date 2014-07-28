@@ -29,13 +29,10 @@ public:															\
 	{															\
 		return OBJ_##T;											\
 	}															\
-	virtual QString asText() const override;						\
+	virtual QString asText() const override;					\
 	virtual void invert() override;								\
 																\
 	LD##T (LDObjectPtr* selfptr);								\
-																\
-protected:														\
-	friend class QSharedPointer<LD##T>::ExternalRefCount;		\
 
 #define LDOBJ_NAME(N)          public: virtual QString typeName() const override { return #N; }
 #define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
@@ -200,25 +197,18 @@ public:
 	// have to be the friend. Do not call this! Ever!
 	void finalDelete();
 
-protected:
-	// LDObjects are to be deleted with the finalDelete() method, not with
-	// operator delete. This is because it seems virtual functions cannot
-	// be properly called from the destructor, thus a normal method must
-	// be used instead. The destructor also doesn't seem to be able to
-	// be private without causing a truckload of problems so it's protected
-	// instead.
-	virtual ~LDObject();
-	void chooseID();
-
 	// Even though we supply a custom deleter to QSharedPointer, the shared
 	// pointer's base class still calls operator delete directly in one of
 	// its methods. The method should never be called but we need to declare
 	// the class making this delete call a friend anyway.
-	friend class QSharedPointer<LDObject>;
-	friend class QSharedPointer<LDObject>::ExternalRefCount;
+	//
+	// Do not directly delete LDObjects. Ever.
+	virtual ~LDObject();
 
 private:
 	Vertex m_coords[4];
+
+	void chooseID();
 };
 
 //

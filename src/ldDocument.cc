@@ -1117,7 +1117,7 @@ int LDDocument::addObject (LDObjectPtr obj)
 		dprint ("Added object #%1 (%2)\n", obj->id(), obj->typeName());
 #endif
 
-	obj->setDocument (this);
+	obj->setDocument (self());
 	g_win->R()->compileObject (obj);
 	return getObjectCount() - 1;
 }
@@ -1139,7 +1139,7 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 {
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
-	obj->setDocument (this);
+	obj->setDocument (self());
 	g_win->R()->compileObject (obj);
 	
 
@@ -1212,7 +1212,7 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 	_objectVertices.remove (m_objects[idx]);
 	m_objects[idx]->deselect();
 	m_objects[idx]->setDocument (LDDocumentPtr());
-	obj->setDocument (this);
+	obj->setDocument (self());
 	addKnownVertices (obj);
 	g_win->R()->compileObject (obj);
 	m_objects[idx] = obj;

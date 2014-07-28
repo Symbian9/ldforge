@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#include <QOpenGLFunctions>
 #include "basics.h"
 
 class LDObject;

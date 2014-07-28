@@ -148,7 +148,7 @@ void ColorSelector::drawColorInfo()
 	if (selection() == null)
 	{
 		ui->colorLabel->setText ("---");
-		ui->iconLabel->setPixmap (null);
+		ui->iconLabel->setPixmap (QPixmap());
 		ui->transparentDirectColor->setChecked (false);
 		return;
 	}

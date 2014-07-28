@@ -193,3 +193,38 @@ IMPLEMENT_CONFIG (Float)
 IMPLEMENT_CONFIG (List)
 IMPLEMENT_CONFIG (KeySequence)
 IMPLEMENT_CONFIG (Vertex)
+
+void IntConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toInt();
+}
+
+void StringConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toString();
+}
+
+void BoolConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toBool();
+}
+
+void ListConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toList();
+}
+
+void KeySequenceConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toString();
+}
+
+void FloatConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.toDouble();
+}
+
+void VertexConfigEntry::loadFromVariant (const QVariant& val)
+{
+	*m_valueptr = val.value<Vertex>();
+}

@@ -60,7 +60,7 @@ public:
 	Q_OBJECT
 	PROPERTY (public,	LDDocumentPtr, 		primaryFile,		setPrimaryFile,		STOCK_WRITE)
 	PROPERTY (public,	bool,				isAborted,			setAborted,			STOCK_WRITE)
-	PROPERTY (private,	Ui_DownloadFrom*,	interface,			setInterface,		STOCK_WRITE)
+	PROPERTY (private,	Ui_DownloadFrom*,	form,				setForm,			STOCK_WRITE)
 	PROPERTY (private,	QStringList,		filesToDownload,	setFilesToDownload,	STOCK_WRITE)
 	PROPERTY (private,	RequestList,		requests,			setRequests,		STOCK_WRITE)
 	PROPERTY (private,	QPushButton*,		downloadButton,		setDownloadButton,	STOCK_WRITE)

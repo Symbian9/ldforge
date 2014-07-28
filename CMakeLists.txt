@@ -9,10 +9,21 @@ project (ldforge)
 add_subdirectory (updaterevision)
 add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
-find_package (Qt4 REQUIRED)
-find_package (OpenGL REQUIRED)
 
 option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct colors" OFF)
+option (USE_QT5 "Use Qt5 instead of Qt4" OFF)
+
+if (USE_QT5)
+	find_package (Qt5Widgets REQUIRED)
+	find_package (Qt5Core REQUIRED)
+	find_package (Qt5OpenGL REQUIRED)
+	find_package (Qt5Network REQUIRED)
+	set (CMAKE_AUTOMOC ON)
+else()
+	find_package (Qt4 REQUIRED)
+endif()
+
+find_package (OpenGL REQUIRED)
 
 get_target_property (UPDATEREVISION_EXE updaterevision LOCATION)
 get_target_property (CODEGEN_EXE codegen LOCATION)
@@ -126,8 +137,11 @@ add_custom_target (codegeneration ALL
 	DEPENDS codegen)
 
 set (LDFORGE_RESOURCES ldforge.qrc)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
+# set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
+
+if (NOT MSVC)
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
+endif()
 
 if (TRANSPARENT_DIRECT_COLORS)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRANSPARENT_DIRECT_COLORS")
@@ -145,28 +159,35 @@ include_directories ("${PROJECT_BINARY_DIR}")
 include_directories ("${PROJECT_BINARY_DIR}/src")
 include_directories ("${PROJECT_BINARY_DIR}/src/misc")
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG")
+if (NOT MSVC)
+	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG")
+	endif()
 endif()
 
-qt4_wrap_cpp (LDFORGE_MOC ${LDFORGE_HEADERS})
-qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
-qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
+if (USE_QT5)
+	qt5_generate_moc (LDFORGE_MOC ${LDFORGE_HEADERS})
+	qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})
+	qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
+	add_executable (ldforge ${LDFORGE_SOURCES} ${LDFORGE_MOC} ${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS})
+else()
+	qt4_wrap_cpp (LDFORGE_MOC ${LDFORGE_HEADERS})
+	qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
+	qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
+	add_executable (ldforge ${LDFORGE_SOURCES} ${LDFORGE_RCC} ${LDFORGE_FORMS_HEADERS} ${LDFORGE_MOC})
+endif()
 
-add_executable (ldforge
-	${LDFORGE_SOURCES}
-	${LDFORGE_RCC}
-	${LDFORGE_FORMS_HEADERS}
-	${LDFORGE_MOC}
-)
-
-target_link_libraries (ldforge
-	${QT_QTCORE_LIBRARY}
-	${QT_QTGUI_LIBRARY}
-	${QT_QTNETWORK_LIBRARY}
-	${QT_QTOPENGL_LIBRARY}
-	${OPENGL_LIBRARIES}
-)
+if (USE_QT5)
+	target_link_libraries (ldforge Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
+else()
+	target_link_libraries (ldforge
+		${QT_QTCORE_LIBRARY}
+		${QT_QTGUI_LIBRARY}
+		${QT_QTNETWORK_LIBRARY}
+		${QT_QTOPENGL_LIBRARY}
+		${OPENGL_LIBRARIES}
+	)
+endif()
 
 add_dependencies (ldforge revision_check codegeneration)
 install (TARGETS ldforge RUNTIME DESTINATION bin)

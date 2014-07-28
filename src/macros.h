@@ -115,6 +115,11 @@ public: \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
 	inline T operator-- (T& a, int) { T result = a; a = (T) ((int) a - 1); return result; }
 
+#if QT_VERSION >= QT_VERSION_CHECK (5, 0, 0)
+# define USE_QT5
+#endif
+
+
 #define FOR_ENUM_NAME_HELPER(LINE) enum_iterator_ ## LINE
 #define FOR_ENUM_NAME(LINE) FOR_ENUM_NAME_HELPER(LINE)
 

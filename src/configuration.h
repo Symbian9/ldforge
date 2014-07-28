@@ -118,10 +118,7 @@ public:																				\
 		return *m_valueptr == m_default;											\
 	}																				\
 																					\
-	virtual void loadFromVariant (const QVariant& val)								\
-	{																				\
-		*m_valueptr = val.value<ValueType>();										\
-	}																				\
+	virtual void loadFromVariant (const QVariant& val);								\
 																					\
 	virtual QVariant toVariant() const												\
 	{																				\

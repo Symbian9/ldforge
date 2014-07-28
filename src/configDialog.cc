@@ -294,6 +294,7 @@ void ConfigDialog::applySettings()
 			print ("Unknown widget of type %1\n", wdg->metaObject()->className());
 
 		conf->loadFromVariant (value);
+		print ("Value of %1: %2\n", conf->name(), conf->toVariant().toString());
 	});
 
 	// Rebuild the quick color toolbar
@@ -509,6 +510,7 @@ void ConfigDialog::setButtonColor()
 		return;
 	}
 
+	print ("Color of %1 is %2\n", button, _buttonColors[button].name());
 	QColor col = QColorDialog::getColor (_buttonColors[button]);
 
 	if (col.isValid())
@@ -532,6 +534,7 @@ void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 	button->setAutoFillBackground (true);
 	button->setStyleSheet (format ("background-color: %1", value));
 	_buttonColors[button] = QColor (value);
+	print ("Color of %1 set to %2\n", button, value);
 }
 
 //

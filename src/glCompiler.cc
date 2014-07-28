@@ -90,6 +90,7 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 //
 void GLCompiler::initialize()
 {
+	initializeOpenGLFunctions();
 	glGenBuffers (g_numVBOs, &m_vbo[0]);
 	checkGLError();
 }
