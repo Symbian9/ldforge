@@ -24,11 +24,7 @@
 
 // =============================================================================
 //
-#ifdef USE_QT5
 class GLCompiler : protected QOpenGLFunctions
-#else
-class GLCompiler
-#endif
 {
 public:
 	struct ObjectVBOInfo

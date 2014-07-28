@@ -17,7 +17,11 @@
  */
 
 #pragma once
-#include <QOpenGLFunctions>
+
+#ifdef USE_QT5
+# include <QOpenGLFunctions>
+#endif
+
 #include "basics.h"
 
 class LDObject;
@@ -61,6 +65,15 @@ enum EVBOComplement
 
 NUMERIC_ENUM_OPERATORS (EVBOSurface)
 NUMERIC_ENUM_OPERATORS (EVBOComplement)
+
+#ifndef USE_QT5
+// Placeholder QOpenGLFunctions for Qt 4.x support
+struct QOpenGLFunctions
+{
+	void initializeOpenGLFunctions() {}
+};
+
+#endif
 
 // KDevelop doesn't seem to understand some VBO stuff
 #ifdef IN_IDE_PARSER

@@ -237,7 +237,9 @@ void GLRenderer::resetAllAngles()
 //
 void GLRenderer::initializeGL()
 {
+#ifdef USE_QT5
 	initializeOpenGLFunctions();
+#endif
 	setBackground();
 	glLineWidth (cfg::LineThickness);
 	glLineStipple (1, 0x6666);
@@ -1621,8 +1623,5 @@ QPoint const& GLRenderer::mousePosition() const
 void GLRenderer::doMakeCurrent()
 {
 	makeCurrent();
-
-#ifdef USE_QT5
 	initializeOpenGLFunctions();
-#endif
 }
