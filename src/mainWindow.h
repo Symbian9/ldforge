@@ -76,6 +76,7 @@ class MainWindow : public QMainWindow
 
 public:
 	explicit MainWindow (QWidget* parent = null, Qt::WindowFlags flags = 0);
+	~MainWindow();
 
 	// Rebuilds the object list.
 	void buildObjList();

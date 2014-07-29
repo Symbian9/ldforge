@@ -143,7 +143,7 @@ public:
 	PROPERTY (public,	MessageManager*,	messageLog, 	setMessageLog,		STOCK_WRITE)
 	PROPERTY (private,	bool,				isPicking,		setPicking,			CUSTOM_WRITE)
 	PROPERTY (public,	LDDocumentPtr,		document,		setDocument,		CUSTOM_WRITE)
-	PROPERTY (private,	GLCompiler*,		compiler,		setCompiler,		STOCK_WRITE)
+	PROPERTY (public,	GLCompiler*,		compiler,		setCompiler,		STOCK_WRITE)
 	PROPERTY (public,	LDObjectWeakPtr,	objectAtCursor,	setObjectAtCursor,	STOCK_WRITE)
 	PROPERTY (private,	bool,				isCameraMoving,	setCameraMoving,	STOCK_WRITE)
 

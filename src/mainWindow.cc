@@ -123,6 +123,11 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
 }
 
+MainWindow::~MainWindow()
+{
+	g_win = null;
+}
+
 // =============================================================================
 //
 void MainWindow::slot_action()

@@ -36,6 +36,7 @@
 
 MainWindow* g_win = null;
 static QString g_versionString, g_fullVersionString;
+static bool g_IsExiting (false);
 
 const Vertex g_origin (0.0f, 0.0f, 0.0f);
 const Matrix g_identity ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
@@ -79,5 +80,18 @@ int main (int argc, char* argv[])
 		Config::Save();
 	}
 
-	return app.exec();
+	int result = app.exec();
+	g_IsExiting = true;
+	return result;
+}
+
+bool IsExiting()
+{
+	return g_IsExiting;
+}
+
+void Exit()
+{
+	g_IsExiting = true;
+	exit (EXIT_SUCCESS);
 }

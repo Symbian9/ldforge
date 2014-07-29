@@ -43,6 +43,7 @@ public:
 	QColor				indexColorForID (int id) const;
 	void				needMerge();
 	void				prepareVBO (int vbonum);
+	void				setRenderer (GLRenderer* compiler);
 	void				stageForCompilation (LDObjectPtr obj);
 	void				unstage (LDObjectPtr obj);
 
@@ -66,14 +67,14 @@ public:
 private:
 	void			compileStaged();
 	void			compileObject (LDObjectPtr obj);
-	void			compilePolygon (LDPolygon& poly, LDObjectPtr topobj, GLCompiler::ObjectVBOInfo* objinfo);
+	void			compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOInfo* objinfo);
 
 	QMap<LDObjectWeakPtr, ObjectVBOInfo>	m_objectInfo;
 	LDObjectWeakList						m_staged; // Objects that need to be compiled
 	GLuint									m_vbo[g_numVBOs];
 	bool									m_vboChanged[g_numVBOs];
 	int										m_vboSizes[g_numVBOs];
-	GLRenderer* const						m_renderer;
+	GLRenderer*								m_renderer;
 };
 
 #define checkGLError() { checkGLError_private (__FILE__, __LINE__); }

@@ -101,6 +101,9 @@ GLCompiler::~GLCompiler()
 {
 	glDeleteBuffers (g_numVBOs, &m_vbo[0]);
 	checkGLError();
+
+	if (m_renderer != null)
+		m_renderer->setCompiler (null);
 }
 
 // =============================================================================
@@ -398,4 +401,9 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOI
 			}
 		}
 	}
+}
+
+void GLCompiler::setRenderer (GLRenderer* renderer)
+{
+	m_renderer = renderer;
 }

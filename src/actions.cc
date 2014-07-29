@@ -172,7 +172,7 @@ void MainWindow::slot_actionSetLDrawPath()
 //
 void MainWindow::slot_actionExit()
 {
-	exit (0);
+	Exit();
 }
 
 // =============================================================================

@@ -143,6 +143,10 @@ GLRenderer::~GLRenderer()
 	for (CameraIcon& info : m_cameraIcons)
 		delete info.img;
 
+	if (messageLog())
+		messageLog()->setRenderer (null);
+
+	m_compiler->setRenderer (null);
 	delete m_compiler;
 	delete m_editmode;
 }
@@ -1130,7 +1134,8 @@ void GLRenderer::compileObject (LDObjectPtr obj)
 //
 void GLRenderer::forgetObject (LDObjectPtr obj)
 {
-	compiler()->dropObject (obj);
+	if (compiler() != null)
+		compiler()->dropObject (obj);
 }
 
 // =============================================================================

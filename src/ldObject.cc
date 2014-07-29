@@ -89,7 +89,7 @@ void LDObject::chooseID()
 	critical ("Created too many objects. Execution cannot continue. You have a "
 		"chance to save any changes to documents, then restart.");
 	(void) safeToCloseAll();
-	exit (0);
+	Exit();
 }
 
 // =============================================================================
@@ -303,6 +303,10 @@ LDObject::~LDObject() {}
 //
 void LDObject::destroy()
 {
+	// Don't bother during program termination
+	if (IsExiting() or isDestructed())
+		return;
+
 	// If this object was selected, unselect it now
 	if (isSelected())
 		deselect();
@@ -312,7 +316,8 @@ void LDObject::destroy()
 		document().toStrongRef()->forgetObject (self());
 
 	// Delete the GL lists
-	g_win->R()->forgetObject (self());
+	if (g_win != null)
+		g_win->R()->forgetObject (self());
 
 	// Remove this object from the list of LDObjects
 	g_allObjects.erase (g_allObjects.find (id()));

@@ -67,7 +67,7 @@ namespace LDPaths
 			LDrawPathDialog dlg (false);
 
 			if (not dlg.exec())
-				exit (0);
+				Exit();
 
 			cfg::LDrawPath = dlg.filename();
 		}
@@ -153,7 +153,10 @@ LDDocumentPtr LDDocument::createNew()
 //
 LDDocument::~LDDocument()
 {
-	print ("Deleted %1", getDisplayName());
+	// Don't bother during program termination
+	if (IsExiting())
+		return;
+
 	g_allDocuments.removeOne (self());
 	m_flags |= DOCF_IsBeingDestroyed;
 	delete m_history;
