@@ -250,7 +250,7 @@ void MainWindow::updateGridToolBar()
 //
 void MainWindow::updateTitle()
 {
-	QString title = format (APPNAME " %1", fullVersionString());
+	QString title = format (APPNAME " %1", versionString());
 
 	// Append our current file if we have one
 	if (getCurrentDocument())

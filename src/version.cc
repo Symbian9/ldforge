@@ -70,7 +70,7 @@ const char* commitTimeString()
 	if (g_buildTime[0] == '\0')
 	{
 		time_t timestamp = SVN_REVISION_NUMBER;
-		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y %T", localtime (&timestamp));
+		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y", localtime (&timestamp));
 	}
 #endif
 
