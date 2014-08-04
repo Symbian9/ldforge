@@ -30,7 +30,7 @@ class QColor;
 class QAction;
 
 // Prime numbers
-extern const int g_primes[NUM_PRIMES];
+extern const int PrimeNumbers[NUM_PRIMES];
 
 // Simplifies the given fraction.
 void simplify (int& numer, int& denom);
@@ -38,41 +38,42 @@ void simplify (int& numer, int& denom);
 using ApplyToMatrixFunction = std::function<void (int, double&)>;
 using ApplyToMatrixConstFunction = std::function<void (int, double)>;
 
-void roundToDecimals (double& a, int decimals);
+void RoundToDecimals (double& a, int decimals);
 void applyToMatrix (Matrix& a, ApplyToMatrixFunction func);
 void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
 
-double getCoordinate (const Vertex& a, Axis ax);
-QString join (QList< StringFormatArg > vals, QString delim = " ");
-QString prettyFileSize (qint64 size);
+double GetCoordinateOf (const Vertex& a, Axis ax);
+QString MakePrettyFileSize (qint64 size);
+
+QString Join (QList<StringFormatArg> vals, QString delim = "");
 
 // Grid stuff
-struct gridinfo
+struct GridData
 {
-	const char*				name;
-	AbstractConfigEntry::FloatType*	coordsnap;
-	AbstractConfigEntry::FloatType*	anglesnap;
+	const char* name;
+	float* coordinateSnap;
+	float* angleSnap;
 };
 
 EXTERN_CFGENTRY (Int, Grid)
-static const int g_numGrids = 3;
-extern const gridinfo g_gridInfo[3];
+extern const GridData Grids[3];
 
-inline const gridinfo& currentGrid()
+inline const GridData& CurrentGrid()
 {
-	return g_gridInfo[cfg::Grid];
+	return Grids[cfg::Grid];
 }
 
 // =============================================================================
-enum ERotationPoint
+enum class RotationPoint
 {
-	EObjectOrigin,
-	EWorldOrigin,
-	ECustomPoint
+	ObjectOrigin,
+	WorldOrigin,
+	CustomPoint,
+	NumValues
 };
 
-Vertex rotPoint (const LDObjectList& objs);
-void configRotationPoint();
+Vertex GetRotationPoint (const LDObjectList& objs);
+void ConfigureRotationPoint();
 
 // =============================================================================
 namespace Grid

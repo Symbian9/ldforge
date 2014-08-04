@@ -360,7 +360,7 @@ void MainWindow::slot_actionRedo()
 void doMoveObjects (Vertex vect)
 {
 	// Apply the grid values
-	vect *= *currentGrid().coordsnap;
+	vect *= *CurrentGrid().coordinateSnap;
 
 	for (LDObjectPtr obj : selection())
 		obj->move (vect);
@@ -425,8 +425,8 @@ static void doRotate (const int l, const int m, const int n)
 {
 	LDObjectList sel = selection();
 	QList<Vertex*> queue;
-	const Vertex rotpoint = rotPoint (sel);
-	const double angle = (pi * *currentGrid().anglesnap) / 180,
+	const Vertex rotpoint = GetRotationPoint (sel);
+	const double angle = (pi * *CurrentGrid().angleSnap) / 180,
 				 cosangle = cos (angle),
 				 sinangle = sin (angle);
 
@@ -511,7 +511,7 @@ void MainWindow::slot_actionRotateZNeg()
 
 void MainWindow::slot_actionRotationPoint()
 {
-	configRotationPoint();
+	ConfigureRotationPoint();
 }
 
 // =============================================================================
@@ -531,8 +531,8 @@ void MainWindow::slot_actionRoundCoordinates()
 			Matrix t = mo->transform();
 
 			// Note: matrix values are to be rounded to 4 decimals.
-			v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::RoundPosition); });
-			applyToMatrix (t, [](int, double& a) { roundToDecimals (a, cfg::RoundMatrix); });
+			v.apply ([](Axis, double& a) { RoundToDecimals (a, cfg::RoundPosition); });
+			applyToMatrix (t, [](int, double& a) { RoundToDecimals (a, cfg::RoundMatrix); });
 
 			mo->setPosition (v);
 			mo->setTransform (t);
@@ -543,7 +543,7 @@ void MainWindow::slot_actionRoundCoordinates()
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
-				v.apply ([](Axis, double& a) { roundToDecimals (a, cfg::RoundPosition); });
+				v.apply ([](Axis, double& a) { RoundToDecimals (a, cfg::RoundPosition); });
 				obj->setVertex (i, v);
 				num += 3;
 			}

@@ -368,7 +368,7 @@ void MainWindow::slot_actionYtruder()
 		return;
 
 	// Compose the command-line arguments
-	QString argv = join (
+	QString argv = Join (
 	{
 		(axis == X) ? "-x" : (axis == Y) ? "-y" : "-z",
 		(mode == Distance) ? "-d" : (mode == Symmetry) ? "-s" : (mode == Projection) ? "-p" : "-r",
@@ -412,7 +412,7 @@ void MainWindow::slot_actionRectifier()
 		return;
 
 	// Compose arguments
-	QString argv = join (
+	QString argv = Join (
 	{
 		(not ui.cb_condense->isChecked()) ? "-q" : "",
 		(not ui.cb_subst->isChecked()) ? "-r" : "",
@@ -490,7 +490,7 @@ void MainWindow::slot_actionIntersector()
 		return;
 	}
 
-	QString parms = join (
+	QString parms = Join (
 	{
 		(ui.cb_colorize->isChecked()) ? "-c" : "",
 		(ui.cb_nocondense->isChecked()) ? "-t" : "",
@@ -498,7 +498,7 @@ void MainWindow::slot_actionIntersector()
 		ui.dsb_prescale->value()
 	});
 
-	QString argv_normal = join (
+	QString argv_normal = Join (
 	{
 		parms,
 		inDATName,
@@ -506,7 +506,7 @@ void MainWindow::slot_actionIntersector()
 		outDATName
 	});
 
-	QString argv_inverse = join (
+	QString argv_inverse = Join (
 	{
 		parms,
 		cutDATName,
@@ -526,7 +526,7 @@ void MainWindow::slot_actionIntersector()
 		insertOutput (outDAT2Name, false, {cutCol});
 
 	if (ui.cb_edges->isChecked() and checkProgPath (Isecalc) and
-		runUtilityProcess (Isecalc, cfg::IsecalcPath, join ( {inDATName, cutDATName, edgesDATName})))
+		runUtilityProcess (Isecalc, cfg::IsecalcPath, Join ({inDATName, cutDATName, edgesDATName})))
 	{
 		insertOutput (edgesDATName, false, {});
 	}
@@ -576,7 +576,7 @@ void MainWindow::slot_actionCoverer()
 		return;
 	}
 
-	QString argv = join (
+	QString argv = Join (
 	{
 		(ui.cb_oldsweep->isChecked() ? "-s" : ""),
 		(ui.cb_reverse->isChecked() ? "-r" : ""),
@@ -642,7 +642,7 @@ void MainWindow::slot_actionIsecalc()
 		return;
 	}
 
-	QString argv = join (
+	QString argv = Join (
 	{
 		in1DATName,
 		in2DATName,
@@ -679,7 +679,7 @@ void MainWindow::slot_actionEdger2()
 
 	int unmatched = ui.unmatched->currentIndex();
 
-	QString argv = join (
+	QString argv = Join (
 	{
 		format ("-p %1", ui.precision->value()),
 		format ("-af %1", ui.flatAngle->value()),

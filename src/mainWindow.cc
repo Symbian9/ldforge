@@ -750,7 +750,7 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 		if (doc == getCurrentDocument())
 			updateTitle();
 
-		print ("Saved to %1 (%2)", path, prettyFileSize (savesize));
+		print ("Saved to %1 (%2)", path, MakePrettyFileSize (savesize));
 
 		// Add it to recent files
 		addRecentFile (path);

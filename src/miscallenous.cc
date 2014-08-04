@@ -27,7 +27,7 @@
 #include "ui_rotpoint.h"
 
 // Prime number table.
-const int g_primes[NUM_PRIMES] =
+const int PrimeNumbers[NUM_PRIMES] =
 {
 	2,    3,    5,    7,    11,   13,   17,   19,   23,   29,
 	31,   37,   41,   43,   47,   53,   59,   61,   67,   71,
@@ -81,7 +81,7 @@ const int g_primes[NUM_PRIMES] =
 	3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571,
 };
 
-static const long g_e10[] =
+static const long E10[] =
 {
 	1l,
 	10l,
@@ -109,7 +109,7 @@ CFGENTRY (Float, GridFineAngleSnap, 7.5f)
 CFGENTRY (Int, RotationPointType, 0)
 CFGENTRY (Vertex, CustomRotationPoint, g_origin)
 
-const gridinfo g_gridInfo[3] =
+const GridData Grids[3] =
 {
 	{ "Coarse",	&cfg::GridCoarseCoordinateSnap,	&cfg::GridCoarseAngleSnap	},
 	{ "Medium",	&cfg::GridMediumCoordinateSnap,	&cfg::GridMediumAngleSnap	},
@@ -122,7 +122,7 @@ const gridinfo g_gridInfo[3] =
 //
 double Grid::snap (double value, const Grid::Config type)
 {
-	double snapvalue = (type == Coordinate) ? *currentGrid().coordsnap : *currentGrid().anglesnap;
+	double snapvalue = (type == Coordinate) ? *CurrentGrid().coordinateSnap : *CurrentGrid().angleSnap;
 	double mult = floor (abs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
@@ -145,9 +145,9 @@ void simplify (int& numer, int& denom)
 	{
 		repeat = false;
 
-		for (int x = 0; x < countof (g_primes); x++)
+		for (int x = 0; x < countof (PrimeNumbers); x++)
 		{
-			int const prime = g_primes[x];
+			int const prime = PrimeNumbers[x];
 
 			if (numer < prime and denom < prime)
 				break;
@@ -165,11 +165,11 @@ void simplify (int& numer, int& denom)
 
 // =============================================================================
 //
-Vertex rotPoint (const LDObjectList& objs)
+Vertex GetRotationPoint (const LDObjectList& objs)
 {
-	switch ((ERotationPoint) cfg::RotationPointType)
+	switch (RotationPoint (cfg::RotationPointType))
 	{
-		case EObjectOrigin:
+		case RotationPoint::ObjectOrigin:
 		{
 			LDBoundingBox box;
 
@@ -185,15 +185,13 @@ Vertex rotPoint (const LDObjectList& objs)
 			return box.center();
 		}
 
-		case EWorldOrigin:
-		{
+		case RotationPoint::WorldOrigin:
 			return g_origin;
-		}
 
-		case ECustomPoint:
-		{
+		case RotationPoint::CustomPoint:
 			return cfg::CustomRotationPoint;
-		}
+
+		case RotationPoint::NumValues: break;
 	}
 
 	return Vertex();
@@ -201,25 +199,27 @@ Vertex rotPoint (const LDObjectList& objs)
 
 // =============================================================================
 //
-void configRotationPoint()
+void ConfigureRotationPoint()
 {
 	QDialog* dlg = new QDialog;
 	Ui::RotPointUI ui;
 	ui.setupUi (dlg);
 
-	switch ((ERotationPoint) cfg::RotationPointType)
+	switch (RotationPoint (cfg::RotationPointType))
 	{
-		case EObjectOrigin:
+		case RotationPoint::ObjectOrigin:
 			ui.objectPoint->setChecked (true);
 			break;
 
-		case EWorldOrigin:
+		case RotationPoint::WorldOrigin:
 			ui.worldPoint->setChecked (true);
 			break;
 
-		case ECustomPoint:
+		case RotationPoint::CustomPoint:
 			ui.customPoint->setChecked (true);
 			break;
+
+		case RotationPoint::NumValues: break;
 	}
 
 	ui.customX->setValue (cfg::CustomRotationPoint.x());
@@ -229,10 +229,10 @@ void configRotationPoint()
 	if (not dlg->exec())
 		return;
 
-	cfg::RotationPointType =
-		(ui.objectPoint->isChecked()) ? EObjectOrigin :
-		(ui.worldPoint->isChecked())  ? EWorldOrigin :
-		ECustomPoint;
+	cfg::RotationPointType = int (
+		(ui.objectPoint->isChecked()) ? RotationPoint::ObjectOrigin :
+		(ui.worldPoint->isChecked())  ? RotationPoint::WorldOrigin :
+		RotationPoint::CustomPoint);
 
 	cfg::CustomRotationPoint.setX (ui.customX->value());
 	cfg::CustomRotationPoint.setY (ui.customY->value());
@@ -241,7 +241,7 @@ void configRotationPoint()
 
 // =============================================================================
 //
-QString join (QList<StringFormatArg> vals, QString delim)
+QString Join (QList<StringFormatArg> vals, QString delim)
 {
 	QStringList list;
 
@@ -253,10 +253,10 @@ QString join (QList<StringFormatArg> vals, QString delim)
 
 // =============================================================================
 //
-void roundToDecimals (double& a, int decimals)
+void RoundToDecimals (double& a, int decimals)
 {
-	assert (decimals >= 0 and decimals < (signed) (sizeof g_e10 / sizeof *g_e10));
-	a = round (a * g_e10[decimals]) / g_e10[decimals];
+	assert (decimals >= 0 and decimals < (signed) (sizeof E10 / sizeof *E10));
+	a = round (a * E10[decimals]) / E10[decimals];
 }
 
 // =============================================================================
@@ -277,7 +277,7 @@ void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 
 // =============================================================================
 //
-double getCoordinate (const Vertex& a, Axis ax)
+double GetCoordinateOf (const Vertex& a, Axis ax)
 {
 	switch (ax)
 	{
@@ -293,7 +293,7 @@ double getCoordinate (const Vertex& a, Axis ax)
 
 // =============================================================================
 //
-QString prettyFileSize (qint64 size)
+QString MakePrettyFileSize (qint64 size)
 {
 	QString result;
 

@@ -95,8 +95,6 @@ static const LDGLAxis g_GLAxes[3] =
 	{ QColor (48,  112, 192), Vertex (0, 0, 10000) }, // Z
 };
 
-static GLuint g_GLAxes_VBO;
-static GLuint g_GLAxes_ColorVBO;
 static bool RendererInitialized (false);
 
 // =============================================================================
@@ -149,6 +147,9 @@ GLRenderer::~GLRenderer()
 	m_compiler->setRenderer (null);
 	delete m_compiler;
 	delete m_editmode;
+
+	glDeleteBuffers (1, &_axesVBO);
+	glDeleteBuffers (1, &_axesColorVBO);
 }
 
 // =============================================================================
@@ -279,11 +280,11 @@ void GLRenderer::initializeAxes()
 		}
 	}
 
-	glGenBuffers (1, &g_GLAxes_VBO);
-	glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+	glGenBuffers (1, &_axesVBO);
+	glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
 	glBufferData (GL_ARRAY_BUFFER, sizeof axesdata, axesdata, GL_STATIC_DRAW);
-	glGenBuffers (1, &g_GLAxes_ColorVBO);
-	glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_ColorVBO);
+	glGenBuffers (1, &_axesColorVBO);
+	glBindBuffer (GL_ARRAY_BUFFER, _axesColorVBO);
 	glBufferData (GL_ARRAY_BUFFER, sizeof colordata, colordata, GL_STATIC_DRAW);
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
 }
@@ -459,9 +460,9 @@ void GLRenderer::drawGLScene()
 
 		if (cfg::DrawAxes)
 		{
-			glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+			glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
-			glBindBuffer (GL_ARRAY_BUFFER, g_GLAxes_VBO);
+			glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
 			glColorPointer (3, GL_FLOAT, 0, NULL);
 			glDrawArrays (GL_LINES, 0, 6);
 			checkGLError();
@@ -539,8 +540,8 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 	cx *= negXFac;
 	cy *= negYFac;
 
-	roundToDecimals (cx, 4);
-	roundToDecimals (cy, 4);
+	RoundToDecimals (cx, 4);
+	RoundToDecimals (cy, 4);
 
 	// Create the vertex from the coordinates
 	pos3d.setCoordinate (axisX, cx);
