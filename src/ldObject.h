@@ -25,14 +25,16 @@
 
 #define LDOBJ(T)												\
 public:															\
+	static constexpr LDObjectType SubclassType = OBJ_##T;		\
+	LD##T (LDObjectPtr* selfptr);								\
+																\
 	virtual LDObjectType type() const override					\
 	{															\
 		return OBJ_##T;											\
 	}															\
+																\
 	virtual QString asText() const override;					\
 	virtual void invert() override;								\
-																\
-	LD##T (LDObjectPtr* selfptr);								\
 
 #define LDOBJ_NAME(N)          public: virtual QString typeName() const override { return #N; }
 #define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
@@ -594,3 +596,35 @@ static const int LowResolution = 16;
 static const int HighResolution = 48;
 
 QString PreferredLicenseText();
+
+template<typename T>
+inline void DynamicExecute (LDObjectPtr obj, std::function<void (QSharedPointer<T> const&)> func)
+{
+	static_assert (std::is_base_of<LDObject, T>::value,
+		"DynamicExecute may only be used with LDObject-derivatives");
+
+	if (obj->type() == T::SubclassType)
+		func (obj.staticCast<T>());
+}
+
+struct LDIterationBreakage {};
+
+template<typename T>
+inline void LDIterate (LDObjectList const& objs,
+	std::function<void (QSharedPointer<T> const&)> func)
+{
+	static_assert (std::is_base_of<LDObject, T>::value,
+		"LDIterate may only be used with LDObject-derivatives");
+
+	try
+	{
+		for (LDObjectPtr const& obj : objs)
+			DynamicExecute<T> (obj, func);
+	}
+	catch (LDIterationBreakage) {}
+}
+
+inline void Break()
+{
+	throw LDIterationBreakage();
+}

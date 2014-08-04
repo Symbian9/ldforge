@@ -255,7 +255,7 @@ QString Join (QList<StringFormatArg> vals, QString delim)
 //
 void RoundToDecimals (double& a, int decimals)
 {
-	assert (decimals >= 0 and decimals < (signed) (sizeof E10 / sizeof *E10));
+	assert (decimals >= 0 and decimals < countof (E10));
 	a = round (a * E10[decimals]) / E10[decimals];
 }
 

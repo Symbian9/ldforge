@@ -245,12 +245,12 @@ void ConfigDialog::initExtProgs()
 void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
 {
 	// Apply configuration
-	for (QWidget* wdg : findChildren<QWidget*>())
+	for (QWidget* widget : findChildren<QWidget*>())
 	{
-		if (not wdg->objectName().startsWith ("config"))
+		if (not widget->objectName().startsWith ("config"))
 			continue;
 
-		QString confname (wdg->objectName().mid (strlen ("config")));
+		QString confname (widget->objectName().mid (strlen ("config")));
 		AbstractConfigEntry* conf (Config::FindByName (confname));
 
 		if (conf == null)
@@ -259,7 +259,7 @@ void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, Abstract
 			continue;
 		}
 
-		func (wdg, conf);
+		func (widget, conf);
 	}
 }
 
@@ -268,7 +268,7 @@ void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, Abstract
 //
 void ConfigDialog::applySettings()
 {
-	_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	_applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
 	{
 		QVariant value (conf->toVariant());
 		QLineEdit* le;
@@ -278,23 +278,22 @@ void ConfigDialog::applySettings()
 		QCheckBox* checkbox;
 		QPushButton* button;
 
-		if ((le = qobject_cast<QLineEdit*> (wdg)) != null)
+		if ((le = qobject_cast<QLineEdit*> (widget)) != null)
 			value = le->text();
-		elif ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
+		elif ((spinbox = qobject_cast<QSpinBox*> (widget)) != null)
 			value = spinbox->value();
-		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
+		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != null)
 			value = doublespinbox->value();
-		elif ((slider = qobject_cast<QSlider*> (wdg)) != null)
+		elif ((slider = qobject_cast<QSlider*> (widget)) != null)
 			value = slider->value();
-		elif ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
+		elif ((checkbox = qobject_cast<QCheckBox*> (widget)) != null)
 			value = checkbox->isChecked();
-		elif ((button = qobject_cast<QPushButton*> (wdg)) != null)
+		elif ((button = qobject_cast<QPushButton*> (widget)) != null)
 			value = _buttonColors[button];
 		else
-			print ("Unknown widget of type %1\n", wdg->metaObject()->className());
+			print ("Unknown widget of type %1\n", widget->metaObject()->className());
 
 		conf->loadFromVariant (value);
-		print ("Value of %1: %2\n", conf->name(), conf->toVariant().toString());
 	});
 
 	// Rebuild the quick color toolbar
@@ -423,17 +422,15 @@ void ConfigDialog::slot_setColor()
 	if (not ColorSelector::selectColor (val, defval, this))
 		return;
 
-	if (entry)
+	if (entry != null)
 	{
 		entry->setColor (val);
 	}
 	else
 	{
 		LDQuickColor entry (val, null);
-
 		item = getSelectedQuickColor();
 		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : quickColorItems.size();
-
 		quickColors.insert (idx, entry);
 		entry = quickColors[idx];
 	}
@@ -471,10 +468,7 @@ void ConfigDialog::slot_moveColor()
 	if (dest < 0 or dest >= quickColorItems.size())
 		return; // destination out of bounds
 
-	LDQuickColor tmp = quickColors[dest];
-	quickColors[dest] = quickColors[idx];
-	quickColors[idx] = tmp;
-
+	qSwap (quickColors[dest], quickColors[idx]);
 	updateQuickColorList (&quickColors[dest]);
 }
 
@@ -510,18 +504,13 @@ void ConfigDialog::setButtonColor()
 		return;
 	}
 
-	print ("Color of %1 is %2\n", button, _buttonColors[button].name());
-	QColor col = QColorDialog::getColor (_buttonColors[button]);
+	QColor color = QColorDialog::getColor (_buttonColors[button]);
 
-	if (col.isValid())
+	if (color.isValid())
 	{
-		int r = col.red();
-		int g = col.green();
-		int b = col.blue();
-
-		QString colname;
-		colname.sprintf ("#%.2X%.2X%.2X", r, g, b);
-		setButtonBackground (button, colname);
+		QString colorname;
+		colorname.sprintf ("#%.2X%.2X%.2X", color.red(), color.green(), color.blue());
+		setButtonBackground (button, colorname);
 	}
 }
 
@@ -534,7 +523,6 @@ void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 	button->setAutoFillBackground (true);
 	button->setStyleSheet (format ("background-color: %1", value));
 	_buttonColors[button] = QColor (value);
-	print ("Color of %1 set to %2\n", button, value);
 }
 
 //

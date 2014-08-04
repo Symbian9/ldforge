@@ -807,19 +807,15 @@ void MainWindow::slot_actionSubfileSelection()
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	LDIterate<LDBFC> (getCurrentDocument()->objects(), [&] (LDBFCPtr const& bfc)
 	{
-		if (obj->type() != OBJ_BFC)
-			continue;
-
-		BFCStatement a = obj.staticCast<LDBFC>()->statement();
-
-		if (eq (a, BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
+		if (eq (bfc->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, 
+			BFCStatement::NoCertify))
 		{
-			bfctype = a;
-			break;
+			bfctype = bfc->statement();
+			Break();
 		}
-	}
+	});
 
 	// Get the body of the document in LDraw code
 	for (LDObjectPtr obj : selection())

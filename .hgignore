@@ -14,3 +14,5 @@ debug_lastInput
 .kdev_include_paths
 *.cfg
 .kdev4
+.*~
+*.orig

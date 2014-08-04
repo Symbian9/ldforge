@@ -121,16 +121,14 @@ static void doInline (bool deep)
 {
 	LDObjectList sel = selection();
 
-	for (LDObjectPtr obj : sel)
+	LDIterate<LDSubfile> (selection(), [&](LDSubfilePtr const& ref)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		long idx = obj->lineNumber();
+		long idx = ref->lineNumber();
 
-		if (idx == -1 or obj->type() != OBJ_Subfile)
-			continue;
-
-		LDObjectList objs = obj.staticCast<LDSubfile>()->inlineContents (deep, false);
+		assert (idx != -1);
+		LDObjectList objs = ref->inlineContents (deep, false);
 
 		// Merge in the inlined objects
 		for (LDObjectPtr inlineobj : objs)
@@ -143,8 +141,8 @@ static void doInline (bool deep)
 		}
 
 		// Delete the subfile now as it's been inlined.
-		obj->destroy();
-	}
+		ref->destroy();
+	});
 
 	g_win->refresh();
 }
@@ -165,25 +163,22 @@ void MainWindow::slot_actionSplitQuads()
 {
 	int num = 0;
 
-	for (LDObjectPtr obj : selection())
+	LDIterate<LDQuad> (selection(), [&](LDQuadPtr const& quad)
 	{
-		if (obj->type() != OBJ_Quad)
-			continue;
-
 		// Find the index of this quad
-		long index = obj->lineNumber();
+		long index = quad->lineNumber();
 
 		if (index == -1)
 			return;
 
-		QList<LDTrianglePtr> triangles = obj.staticCast<LDQuad>()->splitToTriangles();
+		QList<LDTrianglePtr> triangles = quad->splitToTriangles();
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
 		getCurrentDocument()->setObject (index, triangles[0]);
 		getCurrentDocument()->insertObj (index + 1, triangles[1]);
 		num++;
-	}
+	});
 
 	print ("%1 quadrilaterals split", num);
 	refresh();
@@ -666,17 +661,13 @@ void MainWindow::slot_actionFlip()
 //
 void MainWindow::slot_actionDemote()
 {
-	LDObjectList sel = selection();
 	int num = 0;
 
-	for (LDObjectPtr obj : sel)
+	LDIterate<LDCondLine> (selection(), [&](LDCondLinePtr const& cnd)
 	{
-		if (obj->type() != OBJ_CondLine)
-			continue;
-
-		obj.staticCast<LDCondLine>()->toEdgeLine();
+		cnd->toEdgeLine();
 		++num;
-	}
+	});
 
 	print (tr ("Demoted %1 conditional lines"), num);
 	refresh();
@@ -702,8 +693,11 @@ void MainWindow::slot_actionAutocolor()
 	int colnum = 0;
 	LDColor color;
 
-	for (colnum = 0; colnum < numLDConfigColors() and ((color = LDColor::fromIndex (colnum)) == null or isColorUsed (color)); colnum++)
-		;
+	for (colnum = 0;
+		 colnum < numLDConfigColors() and
+			((color = LDColor::fromIndex (colnum)) == null or
+			isColorUsed (color));
+		colnum++) {}
 
 	if (colnum >= numLDConfigColors())
 	{
@@ -794,7 +788,7 @@ void MainWindow::slot_actionSplitLines()
 
 	for (LDObjectPtr obj : selection())
 	{
-		if (obj->type() != OBJ_Line and obj->type() != OBJ_CondLine)
+		if (not eq (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
 		QVector<LDObjectPtr> newsegs;
@@ -803,8 +797,18 @@ void MainWindow::slot_actionSplitLines()
 		{
 			LDObjectPtr segment;
 			Vertex v0, v1;
-			v0.apply ([&](Axis ax, double& a) { a = (obj->vertex (0)[ax] + (((obj->vertex (1)[ax] - obj->vertex (0)[ax]) * i) / segments)); });
-			v1.apply ([&](Axis ax, double& a) { a = (obj->vertex (0)[ax] + (((obj->vertex (1)[ax] - obj->vertex (0)[ax]) * (i + 1)) / segments)); });
+
+			v0.apply ([&](Axis ax, double& a)
+			{
+				double len = obj->vertex (1)[ax] - obj->vertex (0)[ax];
+				a = (obj->vertex (0)[ax] + ((len * i) / segments));
+			});
+
+			v1.apply ([&](Axis ax, double& a)
+			{
+				double len = obj->vertex (1)[ax] - obj->vertex (0)[ax];
+				a = (obj->vertex (0)[ax] + ((len * (i + 1)) / segments));
+			});
 
 			if (obj->type() == OBJ_Line)
 				segment = spawn<LDLine> (v0, v1);
