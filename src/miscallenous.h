@@ -23,14 +23,9 @@
 #include "main.h"
 #include "basics.h"
 
-#define NUM_PRIMES 500
-
 class LDDocument;
 class QColor;
 class QAction;
-
-// Prime numbers
-extern const int PrimeNumbers[NUM_PRIMES];
 
 // Simplifies the given fraction.
 void Simplify (int& numer, int& denom);
