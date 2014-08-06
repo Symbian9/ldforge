@@ -35,14 +35,14 @@ EditModeType CircleMode::type() const
 
 double CircleMode::getCircleDrawDist (int pos) const
 {
-	assert (_drawedVerts.size() >= pos + 1);
-	Vertex v1 = (_drawedVerts.size() >= pos + 2) ? _drawedVerts[pos + 1] :
+	assert (m_drawedVerts.size() >= pos + 1);
+	Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] :
 		renderer()->coordconv2_3 (renderer()->mousePosition(), false);
 	Axis localx, localy;
 	renderer()->getRelativeAxes (localx, localy);
-	double dx = _drawedVerts[0][localx] - v1[localx];
-	double dy = _drawedVerts[0][localy] - v1[localy];
-	return Grid::snap (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
+	double dx = m_drawedVerts[0][localx] - v1[localx];
+	double dy = m_drawedVerts[0][localy] - v1[localy];
+	return Grid::Snap (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
 }
 
 Matrix CircleMode::getCircleDrawMatrix (double scale)
@@ -84,14 +84,14 @@ void CircleMode::buildCircle()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		refFile = getDocument ("4-4edge.dat");
+		refFile = GetDocument ("4-4edge.dat");
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	elif (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		refFile = getDocument ("4-4disc.dat");
+		refFile = GetDocument ("4-4disc.dat");
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
@@ -102,18 +102,18 @@ void CircleMode::buildCircle()
 		{
 			// Get a ref file for this primitive. If we cannot find it in the
 			// LDraw library, generate it.
-			if ((refFile = ::getDocument (radialFileName (::Ring, LowResolution, LowResolution, 
+			if ((refFile = ::GetDocument (MakeRadialFileName (::Ring, LowResolution, LowResolution, 
 cmp.num))) == null)
 			{
-				refFile = generatePrimitive (::Ring, LowResolution, LowResolution, cmp.num);
+				refFile = GeneratePrimitive (::Ring, LowResolution, LowResolution, cmp.num);
 				refFile->setImplicit (false);
 			}
 
-			LDSubfilePtr ref = spawn<LDSubfile>();
+			LDSubfilePtr ref = LDSpawn<LDSubfile>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
-			ref->setPosition (_drawedVerts[0]);
-			ref->setColor (maincolor());
+			ref->setPosition (m_drawedVerts[0]);
+			ref->setColor (MainColor());
 			objs << ref;
 		}
 	}
@@ -124,8 +124,8 @@ cmp.num))) == null)
 		Axis localx, localy, localz;
 		renderer()->getRelativeAxes (localx, localy);
 		localz = (Axis) (3 - localx - localy);
-		double x0 = _drawedVerts[0][localx],
-			y0 = _drawedVerts[0][localy];
+		double x0 = m_drawedVerts[0][localx],
+			y0 = m_drawedVerts[0][localy];
 
 		Vertex templ;
 		templ.setCoordinate (localx, x0);
@@ -133,8 +133,8 @@ cmp.num))) == null)
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		makeCircle (segs, divs, dist0, c0);
-		makeCircle (segs, divs, dist1, c1);
+		MakeCircle (segs, divs, dist0, c0);
+		MakeCircle (segs, divs, dist1, c1);
 
 		for (int i = 0; i < segs; ++i)
 		{
@@ -149,8 +149,8 @@ cmp.num))) == null)
 			v3.setCoordinate (localx, v3[localx] + c1[i].x1());
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
-			LDQuadPtr quad (spawn<LDQuad> (v0, v1, v2, v3));
-			quad->setColor (maincolor());
+			LDQuadPtr quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
+			quad->setColor (MainColor());
 
 			// Ensure the quads always are BFC-front towards the camera
 			if (renderer()->camera() % 3 <= 0)
@@ -162,11 +162,11 @@ cmp.num))) == null)
 
 	if (circleOrDisc and refFile != null)
 	{
-		LDSubfilePtr ref = spawn<LDSubfile>();
+		LDSubfilePtr ref = LDSpawn<LDSubfile>();
 		ref->setFileInfo (refFile);
 		ref->setTransform (transform);
-		ref->setPosition (_drawedVerts[0]);
-		ref->setColor (maincolor());
+		ref->setPosition (m_drawedVerts[0]);
+		ref->setColor (MainColor());
 		objs << ref;
 	}
 
@@ -178,7 +178,7 @@ void CircleMode::render (QPainter& painter) const
 	QFontMetrics metrics = QFontMetrics (QFont());
 
 	// If we have not specified the center point of the circle yet, preview it on the screen.
-	if (_drawedVerts.isEmpty())
+	if (m_drawedVerts.isEmpty())
 	{
 		renderer()->drawBlip (painter, renderer()->coordconv3_2 (renderer()->position3D()));
 	}
@@ -186,9 +186,9 @@ void CircleMode::render (QPainter& painter) const
 	{
 		QVector<Vertex> verts, verts2;
 		const double dist0 = getCircleDrawDist (0),
-			dist1 = (_drawedVerts.size() >= 2) ? getCircleDrawDist (1) : -1;
+			dist1 = (m_drawedVerts.size() >= 2) ? getCircleDrawDist (1) : -1;
 		const int segs = LowResolution;
-		const double angleUnit = (2 * pi) / segs;
+		const double angleUnit = (2 * Pi) / segs;
 		Axis relX, relY;
 		QVector<QPoint> ringpoints, circlepoints, circle2points;
 
@@ -197,15 +197,15 @@ void CircleMode::render (QPainter& painter) const
 		// Calculate the preview positions of vertices
 		for (int i = 0; i < segs; ++i)
 		{
-			Vertex v = g_origin;
-			v.setCoordinate (relX, _drawedVerts[0][relX] + (cos (i * angleUnit) * dist0));
-			v.setCoordinate (relY, _drawedVerts[0][relY] + (sin (i * angleUnit) * dist0));
+			Vertex v = Origin;
+			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist0));
+			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist0));
 			verts << v;
 
 			if (dist1 != -1)
 			{
-				v.setCoordinate (relX, _drawedVerts[0][relX] + (cos (i * angleUnit) * dist1));
-				v.setCoordinate (relY, _drawedVerts[0][relY] + (sin (i * angleUnit) * dist1));
+				v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist1));
+				v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist1));
 				verts2 << v;
 			}
 		}
@@ -242,7 +242,7 @@ void CircleMode::render (QPainter& painter) const
 			ringpoints.insert (33, ringpoints[17]);
 
 		// Draw the ring
-		painter.setBrush ((_drawedVerts.size() >= 2) ? _polybrush : Qt::NoBrush);
+		painter.setBrush ((m_drawedVerts.size() >= 2) ? m_polybrush : Qt::NoBrush);
 		painter.setPen (Qt::NoPen);
 		painter.drawPolygon (QPolygon (ringpoints));
 
@@ -253,12 +253,12 @@ void CircleMode::render (QPainter& painter) const
 		painter.drawPolygon (QPolygon (circle2points));
 
 		// Draw the current radius in the middle of the circle.
-		QPoint origin = renderer()->coordconv3_2 (_drawedVerts[0]);
+		QPoint origin = renderer()->coordconv3_2 (m_drawedVerts[0]);
 		QString label = QString::number (dist0);
 		painter.setPen (renderer()->textPen());
 		painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
 
-		if (_drawedVerts.size() >= 2)
+		if (m_drawedVerts.size() >= 2)
 		{
 			painter.drawText (origin.x() - (metrics.width (label) / 2),
 				origin.y() + metrics.height(), QString::number (dist1));
@@ -273,7 +273,7 @@ bool CircleMode::mouseReleased (MouseEventData const& data)
 
 	if (data.releasedButtons & Qt::LeftButton)
 	{
-		if (_drawedVerts.size() < 3)
+		if (m_drawedVerts.size() < 3)
 			addDrawnVertex (renderer()->position3D());
 		else
 			buildCircle();

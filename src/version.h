@@ -46,6 +46,6 @@
 # undef DEBUG
 #endif // RELEASE
 
-const char* versionString();
-const char* fullVersionString();
-const char* commitTimeString();
+const char* VersionString();
+const char* FullVersionString();
+const char* CommitTimeString();

@@ -86,9 +86,9 @@ void LDObject::chooseID()
 
 	// In case someone does, we cannot really continue execution. We must abort,
 	// give the user a chance to save their documents though.
-	critical ("Created too many objects. Execution cannot continue. You have a "
+	CriticalError ("Created too many objects. Execution cannot continue. You have a "
 		"chance to save any changes to documents, then restart.");
-	(void) safeToCloseAll();
+	(void) IsSafeToCloseAll();
 	Exit();
 }
 
@@ -220,8 +220,8 @@ QList<LDTrianglePtr> LDQuad::splitToTriangles()
 	// |   |  ==>  | /    / |
 	// |   |       |/    /  |
 	// 1---2       1    1---2
-	LDTrianglePtr tri1 (spawn<LDTriangle> (vertex (0), vertex (1), vertex (3)));
-	LDTrianglePtr tri2 (spawn<LDTriangle> (vertex (1), vertex (2), vertex (3)));
+	LDTrianglePtr tri1 (LDSpawn<LDTriangle> (vertex (0), vertex (1), vertex (3)));
+	LDTrianglePtr tri2 (LDSpawn<LDTriangle> (vertex (1), vertex (2), vertex (3)));
 
 	// The triangles also inherit the quad's color
 	tri1->setColor (color());
@@ -337,7 +337,7 @@ void LDObject::finalDelete()
 
 // =============================================================================
 //
-static void transformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDColor parentcolor)
+static void TransformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDColor parentcolor)
 {
 	switch (obj->type())
 	{
@@ -345,7 +345,6 @@ static void transformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDCo
 		case OBJ_CondLine:
 		case OBJ_Triangle:
 		case OBJ_Quad:
-
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
@@ -363,14 +362,14 @@ static void transformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDCo
 			newpos.transform (transform, pos);
 			ref->setPosition (newpos);
 			ref->setTransform (newMatrix);
+			break;
 		}
-		break;
 
 		default:
 			break;
 	}
 
-	if (obj->color() == maincolor())
+	if (obj->color() == MainColor())
 		obj->setColor (parentcolor);
 }
 
@@ -385,7 +384,7 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 	{
 		// Set the parent now so we know what inlined the object.
 		obj->setParent (self());
-		transformObject (obj, transform(), position(), color());
+		TransformObject (obj, transform(), position(), color());
 	}
 
 	return objs;
@@ -482,7 +481,7 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 		obj->swap (file->getObject (target));
 	}
 
-	removeDuplicates (objsToCompile);
+	RemoveDuplicates (objsToCompile);
 
 	// The objects need to be recompiled, otherwise their pick lists are left with
 	// the wrong index colors which messes up selection.
@@ -522,7 +521,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 		if (not text.isEmpty())
 			text += ", ";
 
-		QString noun = format ("%1%2", typeName (objType), plural (count));
+		QString noun = format ("%1%2", typeName (objType), Plural (count));
 
 		// Plural of "vertex" is "vertices", correct that
 		if (objType == OBJ_Vertex and count != 1)
@@ -618,17 +617,17 @@ LDObjectPtr LDObject::getDefault (const LDObjectType type)
 {
 	switch (type)
 	{
-		case OBJ_Comment:		return spawn<LDComment>();
-		case OBJ_BFC:			return spawn<LDBFC>();
-		case OBJ_Line:			return spawn<LDLine>();
-		case OBJ_CondLine:		return spawn<LDCondLine>();
-		case OBJ_Subfile:		return spawn<LDSubfile>();
-		case OBJ_Triangle:		return spawn<LDTriangle>();
-		case OBJ_Quad:			return spawn<LDQuad>();
-		case OBJ_Empty:			return spawn<LDEmpty>();
-		case OBJ_Error:			return spawn<LDError>();
-		case OBJ_Vertex:		return spawn<LDVertex>();
-		case OBJ_Overlay:		return spawn<LDOverlay>();
+		case OBJ_Comment:		return LDSpawn<LDComment>();
+		case OBJ_BFC:			return LDSpawn<LDBFC>();
+		case OBJ_Line:			return LDSpawn<LDLine>();
+		case OBJ_CondLine:		return LDSpawn<LDCondLine>();
+		case OBJ_Subfile:		return LDSpawn<LDSubfile>();
+		case OBJ_Triangle:		return LDSpawn<LDTriangle>();
+		case OBJ_Quad:			return LDSpawn<LDQuad>();
+		case OBJ_Empty:			return LDSpawn<LDEmpty>();
+		case OBJ_Error:			return LDSpawn<LDError>();
+		case OBJ_Vertex:		return LDSpawn<LDVertex>();
+		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
 		case OBJ_NumTypes:		assert (false);
 	}
 	return LDObjectPtr();
@@ -702,7 +701,7 @@ void LDSubfile::invert()
 	{
 		// Subfile has all vertices zero on one specific plane, so it is flat.
 		// Let's flip it.
-		Matrix matrixModifier = g_identity;
+		Matrix matrixModifier = IdentityMatrix;
 
 		if (axisSet & (1 << X))
 			matrixModifier[0] = -1;
@@ -733,7 +732,7 @@ void LDSubfile::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document().toStrongRef()->insertObj (idx, spawn<LDBFC> (BFCStatement::InvertNext));
+	document().toStrongRef()->insertObj (idx, LDSpawn<LDBFC> (BFCStatement::InvertNext));
 }
 
 // =============================================================================
@@ -763,7 +762,7 @@ void LDVertex::invert() {}
 //
 LDLinePtr LDCondLine::toEdgeLine()
 {
-	LDLinePtr replacement (spawn<LDLine>());
+	LDLinePtr replacement (LDSpawn<LDLine>());
 
 	for (int i = 0; i < replacement->numVertices(); ++i)
 		replacement->setVertex (i, vertex (i));
@@ -820,7 +819,7 @@ static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
 		{
 			obj->document().toStrongRef()->addToHistory (new EditHistory (idx, before, after));
 			g_win->R()->compileObject (obj);
-			getCurrentDocument()->redoVertices();
+			CurrentDocument()->redoVertices();
 		}
 	}
 	else
@@ -901,7 +900,7 @@ QString PreferredLicenseText()
 //
 LDObjectPtr LDObject::createCopy() const
 {
-	LDObjectPtr copy = parseLine (asText());
+	LDObjectPtr copy = ParseLine (asText());
 	return copy;
 }
 

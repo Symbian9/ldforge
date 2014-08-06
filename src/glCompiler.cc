@@ -57,7 +57,7 @@ static const QColor		g_BFCBackColor (208, 64, 64);
 
 // =============================================================================
 //
-void checkGLError_private (const char* file, int line)
+void CheckGLErrorImpl (const char* file, int line)
 {
 	QString errmsg;
 	GLenum errnum = glGetError();
@@ -74,7 +74,7 @@ void checkGLError_private (const char* file, int line)
 		}
 	}
 
-	print ("OpenGL ERROR: at %1:%2: %3", basename (QString (file)), line, errmsg);
+	print ("OpenGL ERROR: at %1:%2: %3", Basename (QString (file)), line, errmsg);
 }
 
 // =============================================================================
@@ -92,7 +92,7 @@ void GLCompiler::initialize()
 {
 	initializeOpenGLFunctions();
 	glGenBuffers (g_numVBOs, &m_vbo[0]);
-	checkGLError();
+	CHECK_GL_ERROR();
 }
 
 // =============================================================================
@@ -100,7 +100,7 @@ void GLCompiler::initialize()
 GLCompiler::~GLCompiler()
 {
 	glDeleteBuffers (g_numVBOs, &m_vbo[0]);
-	checkGLError();
+	CHECK_GL_ERROR();
 
 	if (m_renderer != null)
 		m_renderer->setCompiler (null);
@@ -159,16 +159,16 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 			break;
 
 		case VBOCM_NormalColors:
-			if (poly.color == mainColorIndex)
+			if (poly.color == MainColorIndex)
 			{
-				if (topobj->color() == maincolor())
+				if (topobj->color() == MainColor())
 					qcol = GLRenderer::getMainColor();
 				else
 					qcol = topobj->color().faceColor();
 			}
-			elif (poly.color == edgeColorIndex)
+			elif (poly.color == EdgeColorIndex)
 			{
-				qcol = luma (QColor (cfg::BackgroundColor)) > 40 ? Qt::black : Qt::white;
+				qcol = Luma (QColor (cfg::BackgroundColor)) > 40 ? Qt::black : Qt::white;
 			}
 			else
 			{
@@ -260,7 +260,7 @@ void GLCompiler::compileDocument (LDDocumentPtr doc)
 //
 void GLCompiler::compileStaged()
 {
-	removeDuplicates (m_staged);
+	RemoveDuplicates (m_staged);
 
 	for (LDObjectPtr obj : m_staged)
 		compileObject (obj);
@@ -284,14 +284,14 @@ void GLCompiler::prepareVBO (int vbonum)
 	{
 		if (it.key() == null)
 			it = m_objectInfo.erase (it);
-		elif (it.key().toStrongRef()->document() == getCurrentDocument() and not it.key().toStrongRef()->isHidden())
+		elif (it.key().toStrongRef()->document() == CurrentDocument() and not it.key().toStrongRef()->isHidden())
 			vbodata += it->data[vbonum];
 	}
 
 	glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);
 	glBufferData (GL_ARRAY_BUFFER, vbodata.size() * sizeof(GLfloat), vbodata.constData(), GL_STATIC_DRAW);
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
-	checkGLError();
+	CHECK_GL_ERROR();
 	m_vboChanged[vbonum] = false;
 	m_vboSizes[vbonum] = vbodata.size();
 }

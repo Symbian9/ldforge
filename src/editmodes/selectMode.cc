@@ -25,7 +25,7 @@
 
 SelectMode::SelectMode (GLRenderer* renderer) :
 	Super (renderer),
-	_rangepick (false) {}
+	m_rangepick (false) {}
 
 EditModeType SelectMode::type() const
 {
@@ -35,15 +35,15 @@ EditModeType SelectMode::type() const
 void SelectMode::render (QPainter& painter) const
 {
 	// If we're range-picking, draw a rectangle encompassing the selection area.
-	if (_rangepick)
+	if (m_rangepick)
 	{
-		int x0 = _rangeStart.x(),
-			y0 = _rangeStart.y(),
+		int x0 = m_rangeStart.x(),
+			y0 = m_rangeStart.y(),
 			x1 = renderer()->mousePosition().x(),
 			y1 = renderer()->mousePosition().y();
 
 		QRect rect (x0, y0, x1 - x0, y1 - y0);
-		QColor fillColor = (_addpick ? "#40FF00" : "#00CCFF");
+		QColor fillColor = (m_addpick ? "#40FF00" : "#00CCFF");
 		fillColor.setAlphaF (0.2f);
 		painter.setPen (QPen (QColor (0, 0, 0, 208), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 		painter.setBrush (QBrush (fillColor));
@@ -59,34 +59,34 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 	if (data.releasedButtons & Qt::LeftButton)
 	{
 		if (not data.mouseMoved)
-			_rangepick = false;
+			m_rangepick = false;
 
-		if (not _rangepick)
-			_addpick = (data.keymods & Qt::ControlModifier);
+		if (not m_rangepick)
+			m_addpick = (data.keymods & Qt::ControlModifier);
 
-		if (not data.mouseMoved or _rangepick)
+		if (not data.mouseMoved or m_rangepick)
 		{
 			QRect area;
 			int const mx = data.ev->x();
 			int const my = data.ev->y();
 
-			if (not _rangepick)
+			if (not m_rangepick)
 			{
 				area = QRect (mx, my, 1, 1);
 			}
 			else
 			{
-				int const x = min (_rangeStart.x(), mx);
-				int const y = min (_rangeStart.y(), my);
-				int const width = abs (_rangeStart.x() - mx);
-				int const height = abs (_rangeStart.y() - my);
+				int const x = Min (m_rangeStart.x(), mx);
+				int const y = Min (m_rangeStart.y(), my);
+				int const width = Abs (m_rangeStart.x() - mx);
+				int const height = Abs (m_rangeStart.y() - my);
 				area = QRect (x, y, width, height);
 			}
 
-			renderer()->pick (area, _addpick);
+			renderer()->pick (area, m_addpick);
 		}
 
-		_rangepick = false;
+		m_rangepick = false;
 		return true;
 	}
 
@@ -100,10 +100,10 @@ bool SelectMode::mousePressed (QMouseEvent* ev)
 
 	if (ev->modifiers() & Qt::ControlModifier)
 	{
-		_rangepick = true;
-		_rangeStart.setX (ev->x());
-		_rangeStart.setY (ev->y());
-		_addpick = (ev->modifiers() & Qt::AltModifier);
+		m_rangepick = true;
+		m_rangeStart.setX (ev->x());
+		m_rangeStart.setY (ev->y());
+		m_addpick = (ev->modifiers() & Qt::AltModifier);
 		return true;
 	}
 
@@ -133,5 +133,5 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 
 bool SelectMode::mouseMoved (QMouseEvent*)
 {
-	return _rangepick;
+	return m_rangepick;
 }

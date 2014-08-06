@@ -34,7 +34,7 @@ enum class EditModeType
 
 class AbstractEditMode
 {
-	GLRenderer* _renderer;
+	GLRenderer* m_renderer;
 
 public:
 	struct MouseEventData
@@ -68,8 +68,8 @@ class AbstractDrawMode : public AbstractEditMode
 	DEFINE_CLASS (AbstractDrawMode, AbstractEditMode)
 
 protected:
-	QList<Vertex>			_drawedVerts;
-	QBrush					_polybrush;
+	QList<Vertex>			m_drawedVerts;
+	QBrush					m_polybrush;
 
 public:
 	AbstractDrawMode (GLRenderer* renderer);

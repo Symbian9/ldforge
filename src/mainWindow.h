@@ -306,32 +306,32 @@ private slots:
 extern MainWindow* g_win;
 
 //! Get an icon by name from the resources directory.
-QPixmap getIcon (QString iconName);
+QPixmap GetIcon (QString iconName);
 
 //! \returns a list of quick colors based on the configuration entry.
-QList<LDQuickColor> quickColorsFromConfig();
+QList<LDQuickColor> LoadQuickColorList();
 
 //! Asks the user a yes/no question with the given \c message and the given
 //! window \c title.
 //! \returns true if the user answered yes, false if no.
-bool confirm (const QString& title, const QString& message); // Generic confirm prompt
+bool Confirm (const QString& title, const QString& message); // Generic confirm prompt
 
 //! An overload of \c confirm(), this asks the user a yes/no question with the
 //! given \c message.
 //! \returns true if the user answered yes, false if no.
-bool confirm (const QString& message);
+bool Confirm (const QString& message);
 
 //! Displays an error prompt with the given \c message
-void critical (const QString& message);
+void CriticalError (const QString& message);
 
 //! Makes an icon of \c size x \c size pixels to represent \c colinfo
-QIcon makeColorIcon (LDColor colinfo, const int size);
+QIcon MakeColorIcon (LDColor colinfo, const int size);
 
 //! Fills the given combo-box with color information
-void makeColorComboBox (QComboBox* box);
+void MakeColorComboBox (QComboBox* box);
 
 //! \returns a QImage from the given raw GL \c data
-QImage imageFromScreencap (uchar* data, int w, int h);
+QImage GetImageFromScreencap (uchar* data, int w, int h);
 
 //!
 //! Takes in pairs of radio buttons and respective values and finds the first
@@ -340,11 +340,13 @@ QImage imageFromScreencap (uchar* data, int w, int h);
 //! \returns by the user.
 //!
 template<class T>
-T radioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
+T RadioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
 {
 	for (Pair<QRadioButton*, const T&> i : haystack)
+	{
 		if (i.first->isChecked())
 			return i.second;
+	}
 
 	return defval;
 }
@@ -354,7 +356,7 @@ T radioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
 //! found radio button whose respsective value matches \c expr have the given value.
 //!
 template<class T>
-void radioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
+void RadioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
 {
 	for (Pair<QRadioButton*, const T&> i : haystack)
 	{
@@ -372,14 +374,14 @@ class SubfileListItem : public QTreeWidgetItem
 {
 	PROPERTY (public, Primitive*,	primitive, setPrimitive, STOCK_WRITE)
 
-	public:
-		SubfileListItem (QTreeWidgetItem* parent, Primitive* info) :
-			QTreeWidgetItem (parent),
-			m_primitive (info) {}
+public:
+	SubfileListItem (QTreeWidgetItem* parent, Primitive* info) :
+		QTreeWidgetItem (parent),
+		m_primitive (info) {}
 
-		SubfileListItem (QTreeWidget* parent, Primitive* info) :
-			QTreeWidgetItem (parent),
-			m_primitive (info) {}
+	SubfileListItem (QTreeWidget* parent, Primitive* info) :
+		QTreeWidgetItem (parent),
+		m_primitive (info) {}
 };
 
-void populatePrimitives (QTreeWidget* tw, const QString& selectByDefault = QString());
+void PopulatePrimitives (QTreeWidget* tw, const QString& selectByDefault = QString());

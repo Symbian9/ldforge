@@ -33,14 +33,14 @@ class QAction;
 extern const int PrimeNumbers[NUM_PRIMES];
 
 // Simplifies the given fraction.
-void simplify (int& numer, int& denom);
+void Simplify (int& numer, int& denom);
 
 using ApplyToMatrixFunction = std::function<void (int, double&)>;
 using ApplyToMatrixConstFunction = std::function<void (int, double)>;
 
 void RoundToDecimals (double& a, int decimals);
-void applyToMatrix (Matrix& a, ApplyToMatrixFunction func);
-void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
+void ApplyToMatrix (Matrix& a, ApplyToMatrixFunction func);
+void ApplyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
 
 double GetCoordinateOf (const Vertex& a, Axis ax);
 QString MakePrettyFileSize (qint64 size);
@@ -91,5 +91,5 @@ namespace Grid
 		Angle
 	};
 
-	double snap (double value, const Grid::Config type);
+	double Snap (double value, const Grid::Config type);
 }

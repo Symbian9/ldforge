@@ -78,18 +78,18 @@ void MainWindow::slot_actionNew()
 	QString const license = ui.caLicense->isChecked() ? CALicenseText : "";
 
 	LDObjectList objs;
-	objs << spawn<LDComment> (ui.le_title->text());
-	objs << spawn<LDComment> ("Name: <untitled>.dat");
-	objs << spawn<LDComment> (format ("Author: %1", ui.le_author->text()));
-	objs << spawn<LDComment> (format ("!LDRAW_ORG Unofficial_Part"));
+	objs << LDSpawn<LDComment> (ui.le_title->text());
+	objs << LDSpawn<LDComment> ("Name: <untitled>.dat");
+	objs << LDSpawn<LDComment> (format ("Author: %1", ui.le_author->text()));
+	objs << LDSpawn<LDComment> (format ("!LDRAW_ORG Unofficial_Part"));
 
 	if (not license.isEmpty())
-		objs << spawn<LDComment> (license);
+		objs << LDSpawn<LDComment> (license);
 
-	objs << spawn<LDEmpty>();
-	objs << spawn<LDBFC> (bfctype);
-	objs << spawn<LDEmpty>();
-	getCurrentDocument()->addObjects (objs);
+	objs << LDSpawn<LDEmpty>();
+	objs << LDSpawn<LDBFC> (bfctype);
+	objs << LDSpawn<LDEmpty>();
+	CurrentDocument()->addObjects (objs);
 	doFullRefresh();
 }
 
@@ -109,21 +109,21 @@ void MainWindow::slot_actionOpen()
 	if (name.isEmpty())
 		return;
 
-	openMainFile (name);
+	OpenMainModel (name);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionSave()
 {
-	save (getCurrentDocument(), false);
+	save (CurrentDocument(), false);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionSaveAs()
 {
-	save (getCurrentDocument(), true);
+	save (CurrentDocument(), true);
 }
 
 // =============================================================================
@@ -138,20 +138,20 @@ void MainWindow::slot_actionSaveAll()
 //
 void MainWindow::slot_actionClose()
 {
-	if (not getCurrentDocument()->isSafeToClose())
+	if (not CurrentDocument()->isSafeToClose())
 		return;
 
-	getCurrentDocument()->dismiss();
+	CurrentDocument()->dismiss();
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionCloseAll()
 {
-	if (not safeToCloseAll())
+	if (not IsSafeToCloseAll())
 		return;
 
-	closeAll();
+	CloseAllDocuments();
 }
 
 // =============================================================================
@@ -235,10 +235,10 @@ void MainWindow::slot_actionNewVertex()
 //
 void MainWindow::slot_actionEdit()
 {
-	if (selection().size() != 1)
+	if (Selection().size() != 1)
 		return;
 
-	LDObjectPtr obj = selection() [0];
+	LDObjectPtr obj = Selection() [0];
 	AddObjectDialog::staticDialog (obj->type(), obj);
 }
 
@@ -266,7 +266,7 @@ void MainWindow::slot_actionAboutQt()
 //
 void MainWindow::slot_actionSelectAll()
 {
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 		obj->select();
 
 	ui->objectList->selectAll();
@@ -277,21 +277,21 @@ void MainWindow::slot_actionSelectAll()
 //
 void MainWindow::slot_actionSelectByColor()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return;
 
 	QList<LDColor> colors;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (obj->isColored())
 			colors << obj->color();
 	}
 
-	removeDuplicates (colors);
-	getCurrentDocument()->clearSelection();
+	RemoveDuplicates (colors);
+	CurrentDocument()->clearSelection();
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		if (colors.contains (obj->color()))
 			obj->select();
@@ -305,13 +305,13 @@ void MainWindow::slot_actionSelectByColor()
 //
 void MainWindow::slot_actionSelectByType()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return;
 
 	QList<LDObjectType> types;
 	QStringList subfilenames;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		types << obj->type();
 
@@ -319,11 +319,11 @@ void MainWindow::slot_actionSelectByType()
 			subfilenames << obj.staticCast<LDSubfile>()->fileInfo()->name();
 	}
 
-	removeDuplicates (types);
-	removeDuplicates (subfilenames);
-	getCurrentDocument()->clearSelection();
+	RemoveDuplicates (types);
+	RemoveDuplicates (subfilenames);
+	CurrentDocument()->clearSelection();
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		LDObjectType type = obj->type();
 
@@ -383,17 +383,17 @@ void MainWindow::slot_actionInsertFrom()
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		critical (format ("Couldn't open %1 (%2)", fname, f.errorString()));
+		CriticalError (format ("Couldn't open %1 (%2)", fname, f.errorString()));
 		return;
 	}
 
-	LDObjectList objs = loadFileContents (&f, null);
+	LDObjectList objs = LoadFileContents (&f, null);
 
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 
 	for (LDObjectPtr obj : objs)
 	{
-		getCurrentDocument()->insertObj (idx, obj);
+		CurrentDocument()->insertObj (idx, obj);
 		obj->select();
 		R()->compileObject (obj);
 
@@ -408,7 +408,7 @@ void MainWindow::slot_actionInsertFrom()
 //
 void MainWindow::slot_actionExportTo()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return;
 
 	QString fname = QFileDialog::getSaveFileName();
@@ -420,11 +420,11 @@ void MainWindow::slot_actionExportTo()
 
 	if (not file.open (QIODevice::WriteOnly | QIODevice::Text))
 	{
-		critical (format ("Unable to open %1 for writing (%2)", fname, file.errorString()));
+		CriticalError (format ("Unable to open %1 for writing (%2)", fname, file.errorString()));
 		return;
 	}
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		QString contents = obj->asText();
 		QByteArray data = contents.toUtf8();
@@ -454,13 +454,13 @@ void MainWindow::slot_actionInsertRaw()
 	if (dlg->exec() == QDialog::Rejected)
 		return;
 
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 
 	for (QString line : QString (te_edit->toPlainText()).split ("\n"))
 	{
-		LDObjectPtr obj = parseLine (line);
+		LDObjectPtr obj = ParseLine (line);
 
-		getCurrentDocument()->insertObj (idx, obj);
+		CurrentDocument()->insertObj (idx, obj);
 		obj->select();
 		idx++;
 	}
@@ -477,9 +477,9 @@ void MainWindow::slot_actionScreenshot()
 
 	int w, h;
 	uchar* imgdata = R()->getScreencap (w, h);
-	QImage img = imageFromScreencap (imgdata, w, h);
+	QImage img = GetImageFromScreencap (imgdata, w, h);
 
-	QString root = basename (getCurrentDocument()->name());
+	QString root = Basename (CurrentDocument()->name());
 
 	if (root.right (4) == ".dat")
 		root.chop (4);
@@ -489,7 +489,7 @@ void MainWindow::slot_actionScreenshot()
 				"PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;All Files (*.*)");
 
 	if (not fname.isEmpty() and not img.save (fname))
-		critical (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
+		CriticalError (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
 
 	delete[] imgdata;
 }
@@ -507,7 +507,7 @@ void MainWindow::slot_actionAxes()
 //
 void MainWindow::slot_actionVisibilityToggle()
 {
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		obj->setHidden (not obj->isHidden());
 
 	refresh();
@@ -517,7 +517,7 @@ void MainWindow::slot_actionVisibilityToggle()
 //
 void MainWindow::slot_actionVisibilityHide()
 {
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		obj->setHidden (true);
 
 	refresh();
@@ -527,7 +527,7 @@ void MainWindow::slot_actionVisibilityHide()
 //
 void MainWindow::slot_actionVisibilityReveal()
 {
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	obj->setHidden (false);
 	refresh();
 }
@@ -696,16 +696,16 @@ void MainWindow::slot_actionJumpTo()
 	int defval = 0;
 	LDObjectPtr obj;
 
-	if (selection().size() == 1)
-		defval = selection()[0]->lineNumber();
+	if (Selection().size() == 1)
+		defval = Selection()[0]->lineNumber();
 
 	int idx = QInputDialog::getInt (null, "Go to line", "Go to line:", defval,
-		1, getCurrentDocument()->getObjectCount(), 1, &ok);
+		1, CurrentDocument()->getObjectCount(), 1, &ok);
 
-	if (not ok or (obj = getCurrentDocument()->getObject (idx - 1)) == null)
+	if (not ok or (obj = CurrentDocument()->getObject (idx - 1)) == null)
 		return;
 
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 	obj->select();
 	updateSelection();
 }
@@ -714,22 +714,22 @@ void MainWindow::slot_actionJumpTo()
 //
 void MainWindow::slot_actionSubfileSelection()
 {
-	if (selection().size() == 0)
+	if (Selection().size() == 0)
 		return;
 
-	QString			parentpath (getCurrentDocument()->fullPath());
+	QString			parentpath (CurrentDocument()->fullPath());
 
 	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
 	BFCStatement	bfctype (BFCStatement::NoCertify);
 
 	// Dirname of the new subfile
-	QString			subdirname (dirname (parentpath));
+	QString			subdirname (Dirname (parentpath));
 
 	// Title of the new subfile
 	QString			subtitle;
 
 	// Comment containing the title of the parent document
-	LDCommentPtr	titleobj (getCurrentDocument()->getObject (0).dynamicCast<LDComment>());
+	LDCommentPtr	titleobj (CurrentDocument()->getObject (0).dynamicCast<LDComment>());
 
 	// License text for the subfile
 	QString			license (PreferredLicenseText());
@@ -741,7 +741,7 @@ void MainWindow::slot_actionSubfileSelection()
 	QString			fullsubname;
 
 	// Where to insert the subfile reference?
-	int				refidx (selection()[0]->lineNumber());
+	int				refidx (Selection()[0]->lineNumber());
 
 	// Determine title of subfile
 	if (titleobj != null)
@@ -755,7 +755,7 @@ void MainWindow::slot_actionSubfileSelection()
 
 	// If this the parent document isn't already in s/, we need to stuff it into
 	// a subdirectory named s/. Ensure it exists!
-	QString topdirname = basename (dirname (getCurrentDocument()->fullPath()));
+	QString topdirname = Basename (Dirname (CurrentDocument()->fullPath()));
 
 	if (topdirname != "s")
 	{
@@ -764,7 +764,7 @@ void MainWindow::slot_actionSubfileSelection()
 		QString text = format (tr ("The directory <b>%1</b> is suggested for "
 			"subfiles. This directory does not exist, create it?"), desiredPath);
 
-		if (QDir (desiredPath).exists() or confirm (title, text))
+		if (QDir (desiredPath).exists() or Confirm (title, text))
 		{
 			subdirname = desiredPath;
 			QDir().mkpath (subdirname);
@@ -801,15 +801,15 @@ void MainWindow::slot_actionSubfileSelection()
 			if (digits.length() == 1)
 				digits.prepend ("0");
 
-			fullsubname = subdirname + "/" + basename (parentpath) + "s" + digits + ".dat";
-		} while (findDocument ("s\\" + basename (fullsubname)) != null or QFile (fullsubname).exists());
+			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
+		} while (FindDocument ("s\\" + Basename (fullsubname)) != null or QFile (fullsubname).exists());
 	}
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	LDIterate<LDBFC> (getCurrentDocument()->objects(), [&] (LDBFCPtr const& bfc)
+	LDIterate<LDBFC> (CurrentDocument()->objects(), [&] (LDBFCPtr const& bfc)
 	{
-		if (eq (bfc->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, 
+		if (Eq (bfc->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, 
 			BFCStatement::NoCertify))
 		{
 			bfctype = bfc->statement();
@@ -818,7 +818,7 @@ void MainWindow::slot_actionSubfileSelection()
 	});
 
 	// Get the body of the document in LDraw code
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		code << obj->asText();
 
 	// Create the new subfile document
@@ -828,24 +828,24 @@ void MainWindow::slot_actionSubfileSelection()
 	doc->setName (LDDocument::shortenName (fullsubname));
 
 	LDObjectList objs;
-	objs << spawn<LDComment> (subtitle);
-	objs << spawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
-	objs << spawn<LDComment> (format ("Author: %1 [%2]", cfg::DefaultName, cfg::DefaultUser));
-	objs << spawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
+	objs << LDSpawn<LDComment> (subtitle);
+	objs << LDSpawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
+	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", cfg::DefaultName, cfg::DefaultUser));
+	objs << LDSpawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
 
 	if (not license.isEmpty())
-		objs << spawn<LDComment> (license);
+		objs << LDSpawn<LDComment> (license);
 
-	objs << spawn<LDEmpty>();
-	objs << spawn<LDBFC> (bfctype);
-	objs << spawn<LDEmpty>();
+	objs << LDSpawn<LDEmpty>();
+	objs << LDSpawn<LDBFC> (bfctype);
+	objs << LDSpawn<LDEmpty>();
 
 	doc->addObjects (objs);
 
 	// Add the actual subfile code to the new document
 	for (QString line : code)
 	{
-		LDObjectPtr obj = parseLine (line);
+		LDObjectPtr obj = ParseLine (line);
 		doc->addObject (obj);
 	}
 
@@ -854,16 +854,16 @@ void MainWindow::slot_actionSubfileSelection()
 	{
 		// Save was successful. Delete the original selection now from the
 		// main document.
-		for (LDObjectPtr obj : selection())
+		for (LDObjectPtr obj : Selection())
 			obj->destroy();
 
 		// Add a reference to the new subfile to where the selection was
-		LDSubfilePtr ref (spawn<LDSubfile>());
-		ref->setColor (maincolor());
+		LDSubfilePtr ref (LDSpawn<LDSubfile>());
+		ref->setColor (MainColor());
 		ref->setFileInfo (doc);
-		ref->setPosition (g_origin);
-		ref->setTransform (g_identity);
-		getCurrentDocument()->insertObj (refidx, ref);
+		ref->setPosition (Origin);
+		ref->setTransform (IdentityMatrix);
+		CurrentDocument()->insertObj (refidx, ref);
 
 		// Refresh stuff
 		updateDocumentList();
@@ -889,7 +889,7 @@ void MainWindow::slot_actionRandomColors()
 
 void MainWindow::slot_actionOpenSubfiles()
 {
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		LDSubfilePtr ref = obj.dynamicCast<LDSubfile>();
 

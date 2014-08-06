@@ -100,7 +100,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			populatePrimitives (tw_subfileList, (obj != null ? obj.staticCast<LDSubfile>()->fileInfo()->name() : ""));
+			PopulatePrimitives (tw_subfileList, (obj != null ? obj.staticCast<LDSubfile>()->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -116,11 +116,11 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 
 		default:
 		{
-			critical (format ("Unhandled LDObject type %1 (%2) in AddObjectDialog", (int) type, typeName));
+			CriticalError (format ("Unhandled LDObject type %1 (%2) in AddObjectDialog", (int) type, typeName));
 		} return;
 	}
 
-	QPixmap icon = getIcon (format ("add-%1", typeName));
+	QPixmap icon = GetIcon (format ("add-%1", typeName));
 	LDObjectPtr defaults = LDObject::getDefault (type);
 
 	lb_typeIcon = new QLabel;
@@ -130,12 +130,12 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 	if (defaults->isColored())
 	{
 		if (obj != null)
-			_color = obj->color();
+			m_color = obj->color();
 		else
-			_color = (type == OBJ_CondLine or type == OBJ_Line) ? edgecolor() : maincolor();
+			m_color = (type == OBJ_CondLine or type == OBJ_Line) ? EdgeColor() : MainColor();
 
 		pb_color = new QPushButton;
-		setButtonBackground (pb_color, _color);
+		setButtonBackground (pb_color, m_color);
 		connect (pb_color, SIGNAL (clicked()), this, SLOT (slot_colorButtonClicked()));
 	}
 
@@ -193,7 +193,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 		QLabel* lb_matrix = new QLabel ("Matrix:");
 		le_matrix = new QLineEdit;
 		// le_matrix->setValidator (new QDoubleValidator);
-		Matrix defaultMatrix = g_identity;
+		Matrix defaultMatrix = IdentityMatrix;
 
 		if (mo != null)
 		{
@@ -236,7 +236,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 // =============================================================================
 void AddObjectDialog::setButtonBackground (QPushButton* button, LDColor color)
 {
-	button->setIcon (getIcon ("palette"));
+	button->setIcon (GetIcon ("palette"));
 	button->setAutoFillBackground (true);
 
 	if (color != null)
@@ -259,8 +259,8 @@ QString AddObjectDialog::currentSubfileName()
 // =============================================================================
 void AddObjectDialog::slot_colorButtonClicked()
 {
-	ColorSelector::selectColor (_color, _color, this);
-	setButtonBackground (pb_color, _color);
+	ColorSelector::selectColor (m_color, m_color, this);
+	setButtonBackground (pb_color, m_color);
 }
 
 // =============================================================================
@@ -276,10 +276,10 @@ void AddObjectDialog::slot_subfileTypeChanged()
 // =============================================================================
 // =============================================================================
 template<typename T>
-static QSharedPointer<T> initObj (LDObjectPtr& obj)
+static QSharedPointer<T> InitObject (LDObjectPtr& obj)
 {
 	if (obj == null)
-		obj = spawn<T>();
+		obj = LDSpawn<T>();
 
 	return obj.staticCast<T>();
 }
@@ -298,7 +298,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 		return; // Nothing to edit with empties
 
 	const bool newObject = (obj == null);
-	Matrix transform = g_identity;
+	Matrix transform = IdentityMatrix;
 	AddObjectDialog dlg (type, obj);
 
 	assert (obj == null or obj->type() == type);
@@ -326,7 +326,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 	{
 		case OBJ_Comment:
 		{
-			LDCommentPtr comm = initObj<LDComment> (obj);
+			LDCommentPtr comm = InitObject<LDComment> (obj);
 			comm->setText (dlg.le_comment->text());
 		}
 		break;
@@ -354,14 +354,14 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 
 		case OBJ_BFC:
 		{
-			LDBFCPtr bfc = initObj<LDBFC> (obj);
+			LDBFCPtr bfc = InitObject<LDBFC> (obj);
 			assert (within (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
 			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 
 		case OBJ_Vertex:
 		{
-			LDVertexPtr vert = initObj<LDVertex> (obj);
+			LDVertexPtr vert = InitObject<LDVertex> (obj);
 			vert->pos.apply ([&](Axis ax, double& value) { value = dlg.dsb_coords[ax]->value(); });
 		}
 		break;
@@ -373,15 +373,15 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 			if (name.length() == 0)
 				return; // no subfile filename
 
-			LDDocumentPtr file = getDocument (name);
+			LDDocumentPtr file = GetDocument (name);
 
 			if (not file)
 			{
-				critical (format ("Couldn't open `%1': %2", name, strerror (errno)));
+				CriticalError (format ("Couldn't open `%1': %2", name, strerror (errno)));
 				return;
 			}
 
-			LDSubfilePtr ref = initObj<LDSubfile> (obj);
+			LDSubfilePtr ref = InitObject<LDSubfile> (obj);
 			assert (ref);
 
 			for_axes (ax)
@@ -396,12 +396,12 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 	}
 
 	if (obj->isColored())
-		obj->setColor (dlg._color);
+		obj->setColor (dlg.m_color);
 
 	if (newObject)
 	{
 		int idx = g_win->getInsertionPoint();
-		getCurrentDocument()->insertObj (idx, obj);
+		CurrentDocument()->insertObj (idx, obj);
 	}
 
 	g_win->refresh();

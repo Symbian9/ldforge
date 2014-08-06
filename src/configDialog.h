@@ -61,7 +61,7 @@ public:
 private:
 	Ui_ConfigUI* ui;
 	QList<QListWidgetItem*> quickColorItems;
-	QMap<QPushButton*, QColor> _buttonColors;
+	QMap<QPushButton*, QColor> m_buttonColors;
 
 	void applySettings();
 	void addShortcut (QAction* act);
@@ -73,7 +73,7 @@ private:
 	QListWidgetItem* getSelectedQuickColor();
 	QList<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
-	void _applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func);
+	void m_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func);
 
 private slots:
 	void setButtonColor();

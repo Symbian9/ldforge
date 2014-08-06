@@ -35,7 +35,7 @@ void DrawMode::render (QPainter& painter) const
 	QVector<Vertex> poly;
 	QFontMetrics metrics = QFontMetrics (QFont());
 
-	for (Vertex const& vert : _drawedVerts)
+	for (Vertex const& vert : m_drawedVerts)
 		poly << vert;
 
 	// Draw the cursor vertex as the last one in the list.
@@ -48,7 +48,7 @@ void DrawMode::render (QPainter& painter) const
 bool DrawMode::preAddVertex (Vertex const& pos)
 {
 	// If we picked an already-existing vertex, stop drawing
-	for (Vertex& vert : _drawedVerts)
+	for (Vertex& vert : m_drawedVerts)
 	{
 		if (vert == pos)
 		{
@@ -68,7 +68,7 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 	if (data.releasedButtons & Qt::LeftButton)
 	{
 		// If we have 4 verts, stop drawing.
-		if (_drawedVerts.size() >= 4)
+		if (m_drawedVerts.size() >= 4)
 		{
 			endDraw();
 			return true;
@@ -84,7 +84,7 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 void DrawMode::endDraw()
 {
 	// Clean the selection and create the object
-	QList<Vertex>& verts = _drawedVerts;
+	QList<Vertex>& verts = m_drawedVerts;
 	LDObjectList objs;
 
 	switch (verts.size())
@@ -92,9 +92,9 @@ void DrawMode::endDraw()
 		case 1:
 		{
 			// 1 vertex - add a vertex object
-			LDVertexPtr obj = spawn<LDVertex>();
+			LDVertexPtr obj = LDSpawn<LDVertex>();
 			obj->pos = verts[0];
-			obj->setColor (maincolor());
+			obj->setColor (MainColor());
 			objs << obj;
 			break;
 		}
@@ -102,8 +102,8 @@ void DrawMode::endDraw()
 		case 2:
 		{
 			// 2 verts - make a line
-			LDLinePtr obj = spawn<LDLine> (verts[0], verts[1]);
-			obj->setColor (edgecolor());
+			LDLinePtr obj = LDSpawn<LDLine> (verts[0], verts[1]);
+			obj->setColor (EdgeColor());
 			objs << obj;
 			break;
 		}
@@ -112,10 +112,10 @@ void DrawMode::endDraw()
 		case 4:
 		{
 			LDObjectPtr obj = (verts.size() == 3) ?
-				static_cast<LDObjectPtr> (spawn<LDTriangle>()) :
-				static_cast<LDObjectPtr> (spawn<LDQuad>());
+				static_cast<LDObjectPtr> (LDSpawn<LDTriangle>()) :
+				static_cast<LDObjectPtr> (LDSpawn<LDQuad>());
 
-			obj->setColor (maincolor());
+			obj->setColor (MainColor());
 
 			for (int i = 0; i < verts.size(); ++i)
 				obj->setVertex (i, verts[i]);

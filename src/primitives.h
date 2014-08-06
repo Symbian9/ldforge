@@ -91,8 +91,8 @@ private:
 
 extern QList<PrimitiveCategory*> g_PrimitiveCategories;
 
-void loadPrimitives();
-PrimitiveScanner* getActivePrimitiveScanner();
+void LoadPrimitives();
+PrimitiveScanner* ActivePrimitiveScanner();
 
 enum PrimitiveType
 {
@@ -117,11 +117,11 @@ public slots:
 	void hiResToggled (bool on);
 };
 
-void makeCircle (int segs, int divs, double radius, QList<QLineF>& lines);
-LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num);
+void MakeCircle (int segs, int divs, double radius, QList<QLineF>& lines);
+LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num);
 
 // Gets a primitive by the given specs. If the primitive cannot be found, it will
 // be automatically generated.
-LDDocumentPtr getPrimitive (PrimitiveType type, int segs, int divs, int num);
+LDDocumentPtr GetPrimitive (PrimitiveType type, int segs, int divs, int num);
 
-QString radialFileName (PrimitiveType type, int segs, int divs, int num);
+QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num);

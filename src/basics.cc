@@ -224,10 +224,10 @@ void LDBoundingBox::calculateFromCurrentDocument()
 {
 	reset();
 
-	if (getCurrentDocument() == null)
+	if (CurrentDocument() == null)
 		return;
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 		calcObject (obj);
 }
 
@@ -284,12 +284,12 @@ LDBoundingBox& LDBoundingBox::operator<< (LDObjectPtr obj)
 //
 void LDBoundingBox::calcVertex (const Vertex& vertex)
 {
-	m_vertex0.setX (min (vertex.x(), m_vertex0.x()));
-	m_vertex0.setY (min (vertex.y(), m_vertex0.y()));
-	m_vertex0.setZ (min (vertex.z(), m_vertex0.z()));
-	m_vertex1.setX (max (vertex.x(), m_vertex1.x()));
-	m_vertex1.setY (max (vertex.y(), m_vertex1.y()));
-	m_vertex1.setZ (max (vertex.z(), m_vertex1.z()));
+	m_vertex0.setX (Min (vertex.x(), m_vertex0.x()));
+	m_vertex0.setY (Min (vertex.y(), m_vertex0.y()));
+	m_vertex0.setZ (Min (vertex.z(), m_vertex0.z()));
+	m_vertex1.setX (Max (vertex.x(), m_vertex1.x()));
+	m_vertex1.setY (Max (vertex.y(), m_vertex1.y()));
+	m_vertex1.setZ (Max (vertex.z(), m_vertex1.z()));
 	setEmpty (false);
 }
 
@@ -319,8 +319,8 @@ double LDBoundingBox::longestMeasurement() const
 	elif (yscale > zscale)
 		size = yscale;
 
-	if (abs (size) >= 2.0)
-		return abs (size / 2);
+	if (Abs (size) >= 2.0)
+		return Abs (size / 2);
 
 	return 1.0;
 }

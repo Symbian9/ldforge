@@ -39,17 +39,17 @@ public: \
 	inline DataType*	operator->() const = delete;
 
 #define SHARED_POINTER_DATA_ACCESS(N) \
-	public: inline decltype(DataType::_##N) const& N() const { return data()->_##N; }
+	public: inline decltype(DataType::m_##N) const& N() const { return data()->m_##N; }
 
 class LDColor;
 
 struct LDColorData
 {
-	QString _name;
-	QString _hexcode;
-	QColor _faceColor;
-	QColor _edgeColor;
-	qint32 _index;
+	QString m_name;
+	QString m_hexcode;
+	QColor m_faceColor;
+	QColor m_edgeColor;
+	qint32 m_index;
 };
 
 class LDColor : public QSharedPointer<LDColorData>
@@ -70,12 +70,16 @@ public:
 	static LDColor		fromIndex (qint32 index);
 };
 
-void initColors();
-int luma (const QColor& col);
-int numLDConfigColors();
+void InitColors();
+int Luma (const QColor& col);
+int CountLDConfigColors();
 
 // Main and edge colors
-LDColor maincolor();
-LDColor edgecolor();
-static constexpr int mainColorIndex = 16;
-static constexpr int edgeColorIndex = 24;
+LDColor MainColor();
+LDColor EdgeColor();
+
+enum
+{
+	MainColorIndex = 16,
+	EdgeColorIndex = 24,
+};

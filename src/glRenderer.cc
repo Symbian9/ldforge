@@ -110,7 +110,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	setDrawOnly (false);
 	setMessageLog (null);
 	m_width = m_height = -1;
-	m_position3D = g_origin;
+	m_position3D = Origin;
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	m_isCameraMoving = false;
@@ -124,7 +124,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	{
 		QString iconname = format ("camera-%1", tr (g_CameraNames[cam]).toLower());
 		CameraIcon* info = &m_cameraIcons[cam];
-		info->img = new QPixmap (getIcon (iconname));
+		info->img = new QPixmap (GetIcon (iconname));
 		info->cam = cam;
 	}
 
@@ -148,8 +148,8 @@ GLRenderer::~GLRenderer()
 	delete m_compiler;
 	delete m_editmode;
 
-	glDeleteBuffers (1, &_axesVBO);
-	glDeleteBuffers (1, &_axesColorVBO);
+	glDeleteBuffers (1, &m_axesVBO);
+	glDeleteBuffers (1, &m_axesColorVBO);
 }
 
 // =============================================================================
@@ -280,11 +280,11 @@ void GLRenderer::initializeAxes()
 		}
 	}
 
-	glGenBuffers (1, &_axesVBO);
-	glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
+	glGenBuffers (1, &m_axesVBO);
+	glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
 	glBufferData (GL_ARRAY_BUFFER, sizeof axesdata, axesdata, GL_STATIC_DRAW);
-	glGenBuffers (1, &_axesColorVBO);
-	glBindBuffer (GL_ARRAY_BUFFER, _axesColorVBO);
+	glGenBuffers (1, &m_axesColorVBO);
+	glBindBuffer (GL_ARRAY_BUFFER, m_axesColorVBO);
 	glBufferData (GL_ARRAY_BUFFER, sizeof colordata, colordata, GL_STATIC_DRAW);
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
 }
@@ -319,7 +319,7 @@ void GLRenderer::setBackground()
 
 	col.setAlpha (255);
 
-	m_darkbg = luma (col) < 80;
+	m_darkbg = Luma (col) < 80;
 	m_bgcolor = col;
 	qglClearColor (col);
 }
@@ -341,7 +341,7 @@ void GLRenderer::hardRefresh()
 	if (not RendererInitialized)
 		return;
 
-	compiler()->compileDocument (getCurrentDocument());
+	compiler()->compileDocument (CurrentDocument());
 	refresh();
 }
 
@@ -460,12 +460,12 @@ void GLRenderer::drawGLScene()
 
 		if (cfg::DrawAxes)
 		{
-			glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
+			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
-			glBindBuffer (GL_ARRAY_BUFFER, _axesVBO);
+			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
 			glColorPointer (3, GL_FLOAT, 0, NULL);
 			glDrawArrays (GL_LINES, 0, 6);
-			checkGLError();
+			CHECK_GL_ERROR();
 		}
 	}
 
@@ -473,7 +473,7 @@ void GLRenderer::drawGLScene()
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
 	glDisableClientState (GL_VERTEX_ARRAY);
 	glDisableClientState (GL_COLOR_ARRAY);
-	checkGLError();
+	CHECK_GL_ERROR();
 	glDisable (GL_CULL_FACE);
 	glMatrixMode (GL_MODELVIEW);
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
@@ -484,7 +484,7 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
+	if ((Eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
 		(surface == VBOSF_Lines and cfg::DrawEdgeLines == false) or
 		(surface == VBOSF_CondLines and cfg::DrawConditionalLines == false))
 	{
@@ -503,12 +503,12 @@ void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum ty
 	{
 		glBindBuffer (GL_ARRAY_BUFFER, surfacevbo);
 		glVertexPointer (3, GL_FLOAT, 0, null);
-		checkGLError();
+		CHECK_GL_ERROR();
 		glBindBuffer (GL_ARRAY_BUFFER, colorvbo);
 		glColorPointer (4, GL_FLOAT, 0, null);
-		checkGLError();
+		CHECK_GL_ERROR();
 		glDrawArrays (type, 0, count);
-		checkGLError();
+		CHECK_GL_ERROR();
 	}
 }
 
@@ -533,8 +533,8 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 
 	if (snap)
 	{
-		cx = Grid::snap (cx, Grid::Coordinate);
-		cy = Grid::snap (cy, Grid::Coordinate);
+		cx = Grid::Snap (cx, Grid::Coordinate);
+		cy = Grid::Snap (cy, Grid::Coordinate);
 	}
 
 	cx *= negXFac;
@@ -590,7 +590,7 @@ QPen GLRenderer::linePen() const
 {
 	QPen linepen (m_thinBorderPen);
 	linepen.setWidth (2);
-	linepen.setColor (luma (m_bgcolor) < 40 ? Qt::white : Qt::black);
+	linepen.setColor (Luma (m_bgcolor) < 40 ? Qt::white : Qt::black);
 	return linepen;
 }
 
@@ -634,7 +634,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
 					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
 
-			QRect targRect (v0.x(), v0.y(), abs (v1.x() - v0.x()), abs (v1.y() - v0.y())),
+			QRect targRect (v0.x(), v0.y(), Abs (v1.x() - v0.x()), Abs (v1.y() - v0.y())),
 				  srcRect (0, 0, overlay.img->width(), overlay.img->height());
 			paint.drawImage (targRect, *overlay.img, srcRect);
 		}
@@ -794,7 +794,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
 	int dx = ev->x() - m_mousePosition.x();
 	int dy = ev->y() - m_mousePosition.y();
-	m_totalmove += abs (dx) + abs (dy);
+	m_totalmove += Abs (dx) + Abs (dy);
 	setCameraMoving (false);
 
 	if (not m_editmode->mouseMoved (ev))
@@ -830,7 +830,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 	m_globalpos = ev->globalPos();
 
 	// Calculate 3d position of the cursor
-	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : g_origin;
+	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : Origin;
 
 	highlightCursorObject();
 	update();
@@ -858,7 +858,7 @@ void GLRenderer::wheelEvent (QWheelEvent* ev)
 	doMakeCurrent();
 
 	zoomNotch (ev->delta() > 0);
-	zoom() = clamp (zoom(), 0.01, 10000.0);
+	zoom() = Clamp (zoom(), 0.01, 10000.0);
 	setCameraMoving (true);
 	update();
 	ev->accept();
@@ -910,8 +910,8 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	// Clear the selection if we do not wish to add to it.
 	if (not additive)
 	{
-		LDObjectList oldsel = selection();
-		getCurrentDocument()->clearSelection();
+		LDObjectList oldsel = Selection();
+		CurrentDocument()->clearSelection();
 
 		for (LDObjectPtr obj : oldsel)
 			compileObject (obj);
@@ -927,10 +927,10 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	int y1 = y0 + range.height();
 
 	// Clamp the values to ensure they're within bounds
-	x0 = max (0, x0);
-	y0 = max (0, y0);
-	x1 = min (x1, m_width);
-	y1 = min (y1, m_height);
+	x0 = Max (0, x0);
+	y0 = Max (0, y0);
+	x1 = Min (x1, m_width);
+	y1 = Min (y1, m_height);
 	const int areawidth = (x1 - x0);
 	const int areaheight = (y1 - y0);
 	const qint32 numpixels = areawidth * areaheight;
@@ -959,7 +959,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 			indices << idx;
 	}
 
-	removeDuplicates (indices);
+	RemoveDuplicates (indices);
 
 	for (qint32 idx : indices)
 	{
@@ -987,7 +987,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	g_win->updateSelection();
 
 	// Recompile the objects now to update their color
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		compileObject (obj);
 
 	if (removedObj)
@@ -1070,7 +1070,7 @@ void GLRenderer::setPicking (const bool& a)
 		glDisable (GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth (max<double> (cfg::LineThickness, 6.5));
+		glLineWidth (Max<double> (cfg::LineThickness, 6.5));
 	}
 	else
 	{
@@ -1100,7 +1100,7 @@ Axis GLRenderer::getRelativeZ() const
 
 // =============================================================================
 //
-static QList<Vertex> getVertices (LDObjectPtr obj)
+static QList<Vertex> GetVerticesOf (LDObjectPtr obj)
 {
 	QList<Vertex> verts;
 
@@ -1116,7 +1116,7 @@ static QList<Vertex> getVertices (LDObjectPtr obj)
 
 		for (LDObjectPtr obj : objs)
 		{
-			verts << getVertices (obj);
+			verts << GetVerticesOf (obj);
 			obj->destroy();
 		}
 	}
@@ -1196,7 +1196,7 @@ bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, i
 
 	if (img->isNull())
 	{
-		critical (tr ("Failed to load overlay image!"));
+		CriticalError (tr ("Failed to load overlay image!"));
 		currentDocumentData().overlays[cam].invalid = true;
 		delete img;
 		return false;
@@ -1222,7 +1222,7 @@ bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, i
 	const double negXFac = g_FixedCameras[cam].negX ? -1 : 1,
 		negYFac = g_FixedCameras[cam].negY ? -1 : 1;
 
-	info.v0 = info.v1 = g_origin;
+	info.v0 = info.v1 = Origin;
 	info.v0.setCoordinate (x2d, -(info.ox * info.lw * negXFac) / img->width());
 	info.v0.setCoordinate (y2d, (info.oy * info.lh * negYFac) / img->height());
 	info.v1.setCoordinate (x2d, info.v0[x2d] + info.lw);
@@ -1488,7 +1488,7 @@ void GLRenderer::updateOverlayObjects()
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
-			ovlobj = spawn<LDOverlay>();
+			ovlobj = LDSpawn<LDOverlay>();
 
 			// Find a suitable position to place this object. We want to place
 			// this into the header, which is everything up to the first scemantic
@@ -1520,7 +1520,7 @@ void GLRenderer::updateOverlayObjects()
 				document()->insertObj (i, ovlobj);
 
 				if (found)
-					document()->insertObj (i + 1, spawn<LDEmpty>());
+					document()->insertObj (i + 1, LDSpawn<LDEmpty>());
 			}
 		}
 
@@ -1593,11 +1593,11 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 	if (g_win != null and ev->source() == g_win->getPrimitivesTree())
 	{
 		QString primName = static_cast<SubfileListItem*> (g_win->getPrimitivesTree()->currentItem())->primitive()->name;
-		LDSubfilePtr ref = spawn<LDSubfile>();
-		ref->setColor (maincolor());
-		ref->setFileInfo (getDocument (primName));
-		ref->setPosition (g_origin);
-		ref->setTransform (g_identity);
+		LDSubfilePtr ref = LDSpawn<LDSubfile>();
+		ref->setColor (MainColor());
+		ref->setFileInfo (GetDocument (primName));
+		ref->setPosition (Origin);
+		ref->setTransform (IdentityMatrix);
 		LDDocument::current()->insertObj (g_win->getInsertionPoint(), ref);
 		ref->select();
 		g_win->buildObjList();

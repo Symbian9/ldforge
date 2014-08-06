@@ -32,7 +32,7 @@ char g_buildTime[256] = {'\0'};
 
 // =============================================================================
 //
-const char* versionString()
+const char* VersionString()
 {
 	if (g_versionString[0] == '\0')
 	{
@@ -48,12 +48,12 @@ const char* versionString()
 
 // =============================================================================
 //
-const char* fullVersionString()
+const char* FullVersionString()
 {
 	if (g_fullVersionString[0] == '\0')
 	{
 #if BUILD_ID != BUILD_RELEASE and defined (SVN_REVISION_STRING)
-		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, versionString());
+		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, VersionString());
 #else
 		sprintf (g_fullVersionString, "%s", versionString());
 #endif
@@ -64,7 +64,7 @@ const char* fullVersionString()
 
 // =============================================================================
 //
-const char* commitTimeString()
+const char* CommitTimeString()
 {
 #ifdef SVN_REVISION_NUMBER
 	if (g_buildTime[0] == '\0')

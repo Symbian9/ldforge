@@ -26,12 +26,12 @@ MagicWandMode::MagicWandMode (GLRenderer* renderer) :
 	Super (renderer)
 {
 	// Get vertex<->object data
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		// Note: this deliberately only takes vertex-objects into account.
 		// The magic wand does not process subparts.
 		for (int i = 0; i < obj->numVertices(); ++i)
-			_vertices[obj->vertex (i)] << obj;
+			m_vertices[obj->vertex (i)] << obj;
 	}
 }
 
@@ -46,14 +46,14 @@ void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boun
 	// of candidates.
 	for (auto it = candidates.begin(); it != candidates.end(); ++it)
 	{
-		if (not eq ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
+		if (not Eq ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
 			continue;
 
 		int matches = 0;
 
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			if (not eq (obj->vertex (i), (*it)->vertex (0), (*it)->vertex (1)))
+			if (not Eq (obj->vertex (i), (*it)->vertex (0), (*it)->vertex (1)))
 				continue;
 
 			if (++matches == 2)
@@ -61,7 +61,7 @@ void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boun
 				// Boundary found. If it's an edgeline, add it to the boundaries list, if a
 				// conditional line, select it.
 				if ((*it)->type() == OBJ_CondLine)
-					_selection << *it;
+					m_selection << *it;
 				else
 					boundaries.append (std::make_tuple ((*it)->vertex (0), (*it)->vertex (1)));
 
@@ -77,7 +77,7 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 	{
 		if (type == Set)
 		{
-			getCurrentDocument()->clearSelection();
+			CurrentDocument()->clearSelection();
 			g_win->buildObjList();
 		}
 
@@ -90,8 +90,8 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 
 	if (type != InternalRecursion)
 	{
-		_selection.clear();
-		_selection.append (obj);
+		m_selection.clear();
+		m_selection.append (obj);
 	}
 
 	switch (obj->type())
@@ -115,9 +115,9 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 	// Get the list of objects that touch this object, i.e. share a vertex
 	// with this.
 	for (int i = 0; i < obj->numVertices(); ++i)
-		candidates += _vertices[obj->vertex (i)];
+		candidates += m_vertices[obj->vertex (i)];
 
-	removeDuplicates (candidates);
+	RemoveDuplicates (candidates);
 
 	// If we're dealing with surfaces, get a list of boundaries.
 	if (matchesneeded > 1)
@@ -132,7 +132,7 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 			// objects we have already processed.
 			if ((candidate == obj) or
 				(candidate->color() != obj->color()) or
-				(_selection.contains (candidate)) or
+				(m_selection.contains (candidate)) or
 				(matchesneeded == 1 and (candidate->type() != objtype)) or
 				((candidate->numVertices() > 2) ^ (matchesneeded == 2)))
 			{
@@ -160,14 +160,14 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 			// Check if a boundary gets in between the objects.
 			for (auto boundary : boundaries)
 			{
-				if (eq (matches[0], std::get<0> (boundary), std::get<1> (boundary)) and
-					eq (matches[1], std::get<0> (boundary), std::get<1> (boundary)))
+				if (Eq (matches[0], std::get<0> (boundary), std::get<1> (boundary)) and
+					Eq (matches[1], std::get<0> (boundary), std::get<1> (boundary)))
 				{
 					throw 0;
 				}
 			}
 
-			_selection.append (candidate);
+			m_selection.append (candidate);
 			doMagic (candidate, InternalRecursion);
 		}
 		catch (int&)
@@ -179,14 +179,14 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 	switch (type)
 	{
 		case Set:
-			getCurrentDocument()->clearSelection();
+			CurrentDocument()->clearSelection();
 		case Additive:
-			for (LDObjectPtr obj : _selection)
+			for (LDObjectPtr obj : m_selection)
 				obj->select();
 			break;
 
 		case Subtractive:
-			for (LDObjectPtr obj : _selection)
+			for (LDObjectPtr obj : m_selection)
 				obj->deselect();
 			break;
 

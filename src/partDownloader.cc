@@ -44,7 +44,7 @@ void PartDownloader::staticBegin()
 
 	if (path.isEmpty() or not QDir (path).exists())
 	{
-		critical (PartDownloader::tr ("You need to specify a valid path for "
+		CriticalError (PartDownloader::tr ("You need to specify a valid path for "
 			"downloaded files in the configuration to download paths."));
 
 		(new ConfigDialog (ConfigDialog::DownloadTab, null))->exec();
@@ -146,12 +146,12 @@ void PartDownloader::modifyDestination (QString& dest) const
 
 	// If the part starts with s\ or s/, then use parts/s/. Same goes with
 	// 48\ and p/48/.
-	if (eq (dest.left (2), "s\\", "s/"))
+	if (Eq (dest.left (2), "s\\", "s/"))
 	{
 		dest.remove (0, 2);
 		dest.prepend ("parts/s/");
 	}
-	elif (eq (dest.left (3), "48\\", "48/"))
+	elif (Eq (dest.left (3), "48\\", "48/"))
 	{
 		dest.remove (0, 3);
 		dest.prepend ("p/48/");
@@ -223,14 +223,14 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 		setAborted (false);
 
 		if (getSource() == CustomURL)
-			dest = basename (getURL());
+			dest = Basename (getURL());
 
 		modifyDestination (dest);
 
 		if (QFile::exists (PartDownloader::getDownloadPath() + DIRSLASH + dest))
 		{
 			const QString overwritemsg = format (tr ("%1 already exists in download directory. Overwrite?"), dest);
-			if (not confirm (tr ("Overwrite?"), overwritemsg))
+			if (not Confirm (tr ("Overwrite?"), overwritemsg))
 				return;
 		}
 
@@ -289,7 +289,7 @@ void PartDownloader::checkIfFinished()
 	if (primaryFile() != null)
 	{
 		LDDocument::setCurrent (primaryFile());
-		reloadAllSubfiles();
+		ReloadAllSubfiles();
 		g_win->doFullRefresh();
 		g_win->R()->resetAngles();
 	}
@@ -341,7 +341,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 	m_filePointer (null)
 {
 	// Make sure that we have a valid destination.
-	QString dirpath = dirname (filePath());
+	QString dirpath = Dirname (filePath());
 
 	QDir dir (dirpath);
 
@@ -350,7 +350,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 		print ("Creating %1...\n", dirpath);
 
 		if (not dir.mkpath (dirpath))
-			critical (format (tr ("Couldn't create the directory %1!"), dirpath));
+			CriticalError (format (tr ("Couldn't create the directory %1!"), dirpath));
 	}
 
 	setNetworkReply (networkManager()->get (QNetworkRequest (QUrl (url))));
@@ -425,7 +425,7 @@ void PartDownloadRequest::downloadFinished()
 	if (networkReply()->error() != QNetworkReply::NoError)
 	{
 		if (isPrimary() and not prompt()->isAborted())
-			critical (networkReply()->errorString());
+			CriticalError (networkReply()->errorString());
 
 		setState (DLRQ_Failed);
 	}
@@ -452,7 +452,7 @@ void PartDownloadRequest::downloadFinished()
 	}
 
 	// Try to load this file now.
-	LDDocumentPtr f = openDocument (filePath(), false, not isPrimary());
+	LDDocumentPtr f = OpenDocument (filePath(), false, not isPrimary());
 
 	if (f == null)
 		return;
@@ -475,7 +475,7 @@ void PartDownloadRequest::downloadFinished()
 
 	if (isPrimary())
 	{
-		addRecentFile (filePath());
+		AddRecentFile (filePath());
 		prompt()->setPrimaryFile (f);
 	}
 
@@ -509,7 +509,7 @@ void PartDownloadRequest::readyRead()
 
 		if (not filePointer()->open (QIODevice::WriteOnly))
 		{
-			critical (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
+			CriticalError (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
 			setState (DLRQ_Failed);
 			networkReply()->abort();
 			updateToTable();
@@ -525,7 +525,7 @@ void PartDownloadRequest::readyRead()
 //
 bool PartDownloadRequest::isFinished() const
 {
-	return eq (state(), DLRQ_Finished, DLRQ_Failed);
+	return Eq (state(), DLRQ_Finished, DLRQ_Failed);
 }
 
 // =============================================================================

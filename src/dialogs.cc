@@ -90,7 +90,7 @@ OverlayDialog::~OverlayDialog()
 void OverlayDialog::fillDefaults (int newcam)
 {
 	LDGLOverlay& info = g_win->R()->getOverlay (newcam);
-	radioDefault<int> (newcam, m_cameraArgs);
+	RadioDefault<int> (newcam, m_cameraArgs);
 
 	if (info.img != null)
 	{
@@ -139,7 +139,7 @@ double OverlayDialog::lheight() const
 
 int OverlayDialog::camera() const
 {
-	return radioSwitch<int> (ETopCamera, m_cameraArgs);
+	return RadioSwitch<int> (ETopCamera, m_cameraArgs);
 }
 
 void OverlayDialog::slot_fpath()
@@ -173,7 +173,7 @@ LDrawPathDialog::LDrawPathDialog (const bool validDefault, QWidget* parent, Qt::
 	else
 	{
 		cancelButton()->setText ("Exit");
-		cancelButton()->setIcon (getIcon ("exit"));
+		cancelButton()->setIcon (GetIcon ("exit"));
 	}
 
 	okButton()->setEnabled (false);
@@ -346,11 +346,11 @@ AboutDialog::AboutDialog (QWidget* parent, Qt::WindowFlags f) :
 {
 	Ui::AboutUI ui;
 	ui.setupUi (this);
-	ui.versionInfo->setText (APPNAME " " + QString (fullVersionString()));
+	ui.versionInfo->setText (APPNAME " " + QString (FullVersionString()));
 
 	QPushButton* mailButton = new QPushButton;
 	mailButton->setText (tr ("Contact"));
-	mailButton->setIcon (getIcon ("mail"));
+	mailButton->setIcon (GetIcon ("mail"));
 	ui.buttonBox->addButton (static_cast<QAbstractButton*> (mailButton), QDialogButtonBox::HelpRole);
 	connect (ui.buttonBox, SIGNAL (helpRequested()), this, SLOT (slot_mail()));
 
@@ -366,7 +366,7 @@ void AboutDialog::slot_mail()
 
 // =============================================================================
 // =============================================================================
-void bombBox (const QString& message)
+void DisplayBombBox (const QString& message)
 {
 	QDialog dlg (g_win);
 	Ui_BombBox ui;

@@ -22,28 +22,31 @@
 #include "glRenderer.h"
 #include "mainWindow.h"
 
-static const int g_maxMessages = 5;
-static const int g_expiry = 5;
-static const int g_fadeTime = 500; // msecs
+enum
+{
+	MaxMessages = 5,
+	ExpireTime = 5000,
+	FadeTime = 500
+};
 
-// =============================================================================
+// -------------------------------------------------------------------------------------------------
 //
 MessageManager::MessageManager (QObject* parent) :
-			QObject (parent)
+	QObject (parent)
 {
 	m_ticker = new QTimer;
 	m_ticker->start (100);
 	connect (m_ticker, SIGNAL (timeout()), this, SLOT (tick()));
 }
 
-// =============================================================================
+// -------------------------------------------------------------------------------------------------
 //
 MessageManager::Line::Line (QString text) :
-			text (text),
-			alpha (1.0f),
-			expiry (QDateTime::currentDateTime().addSecs (g_expiry)) {}
+	text (text),
+	alpha (1.0f),
+	expiry (QDateTime::currentDateTime().addMSecs (ExpireTime)) {}
 
-// =============================================================================
+// -------------------------------------------------------------------------------------------------
 //
 bool MessageManager::Line::update (bool& changed)
 {
@@ -58,23 +61,24 @@ bool MessageManager::Line::update (bool& changed)
 		return false;
 	}
 
-	if (msec <= g_fadeTime)
+	if (msec <= FadeTime)
 	{
 		// Message line has not expired but is fading out
-		alpha = ( (float) msec) / g_fadeTime;
+		alpha = ( (float) msec) / FadeTime;
 		changed = true;
 	}
 
 	return true;
 }
 
-// =============================================================================
-// Add a line to the message manager.
+// -------------------------------------------------------------------------------------------------
+//
+//	Add a line to the message manager.
 //
 void MessageManager::addLine (QString line)
 {
 	// If there's too many entries, pop the excess out
-	while (m_lines.size() >= g_maxMessages)
+	while (m_lines.size() >= MaxMessages)
 		m_lines.removeFirst();
 
 	m_lines << Line (line);
@@ -84,9 +88,10 @@ void MessageManager::addLine (QString line)
 		renderer()->update();
 }
 
-// =============================================================================
-// Ticks the message manager. All lines are ticked and the renderer scene is
-// redrawn if something changed.
+// -------------------------------------------------------------------------------------------------
+//
+//	Ticks the message manager. All lines are ticked and the renderer scene is redrawn if something
+//	changed.
 //
 void MessageManager::tick()
 {
@@ -118,7 +123,7 @@ const QList<MessageManager::Line>& MessageManager::getLines() const
 
 // =============================================================================
 //
-void printToLog (const QString& msg)
+void PrintToLog (const QString& msg)
 {
 	for (QString& a : msg.split ("\n", QString::SkipEmptyParts))
 	{

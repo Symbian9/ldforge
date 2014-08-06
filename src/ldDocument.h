@@ -76,10 +76,10 @@ public:
 	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
 	PROPERTY (private,	LDDocumentWeakPtr,	self,			setSelf,			STOCK_WRITE)
 
-	QMap<LDObjectPtr, QVector<Vertex>> _objectVertices;
-	QVector<Vertex> _vertices;
-	bool _verticesOutdated;
-	bool _needVertexMerge;
+	QMap<LDObjectPtr, QVector<Vertex>> m_objectVertices;
+	QVector<Vertex> m_vertices;
+	bool m_verticesOutdated;
+	bool m_needVertexMerge;
 
 public:
 	LDDocument(LDDocumentPtr* selfptr);
@@ -177,7 +177,7 @@ private:
 	bool					m_needsReCache;
 };
 
-inline LDDocumentPtr getCurrentDocument()
+inline LDDocumentPtr CurrentDocument()
 {
 	return LDDocument::current();
 }
@@ -186,45 +186,45 @@ inline LDDocumentPtr getCurrentDocument()
 void newFile();
 
 // Opens the given file as the main file. Everything is closed first.
-void openMainFile (QString path);
+void OpenMainModel (QString path);
 
 // Finds an OpenFile by name or null if not open
-LDDocumentPtr findDocument (QString name);
+LDDocumentPtr FindDocument (QString name);
 
 // Opens the given file and parses the LDraw code within. Returns a pointer
 // to the opened file or null on error.
-LDDocumentPtr openDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride = LDDocumentPtr());
+LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride = LDDocumentPtr());
 
 // Opens the given file and returns a pointer to it, potentially looking in /parts and /p
-QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
+QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
 
 // Close all open files, whether user-opened or subfile caches.
-void closeAll();
+void CloseAllDocuments();
 
 // Parses a string line containing an LDraw object and returns the object parsed.
-LDObjectPtr parseLine (QString line);
+LDObjectPtr ParseLine (QString line);
 
 // Retrieves the pointer to the given document by file name. Document is loaded
 // from file if necessary. Can return null if neither succeeds.
-LDDocumentPtr getDocument (QString filename);
+LDDocumentPtr GetDocument (QString filename);
 
 // Re-caches all subfiles.
-void reloadAllSubfiles();
+void ReloadAllSubfiles();
 
 // Is it safe to close all files?
-bool safeToCloseAll();
+bool IsSafeToCloseAll();
 
-LDObjectList loadFileContents (QFile* f, int* numWarnings, bool* ok = null);
+LDObjectList LoadFileContents (QFile* f, int* numWarnings, bool* ok = null);
 
-inline const LDObjectList& selection()
+inline const LDObjectList& Selection()
 {
-	return getCurrentDocument()->getSelection();
+	return CurrentDocument()->getSelection();
 }
 
-void addRecentFile (QString path);
-void loadLogoedStuds();
-QString basename (QString path);
-QString dirname (QString path);
+void AddRecentFile (QString path);
+void LoadLogoStuds();
+QString Basename (QString path);
+QString Dirname (QString path);
 
 // =============================================================================
 //

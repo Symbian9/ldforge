@@ -26,35 +26,35 @@
 
 static LDColor g_LDConfigColors[512];
 
-void initColors()
+void InitColors()
 {
 	LDColorData* col;
 	print ("Initializing color information.\n");
 
 	// Always make sure there's 16 and 24 available. They're special like that.
 	col = new LDColorData;
-	col->_faceColor =
-	col->_hexcode = "#AAAAAA";
-	col->_edgeColor = Qt::black;
+	col->m_faceColor =
+	col->m_hexcode = "#AAAAAA";
+	col->m_edgeColor = Qt::black;
 	g_LDConfigColors[16] = col;
 
 	col = new LDColorData;
-	col->_faceColor =
-	col->_edgeColor =
-	col->_hexcode = "#000000";
+	col->m_faceColor =
+	col->m_edgeColor =
+	col->m_hexcode = "#000000";
 	g_LDConfigColors[24] = col;
 
 	LDConfigParser::parseLDConfig();
 }
 
-LDColor maincolor()
+LDColor MainColor()
 {
-	return g_LDConfigColors[16];
+	return g_LDConfigColors[MainColorIndex];
 }
 
-LDColor edgecolor()
+LDColor EdgeColor()
 {
-	return g_LDConfigColors[24];
+	return g_LDConfigColors[EdgeColorIndex];
 }
 
 void LDColor::addLDConfigColor (qint32 index, LDColor color)
@@ -80,11 +80,11 @@ LDColor LDColor::fromIndex (qint32 index)
 			col.setAlpha (128);
 
 		LDColorData* color = new LDColorData;
-		color->_name = "0x" + QString::number (index, 16).toUpper();
-		color->_faceColor = col;
-		color->_edgeColor = luma(col) < 48 ? Qt::white : Qt::black;
-		color->_hexcode = col.name();
-		color->_index = index;
+		color->m_name = "0x" + QString::number (index, 16).toUpper();
+		color->m_faceColor = col;
+		color->m_edgeColor = Luma (col) < 48 ? Qt::white : Qt::black;
+		color->m_hexcode = col.name();
+		color->m_index = index;
 		return LDColor (color);
 	}
 
@@ -116,14 +116,14 @@ bool LDColor::operator== (LDColor const& other)
 	return true;
 }
 
-int luma (const QColor& col)
+int Luma (const QColor& col)
 {
 	return (0.2126f * col.red()) +
 		   (0.7152f * col.green()) +
 		   (0.0722f * col.blue());
 }
 
-int numLDConfigColors()
+int CountLDConfigColors()
 {
 	return countof (g_LDConfigColors);
 }

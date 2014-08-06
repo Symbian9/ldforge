@@ -38,8 +38,8 @@ MainWindow* g_win = null;
 static QString g_versionString, g_fullVersionString;
 static bool g_IsExiting (false);
 
-const Vertex g_origin (0.0f, 0.0f, 0.0f);
-const Matrix g_identity ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
+const Vertex Origin (0.0f, 0.0f, 0.0f);
+const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
 CFGENTRY (Bool, FirstStart, true)
 
@@ -61,12 +61,12 @@ int main (int argc, char* argv[])
 		if (Config::Save())
 			print ("Configuration file successfully created.\n");
 		else
-			critical ("Failed to create configuration file!\n");
+			CriticalError ("Failed to create configuration file!\n");
 	}
 
 	LDPaths::initPaths();
-	initColors();
-	loadPrimitives();
+	InitColors();
+	LoadPrimitives();
 	MainWindow* win = new MainWindow;
 	newFile();
 	win->show();

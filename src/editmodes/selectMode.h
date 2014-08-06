@@ -21,9 +21,9 @@
 
 class SelectMode : public AbstractSelectMode
 {
-	QPoint _rangeStart;
-	bool _rangepick;
-	bool _addpick;
+	QPoint m_rangeStart;
+	bool m_rangepick;
+	bool m_addpick;
 
 	DEFINE_CLASS (SelectMode, AbstractSelectMode)
 

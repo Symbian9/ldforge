@@ -22,7 +22,7 @@
 class RectangleMode : public AbstractDrawMode
 {
 	DEFINE_CLASS (RectangleMode, AbstractDrawMode)
-	QVector<Vertex> _rectangleVerts;
+	QVector<Vertex> m_rectangleVerts;
 
 public:
 	RectangleMode (GLRenderer* renderer);

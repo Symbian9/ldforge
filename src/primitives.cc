@@ -45,14 +45,14 @@ static const QStringList g_radialNameRoots =
 	"con"
 };
 
-PrimitiveScanner* getActivePrimitiveScanner()
+PrimitiveScanner* ActivePrimitiveScanner()
 {
 	return g_activeScanner;
 }
 
 // =============================================================================
 //
-void loadPrimitives()
+void LoadPrimitives()
 {
 	// Try to load prims.cfg
 	QFile conf (Config::FilePath ("prims.cfg"));
@@ -92,14 +92,14 @@ void loadPrimitives()
 
 // =============================================================================
 //
-static void recursiveGetFilenames (QDir dir, QList<QString>& fnames)
+static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames)
 {
 	QFileInfoList flist = dir.entryInfoList (QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
 	for (const QFileInfo& info : flist)
 	{
 		if (info.isDir())
-			recursiveGetFilenames (QDir (info.absoluteFilePath()), fnames);
+			GetRecursiveFilenames (QDir (info.absoluteFilePath()), fnames);
 		else
 			fnames << info.absoluteFilePath();
 	}
@@ -115,7 +115,7 @@ PrimitiveScanner::PrimitiveScanner (QObject* parent) :
 	QDir dir (LDPaths::prims());
 	assert (dir.exists());
 	m_baselen = dir.absolutePath().length();
-	recursiveGetFilenames (dir, m_files);
+	GetRecursiveFilenames (dir, m_files);
 	emit starting (m_files.size());
 	print ("Scanning primitives...");
 }
@@ -131,7 +131,7 @@ PrimitiveScanner::~PrimitiveScanner()
 //
 void PrimitiveScanner::work()
 {
-	int j = min (m_i + 100, m_files.size());
+	int j = Min (m_i + 100, m_files.size());
 
 	for (; m_i < j; ++m_i)
 	{
@@ -168,7 +168,7 @@ void PrimitiveScanner::work()
 		QFile conf (path);
 
 		if (not conf.open (QIODevice::WriteOnly | QIODevice::Text))
-			critical (format ("Couldn't write primitive list %1: %2",
+			CriticalError (format ("Couldn't write primitive list %1: %2",
 				path, conf.errorString()));
 		else
 		{
@@ -292,7 +292,7 @@ void PrimitiveCategory::loadCategories()
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		critical (format (QObject::tr ("Failed to open primitive categories: %1"), f.errorString()));
+		CriticalError (format (QObject::tr ("Failed to open primitive categories: %1"), f.errorString()));
 		return;
 	}
 
@@ -366,28 +366,28 @@ bool PrimitiveCategory::isValidToInclude()
 
 // =============================================================================
 //
-bool isPrimitiveLoaderBusy()
+bool IsPrimitiveLoaderBusy()
 {
 	return g_activeScanner != null;
 }
 
 // =============================================================================
 //
-static double radialPoint (int i, int divs, double (*func) (double))
+static double GetRadialPoint (int i, int divs, double (*func) (double))
 {
-	return (*func) ((i * 2 * pi) / divs);
+	return (*func) ((i * 2 * Pi) / divs);
 }
 
 // =============================================================================
 //
-void makeCircle (int segs, int divs, double radius, QList<QLineF>& lines)
+void MakeCircle (int segs, int divs, double radius, QList<QLineF>& lines)
 {
 	for (int i = 0; i < segs; ++i)
 	{
-		double x0 = radius * radialPoint (i, divs, cos),
-			x1 = radius * radialPoint (i + 1, divs, cos),
-			z0 = radius * radialPoint (i, divs, sin),
-			z1 = radius * radialPoint (i + 1, divs, sin);
+		double x0 = radius * GetRadialPoint (i, divs, cos),
+			x1 = radius * GetRadialPoint (i + 1, divs, cos),
+			z0 = radius * GetRadialPoint (i, divs, sin),
+			z1 = radius * GetRadialPoint (i + 1, divs, sin);
 
 		lines << QLineF (QPointF (x0, z0), QPointF (x1, z1));
 	}
@@ -395,13 +395,13 @@ void makeCircle (int segs, int divs, double radius, QList<QLineF>& lines)
 
 // =============================================================================
 //
-LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
+LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 {
 	LDObjectList objs;
 	QList<int> condLineSegs;
 	QList<QLineF> circle;
 
-	makeCircle (segs, divs, 1, circle);
+	MakeCircle (segs, divs, 1, circle);
 
 	for (int i = 0; i < segs; ++i)
 	{
@@ -417,10 +417,10 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 				Vertex v0 (x0, 0.0f, z0),
 				  v1 (x1, 0.0f, z1);
 
-				LDLinePtr line (spawn<LDLine>());
+				LDLinePtr line (LDSpawn<LDLine>());
 				line->setVertex (0, v0);
 				line->setVertex (1, v1);
-				line->setColor (edgecolor());
+				line->setColor (EdgeColor());
 				objs << line;
 			} break;
 
@@ -467,8 +467,8 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 					   v2 (x2, y2, z2),
 					   v3 (x3, y3, z3);
 
-				LDQuadPtr quad (spawn<LDQuad> (v0, v1, v2, v3));
-				quad->setColor (maincolor());
+				LDQuadPtr quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
+				quad->setColor (MainColor());
 
 				if (type == Cylinder)
 					quad->invert();
@@ -498,8 +498,8 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 				// Disc negatives need to go the other way around, otherwise
 				// they'll end up upside-down.
-				LDTrianglePtr seg (spawn<LDTriangle>());
-				seg->setColor (maincolor());
+				LDTrianglePtr seg (LDSpawn<LDTriangle>());
+				seg->setColor (MainColor());
 				seg->setVertex (type == Disc ? 0 : 2, v0);
 				seg->setVertex (1, v1);
 				seg->setVertex (type == Disc ? 2 : 0, v2);
@@ -515,10 +515,10 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 	for (int i : condLineSegs)
 	{
-		Vertex v0 (radialPoint (i, divs, cos), 0.0f, radialPoint (i, divs, sin)),
+		Vertex v0 (GetRadialPoint (i, divs, cos), 0.0f, GetRadialPoint (i, divs, sin)),
 		  v1,
-		  v2 (radialPoint (i + 1, divs, cos), 0.0f, radialPoint (i + 1, divs, sin)),
-		  v3 (radialPoint (i - 1, divs, cos), 0.0f, radialPoint (i - 1, divs, sin));
+		  v2 (GetRadialPoint (i + 1, divs, cos), 0.0f, GetRadialPoint (i + 1, divs, sin)),
+		  v3 (GetRadialPoint (i - 1, divs, cos), 0.0f, GetRadialPoint (i - 1, divs, sin));
 
 		if (type == Cylinder)
 		{
@@ -532,8 +532,8 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 			v0.setZ (v0.z() * num);
 		}
 
-		LDCondLinePtr line = (spawn<LDCondLine>());
-		line->setColor (edgecolor());
+		LDCondLinePtr line = (LDSpawn<LDCondLine>());
+		line->setColor (EdgeColor());
 		line->setVertex (0, v0);
 		line->setVertex (1, v1);
 		line->setVertex (2, v2);
@@ -546,7 +546,7 @@ LDObjectList makePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 // =============================================================================
 //
-static QString primitiveTypeName (PrimitiveType type)
+static QString PrimitiveTypeName (PrimitiveType type)
 {
 	// Not translated as primitives are in English.
 	return type == Circle   ? "Circle" :
@@ -558,13 +558,13 @@ static QString primitiveTypeName (PrimitiveType type)
 
 // =============================================================================
 //
-QString radialFileName (PrimitiveType type, int segs, int divs, int num)
+QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num)
 {
 	int numer = segs,
 			denom = divs;
 
 	// Simplify the fractional part, but the denominator must be at least 4.
-	simplify (numer, denom);
+	Simplify (numer, denom);
 
 	if (denom < 4)
 	{
@@ -582,7 +582,7 @@ QString radialFileName (PrimitiveType type, int segs, int divs, int num)
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
 	int extra = (frac.length() + numstr.length() + root.length()) - 8;
-	root.chop (clamp (extra, 0, 2));
+	root.chop (Clamp (extra, 0, 2));
 
 	// Stick them all together and return the result.
 	return prefix + frac + root + numstr + ".dat";
@@ -590,11 +590,11 @@ QString radialFileName (PrimitiveType type, int segs, int divs, int num)
 
 // =============================================================================
 //
-LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num)
+LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 {
 	// Make the description
 	QString frac = QString::number ((float) segs / divs);
-	QString name = radialFileName (type, segs, divs, num);
+	QString name = MakeRadialFileName (type, segs, divs, num);
 	QString descr;
 
 	// Ensure that there's decimals, even if they're 0.
@@ -607,10 +607,10 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 			(num < 10) ? "  " :
 			(num < 100) ? " "  : "";
 
-		descr = format ("%1 %2%3 x %4", primitiveTypeName (type), spacing, num, frac);
+		descr = format ("%1 %2%3 x %4", PrimitiveTypeName (type), spacing, num, frac);
 	}
 	else
-		descr = format ("%1 %2", primitiveTypeName (type), frac);
+		descr = format ("%1 %2", PrimitiveTypeName (type), frac);
 
 	// Prepend "Hi-Res" if 48/ primitive.
 	if (divs == HighResolution)
@@ -630,32 +630,32 @@ LDDocumentPtr generatePrimitive (PrimitiveType type, int segs, int divs, int num
 
 	LDObjectList objs;
 
-	objs << spawn<LDComment> (descr)
-		 << spawn<LDComment> (format ("Name: %1", name))
-		 << spawn<LDComment> (format ("Author: %1", author))
-		 << spawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", divs == HighResolution ? 
-"48_" : ""))
-		 << spawn<LDComment> (license)
-		 << spawn<LDEmpty>()
-		 << spawn<LDBFC> (BFCStatement::CertifyCCW)
-		 << spawn<LDEmpty>();
+	objs << LDSpawn<LDComment> (descr)
+		 << LDSpawn<LDComment> (format ("Name: %1", name))
+		 << LDSpawn<LDComment> (format ("Author: %1", author))
+		 << LDSpawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive",
+									  divs == HighResolution ?  "48_" : ""))
+		 << LDSpawn<LDComment> (license)
+		 << LDSpawn<LDEmpty>()
+		 << LDSpawn<LDBFC> (BFCStatement::CertifyCCW)
+		 << LDSpawn<LDEmpty>();
 
 	f->addObjects (objs);
-	f->addObjects (makePrimitive (type, segs, divs, num));
+	f->addObjects (MakePrimitive (type, segs, divs, num));
 	return f;
 }
 
 // =============================================================================
 //
-LDDocumentPtr getPrimitive (PrimitiveType type, int segs, int divs, int num)
+LDDocumentPtr GetPrimitive (PrimitiveType type, int segs, int divs, int num)
 {
-	QString name = radialFileName (type, segs, divs, num);
-	LDDocumentPtr f = getDocument (name);
+	QString name = MakeRadialFileName (type, segs, divs, num);
+	LDDocumentPtr f = GetDocument (name);
 
 	if (f != null)
 		return f;
 
-	return generatePrimitive (type, segs, divs, num);
+	return GeneratePrimitive (type, segs, divs, num);
 }
 
 // =============================================================================
@@ -706,7 +706,7 @@ void MainWindow::slot_actionMakePrimitive()
 		dlg->ui->rb_ndisc->isChecked()    ? DiscNeg :
 		dlg->ui->rb_ring->isChecked()     ? Ring : Cone;
 
-	LDDocumentPtr f = generatePrimitive (type, segs, divs, num);
+	LDDocumentPtr f = GeneratePrimitive (type, segs, divs, num);
 	f->setImplicit (false);
 	g_win->save (f, false);
 }

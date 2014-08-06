@@ -107,7 +107,7 @@ CFGENTRY (Float, GridMediumAngleSnap, 22.5f)
 CFGENTRY (Float, GridFineCoordinateSnap, 0.1f)
 CFGENTRY (Float, GridFineAngleSnap, 7.5f)
 CFGENTRY (Int, RotationPointType, 0)
-CFGENTRY (Vertex, CustomRotationPoint, g_origin)
+CFGENTRY (Vertex, CustomRotationPoint, Origin)
 
 const GridData Grids[3] =
 {
@@ -120,13 +120,13 @@ const GridData Grids[3] =
 //
 // Snap the given coordinate value on the current grid's given axis.
 //
-double Grid::snap (double value, const Grid::Config type)
+double Grid::Snap (double value, const Grid::Config type)
 {
 	double snapvalue = (type == Coordinate) ? *CurrentGrid().coordinateSnap : *CurrentGrid().angleSnap;
-	double mult = floor (abs<double> (value / snapvalue));
+	double mult = floor (Abs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
-	if (abs (value) - (mult * snapvalue) > snapvalue / 2)
+	if (Abs (value) - (mult * snapvalue) > snapvalue / 2)
 		out += snapvalue;
 
 	if (value < 0)
@@ -137,7 +137,7 @@ double Grid::snap (double value, const Grid::Config type)
 
 // =============================================================================
 //
-void simplify (int& numer, int& denom)
+void Simplify (int& numer, int& denom)
 {
 	bool repeat;
 
@@ -186,7 +186,7 @@ Vertex GetRotationPoint (const LDObjectList& objs)
 		}
 
 		case RotationPoint::WorldOrigin:
-			return g_origin;
+			return Origin;
 
 		case RotationPoint::CustomPoint:
 			return cfg::CustomRotationPoint;
@@ -261,7 +261,7 @@ void RoundToDecimals (double& a, int decimals)
 
 // =============================================================================
 //
-void applyToMatrix (Matrix& a, ApplyToMatrixFunction func)
+void ApplyToMatrix (Matrix& a, ApplyToMatrixFunction func)
 {
 	for (int i = 0; i < 9; ++i)
 		func (i, a[i]);
@@ -269,7 +269,7 @@ void applyToMatrix (Matrix& a, ApplyToMatrixFunction func)
 
 // =============================================================================
 //
-void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
+void ApplyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 {
 	for (int i = 0; i < 9; ++i)
 		func (i, a[i]);

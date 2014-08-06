@@ -33,38 +33,39 @@ using std::getline;
 using std::cout;
 using std::endl;
 
-struct entry_type
+struct EntryType
 {
 	string name;
 	string type;
 	string defvalue;
 
-	inline bool operator< (entry_type const& other) const
+	inline bool operator< (EntryType const& other) const
 	{
 		return name < other.name;
 	}
 
-	inline bool operator== (entry_type const& other) const
+	inline bool operator== (EntryType const& other) const
 	{
 		return name == other.name and type == other.type;
 	}
 
-	inline bool operator!= (entry_type const& other) const
+	inline bool operator!= (EntryType const& other) const
 	{
 		return not operator== (other);
 	}
 };
 
-char advance_pointer (char const*& ptr)
+char AdvancePointer (char const*& ptr)
 {
 	char a = *ptr++;
+
 	if (*ptr == '\0')
 		throw false;
 
 	return a;
 }
 
-void read_cfgentries (string const& filename, vector<entry_type>& entries, const char* macroname)
+void ReadConfigEntries (string const& filename, vector<EntryType>& entries, const char* macroname)
 {
 	ifstream is (filename.c_str());
 	string line;
@@ -78,38 +79,38 @@ void read_cfgentries (string const& filename, vector<entry_type>& entries, const
 				continue;
 
 			char const* ptr = &line[macrolen];
-			entry_type entry;
+			EntryType entry;
 
 			// Skip to paren
 			while (*ptr != '(')
-				advance_pointer (ptr);
+				AdvancePointer (ptr);
 
 			// Skip whitespace
 			while (isspace (*ptr))
-				advance_pointer (ptr);
+				AdvancePointer (ptr);
 
 			// Skip paren
-			advance_pointer (ptr);
+			AdvancePointer (ptr);
 
 			// Read type
 			while (*ptr != ',')
-				entry.type += advance_pointer (ptr);
+				entry.type += AdvancePointer (ptr);
 
 			// Skip comma and whitespace
-			for (advance_pointer (ptr); isspace (*ptr); advance_pointer (ptr))
+			for (AdvancePointer (ptr); isspace (*ptr); AdvancePointer (ptr))
 				;
 
 			// Read name
 			while (*ptr != ',')
-				entry.name += advance_pointer (ptr);
+				entry.name += AdvancePointer (ptr);
 
 			// Skip comma and whitespace
-			for (advance_pointer (ptr); isspace (*ptr); advance_pointer (ptr))
+			for (AdvancePointer (ptr); isspace (*ptr); AdvancePointer (ptr))
 				;
 
 			// Read default
 			while (*ptr != ')')
-				entry.defvalue += advance_pointer (ptr);
+				entry.defvalue += AdvancePointer (ptr);
 
 			entries.push_back (entry);
 		}
@@ -117,7 +118,7 @@ void read_cfgentries (string const& filename, vector<entry_type>& entries, const
 	}
 }
 
-bool check_equality (vector<entry_type> a, vector<entry_type> b)
+bool CheckEquality (vector<EntryType> a, vector<EntryType> b)
 {
 	if (a.size() != b.size())
 		return false;
@@ -136,45 +137,45 @@ bool check_equality (vector<entry_type> a, vector<entry_type> b)
 
 int main (int argc, char* argv[])
 {
-	vector<entry_type> entries;
-	vector<entry_type> oldentries;
-	read_cfgentries (argv[argc - 1], oldentries, "CODEGEN_CACHE");
+	vector<EntryType> entries;
+	vector<EntryType> oldentries;
+	ReadConfigEntries (argv[argc - 1], oldentries, "CODEGEN_CACHE");
 
 	for (int arg = 1; arg < argc - 1; ++arg)
-		read_cfgentries (argv[arg], entries, "CFGENTRY");
+		ReadConfigEntries (argv[arg], entries, "CFGENTRY");
 
-	if (check_equality (entries, oldentries))
+	if (CheckEquality (entries, oldentries))
 	{
 		cout << "Configuration options unchanged" << endl;
+		return 0;
 	}
-	else
+
+	std::ofstream os (argv[argc - 1]);
+	os << "#pragma once" << endl;
+	os << "#define CODEGEN_CACHE(A,B,C)" << endl;
+
+	for (vector<EntryType>::const_iterator it = entries.begin(); it != entries.end(); ++it)
 	{
-		std::ofstream os (argv[argc - 1]);
-		os << "#pragma once" << endl;
-		os << "#define CODEGEN_CACHE(A,B,C)" << endl;
-
-		for (vector<entry_type>::const_iterator it = entries.begin(); it != entries.end(); ++it)
-			os << "CODEGEN_CACHE (" << it->type << ", " << it->name << ", " << it->defvalue << ")" << endl;
-
-		os << endl;
-		for (vector<entry_type>::const_iterator it = entries.begin(); it != entries.end(); ++it)
-			os << "EXTERN_CFGENTRY (" << it->type << ", " << it->name << ")" << endl;
-
-		os << endl;
-		os << "static void InitConfigurationEntry (AbstractConfigEntry* entry);" << endl;
-		os << "static void SetupConfigurationLists()" << endl;
-		os << "{" << endl;
-
-		for (vector<entry_type>::const_iterator it = entries.begin(); it != entries.end(); ++it)
-		{
-			os << "\tInitConfigurationEntry (new " << it->type << "ConfigEntry (&cfg::" <<
-				it->name << ", \"" << it->name << "\", " << it->defvalue << "));" << endl;
-		}
-
-		os << "}" << endl;
-
-		cout << "Wrote configuration options list to " << argv[argc - 1] << "." << endl;
+		os << "CODEGEN_CACHE (" << it->type << ", " << it->name << ", " <<
+			  it->defvalue << ")" << endl;
 	}
 
+	os << endl;
+	for (vector<EntryType>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+		os << "EXTERN_CFGENTRY (" << it->type << ", " << it->name << ")" << endl;
+
+	os << endl;
+	os << "static void InitConfigurationEntry (AbstractConfigEntry* entry);" << endl;
+	os << "static void SetupConfigurationLists()" << endl;
+	os << "{" << endl;
+
+	for (vector<EntryType>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+	{
+		os << "\tInitConfigurationEntry (new " << it->type << "ConfigEntry (&cfg::" <<
+			  it->name << ", \"" << it->name << "\", " << it->defvalue << "));" << endl;
+	}
+
+	os << "}" << endl;
+	cout << "Wrote configuration options list to " << argv[argc - 1] << "." << endl;
 	return 0;
 }

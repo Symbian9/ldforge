@@ -120,7 +120,7 @@ QString format (QString fmtstr, Args... args)
 // From messageLog.cc - declared here so that I don't need to include
 // messageLog.h here. Prints the given message to log.
 //
-void printToLog (const QString& msg);
+void PrintToLog (const QString& msg);
 
 //
 // Format and print the given args to the message log.
@@ -129,7 +129,7 @@ template<typename... Args>
 void print (QString fmtstr, Args... args)
 {
 	formatHelper (fmtstr, args...);
-	printToLog (fmtstr);
+	PrintToLog (fmtstr);
 }
 
 //
@@ -160,7 +160,7 @@ template<typename... Args>
 void dprint (QString fmtstr, Args... args)
 {
 	formatHelper (fmtstr, args...);
-	printToLog (fmtstr);
+	PrintToLog (fmtstr);
 }
 #else
 void dprint (QString, Args...) {}

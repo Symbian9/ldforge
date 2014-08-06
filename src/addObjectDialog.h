@@ -61,7 +61,7 @@ private:
 	void setButtonBackground (QPushButton* button, LDColor color);
 	QString currentSubfileName();
 
-	LDColor _color;
+	LDColor m_color;
 
 private slots:
 	void slot_colorButtonClicked();

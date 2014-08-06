@@ -93,15 +93,15 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (changeCurrentFile()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
-	if (getActivePrimitiveScanner() != null)
-		connect (getActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
+	if (ActivePrimitiveScanner() != null)
+		connect (ActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
 	else
 		updatePrimitives();
 
 	m_msglog = new MessageManager;
 	m_msglog->setRenderer (R());
 	m_renderer->setMessageLog (m_msglog);
-	m_quickColors = quickColorsFromConfig();
+	m_quickColors = LoadQuickColorList();
 	slot_selectionChanged();
 	setStatusBar (new QStatusBar);
 	updateActions();
@@ -144,11 +144,11 @@ void MainWindow::slot_action()
 void MainWindow::endAction()
 {
 	// Add a step in the history now.
-	getCurrentDocument()->addHistoryStep();
+	CurrentDocument()->addHistoryStep();
 
 	// Update the list item of the current file - we may need to draw an icon
 	// now that marks it as having unsaved changes.
-	updateDocumentListItem (getCurrentDocument());
+	updateDocumentListItem (CurrentDocument());
 }
 
 // =============================================================================
@@ -174,7 +174,7 @@ for (QAction * recent : m_recentFiles)
 	for (const QVariant& it : cfg::RecentFiles)
 	{
 		QString file = it.toString();
-		QAction* recent = new QAction (getIcon ("open-recent"), file, this);
+		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
 
 		connect (recent, SIGNAL (triggered()), this, SLOT (slot_recentFile()));
 		ui->menuOpenRecent->insertAction (first, recent);
@@ -185,7 +185,7 @@ for (QAction * recent : m_recentFiles)
 
 // =============================================================================
 //
-QList<LDQuickColor> quickColorsFromConfig()
+QList<LDQuickColor> LoadQuickColorList()
 {
 	QList<LDQuickColor> colors;
 
@@ -221,7 +221,7 @@ void MainWindow::updateColorToolbar()
 		else
 		{
 			QToolButton* colorButton = new QToolButton;
-			colorButton->setIcon (makeColorIcon (entry.color(), 16));
+			colorButton->setIcon (MakeColorIcon (entry.color(), 16));
 			colorButton->setIconSize (QSize (16, 16));
 			colorButton->setToolTip (entry.color().name());
 
@@ -250,23 +250,23 @@ void MainWindow::updateGridToolBar()
 //
 void MainWindow::updateTitle()
 {
-	QString title = format (APPNAME " %1", versionString());
+	QString title = format (APPNAME " %1", VersionString());
 
 	// Append our current file if we have one
-	if (getCurrentDocument())
+	if (CurrentDocument())
 	{
 		title += ": ";
-		title += getCurrentDocument()->getDisplayName();
+		title += CurrentDocument()->getDisplayName();
 
-		if (getCurrentDocument()->getObjectCount() > 0 and
-			getCurrentDocument()->getObject (0)->type() == OBJ_Comment)
+		if (CurrentDocument()->getObjectCount() > 0 and
+			CurrentDocument()->getObject (0)->type() == OBJ_Comment)
 		{
 			// Append title
-			LDCommentPtr comm = getCurrentDocument()->getObject (0).staticCast<LDComment>();
+			LDCommentPtr comm = CurrentDocument()->getObject (0).staticCast<LDComment>();
 			title += format (": %1", comm->text());
 		}
 
-		if (getCurrentDocument()->hasUnsavedChanges())
+		if (CurrentDocument()->hasUnsavedChanges())
 			title += '*';
 	}
 
@@ -276,8 +276,8 @@ void MainWindow::updateTitle()
 	title += " [pre-release build]";
 #endif // DEBUG
 
-	if (commitTimeString()[0] != '\0')
-		title += format (" (%1)", QString::fromUtf8 (commitTimeString()));
+	if (CommitTimeString()[0] != '\0')
+		title += format (" (%1)", QString::fromUtf8 (CommitTimeString()));
 
 	setWindowTitle (title);
 }
@@ -286,10 +286,10 @@ void MainWindow::updateTitle()
 //
 int MainWindow::deleteSelection()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return 0;
 
-	LDObjectList selCopy = selection();
+	LDObjectList selCopy = Selection();
 
 	// Delete the objects that were being selected
 	for (LDObjectPtr obj : selCopy)
@@ -303,7 +303,7 @@ int MainWindow::deleteSelection()
 //
 void MainWindow::buildObjList()
 {
-	if (not getCurrentDocument())
+	if (not CurrentDocument())
 		return;
 
 	// Lock the selection while we do this so that refreshing the object list
@@ -316,7 +316,7 @@ void MainWindow::buildObjList()
 
 	ui->objectList->clear();
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		QString descr;
 
@@ -386,7 +386,7 @@ void MainWindow::buildObjList()
 			{
 				LDOverlayPtr ovl = obj.staticCast<LDOverlay>();
 				descr = format ("[%1] %2 (%3, %4), %5 x %6", g_CameraNames[ovl->camera()],
-					basename (ovl->fileName()), ovl->x(), ovl->y(),
+					Basename (ovl->fileName()), ovl->x(), ovl->y(),
 					ovl->width(), ovl->height());
 				break;
 			}
@@ -399,7 +399,7 @@ void MainWindow::buildObjList()
 		}
 
 		QListWidgetItem* item = new QListWidgetItem (descr);
-		item->setIcon (getIcon (obj->typeName()));
+		item->setIcon (GetIcon (obj->typeName()));
 
 		// Use italic font if hidden
 		if (obj->isHidden())
@@ -416,7 +416,7 @@ void MainWindow::buildObjList()
 			item->setForeground (QColor ("#FFAA00"));
 		}
 		elif (cfg::ColorizeObjectsList and obj->isColored() and
-			obj->color() != null and obj->color() != maincolor() and obj->color() != edgecolor())
+			obj->color() != null and obj->color() != MainColor() and obj->color() != EdgeColor())
 		{
 			// If the object isn't in the main or edge color, draw this
 			// list entry in said color.
@@ -436,10 +436,10 @@ void MainWindow::buildObjList()
 //
 void MainWindow::scrollToSelection()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return;
 
-	LDObjectPtr obj = selection().last();
+	LDObjectPtr obj = Selection().last();
 	ui->objectList->scrollToItem (obj->qObjListEntry);
 }
 
@@ -447,16 +447,16 @@ void MainWindow::scrollToSelection()
 //
 void MainWindow::slot_selectionChanged()
 {
-	if (g_isSelectionLocked == true or getCurrentDocument() == null)
+	if (g_isSelectionLocked == true or CurrentDocument() == null)
 		return;
 
-	LDObjectList priorSelection = selection();
+	LDObjectList priorSelection = Selection();
 
 	// Get the objects from the object list selection
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 	const QList<QListWidgetItem*> items = ui->objectList->selectedItems();
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		for (QListWidgetItem* item : items)
 		{
@@ -473,8 +473,8 @@ void MainWindow::slot_selectionChanged()
 	updateSelection();
 
 	// Update the GL renderer
-	LDObjectList compound = priorSelection + selection();
-	removeDuplicates (compound);
+	LDObjectList compound = priorSelection + Selection();
+	RemoveDuplicates (compound);
 
 	for (LDObjectPtr obj : compound)
 		R()->compileObject (obj);
@@ -487,7 +487,7 @@ void MainWindow::slot_selectionChanged()
 void MainWindow::slot_recentFile()
 {
 	QAction* qAct = static_cast<QAction*> (sender());
-	openMainFile (qAct->text());
+	OpenMainModel (qAct->text());
 }
 
 // =============================================================================
@@ -509,7 +509,7 @@ void MainWindow::slot_quickColor()
 	if (col == null)
 		return;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (not obj->isColored())
 			continue; // uncolored object
@@ -527,11 +527,11 @@ void MainWindow::slot_quickColor()
 int MainWindow::getInsertionPoint()
 {
 	// If we have a selection, put the item after it.
-	if (not selection().isEmpty())
-		return selection().last()->lineNumber() + 1;
+	if (not Selection().isEmpty())
+		return Selection().last()->lineNumber() + 1;
 
 	// Otherwise place the object at the end.
-	return getCurrentDocument()->getObjectCount();
+	return CurrentDocument()->getObjectCount();
 }
 
 // =============================================================================
@@ -558,7 +558,7 @@ void MainWindow::updateSelection()
 
 	ui->objectList->clearSelection();
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (obj->qObjListEntry == null)
 			continue;
@@ -575,7 +575,7 @@ LDColor MainWindow::getSelectedColor()
 {
 	LDColor result;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (not obj->isColored())
 			continue; // doesn't use color
@@ -595,7 +595,7 @@ LDColor MainWindow::getSelectedColor()
 void MainWindow::closeEvent (QCloseEvent* ev)
 {
 	// Check whether it's safe to close all files.
-	if (not safeToCloseAll())
+	if (not IsSafeToCloseAll())
 	{
 		ev->ignore();
 		return;
@@ -612,12 +612,12 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 //
 void MainWindow::spawnContextMenu (const QPoint pos)
 {
-	const bool single = (selection().size() == 1);
-	LDObjectPtr singleObj = single ? selection().first() : LDObjectPtr();
+	const bool single = (Selection().size() == 1);
+	LDObjectPtr singleObj = single ? Selection().first() : LDObjectPtr();
 
 	bool hasSubfiles = false;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
@@ -659,7 +659,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 	contextMenu->addAction (ui->actionModeDraw);
 	contextMenu->addAction (ui->actionModeCircle);
 
-	if (not selection().isEmpty())
+	if (not Selection().isEmpty())
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui->actionSubfileSelection);
@@ -680,7 +680,7 @@ void MainWindow::deleteByColor (LDColor color)
 {
 	LDObjectList objs;
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		if (not obj->isColored() or obj->color() != color)
 			continue;
@@ -708,7 +708,7 @@ void MainWindow::updateEditModeActions()
 //
 void MainWindow::slot_editObject (QListWidgetItem* listitem)
 {
-	for (LDObjectPtr it : getCurrentDocument()->objects())
+	for (LDObjectPtr it : CurrentDocument()->objects())
 	{
 		if (it->qObjListEntry == listitem)
 		{
@@ -747,13 +747,13 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 
 	if (doc->save (path, &savesize))
 	{
-		if (doc == getCurrentDocument())
+		if (doc == CurrentDocument())
 			updateTitle();
 
 		print ("Saved to %1 (%2)", path, MakePrettyFileSize (savesize));
 
 		// Add it to recent files
-		addRecentFile (path);
+		AddRecentFile (path);
 		return true;
 	}
 
@@ -764,7 +764,7 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 
 	// Add a save-as button
 	QPushButton* saveAsBtn = new QPushButton (tr ("Save As"));
-	saveAsBtn->setIcon (getIcon ("file-save-as"));
+	saveAsBtn->setIcon (GetIcon ("file-save-as"));
 	dlg.addButton (saveAsBtn, QMessageBox::ActionRole);
 	dlg.setDefaultButton (QMessageBox::Close);
 	dlg.exec();
@@ -788,21 +788,21 @@ void ObjectList::contextMenuEvent (QContextMenuEvent* ev)
 
 // =============================================================================
 //
-QPixmap getIcon (QString iconName)
+QPixmap GetIcon (QString iconName)
 {
 	return (QPixmap (format (":/icons/%1.png", iconName)));
 }
 
 // =============================================================================
 //
-bool confirm (const QString& message)
+bool Confirm (const QString& message)
 {
-	return confirm (MainWindow::tr ("Confirm"), message);
+	return Confirm (MainWindow::tr ("Confirm"), message);
 }
 
 // =============================================================================
 //
-bool confirm (const QString& title, const QString& message)
+bool Confirm (const QString& title, const QString& message)
 {
 	return QMessageBox::question (g_win, title, message,
 		(QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes;
@@ -810,7 +810,7 @@ bool confirm (const QString& title, const QString& message)
 
 // =============================================================================
 //
-void critical (const QString& message)
+void CriticalError (const QString& message)
 {
 	QMessageBox::critical (g_win, MainWindow::tr ("Error"), message,
 		(QMessageBox::Close), QMessageBox::Close);
@@ -818,14 +818,14 @@ void critical (const QString& message)
 
 // =============================================================================
 //
-QIcon makeColorIcon (LDColor colinfo, const int size)
+QIcon MakeColorIcon (LDColor colinfo, const int size)
 {
 	// Create an image object and link a painter to it.
 	QImage img (size, size, QImage::Format_ARGB32);
 	QPainter paint (&img);
 	QColor col = colinfo.faceColor();
 
-	if (colinfo == maincolor())
+	if (colinfo == MainColor())
 	{
 		// Use the user preferences for main color here
 		col = cfg::MainColor;
@@ -836,7 +836,7 @@ QIcon makeColorIcon (LDColor colinfo, const int size)
 	paint.fillRect (QRect (0, 0, size, size), colinfo.edgeColor());
 
 	// Paint the checkerboard background, visible with translucent icons
-	paint.drawPixmap (QRect (1, 1, size - 2, size - 2), getIcon ("checkerboard"), QRect (0, 0, 8, 8));
+	paint.drawPixmap (QRect (1, 1, size - 2, size - 2), GetIcon ("checkerboard"), QRect (0, 0, 8, 8));
 
 	// Paint the color above the checkerboard
 	paint.fillRect (QRect (1, 1, size - 2, size - 2), col);
@@ -845,11 +845,11 @@ QIcon makeColorIcon (LDColor colinfo, const int size)
 
 // =============================================================================
 //
-void makeColorComboBox (QComboBox* box)
+void MakeColorComboBox (QComboBox* box)
 {
 	std::map<LDColor, int> counts;
 
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		if (not obj->isColored() or obj->color() == null)
 			continue;
@@ -865,9 +865,9 @@ void makeColorComboBox (QComboBox* box)
 
 	for (const auto& pair : counts)
 	{
-		QIcon ico = makeColorIcon (pair.first, 16);
+		QIcon ico = MakeColorIcon (pair.first, 16);
 		box->addItem (ico, format ("[%1] %2 (%3 object%4)",
-			pair.first, pair.first.name(), pair.second, plural (pair.second)));
+			pair.first, pair.first.name(), pair.second, Plural (pair.second)));
 		box->setItemData (row, pair.first.index());
 
 		++row;
@@ -911,13 +911,13 @@ void MainWindow::updateDocumentListItem (LDDocumentPtr doc)
 
 	// If this is the current file, it also needs to be the selected item on
 	// the list.
-	if (doc == getCurrentDocument())
+	if (doc == CurrentDocument())
 		m_tabs->setCurrentIndex (doc->tabIndex());
 
 	m_tabs->setTabText (doc->tabIndex(), doc->getDisplayName());
 
 	// If the document.has unsaved changes, draw a little icon next to it to mark that.
-	m_tabs->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? getIcon ("file-save") : QIcon());
+	m_tabs->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? GetIcon ("file-save") : QIcon());
 	m_tabs->setTabData (doc->tabIndex(), doc->name());
 	m_updatingTabs = oldUpdatingTabs;
 }
@@ -947,7 +947,7 @@ void MainWindow::changeCurrentFile()
 
 	// If we picked the same file we're currently on, we don't need to do
 	// anything.
-	if (f == null or f == getCurrentDocument())
+	if (f == null or f == CurrentDocument())
 		return;
 
 	LDDocument::setCurrent (f);
@@ -973,9 +973,9 @@ for (LDObjectPtr obj : *f)
 //
 void MainWindow::updateActions()
 {
-	if (getCurrentDocument() != null and getCurrentDocument()->history() != null)
+	if (CurrentDocument() != null and CurrentDocument()->history() != null)
 	{
-		History* his = getCurrentDocument()->history();
+		History* his = CurrentDocument()->history();
 		int pos = his->position();
 		ui->actionUndo->setEnabled (pos != -1);
 		ui->actionRedo->setEnabled (pos < (long) his->getSize() - 1);
@@ -995,14 +995,14 @@ void MainWindow::updateActions()
 //
 void MainWindow::updatePrimitives()
 {
-	populatePrimitives (ui->primitives);
+	PopulatePrimitives (ui->primitives);
 }
 
 // =============================================================================
 //
 void MainWindow::closeTab (int tabindex)
 {
-	LDDocumentPtr doc = findDocument (m_tabs->tabData (tabindex).toString());
+	LDDocumentPtr doc = FindDocument (m_tabs->tabData (tabindex).toString());
 
 	if (doc == null)
 		return;
@@ -1056,7 +1056,7 @@ QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
 
 // =============================================================================
 //
-QImage imageFromScreencap (uchar* data, int w, int h)
+QImage GetImageFromScreencap (uchar* data, int w, int h)
 {
 	// GL and Qt formats have R and B swapped. Also, GL flips Y - correct it as well.
 	return QImage (data, w, h, QImage::Format_ARGB32).rgbSwapped().mirrored();
@@ -1082,7 +1082,7 @@ bool LDQuickColor::isSeparator() const
 	return color() == null;
 }
 
-void populatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
+void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
 {
 	tw->clear();
 

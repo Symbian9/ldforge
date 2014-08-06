@@ -27,7 +27,7 @@
 //
 // Helper function for parseLDConfig
 //
-static bool parseLDConfigTag (LDConfigParser& pars, char const* tag, QString& val)
+static bool ParseLDConfigTag (LDConfigParser& pars, char const* tag, QString& val)
 {
 	int pos;
 
@@ -43,11 +43,11 @@ static bool parseLDConfigTag (LDConfigParser& pars, char const* tag, QString& va
 //
 void LDConfigParser::parseLDConfig()
 {
-	QFile* fp = openLDrawFile ("LDConfig.ldr", false);
+	QFile* fp = OpenLDrawFile ("LDConfig.ldr", false);
 
 	if (fp == null)
 	{
-		critical (QObject::tr ("Unable to open LDConfig.ldr for parsing."));
+		CriticalError (QObject::tr ("Unable to open LDConfig.ldr for parsing."));
 		return;
 	}
 
@@ -80,7 +80,7 @@ void LDConfigParser::parseLDConfig()
 		name.replace ("_", " ");
 
 		// Get the CODE tag
-		if (not parseLDConfigTag (pars, "CODE", valuestr))
+		if (not ParseLDConfigTag (pars, "CODE", valuestr))
 			continue;
 
 		// Ensure that the code is within [0 - 511]
@@ -91,7 +91,7 @@ void LDConfigParser::parseLDConfig()
 			continue;
 
 		// VALUE and EDGE tags
-		if (not parseLDConfigTag (pars, "VALUE", facename) or not parseLDConfigTag (pars, "EDGE", edgename))
+		if (not ParseLDConfigTag (pars, "VALUE", facename) or not ParseLDConfigTag (pars, "EDGE", edgename))
 			continue;
 
 		// Ensure that our colors are correct
@@ -102,16 +102,16 @@ void LDConfigParser::parseLDConfig()
 			continue;
 
 		// Parse alpha if given.
-		if (parseLDConfigTag (pars, "ALPHA", valuestr))
-			alpha = clamp (valuestr.toInt(), 0, 255);
+		if (ParseLDConfigTag (pars, "ALPHA", valuestr))
+			alpha = Clamp (valuestr.toInt(), 0, 255);
 
 		LDColorData* col = new LDColorData;
-		col->_name = name;
-		col->_faceColor = faceColor;
-		col->_edgeColor = edgeColor;
-		col->_hexcode = facename;
-		col->_faceColor.setAlpha (alpha);
-		col->_index = code;
+		col->m_name = name;
+		col->m_faceColor = faceColor;
+		col->m_edgeColor = edgeColor;
+		col->m_hexcode = facename;
+		col->m_faceColor.setAlpha (alpha);
+		col->m_index = code;
 		LDColor::addLDConfigColor (code, LDColor (col));
 	}
 

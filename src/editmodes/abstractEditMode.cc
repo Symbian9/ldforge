@@ -31,7 +31,7 @@ CFGENTRY (Bool, DrawLineLengths, true)
 CFGENTRY (Bool, DrawAngles, false)
 
 AbstractEditMode::AbstractEditMode (GLRenderer* renderer) :
-	_renderer (renderer) {}
+	m_renderer (renderer) {}
 
 AbstractEditMode::~AbstractEditMode() {}
 
@@ -51,12 +51,12 @@ AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditMode
 
 GLRenderer* AbstractEditMode::renderer() const
 {
-	return _renderer;
+	return m_renderer;
 }
 
 AbstractDrawMode::AbstractDrawMode (GLRenderer* renderer) :
 	AbstractEditMode (renderer),
-	_polybrush (QBrush (QColor (64, 192, 0, 128)))
+	m_polybrush (QBrush (QColor (64, 192, 0, 128)))
 {
 	// Disable the context menu - we need the right mouse button
 	// for removing vertices.
@@ -66,10 +66,10 @@ AbstractDrawMode::AbstractDrawMode (GLRenderer* renderer) :
 	renderer->setCursor (Qt::CrossCursor);
 
 	// Clear the selection when beginning to draw.
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 
 	g_win->updateSelection();
-	_drawedVerts.clear();
+	m_drawedVerts.clear();
 }
 
 AbstractSelectMode::AbstractSelectMode (GLRenderer* renderer) :
@@ -86,7 +86,7 @@ void AbstractDrawMode::addDrawnVertex (Vertex const& pos)
 	if (preAddVertex (pos))
 		return;
 
-	_drawedVerts << pos;
+	m_drawedVerts << pos;
 }
 
 bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
@@ -94,7 +94,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	if (Super::mouseReleased (data))
 		return true;
 
-	if ((data.releasedButtons & Qt::MidButton) and (_drawedVerts.size() < 4) and (not data.mouseMoved))
+	if ((data.releasedButtons & Qt::MidButton) and (m_drawedVerts.size() < 4) and (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
 		double			minimumDistance = 1024.0;
@@ -146,10 +146,10 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		return true;
 	}
 
-	if ((data.releasedButtons & Qt::RightButton) and (not _drawedVerts.isEmpty()))
+	if ((data.releasedButtons & Qt::RightButton) and (not m_drawedVerts.isEmpty()))
 	{
 		// Remove the last vertex
-		_drawedVerts.removeLast();
+		m_drawedVerts.removeLast();
 
 		return true;
 	}
@@ -171,7 +171,7 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 		g_win->endAction();
 	}
 
-	_drawedVerts.clear();
+	m_drawedVerts.clear();
 }
 
 void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withangles) const
@@ -184,7 +184,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 		poly[i] = renderer()->coordconv3_2 (poly3d[i]);
 
 	// Draw the polygon-to-be
-	painter.setBrush (_polybrush);
+	painter.setBrush (m_polybrush);
 	painter.drawPolygon (QPolygonF (poly));
 
 	// Draw vertex blips

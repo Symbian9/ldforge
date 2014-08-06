@@ -18,7 +18,7 @@
 
 int main(int argc, char **argv)
 {
-	char *name;
+    const char *name = "svnout";
 	char currev[64], lastrev[64], run[256], *rev;
 	unsigned long urev;
 	FILE *stream = NULL;
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 		sprintf (run, "svnversion -cn %s", argv[1]);
 	else
 		sprintf (run, "hg identify -n"); 
-	if ((name = tempnam(NULL, "svnout")) != NULL)
+    // if ((name = tempnam(NULL, "svnout")) != NULL)
 	{
 #ifdef __APPLE__
 		// tempnam will return errno of 2 even though it is successful for our purposes.
@@ -91,10 +91,10 @@ int main(int argc, char **argv)
 		fclose (stream);
 		remove (name);
 	}
-	if (name != NULL)
+    /*if (name != NULL)
 	{
 		free (name);
-	}
+    }*/
 
 	if (!gotrev)
 	{

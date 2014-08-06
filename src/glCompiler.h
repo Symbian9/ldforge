@@ -77,5 +77,5 @@ private:
 	GLRenderer*								m_renderer;
 };
 
-#define checkGLError() { checkGLError_private (__FILE__, __LINE__); }
-void checkGLError_private (const char* file, int line);
+#define CHECK_GL_ERROR() { CheckGLErrorImpl (__FILE__, __LINE__); }
+void CheckGLErrorImpl (const char* file, int line);

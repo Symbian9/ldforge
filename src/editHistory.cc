@@ -139,7 +139,7 @@ void AddHistory::undo() const
 //
 void AddHistory::redo() const
 {
-	LDObjectPtr obj = parseLine (code());
+	LDObjectPtr obj = ParseLine (code());
 	parent()->document().toStrongRef()->insertObj (index(), obj);
 	g_win->R()->compileObject (obj);
 }
@@ -155,7 +155,7 @@ DelHistory::DelHistory (int idx, LDObjectPtr obj) :
 //
 void DelHistory::undo() const
 {
-	LDObjectPtr obj = parseLine (code());
+	LDObjectPtr obj = ParseLine (code());
 	parent()->document().toStrongRef()->insertObj (index(), obj);
 	g_win->R()->compileObject (obj);
 }
@@ -172,8 +172,8 @@ void DelHistory::redo() const
 //
 void EditHistory::undo() const
 {
-	LDObjectPtr obj = getCurrentDocument()->getObject (index());
-	LDObjectPtr newobj = parseLine (oldCode());
+	LDObjectPtr obj = CurrentDocument()->getObject (index());
+	LDObjectPtr newobj = ParseLine (oldCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);
 }
@@ -182,8 +182,8 @@ void EditHistory::undo() const
 //
 void EditHistory::redo() const
 {
-	LDObjectPtr obj = getCurrentDocument()->getObject (index());
-	LDObjectPtr newobj = parseLine (newCode());
+	LDObjectPtr obj = CurrentDocument()->getObject (index());
+	LDObjectPtr newobj = ParseLine (newCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);
 }

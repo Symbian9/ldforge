@@ -97,7 +97,7 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 	ui->setupUi (this);
 
 	// Set defaults
-	_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	m_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
 	{
 		QVariant value (conf->toVariant());
 		QLineEdit* le;
@@ -145,7 +145,7 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 
 	ui->shortcutsList->setSortingEnabled (true);
 	ui->shortcutsList->sortItems();
-	quickColors = quickColorsFromConfig();
+	quickColors = LoadQuickColorList();
 	updateQuickColorList();
 	initExtProgs();
 	selectPage (deftab);
@@ -195,7 +195,7 @@ void ConfigDialog::addShortcut (QAction* act)
 	// If the action doesn't have a valid icon, use an empty one
 	// so that the list is kept aligned.
 	if (act->icon().isNull())
-		item->setIcon (getIcon ("empty"));
+		item->setIcon (GetIcon ("empty"));
 
 	ui->shortcutsList->insertItem (ui->shortcutsList->count(), item);
 }
@@ -215,9 +215,9 @@ void ConfigDialog::initExtProgs()
 		QLineEdit* input = new QLineEdit;
 		QPushButton* setPathButton = new QPushButton;
 
-		icon->setPixmap (getIcon (info.iconname));
+		icon->setPixmap (GetIcon (info.iconname));
 		input->setText (*info.path);
-		setPathButton->setIcon (getIcon ("folder"));
+		setPathButton->setIcon (GetIcon ("folder"));
 		info.input = input;
 		info.setPathButton = setPathButton;
 
@@ -242,7 +242,7 @@ void ConfigDialog::initExtProgs()
 	ui->extProgs->setLayout (pathsLayout);
 }
 
-void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
+void ConfigDialog::m_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
 {
 	// Apply configuration
 	for (QWidget* widget : findChildren<QWidget*>())
@@ -268,7 +268,7 @@ void ConfigDialog::_applyToWidgetOptions (std::function<void (QWidget*, Abstract
 //
 void ConfigDialog::applySettings()
 {
-	_applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
+	m_applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
 	{
 		QVariant value (conf->toVariant());
 		QLineEdit* le;
@@ -289,7 +289,7 @@ void ConfigDialog::applySettings()
 		elif ((checkbox = qobject_cast<QCheckBox*> (widget)) != null)
 			value = checkbox->isChecked();
 		elif ((button = qobject_cast<QPushButton*> (widget)) != null)
-			value = _buttonColors[button];
+			value = m_buttonColors[button];
 		else
 			print ("Unknown widget of type %1\n", widget->metaObject()->className());
 
@@ -317,8 +317,8 @@ void ConfigDialog::applySettings()
 	}
 
 	Config::Save();
-	reloadAllSubfiles();
-	loadLogoedStuds();
+	ReloadAllSubfiles();
+	LoadLogoStuds();
 	g_win->R()->setBackground();
 	g_win->doFullRefresh();
 	g_win->updateDocumentList();
@@ -364,7 +364,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 		if (entry.isSeparator())
 		{
 			item->setText ("<hr />");
-			item->setIcon (getIcon ("empty"));
+			item->setIcon (GetIcon ("empty"));
 		}
 		else
 		{
@@ -373,12 +373,12 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 			if (col == null)
 			{
 				item->setText ("[[unknown color]]");
-				item->setIcon (getIcon ("error"));
+				item->setIcon (GetIcon ("error"));
 			}
 			else
 			{
 				item->setText (col.name());
-				item->setIcon (makeColorIcon (col, 16));
+				item->setIcon (MakeColorIcon (col, 16));
 			}
 		}
 
@@ -504,7 +504,7 @@ void ConfigDialog::setButtonColor()
 		return;
 	}
 
-	QColor color = QColorDialog::getColor (_buttonColors[button]);
+	QColor color = QColorDialog::getColor (m_buttonColors[button]);
 
 	if (color.isValid())
 	{
@@ -519,10 +519,10 @@ void ConfigDialog::setButtonColor()
 //
 void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 {
-	button->setIcon (getIcon ("colorselect"));
+	button->setIcon (GetIcon ("colorselect"));
 	button->setAutoFillBackground (true);
 	button->setStyleSheet (format ("background-color: %1", value));
-	_buttonColors[button] = QColor (value);
+	m_buttonColors[button] = QColor (value);
 }
 
 //

@@ -40,7 +40,7 @@ public:															\
 #define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
 #define LDOBJ_SETCOLORED(V)    public: virtual bool isColored() const override { return V; }
 #define LDOBJ_COLORED          LDOBJ_SETCOLORED (true)
-#define LDOBJ_UNCOLORED        LDOBJ_SETCOLORED (false) LDOBJ_DEFAULTCOLOR (maincolor())
+#define LDOBJ_UNCOLORED        LDOBJ_SETCOLORED (false) LDOBJ_DEFAULTCOLOR (MainColor())
 #define LDOBJ_DEFAULTCOLOR(V)  public: virtual LDColor defaultColor() const override { return (V); }
 
 #define LDOBJ_CUSTOM_SCEMANTIC public: virtual bool isScemantic() const override
@@ -218,13 +218,14 @@ private:
 // deleter so that all deletions go through finalDelete();
 //
 template<typename T, typename... Args>
-inline QSharedPointer<T> spawn (Args... args)
+inline QSharedPointer<T> LDSpawn (Args... args)
 {
-	static_assert (std::is_base_of<LDObject, T>::value, "spawn may only be used with LDObject-derivatives");
+	static_assert (std::is_base_of<LDObject, T>::value,
+		"spawn may only be used with LDObject-derivatives");
 	LDObjectPtr ptr;
 	new T (&ptr, args...);
 
-	// Set default color. This cannot be done in the c-tor.
+	// Set default color. Relying on virtual functions, this cannot be done in the c-tor.
 	if (ptr->isColored())
 		ptr->setColor (ptr->defaultColor());
 
@@ -259,7 +260,7 @@ class LDMatrixObject : public LDObject
 public:
 	LDMatrixObject (LDObjectPtr* selfptr) :
 		LDObject (selfptr),
-		m_position (g_origin) {}
+		m_position (Origin) {}
 
 	LDMatrixObject (LDObjectPtr* selfptr, const Matrix& transform, const Vertex& pos) :
 		LDObject (selfptr),
@@ -414,7 +415,7 @@ class LDSubfile : public LDMatrixObject
 	LDOBJ_NAME (subfile)
 	LDOBJ_VERTICES (0)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (maincolor())
+	LDOBJ_DEFAULTCOLOR (MainColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_HAS_MATRIX
 	PROPERTY (public, LDDocumentPtr, fileInfo, setFileInfo, CUSTOM_WRITE)
@@ -451,7 +452,7 @@ class LDLine : public LDObject
 	LDOBJ_NAME (line)
 	LDOBJ_VERTICES (2)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (edgecolor())
+	LDOBJ_DEFAULTCOLOR (EdgeColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -473,7 +474,7 @@ class LDCondLine : public LDLine
 	LDOBJ_NAME (condline)
 	LDOBJ_VERTICES (4)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (edgecolor())
+	LDOBJ_DEFAULTCOLOR (EdgeColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -499,7 +500,7 @@ class LDTriangle : public LDObject
 	LDOBJ_NAME (triangle)
 	LDOBJ_VERTICES (3)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (maincolor())
+	LDOBJ_DEFAULTCOLOR (MainColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -523,7 +524,7 @@ class LDQuad : public LDObject
 	LDOBJ_NAME (quad)
 	LDOBJ_VERTICES (4)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (maincolor())
+	LDOBJ_DEFAULTCOLOR (MainColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -552,7 +553,7 @@ class LDVertex : public LDObject
 	LDOBJ_NAME (vertex)
 	LDOBJ_VERTICES (0) // TODO: move pos to m_vertices[0]
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (maincolor())
+	LDOBJ_DEFAULTCOLOR (MainColor())
 	LDOBJ_NON_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -583,7 +584,7 @@ class LDOverlay : public LDObject
 	PROPERTY (public,	int,		y,			setY,			STOCK_WRITE)
 	PROPERTY (public,	int,		width,		setWidth,		STOCK_WRITE)
 	PROPERTY (public,	int,		height,		setHeight,		STOCK_WRITE)
-	PROPERTY (public,	QString,		fileName,	setFileName,	STOCK_WRITE)
+	PROPERTY (public,	QString,	fileName,	setFileName,	STOCK_WRITE)
 };
 
 using LDOverlayPtr = QSharedPointer<LDOverlay>;
@@ -592,8 +593,12 @@ using LDOverlayWeakPtr = QWeakPointer<LDOverlay>;
 // Other common LDraw stuff
 static const QString CALicenseText ("!LICENSE Redistributable under CCAL version 2.0 : "
 	"see CAreadme.txt");
-static const int LowResolution = 16;
-static const int HighResolution = 48;
+
+enum
+{
+	LowResolution = 16,
+	HighResolution = 48
+};
 
 QString PreferredLicenseText();
 

@@ -44,9 +44,9 @@ CFGENTRY (Int, SplitLinesSegments, 5)
 
 // =============================================================================
 //
-static int copyToClipboard()
+static int CopyToClipboard()
 {
-	LDObjectList objs = selection();
+	LDObjectList objs = Selection();
 	int num = 0;
 
 	// Clear the clipboard first.
@@ -72,7 +72,7 @@ static int copyToClipboard()
 //
 void MainWindow::slot_actionCut()
 {
-	int num = copyToClipboard();
+	int num = CopyToClipboard();
 	deleteSelection();
 	print (tr ("%1 objects cut"), num);
 }
@@ -81,7 +81,7 @@ void MainWindow::slot_actionCut()
 //
 void MainWindow::slot_actionCopy()
 {
-	int num = copyToClipboard();
+	int num = CopyToClipboard();
 	print (tr ("%1 objects copied"), num);
 }
 
@@ -91,13 +91,13 @@ void MainWindow::slot_actionPaste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
 	int idx = getInsertionPoint();
-	getCurrentDocument()->clearSelection();
+	CurrentDocument()->clearSelection();
 	int num = 0;
 
 	for (QString line : clipboardText.split ("\n"))
 	{
-		LDObjectPtr pasted = parseLine (line);
-		getCurrentDocument()->insertObj (idx++, pasted);
+		LDObjectPtr pasted = ParseLine (line);
+		CurrentDocument()->insertObj (idx++, pasted);
 		pasted->select();
 		++num;
 	}
@@ -117,11 +117,11 @@ void MainWindow::slot_actionDelete()
 
 // =============================================================================
 //
-static void doInline (bool deep)
+static void DoInline (bool deep)
 {
-	LDObjectList sel = selection();
+	LDObjectList sel = Selection();
 
-	LDIterate<LDSubfile> (selection(), [&](LDSubfilePtr const& ref)
+	LDIterate<LDSubfile> (Selection(), [&](LDSubfilePtr const& ref)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
@@ -135,8 +135,8 @@ static void doInline (bool deep)
 		{
 			QString line = inlineobj->asText();
 			inlineobj->destroy();
-			LDObjectPtr newobj = parseLine (line);
-			getCurrentDocument()->insertObj (idx++, newobj);
+			LDObjectPtr newobj = ParseLine (line);
+			CurrentDocument()->insertObj (idx++, newobj);
 			newobj->select();
 		}
 
@@ -149,12 +149,12 @@ static void doInline (bool deep)
 
 void MainWindow::slot_actionInline()
 {
-	doInline (false);
+	DoInline (false);
 }
 
 void MainWindow::slot_actionInlineDeep()
 {
-	doInline (true);
+	DoInline (true);
 }
 
 // =============================================================================
@@ -163,7 +163,7 @@ void MainWindow::slot_actionSplitQuads()
 {
 	int num = 0;
 
-	LDIterate<LDQuad> (selection(), [&](LDQuadPtr const& quad)
+	LDIterate<LDQuad> (Selection(), [&](LDQuadPtr const& quad)
 	{
 		// Find the index of this quad
 		long index = quad->lineNumber();
@@ -175,8 +175,8 @@ void MainWindow::slot_actionSplitQuads()
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
-		getCurrentDocument()->setObject (index, triangles[0]);
-		getCurrentDocument()->insertObj (index + 1, triangles[1]);
+		CurrentDocument()->setObject (index, triangles[0]);
+		CurrentDocument()->insertObj (index + 1, triangles[1]);
 		num++;
 	});
 
@@ -188,10 +188,10 @@ void MainWindow::slot_actionSplitQuads()
 //
 void MainWindow::slot_actionEditRaw()
 {
-	if (selection().size() != 1)
+	if (Selection().size() != 1)
 		return;
 
-	LDObjectPtr obj = selection()[0];
+	LDObjectPtr obj = Selection()[0];
 	QDialog* dlg = new QDialog;
 	Ui::EditRawUI ui;
 
@@ -210,7 +210,7 @@ void MainWindow::slot_actionEditRaw()
 		return;
 
 	// Reinterpret it from the text of the input field
-	LDObjectPtr newobj = parseLine (ui.code->text());
+	LDObjectPtr newobj = ParseLine (ui.code->text());
 	obj->replace (newobj);
 	refresh();
 }
@@ -219,10 +219,10 @@ void MainWindow::slot_actionEditRaw()
 //
 void MainWindow::slot_actionSetColor()
 {
-	if (selection().isEmpty())
+	if (Selection().isEmpty())
 		return;
 
-	LDObjectList objs = selection();
+	LDObjectList objs = Selection();
 
 	// If all selected objects have the same color, said color is our default
 	// value to the color selection dialog.
@@ -246,7 +246,7 @@ void MainWindow::slot_actionSetColor()
 //
 void MainWindow::slot_actionBorders()
 {
-	LDObjectList objs = selection();
+	LDObjectList objs = Selection();
 	int num = 0;
 
 	for (LDObjectPtr obj : objs)
@@ -261,17 +261,17 @@ void MainWindow::slot_actionBorders()
 		if (type == OBJ_Quad)
 		{
 			LDQuadPtr quad = obj.staticCast<LDQuad>();
-			lines[0] = spawn<LDLine> (quad->vertex (0), quad->vertex (1));
-			lines[1] = spawn<LDLine> (quad->vertex (1), quad->vertex (2));
-			lines[2] = spawn<LDLine> (quad->vertex (2), quad->vertex (3));
-			lines[3] = spawn<LDLine> (quad->vertex (3), quad->vertex (0));
+			lines[0] = LDSpawn<LDLine> (quad->vertex (0), quad->vertex (1));
+			lines[1] = LDSpawn<LDLine> (quad->vertex (1), quad->vertex (2));
+			lines[2] = LDSpawn<LDLine> (quad->vertex (2), quad->vertex (3));
+			lines[3] = LDSpawn<LDLine> (quad->vertex (3), quad->vertex (0));
 		}
 		else
 		{
 			LDTrianglePtr tri = obj.staticCast<LDTriangle>();
-			lines[0] = spawn<LDLine> (tri->vertex (0), tri->vertex (1));
-			lines[1] = spawn<LDLine> (tri->vertex (1), tri->vertex (2));
-			lines[2] = spawn<LDLine> (tri->vertex (2), tri->vertex (0));
+			lines[0] = LDSpawn<LDLine> (tri->vertex (0), tri->vertex (1));
+			lines[1] = LDSpawn<LDLine> (tri->vertex (1), tri->vertex (2));
+			lines[2] = LDSpawn<LDLine> (tri->vertex (2), tri->vertex (0));
 		}
 
 		for (int i = 0; i < countof (lines); ++i)
@@ -280,7 +280,7 @@ void MainWindow::slot_actionBorders()
 				continue;
 
 			long idx = obj->lineNumber() + i + 1;
-			getCurrentDocument()->insertObj (idx, lines[i]);
+			CurrentDocument()->insertObj (idx, lines[i]);
 		}
 
 		num += countof (lines);
@@ -296,7 +296,7 @@ void MainWindow::slot_actionCornerVerts()
 {
 	int num = 0;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (obj->numVertices() < 2)
 			continue;
@@ -305,10 +305,10 @@ void MainWindow::slot_actionCornerVerts()
 
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			QSharedPointer<LDVertex> vert (spawn<LDVertex>());
+			QSharedPointer<LDVertex> vert (LDSpawn<LDVertex>());
 			vert->pos = obj->vertex (i);
 			vert->setColor (obj->color());
-			getCurrentDocument()->insertObj (++ln, vert);
+			CurrentDocument()->insertObj (++ln, vert);
 			++num;
 		}
 	}
@@ -319,9 +319,9 @@ void MainWindow::slot_actionCornerVerts()
 
 // =============================================================================
 //
-static void doMoveSelection (const bool up)
+static void MoveSelection (const bool up)
 {
-	LDObjectList objs = selection();
+	LDObjectList objs = Selection();
 	LDObject::moveObjects (objs, up);
 	g_win->buildObjList();
 }
@@ -330,34 +330,34 @@ static void doMoveSelection (const bool up)
 //
 void MainWindow::slot_actionMoveUp()
 {
-	doMoveSelection (true);
+	MoveSelection (true);
 }
 
 void MainWindow::slot_actionMoveDown()
 {
-	doMoveSelection (false);
+	MoveSelection (false);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionUndo()
 {
-	getCurrentDocument()->undo();
+	CurrentDocument()->undo();
 }
 
 void MainWindow::slot_actionRedo()
 {
-	getCurrentDocument()->redo();
+	CurrentDocument()->redo();
 }
 
 // =============================================================================
 //
-void doMoveObjects (Vertex vect)
+static void MoveObjects (Vertex vect)
 {
 	// Apply the grid values
 	vect *= *CurrentGrid().coordinateSnap;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		obj->move (vect);
 
 	g_win->refresh();
@@ -367,39 +367,39 @@ void doMoveObjects (Vertex vect)
 //
 void MainWindow::slot_actionMoveXNeg()
 {
-	doMoveObjects ({-1, 0, 0});
+	MoveObjects ({-1, 0, 0});
 }
 
 void MainWindow::slot_actionMoveYNeg()
 {
-	doMoveObjects ({0, -1, 0});
+	MoveObjects ({0, -1, 0});
 }
 
 void MainWindow::slot_actionMoveZNeg()
 {
-	doMoveObjects ({0, 0, -1});
+	MoveObjects ({0, 0, -1});
 }
 
 void MainWindow::slot_actionMoveXPos()
 {
-	doMoveObjects ({1, 0, 0});
+	MoveObjects ({1, 0, 0});
 }
 
 void MainWindow::slot_actionMoveYPos()
 {
-	doMoveObjects ({0, 1, 0});
+	MoveObjects ({0, 1, 0});
 }
 
 void MainWindow::slot_actionMoveZPos()
 {
-	doMoveObjects ({0, 0, 1});
+	MoveObjects ({0, 0, 1});
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionInvert()
 {
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 		obj->invert();
 
 	refresh();
@@ -407,21 +407,21 @@ void MainWindow::slot_actionInvert()
 
 // =============================================================================
 //
-static void rotateVertex (Vertex& v, const Vertex& rotpoint, const Matrix& transformer)
+static void RotateVertex (Vertex& v, const Vertex& rotpoint, const Matrix& transformer)
 {
 	v -= rotpoint;
-	v.transform (transformer, g_origin);
+	v.transform (transformer, Origin);
 	v += rotpoint;
 }
 
 // =============================================================================
 //
-static void doRotate (const int l, const int m, const int n)
+static void RotateObjects (const int l, const int m, const int n)
 {
-	LDObjectList sel = selection();
+	LDObjectList sel = Selection();
 	QList<Vertex*> queue;
 	const Vertex rotpoint = GetRotationPoint (sel);
-	const double angle = (pi * *CurrentGrid().angleSnap) / 180,
+	const double angle = (Pi * *CurrentGrid().angleSnap) / 180,
 				 cosangle = cos (angle),
 				 sinangle = sin (angle);
 
@@ -449,7 +449,7 @@ static void doRotate (const int l, const int m, const int n)
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
-				rotateVertex (v, rotpoint, transform);
+				RotateVertex (v, rotpoint, transform);
 				obj->setVertex (i, v);
 			}
 		}
@@ -459,7 +459,7 @@ static void doRotate (const int l, const int m, const int n)
 
 			// Transform the position
 			Vertex v = mo->position();
-			rotateVertex (v, rotpoint, transform);
+			RotateVertex (v, rotpoint, transform);
 			mo->setPosition (v);
 
 			// Transform the matrix
@@ -469,7 +469,7 @@ static void doRotate (const int l, const int m, const int n)
 		{
 			LDVertexPtr vert = obj.staticCast<LDVertex>();
 			Vertex v = vert->pos;
-			rotateVertex (v, rotpoint, transform);
+			RotateVertex (v, rotpoint, transform);
 			vert->pos = v;
 		}
 	}
@@ -481,27 +481,27 @@ static void doRotate (const int l, const int m, const int n)
 //
 void MainWindow::slot_actionRotateXPos()
 {
-	doRotate (1, 0, 0);
+	RotateObjects (1, 0, 0);
 }
 void MainWindow::slot_actionRotateYPos()
 {
-	doRotate (0, 1, 0);
+	RotateObjects (0, 1, 0);
 }
 void MainWindow::slot_actionRotateZPos()
 {
-	doRotate (0, 0, 1);
+	RotateObjects (0, 0, 1);
 }
 void MainWindow::slot_actionRotateXNeg()
 {
-	doRotate (-1, 0, 0);
+	RotateObjects (-1, 0, 0);
 }
 void MainWindow::slot_actionRotateYNeg()
 {
-	doRotate (0, -1, 0);
+	RotateObjects (0, -1, 0);
 }
 void MainWindow::slot_actionRotateZNeg()
 {
-	doRotate (0, 0, -1);
+	RotateObjects (0, 0, -1);
 }
 
 void MainWindow::slot_actionRotationPoint()
@@ -516,7 +516,7 @@ void MainWindow::slot_actionRoundCoordinates()
 	setlocale (LC_ALL, "C");
 	int num = 0;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		LDMatrixObjectPtr mo = obj.dynamicCast<LDMatrixObject>();
 
@@ -527,7 +527,7 @@ void MainWindow::slot_actionRoundCoordinates()
 
 			// Note: matrix values are to be rounded to 4 decimals.
 			v.apply ([](Axis, double& a) { RoundToDecimals (a, cfg::RoundPosition); });
-			applyToMatrix (t, [](int, double& a) { RoundToDecimals (a, cfg::RoundMatrix); });
+			ApplyToMatrix (t, [](int, double& a) { RoundToDecimals (a, cfg::RoundMatrix); });
 
 			mo->setPosition (v);
 			mo->setTransform (t);
@@ -556,7 +556,7 @@ void MainWindow::slot_actionUncolor()
 {
 	int num = 0;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (not obj->isColored())
 			continue;
@@ -592,7 +592,7 @@ void MainWindow::slot_actionReplaceCoords()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -638,7 +638,7 @@ void MainWindow::slot_actionFlip()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -663,7 +663,7 @@ void MainWindow::slot_actionDemote()
 {
 	int num = 0;
 
-	LDIterate<LDCondLine> (selection(), [&](LDCondLinePtr const& cnd)
+	LDIterate<LDCondLine> (Selection(), [&](LDCondLinePtr const& cnd)
 	{
 		cnd->toEdgeLine();
 		++num;
@@ -675,9 +675,9 @@ void MainWindow::slot_actionDemote()
 
 // =============================================================================
 //
-static bool isColorUsed (LDColor color)
+static bool IsColorUsed (LDColor color)
 {
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		if (obj->isColored() and obj->color() == color)
 			return true;
@@ -694,18 +694,18 @@ void MainWindow::slot_actionAutocolor()
 	LDColor color;
 
 	for (colnum = 0;
-		 colnum < numLDConfigColors() and
+		 colnum < CountLDConfigColors() and
 			((color = LDColor::fromIndex (colnum)) == null or
-			isColorUsed (color));
+			IsColorUsed (color));
 		colnum++) {}
 
-	if (colnum >= numLDConfigColors())
+	if (colnum >= CountLDConfigColors())
 	{
 		print (tr ("Cannot auto-color: all colors are in use!"));
 		return;
 	}
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
 		if (not obj->isColored())
 			continue;
@@ -741,10 +741,10 @@ void MainWindow::slot_actionAddHistoryLine()
 		ui->m_username->text(),
 		ui->m_comment->text());
 
-	LDCommentPtr comm (spawn<LDComment> (commentText));
+	LDCommentPtr comm (LDSpawn<LDComment> (commentText));
 
 	// Find a spot to place the new comment
-	for (obj = getCurrentDocument()->getObject (0);
+	for (obj = CurrentDocument()->getObject (0);
 		obj != null and obj->next() != null and not obj->next()->isScemantic();
 		obj = obj->next())
 	{
@@ -764,12 +764,12 @@ void MainWindow::slot_actionAddHistoryLine()
 	}
 
 	int idx = obj ? obj->lineNumber() : 0;
-	getCurrentDocument()->insertObj (idx++, comm);
+	CurrentDocument()->insertObj (idx++, comm);
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
-		getCurrentDocument()->insertObj (idx, LDEmptyPtr (spawn<LDEmpty>()));
+		CurrentDocument()->insertObj (idx, LDEmptyPtr (LDSpawn<LDEmpty>()));
 
 	buildObjList();
 	delete ui;
@@ -786,9 +786,9 @@ void MainWindow::slot_actionSplitLines()
 
 	cfg::SplitLinesSegments = segments;
 
-	for (LDObjectPtr obj : selection())
+	for (LDObjectPtr obj : Selection())
 	{
-		if (not eq (obj->type(), OBJ_Line, OBJ_CondLine))
+		if (not Eq (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
 		QVector<LDObjectPtr> newsegs;
@@ -811,9 +811,9 @@ void MainWindow::slot_actionSplitLines()
 			});
 
 			if (obj->type() == OBJ_Line)
-				segment = spawn<LDLine> (v0, v1);
+				segment = LDSpawn<LDLine> (v0, v1);
 			else
-				segment = spawn<LDCondLine> (v0, v1, obj->vertex (2), obj->vertex (3));
+				segment = LDSpawn<LDCondLine> (v0, v1, obj->vertex (2), obj->vertex (3));
 
 			newsegs << segment;
 		}
@@ -821,7 +821,7 @@ void MainWindow::slot_actionSplitLines()
 		int ln = obj->lineNumber();
 
 		for (LDObjectPtr seg : newsegs)
-			getCurrentDocument()->insertObj (ln++, seg);
+			CurrentDocument()->insertObj (ln++, seg);
 
 		obj->destroy();
 	}

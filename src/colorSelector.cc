@@ -51,7 +51,7 @@ ColorSelector::ColorSelector (LDColor defval, QWidget* parent) : QDialog (parent
 	setSelection (defval);
 
 	// not really an icon but eh
-	m_scene->setBackgroundBrush (getIcon ("checkerboard"));
+	m_scene->setBackgroundBrush (GetIcon ("checkerboard"));
 	drawScene();
 
 	int width = viewportWidth();
@@ -93,7 +93,7 @@ void ColorSelector::drawScene()
 	// Draw the color rectangles.
 	m_scene->clear();
 
-	for (int i = 0; i < numLDConfigColors(); ++i)
+	for (int i = 0; i < CountLDConfigColors(); ++i)
 	{
 		LDColor info = LDColor::fromIndex (i);
 
@@ -106,7 +106,7 @@ void ColorSelector::drawScene()
 
 		QColor col (info.faceColor());
 
-		if (i == mainColorIndex)
+		if (i == MainColorIndex)
 		{
 			// Use the user preferences for main color here
 			col = QColor (cfg::MainColor);
@@ -116,12 +116,12 @@ void ColorSelector::drawScene()
 		QPen pen (info.edgeColor(), penWidth, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
 		m_scene->addRect (x, y, w, w, pen, col);
 		QGraphicsTextItem* numtext = m_scene->addText (format ("%1", i));
-		numtext->setDefaultTextColor ((luma (col) < 80) ? Qt::white : Qt::black);
+		numtext->setDefaultTextColor ((Luma (col) < 80) ? Qt::white : Qt::black);
 		numtext->setPos (x, y);
 
 		if (selection() and i == selection().index())
 		{
-			auto curspic = m_scene->addPixmap (getIcon ("colorcursor"));
+			auto curspic = m_scene->addPixmap (GetIcon ("colorcursor"));
 			curspic->setPos (x, y);
 		}
 	}
@@ -131,7 +131,7 @@ void ColorSelector::drawScene()
 //
 int ColorSelector::numRows() const
 {
-	return (numLDConfigColors() / g_numColumns);
+	return (CountLDConfigColors() / g_numColumns);
 }
 
 // =============================================================================
@@ -155,7 +155,7 @@ void ColorSelector::drawColorInfo()
 
 	ui->colorLabel->setText (format ("%1 - %2", selection().indexString(),
 		(selection().isDirect() ? "<direct color>" : selection().name())));
-	ui->iconLabel->setPixmap (makeColorIcon (selection(), 16).pixmap (16, 16));
+	ui->iconLabel->setPixmap (MakeColorIcon (selection(), 16).pixmap (16, 16));
 
 #ifdef TRANSPARENT_DIRECT_COLORS
 	ui->transparentDirectColor->setEnabled (selection().isDirect());
@@ -174,7 +174,7 @@ void ColorSelector::resizeEvent (QResizeEvent*)
 	// currently selected color. We cannot do this in the constructor because the
 	// height is not set properly there. Though don't do this if we selected a
 	// direct color.
-	if (m_firstResize and selection().index() >= numLDConfigColors())
+	if (m_firstResize and selection().index() >= CountLDConfigColors())
 	{
 		int visibleColors = (ui->viewport->height() / g_squareSize) * g_numColumns;
 

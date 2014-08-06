@@ -24,8 +24,8 @@
 
 class MagicWandMode : public AbstractSelectMode
 {
-	QMap<Vertex, QVector<LDObjectPtr>> _vertices;
-	QVector<LDObjectPtr> _selection;
+	QMap<Vertex, QVector<LDObjectPtr>> m_vertices;
+	QVector<LDObjectPtr> m_selection;
 
 	DEFINE_CLASS (MagicWandMode, AbstractSelectMode)
 

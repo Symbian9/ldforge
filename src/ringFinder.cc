@@ -37,7 +37,7 @@ bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolut
 	double num = r0 / scale;
 
 	// If the ring number is integral, we have found a fitting ring to r0 -> r1!
-	if (isInteger (num))
+	if (IsIntegral (num))
 	{
 		Component cmp;
 		cmp.scale = scale;
@@ -55,7 +55,7 @@ bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolut
 	else
 	{
 		// Try find solutions by splitting the ring in various positions.
-		if (isZero (r1 - r0))
+		if (IsZero (r1 - r0))
 			return false;
 
 		double interval;
@@ -130,7 +130,7 @@ bool RingFinder::findRings (double r0, double r1)
 	// components.
 	double scale = 1.0;
 
-	if (not isZero (scale = r0 - floor (r0)) or not isZero (scale = r1 - floor (r1)))
+	if (not IsZero (scale = r0 - floor (r0)) or not IsZero (scale = r1 - floor (r1)))
 	{
 		double r0f = r0 / scale;
 		double r1f = r1 / scale;
@@ -197,8 +197,8 @@ bool RingFinder::Solution::isSuperiorTo (const Solution* other) const
 
 	for (int i = 0; i < getComponents().size(); ++i)
 	{
-		maxA = max (getComponents()[i].num, maxA);
-		maxB = max (other->getComponents()[i].num, maxB);
+		maxA = Max (getComponents()[i].num, maxA);
+		maxB = Max (other->getComponents()[i].num, maxB);
 	}
 
 	if (maxA != maxB)

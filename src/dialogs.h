@@ -138,4 +138,4 @@ private slots:
 	void slot_mail();
 };
 
-void bombBox (const QString& message);
+void DisplayBombBox (const QString& message);

@@ -131,7 +131,7 @@ QString Config::FilePath (QString file)
 QString Config::DirectoryPath()
 {
 	QSettings* settings = SettingsObject();
-	QString result = dirname (settings->fileName());
+	QString result = Dirname (settings->fileName());
 	delete settings;
 	return result;
 }

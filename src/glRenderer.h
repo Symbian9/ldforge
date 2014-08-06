@@ -233,8 +233,8 @@ private:
 							m_totalmove;
 	QColor					m_bgcolor;
 	AbstractEditMode*		m_editmode;
-	GLuint					_axesVBO;
-	GLuint					_axesColorVBO;
+	GLuint					m_axesVBO;
+	GLuint					m_axesColorVBO;
 
 	void					calcCameraIcons();
 	void					clampAngle (double& angle) const;

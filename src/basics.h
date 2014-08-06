@@ -195,68 +195,75 @@ public:
 	LDBoundingBox& operator<< (const Vertex& v);
 };
 
-extern const Vertex g_origin; // Vertex at (0, 0, 0)
-extern const Matrix g_identity; // Identity matrix
+extern const Vertex Origin;
+extern const Matrix IdentityMatrix;
 
-static const double pi = 3.14159265358979323846;
+static const double Pi = 3.14159265358979323846;
 
 
 // =============================================================================
 // Plural expression
-template<class T> static inline const char* plural (T n)
+template<typename T>
+static inline const char* Plural (T n)
 {
 	return (n != 1) ? "s" : "";
 }
 
 // =============================================================================
 // Templated clamp
-template<class T> static inline T clamp (T a, T min, T max)
+template<typename T>
+static inline T Clamp (T a, T min, T max)
 {
 	return (a > max) ? max : (a < min) ? min : a;
 }
 
 // Templated minimum
-template<class T> static inline T min (T a, T b)
+template<typename T>
+static inline T Min (T a, T b)
 {
 	return (a < b) ? a : b;
 }
 
 // Templated maximum
-template<class T> static inline T max (T a, T b)
+template<typename T>
+static inline T Max (T a, T b)
 {
 	return (a > b) ? a : b;
 }
 
 // Templated absolute value
-template<class T> static inline T abs (T a)
+template<typename T>
+static inline T Abs (T a)
 {
 	return (a >= 0) ? a : -a;
 }
 
-template<class T> inline bool isZero (T a)
+template<typename T>
+inline bool IsZero (T a)
 {
-	return abs<T> (a) < 0.0001;
-}
-
-template<class T> inline bool isInteger (T a)
-{
-	return isZero (a - (int) a);
+	return Abs<T> (a) < 0.0001;
 }
 
 template<typename T>
-inline bool within (T a, T b, T c)
+inline bool IsIntegral (T a)
+{
+	return IsZero (a - int (a));
+}
+
+template<typename T>
+inline bool IsWithin (T a, T b, T c)
 {
 	return a >= b and a <= c;
 }
 
 template<typename T>
-void removeDuplicates (T& a)
+void RemoveDuplicates (T& a)
 {
 	std::sort (a.begin(), a.end());
 	a.erase (std::unique (a.begin(), a.end()), a.end());
 }
 
-inline QString utf16 (const char16_t* a)
+inline QString UTF16 (const char16_t* a)
 {
 	if (Q_LIKELY (sizeof(char16_t) == sizeof(unsigned short)))
 		return QString::fromUtf16 (reinterpret_cast<const unsigned short*> (a));
@@ -274,16 +281,16 @@ inline QString utf16 (const char16_t* a)
 // Returns true if first arg is equal to any of the other args
 //
 template<typename T, typename Arg, typename... Args>
-bool eq (T const& a, Arg const& arg, Args const&... args)
+bool Eq (T const& a, Arg const& arg, Args const&... args)
 {
 	if (a == arg)
 		return true;
 
-	return eq (a, args...);
+	return Eq (a, args...);
 }
 
 template<typename T>
-bool eq (T const&)
+bool Eq (T const&)
 {
 	return false;
 }

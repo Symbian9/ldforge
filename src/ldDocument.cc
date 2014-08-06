@@ -126,8 +126,8 @@ namespace LDPaths
 LDDocument::LDDocument (LDDocumentPtr* selfptr) :
 	m_isImplicit (true),
 	m_flags (0),
-	_verticesOutdated (true),
-	_needVertexMerge (true),
+	m_verticesOutdated (true),
+	m_needVertexMerge (true),
 	m_gldata (new LDGLData)
 {
 	*selfptr = LDDocumentPtr (this);
@@ -224,7 +224,7 @@ QList<LDDocumentPtr> const& LDDocument::explicitDocuments()
 
 // =============================================================================
 //
-LDDocumentPtr findDocument (QString name)
+LDDocumentPtr FindDocument (QString name)
 {
 	for (LDDocumentWeakPtr file : g_allDocuments)
 	{
@@ -237,7 +237,7 @@ LDDocumentPtr findDocument (QString name)
 
 // =============================================================================
 //
-QString dirname (QString path)
+QString Dirname (QString path)
 {
 	long lastpos = path.lastIndexOf (DIRSLASH);
 
@@ -254,7 +254,7 @@ QString dirname (QString path)
 
 // =============================================================================
 //
-QString basename (QString path)
+QString Basename (QString path)
 {
 	long lastpos = path.lastIndexOf (DIRSLASH);
 
@@ -266,7 +266,7 @@ QString basename (QString path)
 
 // =============================================================================
 //
-static QString findLDrawFilePath (QString relpath, bool subdirs)
+static QString FindDocumentPath (QString relpath, bool subdirs)
 {
 	QString fullPath;
 
@@ -279,20 +279,20 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 
 	// Try find it relative to other currently open documents. We want a file
 	// in the immediate vicinity of a current model to override stock LDraw stuff.
-	QString reltop = basename (dirname (relpath));
+	QString reltop = Basename (Dirname (relpath));
 
 	for (LDDocumentWeakPtr doc : g_allDocuments)
 	{
 		if (doc == null)
 			continue;
 
-		QString partpath = format ("%1/%2", dirname (doc.toStrongRef()->fullPath()), relpath);
+		QString partpath = format ("%1/%2", Dirname (doc.toStrongRef()->fullPath()), relpath);
 		QFile f (partpath);
 
 		if (f.exists())
 		{
 			// ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
-			QString proptop = basename (dirname (partpath));
+			QString proptop = Basename (Dirname (partpath));
 
 			bool bogus = false;
 
@@ -341,10 +341,10 @@ static QString findLDrawFilePath (QString relpath, bool subdirs)
 
 // =============================================================================
 //
-QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
+QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
 {
 	print ("Opening %1...\n", relpath);
-	QString path = findLDrawFilePath (relpath, subdirs);
+	QString path = FindDocumentPath (relpath, subdirs);
 
 	if (pathpointer != null)
 		*pathpointer = path;
@@ -421,7 +421,7 @@ void LDFileLoader::work (int i)
 		while (line.endsWith ("\n") or line.endsWith ("\r"))
 			line.chop (1);
 
-		LDObjectPtr obj = parseLine (line);
+		LDObjectPtr obj = ParseLine (line);
 
 		// Check for parse errors and warn about tthem
 		if (obj->type() == OBJ_Error)
@@ -481,7 +481,7 @@ void LDFileLoader::abort()
 
 // =============================================================================
 //
-LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok)
+LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 {
 	QStringList lines;
 	LDObjectList objs;
@@ -517,7 +517,7 @@ LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok)
 
 // =============================================================================
 //
-LDDocumentPtr openDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride)
+LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride)
 {
 	// Convert the file name to lowercase since some parts contain uppercase
 	// file names. I'll assume here that the library will always use lowercase
@@ -526,7 +526,7 @@ LDDocumentPtr openDocument (QString path, bool search, bool implicit, LDDocument
 	QString fullpath;
 
 	if (search)
-		fp = openLDrawFile (path.toLower(), true, &fullpath);
+		fp = OpenLDrawFile (path.toLower(), true, &fullpath);
 	else
 	{
 		fp = new QFile (path);
@@ -552,7 +552,7 @@ LDDocumentPtr openDocument (QString path, bool search, bool implicit, LDDocument
 
 	int numWarnings;
 	bool ok;
-	LDObjectList objs = loadFileContents (fp, &numWarnings, &ok);
+	LDObjectList objs = LoadFileContents (fp, &numWarnings, &ok);
 	fp->close();
 	fp->deleteLater();
 
@@ -598,7 +598,7 @@ bool LDDocument::isSafeToClose()
 				if (name().length() == 0)
 				{
 					QString newpath = QFileDialog::getSaveFileName (g_win, tr ("Save As"),
-						getCurrentDocument()->name(), tr ("LDraw files (*.dat *.ldr)"));
+						CurrentDocument()->name(), tr ("LDraw files (*.dat *.ldr)"));
 
 					if (newpath.length() == 0)
 						return false;
@@ -633,7 +633,7 @@ bool LDDocument::isSafeToClose()
 
 // =============================================================================
 //
-void closeAll()
+void CloseAllDocuments()
 {
 	for (LDDocumentPtr file : g_explicitDocuments)
 		file->dismiss();
@@ -657,7 +657,7 @@ void newFile()
 
 // =============================================================================
 //
-void addRecentFile (QString path)
+void AddRecentFile (QString path)
 {
 	auto& rfiles = cfg::RecentFiles;
 	int idx = rfiles.indexOf (path);
@@ -685,7 +685,7 @@ void addRecentFile (QString path)
 // =============================================================================
 // Open an LDraw file and set it as the main model
 // =============================================================================
-void openMainFile (QString path)
+void OpenMainModel (QString path)
 {
 	// If there's already a file with the same name, this file must replace it.
 	LDDocumentPtr documentToReplace;
@@ -716,7 +716,7 @@ void openMainFile (QString path)
 		file->clear();
 	}
 
-	file = openDocument (path, false, false, file);
+	file = OpenDocument (path, false, false, file);
 
 	if (file == null)
 	{
@@ -724,7 +724,7 @@ void openMainFile (QString path)
 		{
 			// Tell the user loading failed.
 			setlocale (LC_ALL, "C");
-			critical (format (QObject::tr ("Failed to open %1: %2"), path, strerror (errno)));
+			CriticalError (format (QObject::tr ("Failed to open %1: %2"), path, strerror (errno)));
 		}
 
 		g_loadingMainFile = false;
@@ -742,7 +742,7 @@ void openMainFile (QString path)
 	g_win->doFullRefresh();
 
 	// Add it to the recent files list.
-	addRecentFile (path);
+	AddRecentFile (path);
 	g_loadingMainFile = false;
 }
 
@@ -815,7 +815,7 @@ void LDDocument::clear()
 
 // =============================================================================
 //
-static void checkTokenCount (const QStringList& tokens, int num)
+static void CheckTokenCount (const QStringList& tokens, int num)
 {
 	if (tokens.size() != num)
 		throw QString (format ("Bad amount of tokens, expected %1, got %2", num, tokens.size()));
@@ -823,7 +823,7 @@ static void checkTokenCount (const QStringList& tokens, int num)
 
 // =============================================================================
 //
-static void checkTokenNumbers (const QStringList& tokens, int min, int max)
+static void CheckTokenNumbers (const QStringList& tokens, int min, int max)
 {
 	bool ok;
 
@@ -856,14 +856,14 @@ static void checkTokenNumbers (const QStringList& tokens, int min, int max)
 
 // =============================================================================
 //
-static Vertex parseVertex (QStringList& s, const int n)
+static Vertex ParseVertex (QStringList& s, const int n)
 {
 	Vertex v;
 	v.apply ([&] (Axis ax, double& a) { a = s[n + ax].toDouble(); });
 	return v;
 }
 
-static int32 stringToNumber (QString a)
+static int32 StringToNumber (QString a, bool* ok = null)
 {
 	int base = 10;
 
@@ -873,7 +873,7 @@ static int32 stringToNumber (QString a)
 		base = 16;
 	}
 
-	return a.toLong (null, base);
+	return a.toLong (ok, base);
 }
 
 // =============================================================================
@@ -881,7 +881,7 @@ static int32 stringToNumber (QString a)
 // code and returns the object parsed from it. parseLine never returns null,
 // the object will be LDError if it could not be parsed properly.
 // =============================================================================
-LDObjectPtr parseLine (QString line)
+LDObjectPtr ParseLine (QString line)
 {
 	try
 	{
@@ -890,7 +890,7 @@ LDObjectPtr parseLine (QString line)
 		if (tokens.size() <= 0)
 		{
 			// Line was empty, or only consisted of whitespace
-			return spawn<LDEmpty>();
+			return LDSpawn<LDEmpty>();
 		}
 
 		if (tokens[0].length() != 1 or not tokens[0][0].isDigit())
@@ -914,7 +914,7 @@ LDObjectPtr parseLine (QString line)
 						if (commentTextSimplified == format ("BFC %1",
 							LDBFC::StatementStrings[int (i)]))
 						{
-							return spawn<LDBFC> (i);
+							return LDSpawn<LDBFC> (i);
 						}
 					}
 
@@ -922,11 +922,11 @@ LDObjectPtr parseLine (QString line)
 					// creates. The above block only handles valid statements, so we
 					// need to handle MLCAD-style invertnext, clip and noclip separately.
 					if (commentTextSimplified == "BFC CERTIFY INVERTNEXT")
-						return spawn<LDBFC> (BFCStatement::InvertNext);
+						return LDSpawn<LDBFC> (BFCStatement::InvertNext);
 					elif (commentTextSimplified == "BFC CERTIFY CLIP")
-						return spawn<LDBFC> (BFCStatement::Clip);
+						return LDSpawn<LDBFC> (BFCStatement::Clip);
 					elif (commentTextSimplified == "BFC CERTIFY NOCLIP")
-						return spawn<LDBFC> (BFCStatement::NoClip);
+						return LDSpawn<LDBFC> (BFCStatement::NoClip);
 				}
 
 				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
@@ -935,21 +935,21 @@ LDObjectPtr parseLine (QString line)
 					if (tokens[2] == "VERTEX")
 					{
 						// Vertex (0 !LDFORGE VERTEX)
-						checkTokenCount (tokens, 7);
-						checkTokenNumbers (tokens, 3, 6);
+						CheckTokenCount (tokens, 7);
+						CheckTokenNumbers (tokens, 3, 6);
 
-						LDVertexPtr obj = spawn<LDVertex>();
-						obj->setColor (LDColor::fromIndex (stringToNumber (tokens[3])));
+						LDVertexPtr obj = LDSpawn<LDVertex>();
+						obj->setColor (LDColor::fromIndex (StringToNumber (tokens[3])));
 						obj->pos.apply ([&](Axis ax, double& value)
 							{ value = tokens[4 + ax].toDouble(); });
 						return obj;
 					}
 					elif (tokens[2] == "OVERLAY")
 					{
-						checkTokenCount (tokens, 9);
-						checkTokenNumbers (tokens, 5, 8);
+						CheckTokenCount (tokens, 9);
+						CheckTokenNumbers (tokens, 5, 8);
 
-						LDOverlayPtr obj = spawn<LDOverlay>();
+						LDOverlayPtr obj = LDSpawn<LDOverlay>();
 						obj->setFileName (tokens[3]);
 						obj->setCamera (tokens[4].toLong());
 						obj->setX (tokens[5].toLong());
@@ -961,7 +961,7 @@ LDObjectPtr parseLine (QString line)
 				}
 
 				// Just a regular comment:
-				LDCommentPtr obj = spawn<LDComment>();
+				LDCommentPtr obj = LDSpawn<LDComment>();
 				obj->setText (commentText);
 				return obj;
 			}
@@ -969,28 +969,28 @@ LDObjectPtr parseLine (QString line)
 			case 1:
 			{
 				// Subfile
-				checkTokenCount (tokens, 15);
-				checkTokenNumbers (tokens, 1, 13);
+				CheckTokenCount (tokens, 15);
+				CheckTokenNumbers (tokens, 1, 13);
 
 				// Try open the file. Disable g_loadingMainFile temporarily since we're
 				// not loading the main file now, but the subfile in question.
 				bool tmp = g_loadingMainFile;
 				g_loadingMainFile = false;
-				LDDocumentPtr load = getDocument (tokens[14]);
+				LDDocumentPtr load = GetDocument (tokens[14]);
 				g_loadingMainFile = tmp;
 
 				// If we cannot open the file, mark it an error. Note we cannot use LDParseError
 				// here because the error object needs the document reference.
 				if (not load)
 				{
-					LDErrorPtr obj = spawn<LDError> (line, format ("Could not open %1", tokens[14]));
+					LDErrorPtr obj = LDSpawn<LDError> (line, format ("Could not open %1", tokens[14]));
 					obj->setFileReferenced (tokens[14]);
 					return obj;
 				}
 
-				LDSubfilePtr obj = spawn<LDSubfile>();
-				obj->setColor (LDColor::fromIndex (stringToNumber (tokens[1])));
-				obj->setPosition (parseVertex (tokens, 2));  // 2 - 4
+				LDSubfilePtr obj = LDSpawn<LDSubfile>();
+				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
+				obj->setPosition (ParseVertex (tokens, 2));  // 2 - 4
 
 				Matrix transform;
 
@@ -1004,30 +1004,30 @@ LDObjectPtr parseLine (QString line)
 
 			case 2:
 			{
-				checkTokenCount (tokens, 8);
-				checkTokenNumbers (tokens, 1, 7);
+				CheckTokenCount (tokens, 8);
+				CheckTokenNumbers (tokens, 1, 7);
 
 				// Line
-				LDLinePtr obj (spawn<LDLine>());
-				obj->setColor (LDColor::fromIndex (stringToNumber (tokens[1])));
+				LDLinePtr obj (LDSpawn<LDLine>());
+				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 
 				for (int i = 0; i < 2; ++i)
-					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 7
+					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 7
 
 				return obj;
 			}
 
 			case 3:
 			{
-				checkTokenCount (tokens, 11);
-				checkTokenNumbers (tokens, 1, 10);
+				CheckTokenCount (tokens, 11);
+				CheckTokenNumbers (tokens, 1, 10);
 
 				// Triangle
-				LDTrianglePtr obj (spawn<LDTriangle>());
-				obj->setColor (LDColor::fromIndex (stringToNumber (tokens[1])));
+				LDTrianglePtr obj (LDSpawn<LDTriangle>());
+				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 
 				for (int i = 0; i < 3; ++i)
-					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 10
+					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 10
 
 				return obj;
 			}
@@ -1035,21 +1035,21 @@ LDObjectPtr parseLine (QString line)
 			case 4:
 			case 5:
 			{
-				checkTokenCount (tokens, 14);
-				checkTokenNumbers (tokens, 1, 13);
+				CheckTokenCount (tokens, 14);
+				CheckTokenNumbers (tokens, 1, 13);
 
 				// Quadrilateral / Conditional line
 				LDObjectPtr obj;
 
 				if (num == 4)
-					obj = spawn<LDQuad>();
+					obj = LDSpawn<LDQuad>();
 				else
-					obj = spawn<LDCondLine>();
+					obj = LDSpawn<LDCondLine>();
 
-				obj->setColor (LDColor::fromIndex (stringToNumber (tokens[1])));
+				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 
 				for (int i = 0; i < 4; ++i)
-					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 13
+					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 13
 
 				return obj;
 			}
@@ -1061,49 +1061,49 @@ LDObjectPtr parseLine (QString line)
 	catch (QString& e)
 	{
 		// Strange line we couldn't parse
-		return spawn<LDError> (line, e);
+		return LDSpawn<LDError> (line, e);
 	}
 }
 
 // =============================================================================
 //
-LDDocumentPtr getDocument (QString filename)
+LDDocumentPtr GetDocument (QString filename)
 {
 	// Try find the file in the list of loaded files
-	LDDocumentPtr doc = findDocument (filename);
+	LDDocumentPtr doc = FindDocument (filename);
 
 	// If it's not loaded, try open it
 	if (not doc)
-		doc = openDocument (filename, true, true);
+		doc = OpenDocument (filename, true, true);
 
 	return doc;
 }
 
 // =============================================================================
 //
-void reloadAllSubfiles()
+void ReloadAllSubfiles()
 {
-	if (not getCurrentDocument())
+	if (not CurrentDocument())
 		return;
 
 	// Go through all objects in the current file and reload the subfiles
-	for (LDObjectPtr obj : getCurrentDocument()->objects())
+	for (LDObjectPtr obj : CurrentDocument()->objects())
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
 			LDSubfilePtr ref = obj.staticCast<LDSubfile>();
-			LDDocumentPtr fileInfo = getDocument (ref->fileInfo()->name());
+			LDDocumentPtr fileInfo = GetDocument (ref->fileInfo()->name());
 
 			if (fileInfo)
 				ref->setFileInfo (fileInfo);
 			else
-				ref->replace (spawn<LDError> (ref->asText(), format ("Could not open %1", ref->fileInfo()->name())));
+				ref->replace (LDSpawn<LDError> (ref->asText(), format ("Could not open %1", ref->fileInfo()->name())));
 		}
 
 		// Reparse gibberish files. It could be that they are invalid because
 		// of loading errors. Circumstances may be different now.
 		if (obj->type() == OBJ_Error)
-			obj->replace (parseLine (obj.staticCast<LDError>()->contents()));
+			obj->replace (ParseLine (obj.staticCast<LDError>()->contents()));
 	}
 }
 
@@ -1156,10 +1156,10 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 //
 void LDDocument::addKnownVertices (LDObjectPtr obj)
 {
-	auto it = _objectVertices.find (obj);
+	auto it = m_objectVertices.find (obj);
 
-	if (it == _objectVertices.end())
-		it = _objectVertices.insert (obj, QVector<Vertex>());
+	if (it == m_objectVertices.end())
+		it = m_objectVertices.insert (obj, QVector<Vertex>());
 	else
 		it->clear();
 
@@ -1178,7 +1178,7 @@ void LDDocument::forgetObject (LDObjectPtr obj)
 	if (not isImplicit() and not (flags() & DOCF_IsBeingDestroyed))
 	{
 		history()->add (new DelHistory (idx, obj));
-		_objectVertices.remove (obj);
+		m_objectVertices.remove (obj);
 	}
 
 	m_objects.removeAt (idx);
@@ -1187,7 +1187,7 @@ void LDDocument::forgetObject (LDObjectPtr obj)
 
 // =============================================================================
 //
-bool safeToCloseAll()
+bool IsSafeToCloseAll()
 {
 	for (LDDocumentPtr f : LDDocument::explicitDocuments())
 	{
@@ -1212,7 +1212,7 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 		*m_history << new EditHistory (idx, oldcode, newcode);
 	}
 
-	_objectVertices.remove (m_objects[idx]);
+	m_objectVertices.remove (m_objects[idx]);
 	m_objects[idx]->deselect();
 	m_objects[idx]->setDocument (LDDocumentPtr());
 	obj->setDocument (self());
@@ -1265,7 +1265,7 @@ void LDDocument::initializeCachedData()
 {
 	if (m_needsReCache)
 	{
-		_vertices.clear();
+		m_vertices.clear();
 
 		for (LDObjectPtr obj : inlineContents (true, true))
 		{
@@ -1282,18 +1282,18 @@ void LDDocument::initializeCachedData()
 		m_needsReCache = false;
 	}
 
-	if (_verticesOutdated)
+	if (m_verticesOutdated)
 	{
-		_objectVertices.clear();
+		m_objectVertices.clear();
 
 		for (LDObjectPtr obj : inlineContents (true, false))
 			addKnownVertices (obj);
 
 		mergeVertices();
-		_verticesOutdated = false;
+		m_verticesOutdated = false;
 	}
 
-	if (_needVertexMerge)
+	if (m_needVertexMerge)
 		mergeVertices();
 }
 
@@ -1301,13 +1301,13 @@ void LDDocument::initializeCachedData()
 //
 void LDDocument::mergeVertices()
 {
-	_vertices.clear();
+	m_vertices.clear();
 
-	for (QVector<Vertex> const& verts : _objectVertices)
-		_vertices << verts;
+	for (QVector<Vertex> const& verts : m_objectVertices)
+		m_vertices << verts;
 
-	removeDuplicates (_vertices);
-	_needVertexMerge = false;
+	RemoveDuplicates (m_vertices);
+	m_needVertexMerge = false;
 }
 
 // =============================================================================
@@ -1328,7 +1328,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	if (cfg::UseLogoStuds and renderinline)
 	{
 		// Ensure logoed studs are loaded first
-		loadLogoedStuds();
+		LoadLogoStuds();
 
 		if (name() == "stud.dat" and g_logoedStud != null)
 			return g_logoedStud->inlineContents (deep, renderinline);
@@ -1416,13 +1416,13 @@ void LDDocument::closeInitialFile()
 
 // =============================================================================
 //
-void loadLogoedStuds()
+void LoadLogoStuds()
 {
 	if (g_logoedStud and g_logoedStud2)
 		return;
 
-	g_logoedStud = openDocument ("stud-logo.dat", true, true);
-	g_logoedStud2 = openDocument ("stud2-logo.dat", true, true);
+	g_logoedStud = OpenDocument ("stud-logo.dat", true, true);
+	g_logoedStud2 = OpenDocument ("stud2-logo.dat", true, true);
 
 	print (LDDocument::tr ("Logoed studs loaded.\n"));
 }
@@ -1486,8 +1486,8 @@ void LDDocument::swapObjects (LDObjectPtr one, LDObjectPtr other)
 //
 QString LDDocument::shortenName (QString a) // [static]
 {
-	QString shortname = basename (a);
-	QString topdirname = basename (dirname (a));
+	QString shortname = Basename (a);
+	QString topdirname = Basename (Dirname (a));
 
 	if (g_specialSubdirectories.contains (topdirname))
 		shortname.prepend (topdirname + "\\");
@@ -1500,15 +1500,15 @@ QString LDDocument::shortenName (QString a) // [static]
 QVector<Vertex> const& LDDocument::inlineVertices()
 {
 	initializeCachedData();
-	return _vertices;
+	return m_vertices;
 }
 
 void LDDocument::redoVertices()
 {
-	_verticesOutdated = true;
+	m_verticesOutdated = true;
 }
 
 void LDDocument::needVertexMerge()
 {
-	_needVertexMerge = true;
+	m_needVertexMerge = true;
 }

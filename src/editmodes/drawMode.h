@@ -22,7 +22,7 @@
 class DrawMode : public AbstractDrawMode
 {
 	DEFINE_CLASS (DrawMode, AbstractDrawMode)
-	bool _rectdraw;
+	bool m_rectdraw;
 
 public:
 	DrawMode (GLRenderer* renderer);

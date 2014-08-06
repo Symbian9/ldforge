@@ -144,7 +144,7 @@ void InitCrashCatcher()
 // the signal handler, which will cause the usual bomb box with GDB diagnostics. Said prompt will
 // embed the assertion failure information.
 //
-void assertionFailure (const char* file, int line, const char* funcname, const char* expr)
+void HandleAssertFailure (const char* file, int line, const char* funcname, const char* expr)
 {
 #ifdef __unix__
 	AssertionFailureText = format ("%1:%2: %3: %4", file, line, funcname, expr);

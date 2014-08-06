@@ -35,6 +35,6 @@
 // Null pointer
 static const std::nullptr_t null = nullptr;
 
-void assertionFailure (const char* file, int line, const char* funcname, const char* expr);
+void HandleAssertFailure (const char* file, int line, const char* funcname, const char* expr);
 bool IsExiting();
 void Exit();

@@ -24,7 +24,7 @@
 
 RectangleMode::RectangleMode (GLRenderer* renderer) :
 	Super (renderer),
-	_rectangleVerts (QVector<Vertex>(4)) {}
+	m_rectangleVerts (QVector<Vertex>(4)) {}
 
 EditModeType RectangleMode::type() const
 {
@@ -33,7 +33,7 @@ EditModeType RectangleMode::type() const
 
 void RectangleMode::render (QPainter& painter) const
 {
-	renderPolygon (painter, (_drawedVerts.size() > 0) ? _rectangleVerts :
+	renderPolygon (painter, (m_drawedVerts.size() > 0) ? m_rectangleVerts :
 		QVector<Vertex> ({renderer()->position3D()}), false);
 }
 
@@ -44,15 +44,15 @@ bool RectangleMode::mouseReleased (MouseEventData const& data)
 
 	if (data.releasedButtons & Qt::LeftButton)
 	{
-		if (_drawedVerts.size() == 2)
+		if (m_drawedVerts.size() == 2)
 		{
-			LDQuadPtr quad (spawn<LDQuad>());
+			LDQuadPtr quad (LDSpawn<LDQuad>());
 			updateRectVerts();
 
 			for (int i = 0; i < quad->numVertices(); ++i)
-				quad->setVertex (i, _rectangleVerts[i]);
+				quad->setVertex (i, m_rectangleVerts[i]);
 
-			quad->setColor (maincolor());
+			quad->setColor (MainColor());
 			finishDraw (LDObjectList ({quad}));
 			return true;
 		}
@@ -75,30 +75,30 @@ bool RectangleMode::mouseMoved (QMouseEvent*)
 
 void RectangleMode::updateRectVerts()
 {
-	if (_drawedVerts.isEmpty())
+	if (m_drawedVerts.isEmpty())
 	{
 		for (int i = 0; i < 4; ++i)
-			_rectangleVerts[i] = renderer()->position3D();
+			m_rectangleVerts[i] = renderer()->position3D();
 
 		return;
 	}
 
-	Vertex v0 = _drawedVerts[0],
-		   v1 = (_drawedVerts.size() >= 2) ? _drawedVerts[1] : renderer()->position3D();
+	Vertex v0 = m_drawedVerts[0],
+		   v1 = (m_drawedVerts.size() >= 2) ? m_drawedVerts[1] : renderer()->position3D();
 
 	const Axis localx = renderer()->getCameraAxis (false),
 			   localy = renderer()->getCameraAxis (true),
 			   localz = (Axis) (3 - localx - localy);
 
 	for (int i = 0; i < 4; ++i)
-		_rectangleVerts[i].setCoordinate (localz, renderer()->getDepthValue());
+		m_rectangleVerts[i].setCoordinate (localz, renderer()->getDepthValue());
 
-	_rectangleVerts[0].setCoordinate (localx, v0[localx]);
-	_rectangleVerts[0].setCoordinate (localy, v0[localy]);
-	_rectangleVerts[1].setCoordinate (localx, v1[localx]);
-	_rectangleVerts[1].setCoordinate (localy, v0[localy]);
-	_rectangleVerts[2].setCoordinate (localx, v1[localx]);
-	_rectangleVerts[2].setCoordinate (localy, v1[localy]);
-	_rectangleVerts[3].setCoordinate (localx, v0[localx]);
-	_rectangleVerts[3].setCoordinate (localy, v1[localy]);
+	m_rectangleVerts[0].setCoordinate (localx, v0[localx]);
+	m_rectangleVerts[0].setCoordinate (localy, v0[localy]);
+	m_rectangleVerts[1].setCoordinate (localx, v1[localx]);
+	m_rectangleVerts[1].setCoordinate (localy, v0[localy]);
+	m_rectangleVerts[2].setCoordinate (localx, v1[localx]);
+	m_rectangleVerts[2].setCoordinate (localy, v1[localy]);
+	m_rectangleVerts[3].setCoordinate (localx, v0[localx]);
+	m_rectangleVerts[3].setCoordinate (localy, v1[localy]);
 }
