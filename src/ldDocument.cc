@@ -1114,12 +1114,6 @@ int LDDocument::addObject (LDObjectPtr obj)
 	history()->add (new AddHistory (objects().size(), obj));
 	m_objects << obj;
 	addKnownVertices (obj);
-
-#ifdef DEBUG
-	if (not isImplicit())
-		dprint ("Added object #%1 (%2)\n", obj->id(), obj->typeName());
-#endif
-
 	obj->setDocument (self());
 	g_win->R()->compileObject (obj);
 	return getObjectCount() - 1;
