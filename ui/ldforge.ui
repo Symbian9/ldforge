@@ -47,8 +47,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>233</width>
-           <height>426</height>
+           <width>237</width>
+           <height>414</height>
           </rect>
          </property>
          <attribute name="label">
@@ -70,13 +70,84 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="pageEditModeOptions">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>237</width>
+           <height>414</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Edit Mode Options</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string>Ring Options</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <layout class="QFormLayout" name="formLayout">
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="ringToolHiRes">
+                 <property name="text">
+                  <string>High resolution</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Segments:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="ringToolSegments">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>16</number>
+                 </property>
+                 <property name="value">
+                  <number>16</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="pagePrimitives">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>99</width>
-           <height>99</height>
+           <width>94</width>
+           <height>94</height>
           </rect>
          </property>
          <attribute name="label">
@@ -112,7 +183,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

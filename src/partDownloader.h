@@ -86,20 +86,20 @@ public slots:
 
 // =============================================================================
 //
-enum PartDownloadRequestState
-{
-	DLRQ_Requesting,
-	DLRQ_Downloading,
-	DLRQ_Finished,
-	DLRQ_Failed,
-};
-
 class PartDownloadRequest : public QObject
 {
 public:
+    enum class State
+    {
+        Requesting,
+        Downloading,
+        Finished,
+        Failed,
+    };
+
 	Q_OBJECT
 	PROPERTY (public,	int,						tableRow,		setTableRow,		STOCK_WRITE)
-	PROPERTY (private,	PartDownloadRequestState,	state,			setState,			STOCK_WRITE)
+    PROPERTY (private,	State,                      state,			setState,			STOCK_WRITE)
 	PROPERTY (private,	PartDownloader*,			prompt,			setPrompt,			STOCK_WRITE)
 	PROPERTY (private,	QString,					url,			setURL,				STOCK_WRITE)
 	PROPERTY (private,	QString,					destinaton,		setDestination,		STOCK_WRITE)

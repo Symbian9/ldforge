@@ -172,6 +172,9 @@ public:
 	void saveShortcuts (QSettings* settings);
 	void applyToActions (std::function<void(QAction*)> function);
 
+    bool ringToolHiRes() const;
+    int ringToolSegments() const;
+
 public slots:
 	void updatePrimitives();
 	void changeCurrentFile();

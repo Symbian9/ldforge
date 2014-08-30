@@ -276,7 +276,7 @@ void PartDownloader::checkIfFinished()
 		if (not req->isFinished())
 			return;
 
-		if (req->state() == DLRQ_Failed)
+        if (req->state() == PartDownloadRequest::State::Failed)
 			failed = true;
 	}
 
@@ -330,7 +330,7 @@ QPushButton* PartDownloader::getButton (PartDownloader::Button i)
 //
 PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent) :
 	QObject (parent),
-	m_state (DLRQ_Requesting),
+    m_state (State::Requesting),
 	m_prompt (parent),
 	m_url (url),
 	m_destinaton (dest),
@@ -375,8 +375,8 @@ void PartDownloadRequest::updateToTable()
 
 	switch (state())
 	{
-		case DLRQ_Requesting:
-		case DLRQ_Downloading:
+        case State::Requesting:
+        case State::Downloading:
 		{
 			prog = qobject_cast<QProgressBar*> (table->cellWidget (tableRow(), progcol));
 
@@ -390,10 +390,10 @@ void PartDownloadRequest::updateToTable()
 			prog->setValue (numBytesRead());
 		} break;
 
-		case DLRQ_Finished:
-		case DLRQ_Failed:
+        case State::Finished:
+        case State::Failed:
 		{
-			const QString text = (state() == DLRQ_Finished)
+            const QString text = (state() == State::Finished)
 				? "<b><span style=\"color: #080\">FINISHED</span></b>"
 				: "<b><span style=\"color: #800\">FAILED</span></b>";
 
@@ -427,10 +427,10 @@ void PartDownloadRequest::downloadFinished()
 		if (isPrimary() and not prompt()->isAborted())
 			CriticalError (networkReply()->errorString());
 
-		setState (DLRQ_Failed);
+        setState (State::Failed);
 	}
-	elif (state() != DLRQ_Failed)
-		setState (DLRQ_Finished);
+    elif (state() != State::Failed)
+        setState (State::Finished);
 
 	setNumBytesRead (numBytesTotal());
 	updateToTable();
@@ -441,11 +441,11 @@ void PartDownloadRequest::downloadFinished()
 		delete filePointer();
 		setFilePointer (null);
 
-		if (state() == DLRQ_Failed)
+        if (state() == State::Failed)
 			QFile::remove (filePath());
 	}
 
-	if (state() != DLRQ_Finished)
+    if (state() != State::Finished)
 	{
 		prompt()->checkIfFinished();
 		return;
@@ -488,7 +488,7 @@ void PartDownloadRequest::downloadProgress (int64 recv, int64 total)
 {
 	setNumBytesRead (recv);
 	setNumBytesTotal (total);
-	setState (DLRQ_Downloading);
+    setState (State::Downloading);
 	updateToTable();
 }
 
@@ -496,7 +496,7 @@ void PartDownloadRequest::downloadProgress (int64 recv, int64 total)
 //
 void PartDownloadRequest::readyRead()
 {
-	if (state() == DLRQ_Failed)
+    if (state() == State::Failed)
 		return;
 
 	if (filePointer() == null)
@@ -510,7 +510,7 @@ void PartDownloadRequest::readyRead()
 		if (not filePointer()->open (QIODevice::WriteOnly))
 		{
 			CriticalError (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
-			setState (DLRQ_Failed);
+            setState (State::Failed);
 			networkReply()->abort();
 			updateToTable();
 			prompt()->checkIfFinished();
@@ -525,7 +525,7 @@ void PartDownloadRequest::readyRead()
 //
 bool PartDownloadRequest::isFinished() const
 {
-	return Eq (state(), DLRQ_Finished, DLRQ_Failed);
+    return Eq (state(), State::Finished, State::Failed);
 }
 
 // =============================================================================

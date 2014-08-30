@@ -1056,6 +1056,20 @@ QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
 
 // =============================================================================
 //
+bool MainWindow::ringToolHiRes() const
+{
+    return ui->ringToolHiRes->isChecked();
+}
+
+// =============================================================================
+//
+int MainWindow::ringToolSegments() const
+{
+    return ui->ringToolSegments->value();
+}
+
+// =============================================================================
+//
 QImage GetImageFromScreencap (uchar* data, int w, int h)
 {
 	// GL and Qt formats have R and B swapped. Also, GL flips Y - correct it as well.
