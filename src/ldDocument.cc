@@ -226,10 +226,15 @@ QList<LDDocumentPtr> const& LDDocument::explicitDocuments()
 //
 LDDocumentPtr FindDocument (QString name)
 {
-	for (LDDocumentWeakPtr file : g_allDocuments)
+	for (LDDocumentWeakPtr weakfile : g_allDocuments)
 	{
-		if (file != null and file.toStrongRef()->name() == name)
-			return file.toStrongRef();
+		if (weakfile == null)
+			continue;
+
+		LDDocumentPtr file (weakfile.toStrongRef());
+
+		if (Eq (name, file->name(), file->defaultName()))
+			return file;
 	}
 
 	return LDDocumentPtr();

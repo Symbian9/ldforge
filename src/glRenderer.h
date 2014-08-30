@@ -157,7 +157,7 @@ public:
 	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
 	QPoint					coordconv3_2 (const Vertex& pos3d);
 	EditModeType			currentEditModeType() const;
-	void					drawBlip (QPainter& paint, QPoint pos) const;
+	void					drawBlip (QPainter& paint, QPointF pos) const;
 	void					drawGLScene();
 	void					forgetObject (LDObjectPtr obj);
 	Axis					getCameraAxis (bool y, ECamera camid = (ECamera) -1);

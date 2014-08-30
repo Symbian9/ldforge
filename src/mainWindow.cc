@@ -121,6 +121,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	loadShortcuts (Config::SettingsObject());
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
+	connect (ui->ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
 }
 
 MainWindow::~MainWindow()
@@ -1058,15 +1059,32 @@ QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
 //
 bool MainWindow::ringToolHiRes() const
 {
-    return ui->ringToolHiRes->isChecked();
+	return ui->ringToolHiRes->isChecked();
 }
 
 // =============================================================================
 //
 int MainWindow::ringToolSegments() const
 {
-    return ui->ringToolSegments->value();
+	return ui->ringToolSegments->value();
 }
+
+// =============================================================================
+//
+void MainWindow::ringToolHiResClicked (bool checked)
+{
+	if (checked)
+	{
+		ui->ringToolSegments->setMaximum (HighResolution);
+		ui->ringToolSegments->setValue (ui->ringToolSegments->value() * 3);
+	}
+	else
+	{
+		ui->ringToolSegments->setValue (ui->ringToolSegments->value() / 3);
+		ui->ringToolSegments->setMaximum (LowResolution);
+	}
+}
+
 
 // =============================================================================
 //

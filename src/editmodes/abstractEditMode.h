@@ -49,7 +49,7 @@ public:
 	virtual ~AbstractEditMode();
 
 	virtual bool			allowFreeCamera() const = 0;
-	virtual void			render (QPainter&) const {};
+	virtual void			render (QPainter&) const {}
 	GLRenderer*				renderer() const;
 	virtual EditModeType	type() const = 0;
 	virtual bool			mousePressed (QMouseEvent*) { return false; }
@@ -82,7 +82,8 @@ public:
 	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
 	void addDrawnVertex (const Vertex& pos);
 	void finishDraw (const LDObjectList& objs);
-	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withangles) const;
+	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d,
+		bool withlengths, bool withangles) const;
 
 	virtual bool preAddVertex (Vertex const&)
 	{

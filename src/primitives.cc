@@ -640,8 +640,11 @@ LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num
 		 << LDSpawn<LDBFC> (BFCStatement::CertifyCCW)
 		 << LDSpawn<LDEmpty>();
 
+	f->setImplicit (false);
+	f->history()->setIgnoring (false);
 	f->addObjects (objs);
 	f->addObjects (MakePrimitive (type, segs, divs, num));
+	f->addHistoryStep();
 	return f;
 }
 

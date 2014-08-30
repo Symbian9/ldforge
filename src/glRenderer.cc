@@ -712,7 +712,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 
 // =============================================================================
 //
-void GLRenderer::drawBlip (QPainter& paint, QPoint pos) const
+void GLRenderer::drawBlip (QPainter& paint, QPointF pos) const
 {
 	QPen pen = m_thinBorderPen;
 	const int blipsize = 8;

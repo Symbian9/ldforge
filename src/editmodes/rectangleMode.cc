@@ -34,7 +34,7 @@ EditModeType RectangleMode::type() const
 void RectangleMode::render (QPainter& painter) const
 {
 	renderPolygon (painter, (m_drawedVerts.size() > 0) ? m_rectangleVerts :
-		QVector<Vertex> ({renderer()->position3D()}), false);
+		QVector<Vertex> ({renderer()->position3D()}), true, false);
 }
 
 bool RectangleMode::mouseReleased (MouseEventData const& data)

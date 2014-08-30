@@ -72,8 +72,8 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 void CircleMode::buildCircle()
 {
 	LDObjectList objs;
-	const int segs (g_win->ringToolHiRes() ? HighResolution : LowResolution);
-	const int divs (segs); // TODO: make customizable
+	const int segments (g_win->ringToolSegments());
+	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
 	LDDocumentPtr refFile;
@@ -86,14 +86,14 @@ void CircleMode::buildCircle()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		refFile = GetDocument (MakeRadialFileName (::Circle, segs, segs, 0));
+		refFile = GetPrimitive (::Circle, segments, divisions, 0);
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	elif (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		refFile = GetDocument (MakeRadialFileName (::Disc, segs, segs, 0));
+		refFile = GetPrimitive (::Disc, segments, divisions, 0);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
@@ -102,14 +102,7 @@ void CircleMode::buildCircle()
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
 		{
-			// Get a ref file for this primitive. If we cannot find it in the
-			// LDraw library, generate it.
-			if ((refFile = ::GetDocument (MakeRadialFileName (::Ring, segs, segs, cmp.num))) == null)
-			{
-				refFile = GeneratePrimitive (::Ring, segs, segs, cmp.num);
-				refFile->setImplicit (false);
-			}
-
+			refFile = GetPrimitive (::Ring, segments, divisions, cmp.num);
 			LDSubfilePtr ref = LDSpawn<LDSubfile>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
@@ -134,10 +127,10 @@ void CircleMode::buildCircle()
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		MakeCircle (segs, divs, dist0, c0);
-		MakeCircle (segs, divs, dist1, c1);
+		MakeCircle (segments, divisions, dist0, c0);
+		MakeCircle (segments, divisions, dist1, c1);
 
-		for (int i = 0; i < segs; ++i)
+		for (int i = 0; i < segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;
@@ -185,84 +178,85 @@ void CircleMode::render (QPainter& painter) const
 		return;
 	}
 
-	QVector<Vertex> verts, verts2;
-	const double dist0 = getCircleDrawDist (0),
-		dist1 = (m_drawedVerts.size() >= 2) ? getCircleDrawDist (1) : -1;
-	const int segs (g_win->ringToolHiRes() ? HighResolution : LowResolution);
-	const double angleUnit = (2 * Pi) / segs;
+	QVector<Vertex> innerverts, outerverts;
+	QVector<QPointF> innerverts2d, outerverts2d;
+	const double innerdistance (getCircleDrawDist (0));
+	const double outerdistance (m_drawedVerts.size() >= 2 ? getCircleDrawDist (1) : -1);
+	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
+	const int segments (g_win->ringToolSegments());
+	const double angleUnit (2 * Pi / divisions);
 	Axis relX, relY;
-	QVector<QPoint> ringpoints, circlepoints, circle2points;
-
 	renderer()->getRelativeAxes (relX, relY);
 
 	// Calculate the preview positions of vertices
-	for (int i = 0; i < segs; ++i)
+	for (int i = 0; i < segments + 1; ++i)
 	{
 		Vertex v (Origin);
-		v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist0));
-		v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist0));
-		verts << v;
+		v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * innerdistance));
+		v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * innerdistance));
+		innerverts << v;
+		innerverts2d << renderer()->coordconv3_2 (v);
 
-		if (dist1 != -1)
+		if (outerdistance != -1)
 		{
-			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * dist1));
-			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * dist1));
-			verts2 << v;
+			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * outerdistance));
+			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * outerdistance));
+			outerverts << v;
+			outerverts2d << renderer()->coordconv3_2 (v);
 		}
 	}
 
-	int i = 0;
-	for (const Vertex& v : verts + verts2)
+	QVector<QLineF> lines (segments);
+
+	if (outerdistance != -1 and outerdistance != innerdistance)
 	{
-		// Calculate the 2D point of the vertex
-		QPoint point (renderer()->coordconv3_2 (v));
+		painter.setBrush (m_polybrush);
+		painter.setPen (Qt::NoPen);
 
-		// Draw a green blip at where it is
-		renderer()->drawBlip (painter, point);
+		// Compile polygons
+		for (int i = 0; i < segments; ++i)
+		{
+			QVector<QPointF> points;
+			points << innerverts2d[i]
+				<< innerverts2d[i + 1]
+				<< outerverts2d[i + 1]
+				<< outerverts2d[i];
+			painter.drawPolygon (QPolygonF (points));
+			lines << QLineF (innerverts2d[i], innerverts2d[i + 1]);
+			lines << QLineF (outerverts2d[i], outerverts2d[i + 1]);
+		}
 
-		// Add it to the list of points for the green ring fill.
-		ringpoints << point;
-
-		// Also add the circle points to separate lists
-		if (i < verts.size())
-			circlepoints << point;
-		else
-			circle2points << point;
-
-		++i;
+		// Add bordering edges for unclosed rings/discs
+		if (segments != divisions)
+		{
+			lines << QLineF (innerverts2d.first(), outerverts2d.first());
+			lines << QLineF (innerverts2d.last(), outerverts2d.last());
+		}
+	}
+	else
+	{
+		for (int i = 0; i < segments; ++i)
+			lines << QLineF (innerverts2d[i], innerverts2d[i + 1]);
 	}
 
-	// Insert the first point as the seventeenth one so that
-	// the ring polygon is closed properly.
-	if (ringpoints.size() >= segs)
-		ringpoints.insert (segs, ringpoints[0]);
+	// Draw a green blips at where the points are
+	for (QPointF const& point : innerverts2d + outerverts2d)
+		renderer()->drawBlip (painter, point);
 
-	// Same for the outer ring. Note that the indices are offset by 1
-	// because of the insertion done above bumps the values.
-	if (ringpoints.size() >= segs * 2 + 1)
-		ringpoints.insert (segs * 2 + 1, ringpoints[segs + 1]);
-
-	// Draw the ring
-	painter.setBrush ((m_drawedVerts.size() >= 2) ? m_polybrush : Qt::NoBrush);
-	painter.setPen (Qt::NoPen);
-	painter.drawPolygon (QPolygon (ringpoints));
-
-	// Draw the circles
-	painter.setBrush (Qt::NoBrush);
+	// Draw edge lines
 	painter.setPen (renderer()->linePen());
-	painter.drawPolygon (QPolygon (circlepoints));
-	painter.drawPolygon (QPolygon (circle2points));
+	painter.drawLines (lines);
 
 	// Draw the current radius in the middle of the circle.
 	QPoint origin = renderer()->coordconv3_2 (m_drawedVerts[0]);
-	QString label = QString::number (dist0);
+	QString label = QString::number (innerdistance);
 	painter.setPen (renderer()->textPen());
 	painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
 
 	if (m_drawedVerts.size() >= 2)
 	{
 		painter.drawText (origin.x() - (metrics.width (label) / 2),
-			origin.y() + metrics.height(), QString::number (dist1));
+			origin.y() + metrics.height(), QString::number (outerdistance));
 	}
 }
 

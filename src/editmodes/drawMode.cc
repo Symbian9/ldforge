@@ -42,7 +42,7 @@ void DrawMode::render (QPainter& painter) const
 	if (poly.size() < 4)
 		poly << renderer()->position3D();
 
-	renderPolygon (painter, poly, true);
+	renderPolygon (painter, poly, true, true);
 }
 
 bool DrawMode::preAddVertex (Vertex const& pos)

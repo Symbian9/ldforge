@@ -174,7 +174,8 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 	m_drawedVerts.clear();
 }
 
-void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withangles) const
+void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d,
+	bool withlengths, bool withangles) const
 {
 	QVector<QPoint> poly (poly3d.size());
 	QFontMetrics metrics = QFontMetrics (QFont());
@@ -200,7 +201,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 	}
 
 	// Draw line lenghts and angle info if appropriate
-	if (poly3d.size() >= 2)
+	if (poly3d.size() >= 2 and (withlengths or withangles))
 	{
 		painter.setPen (renderer()->textPen());
 
@@ -209,7 +210,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			const int j = (i + 1) % poly3d.size();
 			const int h = (i - 1 >= 0) ? (i - 1) : (poly3d.size() - 1);
 
-			if (cfg::DrawLineLengths)
+			if (withlengths and cfg::DrawLineLengths)
 			{
 				const QString label = QString::number ((poly3d[j] - poly3d[i]).length());
 				QPoint origin = QLineF (poly[i], poly[j]).pointAt (0.5).toPoint();
