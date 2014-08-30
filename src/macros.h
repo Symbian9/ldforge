@@ -102,7 +102,7 @@ public: \
 #undef assert
 
 #ifdef DEBUG
-# define assert(N) { ((N) ? (void) 0 : assertionFailure (__FILE__, __LINE__, FUNCNAME, #N)); }
+# define assert(N) { ((N) ? (void) 0 : HandleAssertFailure (__FILE__, __LINE__, FUNCNAME, #N)); }
 #else
 # define assert(N) {}
 #endif // DEBUG

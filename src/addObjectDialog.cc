@@ -355,7 +355,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 		case OBJ_BFC:
 		{
 			LDBFCPtr bfc = InitObject<LDBFC> (obj);
-			assert (within (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
+			assert (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
 			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 

@@ -80,6 +80,10 @@ int main (int argc, char* argv[])
 		Config::Save();
 	}
 
+	// Process the command line
+	for (int arg = 1; arg < argc; ++arg)
+		OpenMainModel (QString::fromLocal8Bit (argv[arg]));
+
 	int result = app.exec();
 	g_IsExiting = true;
 	return result;
