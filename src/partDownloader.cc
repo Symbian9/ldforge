@@ -69,7 +69,9 @@ QString PartDownloader::getDownloadPath()
 
 // =============================================================================
 //
-PartDownloader::PartDownloader (QWidget* parent) : QDialog (parent)
+PartDownloader::PartDownloader (QWidget* parent) :
+	QDialog (parent),
+	m_source (Source (0))
 {
 	setForm (new Ui_DownloadFrom);
 	form()->setupUi (this);
@@ -188,7 +190,15 @@ void PartDownloader::modifyDestination (QString& dest) const
 //
 PartDownloader::Source PartDownloader::getSource() const
 {
-	return (Source) form()->source->currentIndex();
+	return m_source;
+}
+
+// =============================================================================
+//
+void PartDownloader::setSource (Source src)
+{
+	m_source = src;
+	form()->source->setCurrentIndex (int (src));
 }
 
 // =============================================================================
@@ -199,6 +209,8 @@ void PartDownloader::sourceChanged (int i)
 		form()->fileNameLabel->setText (tr ("URL:"));
 	else
 		form()->fileNameLabel->setText (tr ("File name:"));
+
+	m_source = Source (i);
 }
 
 // =============================================================================
@@ -234,14 +246,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 				return;
 		}
 
-		downloadButton()->setEnabled (false);
-		form()->progress->setEnabled (true);
-		form()->fname->setEnabled (false);
-		form()->source->setEnabled (false);
 		downloadFile (dest, getURL(), true);
-		getButton (Close)->setEnabled (false);
-		getButton (Abort)->setEnabled (true);
-		getButton (Download)->setEnabled (false);
 	}
 }
 
@@ -255,6 +260,7 @@ void PartDownloader::downloadFile (QString dest, QString url, bool primary)
 	if (filesToDownload().indexOf (dest) != -1)
 		return;
 
+	print ("Downloading %1 from %2\n", dest, url);
 	modifyDestination (dest);
 	PartDownloadRequest* req = new PartDownloadRequest (url, dest, primary, this);
 	m_filesToDownload << dest;
@@ -262,6 +268,21 @@ void PartDownloader::downloadFile (QString dest, QString url, bool primary)
 	form()->progress->insertRow (row);
 	req->setTableRow (row);
 	req->updateToTable();
+	downloadButton()->setEnabled (false);
+	form()->progress->setEnabled (true);
+	form()->fname->setEnabled (false);
+	form()->source->setEnabled (false);
+	getButton (Close)->setEnabled (false);
+	getButton (Abort)->setEnabled (true);
+	getButton (Download)->setEnabled (false);
+}
+
+// =============================================================================
+//
+void PartDownloader::downloadFromPartsTracker (QString file)
+{
+	modifyDestination (file);
+	downloadFile (file, g_unofficialLibraryURL + file, false);
 }
 
 // =============================================================================
@@ -289,10 +310,12 @@ void PartDownloader::checkIfFinished()
 	if (primaryFile() != null)
 	{
 		LDDocument::setCurrent (primaryFile());
-		ReloadAllSubfiles();
 		g_win->doFullRefresh();
 		g_win->R()->resetAngles();
 	}
+
+		for (LDDocumentPtr f : m_files)
+		f->reloadAllSubfiles();
 
 	if (cfg::AutoCloseDownloadDialog and not failed)
 	{
@@ -427,10 +450,13 @@ void PartDownloadRequest::downloadFinished()
 		if (isPrimary() and not prompt()->isAborted())
 			CriticalError (networkReply()->errorString());
 
+		print ("Unable to download %1: %2\n", m_destinaton, networkReply()->errorString());
         setState (State::Failed);
 	}
     elif (state() != State::Failed)
+	{
         setState (State::Finished);
+	}
 
 	setNumBytesRead (numBytesTotal());
 	updateToTable();
@@ -469,9 +495,10 @@ void PartDownloadRequest::downloadFinished()
 			continue;
 
 		QString dest = err->fileReferenced();
-		prompt()->modifyDestination (dest);
-		prompt()->downloadFile (dest, g_unofficialLibraryURL + dest, false);
+		prompt()->downloadFromPartsTracker (dest);
 	}
+
+	prompt()->addFile (f);
 
 	if (isPrimary())
 	{
@@ -480,6 +507,13 @@ void PartDownloadRequest::downloadFinished()
 	}
 
 	prompt()->checkIfFinished();
+}
+
+// =============================================================================
+//
+void PartDownloader::addFile (LDDocumentPtr f)
+{
+	m_files << f;
 }
 
 // =============================================================================

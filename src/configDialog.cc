@@ -317,7 +317,7 @@ void ConfigDialog::applySettings()
 	}
 
 	Config::Save();
-	ReloadAllSubfiles();
+	LDDocument::current()->reloadAllSubfiles();
 	LoadLogoStuds();
 	g_win->R()->setBackground();
 	g_win->doFullRefresh();

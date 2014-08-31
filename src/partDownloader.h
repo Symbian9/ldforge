@@ -69,10 +69,13 @@ public:
 	explicit		PartDownloader (QWidget* parent = null);
 	virtual			~PartDownloader();
 
+	void			addFile (LDDocumentPtr f);
 	void			downloadFile (QString dest, QString url, bool primary);
+	void			downloadFromPartsTracker (QString file);
 	QPushButton*	getButton (Button i);
 	QString			getURL();
 	Source			getSource() const;
+	void			setSource (Source src);
 	void			modifyDestination (QString& dest) const;
 
 	static QString	getDownloadPath();
@@ -82,6 +85,10 @@ public slots:
 	void			buttonClicked (QAbstractButton* btn);
 	void			checkIfFinished();
 	void			sourceChanged (int i);
+
+private:
+	Source m_source;
+	QList<LDDocumentPtr> m_files;
 };
 
 // =============================================================================

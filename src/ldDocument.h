@@ -108,6 +108,7 @@ public:
 	void addKnownVertices (LDObjectPtr obj);
 	void redoVertices();
 	void needVertexMerge();
+	void reloadAllSubfiles();
 
 	inline LDDocument& operator<< (LDObjectPtr obj)
 	{
@@ -207,9 +208,6 @@ LDObjectPtr ParseLine (QString line);
 // Retrieves the pointer to the given document by file name. Document is loaded
 // from file if necessary. Can return null if neither succeeds.
 LDDocumentPtr GetDocument (QString filename);
-
-// Re-caches all subfiles.
-void ReloadAllSubfiles();
 
 // Is it safe to close all files?
 bool IsSafeToCloseAll();

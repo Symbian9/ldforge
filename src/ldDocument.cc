@@ -31,6 +31,7 @@
 #include "dialogs.h"
 #include "glRenderer.h"
 #include "glCompiler.h"
+#include "partDownloader.h"
 
 CFGENTRY (String, LDrawPath, "")
 CFGENTRY (List, RecentFiles, {})
@@ -749,6 +750,32 @@ void OpenMainModel (QString path)
 	// Add it to the recent files list.
 	AddRecentFile (path);
 	g_loadingMainFile = false;
+
+	// If there were problems loading subfile references, try see if we can find these
+	// files on the parts tracker.
+	QStringList unknowns;
+
+	for (LDObjectPtr obj : file->objects())
+	{
+		if (obj->type() != OBJ_Error or obj.staticCast<LDError>()->fileReferenced().isEmpty())
+			continue;
+
+		unknowns << obj.staticCast<LDError>()->fileReferenced();
+	}
+
+	if (not unknowns.isEmpty())
+	{
+		PartDownloader dl;
+		dl.setSource (PartDownloader::PartsTracker);
+		dl.setPrimaryFile (file);
+
+		for (QString const& unknown : unknowns)
+			dl.downloadFromPartsTracker (unknown);
+
+		dl.exec();
+		dl.checkIfFinished();
+		file->reloadAllSubfiles();
+	}
 }
 
 // =============================================================================
@@ -1086,23 +1113,27 @@ LDDocumentPtr GetDocument (QString filename)
 
 // =============================================================================
 //
-void ReloadAllSubfiles()
+void LDDocument::reloadAllSubfiles()
 {
-	if (not CurrentDocument())
-		return;
+	print ("Reloading subfiles of %1", getDisplayName());
 
 	// Go through all objects in the current file and reload the subfiles
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObjectPtr obj : objects())
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
 			LDSubfilePtr ref = obj.staticCast<LDSubfile>();
 			LDDocumentPtr fileInfo = GetDocument (ref->fileInfo()->name());
 
-			if (fileInfo)
+			if (fileInfo != null)
+			{
 				ref->setFileInfo (fileInfo);
+			}
 			else
-				ref->replace (LDSpawn<LDError> (ref->asText(), format ("Could not open %1", ref->fileInfo()->name())));
+			{
+				ref->replace (LDSpawn<LDError> (ref->asText(),
+					format ("Could not open %1", ref->fileInfo()->name())));
+			}
 		}
 
 		// Reparse gibberish files. It could be that they are invalid because
@@ -1110,6 +1141,11 @@ void ReloadAllSubfiles()
 		if (obj->type() == OBJ_Error)
 			obj->replace (ParseLine (obj.staticCast<LDError>()->contents()));
 	}
+
+	m_needsReCache = true;
+
+	if (self() == CurrentDocument())
+		g_win->buildObjList();
 }
 
 // =============================================================================
@@ -1268,7 +1304,14 @@ void LDDocument::initializeCachedData()
 
 		for (LDObjectPtr obj : inlineContents (true, true))
 		{
-			assert (obj->type() != OBJ_Subfile);
+			if (obj->type() == OBJ_Subfile)
+			{
+				print ("Warning: unable to inline %1 into %2",
+					obj.staticCast<LDSubfile>()->fileInfo()->getDisplayName(),
+					getDisplayName());
+				continue;
+			}
+
 			LDPolygon* data = obj->getPolygon();
 
 			if (data != null)
