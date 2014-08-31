@@ -122,6 +122,9 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
 	connect (ui->ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
+	connect (ui->ringToolSegments, SIGNAL (valueChanged (int)),
+		this, SLOT (circleToolSegmentsChanged()));
+	circleToolSegmentsChanged(); // invoke it manually for initial label text
 }
 
 MainWindow::~MainWindow()
@@ -1086,6 +1089,15 @@ void MainWindow::ringToolHiResClicked (bool checked)
 	}
 }
 
+// =============================================================================
+//
+void MainWindow::circleToolSegmentsChanged()
+{
+	int numerator (ui->ringToolSegments->value());
+	int denominator (ui->ringToolHiRes->isChecked() ? HighResolution : LowResolution);
+	Simplify (numerator, denominator);
+	ui->ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
+}
 
 // =============================================================================
 //

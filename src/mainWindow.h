@@ -180,6 +180,7 @@ public slots:
 	void changeCurrentFile();
 	void closeTab (int tabindex);
 	void ringToolHiResClicked (bool clicked);
+	void circleToolSegmentsChanged();
 	void slot_action();
 	void slot_actionNew();
 	void slot_actionNewFile();
