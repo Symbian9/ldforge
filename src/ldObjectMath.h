@@ -5,7 +5,7 @@
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,23 +17,7 @@
  */
 
 #pragma once
-#include "abstractEditMode.h"
+#include "main.h"
 
-class CircleMode : public AbstractDrawMode
-{
-	DEFINE_CLASS (CircleMode, AbstractDrawMode)
-
-public:
-	CircleMode (GLRenderer* renderer);
-
-	virtual void render (QPainter& painter) const override;
-	virtual EditModeType type() const override;
-
-	double getCircleDrawDist (int pos) const;
-	Matrix getCircleDrawMatrix (double scale);
-	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
-
-private:
-	void buildCircle();
-	double getAngleOffset() const;
-};
+void RotateObjects (const int l, const int m, const int n,
+	double angle, LDObjectList const& objects);

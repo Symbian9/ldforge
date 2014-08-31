@@ -54,6 +54,7 @@ set (LDFORGE_SOURCES
 	src/ldConfig.cc
 	src/ldDocument.cc
 	src/ldObject.cc
+    src/ldObjectMath.cpp
 	src/main.cc
 	src/mainWindow.cc
 	src/messageLog.cc
@@ -81,6 +82,7 @@ set (LDFORGE_HEADERS
 	src/ldConfig.h
 	src/partDownloader.h
 	src/ldObject.h
+    src/ldObjectMath.h
 	src/primitives.h
 	src/miscallenous.h
 	src/messageLog.h

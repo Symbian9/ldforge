@@ -25,6 +25,7 @@
 #include "../primitives.h"
 #include "../glRenderer.h"
 #include "../mainWindow.h"
+#include "../ldObjectMath.h"
 
 CircleMode::CircleMode (GLRenderer* renderer) :
 	Super (renderer) {}
@@ -164,7 +165,32 @@ void CircleMode::buildCircle()
 		objs << ref;
 	}
 
+	unless (objs.isEmpty())
+	{
+		LDFixedCamera const& fixedcam = GetFixedCamera (renderer()->camera());
+		Axis relZ = renderer()->getRelativeZ();
+		const double angleoffset (-getAngleOffset());
+		const int l (relZ == X ? 1 : 0);
+		const int m (relZ == Y ? 1 : 0);
+		const int n (relZ == Z ? 1 : 0);
+		RotateObjects (l, m, n, angleoffset, objs);
+	}
+
 	finishDraw (objs);
+}
+
+double CircleMode::getAngleOffset() const
+{
+	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
+	QPointF originspot (renderer()->coordconv3_2 (m_drawedVerts.first()));
+	QLineF bearing (originspot, renderer()->mousePositionF());
+	QLineF bearing2 (originspot, QPointF (originspot.x(), 0.0));
+	double angleoffset (-bearing.angleTo (bearing2) + 90);
+	angleoffset /= (360.0 / divisions); // convert angle to 0-16 scale
+	angleoffset = round (angleoffset); // round to nearest 16th
+	angleoffset *= ((2 * Pi) / divisions); // convert to radians
+	angleoffset *= renderer()->depthNegateFactor(); // negate based on camera
+	return angleoffset;
 }
 
 void CircleMode::render (QPainter& painter) const
@@ -187,20 +213,23 @@ void CircleMode::render (QPainter& painter) const
 	const double angleUnit (2 * Pi / divisions);
 	Axis relX, relY;
 	renderer()->getRelativeAxes (relX, relY);
+	const double angleoffset (getAngleOffset());
 
 	// Calculate the preview positions of vertices
 	for (int i = 0; i < segments + 1; ++i)
 	{
+		const double sinangle (sin (angleoffset + i * angleUnit));
+		const double cosangle (cos (angleoffset + i * angleUnit));
 		Vertex v (Origin);
-		v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * innerdistance));
-		v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * innerdistance));
+		v.setCoordinate (relX, m_drawedVerts[0][relX] + (cosangle * innerdistance));
+		v.setCoordinate (relY, m_drawedVerts[0][relY] + (sinangle * innerdistance));
 		innerverts << v;
 		innerverts2d << renderer()->coordconv3_2 (v);
 
 		if (outerdistance != -1)
 		{
-			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cos (i * angleUnit) * outerdistance));
-			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sin (i * angleUnit) * outerdistance));
+			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cosangle * outerdistance));
+			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sinangle * outerdistance));
 			outerverts << v;
 			outerverts2d << renderer()->coordconv3_2 (v);
 		}

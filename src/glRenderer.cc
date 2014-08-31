@@ -42,7 +42,7 @@
 #include "glCompiler.h"
 #include "primitives.h"
 
-static const LDFixedCamera g_FixedCameras[6] =
+const LDFixedCamera g_FixedCameras[6] =
 {
 	{{  1,  0, 0 }, X, Z, false, false, false }, // top
 	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
@@ -827,6 +827,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 
 	// Update 2d position
 	m_mousePosition = ev->pos();
+	m_mousePositionF = ev->posF();
 	m_globalpos = ev->globalPos();
 
 	// Calculate 3d position of the cursor
@@ -1626,8 +1627,24 @@ QPoint const& GLRenderer::mousePosition() const
 	return m_mousePosition;
 }
 
+QPointF const& GLRenderer::mousePositionF() const
+{
+	return m_mousePositionF;
+}
+
 void GLRenderer::doMakeCurrent()
 {
 	makeCurrent();
 	initializeOpenGLFunctions();
+}
+
+int GLRenderer::depthNegateFactor() const
+{
+	return g_FixedCameras[camera()].negatedDepth ? -1 : 1;
+}
+
+LDFixedCamera const& GetFixedCamera (ECamera cam)
+{
+	assert (cam != EFreeCamera);
+	return g_FixedCameras[cam];
 }

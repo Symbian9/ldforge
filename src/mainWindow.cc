@@ -150,6 +150,7 @@ void MainWindow::endAction()
 	// Update the list item of the current file - we may need to draw an icon
 	// now that marks it as having unsaved changes.
 	updateDocumentListItem (CurrentDocument());
+	refresh();
 }
 
 // =============================================================================

@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  LDForge: LDraw parts authoring CAD
  *  Copyright (C) 2013, 2014 Teemu Piippo
  *
@@ -31,6 +31,7 @@
 #include "glRenderer.h"
 #include "dialogs.h"
 #include "colors.h"
+#include "ldObjectMath.h"
 #include "ui_replcoords.h"
 #include "ui_editraw.h"
 #include "ui_flip.h"
@@ -407,101 +408,34 @@ void MainWindow::slot_actionInvert()
 
 // =============================================================================
 //
-static void RotateVertex (Vertex& v, const Vertex& rotpoint, const Matrix& transformer)
+static double GetRotateActionAngle()
 {
-	v -= rotpoint;
-	v.transform (transformer, Origin);
-	v += rotpoint;
+	return (Pi * *CurrentGrid().angleSnap) / 180;
 }
 
-// =============================================================================
-//
-static void RotateObjects (const int l, const int m, const int n)
-{
-	LDObjectList sel = Selection();
-	QList<Vertex*> queue;
-	const Vertex rotpoint = GetRotationPoint (sel);
-	const double angle = (Pi * *CurrentGrid().angleSnap) / 180,
-				 cosangle = cos (angle),
-				 sinangle = sin (angle);
-
-	// ref: http://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
-	Matrix transform (
-	{
-		(l* l * (1 - cosangle)) + cosangle,
-		(m* l * (1 - cosangle)) - (n* sinangle),
-		(n* l * (1 - cosangle)) + (m* sinangle),
-
-		(l* m * (1 - cosangle)) + (n* sinangle),
-		(m* m * (1 - cosangle)) + cosangle,
-		(n* m * (1 - cosangle)) - (l* sinangle),
-
-		(l* n * (1 - cosangle)) - (m* sinangle),
-		(m* n * (1 - cosangle)) + (l* sinangle),
-		(n* n * (1 - cosangle)) + cosangle
-	});
-
-	// Apply the above matrix to everything
-	for (LDObjectPtr obj : sel)
-	{
-		if (obj->numVertices())
-		{
-			for (int i = 0; i < obj->numVertices(); ++i)
-			{
-				Vertex v = obj->vertex (i);
-				RotateVertex (v, rotpoint, transform);
-				obj->setVertex (i, v);
-			}
-		}
-		elif (obj->hasMatrix())
-		{
-			LDMatrixObjectPtr mo = obj.dynamicCast<LDMatrixObject>();
-
-			// Transform the position
-			Vertex v = mo->position();
-			RotateVertex (v, rotpoint, transform);
-			mo->setPosition (v);
-
-			// Transform the matrix
-			mo->setTransform (transform * mo->transform());
-		}
-		elif (obj->type() == OBJ_Vertex)
-		{
-			LDVertexPtr vert = obj.staticCast<LDVertex>();
-			Vertex v = vert->pos;
-			RotateVertex (v, rotpoint, transform);
-			vert->pos = v;
-		}
-	}
-
-	g_win->refresh();
-}
-
-// =============================================================================
-//
 void MainWindow::slot_actionRotateXPos()
 {
-	RotateObjects (1, 0, 0);
+	RotateObjects (1, 0, 0, GetRotateActionAngle(), Selection());
 }
 void MainWindow::slot_actionRotateYPos()
 {
-	RotateObjects (0, 1, 0);
+	RotateObjects (0, 1, 0, GetRotateActionAngle(), Selection());
 }
 void MainWindow::slot_actionRotateZPos()
 {
-	RotateObjects (0, 0, 1);
+	RotateObjects (0, 0, 1, GetRotateActionAngle(), Selection());
 }
 void MainWindow::slot_actionRotateXNeg()
 {
-	RotateObjects (-1, 0, 0);
+	RotateObjects (-1, 0, 0, GetRotateActionAngle(), Selection());
 }
 void MainWindow::slot_actionRotateYNeg()
 {
-	RotateObjects (0, -1, 0);
+	RotateObjects (0, -1, 0, GetRotateActionAngle(), Selection());
 }
 void MainWindow::slot_actionRotateZNeg()
 {
-	RotateObjects (0, 0, -1);
+	RotateObjects (0, 0, -1, GetRotateActionAngle(), Selection());
 }
 
 void MainWindow::slot_actionRotationPoint()

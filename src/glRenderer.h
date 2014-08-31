@@ -157,6 +157,7 @@ public:
 	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
 	QPoint					coordconv3_2 (const Vertex& pos3d);
 	EditModeType			currentEditModeType() const;
+	int						depthNegateFactor() const;
 	void					drawBlip (QPainter& paint, QPointF pos) const;
 	void					drawGLScene();
 	void					forgetObject (LDObjectPtr obj);
@@ -175,6 +176,7 @@ public:
 	QPen					linePen() const;
 	bool					mouseHasMoved() const;
 	QPoint const&			mousePosition() const;
+	QPointF const&			mousePositionF() const;
 	void					needZoomToFit();
 	void					pick (int mouseX, int mouseY, bool additive);
 	void					pick (QRect const& range, bool additive);
@@ -224,6 +226,7 @@ private:
 							m_panning;
 	QPoint					m_mousePosition,
 							m_globalpos;
+	QPointF					m_mousePositionF;
 	QPen					m_thinBorderPen;
 	ECamera					m_camera,
 							m_toolTipCamera;
@@ -294,5 +297,7 @@ inline double& GLRenderer::zoom()
 {
 	return currentDocumentData().zoom[camera()];
 }
+
+LDFixedCamera const& GetFixedCamera (ECamera cam);
 
 extern const char* g_CameraNames[7];
