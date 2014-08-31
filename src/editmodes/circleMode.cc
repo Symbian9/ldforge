@@ -167,7 +167,6 @@ void CircleMode::buildCircle()
 
 	unless (objs.isEmpty())
 	{
-		LDFixedCamera const& fixedcam = GetFixedCamera (renderer()->camera());
 		Axis relZ = renderer()->getRelativeZ();
 		const double angleoffset (-getAngleOffset());
 		const int l (relZ == X ? 1 : 0);
