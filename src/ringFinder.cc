@@ -135,10 +135,17 @@ bool RingFinder::findRings (double r0, double r1)
 		double r0f = r0 / scale;
 		double r1f = r1 / scale;
 
-		if (qFuzzyCompare (floor (r0f), r0f) and qFuzzyCompare (floor (r1f), r1f))
+		if (IsIntegral (r0f) and IsIntegral (r1f))
 		{
 			r0 = r0f;
 			r1 = r1f;
+		}
+		// If the numbers are both at most one-decimal fractions, we can use a scale of 10
+		elif (IsIntegral (r0 * 10) and IsIntegral (r1 * 10))
+		{
+			scale = 0.1;
+			r0 *= 10;
+			r1 *= 10;
 		}
 	}
 	else

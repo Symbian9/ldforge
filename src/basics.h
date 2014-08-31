@@ -241,13 +241,13 @@ static inline T Abs (T a)
 template<typename T>
 inline bool IsZero (T a)
 {
-	return Abs<T> (a) < 0.0001;
+	return Abs<T> (a) < 0.00001;
 }
 
 template<typename T>
 inline bool IsIntegral (T a)
 {
-	return IsZero (a - int (a));
+	return (Abs (a - floor(a)) < 0.00001) or (Abs (a - ceil(a)) < 0.00001);
 }
 
 template<typename T>
