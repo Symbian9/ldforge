@@ -22,6 +22,7 @@
 class CircleMode : public AbstractDrawMode
 {
 	DEFINE_CLASS (CircleMode, AbstractDrawMode)
+	double m_angleOffset;
 
 public:
 	CircleMode (GLRenderer* renderer);
@@ -32,6 +33,7 @@ public:
 	double getCircleDrawDist (int pos) const;
 	Matrix getCircleDrawMatrix (double scale);
 	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
+	bool preAddVertex (Vertex const&) override;
 
 private:
 	void buildCircle();

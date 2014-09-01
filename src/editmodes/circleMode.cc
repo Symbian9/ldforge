@@ -167,12 +167,11 @@ void CircleMode::buildCircle()
 
 	unless (objs.isEmpty())
 	{
-		Axis relZ = renderer()->getRelativeZ();
-		const double angleoffset (-getAngleOffset());
+		Axis relZ = renderer()->getRelativeZ();;
 		const int l (relZ == X ? 1 : 0);
 		const int m (relZ == Y ? 1 : 0);
 		const int n (relZ == Z ? 1 : 0);
-		RotateObjects (l, m, n, angleoffset, objs);
+		RotateObjects (l, m, n, -m_angleOffset, objs);
 	}
 
 	finishDraw (objs);
@@ -180,6 +179,9 @@ void CircleMode::buildCircle()
 
 double CircleMode::getAngleOffset() const
 {
+	if (m_drawedVerts.isEmpty())
+		return 0.0;
+
 	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
 	QPointF originspot (renderer()->coordconv3_2 (m_drawedVerts.first()));
 	QLineF bearing (originspot, renderer()->mousePositionF());
@@ -212,7 +214,7 @@ void CircleMode::render (QPainter& painter) const
 	const double angleUnit (2 * Pi / divisions);
 	Axis relX, relY;
 	renderer()->getRelativeAxes (relX, relY);
-	const double angleoffset (getAngleOffset());
+	const double angleoffset (m_drawedVerts.size() < 3 ? getAngleOffset() : m_angleOffset);
 
 	// Calculate the preview positions of vertices
 	for (int i = 0; i < segments + 1; ++i)
@@ -303,5 +305,11 @@ bool CircleMode::mouseReleased (MouseEventData const& data)
 		return true;
 	}
 
+	return false;
+}
+
+bool CircleMode::preAddVertex (const Vertex&)
+{
+	m_angleOffset = getAngleOffset();
 	return false;
 }
