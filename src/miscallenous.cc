@@ -295,14 +295,12 @@ double GetCoordinateOf (const Vertex& a, Axis ax)
 //
 QString MakePrettyFileSize (qint64 size)
 {
-	QString result;
-
-	if (size < 1024)
+	if (size < 1024LL)
 		return QString::number (size) + " bytes";
-	else if (size < (1024 * 1024))
-		return QString::number ((double) size / 1024, 'f', 1) + " Kb";
-	else if (size < (1024 * 1024 * 1024))
-		return QString::number ((double) size / (1024 * 1024), 'f', 1) + " Mb";
+	else if (size < (1024LL * 1024LL))
+		return QString::number (double (size) / 1024LL, 'f', 1) + " Kb";
+	else if (size < (1024LL * 1024LL * 1024LL))
+		return QString::number (double (size) / (1024LL * 1024LL), 'f', 1) + " Mb";
 	else
-		return QString::number ((double) size / (1024 * 1024 * 1024), 'f', 1) + " Gb";
+		return QString::number (double (size) / (1024LL * 1024LL * 1024LL), 'f', 1) + " Gb";
 }

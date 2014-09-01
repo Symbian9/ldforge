@@ -525,14 +525,16 @@ LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 //
 LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride)
 {
-	// Convert the file name to lowercase since some parts contain uppercase
-	// file names. I'll assume here that the library will always use lowercase
-	// file names for the actual parts..
+	// Convert the file name to lowercase when searching because some parts contain subfile
+	// subfile references with uppercase file names. I'll assume here that the library will always
+	// use lowercase file names for the part files.
 	QFile* fp;
 	QString fullpath;
 
 	if (search)
+	{
 		fp = OpenLDrawFile (path.toLower(), true, &fullpath);
+	}
 	else
 	{
 		fp = new QFile (path);
@@ -665,24 +667,23 @@ void newFile()
 //
 void AddRecentFile (QString path)
 {
-	auto& rfiles = cfg::RecentFiles;
-	int idx = rfiles.indexOf (path);
+	int idx = cfg::RecentFiles.indexOf (path);
 
 	// If this file already is in the list, pop it out.
 	if (idx != -1)
 	{
-		if (idx == rfiles.size() - 1)
+		if (idx == cfg::RecentFiles.size() - 1)
 			return; // first recent file - abort and do nothing
 
-		rfiles.removeAt (idx);
+		cfg::RecentFiles.removeAt (idx);
 	}
 
 	// If there's too many recent files, drop one out.
-	while (rfiles.size() > (g_maxRecentFiles - 1))
-		rfiles.removeAt (0);
+	while (cfg::RecentFiles.size() > (g_maxRecentFiles - 1))
+		cfg::RecentFiles.removeAt (0);
 
 	// Add the file
-	rfiles << path;
+	cfg::RecentFiles << path;
 
 	Config::Save();
 	g_win->updateRecentFilesMenu();
