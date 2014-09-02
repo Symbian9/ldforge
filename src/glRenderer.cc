@@ -850,6 +850,8 @@ void GLRenderer::keyPressEvent (QKeyEvent* ev)
 void GLRenderer::keyReleaseEvent (QKeyEvent* ev)
 {
 	m_keymods = ev->modifiers();
+	m_editmode->keyReleased (ev);
+	update();
 }
 
 // =============================================================================

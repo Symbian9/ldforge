@@ -11,5 +11,8 @@ public:
 	void render (QPainter& painter) const override;
 	EditModeType type() const override { return EditModeType::LineLoop; }
 	bool mouseReleased (MouseEventData const& data) override;
+	bool preAddVertex (Vertex const& pos) override;
+	bool keyReleased (QKeyEvent*) override;
+	void endDraw();
 };
 

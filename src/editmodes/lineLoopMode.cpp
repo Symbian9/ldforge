@@ -1,21 +1,28 @@
 #include "lineLoopMode.h"
 #include "../glRenderer.h"
+#include "../mainWindow.h"
+#include <QKeyEvent>
 
 LineLoopMode::LineLoopMode (GLRenderer *renderer) :
 	Super (renderer) {}
 
 void LineLoopMode::render (QPainter& painter) const
 {
-	renderer()->drawBlip (painter, renderer()->coordconv3_2 (renderer()->position3D()));
 	QVector<QPointF> points;
+	QList<Vertex> points3d (m_drawedVerts);
+	points3d << renderer()->position3D();
 
-	for (Vertex const& vrt : m_drawedVerts)
+	for (Vertex const& vrt : points3d)
 		points << renderer()->coordconv3_2 (vrt);
 
 	painter.setPen (renderer()->textPen());
+	assert (points.size() == points3d.size());
 
 	for (int i = 0; i < points.size() - 1; ++i)
+	{
 		painter.drawLine (QLineF (points[i], points[i + 1]));
+		drawLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
+	}
 
 	for (QPointF const& point : points)
 		renderer()->drawBlip (painter, point);
@@ -29,6 +36,47 @@ bool LineLoopMode::mouseReleased (MouseEventData const& data)
 	if (data.releasedButtons & Qt::LeftButton)
 	{
 		addDrawnVertex (renderer()->position3D());
+		return true;
+	}
+
+	return false;
+}
+
+bool LineLoopMode::preAddVertex (Vertex const& pos)
+{
+	// If we picked an the last vertex, stop drawing
+	if (not m_drawedVerts.isEmpty() and pos == m_drawedVerts.last())
+	{
+		endDraw();
+		return true;
+	}
+
+	return false;
+}
+
+void LineLoopMode::endDraw()
+{
+	LDObjectList objs;
+
+	for (int i = 0; i < m_drawedVerts.size() - 1; ++i)
+	{
+		LDLinePtr line = LDSpawn<LDLine>();
+		line->setVertex (0, m_drawedVerts[i]);
+		line->setVertex (1, m_drawedVerts[i + 1]);
+		objs << line;
+	}
+
+	finishDraw (objs);
+}
+
+bool LineLoopMode::keyReleased (QKeyEvent* ev)
+{
+	if (Super::keyReleased (ev))
+		return true;
+
+	if (ev->key() == Qt::Key_Enter or ev->key() == Qt::Key_Return)
+	{
+		endDraw();
 		return true;
 	}
 

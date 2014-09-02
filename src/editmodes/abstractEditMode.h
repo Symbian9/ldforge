@@ -22,6 +22,7 @@
 class QPainter;
 class GLRenderer;
 class QMouseEvent;
+class QKeyEvent;
 
 enum class EditModeType
 {
@@ -57,6 +58,7 @@ public:
 	virtual bool			mouseReleased (MouseEventData const&) { return false; }
 	virtual bool			mouseDoubleClicked (QMouseEvent*) { return false; }
 	virtual bool			mouseMoved (QMouseEvent*) { return false; }
+	virtual bool			keyReleased (QKeyEvent*) { return false; }
 
 	static AbstractEditMode* createByType (GLRenderer* renderer, EditModeType type);
 };
@@ -85,6 +87,9 @@ public:
 	void finishDraw (const LDObjectList& objs);
 	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d,
 		bool withlengths, bool withangles) const;
+	void drawLength (QPainter& painter, Vertex const& v0, Vertex const& v1,
+		const QPointF& v0p, const QPointF& v1p) const;
+	bool keyReleased (QKeyEvent* ev) override;
 
 	virtual bool preAddVertex (Vertex const&)
 	{

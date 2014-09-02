@@ -161,11 +161,13 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 
 void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 {
+	int pos = g_win->getInsertionPoint();
+
 	if (objs.size() > 0)
 	{
 		for (LDObjectPtr obj : objs)
 		{
-			renderer()->document()->addObject (obj);
+			renderer()->document()->insertObj (pos++, obj);
 			renderer()->compileObject (obj);
 		}
 
@@ -174,6 +176,17 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 	}
 
 	m_drawedVerts.clear();
+}
+
+void AbstractDrawMode::drawLength (QPainter &painter, const Vertex &v0, const Vertex &v1,
+	const QPointF& v0p, const QPointF& v1p) const
+{
+	if (not cfg::DrawLineLengths)
+		return;
+
+	const QString label = QString::number ((v1 - v0).length());
+	QPoint origin = QLineF (v0p, v1p).pointAt (0.5).toPoint();
+	painter.drawText (origin, label);
 }
 
 void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d,
@@ -212,12 +225,8 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			const int j = (i + 1) % poly3d.size();
 			const int h = (i - 1 >= 0) ? (i - 1) : (poly3d.size() - 1);
 
-			if (withlengths and cfg::DrawLineLengths)
-			{
-				const QString label = QString::number ((poly3d[j] - poly3d[i]).length());
-				QPoint origin = QLineF (poly[i], poly[j]).pointAt (0.5).toPoint();
-				painter.drawText (origin, label);
-			}
+			if (withlengths)
+				drawLength (painter, poly3d[i], poly3d[j], poly[i], poly[j]);
 
 			if (withangles and cfg::DrawAngles)
 			{
@@ -237,4 +246,18 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			}
 		}
 	}
+}
+
+bool AbstractDrawMode::keyReleased (QKeyEvent *ev)
+{
+	if (Super::keyReleased (ev))
+		return true;
+
+	if (not m_drawedVerts.isEmpty() and ev->key() == Qt::Key_Backspace)
+	{
+		m_drawedVerts.removeLast();
+		return true;
+	}
+
+	return false;
 }

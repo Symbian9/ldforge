@@ -27,11 +27,9 @@ class DrawMode : public AbstractDrawMode
 public:
 	DrawMode (GLRenderer* renderer);
 
-	virtual void render (QPainter& painter) const override;
-	virtual EditModeType type() const override;
-	virtual bool preAddVertex (Vertex const& pos) override;
-	virtual bool mouseReleased (MouseEventData const& data) override;
-
-private:
+	void render (QPainter& painter) const override;
+	EditModeType type() const override;
+	bool mouseReleased (MouseEventData const& data) override;
 	void endDraw();
+	bool preAddVertex (Vertex const&);
 };
