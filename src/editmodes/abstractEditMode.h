@@ -30,6 +30,7 @@ enum class EditModeType
 	Rectangle,
 	Circle,
 	MagicWand,
+	LineLoop,
 };
 
 class AbstractEditMode

@@ -67,6 +67,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/abstractEditMode.cc
 	src/editmodes/circleMode.cc
 	src/editmodes/drawMode.cc
+	src/editmodes/lineLoopMode.cpp
 	src/editmodes/magicWandMode.cc
 	src/editmodes/rectangleMode.cc
 	src/editmodes/selectMode.cc
@@ -102,6 +103,7 @@ set (LDFORGE_HEADERS
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
 	src/editmodes/drawMode.h
+	src/editmodes/lineLoopMode.h
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h

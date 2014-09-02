@@ -707,6 +707,7 @@ void MainWindow::updateEditModeActions()
 	ui->actionModeRectangle->setChecked (mode == EditModeType::Rectangle);
 	ui->actionModeCircle->setChecked (mode == EditModeType::Circle);
 	ui->actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
+	ui->actionModeLineLoop->setChecked (mode == EditModeType::LineLoop);
 }
 
 // =============================================================================

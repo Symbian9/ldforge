@@ -595,6 +595,11 @@ void MainWindow::slot_actionModeMagicWand()
  	R()->setEditMode (EditModeType::MagicWand);
 }
 
+void MainWindow::slot_actionModeLineLoop()
+{
+	R()->setEditMode (EditModeType::LineLoop);
+}
+
 // =============================================================================
 //
 void MainWindow::slot_actionDrawAngles()

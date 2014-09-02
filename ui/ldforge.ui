@@ -47,8 +47,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>434</height>
+           <width>233</width>
+           <height>399</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>434</height>
+           <width>256</width>
+           <height>121</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>94</width>
-           <height>94</height>
+           <width>101</width>
+           <height>101</height>
           </rect>
          </property>
          <attribute name="label">
@@ -194,7 +194,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -535,6 +535,7 @@
    <addaction name="actionModeRectangle"/>
    <addaction name="actionModeCircle"/>
    <addaction name="actionModeMagicWand"/>
+   <addaction name="actionModeLineLoop"/>
   </widget>
   <widget class="QToolBar" name="colorToolbar">
    <property name="windowTitle">
@@ -1697,6 +1698,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+3</string>
+   </property>
+  </action>
+  <action name="actionModeLineLoop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/line.png</normaloff>:/icons/line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Line Loop Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+6</string>
    </property>
   </action>
  </widget>
