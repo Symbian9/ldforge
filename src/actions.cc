@@ -595,9 +595,9 @@ void MainWindow::slot_actionModeMagicWand()
  	R()->setEditMode (EditModeType::MagicWand);
 }
 
-void MainWindow::slot_actionModeLineLoop()
+void MainWindow::slot_actionModeLinePath()
 {
-	R()->setEditMode (EditModeType::LineLoop);
+	R()->setEditMode (EditModeType::LinePath);
 }
 
 // =============================================================================

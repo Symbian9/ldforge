@@ -535,7 +535,7 @@
    <addaction name="actionModeRectangle"/>
    <addaction name="actionModeCircle"/>
    <addaction name="actionModeMagicWand"/>
-   <addaction name="actionModeLineLoop"/>
+   <addaction name="actionModeLinePath"/>
   </widget>
   <widget class="QToolBar" name="colorToolbar">
    <property name="windowTitle">
@@ -1700,7 +1700,7 @@
     <string>Ctrl+3</string>
    </property>
   </action>
-  <action name="actionModeLineLoop">
+  <action name="actionModeLinePath">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -1709,7 +1709,7 @@
      <normaloff>:/icons/line.png</normaloff>:/icons/line.png</iconset>
    </property>
    <property name="text">
-    <string>Line Loop Mode</string>
+    <string>Line Path Mode</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+6</string>

@@ -227,7 +227,7 @@ public slots:
 	void slot_actionModeRectangle();
 	void slot_actionModeCircle();
 	void slot_actionModeMagicWand();
-	void slot_actionModeLineLoop();
+	void slot_actionModeLinePath();
 	void slot_actionSetDrawDepth();
 	void slot_actionSetColor();
 	void slot_actionAutocolor();

@@ -24,7 +24,7 @@
 #include "rectangleMode.h"
 #include "circleMode.h"
 #include "magicWandMode.h"
-#include "lineLoopMode.h"
+#include "linePathMode.h"
 #include "../mainWindow.h"
 #include "../glRenderer.h"
 
@@ -45,7 +45,7 @@ AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditMode
 		case EditModeType::Rectangle: return new RectangleMode (renderer);
 		case EditModeType::Circle: return new CircleMode (renderer);
 		case EditModeType::MagicWand: return new MagicWandMode (renderer);
-		case EditModeType::LineLoop: return new LineLoopMode (renderer);
+		case EditModeType::LinePath: return new LinePathMode (renderer);
 	}
 
 	throw std::logic_error ("bad type given to AbstractEditMode::createByType");

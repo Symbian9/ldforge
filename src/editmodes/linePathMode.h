@@ -1,15 +1,15 @@
 #pragma once
 #include "abstractEditMode.h"
 
-class LineLoopMode : public AbstractDrawMode
+class LinePathMode : public AbstractDrawMode
 {
-	DEFINE_CLASS (LineLoopMode, AbstractDrawMode)
+	DEFINE_CLASS (LinePathMode, AbstractDrawMode)
 
 public:
-	LineLoopMode (GLRenderer* renderer);
+	LinePathMode (GLRenderer* renderer);
 
 	void render (QPainter& painter) const override;
-	EditModeType type() const override { return EditModeType::LineLoop; }
+	EditModeType type() const override { return EditModeType::LinePath; }
 	bool mouseReleased (MouseEventData const& data) override;
 	bool preAddVertex (Vertex const& pos) override;
 	bool keyReleased (QKeyEvent*) override;

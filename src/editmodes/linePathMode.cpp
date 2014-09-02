@@ -1,12 +1,12 @@
-#include "lineLoopMode.h"
+#include "linePathMode.h"
 #include "../glRenderer.h"
 #include "../mainWindow.h"
 #include <QKeyEvent>
 
-LineLoopMode::LineLoopMode (GLRenderer *renderer) :
+LinePathMode::LinePathMode (GLRenderer *renderer) :
 	Super (renderer) {}
 
-void LineLoopMode::render (QPainter& painter) const
+void LinePathMode::render (QPainter& painter) const
 {
 	QVector<QPointF> points;
 	QList<Vertex> points3d (m_drawedVerts);
@@ -28,7 +28,7 @@ void LineLoopMode::render (QPainter& painter) const
 		renderer()->drawBlip (painter, point);
 }
 
-bool LineLoopMode::mouseReleased (MouseEventData const& data)
+bool LinePathMode::mouseReleased (MouseEventData const& data)
 {
 	if (Super::mouseReleased (data))
 		return true;
@@ -42,7 +42,7 @@ bool LineLoopMode::mouseReleased (MouseEventData const& data)
 	return false;
 }
 
-bool LineLoopMode::preAddVertex (Vertex const& pos)
+bool LinePathMode::preAddVertex (Vertex const& pos)
 {
 	// If we picked an the last vertex, stop drawing
 	if (not m_drawedVerts.isEmpty() and pos == m_drawedVerts.last())
@@ -54,7 +54,7 @@ bool LineLoopMode::preAddVertex (Vertex const& pos)
 	return false;
 }
 
-void LineLoopMode::endDraw()
+void LinePathMode::endDraw()
 {
 	LDObjectList objs;
 
@@ -69,7 +69,7 @@ void LineLoopMode::endDraw()
 	finishDraw (objs);
 }
 
-bool LineLoopMode::keyReleased (QKeyEvent* ev)
+bool LinePathMode::keyReleased (QKeyEvent* ev)
 {
 	if (Super::keyReleased (ev))
 		return true;
