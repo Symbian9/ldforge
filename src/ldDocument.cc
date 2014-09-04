@@ -46,6 +46,7 @@ static LDDocumentPtr g_logoedStud2;
 static QList<LDDocumentWeakPtr> g_allDocuments;
 static QList<LDDocumentPtr> g_explicitDocuments;
 static LDDocumentPtr g_currentDocument;
+static bool g_loadingLogoedStuds = false;
 
 const QStringList g_specialSubdirectories ({ "s", "48", "8" });
 
@@ -1461,13 +1462,14 @@ void LDDocument::closeInitialFile()
 //
 void LoadLogoStuds()
 {
-	if (g_logoedStud and g_logoedStud2)
+	if (g_loadingLogoedStuds or (g_logoedStud and g_logoedStud2))
 		return;
 
+	g_loadingLogoedStuds = true;
 	g_logoedStud = OpenDocument ("stud-logo.dat", true, true);
 	g_logoedStud2 = OpenDocument ("stud2-logo.dat", true, true);
-
 	print (LDDocument::tr ("Logoed studs loaded.\n"));
+	g_loadingLogoedStuds = false;
 }
 
 // =============================================================================
