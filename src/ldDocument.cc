@@ -159,6 +159,9 @@ LDDocument::~LDDocument()
 	if (IsExiting())
 		return;
 
+	for (LDObjectPtr obj : m_objects)
+		obj->setSelected (false);
+
 	g_allDocuments.removeOne (self());
 	m_flags |= DOCF_IsBeingDestroyed;
 	delete m_history;

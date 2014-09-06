@@ -337,6 +337,16 @@ void LDObject::finalDelete()
 
 // =============================================================================
 //
+void LDObject::setDocument (const LDDocumentWeakPtr& a)
+{
+	m_document = a;
+
+	if (a == null)
+		setSelected (false);
+}
+
+// =============================================================================
+//
 static void TransformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDColor parentcolor)
 {
 	switch (obj->type())

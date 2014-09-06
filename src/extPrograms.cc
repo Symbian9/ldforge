@@ -281,9 +281,9 @@ bool RunExtProgram (extprog prog, QString path, QString argvstr)
 	if (not err.isEmpty())
 	{
 		CriticalError (format ("%1 failed: %2\n", g_extProgNames[prog], err));
-
 		QString filename ("externalProgramOutput.txt");
 		QFile file (filename);
+
 		if (file.open (QIODevice::WriteOnly | QIODevice::Text))
 		{
 			file.write (proc.readAllStandardOutput());
@@ -295,6 +295,7 @@ bool RunExtProgram (extprog prog, QString path, QString argvstr)
 			print ("Couldn't open %1 for writing: %2",
 				QFileInfo (filename).absoluteFilePath(), file.errorString());
 		}
+
 		return false;
 	}
 
