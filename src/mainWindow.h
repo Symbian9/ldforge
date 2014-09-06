@@ -328,7 +328,7 @@ bool Confirm (const QString& title, const QString& message); // Generic confirm 
 bool Confirm (const QString& message);
 
 //! Displays an error prompt with the given \c message
-void CriticalError (const QString& message);
+void Critical (const QString& message);
 
 //! Makes an icon of \c size x \c size pixels to represent \c colinfo
 QIcon MakeColorIcon (LDColor colinfo, const int size);

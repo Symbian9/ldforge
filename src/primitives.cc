@@ -168,7 +168,7 @@ void PrimitiveScanner::work()
 		QFile conf (path);
 
 		if (not conf.open (QIODevice::WriteOnly | QIODevice::Text))
-			CriticalError (format ("Couldn't write primitive list %1: %2",
+			Critical (format ("Couldn't write primitive list %1: %2",
 				path, conf.errorString()));
 		else
 		{
@@ -292,7 +292,7 @@ void PrimitiveCategory::loadCategories()
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		CriticalError (format (QObject::tr ("Failed to open primitive categories: %1"), f.errorString()));
+		Critical (format (QObject::tr ("Failed to open primitive categories: %1"), f.errorString()));
 		return;
 	}
 

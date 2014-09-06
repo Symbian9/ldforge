@@ -383,7 +383,7 @@ void MainWindow::slot_actionInsertFrom()
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		CriticalError (format ("Couldn't open %1 (%2)", fname, f.errorString()));
+		Critical (format ("Couldn't open %1 (%2)", fname, f.errorString()));
 		return;
 	}
 
@@ -420,7 +420,7 @@ void MainWindow::slot_actionExportTo()
 
 	if (not file.open (QIODevice::WriteOnly | QIODevice::Text))
 	{
-		CriticalError (format ("Unable to open %1 for writing (%2)", fname, file.errorString()));
+		Critical (format ("Unable to open %1 for writing (%2)", fname, file.errorString()));
 		return;
 	}
 
@@ -489,7 +489,7 @@ void MainWindow::slot_actionScreenshot()
 				"PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;All Files (*.*)");
 
 	if (not fname.isEmpty() and not img.save (fname))
-		CriticalError (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
+		Critical (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
 
 	delete[] imgdata;
 }

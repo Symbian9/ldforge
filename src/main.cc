@@ -61,7 +61,7 @@ int main (int argc, char* argv[])
 		if (Config::Save())
 			print ("Configuration file successfully created.\n");
 		else
-			CriticalError ("Failed to create configuration file!\n");
+			Critical ("Failed to create configuration file!\n");
 	}
 
 	LDPaths::initPaths();

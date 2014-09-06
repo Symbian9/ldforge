@@ -149,7 +149,7 @@ void HandleAssertFailure (const char* file, int line, const char* funcname, cons
 #ifdef __unix__
 	AssertionFailureText = format ("%1:%2: %3: %4", file, line, funcname, expr);
 #else
-	bombBox (format (
+	DisplayBombBox (format (
 		"<p><b>File</b>: <tt>%1</tt><br />"
 		"<b>Line</b>: <tt>%2</tt><br />"
 		"<b>Function:</b> <tt>%3</tt></p>"

@@ -47,7 +47,7 @@ void LDConfigParser::parseLDConfig()
 
 	if (fp == null)
 	{
-		CriticalError (QObject::tr ("Unable to open LDConfig.ldr for parsing."));
+		Critical (QObject::tr ("Unable to open LDConfig.ldr for parsing."));
 		return;
 	}
 

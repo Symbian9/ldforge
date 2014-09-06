@@ -732,7 +732,7 @@ void OpenMainModel (QString path)
 		{
 			// Tell the user loading failed.
 			setlocale (LC_ALL, "C");
-			CriticalError (format (QObject::tr ("Failed to open %1: %2"), path, strerror (errno)));
+			Critical (format (QObject::tr ("Failed to open %1: %2"), path, strerror (errno)));
 		}
 
 		g_loadingMainFile = false;

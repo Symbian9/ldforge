@@ -86,7 +86,7 @@ void LDObject::chooseID()
 
 	// In case someone does, we cannot really continue execution. We must abort,
 	// give the user a chance to save their documents though.
-	CriticalError ("Created too many objects. Execution cannot continue. You have a "
+	Critical ("Created too many objects. Execution cannot continue. You have a "
 		"chance to save any changes to documents, then restart.");
 	(void) IsSafeToCloseAll();
 	Exit();

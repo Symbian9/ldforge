@@ -827,8 +827,13 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 
 	// Update 2d position
 	m_mousePosition = ev->pos();
-	m_mousePositionF = ev->posF();
 	m_globalpos = ev->globalPos();
+
+#ifndef USE_QT5
+	m_mousePositionF = ev->posF();
+#else
+	m_mousePositionF = ev->localPos();
+#endif
 
 	// Calculate 3d position of the cursor
 	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : Origin;
@@ -1199,7 +1204,7 @@ bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, i
 
 	if (img->isNull())
 	{
-		CriticalError (tr ("Failed to load overlay image!"));
+		Critical (tr ("Failed to load overlay image!"));
 		currentDocumentData().overlays[cam].invalid = true;
 		delete img;
 		return false;

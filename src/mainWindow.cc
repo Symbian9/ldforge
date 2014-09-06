@@ -816,7 +816,7 @@ bool Confirm (const QString& title, const QString& message)
 
 // =============================================================================
 //
-void CriticalError (const QString& message)
+void Critical (const QString& message)
 {
 	QMessageBox::critical (g_win, MainWindow::tr ("Error"), message,
 		(QMessageBox::Close), QMessageBox::Close);

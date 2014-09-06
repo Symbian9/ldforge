@@ -44,7 +44,7 @@ void PartDownloader::staticBegin()
 
 	if (path.isEmpty() or not QDir (path).exists())
 	{
-		CriticalError (PartDownloader::tr ("You need to specify a valid path for "
+		Critical (PartDownloader::tr ("You need to specify a valid path for "
 			"downloaded files in the configuration to download paths."));
 
 		(new ConfigDialog (ConfigDialog::DownloadTab, null))->exec();
@@ -373,7 +373,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 		print ("Creating %1...\n", dirpath);
 
 		if (not dir.mkpath (dirpath))
-			CriticalError (format (tr ("Couldn't create the directory %1!"), dirpath));
+			Critical (format (tr ("Couldn't create the directory %1!"), dirpath));
 	}
 
 	setNetworkReply (networkManager()->get (QNetworkRequest (QUrl (url))));
@@ -448,7 +448,7 @@ void PartDownloadRequest::downloadFinished()
 	if (networkReply()->error() != QNetworkReply::NoError)
 	{
 		if (isPrimary() and not prompt()->isAborted())
-			CriticalError (networkReply()->errorString());
+			Critical (networkReply()->errorString());
 
 		print ("Unable to download %1: %2\n", m_destinaton, networkReply()->errorString());
         setState (State::Failed);
@@ -543,7 +543,7 @@ void PartDownloadRequest::readyRead()
 
 		if (not filePointer()->open (QIODevice::WriteOnly))
 		{
-			CriticalError (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
+			Critical (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
             setState (State::Failed);
 			networkReply()->abort();
 			updateToTable();

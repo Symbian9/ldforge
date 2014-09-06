@@ -116,7 +116,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 
 		default:
 		{
-			CriticalError (format ("Unhandled LDObject type %1 (%2) in AddObjectDialog", (int) type, typeName));
+			Critical (format ("Unhandled LDObject type %1 (%2) in AddObjectDialog", (int) type, typeName));
 		} return;
 	}
 
@@ -377,7 +377,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 
 			if (not file)
 			{
-				CriticalError (format ("Couldn't open `%1': %2", name, strerror (errno)));
+				Critical (format ("Couldn't open `%1': %2", name, strerror (errno)));
 				return;
 			}
 

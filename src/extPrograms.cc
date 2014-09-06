@@ -195,7 +195,7 @@ static void WriteObjects (const LDObjectList& objects, QString fname)
 
 	if (not f.open (QIODevice::WriteOnly | QIODevice::Text))
 	{
-		CriticalError (format ("Couldn't open temporary file %1 for writing: %2\n", fname, f.errorString()));
+		Critical (format ("Couldn't open temporary file %1 for writing: %2\n", fname, f.errorString()));
 		return;
 	}
 
@@ -259,7 +259,7 @@ bool RunExtProgram (extprog prog, QString path, QString argvstr)
 
 	if (not proc.waitForStarted())
 	{
-		CriticalError (format ("Couldn't start %1: %2\n", g_extProgNames[prog], ProcessExtProgError (prog, proc)));
+		Critical (format ("Couldn't start %1: %2\n", g_extProgNames[prog], ProcessExtProgError (prog, proc)));
 		return false;
 	}
 
@@ -280,7 +280,7 @@ bool RunExtProgram (extprog prog, QString path, QString argvstr)
 
 	if (not err.isEmpty())
 	{
-		CriticalError (format ("%1 failed: %2\n", g_extProgNames[prog], err));
+		Critical (format ("%1 failed: %2\n", g_extProgNames[prog], err));
 		QString filename ("externalProgramOutput.txt");
 		QFile file (filename);
 
@@ -315,7 +315,7 @@ static void InsertOutput (QString fname, bool replace, QList<LDColor> colorsToRe
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		CriticalError (format ("Couldn't open temporary file %1 for reading.\n", fname));
+		Critical (format ("Couldn't open temporary file %1 for reading.\n", fname));
 		return;
 	}
 
@@ -481,7 +481,7 @@ void MainWindow::slot_actionIntersector()
 
 		if (inCol == cutCol)
 		{
-			CriticalError ("Cannot use the same color group for both input and cutter!");
+			Critical ("Cannot use the same color group for both input and cutter!");
 			continue;
 		}
 
@@ -575,7 +575,7 @@ void MainWindow::slot_actionCoverer()
 
 		if (in1Col == in2Col)
 		{
-			CriticalError ("Cannot use the same color group for both inputs!");
+			Critical ("Cannot use the same color group for both inputs!");
 			continue;
 		}
 
@@ -641,7 +641,7 @@ void MainWindow::slot_actionIsecalc()
 
 		if (in1Col == in2Col)
 		{
-			CriticalError ("Cannot use the same color group for both input and cutter!");
+			Critical ("Cannot use the same color group for both input and cutter!");
 			continue;
 		}
 
