@@ -308,7 +308,7 @@ void LDObject::destroy()
 		return;
 
 	// If this object was selected, unselect it now
-	if (isSelected())
+	if (isSelected() and document() != null)
 		deselect();
 
 	// If this object was associated to a file, remove it off it now
