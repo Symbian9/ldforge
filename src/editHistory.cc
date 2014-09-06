@@ -105,7 +105,7 @@ void History::addStep()
 		m_changesets.removeLast();
 	}
 
-	dprint ("History: step added (%1 changes)", m_currentChangeset.size());
+//	dprint ("History: step added (%1 changes)", m_currentChangeset.size());
 	m_changesets << m_currentChangeset;
 	m_currentChangeset.clear();
 	setPosition (position() + 1);
@@ -124,7 +124,7 @@ void History::add (AbstractHistoryEntry* entry)
 
 	entry->setParent (this);
 	m_currentChangeset << entry;
-	dprint ("History: added entry of type %1", entry->getTypeName());
+//	dprint ("History: added entry of type %1", entry->getTypeName());
 }
 
 // =============================================================================
