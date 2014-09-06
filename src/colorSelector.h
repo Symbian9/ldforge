@@ -30,26 +30,21 @@ class ColorSelector : public QDialog
 	PROPERTY (private,	LDColor,	selection,	setSelection,	STOCK_WRITE)
 
 public:
-	explicit ColorSelector (LDColor defval = null, QWidget* parent = null);
+	explicit ColorSelector (LDColor defaultvalue = null, QWidget* parent = null);
 	virtual ~ColorSelector();
 	static bool selectColor (LDColor& val, LDColor defval = null, QWidget* parent = null);
 
-protected:
-	void mousePressEvent (QMouseEvent* event);
-	void resizeEvent (QResizeEvent* ev);
-
 private:
 	Ui_ColorSelUI*	ui;
-	QGraphicsScene*	m_scene;
+	QMap<int, QPushButton*> m_buttons;
+	QMap<QPushButton*, int> m_buttonsReversed;
 	bool			m_firstResize;
 
-	int numRows() const;
-	int viewportWidth() const;
-	void drawScene();
 	void drawColorInfo();
 	void selectDirectColor (QColor col);
 
 private slots:
+	void colorButtonClicked();
 	void chooseDirectColor();
 	void transparentCheckboxClicked();
 };

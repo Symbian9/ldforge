@@ -83,6 +83,7 @@
 		color/type of the existing selection does not need to be uniform anymore.
 !	- Removed the Non-CA license option. The CA license option is now a checkbox (disabling it 
 		means no license at all).
+!	- The color selection prompt now uses a grid of pushbuttons instead of an unorthodox grid of colors
 
 
 
