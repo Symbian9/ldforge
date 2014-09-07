@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>644</width>
+    <width>648</width>
     <height>370</height>
    </rect>
   </property>
@@ -993,6 +993,13 @@ Under Linux, you can also set the programs to be launched with Wine, so you can 
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="configTryDownloadMissingFiles">
+              <property name="text">
+               <string>Attempt to download missing parts from the PT</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="configGuessDownloadPaths">

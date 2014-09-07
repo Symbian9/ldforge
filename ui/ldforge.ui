@@ -541,7 +541,7 @@
    <addaction name="actionModeCircle"/>
    <addaction name="actionModeLinePath"/>
   </widget>
-  <widget class="QToolBar" name="toolBarColor">
+  <widget class="QToolBar" name="toolBarColors">
    <property name="windowTitle">
     <string>Colors</string>
    </property>
