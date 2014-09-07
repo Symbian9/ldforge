@@ -173,6 +173,7 @@ void LDDocument::setImplicit (bool const& a)
 	if (m_isImplicit != a)
 	{
 		m_isImplicit = a;
+		print ("Setting implicity of %1 to %2\n", this, a ? "true" : "false");
 
 		if (a == false)
 		{
@@ -186,20 +187,10 @@ void LDDocument::setImplicit (bool const& a)
 		}
 		else
 		{
+			print ("Removing %1 from explicit documents...\n", this);
 			g_explicitDocuments.removeOne (self().toStrongRef());
+			print ("Removed %1", this);
 			print ("Closed %1", name());
-			int count = 0;
-
-			for (LDObjectWeakPtr obj : g_allObjects)
-			{
-				if (obj == null)
-					continue;
-
-				LDSubfilePtr ref = obj.toStrongRef().dynamicCast<LDSubfile>();
-
-				if (ref != null and ref->fileInfo() == self())
-					count++;
-			}
 		}
 
 		if (g_win != null)
@@ -702,7 +693,7 @@ void OpenMainModel (QString path)
 
 	for (LDDocumentWeakPtr doc : g_allDocuments)
 	{
-		if (doc.toStrongRef()->name() == shortName)
+		if (doc != null and doc.toStrongRef()->name() == shortName)
 		{
 			documentToReplace = doc;
 			break;
@@ -1454,7 +1445,8 @@ void LDDocument::closeInitialFile()
 		not g_explicitDocuments[1]->name().isEmpty() and
 		not g_explicitDocuments[0]->hasUnsavedChanges())
 	{
-		g_explicitDocuments[0]->dismiss();
+		LDDocumentPtr filetoclose = g_explicitDocuments.first();
+		filetoclose->dismiss();
 	}
 }
 

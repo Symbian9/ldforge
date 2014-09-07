@@ -280,12 +280,18 @@ void GLCompiler::prepareVBO (int vbonum)
 
 	QVector<GLfloat> vbodata;
 
-	for (auto it = m_objectInfo.begin(); it != m_objectInfo.end(); ++it)
+	for (auto it = m_objectInfo.begin(); it != m_objectInfo.end();)
 	{
 		if (it.key() == null)
+		{
 			it = m_objectInfo.erase (it);
-		elif (it.key().toStrongRef()->document() == CurrentDocument() and not it.key().toStrongRef()->isHidden())
+		}
+		elif (it.key().toStrongRef()->document() == CurrentDocument()
+			and not it.key().toStrongRef()->isHidden())
+		{
 			vbodata += it->data[vbonum];
+			++it;
+		}
 	}
 
 	glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);
