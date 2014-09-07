@@ -32,6 +32,7 @@ struct LDPolygon
 	Vertex		vertices[4];
 	int			id;
 	int			color;
+	Winding		winding;
 
 	inline int numVertices() const
 	{

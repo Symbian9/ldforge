@@ -419,6 +419,7 @@ LDPolygon* LDObject::getPolygon()
 	data->id = id();
 	data->num = num;
 	data->color = color().index();
+	data->winding = blockWinding();
 
 	for (int i = 0; i < data->numVertices(); ++i)
 		data->vertices[i] = vertex (i);
@@ -430,14 +431,29 @@ LDPolygon* LDObject::getPolygon()
 //
 QList<LDPolygon> LDSubfile::inlinePolygons()
 {
+	bool isInverted (false);
+	LDBFCPtr bfc (previous().dynamicCast<LDBFC>());
+
+	if ((bfc != null and bfc->statement() == BFCStatement::InvertNext)
+		or transform().getDeterminant() < 0)
+	{
+		isInverted = true;
+	}
+
+	print ("inlining polygons of subfile-ref %1: inverted: %2", fileInfo()->name(), isInverted ? "true" : "false");
+
 	QList<LDPolygon> data = fileInfo()->inlinePolygons();
 
 	for (LDPolygon& entry : data)
 	{
 		for (int i = 0; i < entry.numVertices(); ++i)
 			entry.vertices[i].transform (transform(), position());
+
+		if (isInverted)
+			invertWinding (entry.winding);
 	}
 
+	print ("Using winding: %1\n", (data[0].winding == Winding::CCW) ? "CCW" : (data[0].winding == Winding::CW) ? "CW" : "None");
 	return data;
 }
 

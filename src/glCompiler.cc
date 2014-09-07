@@ -49,10 +49,6 @@ CFGENTRY (String, SelectColorBlend, "#0080FF")
 EXTERN_CFGENTRY (Bool, BlackEdges)
 EXTERN_CFGENTRY (String, BackgroundColor)
 
-static QList<int>		g_warnedColors;
-static const QColor		g_BFCFrontColor (64, 192, 80);
-static const QColor		g_BFCBackColor (208, 64, 64);
-
 // static QMap<LDObjectPtr, String> g_objectOrigins;
 
 // =============================================================================
@@ -135,7 +131,12 @@ QColor GLCompiler::indexColorForID (int id) const
 QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 									   EVBOComplement complement) const
 {
+	static const QColor bfcFrontColor (64, 192, 80);
+	static const QColor	bfcBackColor (208, 64, 64);
+	static const QColor	bfcDisabledColor (64, 64, 208);
+	static QList<int> warnedcolors;
 	QColor qcol;
+	print ("Winding of %1 is %2", poly.id, (int) poly.winding);
 
 	switch (complement)
 	{
@@ -144,11 +145,11 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 			return QColor();
 
 		case VBOCM_BFCFrontColors:
-			qcol = g_BFCFrontColor;
+			qcol = (poly.winding != Winding::None) ? bfcFrontColor : bfcDisabledColor;
 			break;
 
 		case VBOCM_BFCBackColors:
-			qcol = g_BFCBackColor;
+			qcol = (poly.winding != Winding::None) ? bfcBackColor : bfcDisabledColor;
 			break;
 
 		case VBOCM_PickColors:
@@ -184,16 +185,13 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
 	{
 		// The color was unknown. Use main color to make the polygon at least
 		// not appear pitch-black.
-		if (poly.num != 2 and poly.num != 5)
-			qcol = GLRenderer::getMainColor();
-		else
-			qcol = Qt::black;
+		qcol = (poly.num != 2 and poly.num != 5) ? GLRenderer::getMainColor() : Qt::black;
 
 		// Warn about the unknown color, but only once.
-		if (not g_warnedColors.contains (poly.color))
+		if (not warnedcolors.contains (poly.color))
 		{
 			print ("Unknown color %1!\n", poly.color);
-			g_warnedColors << poly.color;
+			warnedcolors << poly.color;
 		}
 
 		return qcol;
@@ -389,7 +387,9 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOI
 		QVector<GLfloat>& vbodata	= objinfo->data[vbonum];
 		const QColor color			= getColorForPolygon (poly, topobj, complement);
 
-		for (int vert = 0; vert < numverts; ++vert)
+		bool inverted = (poly.winding != Winding::CCW);
+
+		auto func = [&](int vert)
 		{
 			if (complement == VBOCM_Surfaces)
 			{
@@ -405,6 +405,17 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOI
 						<< ((GLfloat) color.blue()) / 255.0f
 						<< ((GLfloat) color.alpha()) / 255.0f;
 			}
+		};
+
+		if (not inverted)
+		{
+			for (int vert = 0; vert < numverts; ++vert)
+				func (vert);
+		}
+		else
+		{
+			for (int vert = numverts - 1; vert >= 0; --vert)
+				func (vert);
 		}
 	}
 }

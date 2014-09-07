@@ -64,7 +64,6 @@ class LDDocument : public QObject
 {
 public:
 	PROPERTY (public,	QString,				name,			setName,			STOCK_WRITE)
-	PROPERTY (private,	LDObjectList,		objects, 		setObjects,			STOCK_WRITE)
 	PROPERTY (private,	LDObjectList,		cache, 			setCache,			STOCK_WRITE)
 	PROPERTY (private,	History*,			history,		setHistory,			STOCK_WRITE)
 	PROPERTY (public,	QString,				fullPath,		setFullPath,		STOCK_WRITE)
@@ -90,13 +89,13 @@ public:
 	void clearSelection();
 	void forgetObject (LDObjectPtr obj); // Deletes the given object from the object chain.
 	QString getDisplayName();
-	const LDObjectList& getSelection() const;
+	const LDObjectList& getSelection();
 	bool hasUnsavedChanges() const; // Does this document have unsaved changes?
 	void initializeCachedData();
 	LDObjectList inlineContents (bool deep, bool renderinline);
 	void insertObj (int pos, LDObjectPtr obj);
 	int getObjectCount() const;
-	LDObjectPtr getObject (int pos) const;
+	LDObjectPtr getObject (int pos);
 	bool save (QString path = "", int64* sizeptr = null); // Saves this file to disk.
 	void swapObjects (LDObjectPtr one, LDObjectPtr other);
 	bool isSafeToClose(); // Perform safety checks. Do this before closing any files!
@@ -109,6 +108,8 @@ public:
 	void redoVertices();
 	void needVertexMerge();
 	void reloadAllSubfiles();
+	void sweepBFC();
+	LDObjectList const& objects();
 
 	inline LDDocument& operator<< (LDObjectPtr obj)
 	{
@@ -146,6 +147,11 @@ public:
 		setImplicit (true);
 	}
 
+	inline void requireBFCSweep()
+	{
+		m_needBFCSweep = true;
+	}
+
 	static LDDocumentPtr current();
 	static void setCurrent (LDDocumentPtr f);
 	static void closeInitialFile();
@@ -170,12 +176,16 @@ protected:
 	friend class GLRenderer;
 
 private:
+	LDObjectList			m_objects;
 	LDObjectList			m_sel;
 	LDGLData*				m_gldata;
 
 	// If set to true, next polygon inline of this document discards the
 	// stored polygon data and re-builds it.
 	bool					m_needsReCache;
+
+	// If set to true, next object reference request causes BFC sweep.
+	bool					m_needBFCSweep;
 };
 
 inline LDDocumentPtr CurrentDocument()

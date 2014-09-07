@@ -56,6 +56,21 @@ enum Axis
 	Z
 };
 
+enum class Winding
+{
+	CW,
+	CCW,
+	None
+};
+
+inline void invertWinding (Winding& winding)
+{
+	if (winding == Winding::CW)
+		winding = Winding::CCW;
+	elif (winding == Winding::CCW)
+		winding = Winding::CW;
+}
+
 //
 // Derivative of QVector3D: this class is used for the vertices.
 //
