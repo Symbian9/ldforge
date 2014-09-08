@@ -562,18 +562,44 @@ void MainWindow::refresh()
 void MainWindow::updateSelection()
 {
 	g_isSelectionLocked = true;
-
-	ui->objectList->clearSelection();
+	QItemSelection itemselect;
+	int top = -1;
+	int bottom = -1;
+	QTime t0 = QTime::currentTime();
 
 	for (LDObjectPtr obj : Selection())
 	{
 		if (obj->qObjListEntry == null)
 			continue;
 
-		obj->qObjListEntry->setSelected (true);
+		int row = ui->objectList->row (obj->qObjListEntry);
+
+		if (top == -1)
+		{
+			top = bottom = row;
+		}
+		else
+		{
+			if (row != bottom + 1)
+			{
+				itemselect.select (ui->objectList->model()->index (top, 0),
+					ui->objectList->model()->index (bottom, 0));
+				top = -1;
+			}
+
+			bottom = row;
+		}
 	}
 
+	if (top != -1)
+	{
+		itemselect.select (ui->objectList->model()->index (top, 0),
+			ui->objectList->model()->index (bottom, 0));
+	}
+
+	ui->objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
 	g_isSelectionLocked = false;
+	printf ("Selection performed in %dms\n", t0.msecsTo (QTime::currentTime()));
 }
 
 // =============================================================================

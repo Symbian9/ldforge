@@ -880,10 +880,12 @@ void LDObject::select()
 	document().toStrongRef()->addToSelection (self());
 
 	// If this object is inverted with INVERTNEXT, pick the INVERTNEXT as well.
+	/*
 	LDBFCPtr invertnext;
 
 	if (previousIsInvertnext (invertnext))
 		invertnext->select();
+	*/
 }
 
 // =============================================================================

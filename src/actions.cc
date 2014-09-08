@@ -268,9 +268,6 @@ void MainWindow::slot_actionSelectAll()
 {
 	for (LDObjectPtr obj : CurrentDocument()->objects())
 		obj->select();
-
-	ui->objectList->selectAll();
-	refresh();
 }
 
 // =============================================================================
@@ -296,9 +293,6 @@ void MainWindow::slot_actionSelectByColor()
 		if (colors.contains (obj->color()))
 			obj->select();
 	}
-
-	updateSelection();
-	refresh();
 }
 
 // =============================================================================
@@ -336,9 +330,6 @@ void MainWindow::slot_actionSelectByType()
 
 		obj->select();
 	}
-
-	updateSelection();
-	refresh();
 }
 
 // =============================================================================
