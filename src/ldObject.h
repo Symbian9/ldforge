@@ -101,11 +101,6 @@ class LDObject
 	PROPERTY (private,		QColor,				randomColor,	setRandomColor,	STOCK_WRITE)
 	PROPERTY (private,		LDObjectWeakPtr,	self,			setSelf,		STOCK_WRITE)
 
-	// What winding the object is supposed to be wound in, depending on the BFC statements
-	// This is CW if the part is CW-certified at this object, and vice versa. Can also be
-	// Winding::None for NOCERTIFY parts.
-	PROPERTY (public,		Winding,			blockWinding,	setBlockWinding,	STOCK_WRITE)
-
 public:
 	LDObject (LDObjectPtr* selfptr);
 

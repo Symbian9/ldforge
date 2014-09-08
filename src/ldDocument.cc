@@ -209,12 +209,6 @@ void LDDocument::setImplicit (bool const& a)
 	}
 }
 
-LDObjectList const& LDDocument::objects()
-{
-	sweepBFC();
-	return m_objects;
-}
-
 // =============================================================================
 //
 QList<LDDocumentPtr> const& LDDocument::explicitDocuments()
@@ -1153,7 +1147,6 @@ void LDDocument::reloadAllSubfiles()
 }
 
 // =============================================================================
-// Adds an object at the end of the file.
 //
 int LDDocument::addObject (LDObjectPtr obj)
 {
@@ -1162,7 +1155,6 @@ int LDDocument::addObject (LDObjectPtr obj)
 	addKnownVertices (obj);
 	obj->setDocument (self());
 	g_win->R()->compileObject (obj);
-	requireBFCSweep();
 	return getObjectCount() - 1;
 }
 
@@ -1175,8 +1167,6 @@ void LDDocument::addObjects (const LDObjectList& objs)
 		if (obj != null)
 			addObject (obj);
 	}
-
-	requireBFCSweep();
 }
 
 // =============================================================================
@@ -1187,8 +1177,8 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 	m_objects.insert (pos, obj);
 	obj->setDocument (self());
 	g_win->R()->compileObject (obj);
-	requireBFCSweep();
 	
+
 #ifdef DEBUG
 	if (not isImplicit())
 		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
@@ -1223,11 +1213,6 @@ void LDDocument::forgetObject (LDObjectPtr obj)
 		history()->add (new DelHistory (idx, obj));
 		m_objectVertices.remove (obj);
 	}
-
-	// We only need a sweep if we got rid of a BFC object, no processing is required if a polygon
-	// just got removed.
-	if (obj->type() == OBJ_BFC)
-		requireBFCSweep();
 
 	m_objects.removeAt (idx);
 	obj->setDocument (LDDocumentPtr());
@@ -1272,12 +1257,11 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 
 // =============================================================================
 //
-LDObjectPtr LDDocument::getObject (int pos)
+LDObjectPtr LDDocument::getObject (int pos) const
 {
 	if (m_objects.size() <= pos)
 		return LDObjectPtr();
 
-	sweepBFC();
 	return m_objects[pos];
 }
 
@@ -1285,7 +1269,7 @@ LDObjectPtr LDDocument::getObject (int pos)
 //
 int LDDocument::getObjectCount() const
 {
-	return m_objects.size();
+	return objects().size();
 }
 
 // =============================================================================
@@ -1523,9 +1507,8 @@ void LDDocument::clearSelection()
 
 // =============================================================================
 //
-const LDObjectList& LDDocument::getSelection()
+const LDObjectList& LDDocument::getSelection() const
 {
-	sweepBFC();
 	return m_sel;
 }
 
@@ -1539,7 +1522,6 @@ void LDDocument::swapObjects (LDObjectPtr one, LDObjectPtr other)
 	m_objects[b] = one;
 	m_objects[a] = other;
 	addToHistory (new SwapHistory (one->id(), other->id()));
-	requireBFCSweep();
 }
 
 // =============================================================================
@@ -1571,73 +1553,4 @@ void LDDocument::redoVertices()
 void LDDocument::needVertexMerge()
 {
 	m_needVertexMerge = true;
-}
-
-//
-// Sweeps through the file and adjusts the block windings of all objects.
-//
-void LDDocument::sweepBFC()
-{
-	if (not m_needBFCSweep)
-		return;
-
-	QTime t0 (QTime::currentTime());
-	Winding winding (Winding::None);
-	Winding preclip (winding);
-	LDBFCPtr bfc;
-	bool invertnext (false);
-
-	for (LDObjectPtr obj : m_objects)
-	{
-		if (obj->type() == OBJ_BFC)
-		{
-			switch (obj.staticCast<LDBFC>()->statement())
-			{
-			case BFCStatement::CCW:
-			case BFCStatement::CertifyCCW:
-				winding = Winding::CCW;
-				break;
-
-			case BFCStatement::CW:
-			case BFCStatement::CertifyCW:
-				winding = Winding::CW;
-
-			case BFCStatement::NoCertify:
-				winding = Winding::None;
-				break;
-
-			case BFCStatement::NoClip:
-				preclip = winding;
-				winding = Winding::None;
-				break;
-
-			case BFCStatement::InvertNext:
-				invertnext = true;
-				break;
-
-			case BFCStatement::Clip:
-				winding = preclip;
-				break;
-
-			default:
-				break;
-			}
-		}
-		else
-		{
-			Winding objwinding (winding);
-
-			if (invertnext)
-			{
-				invertWinding (objwinding);
-				invertnext = false;
-			}
-
-			print ("%1: BFC sweep: set winding of %2 to %3", getDisplayName(), obj->id(), int (objwinding));
-			obj->setBlockWinding (objwinding);
-		}
-	}
-
-	print ("%1: BFC sweep done in %2ms", getDisplayName(), t0.msecsTo (QTime::currentTime()));
-	m_needBFCSweep = false;
 }
