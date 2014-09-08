@@ -283,13 +283,16 @@ void GLCompiler::prepareVBO (int vbonum)
 		if (it.key() == null)
 		{
 			it = m_objectInfo.erase (it);
+			continue;
 		}
-		elif (it.key().toStrongRef()->document() == CurrentDocument()
+
+		if (it.key().toStrongRef()->document() == CurrentDocument()
 			and not it.key().toStrongRef()->isHidden())
 		{
 			vbodata += it->data[vbonum];
-			++it;
 		}
+
+		++it;
 	}
 
 	glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);

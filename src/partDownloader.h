@@ -70,6 +70,7 @@ public:
 	virtual			~PartDownloader();
 
 	void			addFile (LDDocumentPtr f);
+	bool			checkValidPath();
 	void			downloadFile (QString dest, QString url, bool primary);
 	void			downloadFromPartsTracker (QString file);
 	QPushButton*	getButton (Button i);

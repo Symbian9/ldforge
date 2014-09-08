@@ -22,13 +22,14 @@
 #include <QDir>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QMessageBox>
 #include "partDownloader.h"
 #include "ui_downloadfrom.h"
 #include "basics.h"
 #include "mainWindow.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
-#include "configDialog.h"
 
 CFGENTRY (String, DownloadFilePath, "")
 CFGENTRY (Bool, GuessDownloadPaths, true)
@@ -40,19 +41,12 @@ const QString g_unofficialLibraryURL ("http://ldraw.org/library/unofficial/");
 //
 void PartDownloader::staticBegin()
 {
-	QString path = getDownloadPath();
+	PartDownloader dlg;
 
-	if (path.isEmpty() or not QDir (path).exists())
-	{
-		Critical (PartDownloader::tr ("You need to specify a valid path for "
-			"downloaded files in the configuration to download paths."));
-
-		(new ConfigDialog (ConfigDialog::DownloadTab, null))->exec();
+	if (not dlg.checkValidPath())
 		return;
-	}
 
-	PartDownloader* dlg = new PartDownloader;
-	dlg->exec();
+	dlg.exec();
 }
 
 // =============================================================================
@@ -98,6 +92,26 @@ PartDownloader::PartDownloader (QWidget* parent) :
 PartDownloader::~PartDownloader()
 {
 	delete form();
+}
+
+// =============================================================================
+//
+bool PartDownloader::checkValidPath()
+{
+	QString path = getDownloadPath();
+
+	if (path.isEmpty() or not QDir (path).exists())
+	{
+		QMessageBox::information(this, "Notice", "Please input a path for files to download.");
+		path = QFileDialog::getExistingDirectory (this, "Path for downloaded files:");
+
+		if (path.isEmpty())
+			return false;
+
+		cfg::DownloadFilePath = path;
+	}
+
+	return true;
 }
 
 // =============================================================================

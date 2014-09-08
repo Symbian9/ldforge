@@ -35,6 +35,7 @@
 
 CFGENTRY (String, LDrawPath, "")
 CFGENTRY (List, RecentFiles, {})
+CFGENTRY (Bool, TryDownloadMissingFiles, false)
 EXTERN_CFGENTRY (String, DownloadFilePath)
 EXTERN_CFGENTRY (Bool, UseLogoStuds)
 
@@ -762,18 +763,22 @@ void OpenMainModel (QString path)
 		unknowns << obj.staticCast<LDError>()->fileReferenced();
 	}
 
-	if (not unknowns.isEmpty())
+	if (cfg::TryDownloadMissingFiles and not unknowns.isEmpty())
 	{
 		PartDownloader dl;
-		dl.setSource (PartDownloader::PartsTracker);
-		dl.setPrimaryFile (file);
 
-		for (QString const& unknown : unknowns)
-			dl.downloadFromPartsTracker (unknown);
+		if (dl.checkValidPath())
+		{
+			dl.setSource (PartDownloader::PartsTracker);
+			dl.setPrimaryFile (file);
 
-		dl.exec();
-		dl.checkIfFinished();
-		file->reloadAllSubfiles();
+			for (QString const& unknown : unknowns)
+				dl.downloadFromPartsTracker (unknown);
+
+			dl.exec();
+			dl.checkIfFinished();
+			file->reloadAllSubfiles();
+		}
 	}
 }
 

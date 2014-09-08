@@ -215,14 +215,16 @@ QList<LDQuickColor> LoadQuickColorList()
 void MainWindow::updateColorToolbar()
 {
 	m_colorButtons.clear();
-	ui->colorToolbar->clear();
-	ui->colorToolbar->addAction (ui->actionUncolor);
-	ui->colorToolbar->addSeparator();
+	ui->toolBarColors->clear();
+	ui->toolBarColors->addAction (ui->actionUncolor);
+	ui->toolBarColors->addSeparator();
 
 	for (LDQuickColor& entry : m_quickColors)
 	{
 		if (entry.isSeparator())
-			ui->colorToolbar->addSeparator();
+		{
+			ui->toolBarColors->addSeparator();
+		}
 		else
 		{
 			QToolButton* colorButton = new QToolButton;
@@ -231,7 +233,7 @@ void MainWindow::updateColorToolbar()
 			colorButton->setToolTip (entry.color().name());
 
 			connect (colorButton, SIGNAL (clicked()), this, SLOT (slot_quickColor()));
-			ui->colorToolbar->addWidget (colorButton);
+			ui->toolBarColors->addWidget (colorButton);
 			m_colorButtons << colorButton;
 
 			entry.setToolButton (colorButton);
