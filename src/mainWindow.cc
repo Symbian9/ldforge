@@ -565,7 +565,6 @@ void MainWindow::updateSelection()
 	QItemSelection itemselect;
 	int top = -1;
 	int bottom = -1;
-	QTime t0 = QTime::currentTime();
 
 	for (LDObjectPtr obj : Selection())
 	{
@@ -599,7 +598,6 @@ void MainWindow::updateSelection()
 
 	ui->objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
 	g_isSelectionLocked = false;
-	printf ("Selection performed in %dms\n", t0.msecsTo (QTime::currentTime()));
 }
 
 // =============================================================================
