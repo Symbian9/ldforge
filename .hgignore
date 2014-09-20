@@ -16,3 +16,4 @@ debug_lastInput
 .kdev4
 .*~
 *.orig
+CMakeLists.txt.user
