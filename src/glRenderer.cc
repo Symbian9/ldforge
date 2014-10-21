@@ -1650,6 +1650,11 @@ int GLRenderer::depthNegateFactor() const
 	return g_FixedCameras[camera()].negatedDepth ? -1 : 1;
 }
 
+Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
+{
+	return m_keymods;
+}
+
 LDFixedCamera const& GetFixedCamera (ECamera cam)
 {
 	assert (cam != EFreeCamera);
