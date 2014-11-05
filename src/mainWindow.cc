@@ -58,6 +58,7 @@ static QMap<QAction*, QKeySequence> g_defaultShortcuts;
 CFGENTRY (Bool, ColorizeObjectsList, true)
 CFGENTRY (String, QuickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
 CFGENTRY (Bool, ListImplicitFiles, false)
+CFGENTRY (List, HiddenToolbars, {})
 EXTERN_CFGENTRY (List, RecentFiles)
 EXTERN_CFGENTRY (Bool, DrawAxes)
 EXTERN_CFGENTRY (String, MainColor)
@@ -125,6 +126,14 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	connect (ui->ringToolSegments, SIGNAL (valueChanged (int)),
 		this, SLOT (circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
+
+	for (QVariant const& toolbarname : cfg::HiddenToolbars)
+	{
+		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
+
+		if (toolbar != null)
+			toolbar->hide();
+	}
 }
 
 MainWindow::~MainWindow()
@@ -632,10 +641,17 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 		return;
 	}
 
-	// Save the configuration before leaving so that, for instance, grid choice
-	// is preserved across instances.
-	Config::Save();
+	// Save the toolbar set
+	cfg::HiddenToolbars.clear();
 
+	for (QToolBar* toolbar : findChildren<QToolBar*>())
+	{
+		if (toolbar->isHidden())
+			cfg::HiddenToolbars << toolbar->objectName();
+	}
+
+	// Save the configuration before leaving.
+	Config::Save();
 	ev->accept();
 }
 

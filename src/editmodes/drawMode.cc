@@ -21,6 +21,7 @@
 #include "drawMode.h"
 #include "../ldObject.h"
 #include "../glRenderer.h"
+#include "../miscallenous.h"
 
 DrawMode::DrawMode (GLRenderer* renderer) :
 	Super (renderer) {}
@@ -40,7 +41,7 @@ void DrawMode::render (QPainter& painter) const
 
 	// Draw the cursor vertex as the last one in the list.
 	if (poly.size() < 4)
-		poly << renderer()->position3D();
+		poly << getCursorVertex();
 
 	renderPolygon (painter, poly, true, true);
 }
@@ -74,7 +75,7 @@ bool DrawMode::mouseReleased (MouseEventData const& data)
 			return true;
 		}
 
-		addDrawnVertex (renderer()->position3D());
+		addDrawnVertex (getCursorVertex());
 		return true;
 	}
 
@@ -126,4 +127,37 @@ void DrawMode::endDraw()
 	}
 
 	finishDraw (objs);
+}
+
+template<typename _Type>
+_Type IntervalClamp (_Type a, _Type interval)
+{
+	_Type remainder = a % interval;
+
+	if (remainder >= float (interval / 2))
+		a += interval;
+
+	a -= remainder;
+	return a;
+}
+
+Vertex DrawMode::getCursorVertex() const
+{
+	Vertex result = renderer()->position3D();
+
+	if (renderer()->keyboardModifiers() & Qt::ControlModifier
+		and not m_drawedVerts.isEmpty())
+	{
+		Vertex const& v0 = m_drawedVerts.last();
+		Vertex const& v1 = result;
+		Axis relX, relY;
+
+		renderer()->getRelativeAxes (relX, relY);
+		QLineF ln (v0[relX], v0[relY], v1[relX], v1[relY]);
+		ln.setAngle (IntervalClamp<int> (ln.angle(), 45));
+		result.setCoordinate (relX, Grid::Snap (ln.x2(), Grid::Coordinate));
+		result.setCoordinate (relY, Grid::Snap (ln.y2(), Grid::Coordinate));
+	}
+
+	return result;
 }

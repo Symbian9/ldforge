@@ -168,13 +168,11 @@ LDDocument::~LDDocument()
 
 // =============================================================================
 //
-extern QMap<long, LDObjectWeakPtr>	g_allObjects;
 void LDDocument::setImplicit (bool const& a)
 {
 	if (m_isImplicit != a)
 	{
 		m_isImplicit = a;
-		print ("Setting implicity of %1 to %2\n", this, a ? "true" : "false");
 
 		if (a == false)
 		{
@@ -188,9 +186,7 @@ void LDDocument::setImplicit (bool const& a)
 		}
 		else
 		{
-			print ("Removing %1 from explicit documents...\n", this);
 			g_explicitDocuments.removeOne (self().toStrongRef());
-			print ("Removed %1", this);
 			print ("Closed %1", name());
 		}
 

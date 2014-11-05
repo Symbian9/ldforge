@@ -169,6 +169,7 @@ public:
 	Axis					getRelativeZ() const;
 	LDGLOverlay&			getOverlay (int newcam);
 	uchar*					getScreencap (int& w, int& h);
+	Qt::KeyboardModifiers	keyboardModifiers() const;
 	void					hardRefresh();
 	void					highlightCursorObject();
 	void					initGLData();

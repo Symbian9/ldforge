@@ -32,4 +32,5 @@ public:
 	bool mouseReleased (MouseEventData const& data) override;
 	void endDraw();
 	bool preAddVertex (Vertex const&);
+	Vertex getCursorVertex() const;
 };

@@ -1296,10 +1296,7 @@ LDGLOverlay& GLRenderer::getOverlay (int newcam)
 //
 void GLRenderer::zoomNotch (bool inward)
 {
-	if (zoom() > 15)
-		zoom() *= inward ? 0.833f : 1.2f;
-	else
-		zoom() += inward ? -1.2f : 1.2f;
+	zoom() *= inward ? 0.833f : 1.2f;
 }
 
 // =============================================================================
@@ -1313,13 +1310,9 @@ void GLRenderer::zoomToFit()
 
 	bool lastfilled = false;
 	bool firstrun = true;
-	const uint32 white = 0xFFFFFFFF;
+	enum { black = 0xFF000000 };
 	bool inward = true;
-	const int w = m_width, h = m_height;
 	int runaway = 50;
-
-	glClearColor (1.0, 1.0, 1.0, 1.0);
-	glDisable (GL_DITHER);
 
 	// Use the pick list while drawing the scene, this way we can tell whether borders
 	// are background or not.
@@ -1329,24 +1322,22 @@ void GLRenderer::zoomToFit()
 	{
 		if (zoom() > 10000.0 or zoom() < 0.0)
 		{
-			// Obviously, there's nothing to draw if we get here.
-			// Default to 30.0f and break out.
+			// Nothing to draw if we get here.
 			zoom() = 30.0;
 			break;
 		}
 
 		zoomNotch (inward);
-
-		uchar* cap = new uchar[4 * w * h];
+		QVector<unsigned char> capture (4 * m_width * m_height);
 		drawGLScene();
-		glReadPixels (0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, cap);
-		uint32* imgdata = reinterpret_cast<uint32*> (cap);
+		glReadPixels (0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, capture.data());
+		QImage image (capture.constData(), m_width, m_height, QImage::Format_ARGB32);
 		bool filled = false;
 
 		// Check the top and bottom rows
-		for (int i = 0; i < w; ++i)
+		for (int i = 0; i < image.width(); ++i)
 		{
-			if (imgdata[i] != white or imgdata[((h - 1) * w) + i] != white)
+			if (image.pixel (i, 0) != black or image.pixel (i, m_height - 1) != black)
 			{
 				filled = true;
 				break;
@@ -1356,17 +1347,15 @@ void GLRenderer::zoomToFit()
 		// Left and right edges
 		if (filled == false)
 		{
-			for (int i = 0; i < h; ++i)
+			for (int i = 0; i < image.height(); ++i)
 			{
-				if (imgdata[i * w] != white or imgdata[(i * w) + w - 1] != white)
+				if (image.pixel (0, i) != black or image.pixel (m_width - 1, i) != black)
 				{
 					filled = true;
 					break;
 				}
 			}
 		}
-
-		delete[] cap;
 
 		if (firstrun)
 		{
@@ -1397,7 +1386,6 @@ void GLRenderer::zoomToFit()
 		lastfilled = filled;
 	}
 
-	setBackground();
 	setPicking (false);
 }
 
@@ -1405,15 +1393,7 @@ void GLRenderer::zoomToFit()
 //
 void GLRenderer::zoomAllToFit()
 {
-	ECamera oldcam = camera();
-
-	for (ECamera cam = EFirstCamera; cam < ENumCameras; ++cam)
-	{
-		setCamera (cam);
-		zoomToFit();
-	}
-
-	setCamera (oldcam);
+	zoomToFit();
 }
 
 // =============================================================================
@@ -1648,6 +1628,11 @@ void GLRenderer::doMakeCurrent()
 int GLRenderer::depthNegateFactor() const
 {
 	return g_FixedCameras[camera()].negatedDepth ? -1 : 1;
+}
+
+Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
+{
+	return m_keymods;
 }
 
 LDFixedCamera const& GetFixedCamera (ECamera cam)
