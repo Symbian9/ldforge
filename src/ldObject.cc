@@ -392,7 +392,7 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 	// Transform the objects
 	for (LDObjectPtr obj : objs)
 	{
-		assert (obj->type() != OBJ_Subfile);
+		// assert (obj->type() != OBJ_Subfile);
 		// Set the parent now so we know what inlined the object.
 		obj->setParent (self());
 		TransformObject (obj, transform(), position(), color());

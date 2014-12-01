@@ -262,8 +262,13 @@ void GLCompiler::compileStaged()
 {
 	RemoveDuplicates (m_staged);
 
-	for (LDObjectPtr obj : m_staged)
-		compileObject (obj);
+	for (auto it = m_staged.begin(); it != m_staged.end(); ++it)
+	{
+		if (*it == null)
+			continue;
+
+		compileObject (*it);
+	}
 
 	m_staged.clear();
 }

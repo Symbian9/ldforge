@@ -582,9 +582,9 @@ bool LDDocument::isSafeToClose()
 	// If we have unsaved changes, warn and give the option of saving.
 	if (hasUnsavedChanges())
 	{
-		QString message = format (tr ("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
+		QString message = format (QObject::tr ("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
 
-		int button = msgbox::question (g_win, tr ("Unsaved Changes"), message,
+		int button = msgbox::question (g_win, QObject::tr ("Unsaved Changes"), message,
 			(msgbox::Yes | msgbox::No | msgbox::Cancel), msgbox::Cancel);
 
 		switch (button)
@@ -594,8 +594,8 @@ bool LDDocument::isSafeToClose()
 				// If we don't have a file path yet, we have to ask the user for one.
 				if (name().length() == 0)
 				{
-					QString newpath = QFileDialog::getSaveFileName (g_win, tr ("Save As"),
-						CurrentDocument()->name(), tr ("LDraw files (*.dat *.ldr)"));
+					QString newpath = QFileDialog::getSaveFileName (g_win, QObject::tr ("Save As"),
+						CurrentDocument()->name(), QObject::tr ("LDraw files (*.dat *.ldr)"));
 
 					if (newpath.length() == 0)
 						return false;
@@ -605,10 +605,10 @@ bool LDDocument::isSafeToClose()
 
 				if (not save())
 				{
-					message = format (tr ("Failed to save %1 (%2)\nDo you still want to close?"),
+					message = format (QObject::tr ("Failed to save %1 (%2)\nDo you still want to close?"),
 						name(), strerror (errno));
 
-					if (msgbox::critical (g_win, tr ("Save Failure"), message,
+					if (msgbox::critical (g_win, QObject::tr ("Save Failure"), message,
 						(msgbox::Yes | msgbox::No), msgbox::No) == msgbox::No)
 					{
 						return false;
@@ -1285,7 +1285,7 @@ QString LDDocument::getDisplayName()
 	if (not defaultName().isEmpty())
 		return "[" + defaultName() + "]";
 
-	return tr ("untitled");
+	return QObject::tr ("untitled");
 }
 
 // =============================================================================
@@ -1461,7 +1461,7 @@ void LoadLogoStuds()
 	g_loadingLogoedStuds = true;
 	g_logoedStud = OpenDocument ("stud-logo.dat", true, true);
 	g_logoedStud2 = OpenDocument ("stud2-logo.dat", true, true);
-	print (LDDocument::tr ("Logoed studs loaded.\n"));
+	print (QObject::tr ("Logoed studs loaded.\n"));
 	g_loadingLogoedStuds = false;
 }
 

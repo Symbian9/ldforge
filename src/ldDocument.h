@@ -60,7 +60,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS (LDDocumentFlags)
 // The default name is a placeholder, initially suggested name for a file. The
 // primitive generator uses this to give initial names to primitives.
 //
-class LDDocument : public QObject
+class LDDocument
 {
 public:
 	PROPERTY (public,	QString,				name,			setName,			STOCK_WRITE)
