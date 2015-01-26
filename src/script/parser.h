@@ -1,23 +1,54 @@
 #pragma once
-#include <QString>
+#include "../main.h"
 #include "ast.h"
 
 namespace Script
 {
 	enum TokenType
 	{
-		TOK_Dollar,
-		TOK_Semicolon,
-		TOK_BraceLeft,
-		TOK_BraceRight,
-		TOK_BracketLeft,
-		TOK_BracketRight,
-		TOK_ParenLeft,
-		TOK_ParenRight,
-		TOK_String,
-		TOK_Symbol,
-		TOK_Number,
-		TOK_Any
+		TOK_DoubleEquals,		// ==
+		TOK_AngleLeftEquals,	// <=
+		TOK_AngleRightEquals,	// >=
+		TOK_DoubleAmperstand,	// &&
+		TOK_DoubleBar,			// ||
+		TOK_Dollar,				// $
+		TOK_Colon,				// :
+		TOK_Semicolon,			// ;
+		TOK_Dot,				// .
+		TOK_Comma,				// ,
+		TOK_Equals,				// =
+		TOK_AngleLeft,			// <
+		TOK_AngleRight,			// >
+		TOK_QuestionMark,		// ?
+		TOK_BraceLeft,			// {
+		TOK_BraceRight,			// }
+		TOK_BracketLeft,		// [
+		TOK_BracketRight,		// ]
+		TOK_ParenLeft,			// (
+		TOK_ParenRight,			// )
+		TOK_Minus,				// -
+		TOK_Plus,				// +
+		TOK_Asterisk,			// *
+		TOK_Slash,				// /
+		TOK_Backslash,			// \.
+		TOK_Amperstand,			// &
+		TOK_Caret,				// ^
+		TOK_Bar,				// |
+		TOK_Exclamation,		// !
+		TOK_At,					// @
+		TOK_Pound,				// #
+		TOK_Tilde,				// ~
+		TOK_GraveAccent,		// `
+		TOK_Percent,			// %
+		TOK_String,				// "foo"
+		TOK_Symbol,				// bar
+		TOK_Number,				// 42
+		TOK_Any					// for next() and friends, a token never has this
+	};
+
+	enum
+	{
+		LastNamedToken = TOK_Percent
 	};
 
 	enum Type
@@ -84,9 +115,12 @@ namespace Script
 		bool peekNext(Token& tok);
 		const SavedPosition& position() const;
 		void setPosition(const SavedPosition& pos);
+		QString preprocessedScript() const { return QString::fromAscii (m_data); }
 
 	private:
-		QString m_data;
+		QString m_script;
+		QByteArray m_data;
+		QVector<int> m_lineEndings;
 		SavedPosition m_position;
 		Token m_token;
 		AstNode* m_astRoot;

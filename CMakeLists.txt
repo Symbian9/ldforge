@@ -71,6 +71,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/magicWandMode.cc
 	src/editmodes/rectangleMode.cc
 	src/editmodes/selectMode.cc
+	src/script/parser.cpp
 )
 
 set (LDFORGE_HEADERS
