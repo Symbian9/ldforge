@@ -89,11 +89,25 @@ void Script::Parser::parse()
 {
 	preprocess();
 	m_state.reset();
+	m_astRoot = Ast::spawnRoot();
 
-	while (next (TOK_Any))
+	while (next())
 	{
-		print ("token: %1 (%2)\n", state().token.text, TokenNames[state().token.type]);
+		if (m_state.token.type == TOK_Semicolon)
+			continue;
+
+		tokenMustBe (TOK_Macro);
+		mustGetNext (TOK_Symbol);
+		Ast::MacroPointer macroAst = Ast::spawn<Ast::MacroNode> (m_astRoot, state().token.text);
+		mustGetNext (TOK_Semicolon);
+
+		do
+		{
+			mustGetNext();
+		} while (m_state.token.type != TOK_EndMacro);
 	}
+
+	m_astRoot->dump();
 }
 
 //
@@ -571,4 +585,17 @@ QString Script::Parser::parseIdentifier()
 
 	unread();
 	return identifier;
+}
+
+//
+// -------------------------------------------------------------------------------------------------
+//
+void Script::Parser::tokenMustBe (TokenType desiredType)
+{
+	if (m_state.token.type != desiredType)
+	{
+		scriptError ("expected %1, got %2",
+			TokenNames[desiredType],
+			TokenNames[m_state.token.type]);
+	}
 }

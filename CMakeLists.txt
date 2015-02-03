@@ -73,6 +73,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/selectMode.cc
 	src/script/parser.cpp
 	src/script/objtype.cpp
+	src/script/ast.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -109,6 +110,9 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/script/parser.h
+	src/script/objtype.h
+	src/script/ast.h
 )
 
 set (LDFORGE_FORMS

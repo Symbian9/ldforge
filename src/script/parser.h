@@ -141,6 +141,7 @@ namespace Script
 		void skipSpace();
 		bool isAtEnd() const { return m_state.position >= m_data.length(); }
 		bool tryMatch (const char* text, bool caseSensitive);
+		void tokenMustBe (TokenType desiredType);
 
 		template<typename... Args>
 		void scriptError (QString text, Args... args)
@@ -153,7 +154,7 @@ namespace Script
 		QByteArray m_data;
 		QVector<int> m_lineEndings;
 		SavedState m_state;
-		AstNode* m_astRoot;
+		Ast::RootPointer m_astRoot;
 		Token m_rejectedToken;
 
 		void parseString();
