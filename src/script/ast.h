@@ -4,6 +4,8 @@
 
 namespace Script
 {
+	using AstPointer = QSharedPointer<class AstNode>;
+
 	enum AstNodeType
 	{
 
@@ -12,10 +14,10 @@ namespace Script
 	class AstNode
 	{
 	public:
-		AstNode (QSharedPointer<AstNode> parent);
+		AstNode (AstPointer parent);
 
 	private:
-		QVector<QSharedPointer<AstNode>> m_children;
-		QSharedPointer<AstNode> m_parent;
+		QVector<AstPointer> m_children;
+		AstPointer m_parent;
 	};
 }

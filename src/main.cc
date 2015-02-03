@@ -48,11 +48,26 @@ CFGENTRY (Bool, FirstStart, true)
 //
 int main (int argc, char* argv[])
 {
-	QFile fp ("script.txt", QIODevice::ReadOnly);
-	Script::Parser parser (QString::fromLocal8Bit (fp.readAll()));
-	parser.parse();
-	QFile fp2 ("script.out.txt", QIODevice::WriteOnly);
-	fp2.write (parser.preprocessedScript(), parser.preprocessedScript().length());
+	QFile fp ("script.txt");
+	if (fp.open (QIODevice::ReadOnly))
+	{
+		Script::Parser parser (QString::fromLocal8Bit (fp.readAll()));
+		try
+		{
+			parser.parse();
+			QFile fp2 ("script.out.txt");
+
+			if (fp2.open (QIODevice::WriteOnly))
+			{
+				fp2.write (parser.preprocessedScript().toLocal8Bit(),
+					parser.preprocessedScript().length());
+			}
+		}
+		catch (Script::ParseError e)
+		{
+			print ("error: %1: %2\n", parser.state().lineNumber, e.message());
+		}
+	}
 	return 0;
 
 	QApplication app (argc, argv);

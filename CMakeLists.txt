@@ -72,6 +72,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/rectangleMode.cc
 	src/editmodes/selectMode.cc
 	src/script/parser.cpp
+	src/script/objtype.cpp
 )
 
 set (LDFORGE_HEADERS
