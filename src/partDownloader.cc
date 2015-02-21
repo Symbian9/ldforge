@@ -585,7 +585,7 @@ void PartDownloadRequest::abort()
 
 // =============================================================================
 //
-void MainWindow::slot_actionDownloadFrom()
+void MainWindow::actionDownloadFrom()
 {
 	PartDownloader::staticBegin();
 }

@@ -53,7 +53,7 @@ EXTERN_CFGENTRY (Bool, DrawAxes)
 
 // =============================================================================
 //
-void MainWindow::slot_actionNew()
+void MainWindow::actionNew()
 {
 	QDialog* dlg = new QDialog (g_win);
 	Ui::NewPartUI ui;
@@ -95,14 +95,14 @@ void MainWindow::slot_actionNew()
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewFile()
+void MainWindow::actionNewFile()
 {
 	newFile();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionOpen()
+void MainWindow::actionOpen()
 {
 	QString name = QFileDialog::getOpenFileName (g_win, "Open File", "", "LDraw files (*.dat *.ldr)");
 
@@ -114,21 +114,21 @@ void MainWindow::slot_actionOpen()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSave()
+void MainWindow::actionSave()
 {
 	save (CurrentDocument(), false);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionSaveAs()
+void MainWindow::actionSaveAs()
 {
 	save (CurrentDocument(), true);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionSaveAll()
+void MainWindow::actionSaveAll()
 {
 	for (LDDocumentPtr file : LDDocument::explicitDocuments())
 		save (file, false);
@@ -136,7 +136,7 @@ void MainWindow::slot_actionSaveAll()
 
 // =============================================================================
 //
-void MainWindow::slot_actionClose()
+void MainWindow::actionClose()
 {
 	if (not CurrentDocument()->isSafeToClose())
 		return;
@@ -146,7 +146,7 @@ void MainWindow::slot_actionClose()
 
 // =============================================================================
 //
-void MainWindow::slot_actionCloseAll()
+void MainWindow::actionCloseAll()
 {
 	if (not IsSafeToCloseAll())
 		return;
@@ -156,77 +156,77 @@ void MainWindow::slot_actionCloseAll()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSettings()
+void MainWindow::actionSettings()
 {
 	(new ConfigDialog)->exec();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionSetLDrawPath()
+void MainWindow::actionSetLDrawPath()
 {
 	(new LDrawPathDialog (true))->exec();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionExit()
+void MainWindow::actionExit()
 {
 	Exit();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewSubfile()
+void MainWindow::actionNewSubfile()
 {
 	AddObjectDialog::staticDialog (OBJ_Subfile, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewLine()
+void MainWindow::actionNewLine()
 {
 	AddObjectDialog::staticDialog (OBJ_Line, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewTriangle()
+void MainWindow::actionNewTriangle()
 {
 	AddObjectDialog::staticDialog (OBJ_Triangle, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewQuad()
+void MainWindow::actionNewQuad()
 {
 	AddObjectDialog::staticDialog (OBJ_Quad, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewCLine()
+void MainWindow::actionNewCLine()
 {
 	AddObjectDialog::staticDialog (OBJ_CondLine, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewComment()
+void MainWindow::actionNewComment()
 {
 	AddObjectDialog::staticDialog (OBJ_Comment, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewBFC()
+void MainWindow::actionNewBFC()
 {
 	AddObjectDialog::staticDialog (OBJ_BFC, LDObjectPtr());
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionEdit()
+void MainWindow::actionEdit()
 {
 	if (Selection().size() != 1)
 		return;
@@ -237,27 +237,27 @@ void MainWindow::slot_actionEdit()
 
 // =============================================================================
 //
-void MainWindow::slot_actionHelp()
+void MainWindow::actionHelp()
 {
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionAbout()
+void MainWindow::actionAbout()
 {
 	AboutDialog().exec();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionAboutQt()
+void MainWindow::actionAboutQt()
 {
 	QMessageBox::aboutQt (g_win);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionSelectAll()
+void MainWindow::actionSelectAll()
 {
 	for (LDObjectPtr obj : CurrentDocument()->objects())
 		obj->select();
@@ -265,7 +265,7 @@ void MainWindow::slot_actionSelectAll()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSelectByColor()
+void MainWindow::actionSelectByColor()
 {
 	if (Selection().isEmpty())
 		return;
@@ -290,7 +290,7 @@ void MainWindow::slot_actionSelectByColor()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSelectByType()
+void MainWindow::actionSelectByType()
 {
 	if (Selection().isEmpty())
 		return;
@@ -327,19 +327,19 @@ void MainWindow::slot_actionSelectByType()
 
 // =============================================================================
 //
-void MainWindow::slot_actionGridCoarse()
+void MainWindow::actionGridCoarse()
 {
 	cfg::Grid = Grid::Coarse;
 	updateGridToolBar();
 }
 
-void MainWindow::slot_actionGridMedium()
+void MainWindow::actionGridMedium()
 {
 	cfg::Grid = Grid::Medium;
 	updateGridToolBar();
 }
 
-void MainWindow::slot_actionGridFine()
+void MainWindow::actionGridFine()
 {
 	cfg::Grid = Grid::Fine;
 	updateGridToolBar();
@@ -347,7 +347,7 @@ void MainWindow::slot_actionGridFine()
 
 // =============================================================================
 //
-void MainWindow::slot_actionResetView()
+void MainWindow::actionResetView()
 {
 	R()->resetAngles();
 	R()->update();
@@ -355,7 +355,7 @@ void MainWindow::slot_actionResetView()
 
 // =============================================================================
 //
-void MainWindow::slot_actionInsertFrom()
+void MainWindow::actionInsertFrom()
 {
 	QString fname = QFileDialog::getOpenFileName();
 	int idx = getInsertionPoint();
@@ -390,7 +390,7 @@ void MainWindow::slot_actionInsertFrom()
 
 // =============================================================================
 //
-void MainWindow::slot_actionExportTo()
+void MainWindow::actionExportTo()
 {
 	if (Selection().isEmpty())
 		return;
@@ -419,7 +419,7 @@ void MainWindow::slot_actionExportTo()
 
 // =============================================================================
 //
-void MainWindow::slot_actionInsertRaw()
+void MainWindow::actionInsertRaw()
 {
 	int idx = getInsertionPoint();
 
@@ -455,7 +455,7 @@ void MainWindow::slot_actionInsertRaw()
 
 // =============================================================================
 //
-void MainWindow::slot_actionScreenshot()
+void MainWindow::actionScreenshot()
 {
 	setlocale (LC_ALL, "C");
 
@@ -480,7 +480,7 @@ void MainWindow::slot_actionScreenshot()
 
 // =============================================================================
 //
-void MainWindow::slot_actionAxes()
+void MainWindow::actionAxes()
 {
 	cfg::DrawAxes = not cfg::DrawAxes;
 	updateActions();
@@ -489,7 +489,7 @@ void MainWindow::slot_actionAxes()
 
 // =============================================================================
 //
-void MainWindow::slot_actionVisibilityToggle()
+void MainWindow::actionVisibilityToggle()
 {
 	for (LDObjectPtr obj : Selection())
 		obj->setHidden (not obj->isHidden());
@@ -499,7 +499,7 @@ void MainWindow::slot_actionVisibilityToggle()
 
 // =============================================================================
 //
-void MainWindow::slot_actionVisibilityHide()
+void MainWindow::actionVisibilityHide()
 {
 	for (LDObjectPtr obj : Selection())
 		obj->setHidden (true);
@@ -509,7 +509,7 @@ void MainWindow::slot_actionVisibilityHide()
 
 // =============================================================================
 //
-void MainWindow::slot_actionVisibilityReveal()
+void MainWindow::actionVisibilityReveal()
 {
 	for (LDObjectPtr obj : Selection())
 	obj->setHidden (false);
@@ -518,7 +518,7 @@ void MainWindow::slot_actionVisibilityReveal()
 
 // =============================================================================
 //
-void MainWindow::slot_actionWireframe()
+void MainWindow::actionWireframe()
 {
 	cfg::DrawWireframe = not cfg::DrawWireframe;
 	R()->refresh();
@@ -526,7 +526,7 @@ void MainWindow::slot_actionWireframe()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSetOverlay()
+void MainWindow::actionSetOverlay()
 {
 	OverlayDialog dlg;
 
@@ -539,54 +539,54 @@ void MainWindow::slot_actionSetOverlay()
 
 // =============================================================================
 //
-void MainWindow::slot_actionClearOverlay()
+void MainWindow::actionClearOverlay()
 {
 	R()->clearOverlay();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionModeSelect()
+void MainWindow::actionModeSelect()
 {
 	R()->setEditMode (EditModeType::Select);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionModeDraw()
+void MainWindow::actionModeDraw()
 {
 	R()->setEditMode (EditModeType::Draw);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionModeRectangle()
+void MainWindow::actionModeRectangle()
 {
 	R()->setEditMode (EditModeType::Rectangle);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionModeCircle()
+void MainWindow::actionModeCircle()
 {
 	R()->setEditMode (EditModeType::Circle);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionModeMagicWand()
+void MainWindow::actionModeMagicWand()
 {
  	R()->setEditMode (EditModeType::MagicWand);
 }
 
-void MainWindow::slot_actionModeLinePath()
+void MainWindow::actionModeLinePath()
 {
 	R()->setEditMode (EditModeType::LinePath);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionDrawAngles()
+void MainWindow::actionDrawAngles()
 {
 	cfg::DrawAngles = not cfg::DrawAngles;
 	R()->refresh();
@@ -594,7 +594,7 @@ void MainWindow::slot_actionDrawAngles()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSetDrawDepth()
+void MainWindow::actionSetDrawDepth()
 {
 	if (R()->camera() == EFreeCamera)
 		return;
@@ -612,7 +612,7 @@ void MainWindow::slot_actionSetDrawDepth()
 // This is a test to draw a dummy axle. Meant to be used as a primitive gallery,
 // but I can't figure how to generate these pictures properly. Multi-threading
 // these is an immense pain.
-void MainWindow::slot_actiontestpic()
+void MainWindow::actiontestpic()
 {
 	LDDocumentPtr file = getFile ("axle.dat");
 	setlocale (LC_ALL, "C");
@@ -659,14 +659,14 @@ void MainWindow::slot_actiontestpic()
 
 // =============================================================================
 //
-void MainWindow::slot_actionScanPrimitives()
+void MainWindow::actionScanPrimitives()
 {
 	PrimitiveScanner::start();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionBFCView()
+void MainWindow::actionBFCView()
 {
 	cfg::BFCRedGreenView = not cfg::BFCRedGreenView;
 
@@ -679,7 +679,7 @@ void MainWindow::slot_actionBFCView()
 
 // =============================================================================
 //
-void MainWindow::slot_actionJumpTo()
+void MainWindow::actionJumpTo()
 {
 	bool ok;
 	int defval = 0;
@@ -701,7 +701,7 @@ void MainWindow::slot_actionJumpTo()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSubfileSelection()
+void MainWindow::actionSubfileSelection()
 {
 	if (Selection().size() == 0)
 		return;
@@ -865,7 +865,7 @@ void MainWindow::slot_actionSubfileSelection()
 	}
 }
 
-void MainWindow::slot_actionRandomColors()
+void MainWindow::actionRandomColors()
 {
 	cfg::RandomColors = not cfg::RandomColors;
 
@@ -876,7 +876,7 @@ void MainWindow::slot_actionRandomColors()
 	R()->refresh();
 }
 
-void MainWindow::slot_actionOpenSubfiles()
+void MainWindow::actionOpenSubfiles()
 {
 	for (LDObjectPtr obj : Selection())
 	{
@@ -889,21 +889,21 @@ void MainWindow::slot_actionOpenSubfiles()
 	}
 }
 
-void MainWindow::slot_actionDrawSurfaces()
+void MainWindow::actionDrawSurfaces()
 {
 	cfg::DrawSurfaces = not cfg::DrawSurfaces;
 	updateActions();
 	update();
 }
 
-void MainWindow::slot_actionDrawEdgeLines()
+void MainWindow::actionDrawEdgeLines()
 {
 	cfg::DrawEdgeLines = not cfg::DrawEdgeLines;
 	updateActions();
 	update();
 }
 
-void MainWindow::slot_actionDrawConditionalLines()
+void MainWindow::actionDrawConditionalLines()
 {
 	cfg::DrawConditionalLines = not cfg::DrawConditionalLines;
 	updateActions();

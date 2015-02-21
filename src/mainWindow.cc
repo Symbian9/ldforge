@@ -79,11 +79,11 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	g_win = this;
 	ui = new Ui_LDForgeUI;
 	ui->setupUi (this);
-	m_updatingTabs = false;
+	m_isUpdatingTabs = false;
 	m_renderer = new GLRenderer (this);
-	m_tabs = new QTabBar;
-	m_tabs->setTabsClosable (true);
-	ui->verticalLayout->insertWidget (0, m_tabs);
+	m_tabBar = new QTabBar;
+	m_tabBar->setTabsClosable (true);
+	ui->verticalLayout->insertWidget (0, m_tabBar);
 
 	// Stuff the renderer into its frame
 	QVBoxLayout* rendererLayout = new QVBoxLayout (ui->rendererFrame);
@@ -91,17 +91,17 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 	connect (ui->objectList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_selectionChanged()));
 	connect (ui->objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (slot_editObject (QListWidgetItem*)));
-	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (changeCurrentFile()));
-	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
+	connect (m_tabBar, SIGNAL (currentChanged(int)), this, SLOT (changeCurrentFile()));
+	connect (m_tabBar, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
 	if (ActivePrimitiveScanner() != null)
 		connect (ActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
 	else
 		updatePrimitives();
 
-	m_msglog = new MessageManager;
-	m_msglog->setRenderer (R());
-	m_renderer->setMessageLog (m_msglog);
+	m_messageLog = new MessageManager;
+	m_messageLog->setRenderer (R());
+	m_renderer->setMessageLog (m_messageLog);
 	m_quickColors = LoadQuickColorList();
 	slot_selectionChanged();
 	setStatusBar (new QStatusBar);
@@ -110,7 +110,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	// Connect all actions and save default sequences
 	applyToActions ([&](QAction* act)
 	{
-		connect (act, SIGNAL (triggered()), this, SLOT (slot_action()));
+		connect (act, SIGNAL (triggered()), this, SLOT (actionTriggered()));
 		g_defaultShortcuts[act] = act->shortcut();
 	});
 
@@ -143,7 +143,7 @@ MainWindow::~MainWindow()
 
 // =============================================================================
 //
-void MainWindow::slot_action()
+void MainWindow::actionTriggered()
 {
 	// Get the name of the sender object and use it to compose the slot name,
 	// then invoke this slot to call the action.
@@ -819,7 +819,7 @@ bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
 
 void MainWindow::addMessage (QString msg)
 {
-	m_msglog->addLine (msg);
+	m_messageLog->addLine (msg);
 }
 
 // ============================================================================
@@ -920,28 +920,28 @@ void MakeColorComboBox (QComboBox* box)
 //
 void MainWindow::updateDocumentList()
 {
-	m_updatingTabs = true;
+	m_isUpdatingTabs = true;
 
-	while (m_tabs->count() > 0)
-		m_tabs->removeTab (0);
+	while (m_tabBar->count() > 0)
+		m_tabBar->removeTab (0);
 
 	for (LDDocumentPtr f : LDDocument::explicitDocuments())
 	{
 		// Add an item to the list for this file and store the tab index
 		// in the document so we can find documents by tab index.
-		f->setTabIndex (m_tabs->addTab (""));
+		f->setTabIndex (m_tabBar->addTab (""));
 		updateDocumentListItem (f);
 	}
 
-	m_updatingTabs = false;
+	m_isUpdatingTabs = false;
 }
 
 // =============================================================================
 //
 void MainWindow::updateDocumentListItem (LDDocumentPtr doc)
 {
-	bool oldUpdatingTabs = m_updatingTabs;
-	m_updatingTabs = true;
+	bool oldUpdatingTabs = m_isUpdatingTabs;
+	m_isUpdatingTabs = true;
 
 	if (doc->tabIndex() == -1)
 	{
@@ -954,14 +954,14 @@ void MainWindow::updateDocumentListItem (LDDocumentPtr doc)
 	// If this is the current file, it also needs to be the selected item on
 	// the list.
 	if (doc == CurrentDocument())
-		m_tabs->setCurrentIndex (doc->tabIndex());
+		m_tabBar->setCurrentIndex (doc->tabIndex());
 
-	m_tabs->setTabText (doc->tabIndex(), doc->getDisplayName());
+	m_tabBar->setTabText (doc->tabIndex(), doc->getDisplayName());
 
 	// If the document.has unsaved changes, draw a little icon next to it to mark that.
-	m_tabs->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? GetIcon ("file-save") : QIcon());
-	m_tabs->setTabData (doc->tabIndex(), doc->name());
-	m_updatingTabs = oldUpdatingTabs;
+	m_tabBar->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? GetIcon ("file-save") : QIcon());
+	m_tabBar->setTabData (doc->tabIndex(), doc->name());
+	m_isUpdatingTabs = oldUpdatingTabs;
 }
 
 // =============================================================================
@@ -971,11 +971,11 @@ void MainWindow::updateDocumentListItem (LDDocumentPtr doc)
 //
 void MainWindow::changeCurrentFile()
 {
-	if (m_updatingTabs)
+	if (m_isUpdatingTabs)
 		return;
 
 	LDDocumentPtr f;
-	int tabIndex = m_tabs->currentIndex();
+	int tabIndex = m_tabBar->currentIndex();
 
 	// Find the file pointer of the item that was selected.
 	for (LDDocumentPtr it : LDDocument::explicitDocuments())
@@ -1044,7 +1044,7 @@ void MainWindow::updatePrimitives()
 //
 void MainWindow::closeTab (int tabindex)
 {
-	LDDocumentPtr doc = FindDocument (m_tabs->tabData (tabindex).toString());
+	LDDocumentPtr doc = FindDocument (m_tabBar->tabData (tabindex).toString());
 
 	if (doc == null)
 		return;

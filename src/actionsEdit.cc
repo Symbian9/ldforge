@@ -71,7 +71,7 @@ static int CopyToClipboard()
 
 // =============================================================================
 //
-void MainWindow::slot_actionCut()
+void MainWindow::actionCut()
 {
 	int num = CopyToClipboard();
 	deleteSelection();
@@ -80,7 +80,7 @@ void MainWindow::slot_actionCut()
 
 // =============================================================================
 //
-void MainWindow::slot_actionCopy()
+void MainWindow::actionCopy()
 {
 	int num = CopyToClipboard();
 	print (tr ("%1 objects copied"), num);
@@ -88,7 +88,7 @@ void MainWindow::slot_actionCopy()
 
 // =============================================================================
 //
-void MainWindow::slot_actionPaste()
+void MainWindow::actionPaste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
 	int idx = getInsertionPoint();
@@ -110,7 +110,7 @@ void MainWindow::slot_actionPaste()
 
 // =============================================================================
 //
-void MainWindow::slot_actionDelete()
+void MainWindow::actionDelete()
 {
 	int num = deleteSelection();
 	print (tr ("%1 objects deleted"), num);
@@ -148,19 +148,19 @@ static void DoInline (bool deep)
 	g_win->refresh();
 }
 
-void MainWindow::slot_actionInline()
+void MainWindow::actionInline()
 {
 	DoInline (false);
 }
 
-void MainWindow::slot_actionInlineDeep()
+void MainWindow::actionInlineDeep()
 {
 	DoInline (true);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionSplitQuads()
+void MainWindow::actionSplitQuads()
 {
 	int num = 0;
 
@@ -187,7 +187,7 @@ void MainWindow::slot_actionSplitQuads()
 
 // =============================================================================
 //
-void MainWindow::slot_actionEditRaw()
+void MainWindow::actionEditRaw()
 {
 	if (Selection().size() != 1)
 		return;
@@ -218,7 +218,7 @@ void MainWindow::slot_actionEditRaw()
 
 // =============================================================================
 //
-void MainWindow::slot_actionSetColor()
+void MainWindow::actionSetColor()
 {
 	if (Selection().isEmpty())
 		return;
@@ -245,7 +245,7 @@ void MainWindow::slot_actionSetColor()
 
 // =============================================================================
 //
-void MainWindow::slot_actionBorders()
+void MainWindow::actionBorders()
 {
 	LDObjectList objs = Selection();
 	int num = 0;
@@ -302,24 +302,24 @@ static void MoveSelection (const bool up)
 
 // =============================================================================
 //
-void MainWindow::slot_actionMoveUp()
+void MainWindow::actionMoveUp()
 {
 	MoveSelection (true);
 }
 
-void MainWindow::slot_actionMoveDown()
+void MainWindow::actionMoveDown()
 {
 	MoveSelection (false);
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionUndo()
+void MainWindow::actionUndo()
 {
 	CurrentDocument()->undo();
 }
 
-void MainWindow::slot_actionRedo()
+void MainWindow::actionRedo()
 {
 	CurrentDocument()->redo();
 }
@@ -339,39 +339,39 @@ static void MoveObjects (Vertex vect)
 
 // =============================================================================
 //
-void MainWindow::slot_actionMoveXNeg()
+void MainWindow::actionMoveXNeg()
 {
 	MoveObjects ({-1, 0, 0});
 }
 
-void MainWindow::slot_actionMoveYNeg()
+void MainWindow::actionMoveYNeg()
 {
 	MoveObjects ({0, -1, 0});
 }
 
-void MainWindow::slot_actionMoveZNeg()
+void MainWindow::actionMoveZNeg()
 {
 	MoveObjects ({0, 0, -1});
 }
 
-void MainWindow::slot_actionMoveXPos()
+void MainWindow::actionMoveXPos()
 {
 	MoveObjects ({1, 0, 0});
 }
 
-void MainWindow::slot_actionMoveYPos()
+void MainWindow::actionMoveYPos()
 {
 	MoveObjects ({0, 1, 0});
 }
 
-void MainWindow::slot_actionMoveZPos()
+void MainWindow::actionMoveZPos()
 {
 	MoveObjects ({0, 0, 1});
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionInvert()
+void MainWindow::actionInvert()
 {
 	for (LDObjectPtr obj : Selection())
 		obj->invert();
@@ -386,39 +386,39 @@ static double GetRotateActionAngle()
 	return (Pi * *CurrentGrid().angleSnap) / 180;
 }
 
-void MainWindow::slot_actionRotateXPos()
+void MainWindow::actionRotateXPos()
 {
 	RotateObjects (1, 0, 0, GetRotateActionAngle(), Selection());
 }
-void MainWindow::slot_actionRotateYPos()
+void MainWindow::actionRotateYPos()
 {
 	RotateObjects (0, 1, 0, GetRotateActionAngle(), Selection());
 }
-void MainWindow::slot_actionRotateZPos()
+void MainWindow::actionRotateZPos()
 {
 	RotateObjects (0, 0, 1, GetRotateActionAngle(), Selection());
 }
-void MainWindow::slot_actionRotateXNeg()
+void MainWindow::actionRotateXNeg()
 {
 	RotateObjects (-1, 0, 0, GetRotateActionAngle(), Selection());
 }
-void MainWindow::slot_actionRotateYNeg()
+void MainWindow::actionRotateYNeg()
 {
 	RotateObjects (0, -1, 0, GetRotateActionAngle(), Selection());
 }
-void MainWindow::slot_actionRotateZNeg()
+void MainWindow::actionRotateZNeg()
 {
 	RotateObjects (0, 0, -1, GetRotateActionAngle(), Selection());
 }
 
-void MainWindow::slot_actionRotationPoint()
+void MainWindow::actionRotationPoint()
 {
 	ConfigureRotationPoint();
 }
 
 // =============================================================================
 //
-void MainWindow::slot_actionRoundCoordinates()
+void MainWindow::actionRoundCoordinates()
 {
 	setlocale (LC_ALL, "C");
 	int num = 0;
@@ -459,7 +459,7 @@ void MainWindow::slot_actionRoundCoordinates()
 
 // =============================================================================
 //
-void MainWindow::slot_actionUncolor()
+void MainWindow::actionUncolor()
 {
 	int num = 0;
 
@@ -478,7 +478,7 @@ void MainWindow::slot_actionUncolor()
 
 // =============================================================================
 //
-void MainWindow::slot_actionReplaceCoords()
+void MainWindow::actionReplaceCoords()
 {
 	QDialog* dlg = new QDialog (g_win);
 	Ui::ReplaceCoordsUI ui;
@@ -530,7 +530,7 @@ void MainWindow::slot_actionReplaceCoords()
 
 // =============================================================================
 //
-void MainWindow::slot_actionFlip()
+void MainWindow::actionFlip()
 {
 	QDialog* dlg = new QDialog;
 	Ui::FlipUI ui;
@@ -566,7 +566,7 @@ void MainWindow::slot_actionFlip()
 
 // =============================================================================
 //
-void MainWindow::slot_actionDemote()
+void MainWindow::actionDemote()
 {
 	int num = 0;
 
@@ -595,7 +595,7 @@ static bool IsColorUsed (LDColor color)
 
 // =============================================================================
 //
-void MainWindow::slot_actionAutocolor()
+void MainWindow::actionAutocolor()
 {
 	int colnum = 0;
 	LDColor color;
@@ -626,7 +626,7 @@ void MainWindow::slot_actionAutocolor()
 
 // =============================================================================
 //
-void MainWindow::slot_actionAddHistoryLine()
+void MainWindow::actionAddHistoryLine()
 {
 	LDObjectPtr obj;
 	bool ishistory = false,
@@ -682,7 +682,7 @@ void MainWindow::slot_actionAddHistoryLine()
 	delete ui;
 }
 
-void MainWindow::slot_actionSplitLines()
+void MainWindow::actionSplitLines()
 {
 	bool ok;
 	int segments = QInputDialog::getInt (g_win, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,

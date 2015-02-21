@@ -692,7 +692,7 @@ void PrimitivePrompt::hiResToggled (bool on)
 
 // =============================================================================
 //
-void MainWindow::slot_actionMakePrimitive()
+void MainWindow::actionMakePrimitive()
 {
 	PrimitivePrompt* dlg = new PrimitivePrompt (g_win);
 
