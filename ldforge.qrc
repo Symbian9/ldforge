@@ -9,15 +9,14 @@
 	<file>./icons/add-radial.png</file>
 	<file>./icons/add-subfile.png</file>
 	<file>./icons/add-triangle.png</file>
-	<file>./icons/add-vertex.png</file>
 	<file>./icons/arrow-down.png</file>
 	<file>./icons/arrow-left.png</file>
 	<file>./icons/arrow-right.png</file>
 	<file>./icons/arrow-up.png</file>
 	<file>./icons/autocolor.png</file>
 	<file>./icons/axes.png</file>
-	<file>./icons/bfc.png</file>
 	<file>./icons/bfc-view.png</file>
+	<file>./icons/bfc.png</file>
 	<file>./icons/bomb.png</file>
 	<file>./icons/brick-new.png</file>
 	<file>./icons/brick.png</file>
@@ -30,16 +29,15 @@
 	<file>./icons/camera-top.png</file>
 	<file>./icons/checkerboard.png</file>
 	<file>./icons/colorcursor.png</file>
-	<file>./icons/colorselect.png</file>
 	<file>./icons/colors.txt</file>
+	<file>./icons/colorselect.png</file>
 	<file>./icons/comment.png</file>
 	<file>./icons/condline.png</file>
 	<file>./icons/copy.png</file>
-	<file>./icons/corner-verts.png</file>
 	<file>./icons/coverer.png</file>
 	<file>./icons/cut.png</file>
-	<file>./icons/delete.png</file>
 	<file>./icons/del-line.png</file>
+	<file>./icons/delete.png</file>
 	<file>./icons/empty.png</file>
 	<file>./icons/error.png</file>
 	<file>./icons/exit.png</file>
@@ -47,9 +45,9 @@
 	<file>./icons/file-import.png</file>
 	<file>./icons/file-new.png</file>
 	<file>./icons/file-open.png</file>
-	<file>./icons/file.png</file>
 	<file>./icons/file-save-as.png</file>
 	<file>./icons/file-save.png</file>
+	<file>./icons/file.png</file>
 	<file>./icons/flip.png</file>
 	<file>./icons/folder.png</file>
 	<file>./icons/grid-coarse.png</file>
@@ -84,8 +82,8 @@
 	<file>./icons/overlay.png</file>
 	<file>./icons/palette.png</file>
 	<file>./icons/paste.png</file>
-	<file>./icons/quad.png</file>
 	<file>./icons/quad-split.png</file>
+	<file>./icons/quad.png</file>
 	<file>./icons/radial-convert.png</file>
 	<file>./icons/radial.png</file>
 	<file>./icons/random-colors.png</file>
@@ -103,7 +101,6 @@
 	<file>./icons/triangle.png</file>
 	<file>./icons/uncolorize.png</file>
 	<file>./icons/undo.png</file>
-	<file>./icons/vertex.png</file>
 	<file>./icons/visibility-hide.png</file>
 	<file>./icons/visibility-show.png</file>
 	<file>./icons/visibility-toggle.png</file>

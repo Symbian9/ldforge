@@ -91,14 +91,7 @@ void DrawMode::endDraw()
 	switch (verts.size())
 	{
 		case 1:
-		{
-			// 1 vertex - add a vertex object
-			LDVertexPtr obj = LDSpawn<LDVertex>();
-			obj->pos = verts[0];
-			obj->setColor (MainColor());
-			objs << obj;
-			break;
-		}
+			return;
 
 		case 2:
 		{

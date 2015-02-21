@@ -958,19 +958,7 @@ LDObjectPtr ParseLine (QString line)
 				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
 				{
 					// Handle LDForge-specific types, they're embedded into comments too
-					if (tokens[2] == "VERTEX")
-					{
-						// Vertex (0 !LDFORGE VERTEX)
-						CheckTokenCount (tokens, 7);
-						CheckTokenNumbers (tokens, 3, 6);
-
-						LDVertexPtr obj = LDSpawn<LDVertex>();
-						obj->setColor (LDColor::fromIndex (StringToNumber (tokens[3])));
-						obj->pos.apply ([&](Axis ax, double& value)
-							{ value = tokens[4 + ax].toDouble(); });
-						return obj;
-					}
-					elif (tokens[2] == "OVERLAY")
+					if (tokens[2] == "OVERLAY")
 					{
 						CheckTokenCount (tokens, 9);
 						CheckTokenNumbers (tokens, 5, 8);

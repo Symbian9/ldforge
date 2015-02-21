@@ -26,53 +26,55 @@
 #include "version.h"
 #include "hginfo.h"
 
-char g_versionString[64] = {'\0'};
-char g_fullVersionString[256] = {'\0'};
-char g_buildTime[256] = {'\0'};
-
 // =============================================================================
 //
 const char* VersionString()
 {
-	if (g_versionString[0] == '\0')
+	static char result[64] = {'\0'};
+
+	if (result[0] == '\0')
 	{
 #if VERSION_PATCH == 0
-		sprintf (g_versionString, "%d.%d", VERSION_MAJOR, VERSION_MINOR);
+		sprintf (result, "%d.%d", VERSION_MAJOR, VERSION_MINOR);
 #else
 		sprintf (g_versionString, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 #endif // VERSION_PATCH
 	}
 
-	return g_versionString;
+	return result;
 }
 
 // =============================================================================
 //
 const char* FullVersionString()
 {
-	if (g_fullVersionString[0] == '\0')
+	static char result[256] = {'\0'};
+
+	if (result[0] == '\0')
 	{
 #if BUILD_ID != BUILD_RELEASE and defined (HG_NODE)
-		sprintf (g_fullVersionString, "%s-" HG_NODE, VersionString());
+		sprintf (result, "%s-" HG_NODE, VersionString());
 #else
 		sprintf (g_fullVersionString, "%s", VersionString());
 #endif
 	}
 
-	return g_fullVersionString;
+	return result;
 }
 
 // =============================================================================
 //
 const char* CommitTimeString()
 {
+	static char result[256] = {'\0'};
+
 #ifdef HG_DATE_TIME
-	if (g_buildTime[0] == '\0')
+	if (result[0] == '\0')
 	{
 		time_t timestamp = HG_DATE_TIME;
-		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y", localtime (&timestamp));
+		strftime (result, sizeof result, "%d %b %Y", localtime (&timestamp));
 	}
 #endif
 
-	return g_buildTime;
+	return result;
 }

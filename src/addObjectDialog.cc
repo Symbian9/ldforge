@@ -73,11 +73,6 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 			coordCount = 12;
 		} break;
 
-		case OBJ_Vertex:
-		{
-			coordCount = 3;
-		} break;
-
 		case OBJ_BFC:
 		{
 			rb_bfcType = new RadioGroup ("Statement", {}, 0, Qt::Vertical);
@@ -358,13 +353,6 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
 			assert (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
 			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
-
-		case OBJ_Vertex:
-		{
-			LDVertexPtr vert = InitObject<LDVertex> (obj);
-			vert->pos.apply ([&](Axis ax, double& value) { value = dlg.dsb_coords[ax]->value(); });
-		}
-		break;
 
 		case OBJ_Subfile:
 		{

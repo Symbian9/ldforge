@@ -226,13 +226,6 @@ void MainWindow::slot_actionNewBFC()
 
 // =============================================================================
 //
-void MainWindow::slot_actionNewVertex()
-{
-	AddObjectDialog::staticDialog (OBJ_Vertex, LDObjectPtr());
-}
-
-// =============================================================================
-//
 void MainWindow::slot_actionEdit()
 {
 	if (Selection().size() != 1)

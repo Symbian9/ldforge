@@ -212,7 +212,6 @@ public slots:
 	void slot_actionNewCLine();
 	void slot_actionNewComment();
 	void slot_actionNewBFC();
-	void slot_actionNewVertex();
 	void slot_actionUndo();
 	void slot_actionRedo();
 	void slot_actionCut();
@@ -239,7 +238,6 @@ public slots:
 	void slot_actionSplitQuads();
 	void slot_actionEditRaw();
 	void slot_actionBorders();
-	void slot_actionCornerVerts();
 	void slot_actionRoundCoordinates();
 	void slot_actionVisibilityHide();
 	void slot_actionVisibilityReveal();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1010</width>
+    <width>1008</width>
     <height>641</height>
    </rect>
   </property>
@@ -47,8 +47,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>428</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>428</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>428</height>
           </rect>
          </property>
          <attribute name="label">
@@ -193,8 +193,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1010</width>
-     <height>26</height>
+     <width>1008</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -265,7 +265,6 @@
     <addaction name="actionNewCLine"/>
     <addaction name="actionNewComment"/>
     <addaction name="actionNewBFC"/>
-    <addaction name="actionNewVertex"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -314,7 +313,6 @@
     <addaction name="actionSplitQuads"/>
     <addaction name="actionEditRaw"/>
     <addaction name="actionBorders"/>
-    <addaction name="actionCornerVerts"/>
     <addaction name="actionRoundCoordinates"/>
     <addaction name="actionReplaceCoords"/>
     <addaction name="actionFlip"/>
@@ -437,7 +435,6 @@
    <addaction name="actionNewCLine"/>
    <addaction name="actionNewComment"/>
    <addaction name="actionNewBFC"/>
-   <addaction name="actionNewVertex"/>
   </widget>
   <widget class="QToolBar" name="toolBarBasicTools">
    <property name="windowTitle">
@@ -517,7 +514,6 @@
    <addaction name="actionInline"/>
    <addaction name="actionEditRaw"/>
    <addaction name="actionBorders"/>
-   <addaction name="actionCornerVerts"/>
    <addaction name="actionReplaceCoords"/>
    <addaction name="actionRoundCoordinates"/>
    <addaction name="actionVisibilityHide"/>
@@ -843,15 +839,6 @@
     <string>New BFC Statement</string>
    </property>
   </action>
-  <action name="actionNewVertex">
-   <property name="icon">
-    <iconset resource="../ldforge.qrc">
-     <normaloff>:/icons/add-vertex.png</normaloff>:/icons/add-vertex.png</iconset>
-   </property>
-   <property name="text">
-    <string>New Vertex</string>
-   </property>
-  </action>
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
@@ -1143,18 +1130,6 @@
    </property>
    <property name="statusTip">
     <string>Add borders around given polygons.</string>
-   </property>
-  </action>
-  <action name="actionCornerVerts">
-   <property name="icon">
-    <iconset resource="../ldforge.qrc">
-     <normaloff>:/icons/corner-verts.png</normaloff>:/icons/corner-verts.png</iconset>
-   </property>
-   <property name="text">
-    <string>Make Corner Vertices</string>
-   </property>
-   <property name="statusTip">
-    <string>Adds vertex objects to the corners of the given polygons</string>
    </property>
   </action>
   <action name="actionRoundCoordinates">

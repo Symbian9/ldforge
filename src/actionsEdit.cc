@@ -293,33 +293,6 @@ void MainWindow::slot_actionBorders()
 
 // =============================================================================
 //
-void MainWindow::slot_actionCornerVerts()
-{
-	int num = 0;
-
-	for (LDObjectPtr obj : Selection())
-	{
-		if (obj->numVertices() < 2)
-			continue;
-
-		int ln = obj->lineNumber();
-
-		for (int i = 0; i < obj->numVertices(); ++i)
-		{
-			QSharedPointer<LDVertex> vert (LDSpawn<LDVertex>());
-			vert->pos = obj->vertex (i);
-			vert->setColor (obj->color());
-			CurrentDocument()->insertObj (++ln, vert);
-			++num;
-		}
-	}
-
-	print (tr ("Added %1 vertices"), num);
-	refresh();
-}
-
-// =============================================================================
-//
 static void MoveSelection (const bool up)
 {
 	LDObjectList objs = Selection();

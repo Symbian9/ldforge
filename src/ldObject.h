@@ -68,7 +68,6 @@ enum LDObjectType
 	OBJ_Triangle,		//	Object represents a	triangle
 	OBJ_Line,			//	Object represents a	line
 	OBJ_CondLine,		//	Object represents a	conditional line
-	OBJ_Vertex,			//	Object is a	vertex,	LDForge extension object
 	OBJ_BFC,			//	Object represents a	BFC statement
 	OBJ_Overlay,		//	Object contains meta-info about an overlay image.
 	OBJ_Comment,		//	Object represents a	comment
@@ -538,32 +537,6 @@ public:
 
 using LDQuadPtr = QSharedPointer<LDQuad>;
 using LDQuadWeakPtr = QWeakPointer<LDQuad>;
-
-//
-// LDVertex
-//
-// The vertex is an LDForce-specific extension which represents a single
-// vertex which can be used as a parameter to tools or to store coordinates
-// with. Vertices are a part authoring tool and they should not appear in
-// finished parts.
-//
-class LDVertex : public LDObject
-{
-	LDOBJ (Vertex)
-	LDOBJ_NAME (vertex)
-	LDOBJ_VERTICES (0) // TODO: move pos to m_vertices[0]
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor())
-	LDOBJ_NON_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
-public:
-	Vertex pos;
-	virtual void getVertices (QVector<Vertex>& verts) const override;
-};
-
-using LDVertexPtr = QSharedPointer<LDVertex>;
-using LDVertexWeakPtr = QWeakPointer<LDVertex>;
 
 //
 // LDOverlay

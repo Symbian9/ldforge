@@ -66,7 +66,6 @@ LDOBJ_DEFAULT_CTOR (LDLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
 LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
-LDOBJ_DEFAULT_CTOR (LDVertex, LDObject)
 LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBFC, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
@@ -173,13 +172,6 @@ QString LDCondLine::asText() const
 QString LDError::asText() const
 {
 	return contents();
-}
-
-// =============================================================================
-//
-QString LDVertex::asText() const
-{
-	return format ("0 !LDFORGE VERTEX %1 %2", color(), pos);
 }
 
 // =============================================================================
@@ -533,11 +525,6 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 			text += ", ";
 
 		QString noun = format ("%1%2", typeName (objType), Plural (count));
-
-		// Plural of "vertex" is "vertices", correct that
-		if (objType == OBJ_Vertex and count != 1)
-			noun = "vertices";
-
 		text += format ("%1 %2", count, noun);
 	}
 
@@ -610,11 +597,6 @@ void LDObject::move (Vertex vect)
 		LDMatrixObjectPtr mo = self().toStrongRef().dynamicCast<LDMatrixObject>();
 		mo->setPosition (mo->position() + vect);
 	}
-	elif (type() == OBJ_Vertex)
-	{
-		// ugh
-		self().toStrongRef().staticCast<LDVertex>()->pos += vect;
-	}
 	else
 	{
 		for (int i = 0; i < numVertices(); ++i)
@@ -637,7 +619,6 @@ LDObjectPtr LDObject::getDefault (const LDObjectType type)
 		case OBJ_Quad:			return LDSpawn<LDQuad>();
 		case OBJ_Empty:			return LDSpawn<LDEmpty>();
 		case OBJ_Error:			return LDSpawn<LDError>();
-		case OBJ_Vertex:		return LDSpawn<LDVertex>();
 		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
 		case OBJ_NumTypes:		assert (false);
 	}
@@ -766,8 +747,6 @@ void LDCondLine::invert()
 	setVertex (0, vertex (1));
 	setVertex (1, tmp);
 }
-
-void LDVertex::invert() {}
 
 // =============================================================================
 //
@@ -943,9 +922,4 @@ void LDObject::getVertices (QVector<Vertex>& verts) const
 void LDSubfile::getVertices (QVector<Vertex>& verts) const
 {
 	verts << fileInfo()->inlineVertices();
-}
-
-void LDVertex::getVertices (QVector<Vertex>& verts) const
-{
-	verts.append (pos);
 }
