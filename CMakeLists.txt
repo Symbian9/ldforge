@@ -6,7 +6,6 @@
 ######################################################################
 
 project (ldforge)
-add_subdirectory (updaterevision)
 add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
 
@@ -25,14 +24,7 @@ endif()
 
 find_package (OpenGL REQUIRED)
 
-get_target_property (UPDATEREVISION_EXE updaterevision LOCATION)
 get_target_property (CODEGEN_EXE codegen LOCATION)
-
-add_custom_target (revision_check ALL
-	COMMAND ${UPDATEREVISION_EXE} ${CMAKE_SOURCE_DIR} hginfo.h
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	DEPENDS updaterevision)
-
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (LDFORGE_SOURCES
@@ -173,20 +165,20 @@ if (USE_QT5)
 	qt5_generate_moc (LDFORGE_MOC ${LDFORGE_HEADERS})
 	qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})
 	qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
-	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_MOC}
+	add_executable (${PROJECT_NAME} WIN32 ${LDFORGE_SOURCES} ${LDFORGE_MOC}
 		${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS})
 else()
 	qt4_wrap_cpp (LDFORGE_MOC ${LDFORGE_HEADERS})
 	qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
-	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_RCC}
+	add_executable (${PROJECT_NAME} WIN32 ${LDFORGE_SOURCES} ${LDFORGE_RCC}
 		${LDFORGE_FORMS_HEADERS} ${LDFORGE_MOC})
 endif()
 
 if (USE_QT5)
-	target_link_libraries (ldforge Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
+	target_link_libraries (${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
 else()
-	target_link_libraries (ldforge
+	target_link_libraries (${PROJECT_NAME}
 		${QT_QTCORE_LIBRARY}
 		${QT_QTGUI_LIBRARY}
 		${QT_QTNETWORK_LIBRARY}
@@ -195,5 +187,11 @@ else()
 	)
 endif()
 
-add_dependencies (ldforge revision_check codegeneration)
-install (TARGETS ldforge RUNTIME DESTINATION bin)
+add_dependencies (${PROJECT_NAME} revision_check codegeneration)
+install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+add_custom_target (make_hginfo_h
+	COMMAND python
+		"${CMAKE_SOURCE_DIR}/updaterevision.py"
+		"${CMAKE_CURRENT_BINARY_DIR}/hginfo.h")
+add_dependencies (${PROJECT_NAME} make_hginfo_h)

@@ -3,6 +3,8 @@ build
 build_shared
 build_debug
 build_release
+debug
+release
 *.kdev4
 Makefile
 Makefile.*

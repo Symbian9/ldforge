@@ -52,10 +52,10 @@ const char* FullVersionString()
 {
 	if (g_fullVersionString[0] == '\0')
 	{
-#if BUILD_ID != BUILD_RELEASE and defined (SVN_REVISION_STRING)
-		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, VersionString());
+#if BUILD_ID != BUILD_RELEASE and defined (HG_NODE)
+		sprintf (g_fullVersionString, "%s-" HG_NODE, VersionString());
 #else
-		sprintf (g_fullVersionString, "%s", versionString());
+		sprintf (g_fullVersionString, "%s", VersionString());
 #endif
 	}
 
@@ -66,10 +66,10 @@ const char* FullVersionString()
 //
 const char* CommitTimeString()
 {
-#ifdef SVN_REVISION_NUMBER
+#ifdef HG_DATE_TIME
 	if (g_buildTime[0] == '\0')
 	{
-		time_t timestamp = SVN_REVISION_NUMBER;
+		time_t timestamp = HG_DATE_TIME;
 		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y", localtime (&timestamp));
 	}
 #endif
