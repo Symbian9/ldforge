@@ -102,29 +102,29 @@ set (LDFORGE_HEADERS
 )
 
 set (LDFORGE_FORMS
-	ui/about.ui
-	ui/addhistoryline.ui
-	ui/bombbox.ui
-	ui/colorsel.ui
-	ui/config.ui
-	ui/coverer.ui
-	ui/downloadfrom.ui
-	ui/edger2.ui
-	ui/editraw.ui
-	ui/extprogpath.ui
-	ui/flip.ui
-	ui/intersector.ui
-	ui/isecalc.ui
-	ui/ldforge.ui
-	ui/ldrawpath.ui
-	ui/makeprim.ui
-	ui/newpart.ui
-	ui/openprogress.ui
-	ui/overlay.ui
-	ui/rectifier.ui
-	ui/replcoords.ui
-	ui/rotpoint.ui
-	ui/ytruder.ui
+	src/about.ui
+	src/addhistoryline.ui
+	src/bombbox.ui
+	src/colorsel.ui
+	src/config.ui
+	src/coverer.ui
+	src/downloadfrom.ui
+	src/edger2.ui
+	src/editraw.ui
+	src/extprogpath.ui
+	src/flip.ui
+	src/intersector.ui
+	src/isecalc.ui
+	src/ldforge.ui
+	src/ldrawpath.ui
+	src/makeprim.ui
+	src/newpart.ui
+	src/openprogress.ui
+	src/overlay.ui
+	src/rectifier.ui
+	src/replcoords.ui
+	src/rotpoint.ui
+	src/ytruder.ui
 )
 
 add_custom_target (codegeneration ALL
