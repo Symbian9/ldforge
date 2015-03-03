@@ -32,7 +32,7 @@
 #include "mainWindow.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
-#include "configuration.inc"
+#include "config.aux"
 
 #ifdef _WIN32
 # define EXTENSION ".ini"

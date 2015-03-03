@@ -6,8 +6,8 @@
 ######################################################################
 
 project (ldforge)
-add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
+cmake_policy (SET CMP0020 OLD)
 
 option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct colors" OFF)
 option (USE_QT5 "Use Qt5 instead of Qt4" OFF)
@@ -23,8 +23,6 @@ else()
 endif()
 
 find_package (OpenGL REQUIRED)
-
-get_target_property (CODEGEN_EXE codegen LOCATION)
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (LDFORGE_SOURCES
@@ -127,11 +125,6 @@ set (LDFORGE_FORMS
 	src/ytruder.ui
 )
 
-add_custom_target (codegeneration ALL
-	COMMAND ${CODEGEN_EXE} ${LDFORGE_SOURCES} ${CMAKE_BINARY_DIR}/configuration.inc
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	DEPENDS codegen)
-
 set (LDFORGE_RESOURCES ldforge.qrc)
 # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
 
@@ -187,11 +180,23 @@ else()
 	)
 endif()
 
-add_dependencies (${PROJECT_NAME} revision_check codegeneration)
 install (TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+#
+# Code generators
+#
 
 add_custom_target (make_hginfo_h
 	COMMAND python
-		"${CMAKE_SOURCE_DIR}/updaterevision.py"
-		"${CMAKE_CURRENT_BINARY_DIR}/hginfo.h")
-add_dependencies (${PROJECT_NAME} make_hginfo_h)
+		"${CMAKE_SOURCE_DIR}/codegen.py" "hginfo"
+		"${CMAKE_CURRENT_BINARY_DIR}/hginfo.h"
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+add_custom_target (make_config_aux
+	COMMAND python
+		"${CMAKE_SOURCE_DIR}/codegen.py" "configaux"
+		"${CMAKE_CURRENT_BINARY_DIR}/config.aux"
+		${LDFORGE_SOURCES}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+add_dependencies (${PROJECT_NAME} make_hginfo_h make_config_aux)
