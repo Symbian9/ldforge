@@ -145,10 +145,7 @@ MainWindow::~MainWindow()
 //
 void MainWindow::actionTriggered()
 {
-	// Get the name of the sender object and use it to compose the slot name,
-	// then invoke this slot to call the action.
-	QMetaObject::invokeMethod (this,
-		qPrintable (format ("slot_%1", sender()->objectName())), Qt::DirectConnection);
+	QMetaObject::invokeMethod (this, qPrintable (sender()->objectName()), Qt::DirectConnection);
 	endAction();
 }
 
