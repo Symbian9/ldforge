@@ -22,7 +22,12 @@ else()
 	find_package (Qt4 REQUIRED)
 endif()
 
+find_package (Libarchive)
 find_package (OpenGL REQUIRED)
+
+if (NOT LibArchive_FOUND)
+	message (SEND_ERROR "Could not find Libarchive")
+endif()
 
 get_target_property (CODEGEN_EXE codegen LOCATION)
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
