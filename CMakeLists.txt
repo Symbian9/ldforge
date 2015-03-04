@@ -50,6 +50,7 @@ set (LDFORGE_SOURCES
 	src/ldDocument.cpp
 	src/ldObject.cpp
 	src/ldObjectMath.cpp
+	src/ldproject.cpp
 	src/main.cpp
 	src/mainWindow.cpp
 	src/messageLog.cpp
@@ -149,6 +150,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -DQ_COMPILER_INITIALIZER_LISTS")
 endif()
 
+include_directories (${LibArchive_INCLUDE_DIRS})
 include_directories ("${PROJECT_BINARY_DIR}")
 include_directories ("${PROJECT_BINARY_DIR}/src")
 include_directories ("${PROJECT_BINARY_DIR}/src/misc")
@@ -174,7 +176,13 @@ else()
 endif()
 
 if (USE_QT5)
-	target_link_libraries (${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
+	target_link_libraries (${PROJECT_NAME}
+		Qt5::Widgets
+		Qt5::Network
+		Qt5::OpenGL
+		${OPENGL_LIBRARIES}
+		${LibArchive_LIBRARIES}
+	)
 else()
 	target_link_libraries (${PROJECT_NAME}
 		${QT_QTCORE_LIBRARY}
@@ -182,6 +190,7 @@ else()
 		${QT_QTNETWORK_LIBRARY}
 		${QT_QTOPENGL_LIBRARY}
 		${OPENGL_LIBRARIES}
+		${LibArchive_LIBRARIES}
 	)
 endif()
 

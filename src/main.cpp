@@ -42,12 +42,18 @@ const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
 CFGENTRY (Bool, FirstStart, true)
+#include "ldproject.h"
 
 // =============================================================================
 //
 int main (int argc, char* argv[])
 {
 	QApplication app (argc, argv);
+
+	LDProjectPtr proj = LDProject::LoadFromFile("argh.pk3");
+	if (!proj)
+		Critical ("Couldn't open argh.pk3");
+	return 0;
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
 	InitCrashCatcher();
