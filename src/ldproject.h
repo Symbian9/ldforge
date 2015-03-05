@@ -9,6 +9,7 @@ public:
 	LDProject (const LDProject&) = delete;
 	~LDProject();
 
+	void loadBinaryDocument (const QString& name, const QByteArray& data);
 	bool save (const QString& filename);
 
 	void operator= (const LDProject&) = delete;
