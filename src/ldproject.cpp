@@ -19,16 +19,50 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include "ldproject.h"
+#include "ldDocument.h"
+
+enum { CurrentBinaryVersion = 0 };
 
 LDProject::LDProject() {}
 LDProject::~LDProject() {}
 
 LDProjectPtr LDProject::LoadFromFile (const QString& filename)
 {
-	FILE* fp = fopen ("log.txt", "w");
-	if (!fp)
-		return LDProjectPtr();
+	LDProjectPtr proj = LDProject::NewProject();
+	LDProjectLoader (proj);
+}
 
+struct Xyz
+{
+	double x, y, z;
+	Xyz (Vertex const& a) :
+		x (a.x()),
+		y (a.y()),
+		z (a.z()) {}
+	Vertex toVertex() const { return Vertex (x, y, z); }
+};
+
+QDataStream& operator>> (QDataStream& ds, Xyz& a)
+{
+	return ds >> a.x >> a.y >> a.z;
+}
+
+QDataStream& operator<< (QDataStream& ds, const Xyz& a)
+{
+	return ds << a.x << a.y << a.z;
+}
+
+struct LDProjectLoader
+{
+	QVector<QPair<LDSubfilePtr, QString>> referenceNames;
+
+	LDProjectLoader (LDProjectPtr proj);
+	void loadDocument (const QString &name, const QByteArray &data);
+
+};
+
+LDProjectLoader::LDProjectLoader (LDProjectPtr proj)
+{
 	archive* arc = archive_read_new();
 	archive_read_support_filter_all (arc);
 	archive_read_support_format_zip (arc);
@@ -36,7 +70,7 @@ LDProjectPtr LDProject::LoadFromFile (const QString& filename)
 
 	if (result != ARCHIVE_OK)
 	{
-		fprint (fp, "unable to open argh.pk3 (%1)\n", archive_error_string (arc));
+		fprint (stderr, "unable to open argh.pk3 (%1)\n", archive_error_string (arc));
 		return LDProjectPtr();
 	}
 
@@ -50,40 +84,39 @@ LDProjectPtr LDProject::LoadFromFile (const QString& filename)
 		if (size >= 0)
 		{
 			if (pathname.startsWith ("dat/"))
-				loadBinaryDocument (pathname.right (4), QByteArray (buffer.constData(), buffer.size()));
+				loadDocument (pathname.right (4), QByteArray (buffer.constData(), buffer.size()));
 		}
 		else
-			fprint (fp, "Unable to read %1: %2", pathname, archive_error_string (arc));
+			fprint (stderr, "Unable to read %1: %2", pathname, archive_error_string (arc));
 	}
 
 	if ((result = archive_read_free(arc)) != ARCHIVE_OK)
 	{
-		fprint (fp, "unable to close argh.pk3\n");
+		fprint (stderr, "unable to close argh.pk3\n");
 		return LDProjectPtr();
 	}
 
 	return LDProjectPtr();
 }
 
-#include "ldDocument.h"
-void LDProject::loadBinaryDocument(const QString &name, const QByteArray &data)
+void LDProjectLoader::loadDocument (const QString &name, const QByteArray &data)
 {
 	QDataStream ds (&data, QIODevice::ReadOnly);
 	ds.setVersion (QDataStream::Qt_4_8);
-	enum { CurrentVersion = 0 };
 
 	quint16 version;
 	ds << version;
 
-	if (version > CurrentVersion)
+	if (version > CurrentBinaryVersion)
 		return; // too new
 
 	qint8 header;
 	quint32 color;
 	LDDocumentPtr doc = LDDocument::createNew();
+	doc->setName (name);
 	LDObjectPtr obj;
-	struct XYZ { double x, y, z; Vertex toVertex() const { return Vertex (x,y,z); }};
-	XYZ verts[4];
+	Vertex vertex;
+	Matrix matrix;
 
 	while ((ds << header) != -1)
 	{
@@ -94,6 +127,28 @@ void LDProject::loadBinaryDocument(const QString &name, const QByteArray &data)
 				QString message;
 				ds >> message;
 				doc->addObject (LDSpawn<LDComment> (message));
+			}
+			break;
+
+		case 1:
+			{
+				LDSubfilePtr ref = LDSpawn<LDSubfile>();
+				QString name;
+				ds >> color;
+				ds >> vertex;
+
+				for (int i = 0; i < 9; ++i)
+					ds >> matrix[i];
+
+				ds >> name;
+				ref->setColor (LDColor::fromIndex (color));
+				ref->setPosition (vertex);
+				ref->setTransform (matrix);
+
+				// We leave the fileInfo null for now, references are resolved during post-process.
+				// If this object references a document that we'll parse later, finding it would
+				// yield null now.
+				referenceNames.append ({ref, name});
 			}
 			break;
 
@@ -113,18 +168,102 @@ void LDProject::loadBinaryDocument(const QString &name, const QByteArray &data)
 			obj = LDSpawn<LDCondLine>();
 		polyobject:
 			ds >> color;
+			obj->setColor (LDColor::fromIndex (color));
+
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
-				XYZ v;
-				ds >> v.x >> v.y >> v.z;
-				obj->setVertex (i, Vertex (v.x, v.y, v.z));
+				ds >> vertex;
+				obj->setVertex (i, vertex);
 			}
 
 			doc->addObject (obj);
 			break;
 		}
 	}
+}
 
+struct ArchiveEntry
+{
+	archive_entry* entry;
+	ArchiveEntry() : entry (archive_entry_new()) {}
+	ArchiveEntry (const ArchiveEntry&) = delete;
+	~ArchiveEntry() { archive_entry_free (entry); }
+	void operator= (const ArchiveEntry&) = delete;
+	operator archive_entry*() { return entry; }
+
+	void clear() { archive_entry_clear (entry); }
+	void setSize (size_t size) { archive_entry_set_size (entry, size); }
+	void setPathName (const char* name) { archive_entry_set_pathname (entry, name); }
+	void setFileType (unsigned type) { archive_entry_set_filetype (entry, type); }
+	void setPermissions (int perms) { archive_entry_set_perm (entry, perms); }
+};
+
+void LDProject::saveBinaryDocuments (archive* arc)
+{
+	ArchiveEntry ent;
+
+	for (LDDocumentPtr doc : m_documents)
+	{
+		QByteArray buffer;
+		QDataStream ds (&buffer, QIODevice::WriteOnly);
+		ds << CurrentBinaryVersion;
+
+		for (LDObjectPtr obj : doc->objects())
+		{
+			int number;
+
+			switch (obj->type())
+			{
+			case OBJ_Comment:
+				ds << 0
+				   << obj.staticCast<LDCommentPtr>()->text();
+				break;
+
+			case OBJ_Subfile:
+				{
+					LDSubfilePtr ref = obj.staticCast<LDSubfilePtr>();
+					ds << 1
+					   << ref->color().index()
+					   << ref->position();
+
+					for (int i = 0; i < 9; ++i)
+						ds << ref->transform()[i];
+
+					ds << ref->fileInfo()->name();
+				}
+				break;
+
+			case OBJ_Line:
+				number = 2;
+				goto polyobj;
+
+			case OBJ_Triangle:
+				number = 3;
+				goto polyobj;
+
+			case OBJ_Quad:
+				number = 4;
+				goto polyobj;
+
+			case OBJ_CondLine:
+				number = 5;
+			polyobj:
+				ds << obj->color().index();
+
+				for (int i = 0; i < obj->numVertices(); ++i)
+					ds << obj->vertex (i);
+				break;
+			}
+		}
+
+		ent.clear();
+		ent.setSize (buffer.size());
+		ent.setPathName (QString ("doc/" + doc->name() + ".dat").toLocal8Bit());
+		ent.setFileType (AE_IFREG);
+		ent.setPermissions (0644);
+		archive_write_header (arc, ent);
+		archive_write_data (arc, buffer.constData(), buffer.size());
+	}
 }
 
 LDProjectPtr LDProject::NewProject()
@@ -132,8 +271,21 @@ LDProjectPtr LDProject::NewProject()
 	return LDProjectPtr (new LDProject());
 }
 
-bool LDProject::save (const QString &filename)
+bool LDProject::save (const QString& filename)
 {
-	return false;
-}
+	QString tempname = filename;
 
+	if (tempname.endsWith (".ldforge"))
+		tempname.chop (strlen (".ldforge"));
+
+	if (not tempname.endsWith (".zip"))
+		tempname += ".zip";
+
+	archive* arc = archive_write_new();
+	archive_write_open_filename (arc, filename);
+	saveBinaryDocuments (arc);
+	archive_write_close (arc);
+	m_lastErrorString = archive_error_string (arc);
+	archive_write_free (arc);
+	return true;
+}

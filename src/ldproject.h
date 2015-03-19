@@ -17,8 +17,11 @@ public:
 	static LDProjectPtr NewProject();
 
 private:
+	void saveBinaryDocuments (struct archive* arc);
+
 	QString m_filePath;
 	QList<LDDocumentPtr> m_documents;
+	QString m_lastErrorString;
 	LDProject();
 };
 
