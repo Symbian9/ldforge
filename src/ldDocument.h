@@ -74,7 +74,7 @@ public:
 	PROPERTY (public,	int,				tabIndex,		setTabIndex,		STOCK_WRITE)
 	PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,		STOCK_WRITE)
 	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
-	PROPERTY (private,	LDDocumentWeakPtr,	self,			setSelf,			STOCK_WRITE)
+	PROPERTY (private,	LDDocument*,	self,			setSelf,			STOCK_WRITE)
 
 	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
 	QVector<Vertex> m_vertices;
@@ -82,7 +82,7 @@ public:
 	bool m_needVertexMerge;
 
 public:
-	LDDocument(LDDocumentPtr* selfptr);
+	LDDocument(LDDocument** selfptr);
 	~LDDocument();
 
 	int addObject (LDObject* obj); // Adds an object to this file at the end of the file.
@@ -146,15 +146,15 @@ public:
 		setImplicit (true);
 	}
 
-	static LDDocumentPtr current();
-	static void setCurrent (LDDocumentPtr f);
+	static LDDocument* current();
+	static void setCurrent (LDDocument* f);
 	static void closeInitialFile();
 	static int countExplicitFiles();
-	static LDDocumentPtr createNew();
+	static LDDocument* createNew();
 
 	// Turns a full path into a relative path
 	static QString shortenName (QString a);
-	static QList<LDDocumentPtr> const& explicitDocuments();
+	static QList<LDDocument*> const& explicitDocuments();
 	void mergeVertices();
 
 protected:
@@ -178,7 +178,7 @@ private:
 	bool					m_needsReCache;
 };
 
-inline LDDocumentPtr CurrentDocument()
+inline LDDocument* CurrentDocument()
 {
 	return LDDocument::current();
 }
@@ -190,11 +190,11 @@ void newFile();
 void OpenMainModel (QString path);
 
 // Finds an OpenFile by name or null if not open
-LDDocumentPtr FindDocument (QString name);
+LDDocument* FindDocument (QString name);
 
 // Opens the given file and parses the LDraw code within. Returns a pointer
 // to the opened file or null on error.
-LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride = LDDocumentPtr());
+LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr);
 
 // Opens the given file and returns a pointer to it, potentially looking in /parts and /p
 QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
@@ -207,7 +207,7 @@ LDObject* ParseLine (QString line);
 
 // Retrieves the pointer to the given document by file name. Document is loaded
 // from file if necessary. Can return null if neither succeeds.
-LDDocumentPtr GetDocument (QString filename);
+LDDocument* GetDocument (QString filename);
 
 // Is it safe to close all files?
 bool IsSafeToCloseAll();

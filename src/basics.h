@@ -40,12 +40,7 @@ using uint8 = quint8;
 using uint16 = quint16;
 using uint32 = quint32;
 using uint64 = quint64;
-using LDObject* = QSharedPointer<LDObject>;
 using LDObjectList = QList<LDObject*>;
-using LDObjectWeakPtr = QWeakPointer<LDObject>;
-using LDObjectWeakList = QList<LDObjectWeakPtr>;
-using LDDocumentPtr = QSharedPointer<LDDocument>;
-using LDDocumentWeakPtr = QWeakPointer<LDDocument>;
 
 template<typename T, typename R>
 using Pair = std::pair<T, R>;

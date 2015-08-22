@@ -32,7 +32,7 @@ CFGENTRY (String, DefaultUser, "")
 CFGENTRY (Bool, UseCALicense, true)
 
 // List of all LDObjects
-QMap<int32, LDObjectWeakPtr> g_allObjects;
+QMap<int32, LDObject*> g_allObjects;
 static int32 g_idcursor = 1; // 0 shalt be null
 
 enum { MAX_LDOBJECT_IDS = (1 << 24) };
@@ -229,7 +229,7 @@ QString LDBFC::asText() const
 
 // =============================================================================
 //
-QList<LDTrianglePtr> LDQuad::splitToTriangles()
+QList<LDTriangle*> LDQuad::splitToTriangles()
 {
 	// Create the two triangles based on this quadrilateral:
 	// 0---3       0---3    3
@@ -237,8 +237,8 @@ QList<LDTrianglePtr> LDQuad::splitToTriangles()
 	// |   |  ==>  | /    / |
 	// |   |       |/    /  |
 	// 1---2       1    1---2
-	LDTrianglePtr tri1 (new LDTriangle (vertex (0), vertex (1), vertex (3)));
-	LDTrianglePtr tri2 (new LDTriangle (vertex (1), vertex (2), vertex (3)));
+	LDTriangle* tri1 (new LDTriangle (vertex (0), vertex (1), vertex (3)));
+	LDTriangle* tri2 (new LDTriangle (vertex (1), vertex (2), vertex (3)));
 
 	// The triangles also inherit the quad's color
 	tri1->setColor (color());
@@ -249,7 +249,7 @@ QList<LDTrianglePtr> LDQuad::splitToTriangles()
 
 // =============================================================================
 //
-void LDObject::replace (LDObjectPtr other)
+void LDObject::replace (LDObject* other)
 {
 	int idx = lineNumber();
 
@@ -265,7 +265,7 @@ void LDObject::replace (LDObjectPtr other)
 
 // =============================================================================
 //
-void LDObject::swap (LDObjectPtr other)
+void LDObject::swap (LDObject* other)
 {
 	assert (document() == other->document());
 	document()->swapObjects (self(), other);
@@ -335,7 +335,7 @@ void LDObject::setDocument (LDDocument* a)
 
 // =============================================================================
 //
-static void TransformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDColor parentcolor)
+static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColor parentcolor)
 {
 	switch (obj->type())
 	{
@@ -353,7 +353,7 @@ static void TransformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDCo
 
 	case OBJ_Subfile:
 		{
-			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
+			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			Matrix newMatrix = transform * ref->transform();
 			Vertex newpos = ref->position();
 			newpos.transform (transform, pos);
@@ -377,7 +377,7 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 	LDObjectList objs = fileInfo()->inlineContents (deep, render);
 
 	// Transform the objects
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		// assert (obj->type() != OBJ_Subfile);
 		// Set the parent now so we know what inlined the object.
@@ -455,11 +455,11 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 	long const end = up ? objs.size() : -1;
 	long const incr = up ? 1 : -1;
 	LDObjectList objsToCompile;
-	LDDocumentPtr file = objs[0]->document();
+	LDDocument* file = objs[0]->document();
 
 	for (long i = start; i != end; i += incr)
 	{
-		LDObjectPtr obj = objs[i];
+		LDObject* obj = objs[i];
 
 		long const idx = obj->lineNumber();
 		long const target = idx + (up ? -1 : 1);
@@ -483,7 +483,7 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 
 	// The objects need to be recompiled, otherwise their pick lists are left with
 	// the wrong index colors which messes up selection.
-	for (LDObjectPtr obj : objsToCompile)
+	for (LDObject* obj : objsToCompile)
 		g_win->R()->compileObject (obj);
 }
 
@@ -507,7 +507,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 	{
 		int count = 0;
 
-		for (LDObjectPtr obj : objs)
+		for (LDObject* obj : objs)
 		{
 			if (obj->type() == objType)
 				count++;
@@ -533,7 +533,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 
 // =============================================================================
 //
-LDObjectPtr LDObject::topLevelParent()
+LDObject* LDObject::topLevelParent()
 {
 	LDObject* it;
 	
@@ -545,7 +545,7 @@ LDObjectPtr LDObject::topLevelParent()
 
 // =============================================================================
 //
-LDObjectPtr LDObject::next() const
+LDObject* LDObject::next() const
 {
 	int idx = lineNumber();
 	assert (idx != -1);
@@ -558,7 +558,7 @@ LDObjectPtr LDObject::next() const
 
 // =============================================================================
 //
-LDObjectPtr LDObject::previous() const
+LDObject* LDObject::previous() const
 {
 	int idx = lineNumber();
 	assert (idx != -1);
@@ -607,7 +607,7 @@ void LDObject::move (Vertex vect)
 
 // =============================================================================
 //
-LDObjectPtr LDObject::getDefault (const LDObjectType type)
+LDObject* LDObject::getDefault (const LDObjectType type)
 {
 	switch (type)
 	{
@@ -671,7 +671,7 @@ void LDSubfile::invert()
 	int axisSet = (1 << X) | (1 << Y) | (1 << Z);
 	LDObjectList objs = fileInfo()->inlineContents (true, false);
 
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -767,7 +767,7 @@ LDLine* LDCondLine::toEdgeLine()
 
 // =============================================================================
 //
-LDObjectPtr LDObject::fromID (int id)
+LDObject* LDObject::fromID (int id)
 {
 	auto it = g_allObjects.find (id);
 
@@ -794,7 +794,7 @@ void LDOverlay::invert() {}
 // makes history stuff work out of the box.
 //
 template<typename T>
-static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
+static void changeProperty (LDObject* obj, T* ptr, const T& val)
 {
 	int idx;
 
@@ -872,7 +872,7 @@ void LDObject::deselect()
 		document()->removeFromSelection (self());
 
 		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
-		LDBFCPtr invertnext;
+		LDBFC* invertnext;
 
 		if (previousIsInvertnext (invertnext))
 			invertnext->deselect();
@@ -888,15 +888,15 @@ QString PreferredLicenseText()
 
 // =============================================================================
 //
-LDObjectPtr LDObject::createCopy() const
+LDObject* LDObject::createCopy() const
 {
-	LDObjectPtr copy = ParseLine (asText());
+	LDObject* copy = ParseLine (asText());
 	return copy;
 }
 
 // =============================================================================
 //
-void LDSubfile::setFileInfo (const LDDocumentPtr& a)
+void LDSubfile::setFileInfo (const LDDocument*& a)
 {
 	changeProperty (self(), &m_fileInfo, a);
 

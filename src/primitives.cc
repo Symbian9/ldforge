@@ -417,7 +417,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 				Vertex v0 (x0, 0.0f, z0),
 				  v1 (x1, 0.0f, z1);
 
-				LDLinePtr line (LDSpawn<LDLine>());
+				LDLine* line (LDSpawn<LDLine>());
 				line->setVertex (0, v0);
 				line->setVertex (1, v1);
 				line->setColor (EdgeColor());
@@ -467,7 +467,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 					   v2 (x2, y2, z2),
 					   v3 (x3, y3, z3);
 
-				LDQuadPtr quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
+				LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
 				quad->setColor (MainColor());
 
 				if (type == Cylinder)
@@ -498,7 +498,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 
 				// Disc negatives need to go the other way around, otherwise
 				// they'll end up upside-down.
-				LDTrianglePtr seg (LDSpawn<LDTriangle>());
+				LDTriangle* seg (LDSpawn<LDTriangle>());
 				seg->setColor (MainColor());
 				seg->setVertex (type == Disc ? 0 : 2, v0);
 				seg->setVertex (1, v1);
@@ -532,7 +532,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 			v0.setZ (v0.z() * num);
 		}
 
-		LDCondLinePtr line = (LDSpawn<LDCondLine>());
+		LDCondLine* line = (LDSpawn<LDCondLine>());
 		line->setColor (EdgeColor());
 		line->setVertex (0, v0);
 		line->setVertex (1, v1);
@@ -590,7 +590,7 @@ QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num)
 
 // =============================================================================
 //
-LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
+LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 {
 	// Make the description
 	QString frac = QString::number ((float) segs / divs);
@@ -616,7 +616,7 @@ LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num
 	if (divs == HighResolution)
 		descr.insert (0, "Hi-Res ");
 
-	LDDocumentPtr f = LDDocument::createNew();
+	LDDocument* f = LDDocument::createNew();
 	f->setDefaultName (name);
 
 	QString author = APPNAME;
@@ -650,10 +650,10 @@ LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num
 
 // =============================================================================
 //
-LDDocumentPtr GetPrimitive (PrimitiveType type, int segs, int divs, int num)
+LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num)
 {
 	QString name = MakeRadialFileName (type, segs, divs, num);
-	LDDocumentPtr f = GetDocument (name);
+	LDDocument* f = GetDocument (name);
 
 	if (f != null)
 		return f;
@@ -709,7 +709,7 @@ void MainWindow::slot_actionMakePrimitive()
 		dlg->ui->rb_ndisc->isChecked()    ? DiscNeg :
 		dlg->ui->rb_ring->isChecked()     ? Ring : Cone;
 
-	LDDocumentPtr f = GeneratePrimitive (type, segs, divs, num);
+	LDDocument* f = GeneratePrimitive (type, segs, divs, num);
 	f->setImplicit (false);
 	g_win->save (f, false);
 }

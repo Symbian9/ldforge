@@ -142,9 +142,9 @@ public:
 	PROPERTY (public,	bool,				isDrawOnly,		setDrawOnly,		STOCK_WRITE)
 	PROPERTY (public,	MessageManager*,	messageLog, 	setMessageLog,		STOCK_WRITE)
 	PROPERTY (private,	bool,				isPicking,		setPicking,			CUSTOM_WRITE)
-	PROPERTY (public,	LDDocumentPtr,		document,		setDocument,		CUSTOM_WRITE)
+	PROPERTY (public,	LDDocument*,		document,		setDocument,		CUSTOM_WRITE)
 	PROPERTY (public,	GLCompiler*,		compiler,		setCompiler,		STOCK_WRITE)
-	PROPERTY (public,	LDObjectWeakPtr,	objectAtCursor,	setObjectAtCursor,	STOCK_WRITE)
+	PROPERTY (public,	LDObject*,	objectAtCursor,	setObjectAtCursor,	STOCK_WRITE)
 	PROPERTY (private,	bool,				isCameraMoving,	setCameraMoving,	STOCK_WRITE)
 
 public:
@@ -245,7 +245,7 @@ private:
 	inline LDGLData&		currentDocumentData() const;
 	void					drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
 	void					doMakeCurrent();
-	LDOverlayPtr			findOverlayObject (ECamera cam);
+	LDOverlay*			findOverlayObject (ECamera cam);
 	inline double&			pan (Axis ax);
 	inline const double&	pan (Axis ax) const;
 	inline double&			rot (Axis ax);

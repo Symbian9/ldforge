@@ -1048,7 +1048,7 @@ EditModeType GLRenderer::currentEditModeType() const
 
 // =============================================================================
 //
-void GLRenderer::setDocument (LDDocumentPtr const& a)
+void GLRenderer::setDocument (LDDocument* const& a)
 {
 	m_document = a;
 
@@ -1403,11 +1403,11 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 
 // =============================================================================
 //
-LDOverlayPtr GLRenderer::findOverlayObject (ECamera cam)
+LDOverlay* GLRenderer::findOverlayObject (ECamera cam)
 {
 	for (LDObject* obj : document()->objects())
 	{
-		LDOverlayPtr overlay = dynamic_cast<LDOverlay*> (obj);
+		LDOverlay* overlay = dynamic_cast<LDOverlay*> (obj);
 
 		if (overlay and overlay->camera() == cam)
 			return overlay;
@@ -1428,7 +1428,7 @@ void GLRenderer::initOverlaysFromObjects()
 			continue;
 
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
-		LDOverlayPtr ovlobj = findOverlayObject (cam);
+		LDOverlay* ovlobj = findOverlayObject (cam);
 
 		if (ovlobj == null and meta.img != null)
 		{
@@ -1455,7 +1455,7 @@ void GLRenderer::updateOverlayObjects()
 			continue;
 
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
-		LDOverlayPtr ovlobj = findOverlayObject (cam);
+		LDOverlay* ovlobj = findOverlayObject (cam);
 
 		if (meta.img == null and ovlobj != null)
 		{
@@ -1531,8 +1531,8 @@ void GLRenderer::highlightCursorObject()
 	if (not cfg::HighlightObjectBelowCursor and objectAtCursor() == null)
 		return;
 
-	LDObjectWeakPtr newObject;
-	LDObjectWeakPtr oldObject = objectAtCursor();
+	LDObject* newObject;
+	LDObject* oldObject = objectAtCursor();
 	qint32 newIndex;
 
 	if (isCameraMoving() or not cfg::HighlightObjectBelowCursor)
@@ -1578,7 +1578,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 	if (g_win != null and ev->source() == g_win->getPrimitivesTree())
 	{
 		QString primName = static_cast<SubfileListItem*> (g_win->getPrimitivesTree()->currentItem())->primitive()->name;
-		LDSubfilePtr ref = LDSpawn<LDSubfile>();
+		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setColor (MainColor());
 		ref->setFileInfo (GetDocument (primName));
 		ref->setPosition (Origin);

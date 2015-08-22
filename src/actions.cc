@@ -130,7 +130,7 @@ void MainWindow::slot_actionSaveAs()
 //
 void MainWindow::slot_actionSaveAll()
 {
-	for (LDDocumentPtr file : LDDocument::explicitDocuments())
+	for (LDDocument* file : LDDocument::explicitDocuments())
 		save (file, false);
 }
 
@@ -621,7 +621,7 @@ void MainWindow::slot_actionSetDrawDepth()
 // these is an immense pain.
 void MainWindow::slot_actiontestpic()
 {
-	LDDocumentPtr file = getFile ("axle.dat");
+	LDDocument* file = getFile ("axle.dat");
 	setlocale (LC_ALL, "C");
 
 	if (not file)
@@ -725,7 +725,7 @@ void MainWindow::slot_actionSubfileSelection()
 	QString			subtitle;
 
 	// Comment containing the title of the parent document
-	LDCommentPtr	titleobj = dynamic_cast<LDComment*> (CurrentDocument()->getObject (0));
+	LDComment*	titleobj = dynamic_cast<LDComment*> (CurrentDocument()->getObject (0));
 
 	// License text for the subfile
 	QString			license (PreferredLicenseText());
@@ -803,7 +803,7 @@ void MainWindow::slot_actionSubfileSelection()
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	LDIterate<LDBFC> (CurrentDocument()->objects(), [&] (LDBFCPtr const& bfc)
+	LDIterate<LDBFC> (CurrentDocument()->objects(), [&] (LDBFC* const& bfc)
 	{
 		if (Eq (bfc->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, 
 			BFCStatement::NoCertify))
@@ -818,7 +818,7 @@ void MainWindow::slot_actionSubfileSelection()
 		code << obj->asText();
 
 	// Create the new subfile document
-	LDDocumentPtr doc = LDDocument::createNew();
+	LDDocument* doc = LDDocument::createNew();
 	doc->setImplicit (false);
 	doc->setFullPath (fullsubname);
 	doc->setName (LDDocument::shortenName (fullsubname));
@@ -854,7 +854,7 @@ void MainWindow::slot_actionSubfileSelection()
 			obj->destroy();
 
 		// Add a reference to the new subfile to where the selection was
-		LDSubfilePtr ref (LDSpawn<LDSubfile>());
+		LDSubfile* ref (LDSpawn<LDSubfile>());
 		ref->setColor (MainColor());
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
@@ -887,7 +887,7 @@ void MainWindow::slot_actionOpenSubfiles()
 {
 	for (LDObject* obj : Selection())
 	{
-		LDSubfilePtr ref = dynamic_cast<LDSubfile*> (obj);
+		LDSubfile* ref = dynamic_cast<LDSubfile*> (obj);
 
 		if (ref == null or not ref->fileInfo()->isImplicit())
 			continue;

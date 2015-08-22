@@ -46,7 +46,7 @@ bool RectangleMode::mouseReleased (MouseEventData const& data)
 	{
 		if (m_drawedVerts.size() == 2)
 		{
-			LDQuadPtr quad (LDSpawn<LDQuad>());
+			LDQuad* quad (LDSpawn<LDQuad>());
 			updateRectVerts();
 
 			for (int i = 0; i < quad->numVertices(); ++i)

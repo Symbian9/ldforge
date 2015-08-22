@@ -35,7 +35,7 @@ public:
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	void				compileDocument (LDDocumentPtr doc);
+	void				compileDocument (LDDocument* doc);
 	void				dropObject (LDObject* obj);
 	void				initialize();
 	QColor				getColorForPolygon (LDPolygon& poly, LDObject* topobj,
@@ -69,8 +69,8 @@ private:
 	void			compileObject (LDObject* obj);
 	void			compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
 
-	QMap<LDObjectWeakPtr, ObjectVBOInfo>	m_objectInfo;
-	LDObjectWeakList						m_staged; // Objects that need to be compiled
+	QMap<LDObject*, ObjectVBOInfo>	m_objectInfo;
+	LDObjectList						m_staged; // Objects that need to be compiled
 	GLuint									m_vbo[g_numVBOs];
 	bool									m_vboChanged[g_numVBOs];
 	int										m_vboSizes[g_numVBOs];

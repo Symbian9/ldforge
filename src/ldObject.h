@@ -97,7 +97,7 @@ class LDObject
 	PROPERTY (private,		int32,				id,				setID,			STOCK_WRITE)
 	PROPERTY (public,		LDColor,			color,			setColor,		CUSTOM_WRITE)
 	PROPERTY (private,		QColor,				randomColor,	setRandomColor,	STOCK_WRITE)
-	PROPERTY (private,		LDObjectWeakPtr,	self,			setSelf,		STOCK_WRITE)
+	PROPERTY (private,		LDObject*,	self,			setSelf,		STOCK_WRITE)
 
 public:
 	LDObject (LDDocument* document = nullptr);
@@ -148,7 +148,7 @@ public:
 	LDObject*					previous() const;
 
 	// Is the previous object INVERTNEXT?
-	bool						previousIsInvertnext (LDBFCPtr& ptr);
+	bool						previousIsInvertnext (LDBFC*& ptr);
 
 	// Replace this LDObject with another LDObject. Object is deleted in the process.
 	void						replace (LDObject* other);
@@ -220,11 +220,11 @@ T* LDSpawn (Args... args)
 }
 
 //
-// Apparently QWeakPointer doesn't implement operator<. This is a problem when
+// Apparently QPointer doesn't implement operator<. This is a problem when
 // some of the code needs to sort and remove duplicates from LDObject lists.
 // Adding a specialized version here:
 //
-inline bool operator< (LDObjectWeakPtr a, LDObjectWeakPtr b)
+inline bool operator< (LDObject* a, LDObject* b)
 {
 	return a.data() < b.data();
 }
@@ -246,11 +246,11 @@ class LDMatrixObject : public LDObject
 
 public:
 	LDMatrixObject (LDDocument* document = nullptr) :
-		LDObject (documemnt),
+		LDObject (document),
 		m_position (Origin) {}
 
 	LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document = nullptr) :
-		LDObject (documemnt),
+		LDObject (document),
 		m_transform (transform),
 		m_position (pos) {}
 
@@ -390,7 +390,7 @@ class LDSubfile : public LDMatrixObject
 	LDOBJ_DEFAULTCOLOR (MainColor())
 	LDOBJ_SCEMANTIC
 	LDOBJ_HAS_MATRIX
-	PROPERTY (public, LDDocumentPtr, fileInfo, setFileInfo, CUSTOM_WRITE)
+	PROPERTY (public, LDDocument*, fileInfo, setFileInfo, CUSTOM_WRITE)
 
 public:
 	enum InlineFlag
@@ -447,7 +447,7 @@ class LDCondLine : public LDLine
 
 public:
 	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
-	LDLinePtr toEdgeLine();
+	LDLine* toEdgeLine();
 };
 
 //
@@ -491,7 +491,7 @@ public:
 	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* document = nullptr);
 
 	// Split this quad into two triangles
-	QList<LDTrianglePtr> splitToTriangles();
+	QList<LDTriangle*> splitToTriangles();
 };
 
 //
@@ -552,7 +552,7 @@ enum
 QString PreferredLicenseText();
 
 template<typename T>
-inline void DynamicExecute (LDObject* obj, std::function<void (QSharedPointer<T> const&)> func)
+inline void DynamicExecute (LDObject* obj, std::function<void (T*)> func)
 {
 	static_assert (std::is_base_of<LDObject, T>::value,
 		"DynamicExecute may only be used with LDObject-derivatives");
@@ -565,7 +565,7 @@ struct LDIterationBreakage {};
 
 template<typename T>
 inline void LDIterate (LDObjectList const& objs,
-	std::function<void (QSharedPointer<T> const&)> func)
+	std::function<void (T*)> func)
 {
 	static_assert (std::is_base_of<LDObject, T>::value,
 		"LDIterate may only be used with LDObject-derivatives");

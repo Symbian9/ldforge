@@ -29,7 +29,7 @@ public: \
 	T() : Super() {} \
 	T (DataType* data) : Super (data) {} \
 	T (Super const& other) : Super (other) {} \
-	T (QWeakPointer<DataType> const& other) : Super (other) {} \
+	T (QPointer<DataType> const& other) : Super (other) {} \
 	\
 	template <typename Deleter> \
 	T (DataType* data, Deleter dlt) : Super (data, dlt) {} \

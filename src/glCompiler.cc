@@ -247,7 +247,7 @@ void GLCompiler::unstage (LDObject* obj)
 
 // =============================================================================
 //
-void GLCompiler::compileDocument (LDDocumentPtr doc)
+void GLCompiler::compileDocument (LDDocument* doc)
 {
 	if (doc == null)
 		return;
@@ -356,7 +356,7 @@ void GLCompiler::compileObject (LDObject* obj)
 
 		case OBJ_Subfile:
 		{
-			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
+			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			auto data = ref->inlinePolygons();
 
 			for (LDPolygon& poly : data)

@@ -245,7 +245,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 	elif (btn == getButton (Download))
 	{
 		QString dest = form()->fname->text();
-		setPrimaryFile (LDDocumentPtr());
+		setPrimaryFile (nullptr);
 		setAborted (false);
 
 		if (getSource() == CustomURL)
@@ -328,7 +328,7 @@ void PartDownloader::checkIfFinished()
 		g_win->R()->resetAngles();
 	}
 
-		for (LDDocumentPtr f : m_files)
+		for (LDDocument* f : m_files)
 		f->reloadAllSubfiles();
 
 	if (cfg::AutoCloseDownloadDialog and not failed)
@@ -492,7 +492,7 @@ void PartDownloadRequest::downloadFinished()
 	}
 
 	// Try to load this file now.
-	LDDocumentPtr f = OpenDocument (filePath(), false, not isPrimary());
+	LDDocument* f = OpenDocument (filePath(), false, not isPrimary());
 
 	if (f == null)
 		return;
@@ -503,7 +503,7 @@ void PartDownloadRequest::downloadFinished()
 	// it resolves dependencies.
 	for (LDObject* obj : f->objects())
 	{
-		LDErrorPtr err = dynamic_cast<LDError*> (obj);
+		LDError* err = dynamic_cast<LDError*> (obj);
 
 		if (err == null or err->fileReferenced().isEmpty())
 			continue;
@@ -525,7 +525,7 @@ void PartDownloadRequest::downloadFinished()
 
 // =============================================================================
 //
-void PartDownloader::addFile (LDDocumentPtr f)
+void PartDownloader::addFile (LDDocument* f)
 {
 	m_files << f;
 }

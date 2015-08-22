@@ -58,7 +58,7 @@ public:
 	using RequestList = QList<PartDownloadRequest*>;
 
 	Q_OBJECT
-	PROPERTY (public,	LDDocumentPtr, 		primaryFile,		setPrimaryFile,		STOCK_WRITE)
+	PROPERTY (public,	LDDocument*, 		primaryFile,		setPrimaryFile,		STOCK_WRITE)
 	PROPERTY (public,	bool,				isAborted,			setAborted,			STOCK_WRITE)
 	PROPERTY (private,	Ui_DownloadFrom*,	form,				setForm,			STOCK_WRITE)
 	PROPERTY (private,	QStringList,		filesToDownload,	setFilesToDownload,	STOCK_WRITE)
@@ -69,7 +69,7 @@ public:
 	explicit		PartDownloader (QWidget* parent = null);
 	virtual			~PartDownloader();
 
-	void			addFile (LDDocumentPtr f);
+	void			addFile (LDDocument* f);
 	bool			checkValidPath();
 	void			downloadFile (QString dest, QString url, bool primary);
 	void			downloadFromPartsTracker (QString file);
@@ -89,7 +89,7 @@ public slots:
 
 private:
 	Source m_source;
-	QList<LDDocumentPtr> m_files;
+	QList<LDDocument*> m_files;
 };
 
 // =============================================================================

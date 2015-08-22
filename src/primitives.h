@@ -118,10 +118,10 @@ public slots:
 };
 
 void MakeCircle (int segs, int divs, double radius, QList<QLineF>& lines);
-LDDocumentPtr GeneratePrimitive (PrimitiveType type, int segs, int divs, int num);
+LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num);
 
 // Gets a primitive by the given specs. If the primitive cannot be found, it will
 // be automatically generated.
-LDDocumentPtr GetPrimitive (PrimitiveType type, int segs, int divs, int num);
+LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num);
 
 QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num);

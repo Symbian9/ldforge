@@ -42,11 +42,11 @@ EXTERN_CFGENTRY (Bool, UseLogoStuds)
 static bool g_loadingMainFile = false;
 static const int g_maxRecentFiles = 10;
 static bool g_aborted = false;
-static LDDocumentPtr g_logoedStud;
-static LDDocumentPtr g_logoedStud2;
-static QList<LDDocumentWeakPtr> g_allDocuments;
-static QList<LDDocumentPtr> g_explicitDocuments;
-static LDDocumentPtr g_currentDocument;
+static LDDocument* g_logoedStud;
+static LDDocument* g_logoedStud2;
+static QList<LDDocument*> g_allDocuments;
+static QList<LDDocument*> g_explicitDocuments;
+static LDDocument* g_currentDocument;
 static bool g_loadingLogoedStuds = false;
 
 const QStringList g_specialSubdirectories ({ "s", "48", "8" });
@@ -126,14 +126,14 @@ namespace LDPaths
 
 // =============================================================================
 //
-LDDocument::LDDocument (LDDocumentPtr* selfptr) :
+LDDocument::LDDocument (LDDocument** selfptr) :
 	m_isImplicit (true),
 	m_flags (0),
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
 	m_gldata (new LDGLData)
 {
-	*selfptr = LDDocumentPtr (this);
+	*selfptr = LDDocument* (this);
 	setSelf (*selfptr);
 	setSavePosition (-1);
 	setTabIndex (-1);
@@ -145,9 +145,9 @@ LDDocument::LDDocument (LDDocumentPtr* selfptr) :
 
 // =============================================================================
 //
-LDDocumentPtr LDDocument::createNew()
+LDDocument* LDDocument::createNew()
 {
-	LDDocumentPtr ptr;
+	LDDocument* ptr;
 	new LDDocument (&ptr);
 	return ptr;
 }
@@ -207,27 +207,27 @@ void LDDocument::setImplicit (bool const& a)
 
 // =============================================================================
 //
-QList<LDDocumentPtr> const& LDDocument::explicitDocuments()
+QList<LDDocument*> const& LDDocument::explicitDocuments()
 {
 	return g_explicitDocuments;
 }
 
 // =============================================================================
 //
-LDDocumentPtr FindDocument (QString name)
+LDDocument* FindDocument (QString name)
 {
-	for (LDDocumentWeakPtr weakfile : g_allDocuments)
+	for (LDDocument* file : g_allDocuments)
 	{
-		if (weakfile == null)
+		if (file == null)
 			continue;
 
-		LDDocumentPtr file (weakfile);
+		LDDocument* file (file);
 
 		if (Eq (name, file->name(), file->defaultName()))
 			return file;
 	}
 
-	return LDDocumentPtr();
+	return nullptr;
 }
 
 // =============================================================================
@@ -276,7 +276,7 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 	// in the immediate vicinity of a current model to override stock LDraw stuff.
 	QString reltop = Basename (Dirname (relpath));
 
-	for (LDDocumentWeakPtr doc : g_allDocuments)
+	for (LDDocument* doc : g_allDocuments)
 	{
 		if (doc == null)
 			continue;
@@ -512,7 +512,7 @@ LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 
 // =============================================================================
 //
-LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocumentPtr fileToOverride)
+LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride)
 {
 	// Convert the file name to lowercase when searching because some parts contain subfile
 	// subfile references with uppercase file names. I'll assume here that the library will always
@@ -532,14 +532,14 @@ LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocument
 		if (not fp->open (QIODevice::ReadOnly))
 		{
 			delete fp;
-			return LDDocumentPtr();
+			return nullptr;
 		}
 	}
 
 	if (not fp)
-		return LDDocumentPtr();
+		return nullptr;
 
-	LDDocumentPtr load = (fileToOverride != null ? fileToOverride : LDDocument::createNew());
+	LDDocument* load = (fileToOverride != null ? fileToOverride : LDDocument::createNew());
 	load->setImplicit (implicit);
 	load->setFullPath (fullpath);
 	load->setName (LDDocument::shortenName (load->fullPath()));
@@ -556,7 +556,7 @@ LDDocumentPtr OpenDocument (QString path, bool search, bool implicit, LDDocument
 	if (not ok)
 	{
 		load->dismiss();
-		return LDDocumentPtr();
+		return nullptr;
 	}
 
 	load->addObjects (objs);
@@ -633,7 +633,7 @@ getDisplayName());
 //
 void CloseAllDocuments()
 {
-	for (LDDocumentPtr file : g_explicitDocuments)
+	for (LDDocument* file : g_explicitDocuments)
 		file->dismiss();
 }
 
@@ -642,7 +642,7 @@ void CloseAllDocuments()
 void newFile()
 {
 	// Create a new anonymous file and set it to our current
-	LDDocumentPtr f = LDDocument::createNew();
+	LDDocument* f = LDDocument::createNew();
 	f->setName ("");
 	f->setImplicit (false);
 	LDDocument::setCurrent (f);
@@ -685,11 +685,11 @@ void AddRecentFile (QString path)
 void OpenMainModel (QString path)
 {
 	// If there's already a file with the same name, this file must replace it.
-	LDDocumentPtr documentToReplace;
-	LDDocumentPtr file;
+	LDDocument* documentToReplace;
+	LDDocument* file;
 	QString shortName = LDDocument::shortenName (path);
 
-	for (LDDocumentWeakPtr doc : g_allDocuments)
+	for (LDDocument* doc : g_allDocuments)
 	{
 		if (doc != null and doc->name() == shortName)
 		{
@@ -788,7 +788,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 
 	if (nameObject != null and nameObject->type() == OBJ_Comment)
 	{
-		LDCommentPtr nameComment = static_cast<LDComment*> (nameObject);
+		LDComment* nameComment = static_cast<LDComment*> (nameObject);
 
 		if (nameComment->text().left (6) == "Name: ")
 		{
@@ -964,7 +964,7 @@ LDObject* ParseLine (QString line)
 						CheckTokenCount (tokens, 7);
 						CheckTokenNumbers (tokens, 3, 6);
 
-						LDVertexPtr obj = LDSpawn<LDVertex>();
+						LDVertex* obj = LDSpawn<LDVertex>();
 						obj->setColor (LDColor::fromIndex (StringToNumber (tokens[3])));
 						obj->pos.apply ([&](Axis ax, double& value)
 							{ value = tokens[4 + ax].toDouble(); });
@@ -975,7 +975,7 @@ LDObject* ParseLine (QString line)
 						CheckTokenCount (tokens, 9);
 						CheckTokenNumbers (tokens, 5, 8);
 
-						LDOverlayPtr obj = LDSpawn<LDOverlay>();
+						LDOverlay* obj = LDSpawn<LDOverlay>();
 						obj->setFileName (tokens[3]);
 						obj->setCamera (tokens[4].toLong());
 						obj->setX (tokens[5].toLong());
@@ -987,7 +987,7 @@ LDObject* ParseLine (QString line)
 				}
 
 				// Just a regular comment:
-				LDCommentPtr obj = LDSpawn<LDComment>();
+				LDComment* obj = LDSpawn<LDComment>();
 				obj->setText (commentText);
 				return obj;
 			}
@@ -1002,19 +1002,19 @@ LDObject* ParseLine (QString line)
 				// not loading the main file now, but the subfile in question.
 				bool tmp = g_loadingMainFile;
 				g_loadingMainFile = false;
-				LDDocumentPtr load = GetDocument (tokens[14]);
+				LDDocument* load = GetDocument (tokens[14]);
 				g_loadingMainFile = tmp;
 
 				// If we cannot open the file, mark it an error. Note we cannot use LDParseError
 				// here because the error object needs the document reference.
 				if (not load)
 				{
-					LDErrorPtr obj = LDSpawn<LDError> (line, format ("Could not open %1", tokens[14]));
+					LDError* obj = LDSpawn<LDError> (line, format ("Could not open %1", tokens[14]));
 					obj->setFileReferenced (tokens[14]);
 					return obj;
 				}
 
-				LDSubfilePtr obj = LDSpawn<LDSubfile>();
+				LDSubfile* obj = LDSpawn<LDSubfile>();
 				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 				obj->setPosition (ParseVertex (tokens, 2));  // 2 - 4
 
@@ -1034,7 +1034,7 @@ LDObject* ParseLine (QString line)
 				CheckTokenNumbers (tokens, 1, 7);
 
 				// Line
-				LDLinePtr obj (LDSpawn<LDLine>());
+				LDLine* obj (LDSpawn<LDLine>());
 				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 
 				for (int i = 0; i < 2; ++i)
@@ -1049,7 +1049,7 @@ LDObject* ParseLine (QString line)
 				CheckTokenNumbers (tokens, 1, 10);
 
 				// Triangle
-				LDTrianglePtr obj (LDSpawn<LDTriangle>());
+				LDTriangle* obj (LDSpawn<LDTriangle>());
 				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
 
 				for (int i = 0; i < 3; ++i)
@@ -1093,10 +1093,10 @@ LDObject* ParseLine (QString line)
 
 // =============================================================================
 //
-LDDocumentPtr GetDocument (QString filename)
+LDDocument* GetDocument (QString filename)
 {
 	// Try find the file in the list of loaded files
-	LDDocumentPtr doc = FindDocument (filename);
+	LDDocument* doc = FindDocument (filename);
 
 	// If it's not loaded, try open it
 	if (not doc)
@@ -1116,8 +1116,8 @@ void LDDocument::reloadAllSubfiles()
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
-			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
-			LDDocumentPtr fileInfo = GetDocument (ref->fileInfo()->name());
+			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDDocument* fileInfo = GetDocument (ref->fileInfo()->name());
 
 			if (fileInfo != null)
 			{
@@ -1211,14 +1211,14 @@ void LDDocument::forgetObject (LDObject* obj)
 	}
 
 	m_objects.removeAt (idx);
-	obj->setDocument (LDDocumentPtr());
+	obj->setDocument (nullptr);
 }
 
 // =============================================================================
 //
 bool IsSafeToCloseAll()
 {
-	for (LDDocumentPtr f : LDDocument::explicitDocuments())
+	for (LDDocument* f : LDDocument::explicitDocuments())
 	{
 		if (not f->isSafeToClose())
 			return false;
@@ -1243,7 +1243,7 @@ void LDDocument::setObject (int idx, LDObject* obj)
 
 	m_objectVertices.remove (m_objects[idx]);
 	m_objects[idx]->deselect();
-	m_objects[idx]->setDocument (LDDocumentPtr());
+	m_objects[idx]->setDocument (nullptr);
 	obj->setDocument (this);
 	addKnownVertices (obj);
 	g_win->R()->compileObject (obj);
@@ -1396,7 +1396,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 // =============================================================================
 //
-LDDocumentPtr LDDocument::current()
+LDDocument* LDDocument::current()
 {
 	return g_currentDocument;
 }
@@ -1407,7 +1407,7 @@ LDDocumentPtr LDDocument::current()
 //
 // TODO: f can be temporarily null. This probably should not be the case.
 // =============================================================================
-void LDDocument::setCurrent (LDDocumentPtr f)
+void LDDocument::setCurrent (LDDocument* f)
 {
 	// Implicit files were loaded for caching purposes and must never be set
 	// current.
@@ -1446,7 +1446,7 @@ void LDDocument::closeInitialFile()
 		not g_explicitDocuments[1]->name().isEmpty() and
 		not g_explicitDocuments[0]->hasUnsavedChanges())
 	{
-		LDDocumentPtr filetoclose = g_explicitDocuments.first();
+		LDDocument* filetoclose = g_explicitDocuments.first();
 		filetoclose->dismiss();
 	}
 }

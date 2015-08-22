@@ -68,7 +68,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 		}
 		elif (obj->hasMatrix())
 		{
-			LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
+			LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 
 			// Transform the position
 			Vertex v = mo->position();
@@ -80,7 +80,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 		}
 		elif (obj->type() == OBJ_Vertex)
 		{
-			LDVertexPtr vert = static_cast<LDVertex*> (obj);
+			LDVertex* vert = static_cast<LDVertex*> (obj);
 			Vertex v = vert->pos;
 			RotateVertex (v, rotpoint, transform);
 			vert->pos = v;

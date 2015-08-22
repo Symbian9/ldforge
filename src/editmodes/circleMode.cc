@@ -77,7 +77,7 @@ void CircleMode::buildCircle()
 	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
-	LDDocumentPtr refFile;
+	LDDocument* refFile;
 	Matrix transform;
 	bool circleOrDisc = false;
 
@@ -104,7 +104,7 @@ void CircleMode::buildCircle()
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
 		{
 			refFile = GetPrimitive (::Ring, segments, divisions, cmp.num);
-			LDSubfilePtr ref = LDSpawn<LDSubfile>();
+			LDSubfile* ref = LDSpawn<LDSubfile>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
 			ref->setPosition (m_drawedVerts[0]);
@@ -144,7 +144,7 @@ void CircleMode::buildCircle()
 			v3.setCoordinate (localx, v3[localx] + c1[i].x1());
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
-			LDQuadPtr quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
+			LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
 			quad->setColor (MainColor());
 
 			// Ensure the quads always are BFC-front towards the camera
@@ -157,7 +157,7 @@ void CircleMode::buildCircle()
 
 	if (circleOrDisc and refFile != null)
 	{
-		LDSubfilePtr ref = LDSpawn<LDSubfile>();
+		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setFileInfo (refFile);
 		ref->setTransform (transform);
 		ref->setPosition (m_drawedVerts[0]);

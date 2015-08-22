@@ -52,7 +52,7 @@ public:
 	}
 
 	template<typename T>
-	StringFormatArg (QWeakPointer<T> const& a)
+	StringFormatArg (QPointer<T> const& a)
 	{
 		m_text.sprintf ("%p", a.data());
 	}

@@ -122,7 +122,7 @@ static void DoInline (bool deep)
 {
 	LDObjectList sel = Selection();
 
-	LDIterate<LDSubfile> (Selection(), [&](LDSubfilePtr const& ref)
+	LDIterate<LDSubfile> (Selection(), [&](LDSubfile* const& ref)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
@@ -164,7 +164,7 @@ void MainWindow::slot_actionSplitQuads()
 {
 	int num = 0;
 
-	LDIterate<LDQuad> (Selection(), [&](LDQuadPtr const& quad)
+	LDIterate<LDQuad> (Selection(), [&](LDQuad* const& quad)
 	{
 		// Find the index of this quad
 		long index = quad->lineNumber();
@@ -172,7 +172,7 @@ void MainWindow::slot_actionSplitQuads()
 		if (index == -1)
 			return;
 
-		QList<LDTrianglePtr> triangles = quad->splitToTriangles();
+		QList<LDTriangle*> triangles = quad->splitToTriangles();
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
@@ -257,11 +257,11 @@ void MainWindow::slot_actionBorders()
 		if (type != OBJ_Quad and type != OBJ_Triangle)
 			continue;
 
-		LDLinePtr lines[4];
+		LDLine* lines[4];
 
 		if (type == OBJ_Quad)
 		{
-			LDQuadPtr quad = static_cast<LDQuad*> (obj);
+			LDQuad* quad = static_cast<LDQuad*> (obj);
 			lines[0] = LDSpawn<LDLine> (quad->vertex (0), quad->vertex (1));
 			lines[1] = LDSpawn<LDLine> (quad->vertex (1), quad->vertex (2));
 			lines[2] = LDSpawn<LDLine> (quad->vertex (2), quad->vertex (3));
@@ -269,7 +269,7 @@ void MainWindow::slot_actionBorders()
 		}
 		else
 		{
-			LDTrianglePtr tri = static_cast<LDTriangle*> (obj);
+			LDTriangle* tri = static_cast<LDTriangle*> (obj);
 			lines[0] = LDSpawn<LDLine> (tri->vertex (0), tri->vertex (1));
 			lines[1] = LDSpawn<LDLine> (tri->vertex (1), tri->vertex (2));
 			lines[2] = LDSpawn<LDLine> (tri->vertex (2), tri->vertex (0));
@@ -452,7 +452,7 @@ void MainWindow::slot_actionRoundCoordinates()
 
 	for (LDObject* obj : Selection())
 	{
-		LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
+		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 
 		if (mo != null)
 		{
@@ -597,7 +597,7 @@ void MainWindow::slot_actionDemote()
 {
 	int num = 0;
 
-	LDIterate<LDCondLine> (Selection(), [&](LDCondLinePtr const& cnd)
+	LDIterate<LDCondLine> (Selection(), [&](LDCondLine* const& cnd)
 	{
 		cnd->toEdgeLine();
 		++num;
@@ -656,8 +656,8 @@ void MainWindow::slot_actionAutocolor()
 void MainWindow::slot_actionAddHistoryLine()
 {
 	LDObject* obj;
-	bool ishistory = false,
-		 prevIsHistory = false;
+	bool ishistory = false;
+	bool prevIsHistory = false;
 
 	QDialog* dlg = new QDialog;
 	Ui_AddHistoryLine* ui = new Ui_AddHistoryLine;
@@ -670,29 +670,23 @@ void MainWindow::slot_actionAddHistoryLine()
 		return;
 
 	// Create the comment object based on input
-	QString commentText = format ("!HISTORY %1 [%2] %3",
+	LDComment* comment = new LDComment (format ("!HISTORY %1 [%2] %3",
 		ui->m_date->date().toString ("yyyy-MM-dd"),
 		ui->m_username->text(),
-		ui->m_comment->text());
-
-	LDCommentPtr comm (LDSpawn<LDComment> (commentText));
+		ui->m_comment->text()));
 
 	// Find a spot to place the new comment
 	for (obj = CurrentDocument()->getObject (0);
-		obj != null and obj->next() != null and not obj->next()->isScemantic();
+		obj and obj->next() and not obj->next()->isScemantic();
 		obj = obj->next())
 	{
-		LDCommentPtr comm = dynamic_cast<LDComment*> (obj);
+		LDComment* comment = dynamic_cast<LDComment*> (obj);
 
-		if (comm != null and comm->text().startsWith ("!HISTORY "))
+		if (comment and comment->text().startsWith ("!HISTORY "))
 			ishistory = true;
 
 		if (prevIsHistory and not ishistory)
-		{
-			// Last line was history, this isn't, thus insert the new history
-			// line here.
-			break;
-		}
+			break; // Last line was history, this isn't, thus insert the new history line here.
 
 		prevIsHistory = ishistory;
 	}
@@ -703,7 +697,7 @@ void MainWindow::slot_actionAddHistoryLine()
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
-		CurrentDocument()->insertObj (idx, LDEmptyPtr (LDSpawn<LDEmpty>()));
+		CurrentDocument()->insertObj (idx, new LDEmpty);
 
 	buildObjList();
 	delete ui;

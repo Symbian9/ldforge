@@ -60,7 +60,7 @@ void LinePathMode::endDraw()
 
 	for (int i = 0; i < m_drawedVerts.size() - 1; ++i)
 	{
-		LDLinePtr line = LDSpawn<LDLine>();
+		LDLine* line = LDSpawn<LDLine>();
 		line->setVertex (0, m_drawedVerts[i]);
 		line->setVertex (1, m_drawedVerts[i + 1]);
 		objs << line;

@@ -278,7 +278,7 @@ void MainWindow::updateTitle()
 			CurrentDocument()->getObject (0)->type() == OBJ_Comment)
 		{
 			// Append title
-			LDCommentPtr comm = static_cast <LDComment*> (CurrentDocument()->getObject (0));
+			LDComment* comm = static_cast <LDComment*> (CurrentDocument()->getObject (0));
 			title += format (": %1", comm->text());
 		}
 
@@ -381,7 +381,7 @@ void MainWindow::buildObjList()
 
 			case OBJ_Subfile:
 			{
-				LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
+				LDSubfile* ref = static_cast<LDSubfile*> (obj);
 
 				descr = format ("%1 %2, (", ref->fileInfo()->getDisplayName(), ref->position().toString (true));
 
@@ -400,7 +400,7 @@ void MainWindow::buildObjList()
 
 			case OBJ_Overlay:
 			{
-				LDOverlayPtr ovl = static_cast<LDOverlay*> (obj);
+				LDOverlay* ovl = static_cast<LDOverlay*> (obj);
 				descr = format ("[%1] %2 (%3, %4), %5 x %6", g_CameraNames[ovl->camera()],
 					Basename (ovl->fileName()), ovl->x(), ovl->y(),
 					ovl->width(), ovl->height());
@@ -768,7 +768,7 @@ void MainWindow::slot_editObject (QListWidgetItem* listitem)
 
 // =============================================================================
 //
-bool MainWindow::save (LDDocumentPtr doc, bool saveAs)
+bool MainWindow::save (LDDocument* doc, bool saveAs)
 {
 	QString path = doc->fullPath();
 	int64 savesize;
@@ -931,7 +931,7 @@ void MainWindow::updateDocumentList()
 	while (m_tabs->count() > 0)
 		m_tabs->removeTab (0);
 
-	for (LDDocumentPtr f : LDDocument::explicitDocuments())
+	for (LDDocument* f : LDDocument::explicitDocuments())
 	{
 		// Add an item to the list for this file and store the tab index
 		// in the document so we can find documents by tab index.
@@ -944,7 +944,7 @@ void MainWindow::updateDocumentList()
 
 // =============================================================================
 //
-void MainWindow::updateDocumentListItem (LDDocumentPtr doc)
+void MainWindow::updateDocumentListItem (LDDocument* doc)
 {
 	bool oldUpdatingTabs = m_updatingTabs;
 	m_updatingTabs = true;
@@ -980,11 +980,11 @@ void MainWindow::changeCurrentFile()
 	if (m_updatingTabs)
 		return;
 
-	LDDocumentPtr f;
+	LDDocument* f;
 	int tabIndex = m_tabs->currentIndex();
 
 	// Find the file pointer of the item that was selected.
-	for (LDDocumentPtr it : LDDocument::explicitDocuments())
+	for (LDDocument* it : LDDocument::explicitDocuments())
 	{
 		if (it->tabIndex() == tabIndex)
 		{
@@ -1007,7 +1007,7 @@ void MainWindow::refreshObjectList()
 {
 #if 0
 	ui->objectList->clear();
-	LDDocumentPtr f = getCurrentDocument();
+	LDDocument* f = getCurrentDocument();
 
 for (LDObject* obj : *f)
 		ui->objectList->addItem (obj->qObjListEntry);
@@ -1050,7 +1050,7 @@ void MainWindow::updatePrimitives()
 //
 void MainWindow::closeTab (int tabindex)
 {
-	LDDocumentPtr doc = FindDocument (m_tabs->tabData (tabindex).toString());
+	LDDocument* doc = FindDocument (m_tabs->tabData (tabindex).toString());
 
 	if (doc == null)
 		return;

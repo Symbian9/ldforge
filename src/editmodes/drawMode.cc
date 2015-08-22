@@ -93,7 +93,7 @@ void DrawMode::endDraw()
 		case 1:
 		{
 			// 1 vertex - add a vertex object
-			LDVertexPtr obj = LDSpawn<LDVertex>();
+			LDVertex* obj = LDSpawn<LDVertex>();
 			obj->pos = verts[0];
 			obj->setColor (MainColor());
 			objs << obj;
@@ -103,7 +103,7 @@ void DrawMode::endDraw()
 		case 2:
 		{
 			// 2 verts - make a line
-			LDLinePtr obj = LDSpawn<LDLine> (verts[0], verts[1]);
+			LDLine* obj = LDSpawn<LDLine> (verts[0], verts[1]);
 			obj->setColor (EdgeColor());
 			objs << obj;
 			break;

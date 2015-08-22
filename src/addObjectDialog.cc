@@ -109,7 +109,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 
 			if (obj)
 			{
-				LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
+				LDSubfile* ref = static_cast<LDSubfile*> (obj);
 				le_subfileName->setText (ref->fileInfo()->name());
 			}
 		} break;
@@ -189,7 +189,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 
 	if (defaults->hasMatrix())
 	{
-		LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
+		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 		QLabel* lb_matrix = new QLabel ("Matrix:");
 		le_matrix = new QLineEdit;
 		// le_matrix->setValidator (new QDoubleValidator);
@@ -276,10 +276,10 @@ void AddObjectDialog::slot_subfileTypeChanged()
 // =============================================================================
 // =============================================================================
 template<typename T>
-static QSharedPointer<T> InitObject (LDObject*& obj)
+static T* InitObject (LDObject*& obj)
 {
 	if (obj == null)
-		obj = LDSpawn<T>();
+		obj = new T;
 
 	return static_cast<T*> (obj);
 }
@@ -326,7 +326,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	{
 		case OBJ_Comment:
 		{
-			LDCommentPtr comm = InitObject<LDComment> (obj);
+			LDComment* comm = InitObject<LDComment> (obj);
 			comm->setText (dlg.le_comment->text());
 		}
 		break;
@@ -354,14 +354,14 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 
 		case OBJ_BFC:
 		{
-			LDBFCPtr bfc = InitObject<LDBFC> (obj);
+			LDBFC* bfc = InitObject<LDBFC> (obj);
 			assert (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
 			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 
 		case OBJ_Vertex:
 		{
-			LDVertexPtr vert = InitObject<LDVertex> (obj);
+			LDVertex* vert = InitObject<LDVertex> (obj);
 			vert->pos.apply ([&](Axis ax, double& value) { value = dlg.dsb_coords[ax]->value(); });
 		}
 		break;
@@ -373,7 +373,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 			if (name.length() == 0)
 				return; // no subfile filename
 
-			LDDocumentPtr file = GetDocument (name);
+			LDDocument* file = GetDocument (name);
 
 			if (not file)
 			{
@@ -381,7 +381,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 				return;
 			}
 
-			LDSubfilePtr ref = InitObject<LDSubfile> (obj);
+			LDSubfile* ref = InitObject<LDSubfile> (obj);
 			assert (ref);
 
 			for_axes (ax)

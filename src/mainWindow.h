@@ -114,7 +114,7 @@ public:
 
 	// Updates the document tab for \c doc. If no such tab exists, the
 	// document list is rebuilt instead.
-	void updateDocumentListItem (LDDocumentPtr doc);
+	void updateDocumentListItem (LDDocument* doc);
 
 	// Returns the uniform selected color (i.e. 4 if everything selected is
 	// red), -1 if there is no such consensus.
@@ -134,7 +134,7 @@ public:
 	void deleteByColor (LDColor color);
 
 	// Tries to save the given document.
-	bool save (LDDocumentPtr doc, bool saveAs);
+	bool save (LDDocument* doc, bool saveAs);
 
 	// Updates various actions, undo/redo are set enabled/disabled where
 	// appropriate, togglable actions are updated based on configuration,
