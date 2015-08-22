@@ -248,7 +248,7 @@ int parseXDigit (char xd)
 //
 bool Script::Parser::next (TokenType desiredType)
 {
-	SavedState oldpos = state();
+	State oldpos = state();
 	Token oldtoken = m_state.token;
 
 	if (not getNextToken())
@@ -330,7 +330,7 @@ bool Script::Parser::getNextToken()
 //
 bool Script::Parser::parseNumber()
 {
-	SavedState pos = state();
+	State pos = state();
 	char ch = read();
 	unread();
 	QString numberString;
@@ -539,7 +539,7 @@ void Script::Parser::mustGetNext (TokenType desiredType)
 //
 bool Script::Parser::peekNext (Token& tok)
 {
-	SavedState pos = state();
+	State pos = state();
 
 	if (next (TOK_Any))
 	{
@@ -554,15 +554,7 @@ bool Script::Parser::peekNext (Token& tok)
 //
 // -------------------------------------------------------------------------------------------------
 //
-const Script::SavedState& Script::Parser::state() const
-{
-	return m_state;
-}
-
-//
-// -------------------------------------------------------------------------------------------------
-//
-void Script::Parser::setState (const SavedState& pos)
+void Script::Parser::setState (const State& pos)
 {
 	m_state = pos;
 }

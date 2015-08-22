@@ -16,42 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "objtype.h"
+#pragma once
 
-
-Script::ObjectType::ObjectType() {}
-
-QString Script::ContainerType::asString() const
+namespace Script
 {
-	switch (m_kind)
-	{
-	case ARRAY:
-		return m_elementType->asString() + "[]";
 
-	case TUPLE:
-		return m_elementType->asString()
-			+ "(" + QString::number(m_n1) + ")";
-
-	case MATRIX:
-		return m_elementType->asString()
-			+ "(" + QString::number(m_n1)
-			+ "," + QString::number(m_n2) + ")";
-	}
-
-	return "???";
-}
-
-QString Script::BasicType::asString() const
-{
-	static const char* names[] =
-	{
-		"var",
-		"int",
-		"real",
-		"string",
-		"type",
-		"object",
-	};
-
-	return names[int (m_kind)];
 }

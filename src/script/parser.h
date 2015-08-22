@@ -95,7 +95,7 @@ namespace Script
 		qreal real;
 	};
 
-	struct SavedState
+	struct State
 	{
 		int position;
 		int lineNumber;
@@ -127,21 +127,21 @@ namespace Script
 		Parser(QString text);
 		~Parser();
 
-		void parse();
-		void scriptError (QString text);
-		bool next (TokenType desiredType = TOK_Any);
+		bool isAtEnd() const { return m_state.position >= m_data.length(); }
 		void mustGetNext (TokenType desiredType = TOK_Any);
+		bool next (TokenType desiredType = TOK_Any);
+		void parse();
 		bool peekNext (Token& tok);
-		const SavedState& state() const;
-		void setState(const SavedState& pos);
 		void preprocess();
 		QString preprocessedScript() const { return QString::fromAscii (m_data); }
 		char read();
-		void unread();
+		void scriptError (QString text);
+		void setState (const State& pos);
 		void skipSpace();
-		bool isAtEnd() const { return m_state.position >= m_data.length(); }
-		bool tryMatch (const char* text, bool caseSensitive);
+		State state() const { return m_state; }
 		void tokenMustBe (TokenType desiredType);
+		bool tryMatch (const char* text, bool caseSensitive);
+		void unread();
 
 		template<typename... Args>
 		void scriptError (QString text, Args... args)
@@ -153,7 +153,7 @@ namespace Script
 		QString m_script;
 		QByteArray m_data;
 		QVector<int> m_lineEndings;
-		SavedState m_state;
+		State m_state;
 		Ast::RootPointer m_astRoot;
 		Token m_rejectedToken;
 

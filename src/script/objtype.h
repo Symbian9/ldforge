@@ -21,14 +21,14 @@
 
 namespace Script
 {
-	class Type
+	class ObjectType
 	{
 	public:
-		Type();
+		ObjectType();
 		virtual QString asString() const = 0;
 	};
 
-	class BasicType : public Type
+	class BasicType : public ObjectType
 	{
 	public:
 		enum Kind
@@ -48,7 +48,7 @@ namespace Script
 		Kind m_kind;
 	};
 
-	class ContainerType : public Type
+	class ContainerType : public ObjectType
 	{
 	public:
 		enum Kind
@@ -65,11 +65,11 @@ namespace Script
 		Kind kind() const { return m_kind; }
 		int n1() const { return m_n1; }
 		int n2() const { return m_n1; }
-		QSharedPointer<Type> elementType() const { return m_elementType; }
+		QSharedPointer<ObjectType> elementType() const { return m_elementType; }
 
 	private:
 		Kind m_kind;
-		QSharedPointer<Type> m_elementType;
+		QSharedPointer<ObjectType> m_elementType;
 		int m_n1;
 		int m_n2;
 	};
