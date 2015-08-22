@@ -41,21 +41,21 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 	// ref: http://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
 	Matrix transform (
 	{
-		(l* l * (1 - cosangle)) + cosangle,
-		(m* l * (1 - cosangle)) - (n* sinangle),
-		(n* l * (1 - cosangle)) + (m* sinangle),
+		(l * l * (1 - cosangle)) + cosangle,
+		(m * l * (1 - cosangle)) - (n * sinangle),
+		(n * l * (1 - cosangle)) + (m * sinangle),
 
-		(l* m * (1 - cosangle)) + (n* sinangle),
-		(m* m * (1 - cosangle)) + cosangle,
-		(n* m * (1 - cosangle)) - (l* sinangle),
+		(l * m * (1 - cosangle)) + (n * sinangle),
+		(m * m * (1 - cosangle)) + cosangle,
+		(n * m * (1 - cosangle)) - (l * sinangle),
 
-		(l* n * (1 - cosangle)) - (m* sinangle),
-		(m* n * (1 - cosangle)) + (l* sinangle),
-		(n* n * (1 - cosangle)) + cosangle
+		(l * n * (1 - cosangle)) - (m * sinangle),
+		(m * n * (1 - cosangle)) + (l * sinangle),
+		(n * n * (1 - cosangle)) + cosangle
 	});
 
 	// Apply the above matrix to everything
-	for (LDObjectPtr obj : objects)
+	for (LDObject* obj : objects)
 	{
 		if (obj->numVertices())
 		{
@@ -68,7 +68,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 		}
 		elif (obj->hasMatrix())
 		{
-			LDMatrixObjectPtr mo = obj.dynamicCast<LDMatrixObject>();
+			LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
 
 			// Transform the position
 			Vertex v = mo->position();
@@ -80,7 +80,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 		}
 		elif (obj->type() == OBJ_Vertex)
 		{
-			LDVertexPtr vert = obj.staticCast<LDVertex>();
+			LDVertexPtr vert = static_cast<LDVertex*> (obj);
 			Vertex v = vert->pos;
 			RotateVertex (v, rotpoint, transform);
 			vert->pos = v;

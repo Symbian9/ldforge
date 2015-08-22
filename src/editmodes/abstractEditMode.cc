@@ -165,7 +165,7 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 
 	if (objs.size() > 0)
 	{
-		for (LDObjectPtr obj : objs)
+		for (LDObject* obj : objs)
 		{
 			renderer()->document()->insertObj (pos++, obj);
 			renderer()->compileObject (obj);

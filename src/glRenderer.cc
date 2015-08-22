@@ -921,7 +921,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 		LDObjectList oldsel = Selection();
 		CurrentDocument()->clearSelection();
 
-		for (LDObjectPtr obj : oldsel)
+		for (LDObject* obj : oldsel)
 			compileObject (obj);
 	}
 
@@ -950,7 +950,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	// Read pixels from the color buffer.
 	glReadPixels (x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixeldata);
 
-	LDObjectPtr removedObj;
+	LDObject* removedObj;
 	QList<qint32> indices;
 
 	// Go through each pixel read and add them to the selection.
@@ -971,7 +971,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 
 	for (qint32 idx : indices)
 	{
-		LDObjectPtr obj = LDObject::fromID (idx);
+		LDObject* obj = LDObject::fromID (idx);
 		assert (obj != null);
 
 		// If this is an additive single pick and the object is currently selected,
@@ -995,7 +995,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	g_win->updateSelection();
 
 	// Recompile the objects now to update their color
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		compileObject (obj);
 
 	if (removedObj)
@@ -1008,14 +1008,14 @@ void GLRenderer::pick (QRect const& range, bool additive)
 //
 // Simpler version of GLRenderer::pick which simply picks whatever object on the screen
 //
-LDObjectPtr GLRenderer::pickOneObject (int mouseX, int mouseY)
+LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 {
 	uchar pixel[4];
 	doMakeCurrent();
 	setPicking (true);
 	drawGLScene();
 	glReadPixels (mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-	LDObjectPtr obj = LDObject::fromID ((pixel[0] * 0x10000) + (pixel[1] * 0x100) + pixel[2]);
+	LDObject* obj = LDObject::fromID ((pixel[0] * 0x10000) + (pixel[1] * 0x100) + pixel[2]);
 	setPicking (false);
 	repaint();
 	return obj;
@@ -1108,7 +1108,7 @@ Axis GLRenderer::getRelativeZ() const
 
 // =============================================================================
 //
-static QList<Vertex> GetVerticesOf (LDObjectPtr obj)
+static QList<Vertex> GetVerticesOf (LDObject* obj)
 {
 	QList<Vertex> verts;
 
@@ -1117,12 +1117,9 @@ static QList<Vertex> GetVerticesOf (LDObjectPtr obj)
 		for (int i = 0; i < obj->numVertices(); ++i)
 			verts << obj->vertex (i);
 	}
-	elif (obj->type() == OBJ_Subfile)
+	else if (obj->type() == OBJ_Subfile)
 	{
-		LDSubfilePtr ref = obj.staticCast<LDSubfile>();
-		LDObjectList objs = ref->inlineContents (true, false);
-
-		for (LDObjectPtr obj : objs)
+		for (LDObject* obj : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
 		{
 			verts << GetVerticesOf (obj);
 			obj->destroy();
@@ -1134,14 +1131,14 @@ static QList<Vertex> GetVerticesOf (LDObjectPtr obj)
 
 // =============================================================================
 //
-void GLRenderer::compileObject (LDObjectPtr obj)
+void GLRenderer::compileObject (LDObject* obj)
 {
 	compiler()->stageForCompilation (obj);
 }
 
 // =============================================================================
 //
-void GLRenderer::forgetObject (LDObjectPtr obj)
+void GLRenderer::forgetObject (LDObject* obj)
 {
 	if (compiler() != null)
 		compiler()->dropObject (obj);
@@ -1408,15 +1405,15 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 //
 LDOverlayPtr GLRenderer::findOverlayObject (ECamera cam)
 {
-	for (LDObjectPtr obj : document()->objects())
+	for (LDObject* obj : document()->objects())
 	{
-		LDOverlayPtr ovlobj = obj.dynamicCast<LDOverlay>();
+		LDOverlayPtr overlay = dynamic_cast<LDOverlay*> (obj);
 
-		if (ovlobj != null and obj.staticCast<LDOverlay>()->camera() == cam)
-			return ovlobj;
+		if (overlay and overlay->camera() == cam)
+			return overlay;
 	}
 
-	return LDOverlayPtr();
+	return nullptr;
 }
 
 // =============================================================================
@@ -1463,7 +1460,7 @@ void GLRenderer::updateOverlayObjects()
 		if (meta.img == null and ovlobj != null)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
-			LDObjectPtr nextobj = ovlobj->next();
+			LDObject* nextobj = ovlobj->next();
 
 			if (nextobj and nextobj->type() == OBJ_Empty)
 				nextobj->destroy();
@@ -1489,7 +1486,7 @@ void GLRenderer::updateOverlayObjects()
 
 			for (i = 0; i < document()->getObjectCount(); ++i)
 			{
-				LDObjectPtr obj = document()->getObject (i);
+				LDObject* obj = document()->getObject (i);
 
 				if (obj->isScemantic())
 				{

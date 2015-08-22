@@ -395,7 +395,7 @@ void LDFileLoader::work (int i)
 	// User wishes to abort, so stop here now.
 	if (isAborted())
 	{
-		for (LDObjectPtr obj : m_objects)
+		for (LDObject* obj : m_objects)
 			obj->destroy();
 
 		m_objects.clear();
@@ -416,13 +416,13 @@ void LDFileLoader::work (int i)
 		while (line.endsWith ("\n") or line.endsWith ("\r"))
 			line.chop (1);
 
-		LDObjectPtr obj = ParseLine (line);
+		LDObject* obj = ParseLine (line);
 
 		// Check for parse errors and warn about tthem
 		if (obj->type() == OBJ_Error)
 		{
 			print ("Couldn't parse line #%1: %2",
-				progress() + 1, obj.staticCast<LDError>()->reason());
+				progress() + 1, static_cast<LDError*> (obj)->reason());
 
 			if (warnings() != null)
 				(*warnings())++;
@@ -746,12 +746,12 @@ void OpenMainModel (QString path)
 	// files on the parts tracker.
 	QStringList unknowns;
 
-	for (LDObjectPtr obj : file->objects())
+	for (LDObject* obj : file->objects())
 	{
-		if (obj->type() != OBJ_Error or obj.staticCast<LDError>()->fileReferenced().isEmpty())
+		if (obj->type() != OBJ_Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty(j)
 			continue;
 
-		unknowns << obj.staticCast<LDError>()->fileReferenced();
+		unknowns << static_cast<LDError*> (obj)->fileReferenced();
 	}
 
 	if (cfg::TryDownloadMissingFiles and not unknowns.isEmpty())
@@ -784,11 +784,11 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		path = fullPath();
 
 	// If the second object in the list holds the file name, update that now.
-	LDObjectPtr nameObject = getObject (1);
+	LDObject* nameObject = getObject (1);
 
 	if (nameObject != null and nameObject->type() == OBJ_Comment)
 	{
-		LDCommentPtr nameComment = nameObject.staticCast<LDComment>();
+		LDCommentPtr nameComment = static_cast<LDComment*> (nameObject);
 
 		if (nameComment->text().left (6) == "Name: ")
 		{
@@ -803,9 +803,8 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	if (sizeptr != null)
 		*sizeptr = 0;
 
-	// File is open, now save the model to it. Note that LDraw requires files to
-	// have DOS line endings, so we terminate the lines with \r\n.
-	for (LDObjectPtr obj : objects())
+	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
+	for (LDObject* obj : objects())
 	{
 		QByteArray subdata ((obj->asText() + "\r\n").toUtf8());
 		data.append (subdata);
@@ -836,7 +835,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 //
 void LDDocument::clear()
 {
-	for (LDObjectPtr obj : objects())
+	for (LDObject* obj : objects())
 		forgetObject (obj);
 }
 
@@ -908,7 +907,7 @@ static int32 StringToNumber (QString a, bool* ok = null)
 // code and returns the object parsed from it. parseLine never returns null,
 // the object will be LDError if it could not be parsed properly.
 // =============================================================================
-LDObjectPtr ParseLine (QString line)
+LDObject* ParseLine (QString line)
 {
 	try
 	{
@@ -1066,7 +1065,7 @@ LDObjectPtr ParseLine (QString line)
 				CheckTokenNumbers (tokens, 1, 13);
 
 				// Quadrilateral / Conditional line
-				LDObjectPtr obj;
+				LDObject* obj;
 
 				if (num == 4)
 					obj = LDSpawn<LDQuad>();
@@ -1113,11 +1112,11 @@ void LDDocument::reloadAllSubfiles()
 	print ("Reloading subfiles of %1", getDisplayName());
 
 	// Go through all objects in the current file and reload the subfiles
-	for (LDObjectPtr obj : objects())
+	for (LDObject* obj : objects())
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
-			LDSubfilePtr ref = obj.staticCast<LDSubfile>();
+			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
 			LDDocumentPtr fileInfo = GetDocument (ref->fileInfo()->name());
 
 			if (fileInfo != null)
@@ -1134,7 +1133,7 @@ void LDDocument::reloadAllSubfiles()
 		// Reparse gibberish files. It could be that they are invalid because
 		// of loading errors. Circumstances may be different now.
 		if (obj->type() == OBJ_Error)
-			obj->replace (ParseLine (obj.staticCast<LDError>()->contents()));
+			obj->replace (ParseLine (static_cast<LDError*> (obj)->contents()));
 	}
 
 	m_needsReCache = true;
@@ -1145,7 +1144,7 @@ void LDDocument::reloadAllSubfiles()
 
 // =============================================================================
 //
-int LDDocument::addObject (LDObjectPtr obj)
+int LDDocument::addObject (LDObject* obj)
 {
 	history()->add (new AddHistory (objects().size(), obj));
 	m_objects << obj;
@@ -1159,7 +1158,7 @@ int LDDocument::addObject (LDObjectPtr obj)
 //
 void LDDocument::addObjects (const LDObjectList& objs)
 {
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		if (obj != null)
 			addObject (obj);
@@ -1168,7 +1167,7 @@ void LDDocument::addObjects (const LDObjectList& objs)
 
 // =============================================================================
 //
-void LDDocument::insertObj (int pos, LDObjectPtr obj)
+void LDDocument::insertObj (int pos, LDObject* obj)
 {
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
@@ -1184,7 +1183,7 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 
 // =============================================================================
 //
-void LDDocument::addKnownVertices (LDObjectPtr obj)
+void LDDocument::addKnownVertices (LDObject* obj)
 {
 	auto it = m_objectVertices.find (obj);
 
@@ -1199,7 +1198,7 @@ void LDDocument::addKnownVertices (LDObjectPtr obj)
 
 // =============================================================================
 //
-void LDDocument::forgetObject (LDObjectPtr obj)
+void LDDocument::forgetObject (LDObject* obj)
 {
 	int idx = obj->lineNumber();
 	obj->deselect();
@@ -1230,7 +1229,7 @@ bool IsSafeToCloseAll()
 
 // =============================================================================
 //
-void LDDocument::setObject (int idx, LDObjectPtr obj)
+void LDDocument::setObject (int idx, LDObject* obj)
 {
 	assert (idx >= 0 and idx < m_objects.size());
 
@@ -1254,7 +1253,7 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 
 // =============================================================================
 //
-LDObjectPtr LDDocument::getObject (int pos) const
+LDObject* LDDocument::getObject (int pos) const
 {
 	if (pos < m_objects.size())
 		return m_objects[pos];
@@ -1297,12 +1296,12 @@ void LDDocument::initializeCachedData()
 	{
 		m_vertices.clear();
 
-		for (LDObjectPtr obj : inlineContents (true, true))
+		for (LDObject* obj : inlineContents (true, true))
 		{
 			if (obj->type() == OBJ_Subfile)
 			{
 				print ("Warning: unable to inline %1 into %2",
-					obj.staticCast<LDSubfile>()->fileInfo()->getDisplayName(),
+					static_cast<LDSubfile*> (obj)->fileInfo()->getDisplayName(),
 					getDisplayName());
 				continue;
 			}
@@ -1323,7 +1322,7 @@ void LDDocument::initializeCachedData()
 	{
 		m_objectVertices.clear();
 
-		for (LDObjectPtr obj : inlineContents (true, false))
+		for (LDObject* obj : inlineContents (true, false))
 			addKnownVertices (obj);
 
 		mergeVertices();
@@ -1375,7 +1374,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 	LDObjectList objs, objcache;
 
-	for (LDObjectPtr obj : objects())
+	for (LDObject* obj : objects())
 	{
 		// Skip those without scemantic meaning
 		if (not obj->isScemantic())
@@ -1385,7 +1384,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 		// just add it into the objects normally. Yay, recursion!
 		if (deep == true and obj->type() == OBJ_Subfile)
 		{
-			for (LDObjectPtr otherobj : obj.staticCast<LDSubfile>()->inlineContents (deep, renderinline))
+			for (LDObject* otherobj : static_cast<LDSubfile*> (obj)->inlineContents (deep, renderinline))
 				objs << otherobj;
 		}
 		else
@@ -1468,7 +1467,7 @@ void LoadLogoStuds()
 
 // =============================================================================
 //
-void LDDocument::addToSelection (LDObjectPtr obj) // [protected]
+void LDDocument::addToSelection (LDObject* obj) // [protected]
 {
 	if (obj->isSelected())
 		return;
@@ -1481,7 +1480,7 @@ void LDDocument::addToSelection (LDObjectPtr obj) // [protected]
 
 // =============================================================================
 //
-void LDDocument::removeFromSelection (LDObjectPtr obj) // [protected]
+void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 {
 	if (not obj->isSelected())
 		return;
@@ -1496,7 +1495,7 @@ void LDDocument::removeFromSelection (LDObjectPtr obj) // [protected]
 //
 void LDDocument::clearSelection()
 {
-	for (LDObjectPtr obj : m_sel)
+	for (LDObject* obj : m_sel)
 		removeFromSelection (obj);
 
 	assert (m_sel.isEmpty());
@@ -1511,7 +1510,7 @@ const LDObjectList& LDDocument::getSelection() const
 
 // =============================================================================
 //
-void LDDocument::swapObjects (LDObjectPtr one, LDObjectPtr other)
+void LDDocument::swapObjects (LDObject* one, LDObject* other)
 {
 	int a = m_objects.indexOf (one);
 	int b = m_objects.indexOf (other);

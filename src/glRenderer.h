@@ -153,14 +153,14 @@ public:
 
 	inline ECamera			camera() const;
 	void					clearOverlay();
-	void					compileObject (LDObjectPtr obj);
+	void					compileObject (LDObject* obj);
 	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
 	QPoint					coordconv3_2 (const Vertex& pos3d);
 	EditModeType			currentEditModeType() const;
 	int						depthNegateFactor() const;
 	void					drawBlip (QPainter& paint, QPointF pos) const;
 	void					drawGLScene();
-	void					forgetObject (LDObjectPtr obj);
+	void					forgetObject (LDObject* obj);
 	Axis					getCameraAxis (bool y, ECamera camid = (ECamera) -1);
 	const char*				getCameraName() const;
 	double					getDepthValue() const;
@@ -181,7 +181,7 @@ public:
 	void					needZoomToFit();
 	void					pick (int mouseX, int mouseY, bool additive);
 	void					pick (QRect const& range, bool additive);
-	LDObjectPtr				pickOneObject (int mouseX, int mouseY);
+	LDObject*				pickOneObject (int mouseX, int mouseY);
 	Vertex const&			position3D() const;
 	void					refresh();
 	void					resetAngles();

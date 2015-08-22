@@ -37,7 +37,7 @@
 
 // =============================================================================
 //
-AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWidget* parent) :
+AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidget* parent) :
 	QDialog (parent)
 {
 	setlocale (LC_ALL, "C");
@@ -52,7 +52,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 			le_comment = new QLineEdit;
 
 			if (obj)
-				le_comment->setText (obj.staticCast<LDComment>()->text());
+				le_comment->setText (static_cast<LDComment*> (obj)->text());
 
 			le_comment->setMinimumWidth (384);
 		} break;
@@ -92,7 +92,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 			}
 
 			if (obj)
-				rb_bfcType->setValue ((int) obj.staticCast<LDBFC>()->statement());
+				rb_bfcType->setValue ((int) static_cast<LDBFC*> (obj)->statement());
 		} break;
 
 		case OBJ_Subfile:
@@ -100,7 +100,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			PopulatePrimitives (tw_subfileList, (obj != null ? obj.staticCast<LDSubfile>()->fileInfo()->name() : ""));
+			PopulatePrimitives (tw_subfileList, (obj != null ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -109,7 +109,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 
 			if (obj)
 			{
-				LDSubfilePtr ref = obj.staticCast<LDSubfile>();
+				LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
 				le_subfileName->setText (ref->fileInfo()->name());
 			}
 		} break;
@@ -121,7 +121,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 	}
 
 	QPixmap icon = GetIcon (format ("add-%1", typeName));
-	LDObjectPtr defaults = LDObject::getDefault (type);
+	LDObject* defaults = LDObject::getDefault (type);
 
 	lb_typeIcon = new QLabel;
 	lb_typeIcon->setPixmap (icon);
@@ -189,7 +189,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObjectPtr obj, QWid
 
 	if (defaults->hasMatrix())
 	{
-		LDMatrixObjectPtr mo = obj.dynamicCast<LDMatrixObject>();
+		LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
 		QLabel* lb_matrix = new QLabel ("Matrix:");
 		le_matrix = new QLineEdit;
 		// le_matrix->setValidator (new QDoubleValidator);
@@ -276,17 +276,17 @@ void AddObjectDialog::slot_subfileTypeChanged()
 // =============================================================================
 // =============================================================================
 template<typename T>
-static QSharedPointer<T> InitObject (LDObjectPtr& obj)
+static QSharedPointer<T> InitObject (LDObject*& obj)
 {
 	if (obj == null)
 		obj = LDSpawn<T>();
 
-	return obj.staticCast<T>();
+	return static_cast<T*> (obj);
 }
 
 // =============================================================================
 // =============================================================================
-void AddObjectDialog::staticDialog (const LDObjectType type, LDObjectPtr obj)
+void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 {
 	setlocale (LC_ALL, "C");
 

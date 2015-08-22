@@ -40,8 +40,8 @@ using uint8 = quint8;
 using uint16 = quint16;
 using uint32 = quint32;
 using uint64 = quint64;
-using LDObjectPtr = QSharedPointer<LDObject>;
-using LDObjectList = QList<LDObjectPtr>;
+using LDObject* = QSharedPointer<LDObject>;
+using LDObjectList = QList<LDObject*>;
 using LDObjectWeakPtr = QWeakPointer<LDObject>;
 using LDObjectWeakList = QList<LDObjectWeakPtr>;
 using LDDocumentPtr = QSharedPointer<LDDocument>;
@@ -180,7 +180,7 @@ public:
 
 	// Calculates the given \c obj to the bounding box, adjusting
 	// extremas if necessary.
-	void calcObject (LDObjectPtr obj);
+	void calcObject (LDObject* obj);
 
 	// Calculates the given \c vertex to the bounding box, adjusting
 	// extremas if necessary.
@@ -190,7 +190,7 @@ public:
 	Vertex center() const;
 
 	// An operator overload for calcObject()
-	LDBoundingBox& operator<< (LDObjectPtr obj);
+	LDBoundingBox& operator<< (LDObject* obj);
 
 	// An operator overload for calcVertex()
 	LDBoundingBox& operator<< (const Vertex& v);

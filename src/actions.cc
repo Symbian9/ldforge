@@ -238,7 +238,7 @@ void MainWindow::slot_actionEdit()
 	if (Selection().size() != 1)
 		return;
 
-	LDObjectPtr obj = Selection() [0];
+	LDObject* obj = Selection() [0];
 	AddObjectDialog::staticDialog (obj->type(), obj);
 }
 
@@ -266,7 +266,7 @@ void MainWindow::slot_actionAboutQt()
 //
 void MainWindow::slot_actionSelectAll()
 {
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 		obj->select();
 }
 
@@ -279,7 +279,7 @@ void MainWindow::slot_actionSelectByColor()
 
 	QList<LDColor> colors;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		if (obj->isColored())
 			colors << obj->color();
@@ -288,7 +288,7 @@ void MainWindow::slot_actionSelectByColor()
 	RemoveDuplicates (colors);
 	CurrentDocument()->clearSelection();
 
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 	{
 		if (colors.contains (obj->color()))
 			obj->select();
@@ -305,19 +305,19 @@ void MainWindow::slot_actionSelectByType()
 	QList<LDObjectType> types;
 	QStringList subfilenames;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		types << obj->type();
 
 		if (types.last() == OBJ_Subfile)
-			subfilenames << obj.staticCast<LDSubfile>()->fileInfo()->name();
+			subfilenames << static_cast<LDSubfile*> (obj)->fileInfo()->name();
 	}
 
 	RemoveDuplicates (types);
 	RemoveDuplicates (subfilenames);
 	CurrentDocument()->clearSelection();
 
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 	{
 		LDObjectType type = obj->type();
 
@@ -325,7 +325,7 @@ void MainWindow::slot_actionSelectByType()
 			continue;
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
-		if (type == OBJ_Subfile and not subfilenames.contains (obj.staticCast<LDSubfile>()->fileInfo()->name()))
+		if (type == OBJ_Subfile and not subfilenames.contains (static_cast<LDSubfile*> (obj)->fileInfo()->name()))
 			continue;
 
 		obj->select();
@@ -382,7 +382,7 @@ void MainWindow::slot_actionInsertFrom()
 
 	CurrentDocument()->clearSelection();
 
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		CurrentDocument()->insertObj (idx, obj);
 		obj->select();
@@ -415,7 +415,7 @@ void MainWindow::slot_actionExportTo()
 		return;
 	}
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		QString contents = obj->asText();
 		QByteArray data = contents.toUtf8();
@@ -449,7 +449,7 @@ void MainWindow::slot_actionInsertRaw()
 
 	for (QString line : QString (te_edit->toPlainText()).split ("\n"))
 	{
-		LDObjectPtr obj = ParseLine (line);
+		LDObject* obj = ParseLine (line);
 
 		CurrentDocument()->insertObj (idx, obj);
 		obj->select();
@@ -498,7 +498,7 @@ void MainWindow::slot_actionAxes()
 //
 void MainWindow::slot_actionVisibilityToggle()
 {
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		obj->setHidden (not obj->isHidden());
 
 	refresh();
@@ -508,7 +508,7 @@ void MainWindow::slot_actionVisibilityToggle()
 //
 void MainWindow::slot_actionVisibilityHide()
 {
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		obj->setHidden (true);
 
 	refresh();
@@ -518,7 +518,7 @@ void MainWindow::slot_actionVisibilityHide()
 //
 void MainWindow::slot_actionVisibilityReveal()
 {
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	obj->setHidden (false);
 	refresh();
 }
@@ -690,7 +690,7 @@ void MainWindow::slot_actionJumpTo()
 {
 	bool ok;
 	int defval = 0;
-	LDObjectPtr obj;
+	LDObject* obj;
 
 	if (Selection().size() == 1)
 		defval = Selection()[0]->lineNumber();
@@ -725,7 +725,7 @@ void MainWindow::slot_actionSubfileSelection()
 	QString			subtitle;
 
 	// Comment containing the title of the parent document
-	LDCommentPtr	titleobj (CurrentDocument()->getObject (0).dynamicCast<LDComment>());
+	LDCommentPtr	titleobj = dynamic_cast<LDComment*> (CurrentDocument()->getObject (0));
 
 	// License text for the subfile
 	QString			license (PreferredLicenseText());
@@ -814,7 +814,7 @@ void MainWindow::slot_actionSubfileSelection()
 	});
 
 	// Get the body of the document in LDraw code
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		code << obj->asText();
 
 	// Create the new subfile document
@@ -841,7 +841,7 @@ void MainWindow::slot_actionSubfileSelection()
 	// Add the actual subfile code to the new document
 	for (QString line : code)
 	{
-		LDObjectPtr obj = ParseLine (line);
+		LDObject* obj = ParseLine (line);
 		doc->addObject (obj);
 	}
 
@@ -850,7 +850,7 @@ void MainWindow::slot_actionSubfileSelection()
 	{
 		// Save was successful. Delete the original selection now from the
 		// main document.
-		for (LDObjectPtr obj : Selection())
+		for (LDObject* obj : Selection())
 			obj->destroy();
 
 		// Add a reference to the new subfile to where the selection was
@@ -885,9 +885,9 @@ void MainWindow::slot_actionRandomColors()
 
 void MainWindow::slot_actionOpenSubfiles()
 {
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
-		LDSubfilePtr ref = obj.dynamicCast<LDSubfile>();
+		LDSubfilePtr ref = dynamic_cast<LDSubfile*> (obj);
 
 		if (ref == null or not ref->fileInfo()->isImplicit())
 			continue;

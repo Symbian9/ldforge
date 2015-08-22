@@ -131,7 +131,7 @@ void History::add (AbstractHistoryEntry* entry)
 //
 void AddHistory::undo() const
 {
-	LDObjectPtr obj = parent()->document()->getObject (index());
+	LDObject* obj = parent()->document()->getObject (index());
 	obj->destroy();
 }
 
@@ -139,14 +139,14 @@ void AddHistory::undo() const
 //
 void AddHistory::redo() const
 {
-	LDObjectPtr obj = ParseLine (code());
+	LDObject* obj = ParseLine (code());
 	parent()->document()->insertObj (index(), obj);
 	g_win->R()->compileObject (obj);
 }
 
 // =============================================================================
 //
-DelHistory::DelHistory (int idx, LDObjectPtr obj) :
+DelHistory::DelHistory (int idx, LDObject* obj) :
 	m_index (idx),
 	m_code (obj->asText()) {}
 
@@ -155,7 +155,7 @@ DelHistory::DelHistory (int idx, LDObjectPtr obj) :
 //
 void DelHistory::undo() const
 {
-	LDObjectPtr obj = ParseLine (code());
+	LDObject* obj = ParseLine (code());
 	parent()->document()->insertObj (index(), obj);
 	g_win->R()->compileObject (obj);
 }
@@ -164,7 +164,7 @@ void DelHistory::undo() const
 //
 void DelHistory::redo() const
 {
-	LDObjectPtr obj = parent()->document()->getObject (index());
+	LDObject* obj = parent()->document()->getObject (index());
 	obj->destroy();
 }
 
@@ -172,8 +172,8 @@ void DelHistory::redo() const
 //
 void EditHistory::undo() const
 {
-	LDObjectPtr obj = CurrentDocument()->getObject (index());
-	LDObjectPtr newobj = ParseLine (oldCode());
+	LDObject* obj = CurrentDocument()->getObject (index());
+	LDObject* newobj = ParseLine (oldCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);
 }
@@ -182,8 +182,8 @@ void EditHistory::undo() const
 //
 void EditHistory::redo() const
 {
-	LDObjectPtr obj = CurrentDocument()->getObject (index());
-	LDObjectPtr newobj = ParseLine (newCode());
+	LDObject* obj = CurrentDocument()->getObject (index());
+	LDObject* newobj = ParseLine (newCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);
 }

@@ -26,7 +26,7 @@
 #define LDOBJ(T)												\
 public:															\
 	static constexpr LDObjectType SubclassType = OBJ_##T;		\
-	LD##T (LDObjectPtr* selfptr);								\
+	LD##T (LDObject** selfptr);								\
 																\
 	virtual LDObjectType type() const override					\
 	{															\
@@ -56,7 +56,6 @@ class LDSubfile;
 class LDDocument;
 
 class LDBFC;
-using LDBFCPtr = QSharedPointer<LDBFC>;
 
 //
 // Object type codes.
@@ -93,7 +92,6 @@ class LDObject
 {
 	PROPERTY (public,		bool,				isHidden,		setHidden,		STOCK_WRITE)
 	PROPERTY (public,		bool,				isSelected,		setSelected,	STOCK_WRITE)
-	PROPERTY (public,		bool,				isDestructed,	setDestructed,	STOCK_WRITE)
 	PROPERTY (public,		LDObject*,			parent,			setParent,		STOCK_WRITE)
 	PROPERTY (public,		LDDocument*,		document,		setDocument,	CUSTOM_WRITE)
 	PROPERTY (private,		int32,				id,				setID,			STOCK_WRITE)
@@ -103,12 +101,13 @@ class LDObject
 
 public:
 	LDObject (LDDocument* document = nullptr);
+	virtual ~LDObject();
 
 	// This object as LDraw code
 	virtual QString				asText() const = 0;
 
 	// Makes a copy of this object
-	LDObjectPtr					createCopy() const;
+	LDObject*					createCopy() const;
 
 	// What color does the object default to?
 	virtual LDColor				defaultColor() const = 0;
@@ -140,19 +139,19 @@ public:
 	void						move (Vertex vect);
 
 	// Object after this in the current file
-	LDObjectPtr					next() const;
+	LDObject*					next() const;
 
 	// Number of vertices this object has
 	virtual int					numVertices() const = 0;
 
 	// Object prior to this in the current file
-	LDObjectPtr					previous() const;
+	LDObject*					previous() const;
 
 	// Is the previous object INVERTNEXT?
 	bool						previousIsInvertnext (LDBFCPtr& ptr);
 
 	// Replace this LDObject with another LDObject. Object is deleted in the process.
-	void						replace (LDObjectPtr other);
+	void						replace (LDObject* other);
 
 	// Selects this object.
 	void						select();
@@ -164,10 +163,10 @@ public:
 	void						setVertexCoord (int i, Axis ax, double value);
 
 	// Swap this object with another.
-	void						swap (LDObjectPtr other);
+	void						swap (LDObject* other);
 
 	// What object in the current file ultimately references this?
-	LDObjectPtr					topLevelParent();
+	LDObject*					topLevelParent();
 
 	// Type enumerator of this object
 	virtual LDObjectType		type() const = 0;
@@ -182,30 +181,18 @@ public:
 	static QString typeName (LDObjectType type);
 
 	// Returns a default-constructed LDObject by the given type
-	static LDObjectPtr getDefault (const LDObjectType type);
+	static LDObject* getDefault (const LDObjectType type);
 
 	// TODO: move this to LDDocument?
 	static void moveObjects (LDObjectList objs, const bool up);
 
 	// Get a description of a list of LDObjects
 	static QString describeObjects (const LDObjectList& objs);
-	static LDObjectPtr fromID (int id);
+	static LDObject* fromID (int id);
 	LDPolygon* getPolygon();
 
 	// TODO: make this private!
 	QListWidgetItem* qObjListEntry;
-
-	// This is public because I cannot protect it as the lambda deletor would
-	// have to be the friend. Do not call this! Ever!
-	void finalDelete();
-
-	// Even though we supply a custom deleter to QSharedPointer, the shared
-	// pointer's base class still calls operator delete directly in one of
-	// its methods. The method should never be called but we need to declare
-	// the class making this delete call a friend anyway.
-	//
-	// Do not directly delete LDObjects. Ever.
-	virtual ~LDObject();
 
 private:
 	Vertex m_coords[4];
@@ -289,9 +276,6 @@ public:
 	void setPosition (const Vertex& a);
 };
 
-using LDMatrixObjectPtr = QSharedPointer<LDMatrixObject>;
-using LDMatrixObjectWeakPtr = QWeakPointer<LDMatrixObject>;
-
 //
 //
 // Represents a line in the LDraw file that could not be properly parsed. It is
@@ -317,9 +301,6 @@ public:
 		m_reason (reason) {}
 };
 
-using LDErrorPtr = QSharedPointer<LDError>;
-using LDErrorWeakPtr = QWeakPointer<LDError>;
-
 //
 //
 // Represents an empty line in the LDraw code file.
@@ -333,9 +314,6 @@ class LDEmpty : public LDObject
 	LDOBJ_NON_SCEMANTIC
 	LDOBJ_NO_MATRIX
 };
-
-using LDEmptyPtr = QSharedPointer<LDEmpty>;
-using LDEmptyWeakPtr = QWeakPointer<LDEmpty>;
 
 //
 //
@@ -356,9 +334,6 @@ public:
 		LDObject (document),
 		m_text (text) {}
 };
-
-using LDCommentPtr = QSharedPointer<LDComment>;
-using LDCommentWeakPtr = QWeakPointer<LDComment>;
 
 //
 //
@@ -401,9 +376,6 @@ public:
 	static const char* StatementStrings[];
 };
 
-using LDBFCPtr = QSharedPointer<LDBFC>;
-using LDBFCWeakPtr = QWeakPointer<LDBFC>;
-
 //
 // LDSubfile
 //
@@ -438,8 +410,6 @@ public:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS (LDSubfile::InlineFlags)
-using LDSubfilePtr = QSharedPointer<LDSubfile>;
-using LDSubfileWeakPtr = QWeakPointer<LDSubfile>;
 
 //
 // LDLine
@@ -459,9 +429,6 @@ class LDLine : public LDObject
 public:
 	LDLine (Vertex v1, Vertex v2, LDDocument* document = nullptr);
 };
-
-using LDLinePtr = QSharedPointer<LDLine>;
-using LDLineWeakPtr = QWeakPointer<LDLine>;
 
 //
 // LDCondLine
@@ -483,9 +450,6 @@ public:
 	LDLinePtr toEdgeLine();
 };
 
-using LDCondLinePtr = QSharedPointer<LDCondLine>;
-using LDCondLineWeakPtr = QWeakPointer<LDCondLine>;
-
 //
 // LDTriangle
 //
@@ -506,9 +470,6 @@ class LDTriangle : public LDObject
 public:
 	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* document = nullptr);
 };
-
-using LDTrianglePtr = QSharedPointer<LDTriangle>;
-using LDTriangleWeakPtr = QWeakPointer<LDTriangle>;
 
 //
 // LDQuad
@@ -533,9 +494,6 @@ public:
 	QList<LDTrianglePtr> splitToTriangles();
 };
 
-using LDQuadPtr = QSharedPointer<LDQuad>;
-using LDQuadWeakPtr = QWeakPointer<LDQuad>;
-
 //
 // LDVertex
 //
@@ -559,9 +517,6 @@ public:
 	virtual void getVertices (QVector<Vertex>& verts) const override;
 };
 
-using LDVertexPtr = QSharedPointer<LDVertex>;
-using LDVertexWeakPtr = QWeakPointer<LDVertex>;
-
 //
 // LDOverlay
 //
@@ -584,9 +539,6 @@ class LDOverlay : public LDObject
 	PROPERTY (public,	QString,	fileName,	setFileName,	STOCK_WRITE)
 };
 
-using LDOverlayPtr = QSharedPointer<LDOverlay>;
-using LDOverlayWeakPtr = QWeakPointer<LDOverlay>;
-
 // Other common LDraw stuff
 static const QString CALicenseText ("!LICENSE Redistributable under CCAL version 2.0 : "
 	"see CAreadme.txt");
@@ -600,13 +552,13 @@ enum
 QString PreferredLicenseText();
 
 template<typename T>
-inline void DynamicExecute (LDObjectPtr obj, std::function<void (QSharedPointer<T> const&)> func)
+inline void DynamicExecute (LDObject* obj, std::function<void (QSharedPointer<T> const&)> func)
 {
 	static_assert (std::is_base_of<LDObject, T>::value,
 		"DynamicExecute may only be used with LDObject-derivatives");
 
 	if (obj->type() == T::SubclassType)
-		func (obj.staticCast<T>());
+		func (static_cast<T*> (obj));
 }
 
 struct LDIterationBreakage {};
@@ -620,7 +572,7 @@ inline void LDIterate (LDObjectList const& objs,
 
 	try
 	{
-		for (LDObjectPtr const& obj : objs)
+		for (LDObject* const& obj : objs)
 			DynamicExecute<T> (obj, func);
 	}
 	catch (LDIterationBreakage) {}

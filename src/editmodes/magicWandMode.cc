@@ -26,7 +26,7 @@ MagicWandMode::MagicWandMode (GLRenderer* renderer) :
 	Super (renderer)
 {
 	// Get vertex<->object data
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 	{
 		// Note: this deliberately only takes vertex-objects into account.
 		// The magic wand does not process subparts.
@@ -40,7 +40,7 @@ EditModeType MagicWandMode::type() const
 	return EditModeType::MagicWand;
 }
 
-void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boundaries, QVector<LDObjectPtr>& candidates)
+void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QVector<LDObject*>& candidates)
 {
 	// All boundaries obviously share vertices with the object, therefore they're all in the list
 	// of candidates.
@@ -71,7 +71,7 @@ void MagicWandMode::fillBoundaries (LDObjectPtr obj, QVector<BoundaryType>& boun
 	}
 }
 
-void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
+void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 {
 	if (obj == null)
 	{
@@ -110,7 +110,7 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 			return;
 	}
 
-	QVector<LDObjectPtr> candidates;
+	QVector<LDObject*> candidates;
 
 	// Get the list of objects that touch this object, i.e. share a vertex
 	// with this.
@@ -123,7 +123,7 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 	if (matchesneeded > 1)
 		fillBoundaries (obj, boundaries, candidates);
 
-	for (LDObjectPtr candidate : candidates)
+	for (LDObject* candidate : candidates)
 	{
 		try
 		{
@@ -181,12 +181,12 @@ void MagicWandMode::doMagic (LDObjectPtr obj, MagicWandMode::MagicType type)
 		case Set:
 			CurrentDocument()->clearSelection();
 		case Additive:
-			for (LDObjectPtr obj : m_selection)
+			for (LDObject* obj : m_selection)
 				obj->select();
 			break;
 
 		case Subtractive:
-			for (LDObjectPtr obj : m_selection)
+			for (LDObject* obj : m_selection)
 				obj->deselect();
 			break;
 

@@ -76,6 +76,28 @@ LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBFC, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 
+LDObject::~LDObject()
+{
+	// Don't bother during program termination
+	if (IsExiting() == false)
+	{
+		// If this object was selected, unselect it now
+		if (isSelected() and document() != null)
+			deselect();
+
+		// If this object was associated to a file, remove it off it now
+		if (document() != null)
+			document()->forgetObject (self());
+
+		// Delete the GL lists
+		if (g_win != null)
+			g_win->R()->forgetObject (self());
+
+		// Remove this object from the list of LDObjects
+		g_allObjects.erase (g_allObjects.find (id()));
+	}
+}
+
 // =============================================================================
 //
 void LDObject::chooseID()
@@ -298,35 +320,6 @@ LDObject::~LDObject() {}
 //
 void LDObject::destroy()
 {
-	// Don't bother during program termination
-	if (IsExiting() or isDestructed())
-		return;
-
-	// If this object was selected, unselect it now
-	if (isSelected() and document() != null)
-		deselect();
-
-	// If this object was associated to a file, remove it off it now
-	if (document() != null)
-		document()->forgetObject (self());
-
-	// Delete the GL lists
-	if (g_win != null)
-		g_win->R()->forgetObject (self());
-
-	// Remove this object from the list of LDObjects
-	g_allObjects.erase (g_allObjects.find (id()));
-	setDestructed (true);
-}
-
-//
-// Deletes the object. Only the shared pointer is to call this!
-//
-void LDObject::finalDelete()
-{
-	if (not isDestructed())
-		destroy();
-
 	delete this;
 }
 
@@ -346,32 +339,31 @@ static void TransformObject (LDObjectPtr obj, Matrix transform, Vertex pos, LDCo
 {
 	switch (obj->type())
 	{
-		case OBJ_Line:
-		case OBJ_CondLine:
-		case OBJ_Triangle:
-		case OBJ_Quad:
-			for (int i = 0; i < obj->numVertices(); ++i)
-			{
-				Vertex v = obj->vertex (i);
-				v.transform (transform, pos);
-				obj->setVertex (i, v);
-			}
-
-			break;
-
-		case OBJ_Subfile:
+	case OBJ_Line:
+	case OBJ_CondLine:
+	case OBJ_Triangle:
+	case OBJ_Quad:
+		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			LDSubfilePtr ref = qSharedPointerCast<LDSubfile> (obj);
+			Vertex v = obj->vertex (i);
+			v.transform (transform, pos);
+			obj->setVertex (i, v);
+		}
+		break;
+
+	case OBJ_Subfile:
+		{
+			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
 			Matrix newMatrix = transform * ref->transform();
 			Vertex newpos = ref->position();
 			newpos.transform (transform, pos);
 			ref->setPosition (newpos);
 			ref->setTransform (newMatrix);
-			break;
 		}
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	if (obj->color() == MainColor())
@@ -723,9 +715,9 @@ void LDSubfile::invert()
 
 	if (idx > 0)
 	{
-		LDBFCPtr bfc = previous().dynamicCast<LDBFC>();
+		LDBFC* bfc = dynamic_cast<LDBFC*> (previous());
 
-		if (not bfc.isNull() and bfc->statement() == BFCStatement::InvertNext)
+		if (bfc and bfc->statement() == BFCStatement::InvertNext)
 		{
 			// This is prefixed with an invertnext, thus remove it.
 			bfc->destroy();

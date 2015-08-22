@@ -36,16 +36,16 @@ public:
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
 	void				compileDocument (LDDocumentPtr doc);
-	void				dropObject (LDObjectPtr obj);
+	void				dropObject (LDObject* obj);
 	void				initialize();
-	QColor				getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
+	QColor				getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 											EVBOComplement complement) const;
 	QColor				indexColorForID (int id) const;
 	void				needMerge();
 	void				prepareVBO (int vbonum);
 	void				setRenderer (GLRenderer* compiler);
-	void				stageForCompilation (LDObjectPtr obj);
-	void				unstage (LDObjectPtr obj);
+	void				stageForCompilation (LDObject* obj);
+	void				unstage (LDObject* obj);
 
 	static uint32		colorToRGB (const QColor& color);
 
@@ -66,8 +66,8 @@ public:
 
 private:
 	void			compileStaged();
-	void			compileObject (LDObjectPtr obj);
-	void			compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOInfo* objinfo);
+	void			compileObject (LDObject* obj);
+	void			compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
 
 	QMap<LDObjectWeakPtr, ObjectVBOInfo>	m_objectInfo;
 	LDObjectWeakList						m_staged; // Objects that need to be compiled

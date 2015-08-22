@@ -227,13 +227,13 @@ void LDBoundingBox::calculateFromCurrentDocument()
 	if (CurrentDocument() == null)
 		return;
 
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 		calcObject (obj);
 }
 
 // =============================================================================
 //
-void LDBoundingBox::calcObject (LDObjectPtr obj)
+void LDBoundingBox::calcObject (LDObject* obj)
 {
 	switch (obj->type())
 	{
@@ -241,23 +241,17 @@ void LDBoundingBox::calcObject (LDObjectPtr obj)
 		case OBJ_Triangle:
 		case OBJ_Quad:
 		case OBJ_CondLine:
-		{
 			for (int i = 0; i < obj->numVertices(); ++i)
 				calcVertex (obj->vertex (i));
-		} break;
+			break;
 
 		case OBJ_Subfile:
-		{
-			LDSubfilePtr ref = obj.staticCast<LDSubfile>();
-			LDObjectList objs = ref->inlineContents (true, false);
-
-			for (LDObjectPtr obj : objs)
+			for (LDObject* obj : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
 			{
 				calcObject (obj);
 				obj->destroy();
 			}
-		}
-		break;
+			break;
 
 		default:
 			break;
@@ -274,7 +268,7 @@ LDBoundingBox& LDBoundingBox::operator<< (const Vertex& v)
 
 // =============================================================================
 //
-LDBoundingBox& LDBoundingBox::operator<< (LDObjectPtr obj)
+LDBoundingBox& LDBoundingBox::operator<< (LDObject* obj)
 {
 	calcObject (obj);
 	return *this;

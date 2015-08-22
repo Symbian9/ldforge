@@ -118,7 +118,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	if (ev->buttons() & Qt::LeftButton)
 	{
 		renderer()->document()->clearSelection();
-		LDObjectPtr obj = renderer()->pickOneObject (ev->x(), ev->y());
+		LDObject* obj = renderer()->pickOneObject (ev->x(), ev->y());
 
 		if (obj != null)
 		{

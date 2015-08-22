@@ -112,9 +112,9 @@ void DrawMode::endDraw()
 		case 3:
 		case 4:
 		{
-			LDObjectPtr obj = (verts.size() == 3) ?
-				static_cast<LDObjectPtr> (LDSpawn<LDTriangle>()) :
-				static_cast<LDObjectPtr> (LDSpawn<LDQuad>());
+			LDObject* obj = (verts.size() == 3) ?
+				static_cast<LDObject*> (LDSpawn<LDTriangle>()) :
+				static_cast<LDObject*> (LDSpawn<LDQuad>());
 
 			obj->setColor (MainColor());
 

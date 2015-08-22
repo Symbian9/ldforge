@@ -53,7 +53,7 @@ static QList<int>		g_warnedColors;
 static const QColor		g_BFCFrontColor (64, 192, 80);
 static const QColor		g_BFCBackColor (208, 64, 64);
 
-// static QMap<LDObjectPtr, String> g_objectOrigins;
+// static QMap<LDObject*, String> g_objectOrigins;
 
 // =============================================================================
 //
@@ -132,7 +132,7 @@ QColor GLCompiler::indexColorForID (int id) const
 
 // =============================================================================
 //
-QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObjectPtr topobj,
+QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 									   EVBOComplement complement) const
 {
 	QColor qcol;
@@ -228,7 +228,7 @@ void GLCompiler::needMerge()
 
 // =============================================================================
 //
-void GLCompiler::stageForCompilation (LDObjectPtr obj)
+void GLCompiler::stageForCompilation (LDObject* obj)
 {
 	/*
 	g_objectOrigins[obj] = format ("%1:%2 (%3)",
@@ -240,7 +240,7 @@ void GLCompiler::stageForCompilation (LDObjectPtr obj)
 
 // =============================================================================
 //
-void GLCompiler::unstage (LDObjectPtr obj)
+void GLCompiler::unstage (LDObject* obj)
 {
 	m_staged.removeOne (obj);
 }
@@ -252,7 +252,7 @@ void GLCompiler::compileDocument (LDDocumentPtr doc)
 	if (doc == null)
 		return;
 
-	for (LDObjectPtr obj : doc->objects())
+	for (LDObject* obj : doc->objects())
 		compileObject (obj);
 }
 
@@ -312,7 +312,7 @@ void GLCompiler::prepareVBO (int vbonum)
 
 // =============================================================================
 //
-void GLCompiler::dropObject (LDObjectPtr obj)
+void GLCompiler::dropObject (LDObject* obj)
 {
 	auto it = m_objectInfo.find (obj);
 
@@ -327,7 +327,7 @@ void GLCompiler::dropObject (LDObjectPtr obj)
 
 // =============================================================================
 //
-void GLCompiler::compileObject (LDObjectPtr obj)
+void GLCompiler::compileObject (LDObject* obj)
 {
 //	print ("Compile %1\n", g_objectOrigins[obj]);
 
@@ -356,7 +356,7 @@ void GLCompiler::compileObject (LDObjectPtr obj)
 
 		case OBJ_Subfile:
 		{
-			LDSubfilePtr ref = obj.staticCast<LDSubfile>();
+			LDSubfilePtr ref = static_cast<LDSubfile*> (obj);
 			auto data = ref->inlinePolygons();
 
 			for (LDPolygon& poly : data)
@@ -377,7 +377,7 @@ void GLCompiler::compileObject (LDObjectPtr obj)
 
 // =============================================================================
 //
-void GLCompiler::compilePolygon (LDPolygon& poly, LDObjectPtr topobj, ObjectVBOInfo* objinfo)
+void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
 {
 	EVBOSurface surface;
 	int numverts;

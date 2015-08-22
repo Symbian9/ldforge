@@ -56,7 +56,7 @@ static int CopyToClipboard()
 	// Now, copy the contents into the clipboard.
 	QString data;
 
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		if (not data.isEmpty())
 			data += "\n";
@@ -97,7 +97,7 @@ void MainWindow::slot_actionPaste()
 
 	for (QString line : clipboardText.split ("\n"))
 	{
-		LDObjectPtr pasted = ParseLine (line);
+		LDObject* pasted = ParseLine (line);
 		CurrentDocument()->insertObj (idx++, pasted);
 		pasted->select();
 		++num;
@@ -132,11 +132,11 @@ static void DoInline (bool deep)
 		LDObjectList objs = ref->inlineContents (deep, false);
 
 		// Merge in the inlined objects
-		for (LDObjectPtr inlineobj : objs)
+		for (LDObject* inlineobj : objs)
 		{
 			QString line = inlineobj->asText();
 			inlineobj->destroy();
-			LDObjectPtr newobj = ParseLine (line);
+			LDObject* newobj = ParseLine (line);
 			CurrentDocument()->insertObj (idx++, newobj);
 			newobj->select();
 		}
@@ -192,7 +192,7 @@ void MainWindow::slot_actionEditRaw()
 	if (Selection().size() != 1)
 		return;
 
-	LDObjectPtr obj = Selection()[0];
+	LDObject* obj = Selection()[0];
 	QDialog* dlg = new QDialog;
 	Ui::EditRawUI ui;
 
@@ -200,7 +200,7 @@ void MainWindow::slot_actionEditRaw()
 	ui.code->setText (obj->asText());
 
 	if (obj->type() == OBJ_Error)
-		ui.errorDescription->setText (obj.staticCast<LDError>()->reason());
+		ui.errorDescription->setText (static_cast<LDError*> (obj)->reason());
 	else
 	{
 		ui.errorDescription->hide();
@@ -211,7 +211,7 @@ void MainWindow::slot_actionEditRaw()
 		return;
 
 	// Reinterpret it from the text of the input field
-	LDObjectPtr newobj = ParseLine (ui.code->text());
+	LDObject* newobj = ParseLine (ui.code->text());
 	obj->replace (newobj);
 	refresh();
 }
@@ -233,7 +233,7 @@ void MainWindow::slot_actionSetColor()
 	// Show the dialog to the user now and ask for a color.
 	if (ColorSelector::selectColor (color, defaultcol, g_win))
 	{
-		for (LDObjectPtr obj : objs)
+		for (LDObject* obj : objs)
 		{
 			if (obj->isColored())
 				obj->setColor (color);
@@ -250,7 +250,7 @@ void MainWindow::slot_actionBorders()
 	LDObjectList objs = Selection();
 	int num = 0;
 
-	for (LDObjectPtr obj : objs)
+	for (LDObject* obj : objs)
 	{
 		const LDObjectType type = obj->type();
 
@@ -261,7 +261,7 @@ void MainWindow::slot_actionBorders()
 
 		if (type == OBJ_Quad)
 		{
-			LDQuadPtr quad = obj.staticCast<LDQuad>();
+			LDQuadPtr quad = static_cast<LDQuad*> (obj);
 			lines[0] = LDSpawn<LDLine> (quad->vertex (0), quad->vertex (1));
 			lines[1] = LDSpawn<LDLine> (quad->vertex (1), quad->vertex (2));
 			lines[2] = LDSpawn<LDLine> (quad->vertex (2), quad->vertex (3));
@@ -269,7 +269,7 @@ void MainWindow::slot_actionBorders()
 		}
 		else
 		{
-			LDTrianglePtr tri = obj.staticCast<LDTriangle>();
+			LDTrianglePtr tri = static_cast<LDTriangle*> (obj);
 			lines[0] = LDSpawn<LDLine> (tri->vertex (0), tri->vertex (1));
 			lines[1] = LDSpawn<LDLine> (tri->vertex (1), tri->vertex (2));
 			lines[2] = LDSpawn<LDLine> (tri->vertex (2), tri->vertex (0));
@@ -297,7 +297,7 @@ void MainWindow::slot_actionCornerVerts()
 {
 	int num = 0;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		if (obj->numVertices() < 2)
 			continue;
@@ -358,7 +358,7 @@ static void MoveObjects (Vertex vect)
 	// Apply the grid values
 	vect *= *CurrentGrid().coordinateSnap;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		obj->move (vect);
 
 	g_win->refresh();
@@ -400,7 +400,7 @@ void MainWindow::slot_actionMoveZPos()
 //
 void MainWindow::slot_actionInvert()
 {
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 		obj->invert();
 
 	refresh();
@@ -450,9 +450,9 @@ void MainWindow::slot_actionRoundCoordinates()
 	setlocale (LC_ALL, "C");
 	int num = 0;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
-		LDMatrixObjectPtr mo = obj.dynamicCast<LDMatrixObject>();
+		LDMatrixObjectPtr mo = dynamic_cast<LDMatrixObject*> (obj);
 
 		if (mo != null)
 		{
@@ -490,7 +490,7 @@ void MainWindow::slot_actionUncolor()
 {
 	int num = 0;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		if (not obj->isColored())
 			continue;
@@ -526,7 +526,7 @@ void MainWindow::slot_actionReplaceCoords()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -572,7 +572,7 @@ void MainWindow::slot_actionFlip()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -611,7 +611,7 @@ void MainWindow::slot_actionDemote()
 //
 static bool IsColorUsed (LDColor color)
 {
-	for (LDObjectPtr obj : CurrentDocument()->objects())
+	for (LDObject* obj : CurrentDocument()->objects())
 	{
 		if (obj->isColored() and obj->color() == color)
 			return true;
@@ -639,7 +639,7 @@ void MainWindow::slot_actionAutocolor()
 		return;
 	}
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		if (not obj->isColored())
 			continue;
@@ -655,7 +655,7 @@ void MainWindow::slot_actionAutocolor()
 //
 void MainWindow::slot_actionAddHistoryLine()
 {
-	LDObjectPtr obj;
+	LDObject* obj;
 	bool ishistory = false,
 		 prevIsHistory = false;
 
@@ -682,7 +682,7 @@ void MainWindow::slot_actionAddHistoryLine()
 		obj != null and obj->next() != null and not obj->next()->isScemantic();
 		obj = obj->next())
 	{
-		LDCommentPtr comm = obj.dynamicCast<LDComment>();
+		LDCommentPtr comm = dynamic_cast<LDComment*> (obj);
 
 		if (comm != null and comm->text().startsWith ("!HISTORY "))
 			ishistory = true;
@@ -720,16 +720,16 @@ void MainWindow::slot_actionSplitLines()
 
 	cfg::SplitLinesSegments = segments;
 
-	for (LDObjectPtr obj : Selection())
+	for (LDObject* obj : Selection())
 	{
 		if (not Eq (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
-		QVector<LDObjectPtr> newsegs;
+		QVector<LDObject*> newsegs;
 
 		for (int i = 0; i < segments; ++i)
 		{
-			LDObjectPtr segment;
+			LDObject* segment;
 			Vertex v0, v1;
 
 			v0.apply ([&](Axis ax, double& a)
@@ -754,7 +754,7 @@ void MainWindow::slot_actionSplitLines()
 
 		int ln = obj->lineNumber();
 
-		for (LDObjectPtr seg : newsegs)
+		for (LDObject* seg : newsegs)
 			CurrentDocument()->insertObj (ln++, seg);
 
 		obj->destroy();

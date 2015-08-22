@@ -76,7 +76,7 @@ public:
 	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
 	PROPERTY (private,	LDDocumentWeakPtr,	self,			setSelf,			STOCK_WRITE)
 
-	QMap<LDObjectPtr, QVector<Vertex>> m_objectVertices;
+	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
 	QVector<Vertex> m_vertices;
 	bool m_verticesOutdated;
 	bool m_needVertexMerge;
@@ -85,32 +85,32 @@ public:
 	LDDocument(LDDocumentPtr* selfptr);
 	~LDDocument();
 
-	int addObject (LDObjectPtr obj); // Adds an object to this file at the end of the file.
+	int addObject (LDObject* obj); // Adds an object to this file at the end of the file.
 	void addObjects (const LDObjectList& objs);
 	void clearSelection();
-	void forgetObject (LDObjectPtr obj); // Deletes the given object from the object chain.
+	void forgetObject (LDObject* obj); // Deletes the given object from the object chain.
 	QString getDisplayName();
 	const LDObjectList& getSelection() const;
 	bool hasUnsavedChanges() const; // Does this document have unsaved changes?
 	void initializeCachedData();
 	LDObjectList inlineContents (bool deep, bool renderinline);
-	void insertObj (int pos, LDObjectPtr obj);
+	void insertObj (int pos, LDObject* obj);
 	int getObjectCount() const;
-	LDObjectPtr getObject (int pos) const;
+	LDObject* getObject (int pos) const;
 	bool save (QString path = "", int64* sizeptr = null); // Saves this file to disk.
-	void swapObjects (LDObjectPtr one, LDObjectPtr other);
+	void swapObjects (LDObject* one, LDObject* other);
 	bool isSafeToClose(); // Perform safety checks. Do this before closing any files!
-	void setObject (int idx, LDObjectPtr obj);
+	void setObject (int idx, LDObject* obj);
 	QList<LDPolygon> inlinePolygons();
 	void vertexChanged (const Vertex& a, const Vertex& b);
 	const QVector<Vertex>& inlineVertices();
 	void clear();
-	void addKnownVertices (LDObjectPtr obj);
+	void addKnownVertices (LDObject* obj);
 	void redoVertices();
 	void needVertexMerge();
 	void reloadAllSubfiles();
 
-	inline LDDocument& operator<< (LDObjectPtr obj)
+	inline LDDocument& operator<< (LDObject* obj)
 	{
 		addObject (obj);
 		return *this;
@@ -158,8 +158,8 @@ public:
 	void mergeVertices();
 
 protected:
-	void addToSelection (LDObjectPtr obj);
-	void removeFromSelection (LDObjectPtr obj);
+	void addToSelection (LDObject* obj);
+	void removeFromSelection (LDObject* obj);
 
 	LDGLData* getGLData()
 	{
@@ -203,7 +203,7 @@ QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null
 void CloseAllDocuments();
 
 // Parses a string line containing an LDraw object and returns the object parsed.
-LDObjectPtr ParseLine (QString line);
+LDObject* ParseLine (QString line);
 
 // Retrieves the pointer to the given document by file name. Document is loaded
 // from file if necessary. Can return null if neither succeeds.

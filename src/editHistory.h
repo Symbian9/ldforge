@@ -108,7 +108,7 @@ class DelHistory : public AbstractHistoryEntry
 
 public:
 	IMPLEMENT_HISTORY_TYPE (Del)
-	DelHistory (int idx, LDObjectPtr obj);
+	DelHistory (int idx, LDObject* obj);
 };
 
 // =============================================================================
@@ -138,7 +138,7 @@ class AddHistory : public AbstractHistoryEntry
 public:
 	IMPLEMENT_HISTORY_TYPE (Add)
 
-	AddHistory (int idx, LDObjectPtr obj) :
+	AddHistory (int idx, LDObject* obj) :
 		m_index (idx),
 		m_code (obj->asText()) {}
 };
