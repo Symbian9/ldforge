@@ -35,7 +35,7 @@ class GLRenderer;
 class QComboBox;
 class QProgressBar;
 class Ui_LDForgeUI;
-class Primitive;
+struct Primitive;
 
 // Stuff for dialogs
 #define IMPLEMENT_DIALOG_BUTTONS \

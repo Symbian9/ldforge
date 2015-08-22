@@ -31,6 +31,6 @@ public:
 	EditModeType type() const override;
 	bool mouseReleased (MouseEventData const& data) override;
 	void endDraw();
-	bool preAddVertex (Vertex const&);
+	bool preAddVertex (Vertex const&) override;
 	Vertex getCursorVertex() const;
 };

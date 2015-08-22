@@ -32,7 +32,7 @@ public:
 	static bool selectColor (LDColor& val, LDColor defval = LDColor::nullColor(), QWidget* parent = null);
 
 private:
-	class Ui_ColorSelUI& ui;
+	class Ui_ColorSelUi& ui;
 	QMap<int, QPushButton*> m_buttons;
 	QMap<QPushButton*, int> m_buttonsReversed;
 	bool m_firstResize;

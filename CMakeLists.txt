@@ -6,7 +6,6 @@
 ######################################################################
 
 project (ldforge)
-add_subdirectory (updaterevision)
 add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
 
@@ -25,13 +24,11 @@ endif()
 
 find_package (OpenGL REQUIRED)
 
-get_target_property (UPDATEREVISION_EXE updaterevision LOCATION)
 get_target_property (CODEGEN_EXE codegen LOCATION)
 
 add_custom_target (revision_check ALL
-	COMMAND ${UPDATEREVISION_EXE} ${CMAKE_SOURCE_DIR} hginfo.h
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	DEPENDS updaterevision)
+	COMMAND python "${CMAKE_SOURCE_DIR}/updaterevision.py" hginfo.h
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 

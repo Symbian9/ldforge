@@ -30,10 +30,10 @@ class SelectMode : public AbstractSelectMode
 public:
 	SelectMode (GLRenderer* renderer);
 
-	virtual void render (QPainter& painter) const override;
-	virtual bool mousePressed (QMouseEvent* ev);
-	virtual bool mouseReleased (MouseEventData const& data) override;
-	virtual bool mouseDoubleClicked (QMouseEvent* ev);
-	virtual bool mouseMoved (QMouseEvent*) override;
-	virtual EditModeType type() const override;
+	void render (QPainter& painter) const override;
+	bool mousePressed (QMouseEvent* ev) override;
+	bool mouseReleased (MouseEventData const& data) override;
+	bool mouseDoubleClicked (QMouseEvent* ev) override;
+	bool mouseMoved (QMouseEvent*) override;
+	EditModeType type() const override;
 };

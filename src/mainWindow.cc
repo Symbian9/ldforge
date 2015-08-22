@@ -266,7 +266,7 @@ void MainWindow::updateGridToolBar()
 //
 void MainWindow::updateTitle()
 {
-	QString title = format (APPNAME " %1", VersionString());
+	QString title = format (APPNAME " " VERSION_STRING);
 
 	// Append our current file if we have one
 	if (CurrentDocument())
@@ -292,8 +292,8 @@ void MainWindow::updateTitle()
 	title += " [pre-release build]";
 #endif // DEBUG
 
-	if (CommitTimeString()[0] != '\0')
-		title += format (" (%1)", QString::fromUtf8 (CommitTimeString()));
+	if (strlen (commitTimeString()))
+		title += format (" (%1)", QString::fromUtf8 (commitTimeString()));
 
 	setWindowTitle (title);
 }

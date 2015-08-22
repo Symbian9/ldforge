@@ -20,19 +20,19 @@
 #include "main.h"
 #include "ldObject.h"
 
-#define IMPLEMENT_HISTORY_TYPE(N)							\
-	virtual ~N##History() {}								\
-	virtual void undo() const override;						\
-	virtual void redo() const override;						\
-															\
-	virtual History::EHistoryType getType() const override	\
-	{														\
-		return History::E##N##History;						\
-	}														\
-															\
-	virtual QString getTypeName() const						\
-	{														\
-		return #N;											\
+#define IMPLEMENT_HISTORY_TYPE(N)					\
+	~N##History() {}								\
+	void undo() const override;						\
+	void redo() const override;						\
+													\
+	History::EHistoryType getType() const override	\
+	{												\
+		return History::E##N##History;				\
+	}												\
+													\
+	QString getTypeName() const override			\
+	{												\
+		return #N;									\
 	}
 
 class AbstractHistoryEntry;

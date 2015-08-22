@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ColorSelUI</class>
- <widget class="QDialog" name="ColorSelUI">
+ <class>ColorSelUi</class>
+ <widget class="QDialog" name="ColorSelUi">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -105,7 +105,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ColorSelUI</receiver>
+   <receiver>ColorSelUi</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -121,7 +121,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ColorSelUI</receiver>
+   <receiver>ColorSelUi</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

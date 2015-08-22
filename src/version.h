@@ -18,18 +18,23 @@
 
 #pragma once
 
-//
-// Application name
-//
 #define APPNAME			"LDForge"
 #define UNIXNAME		"ldforge"
 
-//
-// Version number
-//
+#define MACRO_TO_STRING(X) MACRO_TO_STRING_2(X)
+#define MACRO_TO_STRING_2(X) #X
+
 #define VERSION_MAJOR	0
 #define VERSION_MINOR	4
 #define VERSION_PATCH	0
+
+#define VERSION_MAJOR_MINOR_STRING MACRO_TO_STRING (VERSION_MAJOR) "." MACRO_TO_STRING (VERSION_MINOR)
+
+#if VERSION_PATCH == 0
+# define VERSION_STRING VERSION_MAJOR_MINOR_STRING
+#else
+# define VERSION_STRING VERSION_MAJOR_MINOR_STRING "." MACRO_TO_STRING (VERSION_PATCH)
+#endif
 
 //
 // Build ID, this is BUILD_RELEASE for releases
@@ -46,6 +51,5 @@
 # undef DEBUG
 #endif // RELEASE
 
-const char* VersionString();
-const char* FullVersionString();
-const char* CommitTimeString();
+const char* fullVersionString();
+const char* commitTimeString();

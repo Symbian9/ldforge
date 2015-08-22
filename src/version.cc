@@ -16,63 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Note: only using stock C stuff in this file, keeping the STL/Qt stuff out
-// makes this simple file very fast to compile, which is nice since this file
-// must be compiled every time I commit something.
+// This file only uses stock C stuff. Keeping the STL/Qt stuff out  makes this simple file very fast to compile, which
+// is nice since this file must be compiled every time I commit something.
 
-#include <stdio.h>
-#include <string.h>
 #include <time.h>
 #include "version.h"
 #include "hginfo.h"
 
-char g_versionString[64] = {'\0'};
-char g_fullVersionString[256] = {'\0'};
-char g_buildTime[256] = {'\0'};
-
-// =============================================================================
-//
-const char* VersionString()
+const char* fullVersionString()
 {
-	if (g_versionString[0] == '\0')
-	{
-#if VERSION_PATCH == 0
-		sprintf (g_versionString, "%d.%d", VERSION_MAJOR, VERSION_MINOR);
+#if BUILD_ID != BUILD_RELEASE and defined (HG_DATE_VERSION)
+	return VERSION_STRING "-" HG_DATE_VERSION;
 #else
-		sprintf (g_versionString, "%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-#endif // VERSION_PATCH
-	}
-
-	return g_versionString;
-}
-
-// =============================================================================
-//
-const char* FullVersionString()
-{
-	if (g_fullVersionString[0] == '\0')
-	{
-#if BUILD_ID != BUILD_RELEASE and defined (SVN_REVISION_STRING)
-		sprintf (g_fullVersionString, "%s-" SVN_REVISION_STRING, VersionString());
-#else
-		sprintf (g_fullVersionString, "%s", versionString());
+	return HG_DATE_VERSION;
 #endif
-	}
-
-	return g_fullVersionString;
 }
 
-// =============================================================================
-//
-const char* CommitTimeString()
+const char* commitTimeString()
 {
-#ifdef SVN_REVISION_NUMBER
-	if (g_buildTime[0] == '\0')
+	static char buffer[256];
+
+#ifdef HG_COMMIT_TIME
+	if (buffer[0] == '\0')
 	{
-		time_t timestamp = SVN_REVISION_NUMBER;
-		strftime (g_buildTime, sizeof g_buildTime, "%d %b %Y", localtime (&timestamp));
+		time_t timestamp = HG_COMMIT_TIME;
+		strftime (buffer, sizeof buffer, "%d %b %Y", localtime (&timestamp));
 	}
 #endif
 
-	return g_buildTime;
+	return buffer;
 }
