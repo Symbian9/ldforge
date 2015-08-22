@@ -179,56 +179,56 @@ void MainWindow::slot_actionExit()
 //
 void MainWindow::slot_actionNewSubfile()
 {
-	AddObjectDialog::staticDialog (OBJ_Subfile, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Subfile, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewLine()
 {
-	AddObjectDialog::staticDialog (OBJ_Line, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Line, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewTriangle()
 {
-	AddObjectDialog::staticDialog (OBJ_Triangle, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Triangle, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewQuad()
 {
-	AddObjectDialog::staticDialog (OBJ_Quad, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Quad, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewCLine()
 {
-	AddObjectDialog::staticDialog (OBJ_CondLine, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_CondLine, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewComment()
 {
-	AddObjectDialog::staticDialog (OBJ_Comment, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Comment, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewBFC()
 {
-	AddObjectDialog::staticDialog (OBJ_BFC, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_BFC, nullptr);
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionNewVertex()
 {
-	AddObjectDialog::staticDialog (OBJ_Vertex, LDObjectPtr());
+	AddObjectDialog::staticDialog (OBJ_Vertex, nullptr);
 }
 
 // =============================================================================

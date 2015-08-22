@@ -235,14 +235,14 @@ void GLCompiler::stageForCompilation (LDObjectPtr obj)
 		obj->document()->getDisplayName(), obj->lineNumber(), obj->typeName());
 	*/
 
-	m_staged << LDObjectWeakPtr (obj);
+	m_staged << obj;
 }
 
 // =============================================================================
 //
 void GLCompiler::unstage (LDObjectPtr obj)
 {
-	m_staged.removeOne (LDObjectWeakPtr (obj));
+	m_staged.removeOne (obj);
 }
 
 // =============================================================================
@@ -293,8 +293,8 @@ void GLCompiler::prepareVBO (int vbonum)
 			continue;
 		}
 
-		if (it.key().toStrongRef()->document() == CurrentDocument()
-			and not it.key().toStrongRef()->isHidden())
+		if (it.key()->document() == CurrentDocument()
+			and not it.key()->isHidden())
 		{
 			vbodata += it->data[vbonum];
 		}
@@ -331,7 +331,7 @@ void GLCompiler::compileObject (LDObjectPtr obj)
 {
 //	print ("Compile %1\n", g_objectOrigins[obj]);
 
-	if (obj == null or obj->document() == null or obj->document().toStrongRef()->isImplicit())
+	if (obj == null or obj->document() == null or obj->document()->isImplicit())
 		return;
 
 	ObjectVBOInfo info;

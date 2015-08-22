@@ -160,7 +160,7 @@ LDDocument::~LDDocument()
 	if (IsExiting())
 		return;
 
-	g_allDocuments.removeOne (self());
+	g_allDocuments.removeOne (this);
 	m_flags |= DOCF_IsBeingDestroyed;
 	delete m_history;
 	delete m_gldata;
@@ -176,17 +176,17 @@ void LDDocument::setImplicit (bool const& a)
 
 		if (a == false)
 		{
-			g_explicitDocuments << self().toStrongRef();
+			g_explicitDocuments << this;
 			print ("Opened %1", name());
 
 			// Implicit files are not compiled by the GL renderer. Now that this
 			// part is no longer implicit, it needs to be compiled.
 			if (g_win != null)
-				g_win->R()->compiler()->compileDocument (self());
+				g_win->R()->compiler()->compileDocument (this);
 		}
 		else
 		{
-			g_explicitDocuments.removeOne (self().toStrongRef());
+			g_explicitDocuments.removeOne (this);
 			print ("Closed %1", name());
 		}
 
@@ -195,7 +195,7 @@ void LDDocument::setImplicit (bool const& a)
 
 		// If the current document just became implicit (e.g. it was 'closed'),
 		// we need to get a new current document.
-		if (current() == self() and isImplicit())
+		if (current() == this and isImplicit())
 		{
 			if (explicitDocuments().isEmpty())
 				newFile();
@@ -221,7 +221,7 @@ LDDocumentPtr FindDocument (QString name)
 		if (weakfile == null)
 			continue;
 
-		LDDocumentPtr file (weakfile.toStrongRef());
+		LDDocumentPtr file (weakfile);
 
 		if (Eq (name, file->name(), file->defaultName()))
 			return file;
@@ -281,7 +281,7 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 		if (doc == null)
 			continue;
 
-		QString partpath = format ("%1/%2", Dirname (doc.toStrongRef()->fullPath()), relpath);
+		QString partpath = format ("%1/%2", Dirname (doc->fullPath()), relpath);
 		QFile f (partpath);
 
 		if (f.exists())
@@ -582,7 +582,8 @@ bool LDDocument::isSafeToClose()
 	// If we have unsaved changes, warn and give the option of saving.
 	if (hasUnsavedChanges())
 	{
-		QString message = format (QObject::tr ("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
+		QString message = format (QObject::tr ("There are unsaved changes to %1. Should it be saved?"), 
+getDisplayName());
 
 		int button = msgbox::question (g_win, QObject::tr ("Unsaved Changes"), message,
 			(msgbox::Yes | msgbox::No | msgbox::Cancel), msgbox::Cancel);
@@ -690,7 +691,7 @@ void OpenMainModel (QString path)
 
 	for (LDDocumentWeakPtr doc : g_allDocuments)
 	{
-		if (doc != null and doc.toStrongRef()->name() == shortName)
+		if (doc != null and doc->name() == shortName)
 		{
 			documentToReplace = doc;
 			break;
@@ -826,7 +827,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	setFullPath (path);
 	setName (shortenName (path));
 
-	g_win->updateDocumentListItem (self().toStrongRef());
+	g_win->updateDocumentListItem (this);
 	g_win->updateTitle();
 	return true;
 }
@@ -1138,7 +1139,7 @@ void LDDocument::reloadAllSubfiles()
 
 	m_needsReCache = true;
 
-	if (self() == CurrentDocument())
+	if (this == CurrentDocument())
 		g_win->buildObjList();
 }
 
@@ -1149,7 +1150,7 @@ int LDDocument::addObject (LDObjectPtr obj)
 	history()->add (new AddHistory (objects().size(), obj));
 	m_objects << obj;
 	addKnownVertices (obj);
-	obj->setDocument (self());
+	obj->setDocument (this);
 	g_win->R()->compileObject (obj);
 	return getObjectCount() - 1;
 }
@@ -1171,7 +1172,7 @@ void LDDocument::insertObj (int pos, LDObjectPtr obj)
 {
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
-	obj->setDocument (self());
+	obj->setDocument (this);
 	g_win->R()->compileObject (obj);
 	
 
@@ -1244,7 +1245,7 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 	m_objectVertices.remove (m_objects[idx]);
 	m_objects[idx]->deselect();
 	m_objects[idx]->setDocument (LDDocumentPtr());
-	obj->setDocument (self());
+	obj->setDocument (this);
 	addKnownVertices (obj);
 	g_win->R()->compileObject (obj);
 	m_objects[idx] = obj;
@@ -1255,10 +1256,10 @@ void LDDocument::setObject (int idx, LDObjectPtr obj)
 //
 LDObjectPtr LDDocument::getObject (int pos) const
 {
-	if (m_objects.size() <= pos)
-		return LDObjectPtr();
-
-	return m_objects[pos];
+	if (pos < m_objects.size())
+		return m_objects[pos];
+	else
+		return nullptr;
 }
 
 // =============================================================================
@@ -1472,7 +1473,7 @@ void LDDocument::addToSelection (LDObjectPtr obj) // [protected]
 	if (obj->isSelected())
 		return;
 
-	assert (obj->document() == self());
+	assert (obj->document() == this);
 	m_sel << obj;
 	g_win->R()->compileObject (obj);
 	obj->setSelected (true);
@@ -1485,7 +1486,7 @@ void LDDocument::removeFromSelection (LDObjectPtr obj) // [protected]
 	if (not obj->isSelected())
 		return;
 
-	assert (obj->document() == self());
+	assert (obj->document() == this);
 	m_sel.removeOne (obj);
 	g_win->R()->compileObject (obj);
 	obj->setSelected (false);

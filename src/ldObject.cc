@@ -32,33 +32,38 @@ CFGENTRY (String, DefaultUser, "")
 CFGENTRY (Bool, UseCALicense, true)
 
 // List of all LDObjects
-QMap<long, LDObjectWeakPtr>	g_allObjects;
-static int32						g_idcursor = 1; // 0 shalt be null
-static constexpr int32				g_maxID = (1 << 24);
+QMap<int32, LDObjectWeakPtr> g_allObjects;
+static int32 g_idcursor = 1; // 0 shalt be null
+
+enum { MAX_LDOBJECT_IDS = (1 << 24) };
 
 #define LDOBJ_DEFAULT_CTOR(T,BASE) \
-	T :: T (LDObjectPtr* selfptr) : \
-		BASE (selfptr) {}
+	T :: T (LDDocument* document) : \
+		BASE (document) {}
 
 // =============================================================================
 // LDObject constructors
 //
-LDObject::LDObject (LDObjectPtr* selfptr) :
+LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
 	m_isDestructed (false),
 	qObjListEntry (null)
 {
-	*selfptr = LDObjectPtr (this, [](LDObject* obj){ obj->finalDelete(); });
+	if (document)
+		document->addObject (this);
+
 	memset (m_coords, 0, sizeof m_coords);
-	m_self = selfptr->toWeakRef();
 	chooseID();
-	g_allObjects[id()] = self();
+
+	if (id() != 0)
+		g_allObjects[id()] = this;
+
 	setRandomColor (QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128));
 }
 
-LDSubfile::LDSubfile (LDObjectPtr* selfptr) :
-	LDMatrixObject (selfptr) {}
+LDSubfile::LDSubfile (LDDocument* document) :
+	LDMatrixObject (document) {}
 
 LDOBJ_DEFAULT_CTOR (LDEmpty, LDObject)
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
@@ -75,21 +80,11 @@ LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 //
 void LDObject::chooseID()
 {
-	// If this is the first pass we can just use a global ID counter for each
-	// unique object. Let's hope that nobody goes to create 17 million objects
-	// anytime soon.
-	if (g_idcursor < g_maxID)
-	{
+	// Let's hope that nobody goes to create 17 million objects anytime soon...
+	if (g_idcursor < MAX_LDOBJECT_IDS)
 		setID (g_idcursor++);
-		return;
-	}
-
-	// In case someone does, we cannot really continue execution. We must abort,
-	// give the user a chance to save their documents though.
-	Critical ("Created too many objects. Execution cannot continue. You have a "
-		"chance to save any changes to documents, then restart.");
-	(void) IsSafeToCloseAll();
-	Exit();
+	else
+		setID (0);
 }
 
 // =============================================================================
@@ -220,8 +215,8 @@ QList<LDTrianglePtr> LDQuad::splitToTriangles()
 	// |   |  ==>  | /    / |
 	// |   |       |/    /  |
 	// 1---2       1    1---2
-	LDTrianglePtr tri1 (LDSpawn<LDTriangle> (vertex (0), vertex (1), vertex (3)));
-	LDTrianglePtr tri2 (LDSpawn<LDTriangle> (vertex (1), vertex (2), vertex (3)));
+	LDTrianglePtr tri1 (new LDTriangle (vertex (0), vertex (1), vertex (3)));
+	LDTrianglePtr tri2 (new LDTriangle (vertex (1), vertex (2), vertex (3)));
 
 	// The triangles also inherit the quad's color
 	tri1->setColor (color());
@@ -234,14 +229,16 @@ QList<LDTrianglePtr> LDQuad::splitToTriangles()
 //
 void LDObject::replace (LDObjectPtr other)
 {
-	long idx = lineNumber();
-	assert (idx != -1);
+	int idx = lineNumber();
 
-	// Replace the instance of the old object with the new object
-	document().toStrongRef()->setObject (idx, other);
+	if (idx != -1)
+	{
+		// Replace the instance of the old object with the new object
+		document()->setObject (idx, other);
 
-	// Remove the old object
-	destroy();
+		// Remove the old object
+		destroy();
+	}
 }
 
 // =============================================================================
@@ -249,13 +246,13 @@ void LDObject::replace (LDObjectPtr other)
 void LDObject::swap (LDObjectPtr other)
 {
 	assert (document() == other->document());
-	document().toStrongRef()->swapObjects (self(), other);
+	document()->swapObjects (self(), other);
 }
 
 // =============================================================================
 //
-LDLine::LDLine (LDObjectPtr* selfptr, Vertex v1, Vertex v2) :
-	LDObject (selfptr)
+LDLine::LDLine (Vertex v1, Vertex v2, LDDocument* document) :
+	LDObject (document)
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -263,8 +260,8 @@ LDLine::LDLine (LDObjectPtr* selfptr, Vertex v1, Vertex v2) :
 
 // =============================================================================
 //
-LDTriangle::LDTriangle (LDObjectPtr* selfptr, const Vertex& v1, const Vertex& v2, const Vertex& v3) :
-	LDObject (selfptr)
+LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document) :
+	LDObject (document)
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -273,9 +270,8 @@ LDTriangle::LDTriangle (LDObjectPtr* selfptr, const Vertex& v1, const Vertex& v2
 
 // =============================================================================
 //
-LDQuad::LDQuad (LDObjectPtr* selfptr, const Vertex& v1, const Vertex& v2,
-	const Vertex& v3, const Vertex& v4) :
-	LDObject (selfptr)
+LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* document) :
+	LDObject (document)
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -285,9 +281,8 @@ LDQuad::LDQuad (LDObjectPtr* selfptr, const Vertex& v1, const Vertex& v2,
 
 // =============================================================================
 //
-LDCondLine::LDCondLine (LDObjectPtr* selfptr, const Vertex& v0, const Vertex& v1,
-						const Vertex& v2, const Vertex& v3) :
-	LDLine (selfptr)
+LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document) :
+	LDLine (document)
 {
 	setVertex (0, v0);
 	setVertex (1, v1);
@@ -313,7 +308,7 @@ void LDObject::destroy()
 
 	// If this object was associated to a file, remove it off it now
 	if (document() != null)
-		document().toStrongRef()->forgetObject (self());
+		document()->forgetObject (self());
 
 	// Delete the GL lists
 	if (g_win != null)
@@ -337,7 +332,7 @@ void LDObject::finalDelete()
 
 // =============================================================================
 //
-void LDObject::setDocument (const LDDocumentWeakPtr& a)
+void LDObject::setDocument (LDDocument* a)
 {
 	m_document = a;
 
@@ -447,9 +442,9 @@ long LDObject::lineNumber() const
 {
 	assert (document() != null);
 
-	for (int i = 0; i < document().toStrongRef()->getObjectCount(); ++i)
+	for (int i = 0; i < document()->getObjectCount(); ++i)
 	{
-		if (document().toStrongRef()->getObject (i) == this)
+		if (document()->getObject (i) == this)
 			return i;
 	}
 
@@ -548,53 +543,49 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 //
 LDObjectPtr LDObject::topLevelParent()
 {
-	if (parent() == null)
-		return self();
+	LDObject* it;
+	
+	for (it = self(); it->parent(); it = it->parent())
+		;
 
-	LDObjectWeakPtr it (self());
-
-	while (it.toStrongRef()->parent() != null)
-		it = it.toStrongRef()->parent();
-
-	return it.toStrongRef();
+	return it;
 }
 
 // =============================================================================
 //
 LDObjectPtr LDObject::next() const
 {
-	long idx = lineNumber();
+	int idx = lineNumber();
 	assert (idx != -1);
 
-	if (idx == (long) document().toStrongRef()->getObjectCount() - 1)
-		return LDObjectPtr();
+	if (idx == document()->getObjectCount() - 1)
+		return nullptr;
 
-	return document().toStrongRef()->getObject (idx + 1);
+	return document()->getObject (idx + 1);
 }
 
 // =============================================================================
 //
 LDObjectPtr LDObject::previous() const
 {
-	long idx = lineNumber();
+	int idx = lineNumber();
 	assert (idx != -1);
 
 	if (idx == 0)
-		return LDObjectPtr();
+		return nullptr;
 
-	return document().toStrongRef()->getObject (idx - 1);
+	return document()->getObject (idx - 1);
 }
 
 // =============================================================================
 //
-bool LDObject::previousIsInvertnext (LDBFCPtr& ptr)
+bool LDObject::previousIsInvertnext (LDBFC*& ptr)
 {
-	LDObjectPtr prev (previous());
+	LDObject* prev = previous();
 
-	if (prev != null and prev->type() == OBJ_BFC and
-		prev.staticCast<LDBFC>()->statement() == BFCStatement::InvertNext)
+	if (prev and prev->type() == OBJ_BFC and static_cast<LDBFC*> (prev)->statement() == BFCStatement::InvertNext)
 	{
-		ptr = prev.staticCast<LDBFC>();
+		ptr = static_cast<LDBFC*> (prev);
 		return true;
 	}
 
@@ -607,13 +598,13 @@ void LDObject::move (Vertex vect)
 {
 	if (hasMatrix())
 	{
-		LDMatrixObjectPtr mo = self().toStrongRef().dynamicCast<LDMatrixObject>();
+		LDMatrixObject* mo = static_cast<LDMatrixObject*> (this);
 		mo->setPosition (mo->position() + vect);
 	}
-	elif (type() == OBJ_Vertex)
+	else if (type() == OBJ_Vertex)
 	{
 		// ugh
-		self().toStrongRef().staticCast<LDVertex>()->pos += vect;
+		static_cast<LDVertex*> (self)->pos += vect;
 	}
 	else
 	{
@@ -641,7 +632,7 @@ LDObjectPtr LDObject::getDefault (const LDObjectType type)
 		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
 		case OBJ_NumTypes:		assert (false);
 	}
-	return LDObjectPtr();
+	return nullptr;
 }
 
 // =============================================================================
@@ -669,8 +660,8 @@ void LDTriangle::invert()
 //
 void LDQuad::invert()
 {
-	// Quad: 0 -> 1 -> 2 -> 3
-	// rev:  0 -> 3 -> 2 -> 1
+	// Quad:     0 -> 1 -> 2 -> 3
+	// reversed: 0 -> 3 -> 2 -> 1
 	// Thus, we swap 1 and 3.
 	Vertex tmp = vertex (1);
 	setVertex (1, vertex (3));
@@ -681,7 +672,7 @@ void LDQuad::invert()
 //
 void LDSubfile::invert()
 {
-	if (document() == null)
+	if (document() == nullptr)
 		return;
 
 	// Check whether subfile is flat
@@ -743,7 +734,7 @@ void LDSubfile::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document().toStrongRef()->insertObj (idx, LDSpawn<LDBFC> (BFCStatement::InvertNext));
+	document->insertObj (idx, new LDBFC (BFCStatement::InvertNext));
 }
 
 // =============================================================================
@@ -760,8 +751,7 @@ void LDLine::invert()
 //
 void LDCondLine::invert()
 {
-	// I don't think that a conditional line's control points need to be
-	// swapped, do they?
+	// I don't think that a conditional line's control points need to be swapped, do they?
 	Vertex tmp = vertex (0);
 	setVertex (0, vertex (1));
 	setVertex (1, tmp);
@@ -771,15 +761,14 @@ void LDVertex::invert() {}
 
 // =============================================================================
 //
-LDLinePtr LDCondLine::toEdgeLine()
+LDLine* LDCondLine::toEdgeLine()
 {
-	LDLinePtr replacement (LDSpawn<LDLine>());
+	LDLine* replacement = new LDLine;
 
 	for (int i = 0; i < replacement->numVertices(); ++i)
 		replacement->setVertex (i, vertex (i));
 
 	replacement->setColor (color());
-
 	replace (replacement);
 	return replacement;
 }
@@ -793,7 +782,7 @@ LDObjectPtr LDObject::fromID (int id)
 	if (it != g_allObjects.end())
 		return *it;
 
-	return LDObjectPtr();
+	return nullptr;
 }
 
 // =============================================================================
@@ -815,12 +804,12 @@ void LDOverlay::invert() {}
 template<typename T>
 static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
 {
-	long idx;
+	int idx;
 
 	if (*ptr == val)
 		return;
 
-	if (obj->document() != null and (idx = obj->lineNumber()) != -1)
+	if (obj->document() and (idx = obj->lineNumber()) != -1)
 	{
 		QString before = obj->asText();
 		*ptr = val;
@@ -828,13 +817,15 @@ static void changeProperty (LDObjectPtr obj, T* ptr, const T& val)
 
 		if (before != after)
 		{
-			obj->document().toStrongRef()->addToHistory (new EditHistory (idx, before, after));
+			obj->document()->addToHistory (new EditHistory (idx, before, after));
 			g_win->R()->compileObject (obj);
 			CurrentDocument()->redoVertices();
 		}
 	}
 	else
+	{
 		*ptr = val;
+	}
 }
 
 // =============================================================================
@@ -876,30 +867,24 @@ void LDMatrixObject::setTransform (const Matrix& val)
 //
 void LDObject::select()
 {
-	assert (document() != null);
-	document().toStrongRef()->addToSelection (self());
-
-	// If this object is inverted with INVERTNEXT, pick the INVERTNEXT as well.
-	/*
-	LDBFCPtr invertnext;
-
-	if (previousIsInvertnext (invertnext))
-		invertnext->select();
-	*/
+	if (document() != null)
+		document()->addToSelection (self());
 }
 
 // =============================================================================
 //
 void LDObject::deselect()
 {
-	assert (document() != null);
-	document().toStrongRef()->removeFromSelection (self());
+	if (document() != null)
+	{
+		document()->removeFromSelection (self());
 
-	// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
-	LDBFCPtr invertnext;
+		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
+		LDBFCPtr invertnext;
 
-	if (previousIsInvertnext (invertnext))
-		invertnext->deselect();
+		if (previousIsInvertnext (invertnext))
+			invertnext->deselect();
+	}
 }
 
 // =============================================================================

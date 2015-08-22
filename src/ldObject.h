@@ -94,15 +94,15 @@ class LDObject
 	PROPERTY (public,		bool,				isHidden,		setHidden,		STOCK_WRITE)
 	PROPERTY (public,		bool,				isSelected,		setSelected,	STOCK_WRITE)
 	PROPERTY (public,		bool,				isDestructed,	setDestructed,	STOCK_WRITE)
-	PROPERTY (public,		LDObjectWeakPtr,	parent,			setParent,		STOCK_WRITE)
-	PROPERTY (public,		LDDocumentWeakPtr,	document,		setDocument,	CUSTOM_WRITE)
+	PROPERTY (public,		LDObject*,			parent,			setParent,		STOCK_WRITE)
+	PROPERTY (public,		LDDocument*,		document,		setDocument,	CUSTOM_WRITE)
 	PROPERTY (private,		int32,				id,				setID,			STOCK_WRITE)
 	PROPERTY (public,		LDColor,			color,			setColor,		CUSTOM_WRITE)
 	PROPERTY (private,		QColor,				randomColor,	setRandomColor,	STOCK_WRITE)
 	PROPERTY (private,		LDObjectWeakPtr,	self,			setSelf,		STOCK_WRITE)
 
 public:
-	LDObject (LDObjectPtr* selfptr);
+	LDObject (LDDocument* document = nullptr);
 
 	// This object as LDraw code
 	virtual QString				asText() const = 0;
@@ -218,18 +218,18 @@ private:
 // deleter so that all deletions go through finalDelete();
 //
 template<typename T, typename... Args>
-inline QSharedPointer<T> LDSpawn (Args... args)
+T* LDSpawn (Args... args)
 {
 	static_assert (std::is_base_of<LDObject, T>::value,
 		"spawn may only be used with LDObject-derivatives");
-	LDObjectPtr ptr;
-	new T (&ptr, args...);
+	T* result = new T (args..., nullptr);
 
 	// Set default color. Relying on virtual functions, this cannot be done in the c-tor.
-	if (ptr->isColored())
-		ptr->setColor (ptr->defaultColor());
+	// TODO: store -1 as the default color
+	if (result->isColored())
+		result->setColor (ptr->defaultColor());
 
-	return ptr.staticCast<T>();
+	return result;
 }
 
 //
@@ -258,12 +258,12 @@ class LDMatrixObject : public LDObject
 	Vertex m_position;
 
 public:
-	LDMatrixObject (LDObjectPtr* selfptr) :
-		LDObject (selfptr),
+	LDMatrixObject (LDDocument* document = nullptr) :
+		LDObject (documemnt),
 		m_position (Origin) {}
 
-	LDMatrixObject (LDObjectPtr* selfptr, const Matrix& transform, const Vertex& pos) :
-		LDObject (selfptr),
+	LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document = nullptr) :
+		LDObject (documemnt),
 		m_transform (transform),
 		m_position (pos) {}
 
@@ -311,8 +311,8 @@ class LDError : public LDObject
 	PROPERTY (private,	QString,	reason,			setReason,			STOCK_WRITE)
 
 public:
-	LDError (LDObjectPtr* selfptr, QString contents, QString reason) :
-		LDObject (selfptr),
+	LDError (QString contents, QString reason, LDDocument* document = nullptr) :
+		LDObject (document),
 		m_contents (contents),
 		m_reason (reason) {}
 };
@@ -352,8 +352,8 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDComment (LDObjectPtr* selfptr, QString text) :
-		LDObject (selfptr),
+	LDComment (QString text, LDDocument* document = nullptr) :
+		LDObject (document),
 		m_text (text) {}
 };
 
@@ -393,8 +393,8 @@ public:
 	PROPERTY (public, BFCStatement, statement, setStatement, STOCK_WRITE)
 
 public:
-	LDBFC (LDObjectPtr* selfptr, const BFCStatement type) :
-		LDObject (selfptr),
+	LDBFC (const BFCStatement type, LDDocument* document = nullptr) :
+		LDObject (document),
 		m_statement (type) {}
 
 	// Statement strings
@@ -457,7 +457,7 @@ class LDLine : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDLine (LDObjectPtr* selfptr, Vertex v1, Vertex v2);
+	LDLine (Vertex v1, Vertex v2, LDDocument* document = nullptr);
 };
 
 using LDLinePtr = QSharedPointer<LDLine>;
@@ -479,8 +479,7 @@ class LDCondLine : public LDLine
 	LDOBJ_NO_MATRIX
 
 public:
-	LDCondLine (LDObjectPtr* selfptr, const Vertex& v0, const Vertex& v1,
-				const Vertex& v2, const Vertex& v3);
+	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
 	LDLinePtr toEdgeLine();
 };
 
@@ -505,8 +504,7 @@ class LDTriangle : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDTriangle (LDObjectPtr* selfptr, Vertex const& v1,
-		Vertex const& v2, Vertex const& v3);
+	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* document = nullptr);
 };
 
 using LDTrianglePtr = QSharedPointer<LDTriangle>;
@@ -529,8 +527,7 @@ class LDQuad : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDQuad (LDObjectPtr* selfptr, const Vertex& v1, const Vertex& v2,
-		const Vertex& v3, const Vertex& v4);
+	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* document = nullptr);
 
 	// Split this quad into two triangles
 	QList<LDTrianglePtr> splitToTriangles();

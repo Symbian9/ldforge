@@ -660,7 +660,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 void MainWindow::spawnContextMenu (const QPoint pos)
 {
 	const bool single = (Selection().size() == 1);
-	LDObjectPtr singleObj = single ? Selection().first() : LDObjectPtr();
+	LDObjectPtr singleObj = single ? Selection().first() : nullptr;
 
 	bool hasSubfiles = false;
 

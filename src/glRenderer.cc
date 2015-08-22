@@ -1553,7 +1553,7 @@ void GLRenderer::highlightCursorObject()
 		newIndex = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
 	}
 
-	if (newIndex != (oldObject != null ? oldObject.toStrongRef()->id() : 0))
+	if (newIndex != (oldObject != null ? oldObject->id() : 0))
 	{
 		if (newIndex != 0)
 			newObject = LDObject::fromID (newIndex);
