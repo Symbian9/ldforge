@@ -37,14 +37,12 @@ enum { NUM_COLUMNS = 16 };
 EXTERN_CFGENTRY (String, MainColor)
 EXTERN_CFGENTRY (Float, MainColorAlpha)
 
-// =============================================================================
-//
 ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
-	QDialog (parent)
+	QDialog (parent),
+	ui (*new Ui_ColorSelUi)
 {
 	m_firstResize = true;
-	ui = new Ui_ColorSelUI;
-	ui->setupUi (this);
+	ui.setupUi (this);
 	setSelection (defaultvalue);
 
 	QGridLayout* layout = new QGridLayout (this);
@@ -90,29 +88,25 @@ ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
 
 	QWidget* widget = new QWidget();
 	widget->setLayout (layout);
-	ui->definedColors->setWidget (widget);
-	connect (ui->directColor, SIGNAL (clicked (bool)), this, SLOT (chooseDirectColor()));
+	ui.definedColors->setWidget (widget);
+	connect (ui.directColor, SIGNAL (clicked (bool)), this, SLOT (chooseDirectColor()));
 
-	ui->definedColors->setMinimumWidth (ui->definedColors->widget()->width() + 16);
+	ui.definedColors->setMinimumWidth (ui.definedColors->widget()->width() + 16);
 
 #ifdef TRANSPARENT_DIRECT_COLORS
-	connect (ui->transparentDirectColor, SIGNAL (clicked (bool)), this, SLOT (transparentCheckboxClicked()));
+	connect (ui.transparentDirectColor, SIGNAL (clicked (bool)), this, SLOT (transparentCheckboxClicked()));
 #else
-	ui->transparentDirectColor->hide();
+	ui.transparentDirectColor->hide();
 #endif
 
 	drawColorInfo();
 }
 
-// =============================================================================
-//
 ColorSelector::~ColorSelector()
 {
-	delete ui;
+	delete &ui;
 }
 
-// =============================================================================
-//
 void ColorSelector::colorButtonClicked()
 {
 	QPushButton* button = qobject_cast<QPushButton*> (sender());
@@ -139,43 +133,37 @@ void ColorSelector::colorButtonClicked()
 	drawColorInfo();
 }
 
-// =============================================================================
-//
 void ColorSelector::drawColorInfo()
 {
 	if (not selection().isValid())
 	{
-		ui->colorLabel->setText ("---");
-		ui->iconLabel->setPixmap (QPixmap());
-		ui->transparentDirectColor->setChecked (false);
+		ui.colorLabel->setText ("---");
+		ui.iconLabel->setPixmap (QPixmap());
+		ui.transparentDirectColor->setChecked (false);
 		return;
 	}
 
-	ui->colorLabel->setText (format ("%1 - %2", selection().indexString(),
+	ui.colorLabel->setText (format ("%1 - %2", selection().indexString(),
 		(selection().isDirect() ? "<direct color>" : selection().name())));
-	ui->iconLabel->setPixmap (MakeColorIcon (selection(), 16).pixmap (16, 16));
+	ui.iconLabel->setPixmap (MakeColorIcon (selection(), 16).pixmap (16, 16));
 
 #ifdef TRANSPARENT_DIRECT_COLORS
-	ui->transparentDirectColor->setEnabled (selection().isDirect());
-	ui->transparentDirectColor->setChecked (selection().isDirect() and selection().faceColor().alphaF() < 1.0);
+	ui.transparentDirectColor->setEnabled (selection().isDirect());
+	ui.transparentDirectColor->setChecked (selection().isDirect() and selection().faceColor().alphaF() < 1.0);
 #else
-	ui->transparentDirectColor->setChecked (false);
-	ui->transparentDirectColor->setEnabled (false);
+	ui.transparentDirectColor->setChecked (false);
+	ui.transparentDirectColor->setEnabled (false);
 #endif
 }
 
-// =============================================================================
-//
 void ColorSelector::selectDirectColor (QColor color)
 {
-	qint32 colorIndex = (ui->transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
+	qint32 colorIndex = (ui.transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
 	colorIndex |= (color.red() << 16) | (color.green() << 8) | (color.blue());
 	setSelection (colorIndex);
 	drawColorInfo();
 }
 
-// =============================================================================
-//
 void ColorSelector::chooseDirectColor()
 {
 	QColor defcolor = selection() != -1 ? selection().faceColor() : Qt::white;
@@ -187,16 +175,12 @@ void ColorSelector::chooseDirectColor()
 	selectDirectColor (newcolor);
 }
 
-// =============================================================================
-//
 void ColorSelector::transparentCheckboxClicked()
 {
 	if (selection().isDirect())
 		selectDirectColor (selection().faceColor());
 }
 
-// =============================================================================
-//
 bool ColorSelector::selectColor (LDColor& val, LDColor defval, QWidget* parent)
 {
 	ColorSelector dlg (defval, parent);
