@@ -95,7 +95,7 @@ void DrawMode::endDraw()
 			// 1 vertex - add a vertex object
 			LDVertex* obj = LDSpawn<LDVertex>();
 			obj->pos = verts[0];
-			obj->setColor (MainColor());
+			obj->setColor (MainColor);
 			objs << obj;
 			break;
 		}
@@ -104,7 +104,7 @@ void DrawMode::endDraw()
 		{
 			// 2 verts - make a line
 			LDLine* obj = LDSpawn<LDLine> (verts[0], verts[1]);
-			obj->setColor (EdgeColor());
+			obj->setColor (EdgeColor);
 			objs << obj;
 			break;
 		}
@@ -116,7 +116,7 @@ void DrawMode::endDraw()
 				static_cast<LDObject*> (LDSpawn<LDTriangle>()) :
 				static_cast<LDObject*> (LDSpawn<LDQuad>());
 
-			obj->setColor (MainColor());
+			obj->setColor (MainColor);
 
 			for (int i = 0; i < verts.size(); ++i)
 				obj->setVertex (i, verts[i]);

@@ -306,10 +306,10 @@ void MainWindow::slot_actionCornerVerts()
 
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			QSharedPointer<LDVertex> vert (LDSpawn<LDVertex>());
-			vert->pos = obj->vertex (i);
-			vert->setColor (obj->color());
-			CurrentDocument()->insertObj (++ln, vert);
+			LDVertex* vertex = new LDVertex();
+			vertex->pos = obj->vertex (i);
+			vertex->setColor (obj->color());
+			CurrentDocument()->insertObj (++ln, vertex);
 			++num;
 		}
 	}
@@ -624,16 +624,15 @@ static bool IsColorUsed (LDColor color)
 //
 void MainWindow::slot_actionAutocolor()
 {
-	int colnum = 0;
 	LDColor color;
 
-	for (colnum = 0;
-		 colnum < CountLDConfigColors() and
-			((color = LDColor::fromIndex (colnum)) == null or
-			IsColorUsed (color));
-		colnum++) {}
+	for (color = 0; color.isLDConfigColor(); ++color)
+	{
+		if (color.isValid() and not IsColorUsed (color))
+			break;
+	}
 
-	if (colnum >= CountLDConfigColors())
+	if (not color.isLDConfigColor())
 	{
 		print (tr ("Cannot auto-color: all colors are in use!"));
 		return;
@@ -647,7 +646,7 @@ void MainWindow::slot_actionAutocolor()
 		obj->setColor (color);
 	}
 
-	print (tr ("Auto-colored: new color is [%1] %2"), colnum, color.name());
+	print (tr ("Auto-colored: new color is [%1] %2"), color.index(), color.name());
 	refresh();
 }
 
@@ -692,7 +691,7 @@ void MainWindow::slot_actionAddHistoryLine()
 	}
 
 	int idx = obj ? obj->lineNumber() : 0;
-	CurrentDocument()->insertObj (idx++, comm);
+	CurrentDocument()->insertObj (idx++, comment);
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line

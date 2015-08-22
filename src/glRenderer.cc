@@ -950,7 +950,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	// Read pixels from the color buffer.
 	glReadPixels (x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixeldata);
 
-	LDObject* removedObj;
+	LDObject* removedObj = nullptr;
 	QList<qint32> indices;
 
 	// Go through each pixel read and add them to the selection.
@@ -1531,7 +1531,7 @@ void GLRenderer::highlightCursorObject()
 	if (not cfg::HighlightObjectBelowCursor and objectAtCursor() == null)
 		return;
 
-	LDObject* newObject;
+	LDObject* newObject = nullptr;
 	LDObject* oldObject = objectAtCursor();
 	qint32 newIndex;
 
@@ -1579,7 +1579,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 	{
 		QString primName = static_cast<SubfileListItem*> (g_win->getPrimitivesTree()->currentItem())->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();
-		ref->setColor (MainColor());
+		ref->setColor (MainColor);
 		ref->setFileInfo (GetDocument (primName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);

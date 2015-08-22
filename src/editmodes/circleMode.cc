@@ -108,7 +108,7 @@ void CircleMode::buildCircle()
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
 			ref->setPosition (m_drawedVerts[0]);
-			ref->setColor (MainColor());
+			ref->setColor (MainColor);
 			objs << ref;
 		}
 	}
@@ -145,7 +145,7 @@ void CircleMode::buildCircle()
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
 			LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
-			quad->setColor (MainColor());
+			quad->setColor (MainColor);
 
 			// Ensure the quads always are BFC-front towards the camera
 			if (renderer()->camera() % 3 <= 0)
@@ -161,7 +161,7 @@ void CircleMode::buildCircle()
 		ref->setFileInfo (refFile);
 		ref->setTransform (transform);
 		ref->setPosition (m_drawedVerts[0]);
-		ref->setColor (MainColor());
+		ref->setColor (MainColor);
 		objs << ref;
 	}
 

@@ -159,22 +159,22 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 			break;
 
 		case VBOCM_NormalColors:
-			if (poly.color == MainColorIndex)
+			if (poly.color == MainColor)
 			{
-				if (topobj->color() == MainColor())
+				if (topobj->color() == MainColor)
 					qcol = GLRenderer::getMainColor();
 				else
 					qcol = topobj->color().faceColor();
 			}
-			elif (poly.color == EdgeColorIndex)
+			else if (poly.color == EdgeColor)
 			{
 				qcol = Luma (QColor (cfg::BackgroundColor)) > 40 ? Qt::black : Qt::white;
 			}
 			else
 			{
-				LDColor col = LDColor::fromIndex (poly.color);
+				LDColor col = poly.color;
 
-				if (col)
+				if (col.isValid())
 					qcol = col.faceColor();
 			}
 			break;
@@ -203,7 +203,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 
 	if (topobj->isSelected())
 		blendAlpha = 1.0;
-	elif (topobj == m_renderer->objectAtCursor())
+	else if (topobj == m_renderer->objectAtCursor())
 		blendAlpha = 0.5;
 
 	if (blendAlpha != 0.0)
@@ -249,11 +249,11 @@ void GLCompiler::unstage (LDObject* obj)
 //
 void GLCompiler::compileDocument (LDDocument* doc)
 {
-	if (doc == null)
-		return;
-
-	for (LDObject* obj : doc->objects())
-		compileObject (obj);
+	if (doc != null)
+	{
+		for (LDObject* obj : doc->objects())
+			compileObject (obj);
+	}
 }
 
 // =============================================================================

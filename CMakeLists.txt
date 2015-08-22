@@ -51,7 +51,6 @@ set (LDFORGE_SOURCES
 	src/extPrograms.cc
 	src/glRenderer.cc
 	src/glCompiler.cc
-	src/ldConfig.cc
 	src/ldDocument.cc
 	src/ldObject.cc
     src/ldObjectMath.cpp
@@ -80,7 +79,6 @@ set (LDFORGE_HEADERS
 	src/ringFinder.h
 	src/ldDocument.h
 	src/addObjectDialog.h
-	src/ldConfig.h
 	src/partDownloader.h
 	src/ldObject.h
     src/ldObjectMath.h

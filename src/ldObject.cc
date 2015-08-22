@@ -47,7 +47,6 @@ enum { MAX_LDOBJECT_IDS = (1 << 24) };
 LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
-	m_isDestructed (false),
 	qObjListEntry (null)
 {
 	if (document)
@@ -87,11 +86,11 @@ LDObject::~LDObject()
 
 		// If this object was associated to a file, remove it off it now
 		if (document() != null)
-			document()->forgetObject (self());
+			document()->forgetObject (this);
 
 		// Delete the GL lists
 		if (g_win != null)
-			g_win->R()->forgetObject (self());
+			g_win->R()->forgetObject (this);
 
 		// Remove this object from the list of LDObjects
 		g_allObjects.erase (g_allObjects.find (id()));
@@ -268,7 +267,7 @@ void LDObject::replace (LDObject* other)
 void LDObject::swap (LDObject* other)
 {
 	assert (document() == other->document());
-	document()->swapObjects (self(), other);
+	document()->swapObjects (this, other);
 }
 
 // =============================================================================
@@ -314,10 +313,6 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 
 // =============================================================================
 //
-LDObject::~LDObject() {}
-
-// =============================================================================
-//
 void LDObject::destroy()
 {
 	delete this;
@@ -325,7 +320,7 @@ void LDObject::destroy()
 
 // =============================================================================
 //
-void LDObject::setDocument (LDDocument* a)
+void LDObject::setDocument (LDDocument* const& a)
 {
 	m_document = a;
 
@@ -366,7 +361,7 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 		break;
 	}
 
-	if (obj->color() == MainColor())
+	if (obj->color() == MainColor)
 		obj->setColor (parentcolor);
 }
 
@@ -381,7 +376,7 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 	{
 		// assert (obj->type() != OBJ_Subfile);
 		// Set the parent now so we know what inlined the object.
-		obj->setParent (self());
+		obj->setParent (this);
 		TransformObject (obj, transform(), position(), color());
 	}
 
@@ -537,7 +532,7 @@ LDObject* LDObject::topLevelParent()
 {
 	LDObject* it;
 	
-	for (it = self(); it->parent(); it = it->parent())
+	for (it = this; it->parent(); it = it->parent())
 		;
 
 	return it;
@@ -596,7 +591,7 @@ void LDObject::move (Vertex vect)
 	else if (type() == OBJ_Vertex)
 	{
 		// ugh
-		static_cast<LDVertex*> (self)->pos += vect;
+		static_cast<LDVertex*> (this)->pos += vect;
 	}
 	else
 	{
@@ -726,7 +721,7 @@ void LDSubfile::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document->insertObj (idx, new LDBFC (BFCStatement::InvertNext));
+	document()->insertObj (idx, new LDBFC (BFCStatement::InvertNext));
 }
 
 // =============================================================================
@@ -824,7 +819,7 @@ static void changeProperty (LDObject* obj, T* ptr, const T& val)
 //
 void LDObject::setColor (LDColor const& val)
 {
-	changeProperty (self(), &m_color, val);
+	changeProperty (this, &m_color, val);
 }
 
 // =============================================================================
@@ -838,21 +833,21 @@ const Vertex& LDObject::vertex (int i) const
 //
 void LDObject::setVertex (int i, const Vertex& vert)
 {
-	changeProperty (self(), &m_coords[i], vert);
+	changeProperty (this, &m_coords[i], vert);
 }
 
 // =============================================================================
 //
 void LDMatrixObject::setPosition (const Vertex& a)
 {
-	changeProperty (self(), &m_position, a);
+	changeProperty (this, &m_position, a);
 }
 
 // =============================================================================
 //
 void LDMatrixObject::setTransform (const Matrix& val)
 {
-	changeProperty (self(), &m_transform, val);
+	changeProperty (this, &m_transform, val);
 }
 
 // =============================================================================
@@ -860,7 +855,7 @@ void LDMatrixObject::setTransform (const Matrix& val)
 void LDObject::select()
 {
 	if (document() != null)
-		document()->addToSelection (self());
+		document()->addToSelection (this);
 }
 
 // =============================================================================
@@ -869,7 +864,7 @@ void LDObject::deselect()
 {
 	if (document() != null)
 	{
-		document()->removeFromSelection (self());
+		document()->removeFromSelection (this);
 
 		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
 		LDBFC* invertnext;
@@ -896,9 +891,9 @@ LDObject* LDObject::createCopy() const
 
 // =============================================================================
 //
-void LDSubfile::setFileInfo (const LDDocument*& a)
+void LDSubfile::setFileInfo (LDDocument* const& a)
 {
-	changeProperty (self(), &m_fileInfo, a);
+	changeProperty (this, &m_fileInfo, a);
 
 	// If it's an immediate subfile reference (i.e. this subfile belongs in an
 	// explicit file), we need to pre-compile the GL polygons for the document

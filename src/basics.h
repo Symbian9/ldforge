@@ -22,7 +22,6 @@
 #include <QStringList>
 #include <QMetaType>
 #include <QVector3D>
-#include <QSharedPointer>
 #include <functional>
 #include "macros.h"
 

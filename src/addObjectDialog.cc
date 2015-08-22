@@ -132,7 +132,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		if (obj != null)
 			m_color = obj->color();
 		else
-			m_color = (type == OBJ_CondLine or type == OBJ_Line) ? EdgeColor() : MainColor();
+			m_color = (type == OBJ_CondLine or type == OBJ_Line) ? EdgeColor : MainColor;
 
 		pb_color = new QPushButton;
 		setButtonBackground (pb_color, m_color);
@@ -239,7 +239,7 @@ void AddObjectDialog::setButtonBackground (QPushButton* button, LDColor color)
 	button->setIcon (GetIcon ("palette"));
 	button->setAutoFillBackground (true);
 
-	if (color != null)
+	if (color.isValid())
 		button->setStyleSheet (format ("background-color: %1", color.hexcode()));
 }
 

@@ -20,66 +20,75 @@
 #include <QColor>
 #include "main.h"
 
-#define SHARED_POINTER_DERIVATIVE(T) \
-public: \
-	using Self = T; \
-	using DataType = T##Data; \
-	using Super = QSharedPointer<DataType>; \
-	\
-	T() : Super() {} \
-	T (DataType* data) : Super (data) {} \
-	T (Super const& other) : Super (other) {} \
-	T (QPointer<DataType> const& other) : Super (other) {} \
-	\
-	template <typename Deleter> \
-	T (DataType* data, Deleter dlt) : Super (data, dlt) {} \
-	\
-	inline bool			operator== (decltype(nullptr)) { return data() == nullptr; } \
-	inline bool			operator!= (decltype(nullptr)) { return data() != nullptr; } \
-	inline DataType*	operator->() const = delete;
-
-#define SHARED_POINTER_DATA_ACCESS(N) \
-	public: inline decltype(DataType::m_##N) const& N() const { return data()->m_##N; }
-
-class LDColor;
-
-struct LDColorData
+class LDColor
 {
-	QString m_name;
-	QString m_hexcode;
-	QColor m_faceColor;
-	QColor m_edgeColor;
+public:
+	LDColor() : m_index (0) {}
+	LDColor (qint32 index) : m_index (index) {}
+	LDColor (const LDColor& other) : m_index (other.m_index) {}
+
+	bool isLDConfigColor() const;
+	bool isValid() const;
+	QString name() const;
+	QString hexcode() const;
+	QColor faceColor() const;
+	QColor edgeColor() const;
+	qint32 index() const;
+	int luma() const;
+	int edgeLuma() const;
+	bool isDirect() const;
+	QString indexString() const;
+
+	static LDColor nullColor() { return LDColor (-1); }
+
+	LDColor& operator= (qint32 index) { m_index = index; return *this; }
+	LDColor& operator= (LDColor other) { m_index = other.index(); return *this; }
+	LDColor operator++() { return ++m_index; }
+	LDColor operator++ (int) { return m_index++; }
+	LDColor operator--() { return --m_index; }
+	LDColor operator-- (int) { return m_index--; }
+
+	bool operator== (LDColor other) const { return index() == other.index(); }
+	bool operator!= (LDColor other) const { return index() != other.index(); }
+	bool operator< (LDColor other) const { return index() < other.index(); }
+	bool operator<= (LDColor other) const { return index() <= other.index(); }
+	bool operator> (LDColor other) const { return index() > other.index(); }
+	bool operator>= (LDColor other) const { return index() >= other.index(); }
+
+private:
 	qint32 m_index;
 };
 
-class LDColor : public QSharedPointer<LDColorData>
+//
+// Parses ldconfig.ldr
+//
+class LDConfigParser
 {
-	SHARED_POINTER_DERIVATIVE (LDColor)
-	SHARED_POINTER_DATA_ACCESS (edgeColor)
-	SHARED_POINTER_DATA_ACCESS (faceColor)
-	SHARED_POINTER_DATA_ACCESS (hexcode)
-	SHARED_POINTER_DATA_ACCESS (index)
-	SHARED_POINTER_DATA_ACCESS (name)
-
 public:
-	QString				indexString() const;
-	bool				isDirect() const;
+	LDConfigParser (QString inText, char sep);
 
-	bool				operator== (Self const& other);
-	static void			addLDConfigColor (qint32 index, LDColor color);
-	static LDColor		fromIndex (qint32 index);
+	bool getToken (QString& val, const int pos);
+	bool findToken (int& result, char const* needle, int args);
+	bool compareToken (int inPos, QString text);
+	bool parseLDConfigTag (char const* tag, QString& val);
+
+	inline QString operator[] (const int idx)
+	{
+		return m_tokens[idx];
+	}
+
+private:
+	QStringList m_tokens;
+	int m_pos;
 };
 
 void InitColors();
 int Luma (const QColor& col);
 int CountLDConfigColors();
-
-// Main and edge colors
-LDColor MainColor();
-LDColor EdgeColor();
+void parseLDConfig();
 
 enum
 {
-	MainColorIndex = 16,
-	EdgeColorIndex = 24,
+	MainColor = 16,
+	EdgeColor = 24,
 };

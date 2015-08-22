@@ -855,7 +855,7 @@ void MainWindow::slot_actionSubfileSelection()
 
 		// Add a reference to the new subfile to where the selection was
 		LDSubfile* ref (LDSpawn<LDSubfile>());
-		ref->setColor (MainColor());
+		ref->setColor (MainColor);
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);

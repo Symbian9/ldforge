@@ -52,7 +52,7 @@ bool RectangleMode::mouseReleased (MouseEventData const& data)
 			for (int i = 0; i < quad->numVertices(); ++i)
 				quad->setVertex (i, m_rectangleVerts[i]);
 
-			quad->setColor (MainColor());
+			quad->setColor (MainColor);
 			finishDraw (LDObjectList ({quad}));
 			return true;
 		}

@@ -126,30 +126,26 @@ namespace LDPaths
 
 // =============================================================================
 //
-LDDocument::LDDocument (LDDocument** selfptr) :
+LDDocument::LDDocument() :
 	m_isImplicit (true),
 	m_flags (0),
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
 	m_gldata (new LDGLData)
 {
-	*selfptr = LDDocument* (this);
-	setSelf (*selfptr);
 	setSavePosition (-1);
 	setTabIndex (-1);
 	setHistory (new History);
-	history()->setDocument (*selfptr);
+	history()->setDocument (this);
 	m_needsReCache = true;
-	g_allDocuments << *selfptr;
+	g_allDocuments << this;
 }
 
 // =============================================================================
 //
 LDDocument* LDDocument::createNew()
 {
-	LDDocument* ptr;
-	new LDDocument (&ptr);
-	return ptr;
+	return new LDDocument();
 }
 
 // =============================================================================
@@ -220,8 +216,6 @@ LDDocument* FindDocument (QString name)
 	{
 		if (file == null)
 			continue;
-
-		LDDocument* file (file);
 
 		if (Eq (name, file->name(), file->defaultName()))
 			return file;
@@ -685,8 +679,8 @@ void AddRecentFile (QString path)
 void OpenMainModel (QString path)
 {
 	// If there's already a file with the same name, this file must replace it.
-	LDDocument* documentToReplace;
-	LDDocument* file;
+	LDDocument* documentToReplace = nullptr;
+	LDDocument* file = nullptr;
 	QString shortName = LDDocument::shortenName (path);
 
 	for (LDDocument* doc : g_allDocuments)
@@ -748,7 +742,7 @@ void OpenMainModel (QString path)
 
 	for (LDObject* obj : file->objects())
 	{
-		if (obj->type() != OBJ_Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty(j)
+		if (obj->type() != OBJ_Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty())
 			continue;
 
 		unknowns << static_cast<LDError*> (obj)->fileReferenced();
@@ -965,7 +959,7 @@ LDObject* ParseLine (QString line)
 						CheckTokenNumbers (tokens, 3, 6);
 
 						LDVertex* obj = LDSpawn<LDVertex>();
-						obj->setColor (LDColor::fromIndex (StringToNumber (tokens[3])));
+						obj->setColor (StringToNumber (tokens[3]));
 						obj->pos.apply ([&](Axis ax, double& value)
 							{ value = tokens[4 + ax].toDouble(); });
 						return obj;
@@ -1015,7 +1009,7 @@ LDObject* ParseLine (QString line)
 				}
 
 				LDSubfile* obj = LDSpawn<LDSubfile>();
-				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
+				obj->setColor (StringToNumber (tokens[1]));
 				obj->setPosition (ParseVertex (tokens, 2));  // 2 - 4
 
 				Matrix transform;
@@ -1035,7 +1029,7 @@ LDObject* ParseLine (QString line)
 
 				// Line
 				LDLine* obj (LDSpawn<LDLine>());
-				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
+				obj->setColor (StringToNumber (tokens[1]));
 
 				for (int i = 0; i < 2; ++i)
 					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 7
@@ -1050,7 +1044,7 @@ LDObject* ParseLine (QString line)
 
 				// Triangle
 				LDTriangle* obj (LDSpawn<LDTriangle>());
-				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
+				obj->setColor (StringToNumber (tokens[1]));
 
 				for (int i = 0; i < 3; ++i)
 					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 10
@@ -1072,7 +1066,7 @@ LDObject* ParseLine (QString line)
 				else
 					obj = LDSpawn<LDCondLine>();
 
-				obj->setColor (LDColor::fromIndex (StringToNumber (tokens[1])));
+				obj->setColor (StringToNumber (tokens[1]));
 
 				for (int i = 0; i < 4; ++i)
 					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 13

@@ -74,7 +74,6 @@ public:
 	PROPERTY (public,	int,				tabIndex,		setTabIndex,		STOCK_WRITE)
 	PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,		STOCK_WRITE)
 	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
-	PROPERTY (private,	LDDocument*,	self,			setSelf,			STOCK_WRITE)
 
 	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
 	QVector<Vertex> m_vertices;
@@ -82,7 +81,7 @@ public:
 	bool m_needVertexMerge;
 
 public:
-	LDDocument(LDDocument** selfptr);
+	LDDocument();
 	~LDDocument();
 
 	int addObject (LDObject* obj); // Adds an object to this file at the end of the file.

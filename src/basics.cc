@@ -237,24 +237,24 @@ void LDBoundingBox::calcObject (LDObject* obj)
 {
 	switch (obj->type())
 	{
-		case OBJ_Line:
-		case OBJ_Triangle:
-		case OBJ_Quad:
-		case OBJ_CondLine:
-			for (int i = 0; i < obj->numVertices(); ++i)
-				calcVertex (obj->vertex (i));
-			break;
+	case OBJ_Line:
+	case OBJ_Triangle:
+	case OBJ_Quad:
+	case OBJ_CondLine:
+		for (int i = 0; i < obj->numVertices(); ++i)
+			calcVertex (obj->vertex (i));
+		break;
 
-		case OBJ_Subfile:
-			for (LDObject* obj : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
-			{
-				calcObject (obj);
-				obj->destroy();
-			}
-			break;
+	case OBJ_Subfile:
+		for (LDObject* it : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
+		{
+			calcObject (it);
+			it->destroy();
+		}
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 }
 

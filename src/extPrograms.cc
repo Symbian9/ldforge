@@ -476,8 +476,8 @@ void MainWindow::slot_actionIntersector()
 		if (not dlg->exec())
 			return;
 
-		inCol = LDColor::fromIndex (ui.cmb_incol->itemData (ui.cmb_incol->currentIndex()).toInt());
-		cutCol = LDColor::fromIndex (ui.cmb_cutcol->itemData (ui.cmb_cutcol->currentIndex()).toInt());
+		inCol = ui.cmb_incol->itemData (ui.cmb_incol->currentIndex()).toInt();
+		cutCol = ui.cmb_cutcol->itemData (ui.cmb_cutcol->currentIndex()).toInt();
 
 		if (inCol == cutCol)
 		{
@@ -570,8 +570,8 @@ void MainWindow::slot_actionCoverer()
 		if (not dlg->exec())
 			return;
 
-		in1Col = LDColor::fromIndex (ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt());
-		in2Col = LDColor::fromIndex (ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt());
+		in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
+		in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
 
 		if (in1Col == in2Col)
 		{
@@ -636,8 +636,8 @@ void MainWindow::slot_actionIsecalc()
 		if (not dlg->exec())
 			return;
 
-		in1Col = LDColor::fromIndex (ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt());
-		in2Col = LDColor::fromIndex (ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt());
+		in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
+		in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
 
 		if (in1Col == in2Col)
 		{

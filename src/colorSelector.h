@@ -21,24 +21,21 @@
 #include "main.h"
 #include "colors.h"
 
-class Ui_ColorSelUI;
-class QGraphicsScene;
-
 class ColorSelector : public QDialog
 {
 	Q_OBJECT
-	PROPERTY (private,	LDColor,	selection,	setSelection,	STOCK_WRITE)
+	PROPERTY (private, LDColor, selection, setSelection, STOCK_WRITE)
 
 public:
-	explicit ColorSelector (LDColor defaultvalue = null, QWidget* parent = null);
+	explicit ColorSelector (LDColor defaultvalue = LDColor::nullColor(), QWidget* parent = null);
 	virtual ~ColorSelector();
-	static bool selectColor (LDColor& val, LDColor defval = null, QWidget* parent = null);
+	static bool selectColor (LDColor& val, LDColor defval = LDColor::nullColor(), QWidget* parent = null);
 
 private:
-	Ui_ColorSelUI*	ui;
+	class Ui_ColorSelUI* ui;
 	QMap<int, QPushButton*> m_buttons;
 	QMap<QPushButton*, int> m_buttonsReversed;
-	bool			m_firstResize;
+	bool m_firstResize;
 
 	void drawColorInfo();
 	void selectDirectColor (QColor col);

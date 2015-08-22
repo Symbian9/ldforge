@@ -420,7 +420,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 				LDLine* line (LDSpawn<LDLine>());
 				line->setVertex (0, v0);
 				line->setVertex (1, v1);
-				line->setColor (EdgeColor());
+				line->setColor (EdgeColor);
 				objs << line;
 			} break;
 
@@ -468,7 +468,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 					   v3 (x3, y3, z3);
 
 				LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
-				quad->setColor (MainColor());
+				quad->setColor (MainColor);
 
 				if (type == Cylinder)
 					quad->invert();
@@ -499,7 +499,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 				// Disc negatives need to go the other way around, otherwise
 				// they'll end up upside-down.
 				LDTriangle* seg (LDSpawn<LDTriangle>());
-				seg->setColor (MainColor());
+				seg->setColor (MainColor);
 				seg->setVertex (type == Disc ? 0 : 2, v0);
 				seg->setVertex (1, v1);
 				seg->setVertex (type == Disc ? 2 : 0, v2);
@@ -533,7 +533,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 		}
 
 		LDCondLine* line = (LDSpawn<LDCondLine>());
-		line->setColor (EdgeColor());
+		line->setColor (EdgeColor);
 		line->setVertex (0, v0);
 		line->setVertex (1, v1);
 		line->setVertex (2, v2);

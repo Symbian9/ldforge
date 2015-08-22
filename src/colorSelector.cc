@@ -32,7 +32,7 @@
 #include "miscallenous.h"
 #include "ui_colorsel.h"
 
-static const int g_numColumns = 16;
+enum { NUM_COLUMNS = 16 };
 
 EXTERN_CFGENTRY (String, MainColor)
 EXTERN_CFGENTRY (Float, MainColorAlpha)
@@ -50,19 +50,17 @@ ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
 	QGridLayout* layout = new QGridLayout (this);
 
 	// Spawn color selector buttons
-	for (int i = 0; i < CountLDConfigColors(); ++i)
+	for (LDColor ldcolor; ldcolor.isLDConfigColor(); ++ldcolor)
 	{
-		LDColor ldcolor = LDColor::fromIndex (i);
 		QPushButton* button = new QPushButton (this);
 		button->setMinimumSize (QSize (32, 32));
 		button->setMaximumSize (button->minimumSize());
 
-		if (ldcolor != null)
+		if (ldcolor.isValid ())
 		{
-			QString colorname;
 			QColor color (ldcolor.faceColor());
 
-			if (i == MainColorIndex)
+			if (ldcolor == MainColor)
 			{
 				color = QColor (cfg::MainColor);
 				color.setAlphaF (cfg::MainColorAlpha);
@@ -75,8 +73,8 @@ ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
 			button->setCheckable (true);
 			button->setText (QString::number (ldcolor.index()));
 			button->setToolTip (format ("%1: %2", ldcolor.index(), ldcolor.name()));
-			m_buttons[i] = button;
-			m_buttonsReversed[button] = i;
+			m_buttons[ldcolor.index()] = button;
+			m_buttonsReversed[button] = ldcolor.index();
 			connect (button, SIGNAL (clicked(bool)), this, SLOT (colorButtonClicked()));
 
 			if (ldcolor == selection())
@@ -87,7 +85,7 @@ ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
 			button->setEnabled (false);
 		}
 
-		layout->addWidget (button, i / g_numColumns, i % g_numColumns);
+		layout->addWidget (button, ldcolor.index() / NUM_COLUMNS, ldcolor.index() % NUM_COLUMNS);
 	}
 
 	QWidget* widget = new QWidget();
@@ -122,18 +120,18 @@ void ColorSelector::colorButtonClicked()
 	LDColor color;
 
 	if (Q_UNLIKELY (button == null or it == m_buttonsReversed.end()
-		or (color = LDColor::fromIndex (*it)) == null))
+		or not (color = *it).isValid()))
 	{
 		print ("colorButtonClicked() called with invalid sender");
 		return;
 	}
 
-	if (selection() != null)
+	if (selection().isValid())
 	{
-		auto it2 = m_buttons.find (selection().index());
+		auto button = m_buttons.find (selection().index());
 
-		if (it2 != m_buttons.end())
-			(*it2)->setChecked (false);
+		if (button != m_buttons.end())
+			(*button)->setChecked (false);
 	}
 
 	setSelection (color);
@@ -145,7 +143,7 @@ void ColorSelector::colorButtonClicked()
 //
 void ColorSelector::drawColorInfo()
 {
-	if (selection() == null)
+	if (not selection().isValid())
 	{
 		ui->colorLabel->setText ("---");
 		ui->iconLabel->setPixmap (QPixmap());
@@ -168,11 +166,11 @@ void ColorSelector::drawColorInfo()
 
 // =============================================================================
 //
-void ColorSelector::selectDirectColor (QColor col)
+void ColorSelector::selectDirectColor (QColor color)
 {
-	int32 idx = (ui->transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
-	idx |= (col.red() << 16) | (col.green() << 8) | (col.blue());
-	setSelection (LDColor::fromIndex (idx));
+	qint32 colorIndex = (ui->transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
+	colorIndex |= (color.red() << 16) | (color.green() << 8) | (color.blue());
+	setSelection (colorIndex);
 	drawColorInfo();
 }
 
@@ -180,7 +178,7 @@ void ColorSelector::selectDirectColor (QColor col)
 //
 void ColorSelector::chooseDirectColor()
 {
-	QColor defcolor = selection() != null ? selection().faceColor() : Qt::white;
+	QColor defcolor = selection() != -1 ? selection().faceColor() : Qt::white;
 	QColor newcolor = QColorDialog::getColor (defcolor);
 
 	if (not newcolor.isValid())
@@ -193,10 +191,8 @@ void ColorSelector::chooseDirectColor()
 //
 void ColorSelector::transparentCheckboxClicked()
 {
-	if (selection() == null or not selection().isDirect())
-		return;
-
-	selectDirectColor (selection().faceColor());
+	if (selection().isDirect())
+		selectDirectColor (selection().faceColor());
 }
 
 // =============================================================================
@@ -205,7 +201,7 @@ bool ColorSelector::selectColor (LDColor& val, LDColor defval, QWidget* parent)
 {
 	ColorSelector dlg (defval, parent);
 
-	if (dlg.exec() and dlg.selection() != null)
+	if (dlg.exec() and dlg.selection().isValid())
 	{
 		val = dlg.selection();
 		return true;

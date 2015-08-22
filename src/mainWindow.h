@@ -29,7 +29,6 @@
 
 class MessageManager;
 class MainWindow;
-class LDColorData;
 class QToolButton;
 class QDialogButtonBox;
 class GLRenderer;

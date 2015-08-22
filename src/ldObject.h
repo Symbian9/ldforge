@@ -26,7 +26,7 @@
 #define LDOBJ(T)												\
 public:															\
 	static constexpr LDObjectType SubclassType = OBJ_##T;		\
-	LD##T (LDObject** selfptr);								\
+	LD##T (LDDocument* document = nullptr);						\
 																\
 	virtual LDObjectType type() const override					\
 	{															\
@@ -40,7 +40,7 @@ public:															\
 #define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
 #define LDOBJ_SETCOLORED(V)    public: virtual bool isColored() const override { return V; }
 #define LDOBJ_COLORED          LDOBJ_SETCOLORED (true)
-#define LDOBJ_UNCOLORED        LDOBJ_SETCOLORED (false) LDOBJ_DEFAULTCOLOR (MainColor())
+#define LDOBJ_UNCOLORED        LDOBJ_SETCOLORED (false) LDOBJ_DEFAULTCOLOR (MainColor)
 #define LDOBJ_DEFAULTCOLOR(V)  public: virtual LDColor defaultColor() const override { return (V); }
 
 #define LDOBJ_CUSTOM_SCEMANTIC public: virtual bool isScemantic() const override
@@ -97,7 +97,6 @@ class LDObject
 	PROPERTY (private,		int32,				id,				setID,			STOCK_WRITE)
 	PROPERTY (public,		LDColor,			color,			setColor,		CUSTOM_WRITE)
 	PROPERTY (private,		QColor,				randomColor,	setRandomColor,	STOCK_WRITE)
-	PROPERTY (private,		LDObject*,	self,			setSelf,		STOCK_WRITE)
 
 public:
 	LDObject (LDDocument* document = nullptr);
@@ -214,19 +213,9 @@ T* LDSpawn (Args... args)
 	// Set default color. Relying on virtual functions, this cannot be done in the c-tor.
 	// TODO: store -1 as the default color
 	if (result->isColored())
-		result->setColor (ptr->defaultColor());
+		result->setColor (result->defaultColor());
 
 	return result;
-}
-
-//
-// Apparently QPointer doesn't implement operator<. This is a problem when
-// some of the code needs to sort and remove duplicates from LDObject lists.
-// Adding a specialized version here:
-//
-inline bool operator< (LDObject* a, LDObject* b)
-{
-	return a.data() < b.data();
 }
 
 //
@@ -387,7 +376,7 @@ class LDSubfile : public LDMatrixObject
 	LDOBJ_NAME (subfile)
 	LDOBJ_VERTICES (0)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor())
+	LDOBJ_DEFAULTCOLOR (MainColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_HAS_MATRIX
 	PROPERTY (public, LDDocument*, fileInfo, setFileInfo, CUSTOM_WRITE)
@@ -422,7 +411,7 @@ class LDLine : public LDObject
 	LDOBJ_NAME (line)
 	LDOBJ_VERTICES (2)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (EdgeColor())
+	LDOBJ_DEFAULTCOLOR (EdgeColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -441,7 +430,7 @@ class LDCondLine : public LDLine
 	LDOBJ_NAME (condline)
 	LDOBJ_VERTICES (4)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (EdgeColor())
+	LDOBJ_DEFAULTCOLOR (EdgeColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -463,7 +452,7 @@ class LDTriangle : public LDObject
 	LDOBJ_NAME (triangle)
 	LDOBJ_VERTICES (3)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor())
+	LDOBJ_DEFAULTCOLOR (MainColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -483,7 +472,7 @@ class LDQuad : public LDObject
 	LDOBJ_NAME (quad)
 	LDOBJ_VERTICES (4)
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor())
+	LDOBJ_DEFAULTCOLOR (MainColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
@@ -508,7 +497,7 @@ class LDVertex : public LDObject
 	LDOBJ_NAME (vertex)
 	LDOBJ_VERTICES (0) // TODO: move pos to m_vertices[0]
 	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor())
+	LDOBJ_DEFAULTCOLOR (MainColor)
 	LDOBJ_NON_SCEMANTIC
 	LDOBJ_NO_MATRIX
 

@@ -368,17 +368,17 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 		}
 		else
 		{
-			LDColor col (entry.color());
+			LDColor color = entry.color();
 
-			if (col == null)
+			if (color.isValid())
 			{
-				item->setText ("[[unknown color]]");
-				item->setIcon (GetIcon ("error"));
+				item->setText (color.name());
+				item->setIcon (MakeColorIcon (color, 16));
 			}
 			else
 			{
-				item->setText (col.name());
-				item->setIcon (MakeColorIcon (col, 16));
+				item->setText ("[[unknown color]]");
+				item->setIcon (GetIcon ("error"));
 			}
 		}
 
@@ -416,23 +416,23 @@ void ConfigDialog::slot_setColor()
 			return; // don't color separators
 	}
 
-	LDColor defval = entry ? entry->color() : null;
-	LDColor val;
+	LDColor defaultValue = entry ? entry->color() : LDColor::nullColor();
+	LDColor value;
 
-	if (not ColorSelector::selectColor (val, defval, this))
+	if (not ColorSelector::selectColor (value, defaultValue, this))
 		return;
 
 	if (entry != null)
 	{
-		entry->setColor (val);
+		entry->setColor (value);
 	}
 	else
 	{
-		LDQuickColor entry (val, null);
+		LDQuickColor newentry (value, null);
 		item = getSelectedQuickColor();
 		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : quickColorItems.size();
-		quickColors.insert (idx, entry);
-		entry = quickColors[idx];
+		quickColors.insert (idx, newentry);
+		entry = &quickColors[idx];
 	}
 
 	updateQuickColorList (entry);

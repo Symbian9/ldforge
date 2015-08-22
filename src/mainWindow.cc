@@ -209,10 +209,10 @@ QList<LDQuickColor> LoadQuickColorList()
 			colors << LDQuickColor::getSeparator();
 		else
 		{
-			LDColor col = LDColor::fromIndex (colorname.toLong());
+			LDColor color = colorname.toInt();
 
-			if (col != null)
-				colors << LDQuickColor (col, null);
+			if (color.isValid())
+				colors << LDQuickColor (color, null);
 		}
 	}
 
@@ -431,11 +431,10 @@ void MainWindow::buildObjList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		elif (cfg::ColorizeObjectsList and obj->isColored() and
-			obj->color() != null and obj->color() != MainColor() and obj->color() != EdgeColor())
+		else if (cfg::ColorizeObjectsList and obj->isColored() and
+			obj->color().isValid() and obj->color() != MainColor and obj->color() != EdgeColor)
 		{
-			// If the object isn't in the main or edge color, draw this
-			// list entry in said color.
+			// If the object isn't in the main or edge color, draw this list entry in that color.
 			item->setForeground (obj->color().faceColor());
 		}
 
@@ -511,18 +510,18 @@ void MainWindow::slot_recentFile()
 void MainWindow::slot_quickColor()
 {
 	QToolButton* button = static_cast<QToolButton*> (sender());
-	LDColor col = null;
+	LDColor color = LDColor::nullColor();
 
 	for (const LDQuickColor& entry : m_quickColors)
 	{
 		if (entry.toolButton() == button)
 		{
-			col = entry.color();
+			color = entry.color();
 			break;
 		}
 	}
 
-	if (col == null)
+	if (not color.isValid())
 		return;
 
 	for (LDObject* obj : Selection())
@@ -530,7 +529,7 @@ void MainWindow::slot_quickColor()
 		if (not obj->isColored())
 			continue; // uncolored object
 
-		obj->setColor (col);
+		obj->setColor (color);
 		R()->compileObject (obj);
 	}
 
@@ -618,12 +617,12 @@ LDColor MainWindow::getSelectedColor()
 	for (LDObject* obj : Selection())
 	{
 		if (not obj->isColored())
-			continue; // doesn't use color
+			continue; // This one doesn't use color so it doesn't have a say
 
-		if (result != null and obj->color() != result)
-			return null; // No consensus in object color
+		if (result.isValid() and obj->color() != result)
+			return LDColor::nullColor(); // No consensus in object color
 
-		if (result == null)
+		if (not result.isValid())
 			result = obj->color();
 	}
 
@@ -873,7 +872,7 @@ QIcon MakeColorIcon (LDColor colinfo, const int size)
 	QPainter paint (&img);
 	QColor col = colinfo.faceColor();
 
-	if (colinfo == MainColor())
+	if (colinfo == MainColor)
 	{
 		// Use the user preferences for main color here
 		col = cfg::MainColor;
@@ -899,7 +898,7 @@ void MakeColorComboBox (QComboBox* box)
 
 	for (LDObject* obj : CurrentDocument()->objects())
 	{
-		if (not obj->isColored() or obj->color() == null)
+		if (not obj->isColored() or not obj->color().isValid())
 			continue;
 
 		if (counts.find (obj->color()) == counts.end())
@@ -980,7 +979,7 @@ void MainWindow::changeCurrentFile()
 	if (m_updatingTabs)
 		return;
 
-	LDDocument* f;
+	LDDocument* file = nullptr;
 	int tabIndex = m_tabs->currentIndex();
 
 	// Find the file pointer of the item that was selected.
@@ -988,17 +987,17 @@ void MainWindow::changeCurrentFile()
 	{
 		if (it->tabIndex() == tabIndex)
 		{
-			f = it;
+			file = it;
 			break;
 		}
 	}
 
 	// If we picked the same file we're currently on, we don't need to do
 	// anything.
-	if (f == null or f == CurrentDocument())
+	if (file == null or file == CurrentDocument())
 		return;
 
-	LDDocument::setCurrent (f);
+	LDDocument::setCurrent (file);
 }
 
 // =============================================================================
@@ -1160,14 +1159,14 @@ LDQuickColor::LDQuickColor (LDColor color, QToolButton* toolButton) :
 //
 LDQuickColor LDQuickColor::getSeparator()
 {
-	return LDQuickColor (null, null);
+	return LDQuickColor (LDColor::nullColor(), null);
 }
 
 // =============================================================================
 //
 bool LDQuickColor::isSeparator() const
 {
-	return color() == null;
+	return color() == LDColor::nullColor();
 }
 
 void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
