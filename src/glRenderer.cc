@@ -107,6 +107,7 @@ GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
 	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
 	m_compiler = new GLCompiler (this);
+	m_objectAtCursor = nullptr;
 	setDrawOnly (false);
 	setMessageLog (null);
 	m_width = m_height = -1;

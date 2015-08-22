@@ -135,8 +135,8 @@ LDDocument::LDDocument() :
 {
 	setSavePosition (-1);
 	setTabIndex (-1);
-	setHistory (new History);
-	history()->setDocument (this);
+	m_history = new History;
+	m_history->setDocument (this);
 	m_needsReCache = true;
 	g_allDocuments << this;
 }
@@ -152,10 +152,6 @@ LDDocument* LDDocument::createNew()
 //
 LDDocument::~LDDocument()
 {
-	// Don't bother during program termination
-	if (IsExiting())
-		return;
-
 	g_allDocuments.removeOne (this);
 	m_flags |= DOCF_IsBeingDestroyed;
 	delete m_history;
@@ -1195,17 +1191,20 @@ void LDDocument::addKnownVertices (LDObject* obj)
 void LDDocument::forgetObject (LDObject* obj)
 {
 	int idx = obj->lineNumber();
-	obj->deselect();
-	assert (m_objects[idx] == obj);
 
-	if (not isImplicit() and not (flags() & DOCF_IsBeingDestroyed))
+	if (m_objects[idx] == obj)
 	{
-		history()->add (new DelHistory (idx, obj));
-		m_objectVertices.remove (obj);
-	}
+		obj->deselect();
 
-	m_objects.removeAt (idx);
-	obj->setDocument (nullptr);
+		if (not isImplicit() and not (flags() & DOCF_IsBeingDestroyed))
+		{
+			history()->add (new DelHistory (idx, obj));
+			m_objectVertices.remove (obj);
+		}
+
+		m_objects.removeAt (idx);
+		obj->setDocument (nullptr);
+	}
 }
 
 // =============================================================================

@@ -47,6 +47,7 @@ enum { MAX_LDOBJECT_IDS = (1 << 24) };
 LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
+	m_document (nullptr),
 	qObjListEntry (null)
 {
 	if (document)
@@ -80,9 +81,7 @@ LDObject::~LDObject()
 	// Don't bother during program termination
 	if (IsExiting() == false)
 	{
-		// If this object was selected, unselect it now
-		if (isSelected() and document() != null)
-			deselect();
+		deselect();
 
 		// If this object was associated to a file, remove it off it now
 		if (document() != null)
@@ -427,12 +426,13 @@ QList<LDPolygon> LDSubfile::inlinePolygons()
 // -----------------------------------------------------------------------------
 long LDObject::lineNumber() const
 {
-	assert (document() != null);
-
-	for (int i = 0; i < document()->getObjectCount(); ++i)
+	if (document() != null)
 	{
-		if (document()->getObject (i) == this)
-			return i;
+		for (int i = 0; i < document()->getObjectCount(); ++i)
+		{
+			if (document()->getObject (i) == this)
+				return i;
+		}
 	}
 
 	return -1;
@@ -862,7 +862,7 @@ void LDObject::select()
 //
 void LDObject::deselect()
 {
-	if (document() != null)
+	if (isSelected() and document() != null)
 	{
 		document()->removeFromSelection (this);
 
