@@ -18,8 +18,8 @@
 
 #pragma once
 #include <QDialog>
-#include "main.h"
-#include "colors.h"
+#include "../main.h"
+#include "../colors.h"
 
 class ColorSelector : public QDialog
 {

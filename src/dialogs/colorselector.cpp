@@ -14,9 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *  =====================================================================
- *
- *  colorSelectDialog.cxx: Color selector box.
  */
 
 #include <QGraphicsScene>
@@ -24,13 +21,13 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QColorDialog>
-#include "main.h"
-#include "mainWindow.h"
-#include "colorSelector.h"
-#include "colors.h"
-#include "configuration.h"
-#include "miscallenous.h"
-#include "ui_colorsel.h"
+#include "../main.h"
+#include "../mainWindow.h"
+#include "../colors.h"
+#include "../configuration.h"
+#include "../miscallenous.h"
+#include "colorselector.h"
+#include "ui_colorselector.h"
 
 enum { NUM_COLUMNS = 16 };
 

@@ -29,7 +29,7 @@
 #include "addObjectDialog.h"
 #include "ldDocument.h"
 #include "colors.h"
-#include "colorSelector.h"
+#include "dialogs/colorselector.h"
 #include "editHistory.h"
 #include "radioGroup.h"
 #include "miscallenous.h"

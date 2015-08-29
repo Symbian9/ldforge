@@ -35,7 +35,7 @@
 #include "configuration.h"
 #include "miscallenous.h"
 #include "colors.h"
-#include "colorSelector.h"
+#include "dialogs/colorselector.h"
 #include "glRenderer.h"
 #include "ui_config.h"
 

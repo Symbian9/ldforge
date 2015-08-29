@@ -38,7 +38,6 @@ set (LDFORGE_SOURCES
 	src/addObjectDialog.cc
 	src/basics.cc
 	src/colors.cc
-	src/colorSelector.cc
 	src/configuration.cc
 	src/configDialog.cc
 	src/crashCatcher.cc
@@ -60,6 +59,7 @@ set (LDFORGE_SOURCES
 	src/radioGroup.cc
 	src/ringFinder.cc
 	src/version.cc
+	src/dialogs/colorselector.cpp
 	src/editmodes/abstractEditMode.cc
 	src/editmodes/circleMode.cc
 	src/editmodes/drawMode.cc
@@ -87,7 +87,6 @@ set (LDFORGE_HEADERS
 	src/documentation.h
 	src/main.h
 	src/basics.h
-	src/colorSelector.h
 	src/configDialog.h
 	src/glRenderer.h
 	src/glCompiler.h
@@ -95,6 +94,7 @@ set (LDFORGE_HEADERS
 	src/mainWindow.h
 	src/editHistory.h
 	src/format.h
+	src/dialogs/colorselector.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
 	src/editmodes/drawMode.h
@@ -108,7 +108,6 @@ set (LDFORGE_FORMS
 	ui/about.ui
 	ui/addhistoryline.ui
 	ui/bombbox.ui
-	ui/colorsel.ui
 	ui/config.ui
 	ui/coverer.ui
 	ui/downloadfrom.ui
@@ -128,6 +127,7 @@ set (LDFORGE_FORMS
 	ui/replcoords.ui
 	ui/rotpoint.ui
 	ui/ytruder.ui
+	src/dialogs/colorselector.ui
 )
 
 add_custom_target (codegeneration ALL

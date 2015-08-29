@@ -25,7 +25,7 @@
 #include "mainWindow.h"
 #include "main.h"
 #include "ldDocument.h"
-#include "colorSelector.h"
+#include "dialogs/colorselector.h"
 #include "miscallenous.h"
 #include "radioGroup.h"
 #include "glRenderer.h"
