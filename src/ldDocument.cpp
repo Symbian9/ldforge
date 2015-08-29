@@ -21,23 +21,23 @@
 #include <QDir>
 #include <QTime>
 #include <QApplication>
-
 #include "main.h"
 #include "configuration.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainWindow.h"
 #include "editHistory.h"
-#include "dialogs.h"
 #include "glRenderer.h"
 #include "glCompiler.h"
 #include "partDownloader.h"
+#include "ldpaths.h"
+#include "dialogs.h"
 
-CFGENTRY (String, LDrawPath, "")
 CFGENTRY (List, RecentFiles, {})
 CFGENTRY (Bool, TryDownloadMissingFiles, false)
 EXTERN_CFGENTRY (String, DownloadFilePath)
 EXTERN_CFGENTRY (Bool, UseLogoStuds)
+EXTERN_CFGENTRY (String, LDrawPath)
 
 static bool g_loadingMainFile = false;
 static const int g_maxRecentFiles = 10;
@@ -50,79 +50,6 @@ static LDDocument* g_currentDocument;
 static bool g_loadingLogoedStuds = false;
 
 const QStringList g_specialSubdirectories ({ "s", "48", "8" });
-
-// =============================================================================
-//
-namespace LDPaths
-{
-	static QString pathError;
-
-	struct
-	{
-		QString LDConfigPath;
-		QString partsPath, primsPath;
-	} pathInfo;
-
-	void initPaths()
-	{
-		if (not tryConfigure (cfg::LDrawPath))
-		{
-			LDrawPathDialog dlg (false);
-
-			if (not dlg.exec())
-				Exit();
-
-			cfg::LDrawPath = dlg.filename();
-		}
-	}
-
-	bool tryConfigure (QString path)
-	{
-		QDir dir;
-
-		if (not dir.cd (path))
-		{
-			pathError = "Directory does not exist.";
-			return false;
-		}
-
-		QStringList mustHave = { "LDConfig.ldr", "parts", "p" };
-		QStringList contents = dir.entryList (mustHave);
-
-		if (contents.size() != mustHave.size())
-		{
-			pathError = "Not an LDraw directory! Must<br />have LDConfig.ldr, parts/ and p/.";
-			return false;
-		}
-
-		pathInfo.partsPath = format ("%1" DIRSLASH "parts", path);
-		pathInfo.LDConfigPath = format ("%1" DIRSLASH "LDConfig.ldr", path);
-		pathInfo.primsPath = format ("%1" DIRSLASH "p", path);
-
-		return true;
-	}
-
-	// Accessors
-	QString getError()
-	{
-		return pathError;
-	}
-
-	QString ldconfig()
-	{
-		return pathInfo.LDConfigPath;
-	}
-
-	QString prims()
-	{
-		return pathInfo.primsPath;
-	}
-
-	QString parts()
-	{
-		return pathInfo.partsPath;
-	}
-}
 
 // =============================================================================
 //

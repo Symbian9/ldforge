@@ -25,6 +25,7 @@
 #include "ui_makeprim.h"
 #include "miscallenous.h"
 #include "colors.h"
+#include "ldpaths.h"
 
 QList<PrimitiveCategory*> g_PrimitiveCategories;
 QList<Primitive> g_primitives;
@@ -112,7 +113,7 @@ PrimitiveScanner::PrimitiveScanner (QObject* parent) :
 	m_i (0)
 {
 	g_activeScanner = this;
-	QDir dir (LDPaths::prims());
+	QDir dir = LDPaths::primitivesDir();
 	assert (dir.exists());
 	m_baselen = dir.absolutePath().length();
 	GetRecursiveFilenames (dir, m_files);

@@ -33,6 +33,7 @@
 #include "configDialog.h"
 #include "dialogs.h"
 #include "crashCatcher.h"
+#include "ldpaths.h"
 
 MainWindow* g_win = null;
 static QString g_versionString, g_fullVersionString;
@@ -64,7 +65,9 @@ int main (int argc, char* argv[])
 			Critical ("Failed to create configuration file!\n");
 	}
 
-	LDPaths::initPaths();
+	LDPaths* paths = new LDPaths;
+	paths->checkPaths();
+	paths->deleteLater();
 	InitColors();
 	LoadPrimitives();
 	MainWindow* win = new MainWindow;

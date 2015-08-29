@@ -65,31 +65,6 @@ private slots:
 };
 
 // =============================================================================
-class LDrawPathDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit LDrawPathDialog (const bool validDefault, QWidget* parent = null, Qt::WindowFlags f = 0);
-	virtual ~LDrawPathDialog();
-	QString filename() const;
-	void setPath (QString path);
-
-private:
-	Q_DISABLE_COPY (LDrawPathDialog)
-	const bool m_validDefault;
-	Ui_LDPathUI* ui;
-	QPushButton* okButton();
-	QPushButton* cancelButton();
-
-private slots:
-	void slot_findPath();
-	void slot_tryConfigure();
-	void slot_exit();
-	void slot_accept();
-};
-
-// =============================================================================
 class OpenProgressDialog : public QDialog
 {
 	Q_OBJECT

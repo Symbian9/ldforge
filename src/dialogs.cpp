@@ -38,7 +38,6 @@
 #include "ldDocument.h"
 #include "dialogs.h"
 #include "ui_overlay.h"
-#include "ui_ldrawpath.h"
 #include "ui_openprogress.h"
 #include "ui_extprogpath.h"
 #include "ui_about.h"
@@ -156,107 +155,6 @@ void OverlayDialog::slot_dimensionsChanged()
 {
 	bool enable = (ui->width->value() != 0) or (ui->height->value() != 0);
 	ui->buttonBox->button (QDialogButtonBox::Ok)->setEnabled (enable);
-}
-
-// =============================================================================
-// =============================================================================
-LDrawPathDialog::LDrawPathDialog (const bool validDefault, QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f),
-	m_validDefault (validDefault)
-{
-	ui = new Ui_LDPathUI;
-	ui->setupUi (this);
-	ui->status->setText ("---");
-
-	if (validDefault)
-		ui->heading->hide();
-	else
-	{
-		cancelButton()->setText ("Exit");
-		cancelButton()->setIcon (GetIcon ("exit"));
-	}
-
-	okButton()->setEnabled (false);
-
-	connect (ui->path, SIGNAL (textEdited (QString)), this, SLOT (slot_tryConfigure()));
-	connect (ui->searchButton, SIGNAL (clicked()), this, SLOT (slot_findPath()));
-	connect (ui->buttonBox, SIGNAL (rejected()), this, validDefault ? SLOT (reject()) : SLOT (slot_exit()));
-	connect (ui->buttonBox, SIGNAL (accepted()), this, SLOT (slot_accept()));
-
-	setPath (cfg::LDrawPath);
-
-	if (validDefault)
-		slot_tryConfigure();
-}
-
-// =============================================================================
-// =============================================================================
-LDrawPathDialog::~LDrawPathDialog()
-{
-	delete ui;
-}
-
-QPushButton* LDrawPathDialog::okButton()
-{
-	return ui->buttonBox->button (QDialogButtonBox::Ok);
-}
-
-QPushButton* LDrawPathDialog::cancelButton()
-{
-	return ui->buttonBox->button (QDialogButtonBox::Cancel);
-}
-
-void LDrawPathDialog::setPath (QString path)
-{
-	ui->path->setText (path);
-}
-
-QString LDrawPathDialog::filename() const
-{
-	return ui->path->text();
-}
-
-// =============================================================================
-// =============================================================================
-void LDrawPathDialog::slot_findPath()
-{
-	QString newpath = QFileDialog::getExistingDirectory (this, "Find LDraw Path");
-
-	if (not newpath.isEmpty())
-	{
-		setPath (newpath);
-		slot_tryConfigure();
-	}
-}
-
-// =============================================================================
-// =============================================================================
-void LDrawPathDialog::slot_exit()
-{
-	Exit();
-}
-
-// =============================================================================
-// =============================================================================
-void LDrawPathDialog::slot_tryConfigure()
-{
-	if (not LDPaths::tryConfigure (filename()))
-	{
-		ui->status->setText (format ("<span style=\"color:#700; \">%1</span>", LDPaths::getError()));
-		okButton()->setEnabled (false);
-		return;
-	}
-
-	ui->status->setText ("<span style=\"color: #270; \">OK!</span>");
-	okButton()->setEnabled (true);
-}
-
-// =============================================================================
-// =============================================================================
-void LDrawPathDialog::slot_accept()
-{
-	Config::Save();
-	accept();
 }
 
 // =============================================================================

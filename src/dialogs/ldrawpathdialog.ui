@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LDPathUI</class>
- <widget class="QDialog" name="LDPathUI">
+ <class>LDrawPathDialog</class>
+ <widget class="QDialog" name="LDrawPathDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>344</width>
-    <height>123</height>
+    <height>140</height>
    </rect>
   </property>
   <property name="windowTitle">

@@ -37,6 +37,7 @@
 #include "colors.h"
 #include "glCompiler.h"
 #include "ui_newpart.h"
+#include "dialogs/ldrawpathdialog.h"
 #include "editmodes/abstractEditMode.h"
 
 EXTERN_CFGENTRY (Bool, DrawWireframe)
@@ -50,6 +51,7 @@ EXTERN_CFGENTRY (Bool, DrawSurfaces)
 EXTERN_CFGENTRY (Bool, DrawEdgeLines)
 EXTERN_CFGENTRY (Bool, DrawConditionalLines)
 EXTERN_CFGENTRY (Bool, DrawAxes)
+EXTERN_CFGENTRY (String, LDrawPath)
 
 // =============================================================================
 //
@@ -165,7 +167,7 @@ void MainWindow::slot_actionSettings()
 //
 void MainWindow::slot_actionSetLDrawPath()
 {
-	(new LDrawPathDialog (true))->exec();
+	(new LDrawPathDialog (cfg::LDrawPath, true))->exec();
 }
 
 // =============================================================================

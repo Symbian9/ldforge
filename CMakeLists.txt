@@ -50,6 +50,7 @@ set (LDFORGE_SOURCES
 	src/ldDocument.cpp
 	src/ldObject.cpp
     src/ldObjectMath.cpp
+	src/ldpaths.cpp
 	src/main.cpp
 	src/mainWindow.cpp
 	src/messageLog.cpp
@@ -60,6 +61,7 @@ set (LDFORGE_SOURCES
 	src/ringFinder.cpp
 	src/version.cpp
 	src/dialogs/colorselector.cpp
+	src/dialogs/ldrawpathdialog.cpp
 	src/editmodes/abstractEditMode.cpp
 	src/editmodes/circleMode.cpp
 	src/editmodes/drawMode.cpp
@@ -94,7 +96,9 @@ set (LDFORGE_HEADERS
 	src/mainWindow.h
 	src/editHistory.h
 	src/format.h
+	src/ldpaths.h
 	src/dialogs/colorselector.h
+	src/dialogs/ldrawpathdialog.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
 	src/editmodes/drawMode.h
@@ -118,7 +122,6 @@ set (LDFORGE_FORMS
 	ui/intersector.ui
 	ui/isecalc.ui
 	ui/ldforge.ui
-	ui/ldrawpath.ui
 	ui/makeprim.ui
 	ui/newpart.ui
 	ui/openprogress.ui
@@ -128,6 +131,7 @@ set (LDFORGE_FORMS
 	ui/rotpoint.ui
 	ui/ytruder.ui
 	src/dialogs/colorselector.ui
+	src/dialogs/ldrawpathdialog.ui
 )
 
 add_custom_target (codegeneration ALL

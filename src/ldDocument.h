@@ -28,17 +28,6 @@ class OpenProgressDialog;
 struct LDGLData;
 class GLCompiler;
 
-namespace LDPaths
-{
-	void initPaths();
-	bool tryConfigure (QString path);
-
-	QString ldconfig();
-	QString prims();
-	QString parts();
-	QString getError();
-}
-
 //
 // Flags for LDDocument
 //
