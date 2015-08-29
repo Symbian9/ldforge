@@ -33,40 +33,40 @@ add_custom_target (revision_check ALL
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (LDFORGE_SOURCES
-	src/actions.cc
-	src/actionsEdit.cc
-	src/addObjectDialog.cc
-	src/basics.cc
-	src/colors.cc
-	src/configuration.cc
-	src/configDialog.cc
-	src/crashCatcher.cc
-	src/dialogs.cc
-	src/documentation.cc
-	src/editHistory.cc
-	src/extPrograms.cc
-	src/glRenderer.cc
-	src/glCompiler.cc
-	src/ldDocument.cc
-	src/ldObject.cc
+	src/actions.cpp
+	src/actionsEdit.cpp
+	src/addObjectDialog.cpp
+	src/basics.cpp
+	src/colors.cpp
+	src/configuration.cpp
+	src/configDialog.cpp
+	src/crashCatcher.cpp
+	src/dialogs.cpp
+	src/documentation.cpp
+	src/editHistory.cpp
+	src/extPrograms.cpp
+	src/glRenderer.cpp
+	src/glCompiler.cpp
+	src/ldDocument.cpp
+	src/ldObject.cpp
     src/ldObjectMath.cpp
-	src/main.cc
-	src/mainWindow.cc
-	src/messageLog.cc
-	src/miscallenous.cc
-	src/partDownloader.cc
-	src/primitives.cc
-	src/radioGroup.cc
-	src/ringFinder.cc
-	src/version.cc
+	src/main.cpp
+	src/mainWindow.cpp
+	src/messageLog.cpp
+	src/miscallenous.cpp
+	src/partDownloader.cpp
+	src/primitives.cpp
+	src/radioGroup.cpp
+	src/ringFinder.cpp
+	src/version.cpp
 	src/dialogs/colorselector.cpp
-	src/editmodes/abstractEditMode.cc
-	src/editmodes/circleMode.cc
-	src/editmodes/drawMode.cc
+	src/editmodes/abstractEditMode.cpp
+	src/editmodes/circleMode.cpp
+	src/editmodes/drawMode.cpp
     src/editmodes/linePathMode.cpp
-	src/editmodes/magicWandMode.cc
-	src/editmodes/rectangleMode.cc
-	src/editmodes/selectMode.cc
+	src/editmodes/magicWandMode.cpp
+	src/editmodes/rectangleMode.cpp
+	src/editmodes/selectMode.cpp
 )
 
 set (LDFORGE_HEADERS
