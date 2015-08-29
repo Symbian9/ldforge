@@ -62,6 +62,7 @@ set (LDFORGE_SOURCES
 	src/version.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/ldrawpathdialog.cpp
+	src/dialogs/newpartdialog.cpp
 	src/editmodes/abstractEditMode.cpp
 	src/editmodes/circleMode.cpp
 	src/editmodes/drawMode.cpp
@@ -99,6 +100,7 @@ set (LDFORGE_HEADERS
 	src/ldpaths.h
 	src/dialogs/colorselector.h
 	src/dialogs/ldrawpathdialog.h
+	src/dialogs/newpartdialog.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
 	src/editmodes/drawMode.h
@@ -123,7 +125,6 @@ set (LDFORGE_FORMS
 	ui/isecalc.ui
 	ui/ldforge.ui
 	ui/makeprim.ui
-	ui/newpart.ui
 	ui/openprogress.ui
 	ui/overlay.ui
 	ui/rectifier.ui
@@ -132,6 +133,7 @@ set (LDFORGE_FORMS
 	ui/ytruder.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/ldrawpathdialog.ui
+	src/dialogs/newpartdialog.ui
 )
 
 add_custom_target (codegeneration ALL

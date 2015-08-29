@@ -54,6 +54,7 @@ const QStringList g_specialSubdirectories ({ "s", "48", "8" });
 // =============================================================================
 //
 LDDocument::LDDocument() :
+	m_history (new History),
 	m_isImplicit (true),
 	m_flags (0),
 	m_verticesOutdated (true),
@@ -62,7 +63,6 @@ LDDocument::LDDocument() :
 {
 	setSavePosition (-1);
 	setTabIndex (-1);
-	m_history = new History;
 	m_history->setDocument (this);
 	m_needsReCache = true;
 	g_allDocuments << this;

@@ -19,29 +19,20 @@
 #pragma once
 #include <QDialog>
 #include "../main.h"
+#include "../ldObject.h"
 
-class LDrawPathDialog : public QDialog
+class NewPartDialog : public QDialog
 {
 	Q_OBJECT
-
 public:
-	LDrawPathDialog (const QString& defaultPath, bool validDefault, QWidget* parent = null, Qt::WindowFlags f = 0);
-	virtual ~LDrawPathDialog();
-	QString path() const;
-	void setPath (QString path);
-	void setStatusText (const QString& statusText, bool ok);
+	NewPartDialog (QWidget *parent = nullptr);
 
-signals:
-	void pathChanged (QString newPath);
+	QString author() const;
+	void fillHeader (LDDocument* newdoc) const;
+	BFCStatement getWinding() const;
+	bool useCaLicense() const;
+	QString title() const;
 
 private:
-	const bool m_hasValidDefault;
-	class Ui_LDrawPathDialog& ui;
-	QPushButton* okButton();
-	QPushButton* cancelButton();
-
-private slots:
-	void searchButtonClicked();
-	void slot_exit();
-	void slot_accept();
+	class Ui_NewPart& ui;
 };

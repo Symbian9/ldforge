@@ -38,13 +38,11 @@
 #include "glCompiler.h"
 #include "ui_newpart.h"
 #include "dialogs/ldrawpathdialog.h"
+#include "dialogs/newpartdialog.h"
 #include "editmodes/abstractEditMode.h"
 
 EXTERN_CFGENTRY (Bool, DrawWireframe)
 EXTERN_CFGENTRY (Bool, BFCRedGreenView)
-EXTERN_CFGENTRY (String, DefaultName)
-EXTERN_CFGENTRY (String, DefaultUser)
-EXTERN_CFGENTRY (Bool, UseCALicense)
 EXTERN_CFGENTRY (Bool, DrawAngles)
 EXTERN_CFGENTRY (Bool, RandomColors)
 EXTERN_CFGENTRY (Bool, DrawSurfaces)
@@ -52,47 +50,22 @@ EXTERN_CFGENTRY (Bool, DrawEdgeLines)
 EXTERN_CFGENTRY (Bool, DrawConditionalLines)
 EXTERN_CFGENTRY (Bool, DrawAxes)
 EXTERN_CFGENTRY (String, LDrawPath)
+EXTERN_CFGENTRY (String, DefaultName)
+EXTERN_CFGENTRY (String, DefaultUser)
+EXTERN_CFGENTRY (Bool, UseCALicense)
 
 // =============================================================================
 //
 void MainWindow::slot_actionNew()
 {
-	QDialog* dlg = new QDialog (g_win);
-	Ui::NewPartUI ui;
-	ui.setupUi (dlg);
+	NewPartDialog* dlg = new NewPartDialog (this);
 
-	QString authortext = cfg::DefaultName;
-
-	if (not cfg::DefaultUser.isEmpty())
-		authortext.append (format (" [%1]", cfg::DefaultUser));
-
-	ui.le_author->setText (authortext);
-	ui.caLicense->setChecked (cfg::UseCALicense);
-
-	if (dlg->exec() == QDialog::Rejected)
-		return;
-
-	newFile();
-
-	BFCStatement const bfctype = ui.rb_bfc_ccw->isChecked() ? BFCStatement::CertifyCCW
-							   : ui.rb_bfc_cw->isChecked()  ? BFCStatement::CertifyCW
-							   : BFCStatement::NoCertify;
-	QString const license = ui.caLicense->isChecked() ? CALicenseText : "";
-
-	LDObjectList objs;
-	objs << LDSpawn<LDComment> (ui.le_title->text());
-	objs << LDSpawn<LDComment> ("Name: <untitled>.dat");
-	objs << LDSpawn<LDComment> (format ("Author: %1", ui.le_author->text()));
-	objs << LDSpawn<LDComment> (format ("!LDRAW_ORG Unofficial_Part"));
-
-	if (not license.isEmpty())
-		objs << LDSpawn<LDComment> (license);
-
-	objs << LDSpawn<LDEmpty>();
-	objs << LDSpawn<LDBFC> (bfctype);
-	objs << LDSpawn<LDEmpty>();
-	CurrentDocument()->addObjects (objs);
-	doFullRefresh();
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		newFile();
+		dlg->fillHeader (CurrentDocument());
+		doFullRefresh();
+	}
 }
 
 // =============================================================================
@@ -106,7 +79,7 @@ void MainWindow::slot_actionNewFile()
 //
 void MainWindow::slot_actionOpen()
 {
-	QString name = QFileDialog::getOpenFileName (g_win, "Open File", "", "LDraw files (*.dat *.ldr)");
+	QString name = QFileDialog::getOpenFileName (this, "Open File", "", "LDraw files (*.dat *.ldr)");
 
 	if (name.isEmpty())
 		return;
@@ -240,7 +213,7 @@ void MainWindow::slot_actionEdit()
 	if (Selection().size() != 1)
 		return;
 
-	LDObject* obj = Selection() [0];
+	LDObject* obj = Selection().first();
 	AddObjectDialog::staticDialog (obj->type(), obj);
 }
 
@@ -261,7 +234,7 @@ void MainWindow::slot_actionAbout()
 //
 void MainWindow::slot_actionAboutQt()
 {
-	QMessageBox::aboutQt (g_win);
+	QMessageBox::aboutQt (this);
 }
 
 // =============================================================================
@@ -478,7 +451,7 @@ void MainWindow::slot_actionScreenshot()
 		root.chop (4);
 
 	QString defaultname = (root.length() > 0) ? format ("%1.png", root) : "";
-	QString fname = QFileDialog::getSaveFileName (g_win, "Save Screencap", defaultname,
+	QString fname = QFileDialog::getSaveFileName (this, "Save Screencap", defaultname,
 				"PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;All Files (*.*)");
 
 	if (not fname.isEmpty() and not img.save (fname))
@@ -609,7 +582,7 @@ void MainWindow::slot_actionSetDrawDepth()
 		return;
 
 	bool ok;
-	double depth = QInputDialog::getDouble (g_win, "Set Draw Depth",
+	double depth = QInputDialog::getDouble (this, "Set Draw Depth",
 											format ("Depth value for %1 Camera:", R()->getCameraName()),
 											R()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
 

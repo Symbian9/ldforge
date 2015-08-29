@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewPartUI</class>
- <widget class="QDialog" name="NewPartUI">
+ <class>NewPart</class>
+ <widget class="QDialog" name="NewPart">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>491</width>
-    <height>233</height>
+    <height>254</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="../ldforge.qrc">:/icons/brick.png</pixmap>
+          <pixmap resource="../../ldforge.qrc">:/icons/brick.png</pixmap>
          </property>
         </widget>
        </item>
@@ -46,14 +46,14 @@
      <item>
       <layout class="QGridLayout" name="gridLayout">
        <item row="1" column="1">
-        <widget class="QLineEdit" name="le_author">
+        <widget class="QLineEdit" name="author">
          <property name="placeholderText">
           <string/>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="le_title">
+        <widget class="QLineEdit" name="title">
          <property name="placeholderText">
           <string/>
          </property>
@@ -86,7 +86,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QRadioButton" name="rb_bfc_ccw">
+         <widget class="QRadioButton" name="windingCcw">
           <property name="text">
            <string>CCW</string>
           </property>
@@ -96,14 +96,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rb_bfc_cw">
+         <widget class="QRadioButton" name="windingCw">
           <property name="text">
            <string>CW</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rb_bfc_none">
+         <widget class="QRadioButton" name="windingNone">
           <property name="text">
            <string>None</string>
           </property>
@@ -115,7 +115,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QCheckBox" name="caLicense">
+        <widget class="QCheckBox" name="useCaLicense">
          <property name="text">
           <string>Use CA license</string>
          </property>
@@ -150,15 +150,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>title</tabstop>
+  <tabstop>author</tabstop>
+  <tabstop>windingCcw</tabstop>
+  <tabstop>windingCw</tabstop>
+  <tabstop>windingNone</tabstop>
+  <tabstop>useCaLicense</tabstop>
+ </tabstops>
  <resources>
-  <include location="../ldforge.qrc"/>
   <include location="../../ldforge.qrc"/>
  </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>NewPartUI</receiver>
+   <receiver>NewPart</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -174,7 +181,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>NewPartUI</receiver>
+   <receiver>NewPart</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
