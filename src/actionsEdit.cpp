@@ -144,18 +144,18 @@ static void DoInline (bool deep)
 		// Delete the subfile now as it's been inlined.
 		ref->destroy();
 	});
-
-	g_win->refresh();
 }
 
 void MainWindow::slot_actionInline()
 {
 	DoInline (false);
+	refresh();
 }
 
 void MainWindow::slot_actionInlineDeep()
 {
 	DoInline (true);
+	refresh();
 }
 
 // =============================================================================
@@ -231,7 +231,7 @@ void MainWindow::slot_actionSetColor()
 	LDColor defaultcol = getSelectedColor();
 
 	// Show the dialog to the user now and ask for a color.
-	if (ColorSelector::selectColor (color, defaultcol, g_win))
+	if (ColorSelector::selectColor (color, defaultcol, this))
 	{
 		for (LDObject* obj : objs)
 		{
@@ -320,23 +320,23 @@ void MainWindow::slot_actionCornerVerts()
 
 // =============================================================================
 //
-static void MoveSelection (const bool up)
+static void MoveSelection (MainWindow* win, bool up)
 {
 	LDObjectList objs = Selection();
 	LDObject::moveObjects (objs, up);
-	g_win->buildObjList();
+	win->buildObjList();
 }
 
 // =============================================================================
 //
 void MainWindow::slot_actionMoveUp()
 {
-	MoveSelection (true);
+	MoveSelection (this, true);
 }
 
 void MainWindow::slot_actionMoveDown()
 {
-	MoveSelection (false);
+	MoveSelection (this, false);
 }
 
 // =============================================================================
@@ -360,8 +360,6 @@ static void MoveObjects (Vertex vect)
 
 	for (LDObject* obj : Selection())
 		obj->move (vect);
-
-	g_win->refresh();
 }
 
 // =============================================================================
@@ -507,7 +505,7 @@ void MainWindow::slot_actionUncolor()
 //
 void MainWindow::slot_actionReplaceCoords()
 {
-	QDialog* dlg = new QDialog (g_win);
+	QDialog* dlg = new QDialog (this);
 	Ui::ReplaceCoordsUI ui;
 	ui.setupUi (dlg);
 
@@ -705,7 +703,7 @@ void MainWindow::slot_actionAddHistoryLine()
 void MainWindow::slot_actionSplitLines()
 {
 	bool ok;
-	int segments = QInputDialog::getInt (g_win, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,
+	int segments = QInputDialog::getInt (this, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,
 		std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
@@ -754,5 +752,5 @@ void MainWindow::slot_actionSplitLines()
 	}
 
 	buildObjList();
-	g_win->refresh();
+	refresh();
 }
