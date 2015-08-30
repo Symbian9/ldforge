@@ -37,22 +37,16 @@ class QProgressBar;
 class Ui_LDForgeUI;
 struct Primitive;
 
-// Stuff for dialogs
-#define IMPLEMENT_DIALOG_BUTTONS \
-	bbx_buttons = new QDialogButtonBox (QDialogButtonBox::Ok | QDialogButtonBox::Cancel); \
-	connect (bbx_buttons, SIGNAL (accepted()), this, SLOT (accept())); \
-	connect (bbx_buttons, SIGNAL (rejected()), this, SLOT (reject())); \
-
 class LDQuickColor
 {
 	PROPERTY (public,	LDColor,		color,		setColor,		STOCK_WRITE)
 	PROPERTY (public,	QToolButton*,	toolButton,	setToolButton,	STOCK_WRITE)
 
-	public:
-		LDQuickColor (LDColor color, QToolButton* toolButton);
-		bool isSeparator() const;
+public:
+	LDQuickColor (LDColor color, QToolButton* toolButton);
+	bool isSeparator() const;
 
-		static LDQuickColor getSeparator();
+	static LDQuickColor getSeparator();
 };
 
 //

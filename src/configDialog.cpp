@@ -697,7 +697,10 @@ KeySequenceDialog::KeySequenceDialog (QKeySequence seq, QWidget* parent, Qt::Win
 	QDialog (parent, f), seq (seq)
 {
 	lb_output = new QLabel;
-	IMPLEMENT_DIALOG_BUTTONS
+
+	bbx_buttons = new QDialogButtonBox (QDialogButtonBox::Ok | QDialogButtonBox::Cancel); \
+	connect (bbx_buttons, SIGNAL (accepted()), this, SLOT (accept())); \
+	connect (bbx_buttons, SIGNAL (rejected()), this, SLOT (reject())); \
 
 	setWhatsThis (tr ("Into this dialog you can input a key sequence for use as a "
 		"shortcut in LDForge. Use OK to confirm the new shortcut and Cancel to "
