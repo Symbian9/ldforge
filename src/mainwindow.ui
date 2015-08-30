@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>218</width>
-           <height>124</height>
+           <width>234</width>
+           <height>402</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>96</width>
-           <height>86</height>
+           <width>234</width>
+           <height>402</height>
           </rect>
          </property>
          <attribute name="label">
@@ -210,7 +210,7 @@
        <normaloff>:/icons/open-recent.png</normaloff>:/icons/open-recent.png</iconset>
      </property>
     </widget>
-    <addaction name="actionNew"/>
+    <addaction name="actionNewPart"/>
     <addaction name="actionNewFile"/>
     <addaction name="actionOpen"/>
     <addaction name="menuOpenRecent"/>
@@ -239,7 +239,7 @@
     <addaction name="actionResetView"/>
     <addaction name="actionAxes"/>
     <addaction name="actionWireframe"/>
-    <addaction name="actionBFCView"/>
+    <addaction name="actionBfcView"/>
     <addaction name="actionDrawAngles"/>
     <addaction name="actionRandomColors"/>
     <addaction name="separator"/>
@@ -261,8 +261,8 @@
     <addaction name="actionNewSubfile"/>
     <addaction name="actionNewLine"/>
     <addaction name="actionNewTriangle"/>
-    <addaction name="actionNewQuad"/>
-    <addaction name="actionNewCLine"/>
+    <addaction name="actionNewQuadrilateral"/>
+    <addaction name="actionNewConditionalLine"/>
     <addaction name="actionNewComment"/>
     <addaction name="actionNewBFC"/>
    </widget>
@@ -278,7 +278,7 @@
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
-    <addaction name="actionDelete"/>
+    <addaction name="actionRemove"/>
     <addaction name="separator"/>
     <addaction name="actionSelectAll"/>
     <addaction name="actionSelectByColor"/>
@@ -304,7 +304,7 @@
     <addaction name="actionUncolor"/>
     <addaction name="separator"/>
     <addaction name="actionInvert"/>
-    <addaction name="actionInline"/>
+    <addaction name="actionInlineShallow"/>
     <addaction name="actionInlineDeep"/>
     <addaction name="actionMakePrimitive"/>
     <addaction name="separator"/>
@@ -312,9 +312,9 @@
     <addaction name="separator"/>
     <addaction name="actionSplitQuads"/>
     <addaction name="actionEditRaw"/>
-    <addaction name="actionBorders"/>
+    <addaction name="actionMakeBorders"/>
     <addaction name="actionRoundCoordinates"/>
-    <addaction name="actionReplaceCoords"/>
+    <addaction name="actionReplaceCoordinates"/>
     <addaction name="actionFlip"/>
     <addaction name="actionDemote"/>
     <addaction name="actionOpenSubfiles"/>
@@ -390,7 +390,7 @@
     <addaction name="menuRotate"/>
     <addaction name="menuObject_List"/>
     <addaction name="separator"/>
-    <addaction name="actionRotationPoint"/>
+    <addaction name="actionConfigureRotationPoint"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -412,7 +412,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew"/>
+   <addaction name="actionNewPart"/>
    <addaction name="actionNewFile"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
@@ -431,8 +431,8 @@
    <addaction name="actionNewSubfile"/>
    <addaction name="actionNewLine"/>
    <addaction name="actionNewTriangle"/>
-   <addaction name="actionNewQuad"/>
-   <addaction name="actionNewCLine"/>
+   <addaction name="actionNewQuadrilateral"/>
+   <addaction name="actionNewConditionalLine"/>
    <addaction name="actionNewComment"/>
    <addaction name="actionNewBFC"/>
   </widget>
@@ -451,7 +451,7 @@
    <addaction name="actionCut"/>
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
-   <addaction name="actionDelete"/>
+   <addaction name="actionRemove"/>
   </widget>
   <widget class="QToolBar" name="toolBarSelect">
    <property name="windowTitle">
@@ -493,7 +493,7 @@
    </attribute>
    <addaction name="actionAxes"/>
    <addaction name="actionWireframe"/>
-   <addaction name="actionBFCView"/>
+   <addaction name="actionBfcView"/>
    <addaction name="actionRandomColors"/>
    <addaction name="actionDrawAngles"/>
   </widget>
@@ -511,10 +511,10 @@
    <addaction name="actionAutocolor"/>
    <addaction name="actionInvert"/>
    <addaction name="actionSplitQuads"/>
-   <addaction name="actionInline"/>
+   <addaction name="actionInlineShallow"/>
    <addaction name="actionEditRaw"/>
-   <addaction name="actionBorders"/>
-   <addaction name="actionReplaceCoords"/>
+   <addaction name="actionMakeBorders"/>
+   <addaction name="actionReplaceCoordinates"/>
    <addaction name="actionRoundCoordinates"/>
    <addaction name="actionVisibilityHide"/>
    <addaction name="actionVisibilityToggle"/>
@@ -565,7 +565,7 @@
    <addaction name="actionCoverer"/>
    <addaction name="actionEdger2"/>
   </widget>
-  <action name="actionNew">
+  <action name="actionNewPart">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/brick.png</normaloff>:/icons/brick.png</iconset>
@@ -729,7 +729,7 @@
     <string>&amp;Wireframe</string>
    </property>
   </action>
-  <action name="actionBFCView">
+  <action name="actionBfcView">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -803,7 +803,7 @@
     <string>Ne&amp;w Triangle</string>
    </property>
   </action>
-  <action name="actionNewQuad">
+  <action name="actionNewQuadrilateral">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/add-quad.png</normaloff>:/icons/add-quad.png</iconset>
@@ -812,7 +812,7 @@
     <string>New &amp;Quadrilateral</string>
    </property>
   </action>
-  <action name="actionNewCLine">
+  <action name="actionNewConditionalLine">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/add-condline.png</normaloff>:/icons/add-condline.png</iconset>
@@ -917,7 +917,7 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionDelete">
+  <action name="actionRemove">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
@@ -1045,7 +1045,7 @@
     <string>Reduce colors of everything selected to main and edge colors</string>
    </property>
   </action>
-  <action name="actionInline">
+  <action name="actionInlineShallow">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/inline.png</normaloff>:/icons/inline.png</iconset>
@@ -1120,7 +1120,7 @@
     <string>Edit the LDraw code of this object.</string>
    </property>
   </action>
-  <action name="actionBorders">
+  <action name="actionMakeBorders">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/make-borders.png</normaloff>:/icons/make-borders.png</iconset>
@@ -1156,7 +1156,7 @@
     <string>Toggles visibility/hiding on objects.</string>
    </property>
   </action>
-  <action name="actionReplaceCoords">
+  <action name="actionReplaceCoordinates">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/replace-coords.png</normaloff>:/icons/replace-coords.png</iconset>
@@ -1473,7 +1473,7 @@
     <string>Ctrl+Up</string>
    </property>
   </action>
-  <action name="actionRotationPoint">
+  <action name="actionConfigureRotationPoint">
    <property name="text">
     <string>&amp;Set Rotation Point</string>
    </property>

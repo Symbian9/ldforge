@@ -689,27 +689,3 @@ void PrimitivePrompt::hiResToggled (bool on)
 	if (on and ui->sb_segs->value() == LowResolution)
 		ui->sb_segs->setValue (HighResolution);
 }
-
-// =============================================================================
-//
-void MainWindow::slot_actionMakePrimitive()
-{
-	PrimitivePrompt* dlg = new PrimitivePrompt (g_win);
-
-	if (not dlg->exec())
-		return;
-
-	int segs = dlg->ui->sb_segs->value();
-	int divs = dlg->ui->cb_hires->isChecked() ? HighResolution : LowResolution;
-	int num = dlg->ui->sb_ringnum->value();
-	PrimitiveType type =
-		dlg->ui->rb_circle->isChecked()   ? Circle :
-		dlg->ui->rb_cylinder->isChecked() ? Cylinder :
-		dlg->ui->rb_disc->isChecked()     ? Disc :
-		dlg->ui->rb_ndisc->isChecked()    ? DiscNeg :
-		dlg->ui->rb_ring->isChecked()     ? Ring : Cone;
-
-	LDDocument* f = GeneratePrimitive (type, segs, divs, num);
-	f->setImplicit (false);
-	g_win->save (f, false);
-}

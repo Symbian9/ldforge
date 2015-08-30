@@ -582,10 +582,3 @@ void PartDownloadRequest::abort()
 {
 	networkReply()->abort();
 }
-
-// =============================================================================
-//
-void MainWindow::slot_actionDownloadFrom()
-{
-	PartDownloader::staticBegin();
-}

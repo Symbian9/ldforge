@@ -23,6 +23,7 @@
 #include <QListWidget>
 #include <QRadioButton>
 #include <QTreeWidget>
+#include <QMetaMethod>
 #include "configuration.h"
 #include "ldObject.h"
 #include "colors.h"
@@ -35,6 +36,7 @@ class GLRenderer;
 class QComboBox;
 class QProgressBar;
 struct Primitive;
+class Toolset;
 
 class LDQuickColor
 {
@@ -168,112 +170,13 @@ public slots:
 	void ringToolHiResClicked (bool clicked);
 	void circleToolSegmentsChanged();
 	void slot_action();
-	void slot_actionNew();
-	void slot_actionNewFile();
-	void slot_actionOpen();
-	void slot_actionDownloadFrom();
-	void slot_actionSave();
-	void slot_actionSaveAs();
-	void slot_actionSaveAll();
-	void slot_actionClose();
-	void slot_actionCloseAll();
-	void slot_actionInsertFrom();
-	void slot_actionExportTo();
-	void slot_actionSettings();
-	void slot_actionSetLDrawPath();
-	void slot_actionScanPrimitives();
-	void slot_actionExit();
-	void slot_actionResetView();
-	void slot_actionAxes();
-	void slot_actionWireframe();
-	void slot_actionBFCView();
-	void slot_actionSetOverlay();
-	void slot_actionClearOverlay();
-	void slot_actionScreenshot();
-	void slot_actionInsertRaw();
-	void slot_actionNewSubfile();
-	void slot_actionNewLine();
-	void slot_actionNewTriangle();
-	void slot_actionNewQuad();
-	void slot_actionNewCLine();
-	void slot_actionNewComment();
-	void slot_actionNewBFC();
-	void slot_actionUndo();
-	void slot_actionRedo();
-	void slot_actionCut();
-	void slot_actionCopy();
-	void slot_actionPaste();
-	void slot_actionDelete();
-	void slot_actionSelectAll();
-	void slot_actionSelectByColor();
-	void slot_actionSelectByType();
-	void slot_actionModeDraw();
-	void slot_actionModeSelect();
-	void slot_actionModeRectangle();
-	void slot_actionModeCircle();
-	void slot_actionModeMagicWand();
-	void slot_actionModeLinePath();
-	void slot_actionSetDrawDepth();
-	void slot_actionSetColor();
-	void slot_actionAutocolor();
-	void slot_actionUncolor();
-	void slot_actionInline();
-	void slot_actionInlineDeep();
-	void slot_actionInvert();
-	void slot_actionMakePrimitive();
-	void slot_actionSplitQuads();
-	void slot_actionEditRaw();
-	void slot_actionBorders();
-	void slot_actionRoundCoordinates();
-	void slot_actionVisibilityHide();
-	void slot_actionVisibilityReveal();
-	void slot_actionVisibilityToggle();
-	void slot_actionReplaceCoords();
-	void slot_actionFlip();
-	void slot_actionDemote();
-	void slot_actionYtruder();
-	void slot_actionRectifier();
-	void slot_actionIntersector();
-	void slot_actionIsecalc();
-	void slot_actionCoverer();
-	void slot_actionEdger2();
-	void slot_actionHelp();
-	void slot_actionAbout();
-	void slot_actionAboutQt();
-	void slot_actionGridCoarse();
-	void slot_actionGridMedium();
-	void slot_actionGridFine();
-	void slot_actionEdit();
-	void slot_actionMoveUp();
-	void slot_actionMoveDown();
-	void slot_actionMoveXNeg();
-	void slot_actionMoveXPos();
-	void slot_actionMoveYNeg();
-	void slot_actionMoveYPos();
-	void slot_actionMoveZNeg();
-	void slot_actionMoveZPos();
-	void slot_actionRotateXNeg();
-	void slot_actionRotateXPos();
-	void slot_actionRotateYNeg();
-	void slot_actionRotateYPos();
-	void slot_actionRotateZNeg();
-	void slot_actionRotateZPos();
-	void slot_actionRotationPoint();
-	void slot_actionAddHistoryLine();
-	void slot_actionJumpTo();
-	void slot_actionSubfileSelection();
-	void slot_actionDrawAngles();
-	void slot_actionRandomColors();
-	void slot_actionOpenSubfiles();
-	void slot_actionSplitLines();
-	void slot_actionDrawSurfaces();
-	void slot_actionDrawEdgeLines();
-	void slot_actionDrawConditionalLines();
 
 protected:
 	void closeEvent (QCloseEvent* ev);
 
 private:
+	struct ToolInfo { QMetaMethod method; Toolset* object; };
+
 	GLRenderer*			m_renderer;
 	LDObjectList		m_sel;
 	QList<LDQuickColor>	m_quickColors;
@@ -283,6 +186,8 @@ private:
 	class Ui_MainWindow& ui;
 	QTabBar*			m_tabs;
 	bool				m_updatingTabs;
+	QVector<Toolset*>	m_toolsets;
+	QMap<QAction*, ToolInfo> m_toolmap;
 
 private slots:
 	void slot_selectionChanged();

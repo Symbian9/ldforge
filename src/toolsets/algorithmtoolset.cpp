@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  LDForge: LDraw parts authoring CAD
  *  Copyright (C) 2013 - 2015 Teemu Piippo
  *
@@ -17,158 +17,49 @@
  */
 
 #include <limits>
-#include <QSpinBox>
-#include <QCheckBox>
 #include <QBoxLayout>
-#include <QClipboard>
+#include <QCheckBox>
+#include <QDir>
 #include <QInputDialog>
-#include "mainwindow.h"
-#include "main.h"
-#include "ldDocument.h"
-#include "dialogs/colorselector.h"
-#include "miscallenous.h"
-#include "radioGroup.h"
-#include "glRenderer.h"
-#include "dialogs.h"
-#include "colors.h"
-#include "ldObjectMath.h"
+#include <QSpinBox>
+#include "../mainwindow.h"
+#include "../main.h"
+#include "../ldDocument.h"
+#include "../miscallenous.h"
+#include "../radioGroup.h"
+#include "../glRenderer.h"
+#include "../dialogs.h"
+#include "../colors.h"
+#include "../ldObjectMath.h"
+#include "../ldobjectiterator.h"
 #include "ui_replcoords.h"
 #include "ui_editraw.h"
 #include "ui_flip.h"
 #include "ui_addhistoryline.h"
-#include "ldobjectiterator.h"
+#include "algorithmtoolset.h"
 
 EXTERN_CFGENTRY (String, DefaultUser)
 
-CFGENTRY (Int, RoundPosition,		3)
-CFGENTRY (Int, RoundMatrix,		4)
+CFGENTRY (Int, RoundPosition, 3)
+CFGENTRY (Int, RoundMatrix, 4)
 CFGENTRY (Int, SplitLinesSegments, 5)
+EXTERN_CFGENTRY (String, DefaultName)
+EXTERN_CFGENTRY (String, DefaultUser)
+EXTERN_CFGENTRY (Bool, UseCALicense)
 
-// =============================================================================
-//
-static int CopyToClipboard()
+AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
+	Toolset (parent)
 {
-	LDObjectList objs = Selection();
-	int num = 0;
-
-	// Clear the clipboard first.
-	qApp->clipboard()->clear();
-
-	// Now, copy the contents into the clipboard.
-	QString data;
-
-	for (LDObject* obj : objs)
-	{
-		if (not data.isEmpty())
-			data += "\n";
-
-		data += obj->asText();
-		++num;
-	}
-
-	qApp->clipboard()->setText (data);
-	return num;
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionCut()
-{
-	int num = CopyToClipboard();
-	deleteSelection();
-	print (tr ("%1 objects cut"), num);
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionCopy()
-{
-	int num = CopyToClipboard();
-	print (tr ("%1 objects copied"), num);
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionPaste()
-{
-	const QString clipboardText = qApp->clipboard()->text();
-	int idx = getInsertionPoint();
-	CurrentDocument()->clearSelection();
-	int num = 0;
-
-	for (QString line : clipboardText.split ("\n"))
-	{
-		LDObject* pasted = ParseLine (line);
-		CurrentDocument()->insertObj (idx++, pasted);
-		pasted->select();
-		++num;
-	}
-
-	print (tr ("%1 objects pasted"), num);
-	refresh();
-	scrollToSelection();
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionDelete()
-{
-	int num = deleteSelection();
-	print (tr ("%1 objects deleted"), num);
-}
-
-// =============================================================================
-//
-static void DoInline (bool deep)
-{
-	for (LDObjectIterator<LDSubfile> it (Selection()); it.isValid(); ++it)
-	{
-		// Get the index of the subfile so we know where to insert the
-		// inlined contents.
-		int idx = it->lineNumber();
-
-		if (idx != -1)
-		{
-			LDObjectList objs = it->inlineContents (deep, false);
-	
-			// Merge in the inlined objects
-			for (LDObject* inlineobj : objs)
-			{
-				QString line = inlineobj->asText();
-				inlineobj->destroy();
-				LDObject* newobj = ParseLine (line);
-				CurrentDocument()->insertObj (idx++, newobj);
-				newobj->select();
-			}
-	
-			// Delete the subfile now as it's been inlined.
-			it->destroy();
-		}
-	}
-}
-
-void MainWindow::slot_actionInline()
-{
-	DoInline (false);
-	refresh();
-}
-
-void MainWindow::slot_actionInlineDeep()
-{
-	DoInline (true);
-	refresh();
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionSplitQuads()
+void AlgorithmToolset::splitQuads()
 {
 	int num = 0;
 
 	for (LDObjectIterator<LDQuad> it (Selection()); it.isValid(); ++it)
 	{
 		// Find the index of this quad
-		long index = it->lineNumber();
+		int index = it->lineNumber();
 
 		if (index == -1)
 			return;
@@ -183,12 +74,9 @@ void MainWindow::slot_actionSplitQuads()
 	}
 
 	print ("%1 quadrilaterals split", num);
-	refresh();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionEditRaw()
+void AlgorithmToolset::editRaw()
 {
 	if (Selection().size() != 1)
 		return;
@@ -214,39 +102,9 @@ void MainWindow::slot_actionEditRaw()
 	// Reinterpret it from the text of the input field
 	LDObject* newobj = ParseLine (ui.code->text());
 	obj->replace (newobj);
-	refresh();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionSetColor()
-{
-	if (Selection().isEmpty())
-		return;
-
-	LDObjectList objs = Selection();
-
-	// If all selected objects have the same color, said color is our default
-	// value to the color selection dialog.
-	LDColor color;
-	LDColor defaultcol = getSelectedColor();
-
-	// Show the dialog to the user now and ask for a color.
-	if (ColorSelector::selectColor (color, defaultcol, this))
-	{
-		for (LDObject* obj : objs)
-		{
-			if (obj->isColored())
-				obj->setColor (color);
-		}
-
-		refresh();
-	}
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionBorders()
+void AlgorithmToolset::makeBorders()
 {
 	LDObjectList objs = Selection();
 	int num = 0;
@@ -289,135 +147,9 @@ void MainWindow::slot_actionBorders()
 	}
 
 	print (tr ("Added %1 border lines"), num);
-	refresh();
 }
 
-// =============================================================================
-//
-static void MoveSelection (MainWindow* win, bool up)
-{
-	LDObjectList objs = Selection();
-	LDObject::moveObjects (objs, up);
-	win->buildObjList();
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionMoveUp()
-{
-	MoveSelection (this, true);
-}
-
-void MainWindow::slot_actionMoveDown()
-{
-	MoveSelection (this, false);
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionUndo()
-{
-	CurrentDocument()->undo();
-}
-
-void MainWindow::slot_actionRedo()
-{
-	CurrentDocument()->redo();
-}
-
-// =============================================================================
-//
-static void MoveObjects (Vertex vect)
-{
-	// Apply the grid values
-	vect *= *CurrentGrid().coordinateSnap;
-
-	for (LDObject* obj : Selection())
-		obj->move (vect);
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionMoveXNeg()
-{
-	MoveObjects ({-1, 0, 0});
-}
-
-void MainWindow::slot_actionMoveYNeg()
-{
-	MoveObjects ({0, -1, 0});
-}
-
-void MainWindow::slot_actionMoveZNeg()
-{
-	MoveObjects ({0, 0, -1});
-}
-
-void MainWindow::slot_actionMoveXPos()
-{
-	MoveObjects ({1, 0, 0});
-}
-
-void MainWindow::slot_actionMoveYPos()
-{
-	MoveObjects ({0, 1, 0});
-}
-
-void MainWindow::slot_actionMoveZPos()
-{
-	MoveObjects ({0, 0, 1});
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionInvert()
-{
-	for (LDObject* obj : Selection())
-		obj->invert();
-
-	refresh();
-}
-
-// =============================================================================
-//
-static double GetRotateActionAngle()
-{
-	return (Pi * *CurrentGrid().angleSnap) / 180;
-}
-
-void MainWindow::slot_actionRotateXPos()
-{
-	RotateObjects (1, 0, 0, GetRotateActionAngle(), Selection());
-}
-void MainWindow::slot_actionRotateYPos()
-{
-	RotateObjects (0, 1, 0, GetRotateActionAngle(), Selection());
-}
-void MainWindow::slot_actionRotateZPos()
-{
-	RotateObjects (0, 0, 1, GetRotateActionAngle(), Selection());
-}
-void MainWindow::slot_actionRotateXNeg()
-{
-	RotateObjects (-1, 0, 0, GetRotateActionAngle(), Selection());
-}
-void MainWindow::slot_actionRotateYNeg()
-{
-	RotateObjects (0, -1, 0, GetRotateActionAngle(), Selection());
-}
-void MainWindow::slot_actionRotateZNeg()
-{
-	RotateObjects (0, 0, -1, GetRotateActionAngle(), Selection());
-}
-
-void MainWindow::slot_actionRotationPoint()
-{
-	ConfigureRotationPoint();
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionRoundCoordinates()
+void AlgorithmToolset::roundCoordinates()
 {
 	setlocale (LC_ALL, "C");
 	int num = 0;
@@ -452,34 +184,12 @@ void MainWindow::slot_actionRoundCoordinates()
 	}
 
 	print (tr ("Rounded %1 values"), num);
-	refreshObjectList();
-	refresh();
+	m_window->refreshObjectList();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionUncolor()
+void AlgorithmToolset::replaceCoordinates()
 {
-	int num = 0;
-
-	for (LDObject* obj : Selection())
-	{
-		if (not obj->isColored())
-			continue;
-
-		obj->setColor (obj->defaultColor());
-		num++;
-	}
-
-	print (tr ("%1 objects uncolored"), num);
-	refresh();
-}
-
-// =============================================================================
-//
-void MainWindow::slot_actionReplaceCoords()
-{
-	QDialog* dlg = new QDialog (this);
+	QDialog* dlg = new QDialog (m_window);
 	Ui::ReplaceCoordsUI ui;
 	ui.setupUi (dlg);
 
@@ -524,12 +234,9 @@ void MainWindow::slot_actionReplaceCoords()
 	}
 
 	print (tr ("Altered %1 values"), num);
-	refresh();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionFlip()
+void AlgorithmToolset::flip()
 {
 	QDialog* dlg = new QDialog;
 	Ui::FlipUI ui;
@@ -559,13 +266,9 @@ void MainWindow::slot_actionFlip()
 			obj->setVertex (i, v);
 		}
 	}
-
-	refresh();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionDemote()
+void AlgorithmToolset::demote()
 {
 	int num = 0;
 
@@ -576,12 +279,9 @@ void MainWindow::slot_actionDemote()
 	}
 
 	print (tr ("Converted %1 conditional lines"), num);
-	refresh();
 }
 
-// =============================================================================
-//
-static bool IsColorUsed (LDColor color)
+bool AlgorithmToolset::isColorUsed (LDColor color) const
 {
 	for (LDObject* obj : CurrentDocument()->objects())
 	{
@@ -592,15 +292,13 @@ static bool IsColorUsed (LDColor color)
 	return false;
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionAutocolor()
+void AlgorithmToolset::autocolor()
 {
 	LDColor color;
 
 	for (color = 0; color.isLDConfigColor(); ++color)
 	{
-		if (color.isValid() and not IsColorUsed (color))
+		if (color.isValid() and not isColorUsed (color))
 			break;
 	}
 
@@ -619,12 +317,9 @@ void MainWindow::slot_actionAutocolor()
 	}
 
 	print (tr ("Auto-colored: new color is [%1] %2"), color.index(), color.name());
-	refresh();
 }
 
-// =============================================================================
-//
-void MainWindow::slot_actionAddHistoryLine()
+void AlgorithmToolset::addHistoryLine()
 {
 	LDObject* obj;
 	bool ishistory = false;
@@ -670,14 +365,14 @@ void MainWindow::slot_actionAddHistoryLine()
 	if (obj and obj->next() and obj->next()->isScemantic())
 		CurrentDocument()->insertObj (idx, new LDEmpty);
 
-	buildObjList();
+	m_window->buildObjList();
 	delete ui;
 }
 
-void MainWindow::slot_actionSplitLines()
+void AlgorithmToolset::splitLines()
 {
 	bool ok;
-	int segments = QInputDialog::getInt (this, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,
+	int segments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:", cfg::SplitLinesSegments, 0,
 		std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
@@ -725,6 +420,167 @@ void MainWindow::slot_actionSplitLines()
 		obj->destroy();
 	}
 
-	buildObjList();
-	refresh();
+	m_window->buildObjList();
+	m_window->refresh();
+}
+
+void AlgorithmToolset::subfileSelection()
+{
+	if (Selection().size() == 0)
+		return;
+
+	QString			parentpath (CurrentDocument()->fullPath());
+
+	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
+	BFCStatement	bfctype (BFCStatement::NoCertify);
+
+	// Dirname of the new subfile
+	QString			subdirname (Dirname (parentpath));
+
+	// Title of the new subfile
+	QString			subtitle;
+
+	// Comment containing the title of the parent document
+	LDComment*	titleobj = dynamic_cast<LDComment*> (CurrentDocument()->getObject (0));
+
+	// License text for the subfile
+	QString			license (PreferredLicenseText());
+
+	// LDraw code body of the new subfile (i.e. code of the selection)
+	QStringList		code;
+
+	// Full path of the subfile to be
+	QString			fullsubname;
+
+	// Where to insert the subfile reference?
+	int				refidx (Selection()[0]->lineNumber());
+
+	// Determine title of subfile
+	if (titleobj != null)
+		subtitle = "~" + titleobj->text();
+	else
+		subtitle = "~subfile";
+
+	// Remove duplicate tildes
+	while (subtitle.startsWith ("~~"))
+		subtitle.remove (0, 1);
+
+	// If this the parent document isn't already in s/, we need to stuff it into
+	// a subdirectory named s/. Ensure it exists!
+	QString topdirname = Basename (Dirname (CurrentDocument()->fullPath()));
+
+	if (topdirname != "s")
+	{
+		QString desiredPath = subdirname + "/s";
+		QString title = tr ("Create subfile directory?");
+		QString text = format (tr ("The directory <b>%1</b> is suggested for "
+			"subfiles. This directory does not exist, create it?"), desiredPath);
+
+		if (QDir (desiredPath).exists() or Confirm (title, text))
+		{
+			subdirname = desiredPath;
+			QDir().mkpath (subdirname);
+		}
+		else
+			return;
+	}
+
+	// Determine the body of the name of the subfile
+	if (not parentpath.isEmpty())
+	{
+		// Chop existing '.dat' suffix
+		if (parentpath.endsWith (".dat"))
+			parentpath.chop (4);
+
+		// Remove the s?? suffix if it's there, otherwise we'll get filenames
+		// like s01s01.dat when subfiling subfiles.
+		QRegExp subfilesuffix ("s[0-9][0-9]$");
+		if (subfilesuffix.indexIn (parentpath) != -1)
+			parentpath.chop (subfilesuffix.matchedLength());
+
+		int subidx = 1;
+		QString digits;
+
+		// Now find the appropriate filename. Increase the number of the subfile
+		// until we find a name which isn't already taken.
+		do
+		{
+			digits.setNum (subidx++);
+
+			// pad it with a zero
+			if (digits.length() == 1)
+				digits.prepend ("0");
+
+			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
+		} while (FindDocument ("s\\" + Basename (fullsubname)) != null or QFile (fullsubname).exists());
+	}
+
+	// Determine the BFC winding type used in the main document - it is to
+	// be carried over to the subfile.
+	for (LDObjectIterator<LDBFC> it (CurrentDocument()); it.isValid(); ++it)
+	{
+		if (isOneOf (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
+		{
+			bfctype = it->statement();
+			break;
+		}
+	}
+
+	// Get the body of the document in LDraw code
+	for (LDObject* obj : Selection())
+		code << obj->asText();
+
+	// Create the new subfile document
+	LDDocument* doc = LDDocument::createNew();
+	doc->setImplicit (false);
+	doc->setFullPath (fullsubname);
+	doc->setName (LDDocument::shortenName (fullsubname));
+
+	LDObjectList objs;
+	objs << LDSpawn<LDComment> (subtitle);
+	objs << LDSpawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
+	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", cfg::DefaultName, cfg::DefaultUser));
+	objs << LDSpawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
+
+	if (not license.isEmpty())
+		objs << LDSpawn<LDComment> (license);
+
+	objs << LDSpawn<LDEmpty>();
+	objs << LDSpawn<LDBFC> (bfctype);
+	objs << LDSpawn<LDEmpty>();
+
+	doc->addObjects (objs);
+
+	// Add the actual subfile code to the new document
+	for (QString line : code)
+	{
+		LDObject* obj = ParseLine (line);
+		doc->addObject (obj);
+	}
+
+	// Try save it
+	if (m_window->save (doc, true))
+	{
+		// Save was successful. Delete the original selection now from the
+		// main document.
+		for (LDObject* obj : Selection())
+			obj->destroy();
+
+		// Add a reference to the new subfile to where the selection was
+		LDSubfile* ref = LDSpawn<LDSubfile>();
+		ref->setColor (MainColor);
+		ref->setFileInfo (doc);
+		ref->setPosition (Origin);
+		ref->setTransform (IdentityMatrix);
+		CurrentDocument()->insertObj (refidx, ref);
+
+		// Refresh stuff
+		m_window->updateDocumentList();
+		m_window->doFullRefresh();
+	}
+	else
+	{
+		// Failed to save.
+		doc->dismiss();
+	}
 }

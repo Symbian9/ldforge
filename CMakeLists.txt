@@ -33,8 +33,6 @@ add_custom_target (revision_check ALL
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (LDFORGE_SOURCES
-	src/actions.cpp
-	src/actionsEdit.cpp
 	src/addObjectDialog.cpp
 	src/basics.cpp
 	src/colors.cpp
@@ -44,7 +42,6 @@ set (LDFORGE_SOURCES
 	src/dialogs.cpp
 	src/documentation.cpp
 	src/editHistory.cpp
-	src/extPrograms.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
 	src/ldDocument.cpp
@@ -71,6 +68,13 @@ set (LDFORGE_SOURCES
 	src/editmodes/magicWandMode.cpp
 	src/editmodes/rectangleMode.cpp
 	src/editmodes/selectMode.cpp
+	src/toolsets/algorithmtoolset.cpp
+	src/toolsets/basictoolset.cpp
+	src/toolsets/extprogramtoolset.cpp
+	src/toolsets/filetoolset.cpp
+	src/toolsets/movetoolset.cpp
+	src/toolsets/toolset.cpp
+	src/toolsets/viewtoolset.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -110,6 +114,13 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/toolsets/algorithmtoolset.h
+	src/toolsets/basictoolset.h
+	src/toolsets/extprogramtoolset.h
+	src/toolsets/filetoolset.h
+	src/toolsets/movetoolset.h
+	src/toolsets/toolset.h
+	src/toolsets/viewtoolset.h
 )
 
 set (LDFORGE_FORMS

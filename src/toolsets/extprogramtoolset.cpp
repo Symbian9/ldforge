@@ -25,22 +25,23 @@
 #include <QComboBox>
 #include <QGridLayout>
 #include <QFileInfo>
-#include "main.h"
-#include "configuration.h"
-#include "miscallenous.h"
-#include "mainwindow.h"
-#include "ldDocument.h"
-#include "radioGroup.h"
-#include "editHistory.h"
+#include "../main.h"
+#include "../configuration.h"
+#include "../miscallenous.h"
+#include "../mainwindow.h"
+#include "../ldDocument.h"
+#include "../radioGroup.h"
+#include "../editHistory.h"
+#include "../dialogs.h"
+#include "extprogramtoolset.h"
 #include "ui_ytruder.h"
 #include "ui_intersector.h"
 #include "ui_rectifier.h"
 #include "ui_coverer.h"
 #include "ui_isecalc.h"
 #include "ui_edger2.h"
-#include "dialogs.h"
 
-enum extprog
+enum ExtProgramType
 {
 	Isecalc,
 	Intersector,
@@ -96,6 +97,9 @@ const char* g_extProgNames[] =
 	"Edger2"
 };
 
+ExtProgramToolset::ExtProgramToolset (MainWindow* parent) :
+	Toolset (parent) {}
+
 // =============================================================================
 //
 static bool MakeTempFile (QTemporaryFile& tmp, QString& fname)
@@ -110,14 +114,14 @@ static bool MakeTempFile (QTemporaryFile& tmp, QString& fname)
 
 // =============================================================================
 //
-static bool CheckExtProgramPath (const extprog prog)
+static bool CheckExtProgramPath (ExtProgramType program)
 {
-	QString& path = *g_extProgPaths[prog];
+	QString& path = *g_extProgPaths[program];
 
 	if (not path.isEmpty())
 		return true;
 
-	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (g_extProgNames[prog]);
+	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (g_extProgNames[program]);
 
 	if (dlg->exec() and not dlg->getPath().isEmpty())
 	{
@@ -130,36 +134,36 @@ static bool CheckExtProgramPath (const extprog prog)
 
 // =============================================================================
 //
-static QString ProcessExtProgError (extprog prog, QProcess& proc)
+static QString ProcessExtProgError (ExtProgramType prog, QProcess& proc)
 {
 	switch (proc.error())
 	{
-		case QProcess::FailedToStart:
+	case QProcess::FailedToStart:
 		{
-			QString wineblurb;
+			QString winemessage;
 
 #ifndef _WIN32
 			if (*g_extProgWine[prog])
-				wineblurb = "make sure Wine is installed and ";
+				winemessage = "make sure Wine is installed and ";
 #else
-			(void) prog;
+			Q_UNUSED (prog);
 #endif
 
-			return format ("Program failed to start, %1check your permissions", wineblurb);
+			return format ("Program failed to start, %1check your permissions", winemessage);
 		} break;
 
-		case QProcess::Crashed:
-			return "Crashed.";
+	case QProcess::Crashed:
+		return "Crashed.";
 
-		case QProcess::WriteError:
-		case QProcess::ReadError:
-			return "I/O error.";
+	case QProcess::WriteError:
+	case QProcess::ReadError:
+		return "I/O error.";
 
-		case QProcess::UnknownError:
-			return "Unknown error";
+	case QProcess::UnknownError:
+		return "Unknown error";
 
-		case QProcess::Timedout:
-			return format ("Timed out (30 seconds)");
+	case QProcess::Timedout:
+		return "Timed out (30 seconds)";
 	}
 
 	return "";
@@ -233,7 +237,7 @@ void WriteColorGroup (LDColor color, QString fname)
 
 // =============================================================================
 //
-bool RunExtProgram (extprog prog, QString path, QString argvstr)
+bool RunExtProgram (ExtProgramType prog, QString path, QString argvstr)
 {
 	QTemporaryFile input;
 	QStringList argv = argvstr.split (" ", QString::SkipEmptyParts);
@@ -349,7 +353,7 @@ static void InsertOutput (QString fname, bool replace, QList<LDColor> colorsToRe
 // =============================================================================
 // Interface for Ytruder
 // =============================================================================
-void MainWindow::slot_actionYtruder()
+void ExtProgramToolset::ytruder()
 {
 	setlocale (LC_ALL, "C");
 
@@ -406,7 +410,7 @@ void MainWindow::slot_actionYtruder()
 // =============================================================================
 // Rectifier interface
 // =============================================================================
-void MainWindow::slot_actionRectifier()
+void ExtProgramToolset::rectifier()
 {
 	setlocale (LC_ALL, "C");
 
@@ -451,7 +455,7 @@ void MainWindow::slot_actionRectifier()
 // =============================================================================
 // Intersector interface
 // =============================================================================
-void MainWindow::slot_actionIntersector()
+void ExtProgramToolset::intersector()
 {
 	setlocale (LC_ALL, "C");
 
@@ -550,7 +554,7 @@ void MainWindow::slot_actionIntersector()
 
 // =============================================================================
 //
-void MainWindow::slot_actionCoverer()
+void ExtProgramToolset::coverer()
 {
 	setlocale (LC_ALL, "C");
 
@@ -614,7 +618,7 @@ void MainWindow::slot_actionCoverer()
 
 // =============================================================================
 //
-void MainWindow::slot_actionIsecalc()
+void ExtProgramToolset::isecalc()
 {
 	setlocale (LC_ALL, "C");
 
@@ -673,7 +677,7 @@ void MainWindow::slot_actionIsecalc()
 
 // =============================================================================
 //
-void MainWindow::slot_actionEdger2()
+void ExtProgramToolset::edger2()
 {
 	setlocale (LC_ALL, "C");
 

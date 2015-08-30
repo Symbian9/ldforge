@@ -51,6 +51,7 @@
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
+#include "toolsets/toolset.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
@@ -127,6 +128,40 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		this, SLOT (circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
 
+	// Examine the toolsets and make a dictionary of tools
+	m_toolsets = Toolset::createToolsets (this);
+
+	QStringList ignore;
+	for (int i = 0; i < Toolset::staticMetaObject.methodCount(); ++i)
+	{
+		QMetaMethod method = Toolset::staticMetaObject.method (i);
+		ignore.append (QString::fromUtf8 (method.name()));
+	}
+
+	for (Toolset* toolset : m_toolsets)
+	{
+		const QMetaObject* meta = toolset->metaObject();
+
+		for (int i = 0; i < meta->methodCount(); ++i)
+		{
+			ToolInfo info;
+			info.method = meta->method (i);
+			info.object = toolset;
+			QString methodName = QString::fromUtf8 (info.method.name());
+
+			if (ignore.contains (methodName))
+				continue; // The method was inherited from base classes
+
+			QString actionName = "action" + methodName.left (1).toUpper() + methodName.mid (1);
+			QAction* action = findChild<QAction*> (actionName);
+
+			if (action == nullptr)
+				print ("No action for %1::%2 (looked for %3)\n", meta->className(), methodName, actionName);
+			else
+				m_toolmap[action] = info;
+		}
+	}
+
 	for (QVariant const& toolbarname : cfg::HiddenToolbars)
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
@@ -147,8 +182,19 @@ void MainWindow::slot_action()
 {
 	// Get the name of the sender object and use it to compose the slot name,
 	// then invoke this slot to call the action.
-	QMetaObject::invokeMethod (this,
-		qPrintable (format ("slot_%1", sender()->objectName())), Qt::DirectConnection);
+	QAction* action = qobject_cast<QAction*> (sender());
+
+	if (action)
+	{
+		if (m_toolmap.contains (action))
+		{
+			const ToolInfo& info = m_toolmap[action];
+			info.method.invoke (info.object, Qt::DirectConnection);
+		}
+		else
+			print ("No tool info for %1!\n", action->objectName());
+	}
+
 	endAction();
 }
 
@@ -677,14 +723,14 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 	contextMenu->addAction (ui.actionCut);
 	contextMenu->addAction (ui.actionCopy);
 	contextMenu->addAction (ui.actionPaste);
-	contextMenu->addAction (ui.actionDelete);
+	contextMenu->addAction (ui.actionRemove);
 	contextMenu->addSeparator();
 	contextMenu->addAction (ui.actionSetColor);
 
 	if (single)
 		contextMenu->addAction (ui.actionEditRaw);
 
-	contextMenu->addAction (ui.actionBorders);
+	contextMenu->addAction (ui.actionMakeBorders);
 	contextMenu->addAction (ui.actionSetOverlay);
 	contextMenu->addAction (ui.actionClearOverlay);
 
@@ -1024,7 +1070,7 @@ void MainWindow::updateActions()
 
 	ui.actionWireframe->setChecked (cfg::DrawWireframe);
 	ui.actionAxes->setChecked (cfg::DrawAxes);
-	ui.actionBFCView->setChecked (cfg::BFCRedGreenView);
+	ui.actionBfcView->setChecked (cfg::BFCRedGreenView);
 	ui.actionRandomColors->setChecked (cfg::RandomColors);
 	ui.actionDrawAngles->setChecked (cfg::DrawAngles);
 	ui.actionDrawSurfaces->setChecked (cfg::DrawSurfaces);
