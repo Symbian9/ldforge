@@ -78,12 +78,5 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 			// Transform the matrix
 			mo->setTransform (transform * mo->transform());
 		}
-		elif (obj->type() == OBJ_Vertex)
-		{
-			LDVertex* vert = static_cast<LDVertex*> (obj);
-			Vertex v = vert->pos;
-			RotateVertex (v, rotpoint, transform);
-			vert->pos = v;
-		}
 	}
 }

@@ -14,7 +14,7 @@
    <string/>
   </property>
   <property name="windowIcon">
-   <iconset resource="../ldforge.qrc">
+   <iconset>
     <normaloff>:/icons/ldforge.png</normaloff>:/icons/ldforge.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -47,8 +47,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>402</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>402</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>237</width>
-           <height>414</height>
+           <width>234</width>
+           <height>402</height>
           </rect>
          </property>
          <attribute name="label">
@@ -194,19 +194,19 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>26</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
     <widget class="QMenu" name="menuOpenRecent">
      <property name="title">
-      <string>Open Recent...</string>
+      <string>Open &amp;Recent...</string>
      </property>
      <property name="icon">
-      <iconset resource="../ldforge.qrc">
+      <iconset>
        <normaloff>:/icons/open-recent.png</normaloff>:/icons/open-recent.png</iconset>
      </property>
     </widget>
@@ -234,7 +234,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionResetView"/>
     <addaction name="actionAxes"/>
@@ -254,7 +254,7 @@
    </widget>
    <widget class="QMenu" name="menuInsert">
     <property name="title">
-     <string>Insert</string>
+     <string>I&amp;nsert</string>
     </property>
     <addaction name="actionInsertRaw"/>
     <addaction name="separator"/>
@@ -314,7 +314,6 @@
     <addaction name="actionSplitQuads"/>
     <addaction name="actionEditRaw"/>
     <addaction name="actionBorders"/>
-    <addaction name="actionCornerVerts"/>
     <addaction name="actionRoundCoordinates"/>
     <addaction name="actionReplaceCoords"/>
     <addaction name="actionFlip"/>
@@ -328,7 +327,7 @@
    </widget>
    <widget class="QMenu" name="menuExternal_Tools">
     <property name="title">
-     <string>External Tools</string>
+     <string>E&amp;xternal Tools</string>
     </property>
     <addaction name="actionYtruder"/>
     <addaction name="actionRectifier"/>
@@ -348,11 +347,11 @@
    </widget>
    <widget class="QMenu" name="menuMov">
     <property name="title">
-     <string>Move</string>
+     <string>&amp;Move</string>
     </property>
     <widget class="QMenu" name="menuGrids">
      <property name="title">
-      <string>Grids</string>
+      <string>&amp;Grids</string>
      </property>
      <addaction name="actionGridCoarse"/>
      <addaction name="actionGridMedium"/>
@@ -360,7 +359,7 @@
     </widget>
     <widget class="QMenu" name="menuMove_Objects">
      <property name="title">
-      <string>Move Objects</string>
+      <string>&amp;Move Objects</string>
      </property>
      <addaction name="actionMoveXNeg"/>
      <addaction name="actionMoveXPos"/>
@@ -371,14 +370,14 @@
     </widget>
     <widget class="QMenu" name="menuObject_List">
      <property name="title">
-      <string>Object List</string>
+      <string>&amp;Object List</string>
      </property>
      <addaction name="actionMoveUp"/>
      <addaction name="actionMoveDown"/>
     </widget>
     <widget class="QMenu" name="menuRotate">
      <property name="title">
-      <string>Rotate</string>
+      <string>&amp;Rotate</string>
      </property>
      <addaction name="actionRotateXNeg"/>
      <addaction name="actionRotateXPos"/>
@@ -517,7 +516,6 @@
    <addaction name="actionInline"/>
    <addaction name="actionEditRaw"/>
    <addaction name="actionBorders"/>
-   <addaction name="actionCornerVerts"/>
    <addaction name="actionReplaceCoords"/>
    <addaction name="actionRoundCoordinates"/>
    <addaction name="actionVisibilityHide"/>
@@ -571,11 +569,11 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/brick.png</normaloff>:/icons/brick.png</iconset>
    </property>
    <property name="text">
-    <string>New Part</string>
+    <string>&amp;New Part</string>
    </property>
    <property name="statusTip">
     <string>Create a new part model.</string>
@@ -586,11 +584,11 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-open.png</normaloff>:/icons/file-open.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open</string>
    </property>
    <property name="statusTip">
     <string>Load a part model from a file.</string>
@@ -601,11 +599,11 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-save.png</normaloff>:/icons/file-save.png</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>&amp;Save</string>
    </property>
    <property name="statusTip">
     <string>Save the part model.</string>
@@ -619,11 +617,11 @@
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-save-as.png</normaloff>:/icons/file-save-as.png</iconset>
    </property>
    <property name="text">
-    <string>Save As..</string>
+    <string>Sa&amp;ve As..</string>
    </property>
    <property name="whatsThis">
     <string>Save the part model to a specific file.</string>
@@ -634,29 +632,29 @@
   </action>
   <action name="actionInsertFrom">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-import.png</normaloff>:/icons/file-import.png</iconset>
    </property>
    <property name="text">
-    <string>Insert From..</string>
+    <string>&amp;Insert From..</string>
    </property>
   </action>
   <action name="actionExportTo">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-export.png</normaloff>:/icons/file-export.png</iconset>
    </property>
    <property name="text">
-    <string>Export To..</string>
+    <string>&amp;Export To..</string>
    </property>
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/settings.png</normaloff>:/icons/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Settings</string>
+    <string>Settin&amp;gs</string>
    </property>
    <property name="statusTip">
     <string>Edit the settings of LDForge.</string>
@@ -667,11 +665,11 @@
   </action>
   <action name="actionSetLDrawPath">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/settings.png</normaloff>:/icons/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Set LDraw Path</string>
+    <string>Set &amp;LDraw Path</string>
    </property>
    <property name="statusTip">
     <string>Change the LDraw directory path.</string>
@@ -679,11 +677,11 @@
   </action>
   <action name="actionScanPrimitives">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/radial.png</normaloff>:/icons/radial.png</iconset>
    </property>
    <property name="text">
-    <string>Scan Primitives</string>
+    <string>Scan &amp;Primitives</string>
    </property>
    <property name="statusTip">
     <string>Scan the primitives folder for primitive info. Use this if you add new primitives.</string>
@@ -691,11 +689,11 @@
   </action>
   <action name="actionExit">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/exit.png</normaloff>:/icons/exit.png</iconset>
    </property>
    <property name="text">
-    <string>Exit</string>
+    <string>E&amp;xit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -703,7 +701,7 @@
   </action>
   <action name="actionResetView">
    <property name="text">
-    <string>Reset View</string>
+    <string>&amp;Reset View</string>
    </property>
   </action>
   <action name="actionAxes">
@@ -714,11 +712,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/axes.png</normaloff>:/icons/axes.png</iconset>
    </property>
    <property name="text">
-    <string>Draw Axes</string>
+    <string>&amp;Draw Axes</string>
    </property>
   </action>
   <action name="actionWireframe">
@@ -726,11 +724,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/wireframe.png</normaloff>:/icons/wireframe.png</iconset>
    </property>
    <property name="text">
-    <string>Wireframe</string>
+    <string>&amp;Wireframe</string>
    </property>
   </action>
   <action name="actionBFCView">
@@ -738,11 +736,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/bfc-view.png</normaloff>:/icons/bfc-view.png</iconset>
    </property>
    <property name="text">
-    <string>BFC Red/Green View</string>
+    <string>&amp;BFC Red/Green View</string>
    </property>
    <property name="shortcut">
     <string>Shift+B</string>
@@ -750,34 +748,34 @@
   </action>
   <action name="actionSetOverlay">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/overlay.png</normaloff>:/icons/overlay.png</iconset>
    </property>
    <property name="text">
-    <string>Set Overlay Image</string>
+    <string>&amp;Set Overlay Image</string>
    </property>
   </action>
   <action name="actionClearOverlay">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/overlay-clear.png</normaloff>:/icons/overlay-clear.png</iconset>
    </property>
    <property name="text">
-    <string>Clear Overlay Image</string>
+    <string>&amp;Clear Overlay Image</string>
    </property>
   </action>
   <action name="actionScreenshot">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/screencap.png</normaloff>:/icons/screencap.png</iconset>
    </property>
    <property name="text">
-    <string>Screenshot</string>
+    <string>Screens&amp;hot</string>
    </property>
   </action>
   <action name="actionInsertRaw">
    <property name="text">
-    <string>LDraw Code..</string>
+    <string>&amp;LDraw Code..</string>
    </property>
   </action>
   <action name="actionNewLine">
@@ -786,7 +784,7 @@
      <normaloff>:/icons/add-line.png</normaloff>:/icons/add-line.png</iconset>
    </property>
    <property name="text">
-    <string>New Line</string>
+    <string>N&amp;ew Line</string>
    </property>
   </action>
   <action name="actionNewSubfile">
@@ -795,7 +793,7 @@
      <normaloff>:/icons/add-subfile.png</normaloff>:/icons/add-subfile.png</iconset>
    </property>
    <property name="text">
-    <string>New Subfile Reference</string>
+    <string>&amp;New Subfile Reference</string>
    </property>
   </action>
   <action name="actionNewTriangle">
@@ -804,7 +802,7 @@
      <normaloff>:/icons/add-triangle.png</normaloff>:/icons/add-triangle.png</iconset>
    </property>
    <property name="text">
-    <string>New Triangle</string>
+    <string>Ne&amp;w Triangle</string>
    </property>
   </action>
   <action name="actionNewQuad">
@@ -813,7 +811,7 @@
      <normaloff>:/icons/add-quad.png</normaloff>:/icons/add-quad.png</iconset>
    </property>
    <property name="text">
-    <string>New Quadrilateral</string>
+    <string>New &amp;Quadrilateral</string>
    </property>
   </action>
   <action name="actionNewCLine">
@@ -822,7 +820,7 @@
      <normaloff>:/icons/add-condline.png</normaloff>:/icons/add-condline.png</iconset>
    </property>
    <property name="text">
-    <string>New Conditional Line</string>
+    <string>New &amp;Conditional Line</string>
    </property>
   </action>
   <action name="actionNewComment">
@@ -831,7 +829,7 @@
      <normaloff>:/icons/add-comment.png</normaloff>:/icons/add-comment.png</iconset>
    </property>
    <property name="text">
-    <string>New Comment</string>
+    <string>New C&amp;omment</string>
    </property>
   </action>
   <action name="actionNewBFC">
@@ -840,7 +838,7 @@
      <normaloff>:/icons/add-bfc.png</normaloff>:/icons/add-bfc.png</iconset>
    </property>
    <property name="text">
-    <string>New BFC Statement</string>
+    <string>New &amp;BFC Statement</string>
    </property>
   </action>
   <action name="actionNewVertex">
@@ -849,16 +847,16 @@
      <normaloff>:/icons/add-vertex.png</normaloff>:/icons/add-vertex.png</iconset>
    </property>
    <property name="text">
-    <string>New Vertex</string>
+    <string>New &amp;Vertex</string>
    </property>
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/undo.png</normaloff>:/icons/undo.png</iconset>
    </property>
    <property name="text">
-    <string>Undo</string>
+    <string>&amp;Undo</string>
    </property>
    <property name="statusTip">
     <string>Undo a step.</string>
@@ -869,11 +867,11 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/redo.png</normaloff>:/icons/redo.png</iconset>
    </property>
    <property name="text">
-    <string>Redo</string>
+    <string>&amp;Redo</string>
    </property>
    <property name="statusTip">
     <string>Redo a step.</string>
@@ -884,11 +882,11 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/cut.png</normaloff>:/icons/cut.png</iconset>
    </property>
    <property name="text">
-    <string>Cut</string>
+    <string>&amp;Cut</string>
    </property>
    <property name="statusTip">
     <string>Cut the current selection to clipboard.</string>
@@ -899,11 +897,11 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/copy.png</normaloff>:/icons/copy.png</iconset>
    </property>
    <property name="text">
-    <string>Copy</string>
+    <string>C&amp;opy</string>
    </property>
    <property name="statusTip">
     <string>Copy the current selection to clipboard.</string>
@@ -917,11 +915,11 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/paste.png</normaloff>:/icons/paste.png</iconset>
    </property>
    <property name="text">
-    <string>Paste</string>
+    <string>&amp;Paste</string>
    </property>
    <property name="statusTip">
     <string>Paste clipboard contents.</string>
@@ -932,11 +930,11 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete</string>
    </property>
    <property name="statusTip">
     <string>Delete the selection</string>
@@ -947,11 +945,11 @@
   </action>
   <action name="actionSelectAll">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/select-all.png</normaloff>:/icons/select-all.png</iconset>
    </property>
    <property name="text">
-    <string>Select All</string>
+    <string>&amp;Select All</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -959,20 +957,20 @@
   </action>
   <action name="actionSelectByColor">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/select-color.png</normaloff>:/icons/select-color.png</iconset>
    </property>
    <property name="text">
-    <string>Select by Color</string>
+    <string>Select &amp;by Color</string>
    </property>
   </action>
   <action name="actionSelectByType">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/select-type.png</normaloff>:/icons/select-type.png</iconset>
    </property>
    <property name="text">
-    <string>Select by Type</string>
+    <string>Select b&amp;y Type</string>
    </property>
   </action>
   <action name="actionModeSelect">
@@ -983,7 +981,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-select.png</normaloff>:/icons/mode-select.png</iconset>
    </property>
    <property name="text">
@@ -998,11 +996,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-draw.png</normaloff>:/icons/mode-draw.png</iconset>
    </property>
    <property name="text">
-    <string>Draw Mode</string>
+    <string>Dra&amp;w Mode</string>
    </property>
    <property name="shortcut">
     <string>D</string>
@@ -1010,16 +1008,16 @@
   </action>
   <action name="actionSetDrawDepth">
    <property name="text">
-    <string>Set Draw Depth</string>
+    <string>Set Draw Dept&amp;h</string>
    </property>
   </action>
   <action name="actionSetColor">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/palette.png</normaloff>:/icons/palette.png</iconset>
    </property>
    <property name="text">
-    <string>Set Color</string>
+    <string>&amp;Set Color</string>
    </property>
    <property name="statusTip">
     <string>Set the color on given objects.</string>
@@ -1030,11 +1028,11 @@
   </action>
   <action name="actionAutocolor">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/autocolor.png</normaloff>:/icons/autocolor.png</iconset>
    </property>
    <property name="text">
-    <string>Auto-color</string>
+    <string>&amp;Auto-color</string>
    </property>
    <property name="statusTip">
     <string>Set the color of the given object to the first found unused color.</string>
@@ -1045,11 +1043,11 @@
   </action>
   <action name="actionUncolor">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/uncolorize.png</normaloff>:/icons/uncolorize.png</iconset>
    </property>
    <property name="text">
-    <string>Uncolor</string>
+    <string>&amp;Uncolor</string>
    </property>
    <property name="toolTip">
     <string>Uncolor</string>
@@ -1060,11 +1058,11 @@
   </action>
   <action name="actionInline">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/inline.png</normaloff>:/icons/inline.png</iconset>
    </property>
    <property name="text">
-    <string>Inline</string>
+    <string>I&amp;nline</string>
    </property>
    <property name="statusTip">
     <string>Inline selected subfiles.</string>
@@ -1075,11 +1073,11 @@
   </action>
   <action name="actionInlineDeep">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/inline-deep.png</normaloff>:/icons/inline-deep.png</iconset>
    </property>
    <property name="text">
-    <string>Deep Inline</string>
+    <string>&amp;Deep Inline</string>
    </property>
    <property name="statusTip">
     <string>Recursively inline selected subfiles down to polygons only.</string>
@@ -1090,11 +1088,11 @@
   </action>
   <action name="actionInvert">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/invert.png</normaloff>:/icons/invert.png</iconset>
    </property>
    <property name="text">
-    <string>Invert</string>
+    <string>&amp;Invert</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+W</string>
@@ -1102,20 +1100,20 @@
   </action>
   <action name="actionMakePrimitive">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/radial.png</normaloff>:/icons/radial.png</iconset>
    </property>
    <property name="text">
-    <string>Generate Primitive</string>
+    <string>&amp;Generate Primitive</string>
    </property>
   </action>
   <action name="actionSplitQuads">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/quad-split.png</normaloff>:/icons/quad-split.png</iconset>
    </property>
    <property name="text">
-    <string>Split Quads</string>
+    <string>Split &amp;Quads</string>
    </property>
    <property name="statusTip">
     <string>Split quads into triangles.</string>
@@ -1123,11 +1121,11 @@
   </action>
   <action name="actionEditRaw">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/set-contents.png</normaloff>:/icons/set-contents.png</iconset>
    </property>
    <property name="text">
-    <string>Edit LDraw Code</string>
+    <string>&amp;Edit LDraw Code</string>
    </property>
    <property name="statusTip">
     <string>Edit the LDraw code of this object.</string>
@@ -1135,35 +1133,23 @@
   </action>
   <action name="actionBorders">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/make-borders.png</normaloff>:/icons/make-borders.png</iconset>
    </property>
    <property name="text">
-    <string>Make Borders</string>
+    <string>&amp;Make Borders</string>
    </property>
    <property name="statusTip">
     <string>Add borders around given polygons.</string>
    </property>
   </action>
-  <action name="actionCornerVerts">
-   <property name="icon">
-    <iconset resource="../ldforge.qrc">
-     <normaloff>:/icons/corner-verts.png</normaloff>:/icons/corner-verts.png</iconset>
-   </property>
-   <property name="text">
-    <string>Make Corner Vertices</string>
-   </property>
-   <property name="statusTip">
-    <string>Adds vertex objects to the corners of the given polygons</string>
-   </property>
-  </action>
   <action name="actionRoundCoordinates">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/round-coords.png</normaloff>:/icons/round-coords.png</iconset>
    </property>
    <property name="text">
-    <string>Round Coordinates</string>
+    <string>&amp;Round Coordinates</string>
    </property>
    <property name="statusTip">
     <string>Round coordinates down to 3/4 decimals</string>
@@ -1171,11 +1157,11 @@
   </action>
   <action name="actionVisibilityToggle">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/visibility-toggle.png</normaloff>:/icons/visibility-toggle.png</iconset>
    </property>
    <property name="text">
-    <string>Toggle Visibility</string>
+    <string>&amp;Toggle Visibility</string>
    </property>
    <property name="statusTip">
     <string>Toggles visibility/hiding on objects.</string>
@@ -1183,11 +1169,11 @@
   </action>
   <action name="actionReplaceCoords">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/replace-coords.png</normaloff>:/icons/replace-coords.png</iconset>
    </property>
    <property name="text">
-    <string>Replace Coordinates</string>
+    <string>Re&amp;place Coordinates</string>
    </property>
    <property name="statusTip">
     <string>Find and replace coordinate values.</string>
@@ -1195,11 +1181,11 @@
   </action>
   <action name="actionFlip">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/flip.png</normaloff>:/icons/flip.png</iconset>
    </property>
    <property name="text">
-    <string>Flip</string>
+    <string>&amp;Flip</string>
    </property>
    <property name="statusTip">
     <string>Flip coordinates.</string>
@@ -1218,11 +1204,11 @@
   </action>
   <action name="actionYtruder">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/ytruder.png</normaloff>:/icons/ytruder.png</iconset>
    </property>
    <property name="text">
-    <string>Ytruder</string>
+    <string>&amp;Ytruder</string>
    </property>
    <property name="statusTip">
     <string>Extrude selected lines to a given plane</string>
@@ -1230,11 +1216,11 @@
   </action>
   <action name="actionRectifier">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/rectifier.png</normaloff>:/icons/rectifier.png</iconset>
    </property>
    <property name="text">
-    <string>Rectifier</string>
+    <string>&amp;Rectifier</string>
    </property>
    <property name="statusTip">
     <string>Optimizes quads into rect primitives.</string>
@@ -1242,11 +1228,11 @@
   </action>
   <action name="actionIntersector">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/intersector.png</normaloff>:/icons/intersector.png</iconset>
    </property>
    <property name="text">
-    <string>Intersector</string>
+    <string>&amp;Intersector</string>
    </property>
    <property name="statusTip">
     <string>Perform clipping between two input groups.</string>
@@ -1254,11 +1240,11 @@
   </action>
   <action name="actionIsecalc">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/isecalc.png</normaloff>:/icons/isecalc.png</iconset>
    </property>
    <property name="text">
-    <string>Isecalc</string>
+    <string>I&amp;secalc</string>
    </property>
    <property name="statusTip">
     <string>Compute intersection edgelines between two input groups.</string>
@@ -1266,11 +1252,11 @@
   </action>
   <action name="actionCoverer">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/coverer.png</normaloff>:/icons/coverer.png</iconset>
    </property>
    <property name="text">
-    <string>Coverer</string>
+    <string>&amp;Coverer</string>
    </property>
    <property name="statusTip">
     <string>Fill the space between two line shapes</string>
@@ -1278,7 +1264,7 @@
   </action>
   <action name="actionEdger2">
    <property name="text">
-    <string>Edger 2</string>
+    <string>&amp;Edger 2</string>
    </property>
   </action>
   <action name="actionHelp">
@@ -1286,11 +1272,11 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/help.png</normaloff>:/icons/help.png</iconset>
    </property>
    <property name="text">
-    <string>Help</string>
+    <string>&amp;Help</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -1298,16 +1284,16 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/ldforge.png</normaloff>:/icons/ldforge.png</iconset>
    </property>
    <property name="text">
-    <string>About LDForge</string>
+    <string>&amp;About LDForge</string>
    </property>
   </action>
   <action name="actionAboutQt">
    <property name="text">
-    <string>About Qt</string>
+    <string>About &amp;Qt</string>
    </property>
   </action>
   <action name="actionGridCoarse">
@@ -1315,11 +1301,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/grid-coarse.png</normaloff>:/icons/grid-coarse.png</iconset>
    </property>
    <property name="text">
-    <string>Coarse Grid</string>
+    <string>&amp;Coarse Grid</string>
    </property>
   </action>
   <action name="actionGridMedium">
@@ -1330,11 +1316,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/grid-medium.png</normaloff>:/icons/grid-medium.png</iconset>
    </property>
    <property name="text">
-    <string>Medium Grid</string>
+    <string>&amp;Medium Grid</string>
    </property>
   </action>
   <action name="actionGridFine">
@@ -1342,16 +1328,16 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/grid-fine.png</normaloff>:/icons/grid-fine.png</iconset>
    </property>
    <property name="text">
-    <string>Fine Grid</string>
+    <string>&amp;Fine Grid</string>
    </property>
   </action>
   <action name="actionEdit">
    <property name="text">
-    <string>Edit Selected Object</string>
+    <string>&amp;Edit Selected Object</string>
    </property>
   </action>
   <action name="actionMoveUp">
@@ -1360,7 +1346,7 @@
      <normaloff>:/icons/arrow-up.png</normaloff>:/icons/arrow-up.png</iconset>
    </property>
    <property name="text">
-    <string>Move Up</string>
+    <string>&amp;Move Up</string>
    </property>
    <property name="shortcut">
     <string>PgUp</string>
@@ -1372,7 +1358,7 @@
      <normaloff>:/icons/arrow-down.png</normaloff>:/icons/arrow-down.png</iconset>
    </property>
    <property name="text">
-    <string>Move Down</string>
+    <string>Move &amp;Down</string>
    </property>
    <property name="shortcut">
     <string>PgDown</string>
@@ -1380,11 +1366,11 @@
   </action>
   <action name="actionMoveXNeg">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-x-neg.png</normaloff>:/icons/move-x-neg.png</iconset>
    </property>
    <property name="text">
-    <string>Move -X</string>
+    <string>&amp;Move -X</string>
    </property>
    <property name="shortcut">
     <string>Left</string>
@@ -1392,11 +1378,11 @@
   </action>
   <action name="actionMoveXPos">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-x-pos.png</normaloff>:/icons/move-x-pos.png</iconset>
    </property>
    <property name="text">
-    <string>Move +X</string>
+    <string>Move +&amp;X</string>
    </property>
    <property name="shortcut">
     <string>Right</string>
@@ -1404,11 +1390,11 @@
   </action>
   <action name="actionMoveYNeg">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-y-neg.png</normaloff>:/icons/move-y-neg.png</iconset>
    </property>
    <property name="text">
-    <string>Move -Y</string>
+    <string>Move -&amp;Y</string>
    </property>
    <property name="shortcut">
     <string>Home</string>
@@ -1416,11 +1402,11 @@
   </action>
   <action name="actionMoveYPos">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-y-pos.png</normaloff>:/icons/move-y-pos.png</iconset>
    </property>
    <property name="text">
-    <string>Move +Y</string>
+    <string>M&amp;ove +Y</string>
    </property>
    <property name="shortcut">
     <string>End</string>
@@ -1428,11 +1414,11 @@
   </action>
   <action name="actionMoveZNeg">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-z-neg.png</normaloff>:/icons/move-z-neg.png</iconset>
    </property>
    <property name="text">
-    <string>Move -Z</string>
+    <string>Move -&amp;Z</string>
    </property>
    <property name="shortcut">
     <string>Down</string>
@@ -1440,11 +1426,11 @@
   </action>
   <action name="actionMoveZPos">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/move-z-pos.png</normaloff>:/icons/move-z-pos.png</iconset>
    </property>
    <property name="text">
-    <string>Move +Z</string>
+    <string>Mo&amp;ve +Z</string>
    </property>
    <property name="shortcut">
     <string>Up</string>
@@ -1452,7 +1438,7 @@
   </action>
   <action name="actionRotateXNeg">
    <property name="text">
-    <string>Rotate -X</string>
+    <string>&amp;Rotate -X</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Left</string>
@@ -1460,7 +1446,7 @@
   </action>
   <action name="actionRotateXPos">
    <property name="text">
-    <string>Rotate +X</string>
+    <string>Rotate +&amp;X</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Right</string>
@@ -1468,7 +1454,7 @@
   </action>
   <action name="actionRotateYNeg">
    <property name="text">
-    <string>Rotate -Y</string>
+    <string>Rotate -&amp;Y</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+End</string>
@@ -1476,7 +1462,7 @@
   </action>
   <action name="actionRotateYPos">
    <property name="text">
-    <string>Rotate +Y</string>
+    <string>R&amp;otate +Y</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Home</string>
@@ -1484,7 +1470,7 @@
   </action>
   <action name="actionRotateZNeg">
    <property name="text">
-    <string>Rotate -Z</string>
+    <string>Rotate -&amp;Z</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Down</string>
@@ -1492,7 +1478,7 @@
   </action>
   <action name="actionRotateZPos">
    <property name="text">
-    <string>Rotate +Z</string>
+    <string>Rotat&amp;e +Z</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Up</string>
@@ -1500,7 +1486,7 @@
   </action>
   <action name="actionRotationPoint">
    <property name="text">
-    <string>Set Rotation Point</string>
+    <string>&amp;Set Rotation Point</string>
    </property>
   </action>
   <action name="actionSaveAll">
@@ -1510,7 +1496,7 @@
   </action>
   <action name="actionClose">
    <property name="text">
-    <string>Close</string>
+    <string>&amp;Close</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -1526,11 +1512,11 @@
   </action>
   <action name="actionNewFile">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/file-new.png</normaloff>:/icons/file-new.png</iconset>
    </property>
    <property name="text">
-    <string>New File</string>
+    <string>New &amp;File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -1538,7 +1524,7 @@
   </action>
   <action name="actionDownloadFrom">
    <property name="text">
-    <string>Download From...</string>
+    <string>&amp;Download From...</string>
    </property>
   </action>
   <action name="actionAddHistoryLine">
@@ -1548,7 +1534,7 @@
   </action>
   <action name="actionJumpTo">
    <property name="text">
-    <string>Go to Line...</string>
+    <string>&amp;Go to Line...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>
@@ -1559,11 +1545,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-circle.png</normaloff>:/icons/mode-circle.png</iconset>
    </property>
    <property name="text">
-    <string>Circle Mode</string>
+    <string>C&amp;ircle Mode</string>
    </property>
    <property name="shortcut">
     <string>C</string>
@@ -1571,11 +1557,11 @@
   </action>
   <action name="actionVisibilityHide">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/visibility-hide.png</normaloff>:/icons/visibility-hide.png</iconset>
    </property>
    <property name="text">
-    <string>Hide</string>
+    <string>&amp;Hide</string>
    </property>
    <property name="toolTip">
     <string>Hides objects from view</string>
@@ -1583,11 +1569,11 @@
   </action>
   <action name="actionVisibilityReveal">
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/visibility-show.png</normaloff>:/icons/visibility-show.png</iconset>
    </property>
    <property name="text">
-    <string>Reveal</string>
+    <string>Re&amp;veal</string>
    </property>
    <property name="toolTip">
     <string>Reveals objects. Undoes hiding.</string>
@@ -1603,11 +1589,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-angle.png</normaloff>:/icons/mode-angle.png</iconset>
    </property>
    <property name="text">
-    <string>Draw Angles</string>
+    <string>Draw An&amp;gles</string>
    </property>
    <property name="toolTip">
     <string>Draw angle information when drawing lines</string>
@@ -1618,11 +1604,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/random-colors.png</normaloff>:/icons/random-colors.png</iconset>
    </property>
    <property name="text">
-    <string>Random colors</string>
+    <string>Ra&amp;ndom colors</string>
    </property>
    <property name="shortcut">
     <string>Shift+R</string>
@@ -1630,7 +1616,7 @@
   </action>
   <action name="actionOpenSubfiles">
    <property name="text">
-    <string>Open Subfiles for Editing</string>
+    <string>&amp;Open Subfiles for Editing</string>
    </property>
    <property name="toolTip">
     <string>Opens the documents used by the selected subparts for editing.</string>
@@ -1638,7 +1624,7 @@
   </action>
   <action name="actionSplitLines">
    <property name="text">
-    <string>Split Lines...</string>
+    <string>Split &amp;Lines...</string>
    </property>
   </action>
   <action name="actionDrawSurfaces">
@@ -1646,7 +1632,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Draw surfaces</string>
+    <string>Draw s&amp;urfaces</string>
    </property>
    <property name="toolTip">
     <string>Render surfaces (i.e. quads and triangles) on the viewport.</string>
@@ -1657,7 +1643,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Draw edgelines</string>
+    <string>Draw &amp;edgelines</string>
    </property>
    <property name="toolTip">
     <string>Render edgelines on the viewport</string>
@@ -1668,7 +1654,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Draw conditional lines</string>
+    <string>Draw conditional &amp;lines</string>
    </property>
    <property name="toolTip">
     <string>Render conditional lines on the viewport.</string>
@@ -1679,11 +1665,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-magicwand.png</normaloff>:/icons/mode-magicwand.png</iconset>
    </property>
    <property name="text">
-    <string>Magic wand</string>
+    <string>&amp;Magic wand</string>
    </property>
    <property name="shortcut">
     <string>W</string>
@@ -1694,11 +1680,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/mode-rectangle.png</normaloff>:/icons/mode-rectangle.png</iconset>
    </property>
    <property name="text">
-    <string>Rectangle Mode</string>
+    <string>Recta&amp;ngle Mode</string>
    </property>
    <property name="shortcut">
     <string>R</string>
@@ -1709,11 +1695,11 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../ldforge.qrc">
+    <iconset>
      <normaloff>:/icons/line.png</normaloff>:/icons/line.png</iconset>
    </property>
    <property name="text">
-    <string>Line Path Mode</string>
+    <string>&amp;Line Path Mode</string>
    </property>
    <property name="shortcut">
     <string>P</string>

@@ -373,12 +373,6 @@ void MainWindow::buildObjList()
 				break;
 			}
 
-			case OBJ_Vertex:
-			{
-				descr = static_cast<LDVertex*> (obj)->pos.toString (true);
-				break;
-			}
-
 			case OBJ_Subfile:
 			{
 				LDSubfile* ref = static_cast<LDSubfile*> (obj);

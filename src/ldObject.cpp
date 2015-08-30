@@ -72,7 +72,6 @@ LDOBJ_DEFAULT_CTOR (LDLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
 LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
-LDOBJ_DEFAULT_CTOR (LDVertex, LDObject)
 LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBFC, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
@@ -175,13 +174,6 @@ QString LDCondLine::asText() const
 QString LDError::asText() const
 {
 	return contents();
-}
-
-// =============================================================================
-//
-QString LDVertex::asText() const
-{
-	return format ("0 !LDFORGE VERTEX %1 %2", color(), pos);
 }
 
 // =============================================================================
@@ -590,11 +582,6 @@ void LDObject::move (Vertex vect)
 		LDMatrixObject* mo = static_cast<LDMatrixObject*> (this);
 		mo->setPosition (mo->position() + vect);
 	}
-	else if (type() == OBJ_Vertex)
-	{
-		// ugh
-		static_cast<LDVertex*> (this)->pos += vect;
-	}
 	else
 	{
 		for (int i = 0; i < numVertices(); ++i)
@@ -617,7 +604,6 @@ LDObject* LDObject::getDefault (const LDObjectType type)
 		case OBJ_Quad:			return LDSpawn<LDQuad>();
 		case OBJ_Empty:			return LDSpawn<LDEmpty>();
 		case OBJ_Error:			return LDSpawn<LDError>();
-		case OBJ_Vertex:		return LDSpawn<LDVertex>();
 		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
 		case OBJ_NumTypes:		break;
 	}
@@ -745,8 +731,6 @@ void LDCondLine::invert()
 	setVertex (0, vertex (1));
 	setVertex (1, tmp);
 }
-
-void LDVertex::invert() {}
 
 // =============================================================================
 //
@@ -917,9 +901,4 @@ void LDObject::getVertices (QVector<Vertex>& verts) const
 void LDSubfile::getVertices (QVector<Vertex>& verts) const
 {
 	verts << fileInfo()->inlineVertices();
-}
-
-void LDVertex::getVertices (QVector<Vertex>& verts) const
-{
-	verts.append (pos);
 }

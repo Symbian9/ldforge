@@ -53,7 +53,9 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 	{
 		if (vert == pos)
 		{
-			endDraw();
+			if (m_drawedVerts.size() >= 2)
+				endDraw();
+
 			return true;
 		}
 	}
@@ -90,16 +92,6 @@ void DrawMode::endDraw()
 
 	switch (verts.size())
 	{
-		case 1:
-		{
-			// 1 vertex - add a vertex object
-			LDVertex* obj = LDSpawn<LDVertex>();
-			obj->pos = verts[0];
-			obj->setColor (MainColor);
-			objs << obj;
-			break;
-		}
-
 		case 2:
 		{
 			// 2 verts - make a line
@@ -129,10 +121,10 @@ void DrawMode::endDraw()
 	finishDraw (objs);
 }
 
-template<typename _Type>
-_Type IntervalClamp (_Type a, _Type interval)
+template<typename T>
+T IntervalClamp (T a, T interval)
 {
-	_Type remainder = a % interval;
+	T remainder = a % interval;
 
 	if (remainder >= float (interval / 2))
 		a += interval;

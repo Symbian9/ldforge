@@ -360,13 +360,6 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 				bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 
-		case OBJ_Vertex:
-		{
-			LDVertex* vert = InitObject<LDVertex> (obj);
-			vert->pos.apply ([&](Axis ax, double& value) { value = dlg.dsb_coords[ax]->value(); });
-		}
-		break;
-
 		case OBJ_Subfile:
 		{
 			QString name = dlg.le_subfileName->text();

@@ -488,29 +488,6 @@ public:
 };
 
 //
-// LDVertex
-//
-// The vertex is an LDForce-specific extension which represents a single
-// vertex which can be used as a parameter to tools or to store coordinates
-// with. Vertices are a part authoring tool and they should not appear in
-// finished parts.
-//
-class LDVertex : public LDObject
-{
-	LDOBJ (Vertex)
-	LDOBJ_NAME (vertex)
-	LDOBJ_VERTICES (0) // TODO: move pos to m_vertices[0]
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor)
-	LDOBJ_NON_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
-public:
-	Vertex pos;
-	virtual void getVertices (QVector<Vertex>& verts) const override;
-};
-
-//
 // LDOverlay
 //
 // Overlay image meta, stored in the header of parts so as to preserve overlay

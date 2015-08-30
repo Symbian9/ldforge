@@ -238,7 +238,6 @@ public slots:
 	void slot_actionSplitQuads();
 	void slot_actionEditRaw();
 	void slot_actionBorders();
-	void slot_actionCornerVerts();
 	void slot_actionRoundCoordinates();
 	void slot_actionVisibilityHide();
 	void slot_actionVisibilityReveal();
