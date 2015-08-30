@@ -260,7 +260,7 @@ void GLCompiler::compileDocument (LDDocument* doc)
 //
 void GLCompiler::compileStaged()
 {
-	RemoveDuplicates (m_staged);
+	removeDuplicates (m_staged);
 
 	for (auto it = m_staged.begin(); it != m_staged.end(); ++it)
 	{

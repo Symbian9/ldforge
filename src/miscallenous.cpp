@@ -109,10 +109,10 @@ const GridData Grids[3] =
 double Grid::Snap (double value, const Grid::Config type)
 {
 	double snapvalue = (type == Coordinate) ? *CurrentGrid().coordinateSnap : *CurrentGrid().angleSnap;
-	double mult = floor (Abs<double> (value / snapvalue));
+	double mult = floor (qAbs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
-	if (Abs (value) - (mult * snapvalue) > snapvalue / 2)
+	if (qAbs (value) - (mult * snapvalue) > snapvalue / 2)
 		out += snapvalue;
 
 	if (value < 0)

@@ -162,12 +162,12 @@ void PartDownloader::modifyDestination (QString& dest) const
 
 	// If the part starts with s\ or s/, then use parts/s/. Same goes with
 	// 48\ and p/48/.
-	if (Eq (dest.left (2), "s\\", "s/"))
+	if (isOneOf (dest.left (2), "s\\", "s/"))
 	{
 		dest.remove (0, 2);
 		dest.prepend ("parts/s/");
 	}
-	elif (Eq (dest.left (3), "48\\", "48/"))
+	elif (isOneOf (dest.left (3), "48\\", "48/"))
 	{
 		dest.remove (0, 3);
 		dest.prepend ("p/48/");
@@ -573,7 +573,7 @@ void PartDownloadRequest::readyRead()
 //
 bool PartDownloadRequest::isFinished() const
 {
-    return Eq (state(), State::Finished, State::Failed);
+    return isOneOf (state(), State::Finished, State::Failed);
 }
 
 // =============================================================================

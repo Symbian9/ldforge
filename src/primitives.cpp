@@ -131,7 +131,7 @@ PrimitiveScanner::~PrimitiveScanner()
 //
 void PrimitiveScanner::work()
 {
-	int j = Min (m_i + 100, m_files.size());
+	int j = qMin (m_i + 100, m_files.size());
 
 	for (; m_i < j; ++m_i)
 	{
@@ -582,7 +582,7 @@ QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num)
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
 	int extra = (frac.length() + numstr.length() + root.length()) - 8;
-	root.chop (Clamp (extra, 0, 2));
+	root.chop (qBound (0, extra, 2));
 
 	// Stick them all together and return the result.
 	return prefix + frac + root + numstr + ".dat";

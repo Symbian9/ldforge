@@ -485,7 +485,7 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((Eq (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
+	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
 		(surface == VBOSF_Lines and cfg::DrawEdgeLines == false) or
 		(surface == VBOSF_CondLines and cfg::DrawConditionalLines == false))
 	{
@@ -636,7 +636,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
 					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
 
-			QRect targRect (v0.x(), v0.y(), Abs (v1.x() - v0.x()), Abs (v1.y() - v0.y())),
+			QRect targRect (v0.x(), v0.y(), qAbs (v1.x() - v0.x()), qAbs (v1.y() - v0.y())),
 				  srcRect (0, 0, overlay.img->width(), overlay.img->height());
 			paint.drawImage (targRect, *overlay.img, srcRect);
 		}
@@ -796,7 +796,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
 	int dx = ev->x() - m_mousePosition.x();
 	int dy = ev->y() - m_mousePosition.y();
-	m_totalmove += Abs (dx) + Abs (dy);
+	m_totalmove += qAbs (dx) + qAbs (dy);
 	setCameraMoving (false);
 
 	if (not m_editmode->mouseMoved (ev))
@@ -868,7 +868,7 @@ void GLRenderer::wheelEvent (QWheelEvent* ev)
 	doMakeCurrent();
 
 	zoomNotch (ev->delta() > 0);
-	zoom() = Clamp (zoom(), 0.01, 10000.0);
+	zoom() = qBound (0.01, zoom(), 10000.0);
 	setCameraMoving (true);
 	update();
 	ev->accept();
@@ -937,10 +937,10 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	int y1 = y0 + range.height();
 
 	// Clamp the values to ensure they're within bounds
-	x0 = Max (0, x0);
-	y0 = Max (0, y0);
-	x1 = Min (x1, m_width);
-	y1 = Min (y1, m_height);
+	x0 = qMax (0, x0);
+	y0 = qMax (0, y0);
+	x1 = qMin (x1, m_width);
+	y1 = qMin (y1, m_height);
 	const int areawidth = (x1 - x0);
 	const int areaheight = (y1 - y0);
 	const qint32 numpixels = areawidth * areaheight;
@@ -969,7 +969,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 			indices << idx;
 	}
 
-	RemoveDuplicates (indices);
+	removeDuplicates (indices);
 
 	for (qint32 idx : indices)
 	{
@@ -1082,7 +1082,7 @@ void GLRenderer::setPicking (const bool& a)
 		glDisable (GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth (Max<double> (cfg::LineThickness, 6.5));
+		glLineWidth (qMax<double> (cfg::LineThickness, 6.5));
 	}
 	else
 	{

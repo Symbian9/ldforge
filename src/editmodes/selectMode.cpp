@@ -76,10 +76,10 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 			}
 			else
 			{
-				int const x = Min (m_rangeStart.x(), mx);
-				int const y = Min (m_rangeStart.y(), my);
-				int const width = Abs (m_rangeStart.x() - mx);
-				int const height = Abs (m_rangeStart.y() - my);
+				int const x = qMin (m_rangeStart.x(), mx);
+				int const y = qMin (m_rangeStart.y(), my);
+				int const width = qAbs (m_rangeStart.x() - mx);
+				int const height = qAbs (m_rangeStart.y() - my);
 				area = QRect (x, y, width, height);
 			}
 

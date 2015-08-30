@@ -277,12 +277,12 @@ LDBoundingBox& LDBoundingBox::operator<< (LDObject* obj)
 //
 void LDBoundingBox::calcVertex (const Vertex& vertex)
 {
-	m_vertex0.setX (Min (vertex.x(), m_vertex0.x()));
-	m_vertex0.setY (Min (vertex.y(), m_vertex0.y()));
-	m_vertex0.setZ (Min (vertex.z(), m_vertex0.z()));
-	m_vertex1.setX (Max (vertex.x(), m_vertex1.x()));
-	m_vertex1.setY (Max (vertex.y(), m_vertex1.y()));
-	m_vertex1.setZ (Max (vertex.z(), m_vertex1.z()));
+	m_vertex0.setX (qMin (vertex.x(), m_vertex0.x()));
+	m_vertex0.setY (qMin (vertex.y(), m_vertex0.y()));
+	m_vertex0.setZ (qMin (vertex.z(), m_vertex0.z()));
+	m_vertex1.setX (qMax (vertex.x(), m_vertex1.x()));
+	m_vertex1.setY (qMax (vertex.y(), m_vertex1.y()));
+	m_vertex1.setZ (qMax (vertex.z(), m_vertex1.z()));
 	setEmpty (false);
 }
 
@@ -312,8 +312,8 @@ double LDBoundingBox::longestMeasurement() const
 	elif (yscale > zscale)
 		size = yscale;
 
-	if (Abs (size) >= 2.0)
-		return Abs (size / 2);
+	if (qAbs (size) >= 2.0)
+		return qAbs (size / 2);
 
 	return 1.0;
 }

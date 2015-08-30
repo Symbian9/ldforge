@@ -46,14 +46,14 @@ void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& bounda
 	// of candidates.
 	for (auto it = candidates.begin(); it != candidates.end(); ++it)
 	{
-		if (not Eq ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
+		if (not isOneOf ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
 			continue;
 
 		int matches = 0;
 
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			if (not Eq (obj->vertex (i), (*it)->vertex (0), (*it)->vertex (1)))
+			if (not isOneOf (obj->vertex (i), (*it)->vertex (0), (*it)->vertex (1)))
 				continue;
 
 			if (++matches == 2)
@@ -117,7 +117,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 	for (int i = 0; i < obj->numVertices(); ++i)
 		candidates += m_vertices[obj->vertex (i)];
 
-	RemoveDuplicates (candidates);
+	removeDuplicates (candidates);
 
 	// If we're dealing with surfaces, get a list of boundaries.
 	if (matchesneeded > 1)
@@ -160,8 +160,8 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 			// Check if a boundary gets in between the objects.
 			for (auto boundary : boundaries)
 			{
-				if (Eq (matches[0], std::get<0> (boundary), std::get<1> (boundary)) and
-					Eq (matches[1], std::get<0> (boundary), std::get<1> (boundary)))
+				if (isOneOf (matches[0], std::get<0> (boundary), std::get<1> (boundary)) and
+					isOneOf (matches[1], std::get<0> (boundary), std::get<1> (boundary)))
 				{
 					throw 0;
 				}

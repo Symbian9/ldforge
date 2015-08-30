@@ -483,7 +483,7 @@ void MainWindow::slot_selectionChanged()
 
 	// Update the GL renderer
 	LDObjectList compound = priorSelection + Selection();
-	RemoveDuplicates (compound);
+	removeDuplicates (compound);
 
 	for (LDObject* obj : compound)
 		R()->compileObject (obj);
@@ -908,7 +908,7 @@ void MakeColorComboBox (QComboBox* box)
 	{
 		QIcon ico = MakeColorIcon (pair.first, 16);
 		box->addItem (ico, format ("[%1] %2 (%3 object%4)",
-			pair.first, pair.first.name(), pair.second, Plural (pair.second)));
+			pair.first, pair.first.name(), pair.second, plural (pair.second)));
 		box->setItemData (row, pair.first.index());
 
 		++row;

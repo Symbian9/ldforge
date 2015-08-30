@@ -687,7 +687,7 @@ void MainWindow::slot_actionSplitLines()
 
 	for (LDObject* obj : Selection())
 	{
-		if (not Eq (obj->type(), OBJ_Line, OBJ_CondLine))
+		if (not isOneOf (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
 		QVector<LDObject*> newsegs;

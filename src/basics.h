@@ -199,93 +199,44 @@ static const double Pi = 3.14159265358979323846;
 // =============================================================================
 // Plural expression
 template<typename T>
-static inline const char* Plural (T n)
+static inline const char* plural (T n)
 {
 	return (n != 1) ? "s" : "";
 }
 
-// =============================================================================
-// Templated clamp
 template<typename T>
-static inline T Clamp (T a, T min, T max)
+bool isZero (T a)
 {
-	return (a > max) ? max : (a < min) ? min : a;
-}
-
-// Templated minimum
-template<typename T>
-static inline T Min (T a, T b)
-{
-	return (a < b) ? a : b;
-}
-
-// Templated maximum
-template<typename T>
-static inline T Max (T a, T b)
-{
-	return (a > b) ? a : b;
-}
-
-// Templated absolute value
-template<typename T>
-static inline T Abs (T a)
-{
-	return (a >= 0) ? a : -a;
+	return qFuzzyCompare (a + 1.0, 1.0);
 }
 
 template<typename T>
-inline bool IsZero (T a)
+bool isInteger (T a)
 {
-	return Abs<T> (a) < 0.00001;
+	return (qAbs (a - floor(a)) < 0.00001) or (qAbs (a - ceil(a)) < 0.00001);
 }
 
 template<typename T>
-inline bool IsIntegral (T a)
-{
-	return (Abs (a - floor(a)) < 0.00001) or (Abs (a - ceil(a)) < 0.00001);
-}
-
-template<typename T>
-inline bool IsWithin (T a, T b, T c)
-{
-	return a >= b and a <= c;
-}
-
-template<typename T>
-void RemoveDuplicates (T& a)
+void removeDuplicates (T& a)
 {
 	std::sort (a.begin(), a.end());
 	a.erase (std::unique (a.begin(), a.end()), a.end());
-}
-
-inline QString UTF16 (const char16_t* a)
-{
-	if (Q_LIKELY (sizeof(char16_t) == sizeof(unsigned short)))
-		return QString::fromUtf16 (reinterpret_cast<const unsigned short*> (a));
-
-	QVector<unsigned short> data;
-
-	for (const char16_t* ap = &a[0]; *ap != '\u0000'; ++ap)
-		data << *ap;
-
-	data << '\u0000';
-	return QString::fromUtf16 (data.constData());
 }
 
 //
 // Returns true if first arg is equal to any of the other args
 //
 template<typename T, typename Arg, typename... Args>
-bool Eq (T const& a, Arg const& arg, Args const&... args)
+bool isOneOf (T const& a, Arg const& arg, Args const&... args)
 {
 	if (a == arg)
 		return true;
 
-	return Eq (a, args...);
+	return isOneOf (a, args...);
 }
 
 template<typename T>
-bool Eq (T const&)
+bool isOneOf (T const&)
 {
 	return false;
 }

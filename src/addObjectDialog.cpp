@@ -351,7 +351,8 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		case OBJ_BFC:
 		{
 			LDBFC* bfc = InitObject<LDBFC> (obj);
-			if (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1))
+			int value = dlg.rb_bfcType->value();
+			if (value == qBound (0, value, int (BFCStatement::NumValues) - 1))
 				bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 

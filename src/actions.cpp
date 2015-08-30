@@ -253,7 +253,7 @@ void MainWindow::slot_actionSelectByColor()
 			colors << obj->color();
 	}
 
-	RemoveDuplicates (colors);
+	removeDuplicates (colors);
 	CurrentDocument()->clearSelection();
 
 	for (LDObject* obj : CurrentDocument()->objects())
@@ -281,8 +281,8 @@ void MainWindow::slot_actionSelectByType()
 			subfilenames << static_cast<LDSubfile*> (obj)->fileInfo()->name();
 	}
 
-	RemoveDuplicates (types);
-	RemoveDuplicates (subfilenames);
+	removeDuplicates (types);
+	removeDuplicates (subfilenames);
 	CurrentDocument()->clearSelection();
 
 	for (LDObject* obj : CurrentDocument()->objects())
@@ -771,7 +771,7 @@ void MainWindow::slot_actionSubfileSelection()
 	// be carried over to the subfile.
 	for (LDObjectIterator<LDBFC> it (CurrentDocument()); it.isValid(); ++it)
 	{
-		if (Eq (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
+		if (isOneOf (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
 		{
 			bfctype = it->statement();
 			break;

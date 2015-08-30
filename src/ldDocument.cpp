@@ -140,7 +140,7 @@ LDDocument* FindDocument (QString name)
 		if (file == null)
 			continue;
 
-		if (Eq (name, file->name(), file->defaultName()))
+		if (isOneOf (name, file->name(), file->defaultName()))
 			return file;
 	}
 
@@ -1251,7 +1251,7 @@ void LDDocument::mergeVertices()
 	for (QVector<Vertex> const& verts : m_objectVertices)
 		m_vertices << verts;
 
-	RemoveDuplicates (m_vertices);
+	removeDuplicates (m_vertices);
 	m_needVertexMerge = false;
 }
 

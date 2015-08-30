@@ -470,7 +470,7 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 		obj->swap (file->getObject (target));
 	}
 
-	RemoveDuplicates (objsToCompile);
+	removeDuplicates (objsToCompile);
 
 	// The objects need to be recompiled, otherwise their pick lists are left with
 	// the wrong index colors which messes up selection.
@@ -510,7 +510,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 		if (not text.isEmpty())
 			text += ", ";
 
-		QString noun = format ("%1%2", typeName (objType), Plural (count));
+		QString noun = format ("%1%2", typeName (objType), plural (count));
 		text += format ("%1 %2", count, noun);
 	}
 

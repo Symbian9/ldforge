@@ -215,7 +215,7 @@ void parseLDConfig()
 
 		// Parse alpha if given.
 		if (pars.parseLDConfigTag ("ALPHA", valuestr))
-			alpha = Clamp (valuestr.toInt(), 0, 255);
+			alpha = qBound (0, valuestr.toInt(), 255);
 
 		ColorDataEntry& entry = ColorData[code];
 		entry.name = name;
