@@ -31,7 +31,7 @@
 #include "glCompiler.h"
 #include "partDownloader.h"
 #include "ldpaths.h"
-#include "dialogs.h"
+#include "dialogs/openprogressdialog.h"
 
 CFGENTRY (List, RecentFiles, {})
 CFGENTRY (Bool, TryDownloadMissingFiles, false)
@@ -349,8 +349,8 @@ void LDFileLoader::work (int i)
 		setProgress (i);
 
 		// If we have a dialog pointer, update the progress now
-		if (isOnForeground())
-			dlg->updateProgress (i);
+		if (dlg)
+			dlg->setProgress (i);
 	}
 
 	// If we're done now, tell the environment we're done and stop.

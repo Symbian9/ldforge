@@ -65,26 +65,6 @@ private slots:
 };
 
 // =============================================================================
-class OpenProgressDialog : public QDialog
-{
-	Q_OBJECT
-	PROPERTY (public,	int, progress,	setProgress,	STOCK_WRITE)
-	PROPERTY (public,	int, numLines,	setNumLines,	CUSTOM_WRITE)
-
-public:
-	explicit OpenProgressDialog (QWidget* parent = null, Qt::WindowFlags f = 0);
-	virtual ~OpenProgressDialog();
-
-public slots:
-	void updateProgress (int progress);
-
-private:
-	Ui_OpenProgressUI* ui;
-
-	void updateValues();
-};
-
-// =============================================================================
 class ExtProgPathPrompt : public QDialog
 {
 	Q_OBJECT

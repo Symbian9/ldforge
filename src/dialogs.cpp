@@ -38,7 +38,6 @@
 #include "ldDocument.h"
 #include "dialogs.h"
 #include "ui_overlay.h"
-#include "ui_openprogress.h"
 #include "ui_extprogpath.h"
 #include "ui_about.h"
 #include "ui_bombbox.h"
@@ -155,49 +154,6 @@ void OverlayDialog::slot_dimensionsChanged()
 {
 	bool enable = (ui->width->value() != 0) or (ui->height->value() != 0);
 	ui->buttonBox->button (QDialogButtonBox::Ok)->setEnabled (enable);
-}
-
-// =============================================================================
-// =============================================================================
-OpenProgressDialog::OpenProgressDialog (QWidget* parent, Qt::WindowFlags f) : QDialog (parent, f)
-{
-	ui = new Ui_OpenProgressUI;
-	ui->setupUi (this);
-	ui->progressText->setText ("Parsing...");
-	setNumLines (0);
-	m_progress = 0;
-}
-
-// =============================================================================
-// =============================================================================
-OpenProgressDialog::~OpenProgressDialog()
-{
-	delete ui;
-}
-
-// =============================================================================
-// =============================================================================
-void OpenProgressDialog::setNumLines (int const& a)
-{
-	m_numLines = a;
-	ui->progressBar->setRange (0, numLines());
-	updateValues();
-}
-
-// =============================================================================
-// =============================================================================
-void OpenProgressDialog::updateValues()
-{
-	ui->progressText->setText (format ("Parsing... %1 / %2", progress(), numLines()));
-	ui->progressBar->setValue (progress());
-}
-
-// =============================================================================
-// =============================================================================
-void OpenProgressDialog::updateProgress (int progress)
-{
-	setProgress (progress);
-	updateValues();
 }
 
 // =============================================================================
