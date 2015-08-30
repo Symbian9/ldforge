@@ -100,7 +100,6 @@ class LDObject
 
 public:
 	LDObject (LDDocument* document = nullptr);
-	virtual ~LDObject();
 
 	// This object as LDraw code
 	virtual QString				asText() const = 0;
@@ -189,13 +188,18 @@ public:
 	static QString describeObjects (const LDObjectList& objs);
 	static LDObject* fromID (int id);
 	LDPolygon* getPolygon();
+	bool isDestroyed() const { return m_isDestroyed; }
 
 	// TODO: make this private!
 	QListWidgetItem* qObjListEntry;
 
+protected:
+	virtual ~LDObject();
+
 private:
 	Vertex m_coords[4];
-
+	bool m_isDestroyed;
+	
 	void chooseID();
 };
 
@@ -539,35 +543,3 @@ enum
 };
 
 QString PreferredLicenseText();
-
-template<typename T>
-inline void DynamicExecute (LDObject* obj, std::function<void (T*)> func)
-{
-	static_assert (std::is_base_of<LDObject, T>::value,
-		"DynamicExecute may only be used with LDObject-derivatives");
-
-	if (obj->type() == T::SubclassType)
-		func (static_cast<T*> (obj));
-}
-
-struct LDIterationBreakage {};
-
-template<typename T>
-inline void LDIterate (LDObjectList const& objs,
-	std::function<void (T*)> func)
-{
-	static_assert (std::is_base_of<LDObject, T>::value,
-		"LDIterate may only be used with LDObject-derivatives");
-
-	try
-	{
-		for (LDObject* const& obj : objs)
-			DynamicExecute<T> (obj, func);
-	}
-	catch (LDIterationBreakage) {}
-}
-
-inline void Break()
-{
-	throw LDIterationBreakage();
-}

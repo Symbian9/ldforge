@@ -36,6 +36,7 @@
 #include "ui_editraw.h"
 #include "ui_flip.h"
 #include "ui_addhistoryline.h"
+#include "ldobjectiterator.h"
 
 EXTERN_CFGENTRY (String, DefaultUser)
 
@@ -122,14 +123,14 @@ static void DoInline (bool deep)
 {
 	LDObjectList sel = Selection();
 
-	LDIterate<LDSubfile> (Selection(), [&](LDSubfile* const& ref)
+	for (LDObjectIterator<LDSubfile> it (Selection()); it.isValid(); ++it)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		long idx = ref->lineNumber();
+		long idx = it->lineNumber();
 
 		assert (idx != -1);
-		LDObjectList objs = ref->inlineContents (deep, false);
+		LDObjectList objs = it->inlineContents (deep, false);
 
 		// Merge in the inlined objects
 		for (LDObject* inlineobj : objs)
@@ -142,8 +143,8 @@ static void DoInline (bool deep)
 		}
 
 		// Delete the subfile now as it's been inlined.
-		ref->destroy();
-	});
+		it->destroy();
+	}
 }
 
 void MainWindow::slot_actionInline()
@@ -164,22 +165,22 @@ void MainWindow::slot_actionSplitQuads()
 {
 	int num = 0;
 
-	LDIterate<LDQuad> (Selection(), [&](LDQuad* const& quad)
+	for (LDObjectIterator<LDQuad> it (Selection()); it.isValid(); ++it)
 	{
 		// Find the index of this quad
-		long index = quad->lineNumber();
+		long index = it->lineNumber();
 
 		if (index == -1)
 			return;
 
-		QList<LDTriangle*> triangles = quad->splitToTriangles();
+		QList<LDTriangle*> triangles = it->splitToTriangles();
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
 		CurrentDocument()->setObject (index, triangles[0]);
 		CurrentDocument()->insertObj (index + 1, triangles[1]);
 		num++;
-	});
+	}
 
 	print ("%1 quadrilaterals split", num);
 	refresh();
@@ -595,13 +596,13 @@ void MainWindow::slot_actionDemote()
 {
 	int num = 0;
 
-	LDIterate<LDCondLine> (Selection(), [&](LDCondLine* const& cnd)
+	for (LDObjectIterator<LDCondLine> it (Selection()); it.isValid(); ++it)
 	{
-		cnd->toEdgeLine();
+		it->toEdgeLine();
 		++num;
-	});
+	}
 
-	print (tr ("Demoted %1 conditional lines"), num);
+	print (tr ("Converted %1 conditional lines"), num);
 	refresh();
 }
 

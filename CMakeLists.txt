@@ -145,7 +145,7 @@ set (LDFORGE_RESOURCES ldforge.qrc)
 # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
 
 if (NOT MSVC)
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall -Wno-maybe-uninitialized")
 endif()
 
 if (TRANSPARENT_DIRECT_COLORS)

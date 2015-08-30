@@ -48,7 +48,8 @@ LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
 	m_document (nullptr),
-	qObjListEntry (null)
+	qObjListEntry (null),
+	m_isDestroyed (false)
 {
 	if (document)
 		document->addObject (this);
@@ -78,22 +79,8 @@ LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 
 LDObject::~LDObject()
 {
-	// Don't bother during program termination
-	if (IsExiting() == false)
-	{
-		deselect();
-
-		// If this object was associated to a file, remove it off it now
-		if (document() != null)
-			document()->forgetObject (this);
-
-		// Delete the GL lists
-		if (g_win != null)
-			g_win->R()->forgetObject (this);
-
-		// Remove this object from the list of LDObjects
-		g_allObjects.erase (g_allObjects.find (id()));
-	}
+	if (not IsExiting() and not m_isDestroyed)
+		print ("Warning: Object #%1 was not destroyed before getting deleted\n", id());
 }
 
 // =============================================================================
@@ -314,6 +301,25 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 //
 void LDObject::destroy()
 {
+	// Don't bother during program termination (FIXME)
+	if (IsExiting() == false)
+	{
+		deselect();
+
+		// If this object was associated to a file, remove it off it now
+		if (document() != null)
+			document()->forgetObject (this);
+
+		// Delete the GL lists
+		if (g_win != null)
+			g_win->R()->forgetObject (this);
+
+		// Remove this object from the list of LDObjects
+		g_allObjects.erase (g_allObjects.find (id()));
+
+		m_isDestroyed = true;
+	}
+
 	delete this;
 }
 

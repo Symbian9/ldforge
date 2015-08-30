@@ -36,7 +36,7 @@
 #include "radioGroup.h"
 #include "colors.h"
 #include "glCompiler.h"
-#include "ui_newpart.h"
+#include "ldobjectiterator.h"
 #include "dialogs/ldrawpathdialog.h"
 #include "dialogs/newpartdialog.h"
 #include "editmodes/abstractEditMode.h"
@@ -759,8 +759,6 @@ void MainWindow::slot_actionSubfileSelection()
 
 		int subidx = 1;
 		QString digits;
-		QFile f;
-		QString testfname;
 
 		// Now find the appropriate filename. Increase the number of the subfile
 		// until we find a name which isn't already taken.
@@ -778,15 +776,14 @@ void MainWindow::slot_actionSubfileSelection()
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	LDIterate<LDBFC> (CurrentDocument()->objects(), [&] (LDBFC* const& bfc)
+	for (LDObjectIterator<LDBFC> it (CurrentDocument()); it.isValid(); ++it)
 	{
-		if (Eq (bfc->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, 
-			BFCStatement::NoCertify))
+		if (Eq (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
 		{
-			bfctype = bfc->statement();
-			Break();
+			bfctype = it->statement();
+			break;
 		}
-	});
+	}
 
 	// Get the body of the document in LDraw code
 	for (LDObject* obj : Selection())
