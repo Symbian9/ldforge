@@ -252,8 +252,8 @@ void LDObject::replace (LDObject* other)
 //
 void LDObject::swap (LDObject* other)
 {
-	assert (document() == other->document());
-	document()->swapObjects (this, other);
+	if (document() == other->document())
+		document()->swapObjects (this, other);
 }
 
 // =============================================================================
@@ -379,7 +379,6 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 	// Transform the objects
 	for (LDObject* obj : objs)
 	{
-		// assert (obj->type() != OBJ_Subfile);
 		// Set the parent now so we know what inlined the object.
 		obj->setParent (this);
 		TransformObject (obj, transform(), position(), color());
@@ -470,7 +469,6 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 			// One of the objects hit the extrema. If this happens, this should be the first
 			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
 			// abort the entire operation.
-			assert (i == start);
 			return;
 		}
 
@@ -549,9 +547,8 @@ LDObject* LDObject::topLevelParent()
 LDObject* LDObject::next() const
 {
 	int idx = lineNumber();
-	assert (idx != -1);
 
-	if (idx == document()->getObjectCount() - 1)
+	if (idx == -1 or idx == document()->getObjectCount() - 1)
 		return nullptr;
 
 	return document()->getObject (idx + 1);
@@ -562,9 +559,8 @@ LDObject* LDObject::next() const
 LDObject* LDObject::previous() const
 {
 	int idx = lineNumber();
-	assert (idx != -1);
 
-	if (idx == 0)
+	if (idx <= 0)
 		return nullptr;
 
 	return document()->getObject (idx - 1);
@@ -623,7 +619,7 @@ LDObject* LDObject::getDefault (const LDObjectType type)
 		case OBJ_Error:			return LDSpawn<LDError>();
 		case OBJ_Vertex:		return LDSpawn<LDVertex>();
 		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
-		case OBJ_NumTypes:		assert (false);
+		case OBJ_NumTypes:		break;
 	}
 	return nullptr;
 }

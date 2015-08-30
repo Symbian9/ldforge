@@ -114,7 +114,6 @@ PrimitiveScanner::PrimitiveScanner (QObject* parent) :
 {
 	g_activeScanner = this;
 	QDir dir = LDPaths::primitivesDir();
-	assert (dir.exists());
 	m_baselen = dir.absolutePath().length();
 	GetRecursiveFilenames (dir, m_files);
 	emit starting (m_files.size());

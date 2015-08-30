@@ -72,7 +72,6 @@ double Vertex::operator[] (Axis ax) const
 		case Z: return z();
 	}
 
-	assert (false);
 	return 0.0;
 }
 
@@ -122,8 +121,8 @@ Matrix::Matrix (double fillval)
 //
 Matrix::Matrix (const std::initializer_list<double>& vals)
 {
-	assert (vals.size() == 9);
-	memcpy (&m_vals[0], vals.begin(), sizeof m_vals);
+	if (vals.size() == 9)
+		memcpy (&m_vals[0], vals.begin(), sizeof m_vals);
 }
 
 // =============================================================================

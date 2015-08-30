@@ -121,29 +121,29 @@ void MainWindow::slot_actionDelete()
 //
 static void DoInline (bool deep)
 {
-	LDObjectList sel = Selection();
-
 	for (LDObjectIterator<LDSubfile> it (Selection()); it.isValid(); ++it)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		long idx = it->lineNumber();
+		int idx = it->lineNumber();
 
-		assert (idx != -1);
-		LDObjectList objs = it->inlineContents (deep, false);
-
-		// Merge in the inlined objects
-		for (LDObject* inlineobj : objs)
+		if (idx != -1)
 		{
-			QString line = inlineobj->asText();
-			inlineobj->destroy();
-			LDObject* newobj = ParseLine (line);
-			CurrentDocument()->insertObj (idx++, newobj);
-			newobj->select();
+			LDObjectList objs = it->inlineContents (deep, false);
+	
+			// Merge in the inlined objects
+			for (LDObject* inlineobj : objs)
+			{
+				QString line = inlineobj->asText();
+				inlineobj->destroy();
+				LDObject* newobj = ParseLine (line);
+				CurrentDocument()->insertObj (idx++, newobj);
+				newobj->select();
+			}
+	
+			// Delete the subfile now as it's been inlined.
+			it->destroy();
 		}
-
-		// Delete the subfile now as it's been inlined.
-		it->destroy();
 	}
 }
 

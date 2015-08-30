@@ -92,5 +92,3 @@ public:
 private slots:
 	void slot_mail();
 };
-
-void DisplayBombBox (const QString& message);

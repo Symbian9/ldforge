@@ -28,11 +28,10 @@ RingFinder::RingFinder() {}
 bool RingFinder::findRingsRecursor (double r0, double r1, Solution& currentSolution)
 {
 	// Don't recurse too deep.
-	if (m_stack >= 5)
+	if (m_stack >= 5 or r1 < r0)
 		return false;
 
 	// Find the scale and number of a ring between r1 and r0.
-	assert (r1 >= r0);
 	double scale = r1 - r0;
 	double num = r0 / scale;
 

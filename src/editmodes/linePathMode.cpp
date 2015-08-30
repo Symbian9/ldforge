@@ -16,16 +16,18 @@ void LinePathMode::render (QPainter& painter) const
 		points << renderer()->coordconv3_2 (vrt);
 
 	painter.setPen (renderer()->textPen());
-	assert (points.size() == points3d.size());
 
-	for (int i = 0; i < points.size() - 1; ++i)
+	if (points.size() == points3d.size())
 	{
-		painter.drawLine (QLineF (points[i], points[i + 1]));
-		drawLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
+		for (int i = 0; i < points.size() - 1; ++i)
+		{
+			painter.drawLine (QLineF (points[i], points[i + 1]));
+			drawLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
+		}
+	
+		for (QPointF const& point : points)
+			renderer()->drawBlip (painter, point);
 	}
-
-	for (QPointF const& point : points)
-		renderer()->drawBlip (painter, point);
 }
 
 bool LinePathMode::mouseReleased (MouseEventData const& data)

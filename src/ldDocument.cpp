@@ -1151,7 +1151,8 @@ bool IsSafeToCloseAll()
 //
 void LDDocument::setObject (int idx, LDObject* obj)
 {
-	assert (idx >= 0 and idx < m_objects.size());
+	if (idx < 0 or idx >= m_objects.size())
+		return;
 
 	// Mark this change to history
 	if (not m_history->isIgnoring())
@@ -1389,26 +1390,24 @@ void LoadLogoStuds()
 //
 void LDDocument::addToSelection (LDObject* obj) // [protected]
 {
-	if (obj->isSelected())
-		return;
-
-	assert (obj->document() == this);
-	m_sel << obj;
-	g_win->R()->compileObject (obj);
-	obj->setSelected (true);
+	if (not obj->isSelected() and obj->document() == this)
+	{
+		m_sel << obj;
+		g_win->R()->compileObject (obj);
+		obj->setSelected (true);
+	}
 }
 
 // =============================================================================
 //
 void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 {
-	if (not obj->isSelected())
-		return;
-
-	assert (obj->document() == this);
-	m_sel.removeOne (obj);
-	g_win->R()->compileObject (obj);
-	obj->setSelected (false);
+	if (obj->isSelected() and obj->document() == this)
+	{
+		m_sel.removeOne (obj);
+		g_win->R()->compileObject (obj);
+		obj->setSelected (false);
+	}
 }
 
 // =============================================================================
@@ -1416,9 +1415,12 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 void LDDocument::clearSelection()
 {
 	for (LDObject* obj : m_sel)
-		removeFromSelection (obj);
+	{
+		g_win->R()->compileObject (obj);
+		obj->setSelected (false);
+	}
 
-	assert (m_sel.isEmpty());
+	m_sel.clear();
 }
 
 // =============================================================================
@@ -1434,10 +1436,13 @@ void LDDocument::swapObjects (LDObject* one, LDObject* other)
 {
 	int a = m_objects.indexOf (one);
 	int b = m_objects.indexOf (other);
-	assert (a != b and a != -1 and b != -1);
-	m_objects[b] = one;
-	m_objects[a] = other;
-	addToHistory (new SwapHistory (one->id(), other->id()));
+
+	if (a != b and a != -1 and b != -1)
+	{
+		m_objects[b] = one;
+		m_objects[a] = other;
+		addToHistory (new SwapHistory (one->id(), other->id()));
+	}
 }
 
 // =============================================================================

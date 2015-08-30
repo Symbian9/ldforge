@@ -92,23 +92,7 @@ public: \
 #define FUNCNAME __func__
 #endif // __GNUC__
 
-// =============================================================================
-//
 #define dvalof(A) dprint ("value of '%1' = %2\n", #A, A)
-
-// =============================================================================
-//
-// Replace assert with a version that shows a GUI dialog if possible.
-// On Windows I just can't get the actual error messages otherwise.
-//
-#undef assert
-
-#ifdef DEBUG
-# define assert(N) { ((N) ? (void) 0 : HandleAssertFailure (__FILE__, __LINE__, FUNCNAME, #N)); }
-#else
-# define assert(N) {}
-#endif // DEBUG
-
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
 #define NUMERIC_ENUM_OPERATORS(T) \
@@ -120,7 +104,6 @@ public: \
 #if QT_VERSION >= QT_VERSION_CHECK (5, 0, 0)
 # define USE_QT5
 #endif
-
 
 #define FOR_ENUM_NAME_HELPER(LINE) enum_iterator_ ## LINE
 #define FOR_ENUM_NAME(LINE) FOR_ENUM_NAME_HELPER(LINE)

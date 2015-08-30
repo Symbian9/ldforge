@@ -81,20 +81,6 @@ static const int PrimeNumbers[] =
 	3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571,
 };
 
-static const long E10[] =
-{
-	1l,
-	10l,
-	100l,
-	1000l,
-	10000l,
-	100000l,
-	1000000l,
-	10000000l,
-	100000000l,
-	1000000000l,
-};
-
 // =============================================================================
 //
 // Grid stuff
@@ -255,8 +241,22 @@ QString Join (QList<StringFormatArg> vals, QString delim)
 //
 void RoundToDecimals (double& a, int decimals)
 {
-	assert (decimals >= 0 and decimals < countof (E10));
-	a = round (a * E10[decimals]) / E10[decimals];
+	static const long e10[] =
+	{
+		1l,
+		10l,
+		100l,
+		1000l,
+		10000l,
+		100000l,
+		1000000l,
+		10000000l,
+		100000000l,
+		1000000000l,
+	};
+
+	if (decimals >= 0 and decimals < countof (e10))
+		a = round (a * e10[decimals]) / e10[decimals];
 }
 
 // =============================================================================
@@ -286,7 +286,6 @@ double GetCoordinateOf (const Vertex& a, Axis ax)
 		case Z: return a.z();
 	}
 
-	assert (false);
 	return 0.0;
 }
 

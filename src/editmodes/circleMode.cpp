@@ -37,14 +37,18 @@ EditModeType CircleMode::type() const
 
 double CircleMode::getCircleDrawDist (int pos) const
 {
-	assert (m_drawedVerts.size() >= pos + 1);
-	Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] :
-		renderer()->coordconv2_3 (renderer()->mousePosition(), false);
-	Axis localx, localy;
-	renderer()->getRelativeAxes (localx, localy);
-	double dx = m_drawedVerts[0][localx] - v1[localx];
-	double dy = m_drawedVerts[0][localy] - v1[localy];
-	return Grid::Snap (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
+	if (m_drawedVerts.size() >= pos + 1)
+	{
+		Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] :
+			renderer()->coordconv2_3 (renderer()->mousePosition(), false);
+		Axis localx, localy;
+		renderer()->getRelativeAxes (localx, localy);
+		double dx = m_drawedVerts[0][localx] - v1[localx];
+		double dy = m_drawedVerts[0][localy] - v1[localy];
+		return Grid::Snap (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
+	}
+
+	return 0.0;
 }
 
 Matrix CircleMode::getCircleDrawMatrix (double scale)

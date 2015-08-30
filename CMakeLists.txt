@@ -115,7 +115,6 @@ set (LDFORGE_HEADERS
 set (LDFORGE_FORMS
 	ui/about.ui
 	ui/addhistoryline.ui
-	ui/bombbox.ui
 	ui/config.ui
 	ui/coverer.ui
 	ui/downloadfrom.ui

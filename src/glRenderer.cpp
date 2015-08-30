@@ -519,7 +519,8 @@ void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum ty
 //
 Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 {
-	assert (camera() != EFreeCamera);
+	if (camera() == EFreeCamera)
+		return Origin;
 
 	Vertex pos3d;
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
@@ -973,7 +974,9 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	for (qint32 idx : indices)
 	{
 		LDObject* obj = LDObject::fromID (idx);
-		assert (obj != null);
+
+		if (obj == null)
+			continue;
 
 		// If this is an additive single pick and the object is currently selected,
 		// we remove it from selection instead.
@@ -1264,16 +1267,18 @@ void GLRenderer::clearOverlay()
 //
 void GLRenderer::setDepthValue (double depth)
 {
-	assert (camera() < EFreeCamera);
-	currentDocumentData().depthValues[camera()] = depth;
+	if (camera() < EFreeCamera)
+		currentDocumentData().depthValues[camera()] = depth;
 }
 
 // =============================================================================
 //
 double GLRenderer::getDepthValue() const
 {
-	assert (camera() < EFreeCamera);
-	return currentDocumentData().depthValues[camera()];
+	if (camera() < EFreeCamera)
+		return currentDocumentData().depthValues[camera()];
+	else
+		return 0.0;
 }
 
 // =============================================================================
@@ -1635,6 +1640,8 @@ Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
 
 LDFixedCamera const& GetFixedCamera (ECamera cam)
 {
-	assert (cam != EFreeCamera);
-	return g_FixedCameras[cam];
+	if (cam != EFreeCamera)
+		return g_FixedCameras[cam];
+	else
+		return g_FixedCameras[0];
 }

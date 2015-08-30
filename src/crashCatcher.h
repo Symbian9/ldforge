@@ -19,8 +19,8 @@
 #pragma once
 #include "main.h"
 
-#ifdef __unix__
-void InitCrashCatcher();
-#else // ifdef __unix__
-# define InitCrashCatcher()
-#endif // ifdef __unix__
+#ifdef Q_OS_UNIX
+void initCrashCatcher();
+#else
+void initCrashCatcher() {}
+#endif

@@ -51,7 +51,7 @@ int main (int argc, char* argv[])
 	QApplication app (argc, argv);
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
-	InitCrashCatcher();
+	initCrashCatcher();
 	Config::Initialize();
 
 	// Load or create the configuration

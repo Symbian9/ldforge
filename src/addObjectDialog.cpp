@@ -301,7 +301,8 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	Matrix transform = IdentityMatrix;
 	AddObjectDialog dlg (type, obj);
 
-	assert (obj == null or obj->type() == type);
+	if (obj and obj->type() != type)
+		return;
 
 	if (dlg.exec() == QDialog::Rejected)
 		return;
@@ -355,8 +356,8 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		case OBJ_BFC:
 		{
 			LDBFC* bfc = InitObject<LDBFC> (obj);
-			assert (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1));
-			bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
+			if (IsWithin (dlg.rb_bfcType->value(), 0, int (BFCStatement::NumValues) - 1))
+				bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
 		} break;
 
 		case OBJ_Vertex:
@@ -382,7 +383,6 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 			}
 
 			LDSubfile* ref = InitObject<LDSubfile> (obj);
-			assert (ref);
 
 			for_axes (ax)
 				ref->setCoordinate (ax, dlg.dsb_coords[ax]->value());

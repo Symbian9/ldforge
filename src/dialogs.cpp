@@ -40,7 +40,6 @@
 #include "ui_overlay.h"
 #include "ui_extprogpath.h"
 #include "ui_about.h"
-#include "ui_bombbox.h"
 
 extern const char* g_extProgPathFilter;
 EXTERN_CFGENTRY (String, LDrawPath)
@@ -216,17 +215,4 @@ AboutDialog::AboutDialog (QWidget* parent, Qt::WindowFlags f) :
 void AboutDialog::slot_mail()
 {
 	QDesktopServices::openUrl (QUrl ("mailto:Teemu Piippo <arezey@gmail.com>?subject=LDForge"));
-}
-
-// =============================================================================
-// =============================================================================
-void DisplayBombBox (const QString& message)
-{
-	QDialog dlg (g_win);
-	Ui_BombBox ui;
-
-	ui.setupUi (&dlg);
-	ui.m_text->setText (message);
-	ui.buttonBox->button (QDialogButtonBox::Close)->setText (QObject::tr ("Damn it"));
-	dlg.exec();
 }

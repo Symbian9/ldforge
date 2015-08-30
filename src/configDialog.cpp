@@ -92,7 +92,6 @@ static struct LDExtProgInfo
 ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::WindowFlags f) :
 	QDialog (parent, f)
 {
-	assert (g_win != null);
 	ui = new Ui_ConfigUI;
 	ui->setupUi (this);
 
@@ -138,10 +137,13 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 		}
 	});
 
-	g_win->applyToActions ([&](QAction* act)
+	if (g_win)
 	{
-		addShortcut (act);
-	});
+		g_win->applyToActions ([&](QAction* act)
+		{
+			addShortcut (act);
+		});
+	}
 
 	ui->shortcutsList->setSortingEnabled (true);
 	ui->shortcutsList->sortItems();
@@ -297,7 +299,9 @@ void ConfigDialog::applySettings()
 	});
 
 	// Rebuild the quick color toolbar
-	g_win->setQuickColors (quickColors);
+	if (g_win)
+		g_win->setQuickColors (quickColors);
+
 	cfg::QuickColorToolbar = quickColorString();
 
 	// Ext program settings
@@ -319,9 +323,13 @@ void ConfigDialog::applySettings()
 	Config::Save();
 	LDDocument::current()->reloadAllSubfiles();
 	LoadLogoStuds();
-	g_win->R()->setBackground();
-	g_win->doFullRefresh();
-	g_win->updateDocumentList();
+
+	if (g_win)
+	{
+		g_win->R()->setBackground();
+		g_win->doFullRefresh();
+		g_win->updateDocumentList();
+	}
 }
 
 //
@@ -627,13 +635,16 @@ void ConfigDialog::slot_setExtProgPath()
 		}
 	}
 
-	assert (info != null);
-	QString fpath = QFileDialog::getOpenFileName (this, format ("Path to %1", info->name), *info->path, g_extProgPathFilter);
-
-	if (fpath.isEmpty())
-		return;
-
-	info->input->setText (fpath);
+	if (info != null)
+	{
+		QString filepath = QFileDialog::getOpenFileName (this,
+			format ("Path to %1", info->name), *info->path, g_extProgPathFilter);
+	
+		if (filepath.isEmpty())
+			return;
+	
+		info->input->setText (filepath);
+	}
 }
 
 //

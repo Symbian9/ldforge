@@ -16,37 +16,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QProcess>
-#include <QTemporaryFile>
-#include <unistd.h>
-#include <signal.h>
-#include "crashCatcher.h"
-#include "dialogs.h"
- 
-#ifdef __unix__
+#include <QtGlobal>
+
+#ifdef Q_OS_UNIX
+# include <QProcess>
+# include <QTemporaryFile>
+# include <unistd.h>
+# include <signal.h>
+# include "crashCatcher.h"
+# include "dialogs.h"
+
 # ifdef Q_OS_LINUX
 #  include <sys/prctl.h>
 # endif
 
-// Is the crash catcher active now?
-static bool IsCrashCatcherActive = false;
-
-// If an assertion failed, what was it?
-static QString AssertionFailureText;
-
-// List of signals to catch and crash on
-static QList<int> SignalsToCatch ({
-	SIGSEGV, // segmentation fault
-	SIGABRT, // abort() calls
-	SIGFPE, // floating point exceptions (e.g. division by zero)
-	SIGILL, // illegal instructions
-});
-
-// -------------------------------------------------------------------------------------------------
-//
-//	Removes the signal handler from SIGABRT and then aborts.
-//
-static void FinalAbort()
+// Removes the signal handler from SIGABRT and then aborts.
+static void finalAbort()
 {
 	struct sigaction sighandler;
 	sighandler.sa_handler = SIG_DFL;
@@ -55,23 +40,21 @@ static void FinalAbort()
 	abort();
 }
 
-// -------------------------------------------------------------------------------------------------
-//
 static void HandleCrash (int sig)
 {
+	static bool isActive = false;
 	printf ("!! Caught signal %d, launching gdb\n", sig);
 
-	if (IsCrashCatcherActive)
+	if (isActive)
 	{
 		printf ("Caught signal while crash catcher is active! Execution cannot continue.\n");
-		FinalAbort();
+		finalAbort();
 	}
 
 	pid_t const pid (getpid());
 	QProcess proc;
 	QTemporaryFile commandsFile;
-
-	IsCrashCatcherActive = true;
+	isActive = true;
 
 	if (commandsFile.open())
 	{
@@ -98,64 +81,38 @@ static void HandleCrash (int sig)
 
 	if (f.open (QIODevice::WriteOnly))
 	{
-		fprint (f, format ("=== Program crashed with signal %1 ===\n\n%2"
+		fprint (f, format ("=== Program crashed with signal %1 ===\n\n"
 			"GDB stdout:\n%3\nGDB stderr:\n%4\n", sig,
-			(not AssertionFailureText.isEmpty()) ? AssertionFailureText + "\n\n" : "",
 			output, err));
 		f.close();
 	}
 
-	if (not AssertionFailureText.isEmpty())
-		printf ("Assertion failed: \"%s\".\n", qPrintable (AssertionFailureText));
-
 	printf ("Backtrace written to " UNIXNAME "-crash.log. Aborting.\n");
-	FinalAbort();
+	finalAbort();
 }
 
-// -------------------------------------------------------------------------------------------------
-//
-//	Initializes the crash catcher.
-//
-void InitCrashCatcher()
+void initCrashCatcher()
 {
+	// List of signals to catch and crash on
+	static const int signalsToCatch[] = {
+		SIGSEGV, // segmentation fault
+		SIGABRT, // abort() calls
+		SIGFPE, // floating point exceptions (e.g. division by zero)
+		SIGILL, // illegal instructions
+	};
+
 	struct sigaction sighandler;
 	sighandler.sa_handler = &HandleCrash;
 	sighandler.sa_flags = 0;
 	sigemptyset (&sighandler.sa_mask);
 
-	for (int sig : SignalsToCatch)
+	for (int sig : signalsToCatch)
 	{
 		if (sigaction (sig, &sighandler, null) == -1)
-		{
 			fprint (stderr, "Couldn't set signal handler %1: %2", sig, strerror (errno));
-			SignalsToCatch.removeOne (sig);
-		}
 	}
 
-	print ("Crash catcher hooked to signals: %1\n", SignalsToCatch);
+	print ("Crash catcher hooked to signals: %1\n", signalsToCatch);
 }
 
-#endif // #ifdef __unix__
-
-// -------------------------------------------------------------------------------------------------
-//
-// This function catches an assertion failure. It must be readily available in both Windows and
-// Linux. We display the bomb box straight in Windows while in Linux we let abort() trigger
-// the signal handler, which will cause the usual bomb box with GDB diagnostics. Said prompt will
-// embed the assertion failure information.
-//
-void HandleAssertFailure (const char* file, int line, const char* funcname, const char* expr)
-{
-#ifdef __unix__
-	AssertionFailureText = format ("%1:%2: %3: %4", file, line, funcname, expr);
-#else
-	DisplayBombBox (format (
-		"<p><b>File</b>: <tt>%1</tt><br />"
-		"<b>Line</b>: <tt>%2</tt><br />"
-		"<b>Function:</b> <tt>%3</tt></p>"
-		"<p>Assertion <b><tt>`%4'</tt></b> failed.</p>",
-		file, line, funcname, expr));
-#endif
-
-	abort();
-}
+#endif // Q_OS_UNIX
