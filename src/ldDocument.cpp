@@ -866,9 +866,9 @@ LDObject* ParseLine (QString line)
 					// need to handle MLCAD-style invertnext, clip and noclip separately.
 					if (commentTextSimplified == "BFC CERTIFY INVERTNEXT")
 						return LDSpawn<LDBFC> (BFCStatement::InvertNext);
-					elif (commentTextSimplified == "BFC CERTIFY CLIP")
+					else if (commentTextSimplified == "BFC CERTIFY CLIP")
 						return LDSpawn<LDBFC> (BFCStatement::Clip);
-					elif (commentTextSimplified == "BFC CERTIFY NOCLIP")
+					else if (commentTextSimplified == "BFC CERTIFY NOCLIP")
 						return LDSpawn<LDBFC> (BFCStatement::NoClip);
 				}
 
@@ -1277,7 +1277,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 		if (name() == "stud.dat" and g_logoedStud != null)
 			return g_logoedStud->inlineContents (deep, renderinline);
-		elif (name() == "stud2.dat" and g_logoedStud2 != null)
+		else if (name() == "stud2.dat" and g_logoedStud2 != null)
 			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 

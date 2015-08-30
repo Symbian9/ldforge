@@ -67,7 +67,7 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 	{
 		if (transform[i] == 2)
 			transform[i] = scale;
-		elif (transform[i] == 1 and renderer()->camera() >= 3)
+		else if (transform[i] == 1 and renderer()->camera() >= 3)
 			transform[i] = -1;
 	}
 
@@ -95,14 +95,14 @@ void CircleMode::buildCircle()
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
-	elif (dist0 == 0 or dist1 == 0)
+	else if (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
 		refFile = GetPrimitive (::Disc, segments, divisions, 0);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
-	elif (g_RingFinder.findRings (dist0, dist1))
+	else if (g_RingFinder.findRings (dist0, dist1))
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
@@ -169,7 +169,7 @@ void CircleMode::buildCircle()
 		objs << ref;
 	}
 
-	unless (objs.isEmpty())
+	if (not objs.isEmpty())
 	{
 		Axis relZ = renderer()->getRelativeZ();;
 		const int l (relZ == X ? 1 : 0);

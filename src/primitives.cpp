@@ -316,14 +316,14 @@ void PrimitiveCategory::loadCategories()
 
 			cat = new PrimitiveCategory (line);
 		}
-		elif (cat != null)
+		else if (cat != null)
 		{
 			QString cmd = line.left (colon);
 			RegexType type = EFilenameRegex;
 
 			if (cmd == "f")
 				type = EFilenameRegex;
-			elif (cmd == "t")
+			else if (cmd == "t")
 				type = ETitleRegex;
 			else
 			{
@@ -524,7 +524,7 @@ LDObjectList MakePrimitive (PrimitiveType type, int segs, int divs, int num)
 		{
 			v1 = Vertex (v0[X], 1.0f, v0[Z]);
 		}
-		elif (type == Cone)
+		else if (type == Cone)
 		{
 			v1 = Vertex (v0[X] * (num + 1), 0.0f, v0[Z] * (num + 1));
 			v0.setX (v0.x() * num);

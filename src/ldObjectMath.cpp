@@ -66,7 +66,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 				obj->setVertex (i, v);
 			}
 		}
-		elif (obj->hasMatrix())
+		else if (obj->hasMatrix())
 		{
 			LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 

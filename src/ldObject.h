@@ -77,7 +77,7 @@ enum LDObjectType
 	OBJ_FirstType = OBJ_Subfile
 };
 
-NUMERIC_ENUM_OPERATORS (LDObjectType)
+MAKE_ITERABLE_ENUM (LDObjectType)
 
 //
 // LDObject

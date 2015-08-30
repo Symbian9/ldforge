@@ -140,7 +140,7 @@ bool RingFinder::findRings (double r0, double r1)
 			r1 = r1f;
 		}
 		// If the numbers are both at most one-decimal fractions, we can use a scale of 10
-		elif (isInteger (r0 * 10) and isInteger (r1 * 10))
+		else if (isInteger (r0 * 10) and isInteger (r1 * 10))
 		{
 			scale = 0.1;
 			r0 *= 10;

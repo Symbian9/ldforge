@@ -772,7 +772,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 
 		if (not doc->fullPath().isEmpty()) 
 			name = doc->fullPath();
-		elif (not doc->name().isEmpty())
+		else if (not doc->name().isEmpty())
 			name = doc->name();
 
 		name.replace ("\\", "/");

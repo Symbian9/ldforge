@@ -114,7 +114,7 @@ enum ECamera
 	EFirstCamera = ETopCamera
 };
 
-NUMERIC_ENUM_OPERATORS (ECamera)
+MAKE_ITERABLE_ENUM (ECamera)
 
 //
 // CameraIcon::img is a heap-allocated QPixmap because otherwise it gets

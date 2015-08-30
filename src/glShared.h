@@ -63,8 +63,8 @@ enum EVBOComplement
 	VBOCM_First = VBOCM_Surfaces
 };
 
-NUMERIC_ENUM_OPERATORS (EVBOSurface)
-NUMERIC_ENUM_OPERATORS (EVBOComplement)
+MAKE_ITERABLE_ENUM (EVBOSurface)
+MAKE_ITERABLE_ENUM (EVBOComplement)
 
 #ifndef USE_QT5
 // Placeholder QOpenGLFunctions for Qt 4.x support

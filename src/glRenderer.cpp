@@ -812,7 +812,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 			m_panning = true;
 			setCameraMoving (true);
 		}
-		elif (left and camera() == EFreeCamera)
+		else if (left and camera() == EFreeCamera)
 		{
 			rot (X) = rot (X) + dy;
 			rot (Y) = rot (Y) + dx;
@@ -1223,7 +1223,7 @@ bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, i
 
 	if (info.lw == 0)
 		info.lw = (info.lh * img->width()) / img->height();
-	elif (info.lh == 0)
+	else if (info.lh == 0)
 		info.lh = (info.lw * img->height()) / img->width();
 
 	const Axis x2d = getCameraAxis (false, cam),
@@ -1441,7 +1441,7 @@ void GLRenderer::initOverlaysFromObjects()
 			delete meta.img;
 			meta.img = null;
 		}
-		elif (ovlobj != null and
+		else if (ovlobj != null and
 			(meta.img == null or meta.fname != ovlobj->fileName()) and
 			not meta.invalid)
 		{
@@ -1475,7 +1475,7 @@ void GLRenderer::updateOverlayObjects()
 			// not, remove the object.
 			ovlobj->destroy();
 		}
-		elif (meta.img != null and ovlobj == null)
+		else if (meta.img != null and ovlobj == null)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.

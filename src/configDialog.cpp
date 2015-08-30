@@ -110,23 +110,23 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 		{
 			le->setText (value.toString());
 		}
-		elif ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
+		else if ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
 		{
 			spinbox->setValue (value.toInt());
 		}
-		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
+		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
 		{
 			doublespinbox->setValue (value.toDouble());
 		}
-		elif ((slider = qobject_cast<QSlider*> (wdg)) != null)
+		else if ((slider = qobject_cast<QSlider*> (wdg)) != null)
 		{
 			slider->setValue (value.toInt());
 		}
-		elif ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
+		else if ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
 		{
 			checkbox->setChecked (value.toBool());
 		}
-		elif ((button = qobject_cast<QPushButton*> (wdg)) != null)
+		else if ((button = qobject_cast<QPushButton*> (wdg)) != null)
 		{
 			setButtonBackground (button, value.toString());
 			connect (button, SIGNAL (clicked()), this, SLOT (setButtonColor()));
@@ -282,15 +282,15 @@ void ConfigDialog::applySettings()
 
 		if ((le = qobject_cast<QLineEdit*> (widget)) != null)
 			value = le->text();
-		elif ((spinbox = qobject_cast<QSpinBox*> (widget)) != null)
+		else if ((spinbox = qobject_cast<QSpinBox*> (widget)) != null)
 			value = spinbox->value();
-		elif ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != null)
+		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != null)
 			value = doublespinbox->value();
-		elif ((slider = qobject_cast<QSlider*> (widget)) != null)
+		else if ((slider = qobject_cast<QSlider*> (widget)) != null)
 			value = slider->value();
-		elif ((checkbox = qobject_cast<QCheckBox*> (widget)) != null)
+		else if ((checkbox = qobject_cast<QCheckBox*> (widget)) != null)
 			value = checkbox->isChecked();
-		elif ((button = qobject_cast<QPushButton*> (widget)) != null)
+		else if ((button = qobject_cast<QPushButton*> (widget)) != null)
 			value = m_buttonColors[button];
 		else
 			print ("Unknown widget of type %1\n", widget->metaObject()->className());
@@ -344,11 +344,11 @@ void ConfigDialog::buttonClicked (QAbstractButton* button)
 		applySettings();
 		accept();
 	}
-	elif (button == dbb->button (QDialogButtonBox::Apply))
+	else if (button == dbb->button (QDialogButtonBox::Apply))
 	{
 		applySettings();
 	}
-	elif (button == dbb->button (QDialogButtonBox::Cancel))
+	else if (button == dbb->button (QDialogButtonBox::Cancel))
 	{
 		reject();
 	}

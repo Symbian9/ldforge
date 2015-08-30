@@ -309,7 +309,7 @@ double LDBoundingBox::longestMeasurement() const
 		if (xscale > zscale)
 			size = xscale;
 	}
-	elif (yscale > zscale)
+	else if (yscale > zscale)
 		size = yscale;
 
 	if (qAbs (size) >= 2.0)

@@ -167,7 +167,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 		dest.remove (0, 2);
 		dest.prepend ("parts/s/");
 	}
-	elif (isOneOf (dest.left (3), "48\\", "48/"))
+	else if (isOneOf (dest.left (3), "48\\", "48/"))
 	{
 		dest.remove (0, 3);
 		dest.prepend ("p/48/");
@@ -194,9 +194,9 @@ void PartDownloader::modifyDestination (QString& dest) const
 
 	if (QRegExp (subpartRegex).exactMatch (dest))
 		dest.prepend ("parts/s/");
-	elif (QRegExp (partRegex).exactMatch (dest))
+	else if (QRegExp (partRegex).exactMatch (dest))
 		dest.prepend ("parts/");
-	elif (not dest.startsWith ("parts/") and not dest.startsWith ("p/"))
+	else if (not dest.startsWith ("parts/") and not dest.startsWith ("p/"))
 		dest.prepend ("p/");
 }
 
@@ -235,14 +235,14 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 	{
 		reject();
 	}
-	elif (btn == getButton (Abort))
+	else if (btn == getButton (Abort))
 	{
 		setAborted (true);
 
 		for (PartDownloadRequest* req : requests())
 			req->abort();
 	}
-	elif (btn == getButton (Download))
+	else if (btn == getButton (Download))
 	{
 		QString dest = form()->fname->text();
 		setPrimaryFile (nullptr);
@@ -467,7 +467,7 @@ void PartDownloadRequest::downloadFinished()
 		print ("Unable to download %1: %2\n", m_destinaton, networkReply()->errorString());
         setState (State::Failed);
 	}
-    elif (state() != State::Failed)
+    else if (state() != State::Failed)
 	{
         setState (State::Finished);
 	}

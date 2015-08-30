@@ -209,7 +209,7 @@ bool MagicWandMode::mouseReleased (MouseEventData const& data)
 
 		if (data.keymods & Qt::ShiftModifier)
 			wandtype = MagicWandMode::Additive;
-		elif (data.keymods & Qt::ControlModifier)
+		else if (data.keymods & Qt::ControlModifier)
 			wandtype = MagicWandMode::Subtractive;
 
 		doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);

@@ -23,22 +23,10 @@
 # define __attribute__(X)
 #endif
 
-// =============================================================================
-//
-#define countof(A) (safeCountOf<std::is_array<decltype(A)>::value, (sizeof A / sizeof *A)>())
+template <typename T, size_t N>
+char (&countofHelper (T(&)[N]))[N];
+#define countof(x) ((int) sizeof (countofHelper(x)))
 
-template<bool isArray, size_t elems>
-inline constexpr int safeCountOf() __attribute__ ((always_inline));
-
-template<bool isArray, size_t elems>
-inline constexpr int safeCountOf()
-{
-	static_assert (isArray, "parameter to countof must be an array");
-	return elems;
-}
-
-// =============================================================================
-//
 #define PROPERTY(ACCESS, TYPE, READ, WRITE, WRITETYPE)			\
 private:														\
 	TYPE m_##READ;												\
@@ -60,22 +48,11 @@ ACCESS:															\
 #define PROPERTY_CUSTOM_WRITE(READ)								\
 	;
 
-#define readAccess(A) inline decltype(_##A) A() const { return _##A; }
-#define writeAccess(A,B) inline void B (decltype(_##A) const& a) const { _##A = a; }
-
 #define DEFINE_CLASS(SELF, SUPER) \
 public: \
 	using Self = SELF; \
 	using Super = SUPER;
 
-// =============================================================================
-//
-#define elif(A) else if (A)
-#define unless(A) if (not (A))
-#define until(A) while (not (A))
-
-// =============================================================================
-//
 #ifdef WIN32
 # define DIRSLASH "\\"
 # define DIRSLASH_CHAR '\\'
@@ -84,18 +61,10 @@ public: \
 # define DIRSLASH_CHAR '/'
 #endif // WIN32
 
-// =============================================================================
-//
-#ifdef __GNUC__
-#define FUNCNAME __PRETTY_FUNCTION__
-#else
-#define FUNCNAME __func__
-#endif // __GNUC__
-
 #define dvalof(A) dprint ("value of '%1' = %2\n", #A, A)
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
-#define NUMERIC_ENUM_OPERATORS(T) \
+#define MAKE_ITERABLE_ENUM(T) \
 	inline T operator++ (T& a) { a = (T) ((int) a + 1); return a; } \
 	inline T operator-- (T& a) { a = (T) ((int) a - 1); return a; } \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
@@ -115,20 +84,3 @@ public: \
 		++FOR_ENUM_NAME (__LINE__)) \
 	for (ENUM NAME = ENUM (FOR_ENUM_NAME (__LINE__)); NAME != ENUM::NumValues; \
 		NAME = ENUM::NumValues)
-
-// =============================================================================
-#ifdef IN_IDE_PARSER // KDevelop workarounds:
-# error IN_IDE_PARSER is defined (this code is only for KDevelop workarounds)
-# define COMPILE_DATE "14-01-10 10:31:09"
-
-# ifndef va_start
-#  define va_start(va, arg)
-# endif // va_start
-
-# ifndef va_end
-#  define va_end(va)
-# endif // va_end
-
-static const char* __func__ = ""; // Current function name
-typedef void FILE; // :|
-#endif // IN_IDE_PARSER
