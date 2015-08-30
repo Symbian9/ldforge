@@ -284,9 +284,8 @@ void MainWindow::slot_actionBorders()
 
 			long idx = obj->lineNumber() + i + 1;
 			CurrentDocument()->insertObj (idx, lines[i]);
+			++num;
 		}
-
-		num += countof (lines);
 	}
 
 	print (tr ("Added %1 border lines"), num);
