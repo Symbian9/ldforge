@@ -22,7 +22,7 @@
 #include <QBoxLayout>
 #include <QClipboard>
 #include <QInputDialog>
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "main.h"
 #include "ldDocument.h"
 #include "dialogs/colorselector.h"

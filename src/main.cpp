@@ -22,7 +22,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "configuration.h"

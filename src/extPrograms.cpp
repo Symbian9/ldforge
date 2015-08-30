@@ -28,7 +28,7 @@
 #include "main.h"
 #include "configuration.h"
 #include "miscallenous.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "ldDocument.h"
 #include "radioGroup.h"
 #include "editHistory.h"

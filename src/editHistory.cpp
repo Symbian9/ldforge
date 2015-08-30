@@ -20,7 +20,7 @@
 #include "ldObject.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "glRenderer.h"
 
 // =============================================================================

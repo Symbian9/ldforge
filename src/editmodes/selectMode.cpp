@@ -20,7 +20,7 @@
 #include "selectMode.h"
 #include "../glRenderer.h"
 #include "../addObjectDialog.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include "../glRenderer.h"
 
 SelectMode::SelectMode (GLRenderer* renderer) :

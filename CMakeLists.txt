@@ -52,7 +52,7 @@ set (LDFORGE_SOURCES
     src/ldObjectMath.cpp
 	src/ldpaths.cpp
 	src/main.cpp
-	src/mainWindow.cpp
+	src/mainwindow.cpp
 	src/messageLog.cpp
 	src/miscallenous.cpp
 	src/partDownloader.cpp
@@ -95,7 +95,7 @@ set (LDFORGE_HEADERS
 	src/glRenderer.h
 	src/glCompiler.h
 	src/configuration.h
-	src/mainWindow.h
+	src/mainwindow.h
 	src/editHistory.h
 	src/format.h
 	src/ldpaths.h
@@ -124,13 +124,13 @@ set (LDFORGE_FORMS
 	ui/flip.ui
 	ui/intersector.ui
 	ui/isecalc.ui
-	ui/ldforge.ui
 	ui/makeprim.ui
 	ui/overlay.ui
 	ui/rectifier.ui
 	ui/replcoords.ui
 	ui/rotpoint.ui
 	ui/ytruder.ui
+	src/mainwindow.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/ldrawpathdialog.ui
 	src/dialogs/newpartdialog.ui

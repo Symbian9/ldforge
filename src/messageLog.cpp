@@ -20,7 +20,7 @@
 #include <QDate>
 #include "messageLog.h"
 #include "glRenderer.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 
 enum
 {

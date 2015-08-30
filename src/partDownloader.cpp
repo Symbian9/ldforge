@@ -27,7 +27,7 @@
 #include "partDownloader.h"
 #include "ui_downloadfrom.h"
 #include "basics.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
 

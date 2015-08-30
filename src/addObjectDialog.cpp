@@ -25,7 +25,7 @@
 #include <QTreeWidget>
 #include <QLineEdit>
 #include <QPushButton>
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "addObjectDialog.h"
 #include "ldDocument.h"
 #include "colors.h"

@@ -33,7 +33,7 @@
 #include "ldDocument.h"
 #include "glRenderer.h"
 #include "colors.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "miscallenous.h"
 #include "editHistory.h"
 #include "dialogs.h"

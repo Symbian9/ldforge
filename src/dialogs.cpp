@@ -32,7 +32,7 @@
 #include <QUrl>
 #include "dialogs.h"
 #include "radioGroup.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "glRenderer.h"
 #include "documentation.h"
 #include "ldDocument.h"

@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include <QDialog>
 
 class Ui_ConfigUI;

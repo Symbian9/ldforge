@@ -21,7 +21,7 @@
 #include "colors.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 
 struct ColorDataEntry
 {

@@ -22,7 +22,7 @@
 #include <QScrollBar>
 #include <QColorDialog>
 #include "../main.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include "../colors.h"
 #include "../configuration.h"
 #include "../miscallenous.h"

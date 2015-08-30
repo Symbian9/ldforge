@@ -24,7 +24,7 @@
 #include "../ringFinder.h"
 #include "../primitives.h"
 #include "../glRenderer.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include "../ldObjectMath.h"
 
 CircleMode::CircleMode (GLRenderer* renderer) :

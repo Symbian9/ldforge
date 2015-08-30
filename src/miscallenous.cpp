@@ -21,7 +21,7 @@
 #include <QColor>
 #include "main.h"
 #include "miscallenous.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "dialogs.h"
 #include "ldDocument.h"
 #include "ui_rotpoint.h"

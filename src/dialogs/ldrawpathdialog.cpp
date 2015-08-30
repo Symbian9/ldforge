@@ -21,7 +21,7 @@
 #include <QLabel>
 #include "ldrawpathdialog.h"
 #include "ui_ldrawpathdialog.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 
 LDrawPathDialog::LDrawPathDialog (const QString& defaultPath, bool validDefault, QWidget* parent, Qt::WindowFlags f) :
 	QDialog (parent, f),

@@ -38,7 +38,7 @@
 #include <QSettings>
 #include "main.h"
 #include "glRenderer.h"
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "ldDocument.h"
 #include "configuration.h"
 #include "miscallenous.h"

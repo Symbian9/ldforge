@@ -24,7 +24,7 @@
 #include <QPushButton>
 #include <QInputDialog>
 
-#include "mainWindow.h"
+#include "mainwindow.h"
 #include "ldDocument.h"
 #include "editHistory.h"
 #include "configDialog.h"

@@ -25,7 +25,7 @@
 #include "circleMode.h"
 #include "magicWandMode.h"
 #include "linePathMode.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include "../glRenderer.h"
 
 CFGENTRY (Bool, DrawLineLengths, true)

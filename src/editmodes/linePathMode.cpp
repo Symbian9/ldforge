@@ -1,6 +1,6 @@
 #include "linePathMode.h"
 #include "../glRenderer.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include <QKeyEvent>
 
 LinePathMode::LinePathMode (GLRenderer *renderer) :

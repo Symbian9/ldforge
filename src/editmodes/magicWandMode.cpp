@@ -19,7 +19,7 @@
 #include <QMouseEvent>
 #include "magicWandMode.h"
 #include "../ldDocument.h"
-#include "../mainWindow.h"
+#include "../mainwindow.h"
 #include "../glRenderer.h"
 
 MagicWandMode::MagicWandMode (GLRenderer* renderer) :
