@@ -274,6 +274,7 @@ void MainWindow::slot_actionBorders()
 			lines[0] = LDSpawn<LDLine> (tri->vertex (0), tri->vertex (1));
 			lines[1] = LDSpawn<LDLine> (tri->vertex (1), tri->vertex (2));
 			lines[2] = LDSpawn<LDLine> (tri->vertex (2), tri->vertex (0));
+			lines[3] = nullptr;
 		}
 
 		for (int i = 0; i < countof (lines); ++i)
