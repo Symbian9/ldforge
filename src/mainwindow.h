@@ -34,7 +34,6 @@ class QDialogButtonBox;
 class GLRenderer;
 class QComboBox;
 class QProgressBar;
-class Ui_LDForgeUI;
 struct Primitive;
 
 class LDQuickColor
@@ -281,7 +280,7 @@ private:
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*>		m_recentFiles;
 	MessageManager*		m_msglog;
-	Ui_LDForgeUI*		ui;
+	class Ui_MainWindow& ui;
 	QTabBar*			m_tabs;
 	bool				m_updatingTabs;
 

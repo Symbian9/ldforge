@@ -74,23 +74,23 @@ EXTERN_CFGENTRY (Bool, DrawConditionalLines)
 // =============================================================================
 //
 MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
-	QMainWindow (parent, flags)
+	QMainWindow (parent, flags),
+	ui (*new Ui_MainWindow)
 {
 	g_win = this;
-	ui = new Ui_LDForgeUI;
-	ui->setupUi (this);
+	ui.setupUi (this);
 	m_updatingTabs = false;
 	m_renderer = new GLRenderer (this);
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
-	ui->verticalLayout->insertWidget (0, m_tabs);
+	ui.verticalLayout->insertWidget (0, m_tabs);
 
 	// Stuff the renderer into its frame
-	QVBoxLayout* rendererLayout = new QVBoxLayout (ui->rendererFrame);
+	QVBoxLayout* rendererLayout = new QVBoxLayout (ui.rendererFrame);
 	rendererLayout->addWidget (R());
 
-	connect (ui->objectList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_selectionChanged()));
-	connect (ui->objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (slot_editObject (QListWidgetItem*)));
+	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_selectionChanged()));
+	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (slot_editObject (QListWidgetItem*)));
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (changeCurrentFile()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
@@ -122,8 +122,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	loadShortcuts (Config::SettingsObject());
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
-	connect (ui->ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
-	connect (ui->ringToolSegments, SIGNAL (valueChanged (int)),
+	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
+	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)),
 		this, SLOT (circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
 
@@ -170,7 +170,7 @@ void MainWindow::endAction()
 void MainWindow::slot_lastSecondCleanup()
 {
 	delete m_renderer;
-	delete ui;
+	delete &ui;
 }
 
 // =============================================================================
@@ -191,7 +191,7 @@ for (QAction * recent : m_recentFiles)
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
 
 		connect (recent, SIGNAL (triggered()), this, SLOT (slot_recentFile()));
-		ui->menuOpenRecent->insertAction (first, recent);
+		ui.menuOpenRecent->insertAction (first, recent);
 		m_recentFiles << recent;
 		first = recent;
 	}
@@ -224,15 +224,15 @@ QList<LDQuickColor> LoadQuickColorList()
 void MainWindow::updateColorToolbar()
 {
 	m_colorButtons.clear();
-	ui->toolBarColors->clear();
-	ui->toolBarColors->addAction (ui->actionUncolor);
-	ui->toolBarColors->addSeparator();
+	ui.toolBarColors->clear();
+	ui.toolBarColors->addAction (ui.actionUncolor);
+	ui.toolBarColors->addSeparator();
 
 	for (LDQuickColor& entry : m_quickColors)
 	{
 		if (entry.isSeparator())
 		{
-			ui->toolBarColors->addSeparator();
+			ui.toolBarColors->addSeparator();
 		}
 		else
 		{
@@ -242,7 +242,7 @@ void MainWindow::updateColorToolbar()
 			colorButton->setToolTip (entry.color().name());
 
 			connect (colorButton, SIGNAL (clicked()), this, SLOT (slot_quickColor()));
-			ui->toolBarColors->addWidget (colorButton);
+			ui.toolBarColors->addWidget (colorButton);
 			m_colorButtons << colorButton;
 
 			entry.setToolButton (colorButton);
@@ -257,9 +257,9 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	ui->actionGridCoarse->setChecked (cfg::Grid == Grid::Coarse);
-	ui->actionGridMedium->setChecked (cfg::Grid == Grid::Medium);
-	ui->actionGridFine->setChecked (cfg::Grid == Grid::Fine);
+	ui.actionGridCoarse->setChecked (cfg::Grid == Grid::Coarse);
+	ui.actionGridMedium->setChecked (cfg::Grid == Grid::Medium);
+	ui.actionGridFine->setChecked (cfg::Grid == Grid::Fine);
 }
 
 // =============================================================================
@@ -327,10 +327,10 @@ void MainWindow::buildObjList()
 	// while this is done.
 	g_isSelectionLocked = true;
 
-	for (int i = 0; i < ui->objectList->count(); ++i)
-		delete ui->objectList->item (i);
+	for (int i = 0; i < ui.objectList->count(); ++i)
+		delete ui.objectList->item (i);
 
-	ui->objectList->clear();
+	ui.objectList->clear();
 
 	for (LDObject* obj : CurrentDocument()->objects())
 	{
@@ -433,7 +433,7 @@ void MainWindow::buildObjList()
 		}
 
 		obj->qObjListEntry = item;
-		ui->objectList->insertItem (ui->objectList->count(), item);
+		ui.objectList->insertItem (ui.objectList->count(), item);
 	}
 
 	g_isSelectionLocked = false;
@@ -449,7 +449,7 @@ void MainWindow::scrollToSelection()
 		return;
 
 	LDObject* obj = Selection().last();
-	ui->objectList->scrollToItem (obj->qObjListEntry);
+	ui.objectList->scrollToItem (obj->qObjListEntry);
 }
 
 // =============================================================================
@@ -463,7 +463,7 @@ void MainWindow::slot_selectionChanged()
 
 	// Get the objects from the object list selection
 	CurrentDocument()->clearSelection();
-	const QList<QListWidgetItem*> items = ui->objectList->selectedItems();
+	const QList<QListWidgetItem*> items = ui.objectList->selectedItems();
 
 	for (LDObject* obj : CurrentDocument()->objects())
 	{
@@ -573,7 +573,7 @@ void MainWindow::updateSelection()
 		if (obj->qObjListEntry == null)
 			continue;
 
-		int row = ui->objectList->row (obj->qObjListEntry);
+		int row = ui.objectList->row (obj->qObjListEntry);
 
 		if (top == -1)
 		{
@@ -583,8 +583,8 @@ void MainWindow::updateSelection()
 		{
 			if (row != bottom + 1)
 			{
-				itemselect.select (ui->objectList->model()->index (top, 0),
-					ui->objectList->model()->index (bottom, 0));
+				itemselect.select (ui.objectList->model()->index (top, 0),
+					ui.objectList->model()->index (bottom, 0));
 				top = -1;
 			}
 
@@ -594,11 +594,11 @@ void MainWindow::updateSelection()
 
 	if (top != -1)
 	{
-		itemselect.select (ui->objectList->model()->index (top, 0),
-			ui->objectList->model()->index (bottom, 0));
+		itemselect.select (ui.objectList->model()->index (top, 0),
+			ui.objectList->model()->index (bottom, 0));
 	}
 
-	ui->objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
+	ui.objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
 	g_isSelectionLocked = false;
 }
 
@@ -670,45 +670,45 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 
 	if (single and singleObj->type() != OBJ_Empty)
 	{
-		contextMenu->addAction (ui->actionEdit);
+		contextMenu->addAction (ui.actionEdit);
 		contextMenu->addSeparator();
 	}
 
-	contextMenu->addAction (ui->actionCut);
-	contextMenu->addAction (ui->actionCopy);
-	contextMenu->addAction (ui->actionPaste);
-	contextMenu->addAction (ui->actionDelete);
+	contextMenu->addAction (ui.actionCut);
+	contextMenu->addAction (ui.actionCopy);
+	contextMenu->addAction (ui.actionPaste);
+	contextMenu->addAction (ui.actionDelete);
 	contextMenu->addSeparator();
-	contextMenu->addAction (ui->actionSetColor);
+	contextMenu->addAction (ui.actionSetColor);
 
 	if (single)
-		contextMenu->addAction (ui->actionEditRaw);
+		contextMenu->addAction (ui.actionEditRaw);
 
-	contextMenu->addAction (ui->actionBorders);
-	contextMenu->addAction (ui->actionSetOverlay);
-	contextMenu->addAction (ui->actionClearOverlay);
+	contextMenu->addAction (ui.actionBorders);
+	contextMenu->addAction (ui.actionSetOverlay);
+	contextMenu->addAction (ui.actionClearOverlay);
 
 	if (hasSubfiles)
 	{
 		contextMenu->addSeparator();
-		contextMenu->addAction (ui->actionOpenSubfiles);
+		contextMenu->addAction (ui.actionOpenSubfiles);
 	}
 
 	contextMenu->addSeparator();
-	contextMenu->addAction (ui->actionModeSelect);
-	contextMenu->addAction (ui->actionModeDraw);
-	contextMenu->addAction (ui->actionModeCircle);
+	contextMenu->addAction (ui.actionModeSelect);
+	contextMenu->addAction (ui.actionModeDraw);
+	contextMenu->addAction (ui.actionModeCircle);
 
 	if (not Selection().isEmpty())
 	{
 		contextMenu->addSeparator();
-		contextMenu->addAction (ui->actionSubfileSelection);
+		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
 	if (R()->camera() != EFreeCamera)
 	{
 		contextMenu->addSeparator();
-		contextMenu->addAction (ui->actionSetDrawDepth);
+		contextMenu->addAction (ui.actionSetDrawDepth);
 	}
 
 	contextMenu->exec (pos);
@@ -737,12 +737,12 @@ void MainWindow::deleteByColor (LDColor color)
 void MainWindow::updateEditModeActions()
 {
 	const EditModeType mode = R()->currentEditModeType();
-	ui->actionModeSelect->setChecked (mode == EditModeType::Select);
-	ui->actionModeDraw->setChecked (mode == EditModeType::Draw);
-	ui->actionModeRectangle->setChecked (mode == EditModeType::Rectangle);
-	ui->actionModeCircle->setChecked (mode == EditModeType::Circle);
-	ui->actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
-	ui->actionModeLinePath->setChecked (mode == EditModeType::LinePath);
+	ui.actionModeSelect->setChecked (mode == EditModeType::Select);
+	ui.actionModeDraw->setChecked (mode == EditModeType::Draw);
+	ui.actionModeRectangle->setChecked (mode == EditModeType::Rectangle);
+	ui.actionModeCircle->setChecked (mode == EditModeType::Circle);
+	ui.actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
+	ui.actionModeLinePath->setChecked (mode == EditModeType::LinePath);
 }
 
 // =============================================================================
@@ -999,11 +999,11 @@ void MainWindow::changeCurrentFile()
 void MainWindow::refreshObjectList()
 {
 #if 0
-	ui->objectList->clear();
+	ui.objectList->clear();
 	LDDocument* f = getCurrentDocument();
 
 for (LDObject* obj : *f)
-		ui->objectList->addItem (obj->qObjListEntry);
+		ui.objectList->addItem (obj->qObjListEntry);
 
 #endif
 
@@ -1018,25 +1018,25 @@ void MainWindow::updateActions()
 	{
 		History* his = CurrentDocument()->history();
 		int pos = his->position();
-		ui->actionUndo->setEnabled (pos != -1);
-		ui->actionRedo->setEnabled (pos < (long) his->getSize() - 1);
+		ui.actionUndo->setEnabled (pos != -1);
+		ui.actionRedo->setEnabled (pos < (long) his->getSize() - 1);
 	}
 
-	ui->actionWireframe->setChecked (cfg::DrawWireframe);
-	ui->actionAxes->setChecked (cfg::DrawAxes);
-	ui->actionBFCView->setChecked (cfg::BFCRedGreenView);
-	ui->actionRandomColors->setChecked (cfg::RandomColors);
-	ui->actionDrawAngles->setChecked (cfg::DrawAngles);
-	ui->actionDrawSurfaces->setChecked (cfg::DrawSurfaces);
-	ui->actionDrawEdgeLines->setChecked (cfg::DrawEdgeLines);
-	ui->actionDrawConditionalLines->setChecked (cfg::DrawConditionalLines);
+	ui.actionWireframe->setChecked (cfg::DrawWireframe);
+	ui.actionAxes->setChecked (cfg::DrawAxes);
+	ui.actionBFCView->setChecked (cfg::BFCRedGreenView);
+	ui.actionRandomColors->setChecked (cfg::RandomColors);
+	ui.actionDrawAngles->setChecked (cfg::DrawAngles);
+	ui.actionDrawSurfaces->setChecked (cfg::DrawSurfaces);
+	ui.actionDrawEdgeLines->setChecked (cfg::DrawEdgeLines);
+	ui.actionDrawConditionalLines->setChecked (cfg::DrawConditionalLines);
 }
 
 // =============================================================================
 //
 void MainWindow::updatePrimitives()
 {
-	PopulatePrimitives (ui->primitives);
+	PopulatePrimitives (ui.primitives);
 }
 
 // =============================================================================
@@ -1092,7 +1092,7 @@ void MainWindow::applyToActions (std::function<void(QAction*)> function)
 //
 QTreeWidget* MainWindow::getPrimitivesTree() const
 {
-	return ui->primitives;
+	return ui.primitives;
 }
 
 // =============================================================================
@@ -1106,14 +1106,14 @@ QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
 //
 bool MainWindow::ringToolHiRes() const
 {
-	return ui->ringToolHiRes->isChecked();
+	return ui.ringToolHiRes->isChecked();
 }
 
 // =============================================================================
 //
 int MainWindow::ringToolSegments() const
 {
-	return ui->ringToolSegments->value();
+	return ui.ringToolSegments->value();
 }
 
 // =============================================================================
@@ -1122,13 +1122,13 @@ void MainWindow::ringToolHiResClicked (bool checked)
 {
 	if (checked)
 	{
-		ui->ringToolSegments->setMaximum (HighResolution);
-		ui->ringToolSegments->setValue (ui->ringToolSegments->value() * 3);
+		ui.ringToolSegments->setMaximum (HighResolution);
+		ui.ringToolSegments->setValue (ui.ringToolSegments->value() * 3);
 	}
 	else
 	{
-		ui->ringToolSegments->setValue (ui->ringToolSegments->value() / 3);
-		ui->ringToolSegments->setMaximum (LowResolution);
+		ui.ringToolSegments->setValue (ui.ringToolSegments->value() / 3);
+		ui.ringToolSegments->setMaximum (LowResolution);
 	}
 }
 
@@ -1136,10 +1136,10 @@ void MainWindow::ringToolHiResClicked (bool checked)
 //
 void MainWindow::circleToolSegmentsChanged()
 {
-	int numerator (ui->ringToolSegments->value());
-	int denominator (ui->ringToolHiRes->isChecked() ? HighResolution : LowResolution);
+	int numerator (ui.ringToolSegments->value());
+	int denominator (ui.ringToolHiRes->isChecked() ? HighResolution : LowResolution);
 	Simplify (numerator, denominator);
-	ui->ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
+	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
 }
 
 // =============================================================================

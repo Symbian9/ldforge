@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QSettings>
+#include <QApplication>
 #include "main.h"
 #include "configuration.h"
 #include "miscallenous.h"

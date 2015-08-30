@@ -17,7 +17,7 @@
  */
 
 #include "openprogressdialog.h"
-#include "ui_openprogress.h"
+#include "ui_openprogressdialog.h"
 #include "../main.h"
 
 OpenProgressDialog::OpenProgressDialog (QWidget* parent, Qt::WindowFlags f) :
