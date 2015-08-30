@@ -22,9 +22,9 @@
 #include <QAction>
 #include <QListWidget>
 #include <QRadioButton>
+#include <QTreeWidget>
 #include "configuration.h"
 #include "ldObject.h"
-#include "ui_ldforge.h"
 #include "colors.h"
 
 class MessageManager;
@@ -158,14 +158,8 @@ public:
 
 	// Updates the object list. Right now this just rebuilds it.
 	void refreshObjectList();
-
 	void endAction();
-
-	inline QTreeWidget* getPrimitivesTree() const
-	{
-		return ui->primitives;
-	}
-
+	QTreeWidget* getPrimitivesTree() const;
 	static QKeySequence defaultShortcut (QAction* act);
 	void loadShortcuts (QSettings const* settings);
 	void saveShortcuts (QSettings* settings);
@@ -211,7 +205,6 @@ public slots:
 	void slot_actionNewCLine();
 	void slot_actionNewComment();
 	void slot_actionNewBFC();
-	void slot_actionNewVertex();
 	void slot_actionUndo();
 	void slot_actionRedo();
 	void slot_actionCut();

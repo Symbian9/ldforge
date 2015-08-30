@@ -265,7 +265,6 @@
     <addaction name="actionNewCLine"/>
     <addaction name="actionNewComment"/>
     <addaction name="actionNewBFC"/>
-    <addaction name="actionNewVertex"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -436,7 +435,6 @@
    <addaction name="actionNewCLine"/>
    <addaction name="actionNewComment"/>
    <addaction name="actionNewBFC"/>
-   <addaction name="actionNewVertex"/>
   </widget>
   <widget class="QToolBar" name="toolBarBasicTools">
    <property name="windowTitle">
@@ -841,15 +839,6 @@
     <string>New &amp;BFC Statement</string>
    </property>
   </action>
-  <action name="actionNewVertex">
-   <property name="icon">
-    <iconset resource="../ldforge.qrc">
-     <normaloff>:/icons/add-vertex.png</normaloff>:/icons/add-vertex.png</iconset>
-   </property>
-   <property name="text">
-    <string>New &amp;Vertex</string>
-   </property>
-  </action>
   <action name="actionUndo">
    <property name="icon">
     <iconset>
@@ -1196,7 +1185,7 @@
   </action>
   <action name="actionDemote">
    <property name="text">
-    <string>Demote Conditional Lines</string>
+    <string>Demote &amp;Conditional Lines</string>
    </property>
    <property name="statusTip">
     <string>Demote conditional lines down to normal lines.</string>

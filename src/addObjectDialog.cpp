@@ -73,11 +73,6 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 12;
 		} break;
 
-		case OBJ_Vertex:
-		{
-			coordCount = 3;
-		} break;
-
 		case OBJ_BFC:
 		{
 			rb_bfcType = new RadioGroup ("Statement", {}, 0, Qt::Vertical);

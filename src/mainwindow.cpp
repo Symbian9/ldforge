@@ -48,7 +48,7 @@
 #include "addObjectDialog.h"
 #include "messageLog.h"
 #include "configuration.h"
-#include "ui_ldforge.h"
+#include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
 
@@ -1086,6 +1086,13 @@ void MainWindow::applyToActions (std::function<void(QAction*)> function)
 		if (not act->objectName().isEmpty())
 			function (act);
 	}
+}
+
+// =============================================================================
+//
+QTreeWidget* MainWindow::getPrimitivesTree() const
+{
+	return ui->primitives;
 }
 
 // =============================================================================

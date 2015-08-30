@@ -511,11 +511,6 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 			text += ", ";
 
 		QString noun = format ("%1%2", typeName (objType), Plural (count));
-
-		// Plural of "vertex" is "vertices", correct that
-		if (objType == OBJ_Vertex and count != 1)
-			noun = "vertices";
-
 		text += format ("%1 %2", count, noun);
 	}
 

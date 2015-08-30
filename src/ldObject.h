@@ -67,7 +67,6 @@ enum LDObjectType
 	OBJ_Triangle,		//	Object represents a	triangle
 	OBJ_Line,			//	Object represents a	line
 	OBJ_CondLine,		//	Object represents a	conditional line
-	OBJ_Vertex,			//	Object is a	vertex,	LDForge extension object
 	OBJ_BFC,			//	Object represents a	BFC statement
 	OBJ_Overlay,		//	Object contains meta-info about an overlay image.
 	OBJ_Comment,		//	Object represents a	comment
