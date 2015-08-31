@@ -46,12 +46,12 @@
 #include "radioGroup.h"
 #include "addObjectDialog.h"
 #include "messageLog.h"
-#include "configDialog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
 #include "toolsets/extprogramtoolset.h"
 #include "toolsets/toolset.h"
+#include "dialogs/configdialog.h"
 #include "guiutilities.h"
 
 static bool g_isSelectionLocked = false;

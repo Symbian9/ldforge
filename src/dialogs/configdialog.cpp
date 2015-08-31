@@ -30,15 +30,15 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QSettings>
-#include "main.h"
-#include "configDialog.h"
-#include "ldDocument.h"
-#include "miscallenous.h"
-#include "colors.h"
-#include "dialogs/colorselector.h"
-#include "glRenderer.h"
-#include "ui_config.h"
-#include "guiutilities.h"
+#include <QPushButton>
+#include "../main.h"
+#include "../ldDocument.h"
+#include "../miscallenous.h"
+#include "../glRenderer.h"
+#include "../guiutilities.h"
+#include "colorselector.h"
+#include "configdialog.h"
+#include "ui_configdialog.h"
 
 const char* g_extProgPathFilter =
 #ifdef _WIN32
@@ -51,7 +51,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	HierarchyElement (parent),
 	m_settings (m_window->makeSettings (this))
 {
-	ui = new Ui_ConfigUI;
+	ui = new Ui_ConfigDialog;
 	ui->setupUi (this);
 
 	// Set defaults

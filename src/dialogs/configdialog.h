@@ -17,11 +17,10 @@
  */
 
 #pragma once
-#include "mainwindow.h"
-#include "toolsets/extprogramtoolset.h"
+#include "../mainwindow.h"
+#include "../toolsets/extprogramtoolset.h"
 #include <QDialog>
 
-class Ui_ConfigUI;
 class QLabel;
 class QDoubleSpinBox;
 
@@ -67,7 +66,7 @@ public:
 	QList<LDQuickColor> quickColors;
 
 private:
-	Ui_ConfigUI* ui;
+	class Ui_ConfigDialog* ui;
 	QList<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];

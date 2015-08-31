@@ -18,13 +18,13 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include "../configDialog.h"
 #include "../dialogs.h"
 #include "../glRenderer.h"
 #include "../ldDocument.h"
 #include "../mainwindow.h"
 #include "../partDownloader.h"
 #include "../primitives.h"
+#include "../dialogs/configdialog.h"
 #include "../dialogs/ldrawpathdialog.h"
 #include "../dialogs/newpartdialog.h"
 #include "filetoolset.h"

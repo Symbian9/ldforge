@@ -35,7 +35,6 @@ set (LDFORGE_SOURCES
 	src/addObjectDialog.cpp
 	src/basics.cpp
 	src/colors.cpp
-	src/configDialog.cpp
 	src/crashCatcher.cpp
 	src/dialogs.cpp
 	src/documentation.cpp
@@ -58,6 +57,7 @@ set (LDFORGE_SOURCES
 	src/ringFinder.cpp
 	src/version.cpp
 	src/dialogs/colorselector.cpp
+	src/dialogs/configdialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
 	src/dialogs/newpartdialog.cpp
 	src/dialogs/openprogressdialog.cpp
@@ -95,7 +95,6 @@ set (LDFORGE_HEADERS
 	src/documentation.h
 	src/main.h
 	src/basics.h
-	src/configDialog.h
 	src/glRenderer.h
 	src/glCompiler.h
 	src/mainwindow.h
@@ -105,6 +104,7 @@ set (LDFORGE_HEADERS
 	src/hierarchyelement.h
 	src/guiutilities.h
 	src/dialogs/colorselector.h
+	src/dialogs/configdialog.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
 	src/dialogs/openprogressdialog.h
@@ -127,7 +127,6 @@ set (LDFORGE_HEADERS
 set (LDFORGE_FORMS
 	ui/about.ui
 	ui/addhistoryline.ui
-	ui/config.ui
 	ui/coverer.ui
 	ui/downloadfrom.ui
 	ui/edger2.ui
@@ -144,6 +143,7 @@ set (LDFORGE_FORMS
 	ui/ytruder.ui
 	src/mainwindow.ui
 	src/dialogs/colorselector.ui
+	src/dialogs/configdialog.ui
 	src/dialogs/ldrawpathdialog.ui
 	src/dialogs/newpartdialog.ui
 	src/dialogs/openprogressdialog.ui
