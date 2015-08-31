@@ -29,10 +29,10 @@
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QSettings>
 #include "main.h"
 #include "configDialog.h"
 #include "ldDocument.h"
-#include "configuration.h"
 #include "miscallenous.h"
 #include "colors.h"
 #include "dialogs/colorselector.h"
@@ -45,19 +45,19 @@ const char* g_extProgPathFilter =
 #endif
 	"All files (*.*)(*.*)";
 
-//
-//
 ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::WindowFlags f) :
 	QDialog (parent, f),
-	HierarchyElement (parent)
+	HierarchyElement (parent),
+	m_settings (m_window->makeSettings (this))
 {
 	ui = new Ui_ConfigUI;
 	ui->setupUi (this);
 
 	// Set defaults
-	applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	applyToWidgetOptions (
+	[&](QWidget* widget, QString confname)
 	{
-		QVariant value (conf->toVariant());
+		QVariant value = m_settings->value (confname, m_config->defaultValueByName (confname));
 		QLineEdit* le;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
@@ -65,34 +65,34 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 		QCheckBox* checkbox;
 		QPushButton* button;
 
-		if ((le = qobject_cast<QLineEdit*> (wdg)) != null)
+		if ((le = qobject_cast<QLineEdit*> (widget)) != null)
 		{
 			le->setText (value.toString());
 		}
-		else if ((spinbox = qobject_cast<QSpinBox*> (wdg)) != null)
+		else if ((spinbox = qobject_cast<QSpinBox*> (widget)) != null)
 		{
 			spinbox->setValue (value.toInt());
 		}
-		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (wdg)) != null)
+		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != null)
 		{
 			doublespinbox->setValue (value.toDouble());
 		}
-		else if ((slider = qobject_cast<QSlider*> (wdg)) != null)
+		else if ((slider = qobject_cast<QSlider*> (widget)) != null)
 		{
 			slider->setValue (value.toInt());
 		}
-		else if ((checkbox = qobject_cast<QCheckBox*> (wdg)) != null)
+		else if ((checkbox = qobject_cast<QCheckBox*> (widget)) != null)
 		{
 			checkbox->setChecked (value.toBool());
 		}
-		else if ((button = qobject_cast<QPushButton*> (wdg)) != null)
+		else if ((button = qobject_cast<QPushButton*> (widget)) != null)
 		{
 			setButtonBackground (button, value.toString());
 			connect (button, SIGNAL (clicked()), this, SLOT (setButtonColor()));
 		}
 		else
 		{
-			print ("Unknown widget of type %1\n", wdg->metaObject()->className());
+			print ("Unknown widget of type %1\n", widget->metaObject()->className());
 		}
 	});
 
@@ -124,15 +124,11 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	connect (ui->m_pagelist, SIGNAL (currentRowChanged (int)), this, SLOT (selectPage (int)));
 }
 
-//
-//
 ConfigDialog::~ConfigDialog()
 {
 	delete ui;
 }
 
-//
-//
 void ConfigDialog::selectPage (int row)
 {
 	ui->m_pagelist->setCurrentRow (row);
@@ -177,7 +173,7 @@ void ConfigDialog::initExtProgs()
 		QPushButton* setPathButton = new QPushButton;
 
 		icon->setPixmap (GetIcon (name.toLower()));
-		input->setText (*info.path);
+		input->setText (m_window->externalPrograms()->getPathSetting (program));
 		setPathButton->setIcon (GetIcon ("folder"));
 		widgets.input = input;
 		widgets.setPathButton = setPathButton;
@@ -196,14 +192,12 @@ void ConfigDialog::initExtProgs()
 			pathsLayout->addWidget (wineBox, row, 4);
 		}
 #endif
-
 		++row;
 	}
-
 	ui->extProgs->setLayout (pathsLayout);
 }
 
-void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
+void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)> func)
 {
 	// Apply configuration
 	for (QWidget* widget : findChildren<QWidget*>())
@@ -211,16 +205,12 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, AbstractC
 		if (not widget->objectName().startsWith ("config"))
 			continue;
 
-		QString confname (widget->objectName().mid (strlen ("config")));
-		AbstractConfigEntry* conf (m_config->findByName (confname));
+		QString optionname (widget->objectName().mid (strlen ("config")));
 
-		if (conf == null)
-		{
-			print ("Couldn't find configuration entry named %1", confname);
-			continue;
-		}
-
-		func (widget, conf);
+		if (m_settings->contains (optionname))
+			func (widget, optionname);
+		else
+			print ("Couldn't find configuration entry named %1", optionname);
 	}
 }
 
@@ -229,9 +219,9 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, AbstractC
 //
 void ConfigDialog::applySettings()
 {
-	applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
+	applyToWidgetOptions ([&](QWidget* widget, QString confname)
 	{
-		QVariant value (conf->toVariant());
+		QVariant value;
 		QLineEdit* le;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
@@ -252,14 +242,17 @@ void ConfigDialog::applySettings()
 		else if ((button = qobject_cast<QPushButton*> (widget)) != null)
 			value = m_buttonColors[button];
 		else
+		{
 			print ("Unknown widget of type %1\n", widget->metaObject()->className());
+			return;
+		}
 
-		conf->loadFromVariant (value);
+		m_settings->setValue (confname, value);
 	});
 
 	// Rebuild the quick color toolbar
 	m_window->setQuickColors (quickColors);
-	m_config->quickColorToolbar = quickColorString();
+	m_config->setQuickColorToolbar (quickColorString());
 
 	// Ext program settings
 	for (int i = 0; i < NumExternalPrograms; ++i)
@@ -270,7 +263,7 @@ void ConfigDialog::applySettings()
 		toolset->getPathSetting (program) = widgets.input->text();
 
 		if (widgets.wineBox)
-			toolset->getWineSetting (program) = widgets.wineBox->isChecked();
+			toolset->setWineSetting (program, widgets.wineBox->isChecked());
 	}
 
 	// Apply shortcuts
@@ -280,7 +273,7 @@ void ConfigDialog::applySettings()
 		item->action()->setShortcut (item->sequence());
 	}
 
-	Config::Save();
+	m_window->syncSettings();
 	LDDocument::current()->reloadAllSubfiles();
 	LoadLogoStuds();
 
@@ -384,7 +377,7 @@ void ConfigDialog::slot_setColor()
 	LDColor defaultValue = entry ? entry->color() : LDColor::nullColor();
 	LDColor value;
 
-	if (not ColorSelector::selectColor (value, defaultValue, this))
+	if (not ColorSelector::selectColor (this, value, defaultValue))
 		return;
 
 	if (entry != null)

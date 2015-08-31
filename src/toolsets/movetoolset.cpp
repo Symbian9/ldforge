@@ -44,26 +44,26 @@ void MoveToolset::moveDown()
 
 void MoveToolset::gridCoarse()
 {
-	m_config->grid = Grid::Coarse;
+	m_config->setGrid (Grid::Coarse);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridMedium()
 {
-	m_config->grid = Grid::Medium;
+	m_config->setGrid (Grid::Medium);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridFine()
 {
-	m_config->grid = Grid::Fine;
+	m_config->setGrid (Grid::Fine);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::moveObjects (Vertex vect)
 {
 	// Apply the grid values
-	vect *= m_window->config (CurrentGrid().coordinateSnap);
+	vect *= gridCoordinateSnap();
 
 	for (LDObject* obj : Selection())
 		obj->move (vect);
@@ -101,7 +101,7 @@ void MoveToolset::moveZPos()
 
 double MoveToolset::getRotateActionAngle()
 {
-	return (Pi * m_window->config (CurrentGrid().angleSnap)) / 180;
+	return (Pi * gridAngleSnap()) / 180;
 }
 
 void MoveToolset::rotateXPos()

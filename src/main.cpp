@@ -25,12 +25,10 @@
 #include "mainwindow.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
-#include "configuration.h"
 #include "colors.h"
 #include "basics.h"
 #include "primitives.h"
 #include "glRenderer.h"
-#include "configDialog.h"
 #include "dialogs.h"
 #include "crashCatcher.h"
 #include "ldpaths.h"
@@ -42,7 +40,7 @@ static bool g_IsExiting (false);
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
-ConfigOption (bool firstStart = true)
+ConfigOption (bool FirstStart = true)
 
 // =============================================================================
 //
@@ -52,19 +50,6 @@ int main (int argc, char* argv[])
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
 	initCrashCatcher();
-	Config::Initialize();
-
-	// Load or create the configuration
-	if (not Config::Load())
-	{
-		print ("Creating configuration file...\n");
-
-		if (Config::Save())
-			print ("Configuration file successfully created.\n");
-		else
-			Critical ("Failed to create configuration file!\n");
-	}
-	
 	MainWindow* win = new MainWindow;
 	LDPaths* paths = new LDPaths (win);
 	paths->checkPaths();
@@ -73,15 +58,6 @@ int main (int argc, char* argv[])
 	LoadPrimitives();
 	newFile();
 	win->show();
-
-	// If this is the first start, get the user to configuration. Especially point
-	// them to the profile tab, it's the most important form to fill in.
-	if (win->configBag()->firstStart)
-	{
-		(new ConfigDialog (ConfigDialog::ProfileTab))->exec();
-		win->configBag()->firstStart = false;
-		Config::Save();
-	}
 
 	// Process the command line
 	for (int arg = 1; arg < argc; ++arg)

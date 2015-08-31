@@ -12,7 +12,7 @@ LDPaths::LDPaths (QObject* parent) :
 
 void LDPaths::checkPaths()
 {
-	QString& pathconfig = m_config->lDrawPath;
+	QString pathconfig = m_config->lDrawPath();
 
 	if (not configurePaths (pathconfig))
 	{
@@ -22,7 +22,7 @@ void LDPaths::checkPaths()
 		if (not m_dialog->exec())
 			Exit();
 		else
-			pathconfig = m_dialog->path();
+			m_config->setLDrawPath (m_dialog->path());
 	}
 }
 

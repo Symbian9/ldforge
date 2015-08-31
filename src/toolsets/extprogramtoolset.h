@@ -35,12 +35,12 @@ enum ExtProgramType
 struct ExtProgramInfo
 {
 	QString name;
-	QString* path;
-	bool* wine;
 };
 
 class ExtProgramToolset : public Toolset
 {
+	Q_OBJECT
+
 public:
 	ExtProgramToolset (MainWindow* parent);
 
@@ -50,12 +50,17 @@ public:
 	Q_INVOKABLE void isecalc();
 	Q_INVOKABLE void rectifier();
 	Q_INVOKABLE void ytruder();
+	
+	bool programUsesWine (ExtProgramType program);
+	QString externalProgramName (ExtProgramType program);
+	QString getPathSetting (ExtProgramType program);
+	bool getWineSetting (ExtProgramType program);
+	void setPathSetting (ExtProgramType program, QString value);
+	void setWineSetting (ExtProgramType program, bool value);
 
 private:
-	QString externalProgramName (ExtProgramType program);
-	bool programUsesWine (ExtProgramType program);
-	QString checkExtProgramPath (ExtProgramType program);
-	bool makeTempFile (QTemporaryFile& tmp, QString& fname);
+	bool checkExtProgramPath(ExtProgramType program);
+	bool makeTempFile (class QTemporaryFile& tmp, QString& fname);
 	bool runExtProgram (ExtProgramType prog, QString argvstr);
 	QString errorCodeString (ExtProgramType program, class QProcess& process);
 	void insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace);
@@ -63,8 +68,6 @@ private:
 	void writeObjects (const LDObjectList& objects, QFile& f);
 	void writeObjects (const LDObjectList& objects, QString fname);
 	void writeSelection (QString fname);
-	bool& getWineSetting (ExtProgramType program);
-	QString getPathSetting (ExtProgramType program);
 
 	ExtProgramInfo extProgramInfo[NumExternalPrograms];
 };

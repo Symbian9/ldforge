@@ -29,7 +29,6 @@
 #include <QTimer>
 #include <GL/glu.h>
 #include "main.h"
-#include "configuration.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
 #include "colors.h"
@@ -104,7 +103,7 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	HierarchyElement (parent)
 {
 	m_isPicking = false;
-	m_camera = (ECamera) m_config->camera;
+	m_camera = (ECamera) m_config->camera();
 	m_drawToolTip = false;
 	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
@@ -195,7 +194,7 @@ void GLRenderer::initGLData()
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_MULTISAMPLE);
 
-	if (m_config->antiAliasedLines)
+	if (m_config->antiAliasedLines())
 	{
 		glEnable (GL_LINE_SMOOTH);
 		glEnable (GL_POLYGON_SMOOTH);
@@ -249,7 +248,7 @@ void GLRenderer::initializeGL()
 	initializeOpenGLFunctions();
 #endif
 	setBackground();
-	glLineWidth (m_config->lineThickness);
+	glLineWidth (m_config->lineThickness());
 	glLineStipple (1, 0x6666);
 	setAutoFillBackground (false);
 	setMouseTracking (true);
@@ -296,12 +295,12 @@ void GLRenderer::initializeAxes()
 //
 QColor GLRenderer::getMainColor()
 {
-	QColor col (m_config->mainColor);
+	QColor col (m_config->mainColor());
 
 	if (not col.isValid())
 		return QColor (0, 0, 0);
 
-	col.setAlpha (m_config->mainColorAlpha * 255.f);
+	col.setAlpha (m_config->mainColorAlpha() * 255.f);
 	return col;
 }
 
@@ -315,7 +314,7 @@ void GLRenderer::setBackground()
 		return;
 	}
 
-	QColor col (m_config->backgroundColor);
+	QColor col (m_config->backgroundColor());
 
 	if (not col.isValid())
 		return;
@@ -377,7 +376,7 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (m_config->drawWireframe and not isPicking())
+	if (m_config->drawWireframe() and not isPicking())
 		glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -431,7 +430,7 @@ void GLRenderer::drawGLScene()
 	}
 	else
 	{
-		if (m_config->bfcRedGreenView)
+		if (m_config->bfcRedGreenView())
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
@@ -444,7 +443,7 @@ void GLRenderer::drawGLScene()
 		}
 		else
 		{
-			EVBOComplement colors = (m_config->randomColors) ? VBOCM_RandomColors : VBOCM_NormalColors;
+			EVBOComplement colors = (m_config->randomColors()) ? VBOCM_RandomColors : VBOCM_NormalColors;
 			drawVBOs (VBOSF_Triangles, colors, GL_TRIANGLES);
 			drawVBOs (VBOSF_Quads, colors, GL_QUADS);
 		}
@@ -454,7 +453,7 @@ void GLRenderer::drawGLScene()
 		drawVBOs (VBOSF_CondLines, VBOCM_NormalColors, GL_LINES);
 		glDisable (GL_LINE_STIPPLE);
 
-		if (m_config->drawAxes)
+		if (m_config->drawAxes())
 		{
 			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
@@ -480,9 +479,9 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and m_config->drawSurfaces == false) or
-		(surface == VBOSF_Lines and m_config->drawEdgeLines == false) or
-		(surface == VBOSF_CondLines and m_config->drawConditionalLines == false))
+	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and m_config->drawSurfaces() == false) or
+		(surface == VBOSF_Lines and m_config->drawEdgeLines() == false) or
+		(surface == VBOSF_CondLines and m_config->drawConditionalLines() == false))
 	{
 		return;
 	}
@@ -895,7 +894,7 @@ void GLRenderer::setCamera (const ECamera cam)
 		return;
 
 	m_camera = cam;
-	m_config->camera = (int) cam;
+	m_config->setCamera ((int) cam);
 	m_window->updateEditModeActions();
 }
 
@@ -1077,14 +1076,14 @@ void GLRenderer::setPicking (const bool& a)
 		glDisable (GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth (qMax<double> (m_config->lineThickness, 6.5));
+		glLineWidth (qMax<double> (m_config->lineThickness(), 6.5));
 	}
 	else
 	{
 		glEnable (GL_DITHER);
 
 		// Restore line thickness
-		glLineWidth (m_config->lineThickness);
+		glLineWidth (m_config->lineThickness());
 	}
 }
 
@@ -1529,14 +1528,14 @@ void GLRenderer::updateOverlayObjects()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not m_config->highlightObjectBelowCursor and objectAtCursor() == null)
+	if (not m_config->highlightObjectBelowCursor() and objectAtCursor() == null)
 		return;
 
 	LDObject* newObject = nullptr;
 	LDObject* oldObject = objectAtCursor();
 	qint32 newIndex;
 
-	if (isCameraMoving() or not m_config->highlightObjectBelowCursor)
+	if (isCameraMoving() or not m_config->highlightObjectBelowCursor())
 	{
 		newIndex = 0;
 	}

@@ -195,7 +195,7 @@ public:
 	void					updateOverlayObjects();
 	void					zoomNotch (bool inward);
 
-	static QColor			getMainColor();
+	QColor					getMainColor();
 
 protected:
 	void					contextMenuEvent (QContextMenuEvent* ev);

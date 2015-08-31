@@ -95,16 +95,32 @@ ConfigOption (float GridFineAngleSnap = 7.5f)
 ConfigOption (int RotationPointType = 0)
 ConfigOption (Vertex CustomRotationPoint = Origin)
 
-const GridData Grids[3] =
+float gridCoordinateSnap()
 {
-	{ "Coarse", cfg::GRID_COARSE_COORDINATE_SNAP, cfg::GRID_COARSE_ANGLE_SNAP },
-	{ "Medium", cfg::GRID_MEDIUM_COORDINATE_SNAP, cfg::GRID_MEDIUM_ANGLE_SNAP },
-	{ "Fine", cfg::GRID_FINE_COORDINATE_SNAP, cfg::GRID_FINE_ANGLE_SNAP },
-};
+	ConfigurationValueBag* config = g_win->configBag();
 
-const GridData& CurrentGrid()
+	switch (config->grid())
+	{
+	case Grid::Coarse: return config->gridCoarseCoordinateSnap();
+	case Grid::Medium: return config->gridMediumCoordinateSnap();
+	case Grid::Fine: return config->gridFineCoordinateSnap();
+	}
+
+	return 1.0f;
+}
+
+float gridAngleSnap()
 {
-	return Grids[g_win->configBag()->grid];
+	ConfigurationValueBag* config = g_win->configBag();
+
+	switch (config->grid())
+	{
+	case Grid::Coarse: return config->gridCoarseAngleSnap();
+	case Grid::Medium: return config->gridMediumAngleSnap();
+	case Grid::Fine: return config->gridFineAngleSnap();
+	}
+
+	return 45.0f;
 }
 
 // =============================================================================
@@ -113,7 +129,7 @@ const GridData& CurrentGrid()
 //
 double Grid::Snap (double value, const Grid::Config type)
 {
-	double snapvalue = g_win->config ((type == Coordinate) ? CurrentGrid().coordinateSnap : CurrentGrid().angleSnap);
+	double snapvalue = (type == Coordinate) ? gridCoordinateSnap() : gridAngleSnap();
 	double mult = floor (qAbs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
@@ -158,7 +174,7 @@ void Simplify (int& numer, int& denom)
 //
 Vertex GetRotationPoint (const LDObjectList& objs)
 {
-	switch (RotationPoint (g_win->configBag()->rotationPointType))
+	switch (RotationPoint (g_win->configBag()->rotationPointType()))
 	{
 	case RotationPoint::ObjectOrigin:
 		{
@@ -180,7 +196,7 @@ Vertex GetRotationPoint (const LDObjectList& objs)
 		return Origin;
 
 	case RotationPoint::CustomPoint:
-		return g_win->configBag()->customRotationPoint;
+		return g_win->configBag()->customRotationPoint();
 
 	case RotationPoint::NumValues:
 		break;
@@ -197,7 +213,7 @@ void ConfigureRotationPoint()
 	Ui::RotPointUI ui;
 	ui.setupUi (dlg);
 
-	switch (RotationPoint (g_win->configBag()->rotationPointType))
+	switch (RotationPoint (g_win->configBag()->rotationPointType()))
 	{
 	case RotationPoint::ObjectOrigin:
 		ui.objectPoint->setChecked (true);
@@ -215,7 +231,7 @@ void ConfigureRotationPoint()
 		break;
 	}
 
-	Vertex& custompoint = g_win->configBag()->customRotationPoint;
+	Vertex custompoint = g_win->configBag()->customRotationPoint();
 	ui.customX->setValue (custompoint.x());
 	ui.customY->setValue (custompoint.y());
 	ui.customZ->setValue (custompoint.z());
@@ -223,14 +239,15 @@ void ConfigureRotationPoint()
 	if (not dlg->exec())
 		return;
 
-	g_win->configBag()->rotationPointType =
+	g_win->configBag()->setRotationPointType (int (
 		(ui.objectPoint->isChecked()) ? RotationPoint::ObjectOrigin :
 		(ui.worldPoint->isChecked())  ? RotationPoint::WorldOrigin :
-		RotationPoint::CustomPoint;
+		RotationPoint::CustomPoint));
 
 	custompoint.setX (ui.customX->value());
 	custompoint.setY (ui.customY->value());
 	custompoint.setZ (ui.customZ->value());
+	g_win->configBag()->setCustomRotationPoint (custompoint);
 }
 
 // =============================================================================

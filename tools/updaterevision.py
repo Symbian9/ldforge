@@ -36,10 +36,10 @@ import outputfile
 def main():
 	import subprocess
 	from datetime import datetime
-	parser = argparser.ArgumentParser (description='Writes a header file with Hg commit information')
+	parser = argparse.ArgumentParser (description='Writes a header file with Hg commit information')
 	parser.add_argument ('output')
 	args = parser.parse_args()
-	f = OutputFile (args.output)
+	f = outputfile.OutputFile (args.output)
 	data = subprocess.check_output (['hg', 'log', '-r.', '--template',
 		'{node|short} {branch} {date|hgdate}']).replace ('\n', '').split (' ')
 

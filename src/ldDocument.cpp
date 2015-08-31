@@ -22,7 +22,6 @@
 #include <QTime>
 #include <QApplication>
 #include "main.h"
-#include "configuration.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
@@ -223,7 +222,7 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 		return relpath;
 
 	// Try with just the LDraw path first
-	fullPath = format ("%1" DIRSLASH "%2", g_win->configBag()->lDrawPath, relpath);
+	fullPath = format ("%1" DIRSLASH "%2", g_win->configBag()->lDrawPath(), relpath);
 
 	if (QFile::exists (fullPath))
 		return fullPath;
@@ -232,7 +231,7 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 	{
 		// Look in sub-directories: parts and p. Also look in net_downloadpath, since that's
 		// where we download parts from the PT to.
-		QStringList dirs = { g_win->configBag()->lDrawPath, g_win->configBag()->downloadFilePath };
+		QStringList dirs = { g_win->configBag()->lDrawPath(), g_win->configBag()->downloadFilePath() };
 		for (const QString& topdir : dirs)
 		{
 			for (const QString& subdir : QStringList ({ "parts", "p" }))
@@ -572,7 +571,7 @@ void newFile()
 //
 void AddRecentFile (QString path)
 {
-	QStringList& recentFiles = g_win->configBag()->recentFiles;
+	QStringList recentFiles = g_win->configBag()->recentFiles();
 	int idx = recentFiles.indexOf (path);
 
 	// If this file already is in the list, pop it out.
@@ -590,7 +589,8 @@ void AddRecentFile (QString path)
 
 	// Add the file
 	recentFiles << path;
-	Config::Save();
+	g_win->configBag()->setRecentFiles (recentFiles);
+	g_win->syncSettings();
 	g_win->updateRecentFilesMenu();
 }
 
@@ -669,7 +669,7 @@ void OpenMainModel (QString path)
 		unknowns << static_cast<LDError*> (obj)->fileReferenced();
 	}
 
-	if (g_win->configBag()->tryDownloadMissingFiles and not unknowns.isEmpty())
+	if (g_win->configBag()->tryDownloadMissingFiles() and not unknowns.isEmpty())
 	{
 		PartDownloader dl;
 
@@ -1268,7 +1268,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (g_win->configBag()->useLogoStuds and renderinline)
+	if (g_win->configBag()->useLogoStuds() and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		LoadLogoStuds();

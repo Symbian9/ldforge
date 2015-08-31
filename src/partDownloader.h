@@ -79,7 +79,7 @@ public:
 	void			setSource (Source src);
 	void			modifyDestination (QString& dest) const;
 
-	static QString	getDownloadPath();
+	QString			getDownloadPath();
 	static void		staticBegin();
 
 public slots:

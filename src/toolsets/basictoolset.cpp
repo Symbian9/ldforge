@@ -208,7 +208,7 @@ void BasicToolset::setColor()
 	LDColor defaultcol = m_window->getSelectedColor();
 
 	// Show the dialog to the user now and ask for a color.
-	if (ColorSelector::selectColor (color, defaultcol, m_window))
+	if (ColorSelector::selectColor (m_window, color, defaultcol))
 	{
 		for (LDObject* obj : objs)
 		{

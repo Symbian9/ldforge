@@ -254,7 +254,7 @@ QString AddObjectDialog::currentSubfileName()
 // =============================================================================
 void AddObjectDialog::slot_colorButtonClicked()
 {
-	ColorSelector::selectColor (m_color, m_color, this);
+	ColorSelector::selectColor (this, m_color, m_color);
 	setButtonBackground (pb_color, m_color);
 }
 

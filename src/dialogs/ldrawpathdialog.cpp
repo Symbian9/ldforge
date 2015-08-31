@@ -44,7 +44,7 @@ LDrawPathDialog::LDrawPathDialog (const QString& defaultPath, bool validDefault,
 	connect (ui.path, SIGNAL (textChanged (QString)), this, SIGNAL (pathChanged (QString)));
 	connect (ui.searchButton, SIGNAL (clicked()), this, SLOT (searchButtonClicked()));
 	connect (ui.buttonBox, SIGNAL (rejected()), this, validDefault ? SLOT (reject()) : SLOT (slot_exit()));
-	connect (ui.buttonBox, SIGNAL (accepted()), this, SLOT (slot_accept()));
+	connect (ui.buttonBox, SIGNAL (accepted()), this, SLOT (accept()));
 	setPath (defaultPath);
 }
 
@@ -98,10 +98,4 @@ void LDrawPathDialog::setStatusText (const QString& statusText, bool ok)
 			.arg (ok ? "#700" : "#270")
 			.arg (statusText));
 	}
-}
-
-void LDrawPathDialog::slot_accept()
-{
-	Config::Save();
-	accept();
 }

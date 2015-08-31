@@ -24,7 +24,6 @@
 #include "../main.h"
 #include "../mainwindow.h"
 #include "../colors.h"
-#include "../configuration.h"
 #include "../miscallenous.h"
 #include "colorselector.h"
 #include "ui_colorselector.h"
@@ -55,8 +54,8 @@ ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 
 			if (ldcolor == MainColor)
 			{
-				color = QColor (m_config->mainColor);
-				color.setAlphaF (m_config->mainColorAlpha);
+				color = QColor (m_config->mainColor());
+				color.setAlphaF (m_config->mainColorAlpha());
 			}
 
 			QString color2name (Luma (color) < 80 ? "white" : "black");

@@ -40,14 +40,13 @@
 #include "glRenderer.h"
 #include "mainwindow.h"
 #include "ldDocument.h"
-#include "configuration.h"
 #include "miscallenous.h"
 #include "colors.h"
 #include "editHistory.h"
 #include "radioGroup.h"
 #include "addObjectDialog.h"
 #include "messageLog.h"
-#include "configuration.h"
+#include "configDialog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
@@ -62,12 +61,14 @@ ConfigOption (QString quickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
 ConfigOption (bool listImplicitFiles = false)
 ConfigOption (QStringList hiddenToolbars)
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
+	m_configOptions (this),
 	ui (*new Ui_MainWindow),
-	m_externalPrograms (nullptr)
+	m_externalPrograms (nullptr),
+	m_settings (makeSettings (this))
 {
 	g_win = this;
 	ui.setupUi (this);
@@ -111,7 +112,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	updateRecentFilesMenu();
 	updateColorToolbar();
 	updateTitle();
-	loadShortcuts (Config::SettingsObject());
+	loadShortcuts();
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
 	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
@@ -133,8 +134,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	{
 		const QMetaObject* meta = toolset->metaObject();
 
-		if (qobject_cast<ExtProgramToolset*> (meta))
-			m_externalPrograms = meta;
+		if (qobject_cast<ExtProgramToolset*> (toolset))
+			m_externalPrograms = static_cast<ExtProgramToolset*> (toolset);
 
 		for (int i = 0; i < meta->methodCount(); ++i)
 		{
@@ -156,12 +157,21 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		}
 	}
 
-	for (QVariant const& toolbarname : m_configOptions.hiddenToolbars)
+	for (QVariant const& toolbarname : m_configOptions.hiddenToolbars())
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
 		if (toolbar != null)
 			toolbar->hide();
+	}
+
+	// If this is the first start, get the user to configuration. Especially point
+	// them to the profile tab, it's the most important form to fill in.
+	if (m_configOptions.firstStart())
+	{
+		(new ConfigDialog (this, ConfigDialog::ProfileTab))->exec();
+		m_configOptions.setFirstStart (false);
+		syncSettings();
 	}
 }
 
@@ -170,7 +180,7 @@ MainWindow::~MainWindow()
 	g_win = null;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_action()
 {
@@ -192,7 +202,7 @@ void MainWindow::slot_action()
 	endAction();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::endAction()
 {
@@ -205,7 +215,7 @@ void MainWindow::endAction()
 	refresh();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_lastSecondCleanup()
 {
@@ -213,19 +223,19 @@ void MainWindow::slot_lastSecondCleanup()
 	delete &ui;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateRecentFilesMenu()
 {
 	// First, clear any items in the recent files menu
-for (QAction * recent : m_recentFiles)
+	for (QAction* recent : m_recentFiles)
 		delete recent;
 
 	m_recentFiles.clear();
 
 	QAction* first = null;
 
-	for (const QVariant& it : m_configOptions.recentFiles)
+	for (const QVariant& it : m_configOptions.recentFiles())
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
@@ -237,13 +247,13 @@ for (QAction * recent : m_recentFiles)
 	}
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QList<LDQuickColor> LoadQuickColorList()
 {
 	QList<LDQuickColor> colors;
 
-	for (QString colorname : m_configOptions.quickColorToolbar.split (":"))
+	for (QString colorname : g_win->configBag()->quickColorToolbar().split (":"))
 	{
 		if (colorname == "|")
 			colors << LDQuickColor::getSeparator();
@@ -259,7 +269,7 @@ QList<LDQuickColor> LoadQuickColorList()
 	return colors;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateColorToolbar()
 {
@@ -292,17 +302,18 @@ void MainWindow::updateColorToolbar()
 	updateGridToolBar();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	ui.actionGridCoarse->setChecked (m_configOptions.grid == Grid::Coarse);
-	ui.actionGridMedium->setChecked (m_configOptions.grid == Grid::Medium);
-	ui.actionGridFine->setChecked (m_configOptions.grid == Grid::Fine);
+	int grid = m_configOptions.grid();
+	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
+	ui.actionGridMedium->setChecked (grid == Grid::Medium);
+	ui.actionGridFine->setChecked (grid == Grid::Fine);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateTitle()
 {
@@ -338,7 +349,7 @@ void MainWindow::updateTitle()
 	setWindowTitle (title);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 int MainWindow::deleteSelection()
 {
@@ -355,7 +366,7 @@ int MainWindow::deleteSelection()
 	return selCopy.size();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::buildObjList()
 {
@@ -465,7 +476,7 @@ void MainWindow::buildObjList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		else if (m_configOptions.colorizeObjectsList
+		else if (m_configOptions.colorizeObjectsList()
 			and obj->isColored()
 			and obj->color().isValid()
 			and obj->color() != MainColor
@@ -484,7 +495,7 @@ void MainWindow::buildObjList()
 	scrollToSelection();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::scrollToSelection()
 {
@@ -495,7 +506,7 @@ void MainWindow::scrollToSelection()
 	ui.objectList->scrollToItem (obj->qObjListEntry);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_selectionChanged()
 {
@@ -534,7 +545,7 @@ void MainWindow::slot_selectionChanged()
 	R()->update();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_recentFile()
 {
@@ -542,7 +553,7 @@ void MainWindow::slot_recentFile()
 	OpenMainModel (qAct->text());
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_quickColor()
 {
@@ -574,7 +585,7 @@ void MainWindow::slot_quickColor()
 	refresh();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 int MainWindow::getInsertionPoint()
 {
@@ -586,7 +597,7 @@ int MainWindow::getInsertionPoint()
 	return CurrentDocument()->getObjectCount();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::doFullRefresh()
 {
@@ -594,7 +605,7 @@ void MainWindow::doFullRefresh()
 	m_renderer->hardRefresh();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::refresh()
 {
@@ -602,7 +613,7 @@ void MainWindow::refresh()
 	m_renderer->update();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateSelection()
 {
@@ -645,7 +656,7 @@ void MainWindow::updateSelection()
 	g_isSelectionLocked = false;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 LDColor MainWindow::getSelectedColor()
 {
@@ -666,7 +677,7 @@ LDColor MainWindow::getSelectedColor()
 	return result;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::closeEvent (QCloseEvent* ev)
 {
@@ -678,20 +689,21 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 	}
 
 	// Save the toolbar set
-	m_configOptions.hiddenToolbars.clear();
+	QStringList hiddenToolbars;
 
 	for (QToolBar* toolbar : findChildren<QToolBar*>())
 	{
 		if (toolbar->isHidden())
-			m_configOptions.hiddenToolbars << toolbar->objectName();
+			hiddenToolbars << toolbar->objectName();
 	}
 
 	// Save the configuration before leaving.
-	Config::Save();
+	m_configOptions.setHiddenToolbars (hiddenToolbars);
+	syncSettings();
 	ev->accept();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::spawnContextMenu (const QPoint pos)
 {
@@ -757,7 +769,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 	contextMenu->exec (pos);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::deleteByColor (LDColor color)
 {
@@ -775,7 +787,7 @@ void MainWindow::deleteByColor (LDColor color)
 		obj->destroy();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateEditModeActions()
 {
@@ -788,7 +800,7 @@ void MainWindow::updateEditModeActions()
 	ui.actionModeLinePath->setChecked (mode == EditModeType::LinePath);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::slot_editObject (QListWidgetItem* listitem)
 {
@@ -802,7 +814,7 @@ void MainWindow::slot_editObject (QListWidgetItem* listitem)
 	}
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 bool MainWindow::save (LDDocument* doc, bool saveAs)
 {
@@ -819,7 +831,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 			name = doc->name();
 
 		name.replace ("\\", "/");
-		path = QFileDialog::getSaveFileName (g_win, tr ("Save As"),
+		path = QFileDialog::getSaveFileName (this, tr ("Save As"),
 			name, tr ("LDraw files (*.dat *.ldr)"));
 
 		if (path.isEmpty())
@@ -844,7 +856,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 	QString message = format (tr ("Failed to save to %1: %2"), path, strerror (errno));
 
 	// Tell the user the save failed, and give the option for saving as with it.
-	QMessageBox dlg (QMessageBox::Critical, tr ("Save Failure"), message, QMessageBox::Close, g_win);
+	QMessageBox dlg (QMessageBox::Critical, tr ("Save Failure"), message, QMessageBox::Close, this);
 
 	// Add a save-as button
 	QPushButton* saveAsBtn = new QPushButton (tr ("Save As"));
@@ -870,21 +882,21 @@ void ObjectList::contextMenuEvent (QContextMenuEvent* ev)
 	g_win->spawnContextMenu (ev->globalPos());
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QPixmap GetIcon (QString iconName)
 {
 	return (QPixmap (format (":/icons/%1.png", iconName)));
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 bool Confirm (const QString& message)
 {
 	return Confirm (MainWindow::tr ("Confirm"), message);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 bool Confirm (const QString& title, const QString& message)
 {
@@ -892,7 +904,7 @@ bool Confirm (const QString& title, const QString& message)
 		(QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void Critical (const QString& message)
 {
@@ -900,7 +912,7 @@ void Critical (const QString& message)
 		(QMessageBox::Close), QMessageBox::Close);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QIcon MakeColorIcon (LDColor colinfo, const int size)
 {
@@ -912,8 +924,8 @@ QIcon MakeColorIcon (LDColor colinfo, const int size)
 	if (colinfo == MainColor)
 	{
 		// Use the user preferences for main color here
-		col = g_win->configBag()->mainColor;
-		col.setAlphaF (g_win->configBag()->mainColorAlpha);
+		col = g_win->configBag()->mainColor();
+		col.setAlphaF (g_win->configBag()->mainColorAlpha());
 	}
 
 	// Paint the icon border
@@ -927,7 +939,7 @@ QIcon MakeColorIcon (LDColor colinfo, const int size)
 	return QIcon (QPixmap::fromImage (img));
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MakeColorComboBox (QComboBox* box)
 {
@@ -958,7 +970,7 @@ void MakeColorComboBox (QComboBox* box)
 	}
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateDocumentList()
 {
@@ -978,7 +990,7 @@ void MainWindow::updateDocumentList()
 	m_updatingTabs = false;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateDocumentListItem (LDDocument* doc)
 {
@@ -1006,7 +1018,7 @@ void MainWindow::updateDocumentListItem (LDDocument* doc)
 	m_updatingTabs = oldUpdatingTabs;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 // A file is selected from the list of files on the left of the screen. Find out
 // which file was picked and change to it.
@@ -1037,7 +1049,7 @@ void MainWindow::changeCurrentFile()
 	LDDocument::setCurrent (file);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::refreshObjectList()
 {
@@ -1053,7 +1065,7 @@ for (LDObject* obj : *f)
 	buildObjList();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateActions()
 {
@@ -1065,24 +1077,24 @@ void MainWindow::updateActions()
 		ui.actionRedo->setEnabled (pos < (long) his->getSize() - 1);
 	}
 
-	ui.actionWireframe->setChecked (m_configOptions.drawWireframe);
-	ui.actionAxes->setChecked (m_configOptions.drawAxes);
-	ui.actionBfcView->setChecked (m_configOptions.bfcRedGreenView);
-	ui.actionRandomColors->setChecked (m_configOptions.randomColors);
-	ui.actionDrawAngles->setChecked (m_configOptions.drawAngles);
-	ui.actionDrawSurfaces->setChecked (m_configOptions.drawSurfaces);
-	ui.actionDrawEdgeLines->setChecked (m_configOptions.drawEdgeLines);
-	ui.actionDrawConditionalLines->setChecked (m_configOptions.drawConditionalLines);
+	ui.actionWireframe->setChecked (m_configOptions.drawWireframe());
+	ui.actionAxes->setChecked (m_configOptions.drawAxes());
+	ui.actionBfcView->setChecked (m_configOptions.bfcRedGreenView());
+	ui.actionRandomColors->setChecked (m_configOptions.randomColors());
+	ui.actionDrawAngles->setChecked (m_configOptions.drawAngles());
+	ui.actionDrawSurfaces->setChecked (m_configOptions.drawSurfaces());
+	ui.actionDrawEdgeLines->setChecked (m_configOptions.drawEdgeLines());
+	ui.actionDrawConditionalLines->setChecked (m_configOptions.drawConditionalLines());
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updatePrimitives()
 {
 	PopulatePrimitives (ui.primitives);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::closeTab (int tabindex)
 {
@@ -1094,33 +1106,37 @@ void MainWindow::closeTab (int tabindex)
 	doc->dismiss();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::loadShortcuts (QSettings const* settings)
+void MainWindow::loadShortcuts()
 {
 	for (QAction* act : findChildren<QAction*>())
 	{
-		QKeySequence seq = settings->value ("shortcut_" + act->objectName(), act->shortcut()).value<QKeySequence>();
+		QKeySequence seq = m_settings->value ("shortcut_" + act->objectName(), act->shortcut()).value<QKeySequence>();
 		act->setShortcut (seq);
 	}
+
+	m_settings->deleteLater();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::saveShortcuts (QSettings* settings)
+void MainWindow::saveShortcuts()
 {
 	applyToActions ([&](QAction* act)
 	{
 		QString const key = "shortcut_" + act->objectName();
 
 		if (g_defaultShortcuts[act] != act->shortcut())
-			settings->setValue (key, act->shortcut());
+			m_settings->setValue (key, act->shortcut());
 		else
-			settings->remove (key);
+			m_settings->remove (key);
 	});
+
+	m_settings->deleteLater();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::applyToActions (std::function<void(QAction*)> function)
 {
@@ -1131,35 +1147,35 @@ void MainWindow::applyToActions (std::function<void(QAction*)> function)
 	}
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QTreeWidget* MainWindow::getPrimitivesTree() const
 {
 	return ui.primitives;
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
 {
 	return g_defaultShortcuts[act];
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 bool MainWindow::ringToolHiRes() const
 {
 	return ui.ringToolHiRes->isChecked();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 int MainWindow::ringToolSegments() const
 {
 	return ui.ringToolSegments->value();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::ringToolHiResClicked (bool checked)
 {
@@ -1175,7 +1191,7 @@ void MainWindow::ringToolHiResClicked (bool checked)
 	}
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::circleToolSegmentsChanged()
 {
@@ -1185,36 +1201,29 @@ void MainWindow::circleToolSegmentsChanged()
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
 }
 
-
-//
-// Where is the configuration file located at?
-//
-QString MainWindow::configFilePath (QString file)
-{
-	return Config::DirectoryPath() + DIRSLASH + file;
-}
-
-//
-// Directory of the configuration file.
-//
-QString Config::DirectoryPath()
-{
-	QSettings* settings = SettingsObject();
-	QString result = Dirname (settings->fileName());
-	delete settings;
-	return result;
-}
-
+// ---------------------------------------------------------------------------------------------------------------------
 //
 // Accessor to the settings object
 //
-QSettings* Config::SettingsObject()
+QSettings* MainWindow::makeSettings (QObject* parent)
 {
 	QString path = qApp->applicationDirPath() + "/" UNIXNAME ".ini";
-	return new QSettings (path, QSettings::IniFormat);
+	return new QSettings (path, QSettings::IniFormat, parent);
 }
 
-// =============================================================================
+void MainWindow::syncSettings()
+{
+	m_settings->sync();
+	m_settings->deleteLater();
+}
+
+QVariant MainWindow::getConfigValue (QString name)
+{
+	QVariant value = m_settings->value (name, m_configOptions.defaultValueByName (name));
+	return value;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 //
 QImage GetImageFromScreencap (uchar* data, int w, int h)
 {
@@ -1222,26 +1231,28 @@ QImage GetImageFromScreencap (uchar* data, int w, int h)
 	return QImage (data, w, h, QImage::Format_ARGB32).rgbSwapped().mirrored();
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 LDQuickColor::LDQuickColor (LDColor color, QToolButton* toolButton) :
 	m_color (color),
 	m_toolButton (toolButton) {}
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 LDQuickColor LDQuickColor::getSeparator()
 {
 	return LDQuickColor (LDColor::nullColor(), null);
 }
 
-// =============================================================================
+// ---------------------------------------------------------------------------------------------------------------------
 //
 bool LDQuickColor::isSeparator() const
 {
 	return color() == LDColor::nullColor();
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
 void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
 {
 	tw->clear();

@@ -31,13 +31,13 @@ NewPartDialog::NewPartDialog (QWidget *parent) :
 {
 	ui.setupUi (this);
 
-	QString authortext = m_config->defaultName;
+	QString authortext = m_config->defaultName();
 
-	if (not m_config->defaultUser.isEmpty())
-		authortext.append (format (" [%1]", m_config->defaultUser));
+	if (not m_config->defaultUser().isEmpty())
+		authortext.append (format (" [%1]", m_config->defaultUser()));
 
 	ui.author->setText (authortext);
-	ui.useCaLicense->setChecked (m_config->useCaLicense);
+	ui.useCaLicense->setChecked (m_config->useCaLicense());
 }
 
 BFCStatement NewPartDialog::getWinding() const

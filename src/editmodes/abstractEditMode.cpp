@@ -183,7 +183,7 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 void AbstractDrawMode::drawLength (QPainter &painter, const Vertex &v0, const Vertex &v1,
 	const QPointF& v0p, const QPointF& v1p) const
 {
-	if (not m_config->drawLineLengths)
+	if (not m_config->drawLineLengths())
 		return;
 
 	const QString label = QString::number ((v1 - v0).length());
@@ -230,7 +230,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			if (withlengths)
 				drawLength (painter, poly3d[i], poly3d[j], poly[i], poly[j]);
 
-			if (withangles and m_config->drawAngles)
+			if (withangles and m_config->drawAngles())
 			{
 				QLineF l0 (poly[h], poly[i]),
 					l1 (poly[i], poly[j]);

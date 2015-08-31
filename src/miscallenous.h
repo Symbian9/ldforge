@@ -19,7 +19,6 @@
 #pragma once
 #include <QVector>
 #include <functional>
-#include "configuration.h"
 #include "main.h"
 #include "basics.h"
 #include "configurationvaluebag.h"
@@ -44,15 +43,8 @@ QString MakePrettyFileSize (qint64 size);
 QString Join (QList<StringFormatArg> vals, QString delim = " ");
 
 // Grid stuff
-struct GridData
-{
-	const char* name;
-	CONFIG_KEY_TYPE(float) coordinateSnap;
-	CONFIG_KEY_TYPE(float) angleSnap;
-};
-
-extern const GridData Grids[3];
-const GridData& CurrentGrid();
+float gridCoordinateSnap();
+float gridAngleSnap();
 
 // =============================================================================
 enum class RotationPoint

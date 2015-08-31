@@ -47,12 +47,17 @@ PrimitiveScanner* ActivePrimitiveScanner()
 	return g_activeScanner;
 }
 
+QString getPrimitivesCfgPath()
+{
+	return qApp->applicationDirPath() + DIRSLASH "prims.cfg";
+}
+
 // =============================================================================
 //
 void LoadPrimitives()
 {
 	// Try to load prims.cfg
-	QFile conf (Config::FilePath ("prims.cfg"));
+	QFile conf (getPrimitivesCfgPath());
 
 	if (not conf.open (QIODevice::ReadOnly))
 	{
@@ -160,7 +165,7 @@ void PrimitiveScanner::work()
 	if (m_i == m_files.size())
 	{
 		// Done with primitives, now save to a config file
-		QString path = Config::FilePath ("prims.cfg");
+		QString path = getPrimitivesCfgPath();
 		QFile conf (path);
 
 		if (not conf.open (QIODevice::WriteOnly | QIODevice::Text))
@@ -279,11 +284,7 @@ void PrimitiveCategory::loadCategories()
 		delete cat;
 
 	g_PrimitiveCategories.clear();
-	QString path = Config::DirectoryPath() + "primregexps.cfg";
-
-	if (not QFile::exists (path))
-		path = ":/data/primitive-categories.cfg";
-
+	QString path = ":/data/primitive-categories.cfg";
 	QFile f (path);
 
 	if (not f.open (QIODevice::ReadOnly))
@@ -618,10 +619,10 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 	QString author = APPNAME;
 	QString license = "";
 
-	if (not g_win->configBag()->defaultName.isEmpty())
+	if (not g_win->configBag()->defaultName().isEmpty())
 	{
 		license = PreferredLicenseText();
-		author = format ("%1 [%2]", g_win->configBag()->defaultName, g_win->configBag()->defaultUser);
+		author = format ("%1 [%2]", g_win->configBag()->defaultName(), g_win->configBag()->defaultUser());
 	}
 
 	LDObjectList objs;

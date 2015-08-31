@@ -12,3 +12,4 @@ release
 *.rej
 *.orig
 CMakeLists.txt.user
+*.pyc

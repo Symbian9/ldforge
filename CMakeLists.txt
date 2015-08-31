@@ -27,20 +27,12 @@ add_custom_target (revision_check ALL
 	COMMAND python "${CMAKE_SOURCE_DIR}/tools/updaterevision.py" hginfo.h
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_custom_target (config_collection ALL
-	COMMAND python
-		"${CMAKE_SOURCE_DIR}/tools/configcollector.py"
-		--header configurationvaluebag.h
-		--source configurationvaluebag.cpp
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (LDFORGE_SOURCES
 	src/addObjectDialog.cpp
 	src/basics.cpp
 	src/colors.cpp
-	src/configuration.cpp
 	src/configDialog.cpp
 	src/crashCatcher.cpp
 	src/dialogs.cpp
@@ -48,9 +40,10 @@ set (LDFORGE_SOURCES
 	src/editHistory.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
+	src/hierarchyelement.cpp
 	src/ldDocument.cpp
 	src/ldObject.cpp
-    src/ldObjectMath.cpp
+	src/ldObjectMath.cpp
 	src/ldpaths.cpp
 	src/main.cpp
 	src/mainwindow.cpp
@@ -79,6 +72,7 @@ set (LDFORGE_SOURCES
 	src/toolsets/movetoolset.cpp
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
+	${CMAKE_BINARY_DIR}/configurationvaluebag.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -102,11 +96,11 @@ set (LDFORGE_HEADERS
 	src/configDialog.h
 	src/glRenderer.h
 	src/glCompiler.h
-	src/configuration.h
 	src/mainwindow.h
 	src/editHistory.h
 	src/format.h
 	src/ldpaths.h
+	src/hierarchyelement.h
 	src/dialogs/colorselector.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
@@ -206,6 +200,15 @@ else()
 		${OPENGL_LIBRARIES}
 	)
 endif()
+
+add_custom_target (config_collection ALL
+	COMMAND python
+		"${CMAKE_SOURCE_DIR}/tools/configcollector.py"
+		--header ${CMAKE_BINARY_DIR}/configurationvaluebag.h
+		--source ${CMAKE_BINARY_DIR}/configurationvaluebag.cpp
+		--sourcedir ${CMAKE_SOURCE_DIR}/src
+		${LDFORGE_SOURCES}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_dependencies (ldforge revision_check config_collection)
 install (TARGETS ldforge RUNTIME DESTINATION bin)

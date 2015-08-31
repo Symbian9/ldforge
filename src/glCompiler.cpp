@@ -78,7 +78,7 @@ void CheckGLErrorImpl (const char* file, int line)
 // =============================================================================
 //
 GLCompiler::GLCompiler (GLRenderer* renderer) :
-	HierarchyElement (parent),
+	HierarchyElement (renderer),
 	m_renderer (renderer)
 {
 	needMerge();
@@ -161,13 +161,13 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 			if (poly.color == MainColor)
 			{
 				if (topobj->color() == MainColor)
-					qcol = GLRenderer::getMainColor();
+					qcol = m_renderer->getMainColor();
 				else
 					qcol = topobj->color().faceColor();
 			}
 			else if (poly.color == EdgeColor)
 			{
-				qcol = Luma (QColor (m_config->backgroundColor)) > 40 ? Qt::black : Qt::white;
+				qcol = Luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
 			}
 			else
 			{
@@ -184,7 +184,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 		// The color was unknown. Use main color to make the polygon at least
 		// not appear pitch-black.
 		if (poly.num != 2 and poly.num != 5)
-			qcol = GLRenderer::getMainColor();
+			qcol = m_renderer->getMainColor();
 		else
 			qcol = Qt::black;
 
@@ -207,7 +207,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 
 	if (blendAlpha != 0.0)
 	{
-		QColor selcolor (m_config->selectColorBlend);
+		QColor selcolor (m_config->selectColorBlend());
 		double denom = blendAlpha + 1.0;
 		qcol.setRed ((qcol.red() + (selcolor.red() * blendAlpha)) / denom);
 		qcol.setGreen ((qcol.green() + (selcolor.green() * blendAlpha)) / denom);

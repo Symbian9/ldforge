@@ -53,7 +53,7 @@ void PartDownloader::staticBegin()
 //
 QString PartDownloader::getDownloadPath()
 {
-	QString path = m_config->downloadFilePath;
+	QString path = m_config->downloadFilePath();
 
 	if (DIRSLASH[0] != '/')
 		path.replace (DIRSLASH, "/");
@@ -109,7 +109,7 @@ bool PartDownloader::checkValidPath()
 		if (path.isEmpty())
 			return false;
 
-		m_config->downloadFilePath = path;
+		m_config->setDownloadFilePath (path);
 	}
 
 	return true;
@@ -145,7 +145,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 	dest = dest.simplified();
 
 	// If the user doesn't want us to guess, stop right here.
-	if (not m_config->guessDownloadPaths)
+	if (not m_config->guessDownloadPaths())
 		return;
 
 	// Ensure .dat extension
@@ -254,7 +254,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 
 		modifyDestination (dest);
 
-		if (QFile::exists (PartDownloader::getDownloadPath() + DIRSLASH + dest))
+		if (QFile::exists (getDownloadPath() + DIRSLASH + dest))
 		{
 			const QString overwritemsg = format (tr ("%1 already exists in download directory. Overwrite?"), dest);
 			if (not Confirm (tr ("Overwrite?"), overwritemsg))
@@ -332,7 +332,7 @@ void PartDownloader::checkIfFinished()
 		for (LDDocument* f : m_files)
 		f->reloadAllSubfiles();
 
-	if (m_config->autoCloseDownloadDialog and not failed)
+	if (m_config->autoCloseDownloadDialog() and not failed)
 	{
 		// Close automatically if desired.
 		accept();
@@ -372,7 +372,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 	m_prompt (parent),
 	m_url (url),
 	m_destinaton (dest),
-	m_filePath (PartDownloader::getDownloadPath() + DIRSLASH + dest),
+	m_filePath (parent->getDownloadPath() + DIRSLASH + dest),
 	m_networkManager (new QNetworkAccessManager),
 	m_isFirstUpdate (true),
 	m_isPrimary (primary),

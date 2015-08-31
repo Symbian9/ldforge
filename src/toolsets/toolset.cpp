@@ -27,8 +27,7 @@
 
 Toolset::Toolset (MainWindow* parent) :
 	QObject (parent),
-	HierarchyElement (parent),
-	m_window (parent) {}
+	HierarchyElement (parent) {}
 
 QVector<Toolset*> Toolset::createToolsets (MainWindow* parent)
 {

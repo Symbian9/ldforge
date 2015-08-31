@@ -99,7 +99,10 @@ void FileToolset::settings()
 
 void FileToolset::setLDrawPath()
 {
-	(new LDrawPathDialog (m_config->ldrawPath, true))->exec();
+	LDrawPathDialog* dialog = new LDrawPathDialog (m_config->lDrawPath(), true);
+
+	if (dialog->exec())
+		m_config->setLDrawPath (dialog->path());
 }
 
 void FileToolset::exit()

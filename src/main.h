@@ -29,7 +29,6 @@
 #include <QTextFormat>
 #include "macros.h"
 #include "version.h"
-#include "configuration.h"
 #include "format.h"
 #include "hierarchyelement.h"
 

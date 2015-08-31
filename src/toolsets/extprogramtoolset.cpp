@@ -24,9 +24,9 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
+#include <QSettings>
 #include <QFileInfo>
 #include "../main.h"
-#include "../configuration.h"
 #include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "../ldDocument.h"
@@ -60,23 +60,11 @@ ExtProgramToolset::ExtProgramToolset (MainWindow* parent) :
 	Toolset (parent)
 {
 	extProgramInfo[Isecalc].name = "Isecalc";
-	extProgramInfo[Isecalc].path = &m_config->isecalcPath;
-	extProgramInfo[Isecalc].wine = &m_config->isecalcUsesWine;
 	extProgramInfo[Intersector].name = "Intersector";
-	extProgramInfo[Intersector].path = &m_config->intersectorPath;
-	extProgramInfo[Intersector].wine = &m_config->intersectorUsesWine;
 	extProgramInfo[Coverer].name = "Coverer";
-	extProgramInfo[Coverer].path = &m_config->covererPath;
-	extProgramInfo[Coverer].wine = &m_config->covererUsesWine;
 	extProgramInfo[Ytruder].name = "Ytruder";
-	extProgramInfo[Ytruder].path = &m_config->ytruderPath;
-	extProgramInfo[Ytruder].wine = &m_config->ytruderUsesWine;
 	extProgramInfo[Rectifier].name = "Rectifier";
-	extProgramInfo[Rectifier].path = &m_config->rectifierPath;
-	extProgramInfo[Rectifier].wine = &m_config->rectifierUsesWine;
 	extProgramInfo[Edger2].name = "Edger2";
-	extProgramInfo[Edger2].path = &m_config->edger2Path;
-	extProgramInfo[Edger2].wine = &m_config->edger2UsesWine;
 }
 
 bool ExtProgramToolset::makeTempFile (QTemporaryFile& tmp, QString& fname)
@@ -98,14 +86,24 @@ bool ExtProgramToolset::programUsesWine (ExtProgramType program)
 #endif
 }
 
-bool& ExtProgramToolset::getWineSetting (ExtProgramType program)
+bool ExtProgramToolset::getWineSetting (ExtProgramType program)
 {
-	return *extProgramInfo[program].wine;
+	return m_window->getConfigValue (externalProgramName (program) + "UsesWine").toBool();
 }
 
 QString ExtProgramToolset::getPathSetting (ExtProgramType program)
 {
-	return *extProgramInfo[program].path;
+	return m_window->getConfigValue (externalProgramName (program) + "Path").toString();
+}
+
+void ExtProgramToolset::setPathSetting (ExtProgramType program, QString value)
+{
+	m_window->getSettings()->setValue (externalProgramName (program) + "Path", QVariant::fromValue (value));
+}
+
+void ExtProgramToolset::setWineSetting (ExtProgramType program, bool value)
+{
+	m_window->getSettings()->setValue (externalProgramName (program) + "UsesWine", QVariant::fromValue (value));
 }
 
 QString ExtProgramToolset::externalProgramName (ExtProgramType program)
@@ -113,18 +111,18 @@ QString ExtProgramToolset::externalProgramName (ExtProgramType program)
 	return extProgramInfo[program].name;
 }
 
-QString ExtProgramToolset::checkExtProgramPath(ExtProgramType program)
+bool ExtProgramToolset::checkExtProgramPath (ExtProgramType program)
 {
-	QString& path = getPathSetting (program);
+	QString path = getPathSetting (program);
 
 	if (not path.isEmpty())
 		return true;
 
-	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (externalProgramName (program));
+	ExtProgPathPrompt* dialog = new ExtProgPathPrompt (externalProgramName (program));
 
-	if (dlg->exec() and not dlg->getPath().isEmpty())
+	if (dialog->exec() and not dialog->getPath().isEmpty())
 	{
-		path = dlg->getPath();
+		setPathSetting (program, dialog->getPath());
 		return true;
 	}
 
@@ -392,12 +390,12 @@ void ExtProgramToolset::ytruder()
 		outDATName
 	});
 
-	WriteSelection (inDATName);
+	writeSelection (inDATName);
 
 	if (not runExtProgram (Ytruder, argv))
 		return;
 
-	InsertOutput (outDATName, false, {});
+	insertOutput (outDATName, false, {});
 }
 
 // =============================================================================
@@ -437,12 +435,12 @@ void ExtProgramToolset::rectifier()
 		outDATName
 	});
 
-	WriteSelection (inDATName);
+	writeSelection (inDATName);
 
 	if (not runExtProgram (Rectifier, argv))
 		return;
 
-	InsertOutput (outDATName, true, {});
+	insertOutput (outDATName, true, {});
 }
 
 // =============================================================================

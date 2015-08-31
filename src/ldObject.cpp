@@ -859,7 +859,7 @@ void LDObject::deselect()
 //
 QString PreferredLicenseText()
 {
-	return (g_win->configBag()->useCaLicense ? CALicenseText : "");
+	return g_win->configBag()->useCaLicense() ? CALicenseText : "";
 }
 
 // =============================================================================

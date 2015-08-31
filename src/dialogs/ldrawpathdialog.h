@@ -43,5 +43,4 @@ private:
 private slots:
 	void searchButtonClicked();
 	void slot_exit();
-	void slot_accept();
 };

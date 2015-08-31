@@ -24,7 +24,6 @@
 #include <QRadioButton>
 #include <QTreeWidget>
 #include <QMetaMethod>
-#include "configuration.h"
 #include "ldObject.h"
 #include "colors.h"
 #include "configurationvaluebag.h"
@@ -157,19 +156,17 @@ public:
 	void endAction();
 	QTreeWidget* getPrimitivesTree() const;
 	static QKeySequence defaultShortcut (QAction* act);
-	void loadShortcuts (QSettings const* settings);
-	void saveShortcuts (QSettings* settings);
+	void loadShortcuts();
+	void saveShortcuts();
 	void applyToActions (std::function<void(QAction*)> function);
 
 	bool ringToolHiRes() const;
 	int ringToolSegments() const;
-	ConfigurationValueBag* configBag() const { return m_configOptions; }
-
-	template<typename T>
-	auto& config (T key)
-	{
-		return m_configOptions.get (key);
-	}
+	ConfigurationValueBag* configBag() { return &m_configOptions; }
+	class QSettings* makeSettings (QObject* parent = nullptr);
+	void syncSettings();
+	QVariant getConfigValue (QString name);
+	class QSettings* getSettings() { return m_settings; }
 
 	class ExtProgramToolset* externalPrograms()
 	{
@@ -203,6 +200,7 @@ private:
 	QVector<Toolset*>	m_toolsets;
 	QMap<QAction*, ToolInfo> m_toolmap;
 	class ExtProgramToolset* m_externalPrograms;
+	class QSettings* m_settings;
 
 private slots:
 	void slot_selectionChanged();

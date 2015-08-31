@@ -126,7 +126,7 @@ void ViewToolset::screenshot()
 
 void ViewToolset::axes()
 {
-	m_config->drawAxes = not m_config->drawAxes;
+	m_config->setDrawAxes (not m_config->drawAxes());
 	m_window->updateActions();
 	m_window->R()->update();
 }
@@ -151,7 +151,7 @@ void ViewToolset::visibilityReveal()
 
 void ViewToolset::wireframe()
 {
-	m_config->drawWireframe = not m_config->drawWireframe;
+	m_config->setDrawWireframe (not m_config->drawWireframe());
 	m_window->R()->refresh();
 }
 
@@ -173,7 +173,7 @@ void ViewToolset::clearOverlay()
 
 void ViewToolset::drawAngles()
 {
-	m_config->drawAngles = not m_config->drawAngles;
+	m_config->setDrawAngles (not m_config->drawAngles());
 	m_window->R()->refresh();
 }
 
@@ -242,10 +242,10 @@ void ViewToolset::testpic()
 
 void ViewToolset::bfcView()
 {
-	m_config->bfcRedGreenView = not m_config->bfcRedGreenView;
+	m_config->setBfcRedGreenView (not m_config->bfcRedGreenView());
 
-	if (m_config->bfcRedGreenView)
-		m_config->randomColors = false;
+	if (m_config->bfcRedGreenView())
+		m_config->setRandomColors (false);
 
 	m_window->updateActions();
 	m_window->R()->refresh();
@@ -273,10 +273,10 @@ void ViewToolset::jumpTo()
 
 void ViewToolset::randomColors()
 {
-	m_config->randomColors = not m_config->randomColors;
+	m_config->setRandomColors (not m_config->randomColors());
 
-	if (m_config->randomColors)
-		m_config->bfcRedGreenView = false;
+	if (m_config->randomColors())
+		m_config->setBfcRedGreenView (false);
 
 	m_window->updateActions();
 	m_window->R()->refresh();
@@ -284,18 +284,18 @@ void ViewToolset::randomColors()
 
 void ViewToolset::drawSurfaces()
 {
-	m_config->drawSurfaces = not m_config->drawSurfaces;
+	m_config->setDrawSurfaces (not m_config->drawSurfaces());
 	m_window->updateActions();
 }
 
 void ViewToolset::drawEdgeLines()
 {
-	m_config->drawEdgeLines = not m_config->drawEdgeLines;
+	m_config->setDrawEdgeLines (not m_config->drawEdgeLines());
 	m_window->updateActions();
 }
 
 void ViewToolset::drawConditionalLines()
 {
-	m_config->drawConditionalLines = not m_config->drawConditionalLines;
+	m_config->setDrawConditionalLines (not m_config->drawConditionalLines());
 	m_window->updateActions();
 }
