@@ -26,6 +26,7 @@
 #include <QGridLayout>
 #include <QSettings>
 #include <QFileInfo>
+#include "../guiutilities.h"
 #include "../main.h"
 #include "../miscallenous.h"
 #include "../mainwindow.h"
@@ -456,11 +457,10 @@ void ExtProgramToolset::intersector()
 	QDialog* dlg = new QDialog;
 	Ui::IntersectorUI ui;
 	ui.setupUi (dlg);
-
-	MakeColorComboBox (ui.cmb_incol);
-	MakeColorComboBox (ui.cmb_cutcol);
-	ui.cb_repeat->setWhatsThis ("If this is set, " APPNAME " runs Intersector a second time with inverse files to cut the "
-								" cutter group with the input group. Both groups are cut by the intersection.");
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_incol);
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_cutcol);
+	ui.cb_repeat->setWhatsThis ("If this is set, " APPNAME " runs Intersector a second time with inverse files to cut "
+								" the cutter group with the input group. Both groups are cut by the intersection.");
 	ui.cb_edges->setWhatsThis ("Makes " APPNAME " try run Isecalc to create edgelines for the intersection.");
 
 	LDColor inCol, cutCol;
@@ -556,8 +556,8 @@ void ExtProgramToolset::coverer()
 	QDialog* dlg = new QDialog;
 	Ui::CovererUI ui;
 	ui.setupUi (dlg);
-	MakeColorComboBox (ui.cmb_col1);
-	MakeColorComboBox (ui.cmb_col2);
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col1);
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col2);
 
 	LDColor in1Col, in2Col;
 
@@ -621,8 +621,8 @@ void ExtProgramToolset::isecalc()
 	QDialog* dlg = new QDialog;
 	ui.setupUi (dlg);
 
-	MakeColorComboBox (ui.cmb_col1);
-	MakeColorComboBox (ui.cmb_col2);
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col1);
+	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col2);
 
 	LDColor in1Col, in2Col;
 

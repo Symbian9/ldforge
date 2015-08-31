@@ -18,7 +18,7 @@
 
 #pragma once
 #include <QColor>
-#include "main.h"
+#include "basics.h"
 
 class LDColor
 {

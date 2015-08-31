@@ -42,6 +42,7 @@ set (LDFORGE_SOURCES
 	src/editHistory.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
+	src/guiutilities.cpp
 	src/hierarchyelement.cpp
 	src/ldDocument.cpp
 	src/ldObject.cpp
@@ -102,6 +103,7 @@ set (LDFORGE_HEADERS
 	src/format.h
 	src/ldpaths.h
 	src/hierarchyelement.h
+	src/guiutilities.h
 	src/dialogs/colorselector.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h

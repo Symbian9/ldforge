@@ -21,9 +21,10 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QColorDialog>
+#include "../colors.h"
+#include "../guiutilities.h"
 #include "../main.h"
 #include "../mainwindow.h"
-#include "../colors.h"
 #include "../miscallenous.h"
 #include "colorselector.h"
 #include "ui_colorselector.h"
@@ -139,7 +140,7 @@ void ColorSelector::drawColorInfo()
 
 	ui.colorLabel->setText (format ("%1 - %2", selection().indexString(),
 		(selection().isDirect() ? "<direct color>" : selection().name())));
-	ui.iconLabel->setPixmap (MakeColorIcon (selection(), 16).pixmap (16, 16));
+	ui.iconLabel->setPixmap (guiUtilities()->makeColorIcon (selection(), 16).pixmap (16, 16));
 
 #ifdef TRANSPARENT_DIRECT_COLORS
 	ui.transparentDirectColor->setEnabled (selection().isDirect());

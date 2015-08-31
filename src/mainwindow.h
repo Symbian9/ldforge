@@ -173,6 +173,11 @@ public:
 		return m_externalPrograms;
 	}
 
+	class GuiUtilities* guiUtilities()
+	{
+		return m_guiUtilities;
+	}
+
 public slots:
 	void updatePrimitives();
 	void changeCurrentFile();
@@ -188,6 +193,7 @@ private:
 	struct ToolInfo { QMetaMethod method; Toolset* object; };
 
 	ConfigurationValueBag m_configOptions;
+	class GuiUtilities* m_guiUtilities;
 	GLRenderer*			m_renderer;
 	LDObjectList		m_sel;
 	QList<LDQuickColor>	m_quickColors;
@@ -231,12 +237,6 @@ bool Confirm (const QString& message);
 
 //! Displays an error prompt with the given \c message
 void Critical (const QString& message);
-
-//! Makes an icon of \c size x \c size pixels to represent \c colinfo
-QIcon MakeColorIcon (LDColor colinfo, const int size);
-
-//! Fills the given combo-box with color information
-void MakeColorComboBox (QComboBox* box);
 
 //! \returns a QImage from the given raw GL \c data
 QImage GetImageFromScreencap (uchar* data, int w, int h);

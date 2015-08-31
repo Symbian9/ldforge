@@ -2,6 +2,7 @@
 #include <QMetaObject>
 #include "hierarchyelement.h"
 #include "mainwindow.h"
+#include "guiutilities.h"
 
 HierarchyElement::HierarchyElement (QObject* parent) :
 	m_window (nullptr),
@@ -23,4 +24,10 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	}
 
 	m_config = m_window->configBag();
+}
+
+
+GuiUtilities* HierarchyElement::guiUtilities() const
+{
+	return m_window->guiUtilities();
 }

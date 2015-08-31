@@ -38,6 +38,7 @@
 #include "dialogs/colorselector.h"
 #include "glRenderer.h"
 #include "ui_config.h"
+#include "guiutilities.h"
 
 const char* g_extProgPathFilter =
 #ifdef _WIN32
@@ -331,7 +332,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 			if (color.isValid())
 			{
 				item->setText (color.name());
-				item->setIcon (MakeColorIcon (color, 16));
+				item->setIcon (guiUtilities()->makeColorIcon (color, 16));
 			}
 			else
 			{

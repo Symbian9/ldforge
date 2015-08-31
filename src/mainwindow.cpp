@@ -52,6 +52,7 @@
 #include "editmodes/abstractEditMode.h"
 #include "toolsets/extprogramtoolset.h"
 #include "toolsets/toolset.h"
+#include "guiutilities.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
@@ -66,6 +67,7 @@ ConfigOption (QStringList HiddenToolbars)
 MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
 	m_configOptions (this),
+	m_guiUtilities (new GuiUtilities (this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this))
@@ -289,7 +291,7 @@ void MainWindow::updateColorToolbar()
 		else
 		{
 			QToolButton* colorButton = new QToolButton;
-			colorButton->setIcon (MakeColorIcon (entry.color(), 16));
+			colorButton->setIcon (m_guiUtilities->makeColorIcon (entry.color(), 16));
 			colorButton->setIconSize (QSize (16, 16));
 			colorButton->setToolTip (entry.color().name());
 
@@ -912,64 +914,6 @@ void Critical (const QString& message)
 {
 	QMessageBox::critical (g_win, MainWindow::tr ("Error"), message,
 		(QMessageBox::Close), QMessageBox::Close);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QIcon MakeColorIcon (LDColor colinfo, const int size)
-{
-	// Create an image object and link a painter to it.
-	QImage img (size, size, QImage::Format_ARGB32);
-	QPainter paint (&img);
-	QColor col = colinfo.faceColor();
-
-	if (colinfo == MainColor)
-	{
-		// Use the user preferences for main color here
-		col = g_win->configBag()->mainColor();
-		col.setAlphaF (g_win->configBag()->mainColorAlpha());
-	}
-
-	// Paint the icon border
-	paint.fillRect (QRect (0, 0, size, size), colinfo.edgeColor());
-
-	// Paint the checkerboard background, visible with translucent icons
-	paint.drawPixmap (QRect (1, 1, size - 2, size - 2), GetIcon ("checkerboard"), QRect (0, 0, 8, 8));
-
-	// Paint the color above the checkerboard
-	paint.fillRect (QRect (1, 1, size - 2, size - 2), col);
-	return QIcon (QPixmap::fromImage (img));
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MakeColorComboBox (QComboBox* box)
-{
-	std::map<LDColor, int> counts;
-
-	for (LDObject* obj : CurrentDocument()->objects())
-	{
-		if (not obj->isColored() or not obj->color().isValid())
-			continue;
-
-		if (counts.find (obj->color()) == counts.end())
-			counts[obj->color()] = 1;
-		else
-			counts[obj->color()]++;
-	}
-
-	box->clear();
-	int row = 0;
-
-	for (const auto& pair : counts)
-	{
-		QIcon ico = MakeColorIcon (pair.first, 16);
-		box->addItem (ico, format ("[%1] %2 (%3 object%4)",
-			pair.first, pair.first.name(), pair.second, plural (pair.second)));
-		box->setItemData (row, pair.first.index());
-
-		++row;
-	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
