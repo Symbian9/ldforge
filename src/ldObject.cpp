@@ -27,9 +27,9 @@
 #include "colors.h"
 #include "glCompiler.h"
 
-CFGENTRY (String, DefaultName, "")
-CFGENTRY (String, DefaultUser, "")
-CFGENTRY (Bool, UseCALicense, true)
+ConfigOption (QString DefaultName = "")
+ConfigOption (QString DefaultUser = "")
+ConfigOption (bool UseCaLicense = true)
 
 // List of all LDObjects
 QMap<int32, LDObject*> g_allObjects;
@@ -859,7 +859,7 @@ void LDObject::deselect()
 //
 QString PreferredLicenseText()
 {
-	return (cfg::UseCALicense ? CALicenseText : "");
+	return (g_win->configBag()->useCaLicense ? CALicenseText : "");
 }
 
 // =============================================================================

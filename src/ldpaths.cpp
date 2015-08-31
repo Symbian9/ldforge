@@ -1,24 +1,28 @@
 #include <QDir>
 #include "ldpaths.h"
+#include "mainwindow.h"
 #include "dialogs/ldrawpathdialog.h"
 
-CFGENTRY (String, LDrawPath, "")
+ConfigOption (QString LDrawPath)
 
 LDPaths::LDPaths (QObject* parent) :
 	QObject (parent),
+	HierarchyElement (parent),
 	m_dialog (nullptr) {}
 
 void LDPaths::checkPaths()
 {
-	if (not configurePaths (cfg::LDrawPath))
+	QString& pathconfig = m_config->lDrawPath;
+
+	if (not configurePaths (pathconfig))
 	{
-		m_dialog = new LDrawPathDialog (cfg::LDrawPath, false);
+		m_dialog = new LDrawPathDialog (pathconfig, false);
 		connect (m_dialog, SIGNAL (pathChanged(QString)), this, SLOT (configurePaths (QString)));
 
 		if (not m_dialog->exec())
 			Exit();
 		else
-			cfg::LDrawPath = m_dialog->path();
+			pathconfig = m_dialog->path();
 	}
 }
 

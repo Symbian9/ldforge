@@ -42,7 +42,7 @@ static bool g_IsExiting (false);
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
-CFGENTRY (Bool, FirstStart, true)
+ConfigOption (bool firstStart = true)
 
 // =============================================================================
 //
@@ -64,22 +64,22 @@ int main (int argc, char* argv[])
 		else
 			Critical ("Failed to create configuration file!\n");
 	}
-
-	LDPaths* paths = new LDPaths;
+	
+	MainWindow* win = new MainWindow;
+	LDPaths* paths = new LDPaths (win);
 	paths->checkPaths();
 	paths->deleteLater();
 	InitColors();
 	LoadPrimitives();
-	MainWindow* win = new MainWindow;
 	newFile();
 	win->show();
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
-	if (cfg::FirstStart)
+	if (win->configBag()->firstStart)
 	{
 		(new ConfigDialog (ConfigDialog::ProfileTab))->exec();
-		cfg::FirstStart = false;
+		win->configBag()->firstStart = false;
 		Config::Save();
 	}
 

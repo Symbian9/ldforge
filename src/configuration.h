@@ -26,9 +26,6 @@
 class QSettings;
 class AbstractConfigEntry;
 
-#define CFGENTRY(T, NAME, DEFAULT) namespace cfg { AbstractConfigEntry::T##Type NAME; }
-#define EXTERN_CFGENTRY(T, NAME) namespace cfg { extern AbstractConfigEntry::T##Type NAME; }
-
 namespace Config
 {
 	void Initialize();

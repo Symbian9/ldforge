@@ -32,10 +32,6 @@ QList<Primitive> g_primitives;
 static PrimitiveScanner* g_activeScanner = null;
 PrimitiveCategory* g_unmatched = null;
 
-EXTERN_CFGENTRY (String, DefaultName)
-EXTERN_CFGENTRY (String, DefaultUser)
-EXTERN_CFGENTRY (Int, DefaultLicense)
-
 static const QStringList g_radialNameRoots =
 {
 	"edge",
@@ -622,10 +618,10 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 	QString author = APPNAME;
 	QString license = "";
 
-	if (not cfg::DefaultName.isEmpty())
+	if (not g_win->configBag()->defaultName.isEmpty())
 	{
 		license = PreferredLicenseText();
-		author = format ("%1 [%2]", cfg::DefaultName, cfg::DefaultUser);
+		author = format ("%1 [%2]", g_win->configBag()->defaultName, g_win->configBag()->defaultUser);
 	}
 
 	LDObjectList objs;

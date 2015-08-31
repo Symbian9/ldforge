@@ -31,6 +31,7 @@
 #include "version.h"
 #include "configuration.h"
 #include "format.h"
+#include "hierarchyelement.h"
 
 // Null pointer
 static const std::nullptr_t null = nullptr;

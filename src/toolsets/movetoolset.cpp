@@ -23,9 +23,7 @@
 #include "movetoolset.h"
 
 MoveToolset::MoveToolset (MainWindow* parent) :
-	Toolset (parent)
-{
-}
+	Toolset (parent) {}
 
 void MoveToolset::moveSelection (bool up)
 {
@@ -46,26 +44,26 @@ void MoveToolset::moveDown()
 
 void MoveToolset::gridCoarse()
 {
-	cfg::Grid = Grid::Coarse;
+	m_config->grid = Grid::Coarse;
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridMedium()
 {
-	cfg::Grid = Grid::Medium;
+	m_config->grid = Grid::Medium;
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridFine()
 {
-	cfg::Grid = Grid::Fine;
+	m_config->grid = Grid::Fine;
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::moveObjects (Vertex vect)
 {
 	// Apply the grid values
-	vect *= *CurrentGrid().coordinateSnap;
+	vect *= m_window->config (CurrentGrid().coordinateSnap);
 
 	for (LDObject* obj : Selection())
 		obj->move (vect);
@@ -101,34 +99,39 @@ void MoveToolset::moveZPos()
 	moveObjects ({0, 0, 1});
 }
 
-static double GetRotateActionAngle()
+double MoveToolset::getRotateActionAngle()
 {
-	return (Pi * *CurrentGrid().angleSnap) / 180;
+	return (Pi * m_window->config (CurrentGrid().angleSnap)) / 180;
 }
 
 void MoveToolset::rotateXPos()
 {
-	RotateObjects (1, 0, 0, GetRotateActionAngle(), Selection());
+	RotateObjects (1, 0, 0, getRotateActionAngle(), Selection());
 }
+
 void MoveToolset::rotateYPos()
 {
-	RotateObjects (0, 1, 0, GetRotateActionAngle(), Selection());
+	RotateObjects (0, 1, 0, getRotateActionAngle(), Selection());
 }
+
 void MoveToolset::rotateZPos()
 {
-	RotateObjects (0, 0, 1, GetRotateActionAngle(), Selection());
+	RotateObjects (0, 0, 1, getRotateActionAngle(), Selection());
 }
+
 void MoveToolset::rotateXNeg()
 {
-	RotateObjects (-1, 0, 0, GetRotateActionAngle(), Selection());
+	RotateObjects (-1, 0, 0, getRotateActionAngle(), Selection());
 }
+
 void MoveToolset::rotateYNeg()
 {
-	RotateObjects (0, -1, 0, GetRotateActionAngle(), Selection());
+	RotateObjects (0, -1, 0, getRotateActionAngle(), Selection());
 }
+
 void MoveToolset::rotateZNeg()
 {
-	RotateObjects (0, 0, -1, GetRotateActionAngle(), Selection());
+	RotateObjects (0, 0, -1, getRotateActionAngle(), Selection());
 }
 
 void MoveToolset::configureRotationPoint()

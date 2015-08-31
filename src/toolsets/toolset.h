@@ -22,14 +22,11 @@
 
 class MainWindow;
 
-class Toolset : public QObject
+class Toolset : public QObject, public HierarchyElement
 {
 	Q_OBJECT
 public:
 	Toolset (MainWindow* parent);
 
 	static QVector<Toolset*> createToolsets (MainWindow* parent);
-
-protected:
-	MainWindow* m_window;
 };

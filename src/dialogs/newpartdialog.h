@@ -21,11 +21,11 @@
 #include "../main.h"
 #include "../ldObject.h"
 
-class NewPartDialog : public QDialog
+class NewPartDialog : public QDialog, HierarchyElement
 {
 	Q_OBJECT
 public:
-	NewPartDialog (QWidget *parent = nullptr);
+	NewPartDialog (QWidget *parent);
 
 	QString author() const;
 	void fillHeader (LDDocument* newdoc) const;

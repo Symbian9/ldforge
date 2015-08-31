@@ -28,15 +28,6 @@
 #include "../glCompiler.h"
 #include "viewtoolset.h"
 
-EXTERN_CFGENTRY (Bool, DrawWireframe)
-EXTERN_CFGENTRY (Bool, BFCRedGreenView)
-EXTERN_CFGENTRY (Bool, DrawAngles)
-EXTERN_CFGENTRY (Bool, RandomColors)
-EXTERN_CFGENTRY (Bool, DrawSurfaces)
-EXTERN_CFGENTRY (Bool, DrawEdgeLines)
-EXTERN_CFGENTRY (Bool, DrawConditionalLines)
-EXTERN_CFGENTRY (Bool, DrawAxes)
-
 ViewToolset::ViewToolset (MainWindow *parent) :
 	Toolset (parent) {}
 
@@ -135,7 +126,7 @@ void ViewToolset::screenshot()
 
 void ViewToolset::axes()
 {
-	cfg::DrawAxes = not cfg::DrawAxes;
+	m_config->drawAxes = not m_config->drawAxes;
 	m_window->updateActions();
 	m_window->R()->update();
 }
@@ -160,7 +151,7 @@ void ViewToolset::visibilityReveal()
 
 void ViewToolset::wireframe()
 {
-	cfg::DrawWireframe = not cfg::DrawWireframe;
+	m_config->drawWireframe = not m_config->drawWireframe;
 	m_window->R()->refresh();
 }
 
@@ -182,7 +173,7 @@ void ViewToolset::clearOverlay()
 
 void ViewToolset::drawAngles()
 {
-	cfg::DrawAngles = not cfg::DrawAngles;
+	m_config->drawAngles = not m_config->drawAngles;
 	m_window->R()->refresh();
 }
 
@@ -251,10 +242,10 @@ void ViewToolset::testpic()
 
 void ViewToolset::bfcView()
 {
-	cfg::BFCRedGreenView = not cfg::BFCRedGreenView;
+	m_config->bfcRedGreenView = not m_config->bfcRedGreenView;
 
-	if (cfg::BFCRedGreenView)
-		cfg::RandomColors = false;
+	if (m_config->bfcRedGreenView)
+		m_config->randomColors = false;
 
 	m_window->updateActions();
 	m_window->R()->refresh();
@@ -282,10 +273,10 @@ void ViewToolset::jumpTo()
 
 void ViewToolset::randomColors()
 {
-	cfg::RandomColors = not cfg::RandomColors;
+	m_config->randomColors = not m_config->randomColors;
 
-	if (cfg::RandomColors)
-		cfg::BFCRedGreenView = false;
+	if (m_config->randomColors)
+		m_config->bfcRedGreenView = false;
 
 	m_window->updateActions();
 	m_window->R()->refresh();
@@ -293,18 +284,18 @@ void ViewToolset::randomColors()
 
 void ViewToolset::drawSurfaces()
 {
-	cfg::DrawSurfaces = not cfg::DrawSurfaces;
+	m_config->drawSurfaces = not m_config->drawSurfaces;
 	m_window->updateActions();
 }
 
 void ViewToolset::drawEdgeLines()
 {
-	cfg::DrawEdgeLines = not cfg::DrawEdgeLines;
+	m_config->drawEdgeLines = not m_config->drawEdgeLines;
 	m_window->updateActions();
 }
 
 void ViewToolset::drawConditionalLines()
 {
-	cfg::DrawConditionalLines = not cfg::DrawConditionalLines;
+	m_config->drawConditionalLines = not m_config->drawConditionalLines;
 	m_window->updateActions();
 }

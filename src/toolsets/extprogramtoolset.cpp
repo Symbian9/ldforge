@@ -41,68 +41,45 @@
 #include "ui_isecalc.h"
 #include "ui_edger2.h"
 
-enum ExtProgramType
-{
-	Isecalc,
-	Intersector,
-	Coverer,
-	Ytruder,
-	Rectifier,
-	Edger2,
-};
-
 // =============================================================================
 //
-CFGENTRY (String, IsecalcPath, "")
-CFGENTRY (String, IntersectorPath, "")
-CFGENTRY (String, CovererPath, "")
-CFGENTRY (String, YtruderPath, "")
-CFGENTRY (String, RectifierPath, "")
-CFGENTRY (String, Edger2Path, "")
-
-QString* const g_extProgPaths[] =
-{
-	&cfg::IsecalcPath,
-	&cfg::IntersectorPath,
-	&cfg::CovererPath,
-	&cfg::YtruderPath,
-	&cfg::RectifierPath,
-	&cfg::Edger2Path,
-};
-
-CFGENTRY (Bool, IsecalcUsesWine, false)
-CFGENTRY (Bool, IntersectorUsesWine, false)
-CFGENTRY (Bool, CovererUsesWine, false)
-CFGENTRY (Bool, YtruderUsesWine, false)
-CFGENTRY (Bool, RectifierUsesWine, false)
-CFGENTRY (Bool, Edger2UsesWine, false)
-
-bool* const g_extProgWine[] =
-{
-	&cfg::IsecalcUsesWine,
-	&cfg::IntersectorUsesWine,
-	&cfg::CovererUsesWine,
-	&cfg::YtruderUsesWine,
-	&cfg::RectifierUsesWine,
-	&cfg::Edger2UsesWine,
-};
-
-const char* g_extProgNames[] =
-{
-	"Isecalc",
-	"Intersector",
-	"Coverer",
-	"Ytruder",
-	"Rectifier",
-	"Edger2"
-};
+ConfigOption (QString IsecalcPath)
+ConfigOption (QString IntersectorPath)
+ConfigOption (QString CovererPath)
+ConfigOption (QString RectifierPath)
+ConfigOption (QString YtruderPath)
+ConfigOption (QString Edger2Path)
+ConfigOption (bool IsecalcUsesWine = false)
+ConfigOption (bool IntersectorUsesWine = false)
+ConfigOption (bool CovererUsesWine = false)
+ConfigOption (bool YtruderUsesWine = false)
+ConfigOption (bool RectifierUsesWine = false)
+ConfigOption (bool Edger2UsesWine = false)
 
 ExtProgramToolset::ExtProgramToolset (MainWindow* parent) :
-	Toolset (parent) {}
+	Toolset (parent)
+{
+	extProgramInfo[Isecalc].name = "Isecalc";
+	extProgramInfo[Isecalc].path = &m_config->isecalcPath;
+	extProgramInfo[Isecalc].wine = &m_config->isecalcUsesWine;
+	extProgramInfo[Intersector].name = "Intersector";
+	extProgramInfo[Intersector].path = &m_config->intersectorPath;
+	extProgramInfo[Intersector].wine = &m_config->intersectorUsesWine;
+	extProgramInfo[Coverer].name = "Coverer";
+	extProgramInfo[Coverer].path = &m_config->covererPath;
+	extProgramInfo[Coverer].wine = &m_config->covererUsesWine;
+	extProgramInfo[Ytruder].name = "Ytruder";
+	extProgramInfo[Ytruder].path = &m_config->ytruderPath;
+	extProgramInfo[Ytruder].wine = &m_config->ytruderUsesWine;
+	extProgramInfo[Rectifier].name = "Rectifier";
+	extProgramInfo[Rectifier].path = &m_config->rectifierPath;
+	extProgramInfo[Rectifier].wine = &m_config->rectifierUsesWine;
+	extProgramInfo[Edger2].name = "Edger2";
+	extProgramInfo[Edger2].path = &m_config->edger2Path;
+	extProgramInfo[Edger2].wine = &m_config->edger2UsesWine;
+}
 
-// =============================================================================
-//
-static bool MakeTempFile (QTemporaryFile& tmp, QString& fname)
+bool ExtProgramToolset::makeTempFile (QTemporaryFile& tmp, QString& fname)
 {
 	if (not tmp.open())
 		return false;
@@ -112,16 +89,38 @@ static bool MakeTempFile (QTemporaryFile& tmp, QString& fname)
 	return true;
 }
 
-// =============================================================================
-//
-static bool CheckExtProgramPath (ExtProgramType program)
+bool ExtProgramToolset::programUsesWine (ExtProgramType program)
 {
-	QString& path = *g_extProgPaths[program];
+#ifndef Q_OS_WIN32
+	return getWineSetting (program);
+#else
+	return false;
+#endif
+}
+
+bool& ExtProgramToolset::getWineSetting (ExtProgramType program)
+{
+	return *extProgramInfo[program].wine;
+}
+
+QString ExtProgramToolset::getPathSetting (ExtProgramType program)
+{
+	return *extProgramInfo[program].path;
+}
+
+QString ExtProgramToolset::externalProgramName (ExtProgramType program)
+{
+	return extProgramInfo[program].name;
+}
+
+QString ExtProgramToolset::checkExtProgramPath(ExtProgramType program)
+{
+	QString& path = getPathSetting (program);
 
 	if (not path.isEmpty())
 		return true;
 
-	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (g_extProgNames[program]);
+	ExtProgPathPrompt* dlg = new ExtProgPathPrompt (externalProgramName (program));
 
 	if (dlg->exec() and not dlg->getPath().isEmpty())
 	{
@@ -134,36 +133,28 @@ static bool CheckExtProgramPath (ExtProgramType program)
 
 // =============================================================================
 //
-static QString ProcessExtProgError (ExtProgramType prog, QProcess& proc)
+QString ExtProgramToolset::errorCodeString (ExtProgramType program, QProcess& process)
 {
-	switch (proc.error())
+	switch (process.error())
 	{
 	case QProcess::FailedToStart:
-		{
-			QString winemessage;
+		if (programUsesWine (program))
+			return tr ("Program failed to start, make sure that Wine is installed and check your permissions.");
 
-#ifndef _WIN32
-			if (*g_extProgWine[prog])
-				winemessage = "make sure Wine is installed and ";
-#else
-			Q_UNUSED (prog);
-#endif
-
-			return format ("Program failed to start, %1check your permissions", winemessage);
-		} break;
+		return tr ("Program failed to start, %1check your permissions");
 
 	case QProcess::Crashed:
-		return "Crashed.";
+		return tr ("Crashed.");
 
 	case QProcess::WriteError:
 	case QProcess::ReadError:
-		return "I/O error.";
+		return tr ("I/O error.");
 
 	case QProcess::UnknownError:
-		return "Unknown error";
+		return tr ("Unknown error");
 
 	case QProcess::Timedout:
-		return "Timed out (30 seconds)";
+		return tr ("Timed out (30 seconds)");
 	}
 
 	return "";
@@ -171,7 +162,7 @@ static QString ProcessExtProgError (ExtProgramType prog, QProcess& proc)
 
 // =============================================================================
 //
-static void WriteObjects (const LDObjectList& objects, QFile& f)
+void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 {
 	for (LDObject* obj : objects)
 	{
@@ -180,7 +171,7 @@ static void WriteObjects (const LDObjectList& objects, QFile& f)
 			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			LDObjectList objs = ref->inlineContents (true, false);
 
-			WriteObjects (objs, f);
+			writeObjects (objs, f);
 
 			for (LDObject* obj : objs)
 				obj->destroy();
@@ -192,7 +183,7 @@ static void WriteObjects (const LDObjectList& objects, QFile& f)
 
 // =============================================================================
 //
-static void WriteObjects (const LDObjectList& objects, QString fname)
+void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString fname)
 {
 	// Write the input file
 	QFile f (fname);
@@ -203,7 +194,7 @@ static void WriteObjects (const LDObjectList& objects, QString fname)
 		return;
 	}
 
-	WriteObjects (objects, f);
+	writeObjects (objects, f);
 	f.close();
 
 #ifdef DEBUG
@@ -213,14 +204,14 @@ static void WriteObjects (const LDObjectList& objects, QString fname)
 
 // =============================================================================
 //
-void WriteSelection (QString fname)
+void ExtProgramToolset::writeSelection (QString fname)
 {
-	WriteObjects (Selection(), fname);
+	writeObjects (Selection(), fname);
 }
 
 // =============================================================================
 //
-void WriteColorGroup (LDColor color, QString fname)
+void ExtProgramToolset::writeColorGroup (LDColor color, QString fname)
 {
 	LDObjectList objects;
 
@@ -232,38 +223,40 @@ void WriteColorGroup (LDColor color, QString fname)
 		objects << obj;
 	}
 
-	WriteObjects (objects, fname);
+	writeObjects (objects, fname);
 }
 
 // =============================================================================
 //
-bool RunExtProgram (ExtProgramType prog, QString path, QString argvstr)
+bool ExtProgramToolset::runExtProgram (ExtProgramType program, QString argvstr)
 {
+	QString path = getPathSetting (program);
 	QTemporaryFile input;
 	QStringList argv = argvstr.split (" ", QString::SkipEmptyParts);
 
-#ifndef _WIN32
-	if (*g_extProgWine[prog])
+#ifndef Q_OS_WIN32
+	if (programUsesWine (program))
 	{
 		argv.insert (0, path);
 		path = "wine";
 	}
-#endif // _WIN32
+#endif // Q_OS_WIN32
 
 	print ("Running command: %1 %2\n", path, argv.join (" "));
 
 	if (not input.open())
 		return false;
 
-	QProcess proc;
+	QProcess process;
 
 	// Begin!
-	proc.setStandardInputFile (input.fileName());
-	proc.start (path, argv);
+	process.setStandardInputFile (input.fileName());
+	process.start (path, argv);
 
-	if (not proc.waitForStarted())
+	if (not process.waitForStarted())
 	{
-		Critical (format ("Couldn't start %1: %2\n", g_extProgNames[prog], ProcessExtProgError (prog, proc)));
+		Critical (format ("Couldn't start %1: %2\n", externalProgramName (program),
+			errorCodeString (program, process)));
 		return false;
 	}
 
@@ -271,27 +264,27 @@ bool RunExtProgram (ExtProgramType prog, QString path, QString argvstr)
 	input.write ("\n");
 
 	// Wait while it runs
-	proc.waitForFinished();
+	process.waitForFinished();
 
 	QString err = "";
 
-	if (proc.exitStatus() != QProcess::NormalExit)
-		err = ProcessExtProgError (prog, proc);
+	if (process.exitStatus() != QProcess::NormalExit)
+		err = errorCodeString (program, process);
 
 	// Check the return code
-	if (proc.exitCode() != 0)
-		err = format ("Program exited abnormally (return code %1).",  proc.exitCode());
+	if (process.exitCode() != 0)
+		err = format ("Program exited abnormally (return code %1).",  process.exitCode());
 
 	if (not err.isEmpty())
 	{
-		Critical (format ("%1 failed: %2\n", g_extProgNames[prog], err));
+		Critical (format ("%1 failed: %2\n", externalProgramName (program), err));
 		QString filename ("externalProgramOutput.txt");
 		QFile file (filename);
 
 		if (file.open (QIODevice::WriteOnly | QIODevice::Text))
 		{
-			file.write (proc.readAllStandardOutput());
-			file.write (proc.readAllStandardError());
+			file.write (process.readAllStandardOutput());
+			file.write (process.readAllStandardError());
 			print ("Wrote output and error logs to %1", QFileInfo (file).absoluteFilePath());
 		}
 		else
@@ -308,11 +301,11 @@ bool RunExtProgram (ExtProgramType prog, QString path, QString argvstr)
 
 // =============================================================================
 //
-static void InsertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace)
+void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace)
 {
 #ifdef DEBUG
 	QFile::copy (fname, "./debug_lastOutput");
-#endif // RELEASE
+#endif
 
 	// Read the output file
 	QFile f (fname);
@@ -327,10 +320,10 @@ static void InsertOutput (QString fname, bool replace, QList<LDColor> colorsToRe
 
 	// If we replace the objects, delete the selection now.
 	if (replace)
-		g_win->deleteSelection();
+		m_window->deleteSelection();
 
 	for (LDColor color : colorsToReplace)
-		g_win->deleteByColor (color);
+		m_window->deleteByColor (color);
 
 	// Insert the new objects
 	CurrentDocument()->clearSelection();
@@ -347,7 +340,7 @@ static void InsertOutput (QString fname, bool replace, QList<LDColor> colorsToRe
 		obj->select();
 	}
 
-	g_win->doFullRefresh();
+	m_window->doFullRefresh();
 }
 
 // =============================================================================
@@ -357,7 +350,7 @@ void ExtProgramToolset::ytruder()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Ytruder))
+	if (not checkExtProgramPath (Ytruder))
 		return;
 
 	QDialog* dlg = new QDialog;
@@ -384,7 +377,7 @@ void ExtProgramToolset::ytruder()
 	QString inDATName, outDATName;
 
 	// Make temp files for the input and output files
-	if (not MakeTempFile (indat, inDATName) or not MakeTempFile (outdat, outDATName))
+	if (not makeTempFile (indat, inDATName) or not makeTempFile (outdat, outDATName))
 		return;
 
 	// Compose the command-line arguments
@@ -401,7 +394,7 @@ void ExtProgramToolset::ytruder()
 
 	WriteSelection (inDATName);
 
-	if (not RunExtProgram (Ytruder, cfg::YtruderPath, argv))
+	if (not runExtProgram (Ytruder, argv))
 		return;
 
 	InsertOutput (outDATName, false, {});
@@ -414,7 +407,7 @@ void ExtProgramToolset::rectifier()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Rectifier))
+	if (not checkExtProgramPath (Rectifier))
 		return;
 
 	QDialog* dlg = new QDialog;
@@ -428,7 +421,7 @@ void ExtProgramToolset::rectifier()
 	QString inDATName, outDATName;
 
 	// Make temp files for the input and output files
-	if (not MakeTempFile (indat, inDATName) or not MakeTempFile (outdat, outDATName))
+	if (not makeTempFile (indat, inDATName) or not makeTempFile (outdat, outDATName))
 		return;
 
 	// Compose arguments
@@ -446,7 +439,7 @@ void ExtProgramToolset::rectifier()
 
 	WriteSelection (inDATName);
 
-	if (not RunExtProgram (Rectifier, cfg::RectifierPath, argv))
+	if (not runExtProgram (Rectifier, argv))
 		return;
 
 	InsertOutput (outDATName, true, {});
@@ -459,7 +452,7 @@ void ExtProgramToolset::intersector()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Intersector))
+	if (not checkExtProgramPath (Intersector))
 		return;
 
 	QDialog* dlg = new QDialog;
@@ -501,11 +494,11 @@ void ExtProgramToolset::intersector()
 	QTemporaryFile indat, cutdat, outdat, outdat2, edgesdat;
 	QString inDATName, cutDATName, outDATName, outDAT2Name, edgesDATName;
 
-	if (not MakeTempFile (indat, inDATName) or
-		not MakeTempFile (cutdat, cutDATName) or
-		not MakeTempFile (outdat, outDATName) or
-		not MakeTempFile (outdat2, outDAT2Name) or
-		not MakeTempFile (edgesdat, edgesDATName))
+	if (not makeTempFile (indat, inDATName) or
+		not makeTempFile (cutdat, cutDATName) or
+		not makeTempFile (outdat, outDATName) or
+		not makeTempFile (outdat2, outDAT2Name) or
+		not makeTempFile (edgesdat, edgesDATName))
 	{
 		return;
 	}
@@ -534,21 +527,22 @@ void ExtProgramToolset::intersector()
 		outDAT2Name
 	});
 
-	WriteColorGroup (inCol, inDATName);
-	WriteColorGroup (cutCol, cutDATName);
+	writeColorGroup (inCol, inDATName);
+	writeColorGroup (cutCol, cutDATName);
 
-	if (not RunExtProgram (Intersector, cfg::IntersectorPath, argv_normal))
+	if (not runExtProgram (Intersector, argv_normal))
 		return;
 
-	InsertOutput (outDATName, false, {inCol});
+	insertOutput (outDATName, false, {inCol});
 
-	if (repeatInverse and RunExtProgram (Intersector, cfg::IntersectorPath, argv_inverse))
-		InsertOutput (outDAT2Name, false, {cutCol});
+	if (repeatInverse and runExtProgram (Intersector, argv_inverse))
+		insertOutput (outDAT2Name, false, {cutCol});
 
-	if (ui.cb_edges->isChecked() and CheckExtProgramPath (Isecalc) and
-		RunExtProgram (Isecalc, cfg::IsecalcPath, Join ({inDATName, cutDATName, edgesDATName})))
+	if (ui.cb_edges->isChecked()
+		and checkExtProgramPath (Isecalc)
+		and runExtProgram (Isecalc, Join ({inDATName, cutDATName, edgesDATName})))
 	{
-		InsertOutput (edgesDATName, false, {});
+		insertOutput (edgesDATName, false, {});
 	}
 }
 
@@ -558,7 +552,7 @@ void ExtProgramToolset::coverer()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Coverer))
+	if (not checkExtProgramPath (Coverer))
 		return;
 
 	QDialog* dlg = new QDialog;
@@ -589,9 +583,9 @@ void ExtProgramToolset::coverer()
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 
-	if (not MakeTempFile (in1dat, in1DATName) or
-		not MakeTempFile (in2dat, in2DATName) or
-		not MakeTempFile (outdat, outDATName))
+	if (not makeTempFile (in1dat, in1DATName) or
+		not makeTempFile (in2dat, in2DATName) or
+		not makeTempFile (outdat, outDATName))
 	{
 		return;
 	}
@@ -607,13 +601,13 @@ void ExtProgramToolset::coverer()
 		outDATName
 	});
 
-	WriteColorGroup (in1Col, in1DATName);
-	WriteColorGroup (in2Col, in2DATName);
+	writeColorGroup (in1Col, in1DATName);
+	writeColorGroup (in2Col, in2DATName);
 
-	if (not RunExtProgram (Coverer, cfg::CovererPath, argv))
+	if (not runExtProgram (Coverer, argv))
 		return;
 
-	InsertOutput (outDATName, false, {});
+	insertOutput (outDATName, false, {});
 }
 
 // =============================================================================
@@ -622,7 +616,7 @@ void ExtProgramToolset::isecalc()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Isecalc))
+	if (not checkExtProgramPath (Isecalc))
 		return;
 
 	Ui::IsecalcUI ui;
@@ -655,9 +649,9 @@ void ExtProgramToolset::isecalc()
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 
-	if (not MakeTempFile (in1dat, in1DATName) or
-		not MakeTempFile (in2dat, in2DATName) or
-		not MakeTempFile (outdat, outDATName))
+	if (not makeTempFile (in1dat, in1DATName) or
+		not makeTempFile (in2dat, in2DATName) or
+		not makeTempFile (outdat, outDATName))
 	{
 		return;
 	}
@@ -669,10 +663,10 @@ void ExtProgramToolset::isecalc()
 		outDATName
 	});
 
-	WriteColorGroup (in1Col, in1DATName);
-	WriteColorGroup (in2Col, in2DATName);
-	RunExtProgram (Isecalc, cfg::IsecalcPath, argv);
-	InsertOutput (outDATName, false, {});
+	writeColorGroup (in1Col, in1DATName);
+	writeColorGroup (in2Col, in2DATName);
+	runExtProgram (Isecalc, argv);
+	insertOutput (outDATName, false, {});
 }
 
 // =============================================================================
@@ -681,7 +675,7 @@ void ExtProgramToolset::edger2()
 {
 	setlocale (LC_ALL, "C");
 
-	if (not CheckExtProgramPath (Edger2))
+	if (not checkExtProgramPath (Edger2))
 		return;
 
 	QDialog* dlg = new QDialog;
@@ -694,7 +688,7 @@ void ExtProgramToolset::edger2()
 	QTemporaryFile in, out;
 	QString inName, outName;
 
-	if (not MakeTempFile (in, inName) or not MakeTempFile (out, outName))
+	if (not makeTempFile (in, inName) or not makeTempFile (out, outName))
 		return;
 
 	int unmatched = ui.unmatched->currentIndex();
@@ -716,10 +710,10 @@ void ExtProgramToolset::edger2()
 		outName,
 	});
 
-	WriteSelection (inName);
+	writeSelection (inName);
 
-	if (not RunExtProgram (Edger2, cfg::Edger2Path, argv))
+	if (not runExtProgram (Edger2, argv))
 		return;
 
-	InsertOutput (outName, true, {});
+	insertOutput (outName, true, {});
 }

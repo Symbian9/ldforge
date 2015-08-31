@@ -30,8 +30,6 @@
 #include "filetoolset.h"
 #include "ui_makeprim.h"
 
-EXTERN_CFGENTRY (String, LDrawPath)
-
 FileToolset::FileToolset (MainWindow* parent) :
 	Toolset (parent) {}
 
@@ -101,7 +99,7 @@ void FileToolset::settings()
 
 void FileToolset::setLDrawPath()
 {
-	(new LDrawPathDialog (cfg::LDrawPath, true))->exec();
+	(new LDrawPathDialog (m_config->ldrawPath, true))->exec();
 }
 
 void FileToolset::exit()

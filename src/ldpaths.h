@@ -2,13 +2,14 @@
 #include "main.h"
 
 class QDir;
+class MainWindow;
 
-class LDPaths : public QObject
+class LDPaths : public QObject, public HierarchyElement
 {
 	Q_OBJECT
 
 public:
-	LDPaths (QObject* parent = nullptr);
+	LDPaths (QObject* parent);
 	void checkPaths();
 	bool isValid (const class QDir& path) const;
 

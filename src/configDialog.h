@@ -18,6 +18,7 @@
 
 #pragma once
 #include "mainwindow.h"
+#include "toolsets/extprogramtoolset.h"
 #include <QDialog>
 
 class Ui_ConfigUI;
@@ -35,8 +36,15 @@ public:
 		QListWidgetItem (view, type) {}
 };
 
+struct ExternalProgramWidgets
+{
+	class QLineEdit* input;
+	class QPushButton* setPathButton;
+	class QCheckBox* wineBox;
+};
+
 // =============================================================================
-class ConfigDialog : public QDialog
+class ConfigDialog : public QDialog, public HierarchyElement
 {
 	Q_OBJECT
 
@@ -53,7 +61,7 @@ public:
 		DownloadTab
 	};
 
-	explicit ConfigDialog (Tab deftab = InterfaceTab, QWidget* parent = null, Qt::WindowFlags f = 0);
+	explicit ConfigDialog (QWidget* parent = nullptr, Tab defaulttab = (Tab) 0, Qt::WindowFlags f = 0);
 	virtual ~ConfigDialog();
 
 	QList<LDQuickColor> quickColors;
@@ -62,6 +70,7 @@ private:
 	Ui_ConfigUI* ui;
 	QList<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
+	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
 
 	void applySettings();
 	void addShortcut (QAction* act);
@@ -73,7 +82,7 @@ private:
 	QListWidgetItem* getSelectedQuickColor();
 	QList<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
-	void m_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func);
+	void applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func);
 
 private slots:
 	void setButtonColor();

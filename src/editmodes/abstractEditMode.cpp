@@ -28,10 +28,12 @@
 #include "../mainwindow.h"
 #include "../glRenderer.h"
 
-CFGENTRY (Bool, DrawLineLengths, true)
-CFGENTRY (Bool, DrawAngles, false)
+ConfigOption (bool DrawLineLengths = true)
+ConfigOption (bool DrawAngles = false)
 
 AbstractEditMode::AbstractEditMode (GLRenderer* renderer) :
+	QObject (renderer),
+	HierarchyElement (renderer),
 	m_renderer (renderer) {}
 
 AbstractEditMode::~AbstractEditMode() {}
@@ -40,12 +42,12 @@ AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditMode
 {
 	switch (type)
 	{
-		case EditModeType::Select: return new SelectMode (renderer);
-		case EditModeType::Draw: return new DrawMode (renderer);
-		case EditModeType::Rectangle: return new RectangleMode (renderer);
-		case EditModeType::Circle: return new CircleMode (renderer);
-		case EditModeType::MagicWand: return new MagicWandMode (renderer);
-		case EditModeType::LinePath: return new LinePathMode (renderer);
+	case EditModeType::Select: return new SelectMode (renderer);
+	case EditModeType::Draw: return new DrawMode (renderer);
+	case EditModeType::Rectangle: return new RectangleMode (renderer);
+	case EditModeType::Circle: return new CircleMode (renderer);
+	case EditModeType::MagicWand: return new MagicWandMode (renderer);
+	case EditModeType::LinePath: return new LinePathMode (renderer);
 	}
 
 	throw std::logic_error ("bad type given to AbstractEditMode::createByType");
@@ -70,7 +72,7 @@ AbstractDrawMode::AbstractDrawMode (GLRenderer* renderer) :
 	// Clear the selection when beginning to draw.
 	CurrentDocument()->clearSelection();
 
-	g_win->updateSelection();
+	m_window->updateSelection();
 	m_drawedVerts.clear();
 }
 
@@ -161,7 +163,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 
 void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 {
-	int pos = g_win->getInsertionPoint();
+	int pos = m_window->getInsertionPoint();
 
 	if (objs.size() > 0)
 	{
@@ -171,8 +173,8 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 			renderer()->compileObject (obj);
 		}
 
-		g_win->refresh();
-		g_win->endAction();
+		m_window->refresh();
+		m_window->endAction();
 	}
 
 	m_drawedVerts.clear();
@@ -181,7 +183,7 @@ void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 void AbstractDrawMode::drawLength (QPainter &painter, const Vertex &v0, const Vertex &v1,
 	const QPointF& v0p, const QPointF& v1p) const
 {
-	if (not cfg::DrawLineLengths)
+	if (not m_config->drawLineLengths)
 		return;
 
 	const QString label = QString::number ((v1 - v0).length());
@@ -228,7 +230,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 			if (withlengths)
 				drawLength (painter, poly3d[i], poly3d[j], poly[i], poly[j]);
 
-			if (withangles and cfg::DrawAngles)
+			if (withangles and m_config->drawAngles)
 			{
 				QLineF l0 (poly[h], poly[i]),
 					l1 (poly[i], poly[j]);

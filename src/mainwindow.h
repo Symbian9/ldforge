@@ -27,6 +27,7 @@
 #include "configuration.h"
 #include "ldObject.h"
 #include "colors.h"
+#include "configurationvaluebag.h"
 
 class MessageManager;
 class MainWindow;
@@ -162,6 +163,18 @@ public:
 
 	bool ringToolHiRes() const;
 	int ringToolSegments() const;
+	ConfigurationValueBag* configBag() const { return m_configOptions; }
+
+	template<typename T>
+	auto& config (T key)
+	{
+		return m_configOptions.get (key);
+	}
+
+	class ExtProgramToolset* externalPrograms()
+	{
+		return m_externalPrograms;
+	}
 
 public slots:
 	void updatePrimitives();
@@ -177,6 +190,7 @@ protected:
 private:
 	struct ToolInfo { QMetaMethod method; Toolset* object; };
 
+	ConfigurationValueBag m_configOptions;
 	GLRenderer*			m_renderer;
 	LDObjectList		m_sel;
 	QList<LDQuickColor>	m_quickColors;
@@ -188,6 +202,7 @@ private:
 	bool				m_updatingTabs;
 	QVector<Toolset*>	m_toolsets;
 	QMap<QAction*, ToolInfo> m_toolmap;
+	class ExtProgramToolset* m_externalPrograms;
 
 private slots:
 	void slot_selectionChanged();

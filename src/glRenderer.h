@@ -135,7 +135,7 @@ struct CameraIcon
 // and selection picking. The instance of GLRenderer is accessible as
 // g_win->R()
 //
-class GLRenderer : public QGLWidget, protected QOpenGLFunctions
+class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
 {
 public:
 	Q_OBJECT

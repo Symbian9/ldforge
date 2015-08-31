@@ -31,11 +31,9 @@
 
 enum { NUM_COLUMNS = 16 };
 
-EXTERN_CFGENTRY (String, MainColor)
-EXTERN_CFGENTRY (Float, MainColorAlpha)
-
-ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
+ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 	QDialog (parent),
+	HierarchyElement (parent),
 	ui (*new Ui_ColorSelUi)
 {
 	m_firstResize = true;
@@ -57,8 +55,8 @@ ColorSelector::ColorSelector (LDColor defaultvalue, QWidget* parent) :
 
 			if (ldcolor == MainColor)
 			{
-				color = QColor (cfg::MainColor);
-				color.setAlphaF (cfg::MainColorAlpha);
+				color = QColor (m_config->mainColor);
+				color.setAlphaF (m_config->mainColorAlpha);
 			}
 
 			QString color2name (Luma (color) < 80 ? "white" : "black");
@@ -178,9 +176,9 @@ void ColorSelector::transparentCheckboxClicked()
 		selectDirectColor (selection().faceColor());
 }
 
-bool ColorSelector::selectColor (LDColor& val, LDColor defval, QWidget* parent)
+bool ColorSelector::selectColor (QWidget* parent, LDColor& val, LDColor defaultvalue)
 {
-	ColorSelector dlg (defval, parent);
+	ColorSelector dlg (parent, defaultvalue);
 
 	if (dlg.exec() and dlg.selection().isValid())
 	{

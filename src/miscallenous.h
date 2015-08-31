@@ -22,6 +22,7 @@
 #include "configuration.h"
 #include "main.h"
 #include "basics.h"
+#include "configurationvaluebag.h"
 
 class LDDocument;
 class QColor;
@@ -46,17 +47,12 @@ QString Join (QList<StringFormatArg> vals, QString delim = " ");
 struct GridData
 {
 	const char* name;
-	float* coordinateSnap;
-	float* angleSnap;
+	CONFIG_KEY_TYPE(float) coordinateSnap;
+	CONFIG_KEY_TYPE(float) angleSnap;
 };
 
-EXTERN_CFGENTRY (Int, Grid)
 extern const GridData Grids[3];
-
-inline const GridData& CurrentGrid()
-{
-	return Grids[cfg::Grid];
-}
+const GridData& CurrentGrid();
 
 // =============================================================================
 enum class RotationPoint

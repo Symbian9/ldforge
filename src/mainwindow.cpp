@@ -51,32 +51,23 @@
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
+#include "toolsets/extprogramtoolset.h"
 #include "toolsets/toolset.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
 
-CFGENTRY (Bool, ColorizeObjectsList, true)
-CFGENTRY (String, QuickColorToolbar, "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
-CFGENTRY (Bool, ListImplicitFiles, false)
-CFGENTRY (List, HiddenToolbars, {})
-EXTERN_CFGENTRY (List, RecentFiles)
-EXTERN_CFGENTRY (Bool, DrawAxes)
-EXTERN_CFGENTRY (String, MainColor)
-EXTERN_CFGENTRY (Float, MainColorAlpha)
-EXTERN_CFGENTRY (Bool, DrawWireframe)
-EXTERN_CFGENTRY (Bool, BFCRedGreenView)
-EXTERN_CFGENTRY (Bool, DrawAngles)
-EXTERN_CFGENTRY (Bool, RandomColors)
-EXTERN_CFGENTRY (Bool, DrawSurfaces)
-EXTERN_CFGENTRY (Bool, DrawEdgeLines)
-EXTERN_CFGENTRY (Bool, DrawConditionalLines)
+ConfigOption (bool colorizeObjectsList = true)
+ConfigOption (QString quickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
+ConfigOption (bool listImplicitFiles = false)
+ConfigOption (QStringList hiddenToolbars)
 
 // =============================================================================
 //
 MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
-	ui (*new Ui_MainWindow)
+	ui (*new Ui_MainWindow),
+	m_externalPrograms (nullptr)
 {
 	g_win = this;
 	ui.setupUi (this);
@@ -142,6 +133,9 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	{
 		const QMetaObject* meta = toolset->metaObject();
 
+		if (qobject_cast<ExtProgramToolset*> (meta))
+			m_externalPrograms = meta;
+
 		for (int i = 0; i < meta->methodCount(); ++i)
 		{
 			ToolInfo info;
@@ -162,7 +156,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		}
 	}
 
-	for (QVariant const& toolbarname : cfg::HiddenToolbars)
+	for (QVariant const& toolbarname : m_configOptions.hiddenToolbars)
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
@@ -231,7 +225,7 @@ for (QAction * recent : m_recentFiles)
 
 	QAction* first = null;
 
-	for (const QVariant& it : cfg::RecentFiles)
+	for (const QVariant& it : m_configOptions.recentFiles)
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
@@ -249,7 +243,7 @@ QList<LDQuickColor> LoadQuickColorList()
 {
 	QList<LDQuickColor> colors;
 
-	for (QString colorname : cfg::QuickColorToolbar.split (":"))
+	for (QString colorname : m_configOptions.quickColorToolbar.split (":"))
 	{
 		if (colorname == "|")
 			colors << LDQuickColor::getSeparator();
@@ -303,9 +297,9 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	ui.actionGridCoarse->setChecked (cfg::Grid == Grid::Coarse);
-	ui.actionGridMedium->setChecked (cfg::Grid == Grid::Medium);
-	ui.actionGridFine->setChecked (cfg::Grid == Grid::Fine);
+	ui.actionGridCoarse->setChecked (m_configOptions.grid == Grid::Coarse);
+	ui.actionGridMedium->setChecked (m_configOptions.grid == Grid::Medium);
+	ui.actionGridFine->setChecked (m_configOptions.grid == Grid::Fine);
 }
 
 // =============================================================================
@@ -471,8 +465,11 @@ void MainWindow::buildObjList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		else if (cfg::ColorizeObjectsList and obj->isColored() and
-			obj->color().isValid() and obj->color() != MainColor and obj->color() != EdgeColor)
+		else if (m_configOptions.colorizeObjectsList
+			and obj->isColored()
+			and obj->color().isValid()
+			and obj->color() != MainColor
+			and obj->color() != EdgeColor)
 		{
 			// If the object isn't in the main or edge color, draw this list entry in that color.
 			item->setForeground (obj->color().faceColor());
@@ -681,12 +678,12 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 	}
 
 	// Save the toolbar set
-	cfg::HiddenToolbars.clear();
+	m_configOptions.hiddenToolbars.clear();
 
 	for (QToolBar* toolbar : findChildren<QToolBar*>())
 	{
 		if (toolbar->isHidden())
-			cfg::HiddenToolbars << toolbar->objectName();
+			m_configOptions.hiddenToolbars << toolbar->objectName();
 	}
 
 	// Save the configuration before leaving.
@@ -915,8 +912,8 @@ QIcon MakeColorIcon (LDColor colinfo, const int size)
 	if (colinfo == MainColor)
 	{
 		// Use the user preferences for main color here
-		col = cfg::MainColor;
-		col.setAlphaF (cfg::MainColorAlpha);
+		col = g_win->configBag()->mainColor;
+		col.setAlphaF (g_win->configBag()->mainColorAlpha);
 	}
 
 	// Paint the icon border
@@ -1068,14 +1065,14 @@ void MainWindow::updateActions()
 		ui.actionRedo->setEnabled (pos < (long) his->getSize() - 1);
 	}
 
-	ui.actionWireframe->setChecked (cfg::DrawWireframe);
-	ui.actionAxes->setChecked (cfg::DrawAxes);
-	ui.actionBfcView->setChecked (cfg::BFCRedGreenView);
-	ui.actionRandomColors->setChecked (cfg::RandomColors);
-	ui.actionDrawAngles->setChecked (cfg::DrawAngles);
-	ui.actionDrawSurfaces->setChecked (cfg::DrawSurfaces);
-	ui.actionDrawEdgeLines->setChecked (cfg::DrawEdgeLines);
-	ui.actionDrawConditionalLines->setChecked (cfg::DrawConditionalLines);
+	ui.actionWireframe->setChecked (m_configOptions.drawWireframe);
+	ui.actionAxes->setChecked (m_configOptions.drawAxes);
+	ui.actionBfcView->setChecked (m_configOptions.bfcRedGreenView);
+	ui.actionRandomColors->setChecked (m_configOptions.randomColors);
+	ui.actionDrawAngles->setChecked (m_configOptions.drawAngles);
+	ui.actionDrawSurfaces->setChecked (m_configOptions.drawSurfaces);
+	ui.actionDrawEdgeLines->setChecked (m_configOptions.drawEdgeLines);
+	ui.actionDrawConditionalLines->setChecked (m_configOptions.drawConditionalLines);
 }
 
 // =============================================================================
@@ -1186,6 +1183,35 @@ void MainWindow::circleToolSegmentsChanged()
 	int denominator (ui.ringToolHiRes->isChecked() ? HighResolution : LowResolution);
 	Simplify (numerator, denominator);
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
+}
+
+
+//
+// Where is the configuration file located at?
+//
+QString MainWindow::configFilePath (QString file)
+{
+	return Config::DirectoryPath() + DIRSLASH + file;
+}
+
+//
+// Directory of the configuration file.
+//
+QString Config::DirectoryPath()
+{
+	QSettings* settings = SettingsObject();
+	QString result = Dirname (settings->fileName());
+	delete settings;
+	return result;
+}
+
+//
+// Accessor to the settings object
+//
+QSettings* Config::SettingsObject()
+{
+	QString path = qApp->applicationDirPath() + "/" UNIXNAME ".ini";
+	return new QSettings (path, QSettings::IniFormat);
 }
 
 // =============================================================================

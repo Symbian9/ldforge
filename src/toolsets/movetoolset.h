@@ -48,4 +48,5 @@ public:
 private:
 	void moveSelection (bool up);
 	void moveObjects (Vertex vect);
+	double getRotateActionAngle();
 };

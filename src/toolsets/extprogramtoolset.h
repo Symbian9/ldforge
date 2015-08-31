@@ -18,6 +18,26 @@
 
 #pragma once
 #include "toolset.h"
+#include "configurationvaluebag.h"
+
+enum ExtProgramType
+{
+	Isecalc,
+	Intersector,
+	Coverer,
+	Ytruder,
+	Rectifier,
+	Edger2,
+
+	NumExternalPrograms,
+};
+
+struct ExtProgramInfo
+{
+	QString name;
+	QString* path;
+	bool* wine;
+};
 
 class ExtProgramToolset : public Toolset
 {
@@ -30,4 +50,21 @@ public:
 	Q_INVOKABLE void isecalc();
 	Q_INVOKABLE void rectifier();
 	Q_INVOKABLE void ytruder();
+
+private:
+	QString externalProgramName (ExtProgramType program);
+	bool programUsesWine (ExtProgramType program);
+	QString checkExtProgramPath (ExtProgramType program);
+	bool makeTempFile (QTemporaryFile& tmp, QString& fname);
+	bool runExtProgram (ExtProgramType prog, QString argvstr);
+	QString errorCodeString (ExtProgramType program, class QProcess& process);
+	void insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace);
+	void writeColorGroup (LDColor color, QString fname);
+	void writeObjects (const LDObjectList& objects, QFile& f);
+	void writeObjects (const LDObjectList& objects, QString fname);
+	void writeSelection (QString fname);
+	bool& getWineSetting (ExtProgramType program);
+	QString getPathSetting (ExtProgramType program);
+
+	ExtProgramInfo extProgramInfo[NumExternalPrograms];
 };

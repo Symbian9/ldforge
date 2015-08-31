@@ -21,15 +21,15 @@
 #include "../main.h"
 #include "../colors.h"
 
-class ColorSelector : public QDialog
+class ColorSelector : public QDialog, public HierarchyElement
 {
 	Q_OBJECT
 	PROPERTY (private, LDColor, selection, setSelection, STOCK_WRITE)
 
 public:
-	explicit ColorSelector (LDColor defaultvalue = LDColor::nullColor(), QWidget* parent = null);
+	explicit ColorSelector (QWidget* parent, LDColor defaultvalue = LDColor::nullColor());
 	virtual ~ColorSelector();
-	static bool selectColor (LDColor& val, LDColor defval = LDColor::nullColor(), QWidget* parent = null);
+	static bool selectColor (QWidget* parent, LDColor& val, LDColor defval = LDColor::nullColor());
 
 private:
 	class Ui_ColorSelUi& ui;

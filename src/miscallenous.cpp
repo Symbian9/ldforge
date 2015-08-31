@@ -85,22 +85,27 @@ static const int PrimeNumbers[] =
 //
 // Grid stuff
 //
-CFGENTRY (Int, Grid, Grid::Medium)
-CFGENTRY (Float, GridCoarseCoordinateSnap, 5.0f)
-CFGENTRY (Float, GridCoarseAngleSnap, 45.0f)
-CFGENTRY (Float, GridMediumCoordinateSnap, 1.0f)
-CFGENTRY (Float, GridMediumAngleSnap, 22.5f)
-CFGENTRY (Float, GridFineCoordinateSnap, 0.1f)
-CFGENTRY (Float, GridFineAngleSnap, 7.5f)
-CFGENTRY (Int, RotationPointType, 0)
-CFGENTRY (Vertex, CustomRotationPoint, Origin)
+ConfigOption (int Grid = 1)
+ConfigOption (float GridCoarseCoordinateSnap = 5.0f)
+ConfigOption (float GridCoarseAngleSnap = 45.0f)
+ConfigOption (float GridMediumCoordinateSnap = 1.0f)
+ConfigOption (float GridMediumAngleSnap = 22.5f)
+ConfigOption (float GridFineCoordinateSnap = 0.1f)
+ConfigOption (float GridFineAngleSnap = 7.5f)
+ConfigOption (int RotationPointType = 0)
+ConfigOption (Vertex CustomRotationPoint = Origin)
 
 const GridData Grids[3] =
 {
-	{ "Coarse",	&cfg::GridCoarseCoordinateSnap,	&cfg::GridCoarseAngleSnap	},
-	{ "Medium",	&cfg::GridMediumCoordinateSnap,	&cfg::GridMediumAngleSnap	},
-	{ "Fine",	&cfg::GridFineCoordinateSnap,	&cfg::GridFineAngleSnap	},
+	{ "Coarse", cfg::GRID_COARSE_COORDINATE_SNAP, cfg::GRID_COARSE_ANGLE_SNAP },
+	{ "Medium", cfg::GRID_MEDIUM_COORDINATE_SNAP, cfg::GRID_MEDIUM_ANGLE_SNAP },
+	{ "Fine", cfg::GRID_FINE_COORDINATE_SNAP, cfg::GRID_FINE_ANGLE_SNAP },
 };
+
+const GridData& CurrentGrid()
+{
+	return Grids[g_win->configBag()->grid];
+}
 
 // =============================================================================
 //
@@ -108,7 +113,7 @@ const GridData Grids[3] =
 //
 double Grid::Snap (double value, const Grid::Config type)
 {
-	double snapvalue = (type == Coordinate) ? *CurrentGrid().coordinateSnap : *CurrentGrid().angleSnap;
+	double snapvalue = g_win->config ((type == Coordinate) ? CurrentGrid().coordinateSnap : CurrentGrid().angleSnap);
 	double mult = floor (qAbs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
@@ -153,9 +158,9 @@ void Simplify (int& numer, int& denom)
 //
 Vertex GetRotationPoint (const LDObjectList& objs)
 {
-	switch (RotationPoint (cfg::RotationPointType))
+	switch (RotationPoint (g_win->configBag()->rotationPointType))
 	{
-		case RotationPoint::ObjectOrigin:
+	case RotationPoint::ObjectOrigin:
 		{
 			LDBoundingBox box;
 
@@ -171,13 +176,14 @@ Vertex GetRotationPoint (const LDObjectList& objs)
 			return box.center();
 		}
 
-		case RotationPoint::WorldOrigin:
-			return Origin;
+	case RotationPoint::WorldOrigin:
+		return Origin;
 
-		case RotationPoint::CustomPoint:
-			return cfg::CustomRotationPoint;
+	case RotationPoint::CustomPoint:
+		return g_win->configBag()->customRotationPoint;
 
-		case RotationPoint::NumValues: break;
+	case RotationPoint::NumValues:
+		break;
 	}
 
 	return Vertex();
@@ -191,38 +197,40 @@ void ConfigureRotationPoint()
 	Ui::RotPointUI ui;
 	ui.setupUi (dlg);
 
-	switch (RotationPoint (cfg::RotationPointType))
+	switch (RotationPoint (g_win->configBag()->rotationPointType))
 	{
-		case RotationPoint::ObjectOrigin:
-			ui.objectPoint->setChecked (true);
-			break;
+	case RotationPoint::ObjectOrigin:
+		ui.objectPoint->setChecked (true);
+		break;
 
-		case RotationPoint::WorldOrigin:
-			ui.worldPoint->setChecked (true);
-			break;
+	case RotationPoint::WorldOrigin:
+		ui.worldPoint->setChecked (true);
+		break;
 
-		case RotationPoint::CustomPoint:
-			ui.customPoint->setChecked (true);
-			break;
+	case RotationPoint::CustomPoint:
+		ui.customPoint->setChecked (true);
+		break;
 
-		case RotationPoint::NumValues: break;
+	case RotationPoint::NumValues:
+		break;
 	}
 
-	ui.customX->setValue (cfg::CustomRotationPoint.x());
-	ui.customY->setValue (cfg::CustomRotationPoint.y());
-	ui.customZ->setValue (cfg::CustomRotationPoint.z());
+	Vertex& custompoint = g_win->configBag()->customRotationPoint;
+	ui.customX->setValue (custompoint.x());
+	ui.customY->setValue (custompoint.y());
+	ui.customZ->setValue (custompoint.z());
 
 	if (not dlg->exec())
 		return;
 
-	cfg::RotationPointType = int (
+	g_win->configBag()->rotationPointType =
 		(ui.objectPoint->isChecked()) ? RotationPoint::ObjectOrigin :
 		(ui.worldPoint->isChecked())  ? RotationPoint::WorldOrigin :
-		RotationPoint::CustomPoint);
+		RotationPoint::CustomPoint;
 
-	cfg::CustomRotationPoint.setX (ui.customX->value());
-	cfg::CustomRotationPoint.setY (ui.customY->value());
-	cfg::CustomRotationPoint.setZ (ui.customZ->value());
+	custompoint.setX (ui.customX->value());
+	custompoint.setY (ui.customY->value());
+	custompoint.setZ (ui.customZ->value());
 }
 
 // =============================================================================

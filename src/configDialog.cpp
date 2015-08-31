@@ -39,20 +39,6 @@
 #include "glRenderer.h"
 #include "ui_config.h"
 
-EXTERN_CFGENTRY (String, YtruderPath)
-EXTERN_CFGENTRY (String, RectifierPath)
-EXTERN_CFGENTRY (String, IntersectorPath)
-EXTERN_CFGENTRY (String, CovererPath)
-EXTERN_CFGENTRY (String, IsecalcPath)
-EXTERN_CFGENTRY (String, Edger2Path)
-EXTERN_CFGENTRY (Bool, YtruderUsesWine)
-EXTERN_CFGENTRY (Bool, RectifierUsesWine)
-EXTERN_CFGENTRY (Bool, IntersectorUsesWine)
-EXTERN_CFGENTRY (Bool, CovererUsesWine)
-EXTERN_CFGENTRY (Bool, IsecalcUsesWine)
-EXTERN_CFGENTRY (Bool, Edger2UsesWine)
-EXTERN_CFGENTRY (String, QuickColorToolbar)
-
 const char* g_extProgPathFilter =
 #ifdef _WIN32
 	"Applications (*.exe)(*.exe);;"
@@ -61,42 +47,15 @@ const char* g_extProgPathFilter =
 
 //
 //
-static struct LDExtProgInfo
-{
-	QString const	name;
-	QString const	iconname;
-	QString* const	path;
-	QLineEdit*		input;
-	QPushButton*	setPathButton;
-	bool* const		wine;
-	QCheckBox*		wineBox;
-} g_LDExtProgInfo[] =
-{
-#ifndef _WIN32
-# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::NAME##Path, null, null, \
-	&cfg::NAME##UsesWine, null },
-#else
-# define EXTPROG(NAME, LOWNAME) { #NAME, #LOWNAME, &cfg::NAME##Path, null, null, null, null },
-#endif
-	EXTPROG (Ytruder, ytruder)
-	EXTPROG (Rectifier, rectifier)
-	EXTPROG (Intersector, intersector)
-	EXTPROG (Isecalc, isecalc)
-	EXTPROG (Coverer, coverer)
-	EXTPROG (Edger2, edger2)
-#undef EXTPROG
-};
-
-//
-//
-ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f)
+ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::WindowFlags f) :
+	QDialog (parent, f),
+	HierarchyElement (parent)
 {
 	ui = new Ui_ConfigUI;
 	ui->setupUi (this);
 
 	// Set defaults
-	m_applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
+	applyToWidgetOptions ([&](QWidget* wdg, AbstractConfigEntry* conf)
 	{
 		QVariant value (conf->toVariant());
 		QLineEdit* le;
@@ -137,20 +96,17 @@ ConfigDialog::ConfigDialog (ConfigDialog::Tab deftab, QWidget* parent, Qt::Windo
 		}
 	});
 
-	if (g_win)
+	m_window->applyToActions ([&](QAction* act)
 	{
-		g_win->applyToActions ([&](QAction* act)
-		{
-			addShortcut (act);
-		});
-	}
+		addShortcut (act);
+	});
 
 	ui->shortcutsList->setSortingEnabled (true);
 	ui->shortcutsList->sortItems();
 	quickColors = LoadQuickColorList();
 	updateQuickColorList();
 	initExtProgs();
-	selectPage (deftab);
+	selectPage (defaulttab);
 	connect (ui->shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
 	connect (ui->shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
 	connect (ui->shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
@@ -210,33 +166,36 @@ void ConfigDialog::initExtProgs()
 	QGridLayout* pathsLayout = new QGridLayout;
 	int row = 0;
 
-	for (LDExtProgInfo& info : g_LDExtProgInfo)
+	for (int i = 0; i < NumExternalPrograms; ++i)
 	{
-		QLabel* icon = new QLabel,
-		*progLabel = new QLabel (info.name);
+		ExtProgramType program = (ExtProgramType) i;
+		ExternalProgramWidgets& widgets = m_externalProgramWidgets[i];
+		QString name = m_window->externalPrograms()->externalProgramName (program);
+		QLabel* icon = new QLabel;
+		QLabel* progLabel = new QLabel (name);
 		QLineEdit* input = new QLineEdit;
 		QPushButton* setPathButton = new QPushButton;
 
-		icon->setPixmap (GetIcon (info.iconname));
+		icon->setPixmap (GetIcon (name.toLower()));
 		input->setText (*info.path);
 		setPathButton->setIcon (GetIcon ("folder"));
-		info.input = input;
-		info.setPathButton = setPathButton;
-
+		widgets.input = input;
+		widgets.setPathButton = setPathButton;
+		widgets.wineBox = nullptr;
 		connect (setPathButton, SIGNAL (clicked()), this, SLOT (slot_setExtProgPath()));
-
 		pathsLayout->addWidget (icon, row, 0);
 		pathsLayout->addWidget (progLabel, row, 1);
 		pathsLayout->addWidget (input, row, 2);
 		pathsLayout->addWidget (setPathButton, row, 3);
 
-		if (info.wine != null)
+#ifdef Q_OS_UNIX
 		{
 			QCheckBox* wineBox = new QCheckBox ("Wine");
-			wineBox->setChecked (*info.wine);
-			info.wineBox = wineBox;
+			wineBox->setChecked (m_window->externalPrograms()->programUsesWine (program));
+			widgets.wineBox = wineBox;
 			pathsLayout->addWidget (wineBox, row, 4);
 		}
+#endif
 
 		++row;
 	}
@@ -244,7 +203,7 @@ void ConfigDialog::initExtProgs()
 	ui->extProgs->setLayout (pathsLayout);
 }
 
-void ConfigDialog::m_applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
+void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, AbstractConfigEntry*)> func)
 {
 	// Apply configuration
 	for (QWidget* widget : findChildren<QWidget*>())
@@ -253,7 +212,7 @@ void ConfigDialog::m_applyToWidgetOptions (std::function<void (QWidget*, Abstrac
 			continue;
 
 		QString confname (widget->objectName().mid (strlen ("config")));
-		AbstractConfigEntry* conf (Config::FindByName (confname));
+		AbstractConfigEntry* conf (m_config->findByName (confname));
 
 		if (conf == null)
 		{
@@ -270,7 +229,7 @@ void ConfigDialog::m_applyToWidgetOptions (std::function<void (QWidget*, Abstrac
 //
 void ConfigDialog::applySettings()
 {
-	m_applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
+	applyToWidgetOptions ([&](QWidget* widget, AbstractConfigEntry* conf)
 	{
 		QVariant value (conf->toVariant());
 		QLineEdit* le;
@@ -299,18 +258,19 @@ void ConfigDialog::applySettings()
 	});
 
 	// Rebuild the quick color toolbar
-	if (g_win)
-		g_win->setQuickColors (quickColors);
-
-	cfg::QuickColorToolbar = quickColorString();
+	m_window->setQuickColors (quickColors);
+	m_config->quickColorToolbar = quickColorString();
 
 	// Ext program settings
-	for (const LDExtProgInfo& info : g_LDExtProgInfo)
+	for (int i = 0; i < NumExternalPrograms; ++i)
 	{
-		*info.path = info.input->text();
+		ExtProgramType program = (ExtProgramType) i;
+		ExtProgramToolset* toolset = m_window->externalPrograms();
+		ExternalProgramWidgets& widgets = m_externalProgramWidgets[i];
+		toolset->getPathSetting (program) = widgets.input->text();
 
-		if (info.wine != null)
-			*info.wine = info.wineBox->isChecked();
+		if (widgets.wineBox)
+			toolset->getWineSetting (program) = widgets.wineBox->isChecked();
 	}
 
 	// Apply shortcuts
@@ -324,12 +284,9 @@ void ConfigDialog::applySettings()
 	LDDocument::current()->reloadAllSubfiles();
 	LoadLogoStuds();
 
-	if (g_win)
-	{
-		g_win->R()->setBackground();
-		g_win->doFullRefresh();
-		g_win->updateDocumentList();
-	}
+	m_window->R()->setBackground();
+	m_window->doFullRefresh();
+	m_window->updateDocumentList();
 }
 
 //
@@ -624,26 +581,29 @@ void ConfigDialog::slot_clearShortcut()
 //
 void ConfigDialog::slot_setExtProgPath()
 {
-	const LDExtProgInfo* info = null;
+	ExtProgramType program = NumExternalPrograms;
 
-	for (const LDExtProgInfo& it : g_LDExtProgInfo)
+	for (int i = 0; i < NumExternalPrograms; ++i)
 	{
-		if (it.setPathButton == sender())
+		if (m_externalProgramWidgets[i].setPathButton == sender())
 		{
-			info = &it;
+			program = (ExtProgramType) i;
 			break;
 		}
 	}
 
-	if (info != null)
+	if (program != NumExternalPrograms)
 	{
+		ExtProgramToolset* toolset = m_window->externalPrograms();
+		ExternalProgramWidgets& widgets = m_externalProgramWidgets[program];
 		QString filepath = QFileDialog::getOpenFileName (this,
-			format ("Path to %1", info->name), *info->path, g_extProgPathFilter);
+			format ("Path to %1", toolset->externalProgramName (program)),
+			widgets.input->text(), g_extProgPathFilter);
 	
 		if (filepath.isEmpty())
 			return;
 	
-		info->input->setText (filepath);
+		widgets.input->setText (filepath);
 	}
 }
 

@@ -52,22 +52,22 @@ const LDFixedCamera g_FixedCameras[6] =
 	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
 };
 
-CFGENTRY (String, BackgroundColor,			"#FFFFFF")
-CFGENTRY (String, MainColor,					"#A0A0A0")
-CFGENTRY (Float, MainColorAlpha,				1.0)
-CFGENTRY (Int, LineThickness,				2)
-CFGENTRY (Bool, BFCRedGreenView,			false)
-CFGENTRY (Int, Camera,						EFreeCamera)
-CFGENTRY (Bool, BlackEdges,					false)
-CFGENTRY (Bool, DrawAxes,					false)
-CFGENTRY (Bool, DrawWireframe,				false)
-CFGENTRY (Bool, UseLogoStuds,				false)
-CFGENTRY (Bool, AntiAliasedLines,			true)
-CFGENTRY (Bool, RandomColors,				false)
-CFGENTRY (Bool, HighlightObjectBelowCursor,	true)
-CFGENTRY (Bool, DrawSurfaces,				true)
-CFGENTRY (Bool, DrawEdgeLines,				true)
-CFGENTRY (Bool, DrawConditionalLines,		true)
+ConfigOption (QString BackgroundColor = "#FFFFFF")
+ConfigOption (QString MainColor = "#A0A0A0")
+ConfigOption (float MainColorAlpha = 1.0)
+ConfigOption (int LineThickness = 2)
+ConfigOption (bool BfcRedGreenView = false)
+ConfigOption (int Camera = 6)
+ConfigOption (bool BlackEdges = false)
+ConfigOption (bool DrawAxes = false)
+ConfigOption (bool DrawWireframe = false)
+ConfigOption (bool UseLogoStuds = false)
+ConfigOption (bool AntiAliasedLines = true)
+ConfigOption (bool RandomColors = false)
+ConfigOption (bool HighlightObjectBelowCursor = true)
+ConfigOption (bool DrawSurfaces = true)
+ConfigOption (bool DrawEdgeLines = true)
+ConfigOption (bool DrawConditionalLines = true)
 
 // argh
 const char* g_CameraNames[7] =
@@ -99,10 +99,12 @@ static bool RendererInitialized (false);
 
 // =============================================================================
 //
-GLRenderer::GLRenderer (QWidget* parent) : QGLWidget (parent)
+GLRenderer::GLRenderer (QWidget* parent) :
+	QGLWidget (parent),
+	HierarchyElement (parent)
 {
 	m_isPicking = false;
-	m_camera = (ECamera) cfg::Camera;
+	m_camera = (ECamera) m_config->camera;
 	m_drawToolTip = false;
 	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
@@ -193,7 +195,7 @@ void GLRenderer::initGLData()
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_MULTISAMPLE);
 
-	if (cfg::AntiAliasedLines)
+	if (m_config->antiAliasedLines)
 	{
 		glEnable (GL_LINE_SMOOTH);
 		glEnable (GL_POLYGON_SMOOTH);
@@ -247,7 +249,7 @@ void GLRenderer::initializeGL()
 	initializeOpenGLFunctions();
 #endif
 	setBackground();
-	glLineWidth (cfg::LineThickness);
+	glLineWidth (m_config->lineThickness);
 	glLineStipple (1, 0x6666);
 	setAutoFillBackground (false);
 	setMouseTracking (true);
@@ -294,12 +296,12 @@ void GLRenderer::initializeAxes()
 //
 QColor GLRenderer::getMainColor()
 {
-	QColor col (cfg::MainColor);
+	QColor col (m_config->mainColor);
 
 	if (not col.isValid())
 		return QColor (0, 0, 0);
 
-	col.setAlpha (cfg::MainColorAlpha * 255.f);
+	col.setAlpha (m_config->mainColorAlpha * 255.f);
 	return col;
 }
 
@@ -313,7 +315,7 @@ void GLRenderer::setBackground()
 		return;
 	}
 
-	QColor col (cfg::BackgroundColor);
+	QColor col (m_config->backgroundColor);
 
 	if (not col.isValid())
 		return;
@@ -375,7 +377,7 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (cfg::DrawWireframe and not isPicking())
+	if (m_config->drawWireframe and not isPicking())
 		glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -429,7 +431,7 @@ void GLRenderer::drawGLScene()
 	}
 	else
 	{
-		if (cfg::BFCRedGreenView)
+		if (m_config->bfcRedGreenView)
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
@@ -442,16 +444,9 @@ void GLRenderer::drawGLScene()
 		}
 		else
 		{
-			if (cfg::RandomColors)
-			{
-				drawVBOs (VBOSF_Triangles, VBOCM_RandomColors, GL_TRIANGLES);
-				drawVBOs (VBOSF_Quads, VBOCM_RandomColors, GL_QUADS);
-			}
-			else
-			{
-				drawVBOs (VBOSF_Triangles, VBOCM_NormalColors, GL_TRIANGLES);
-				drawVBOs (VBOSF_Quads, VBOCM_NormalColors, GL_QUADS);
-			}
+			EVBOComplement colors = (m_config->randomColors) ? VBOCM_RandomColors : VBOCM_NormalColors;
+			drawVBOs (VBOSF_Triangles, colors, GL_TRIANGLES);
+			drawVBOs (VBOSF_Quads, colors, GL_QUADS);
 		}
 
 		drawVBOs (VBOSF_Lines, VBOCM_NormalColors, GL_LINES);
@@ -459,7 +454,7 @@ void GLRenderer::drawGLScene()
 		drawVBOs (VBOSF_CondLines, VBOCM_NormalColors, GL_LINES);
 		glDisable (GL_LINE_STIPPLE);
 
-		if (cfg::DrawAxes)
+		if (m_config->drawAxes)
 		{
 			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
@@ -485,9 +480,9 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and cfg::DrawSurfaces == false) or
-		(surface == VBOSF_Lines and cfg::DrawEdgeLines == false) or
-		(surface == VBOSF_CondLines and cfg::DrawConditionalLines == false))
+	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and m_config->drawSurfaces == false) or
+		(surface == VBOSF_Lines and m_config->drawEdgeLines == false) or
+		(surface == VBOSF_CondLines and m_config->drawConditionalLines == false))
 	{
 		return;
 	}
@@ -888,7 +883,7 @@ void GLRenderer::leaveEvent (QEvent* ev)
 //
 void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 {
-	g_win->spawnContextMenu (ev->globalPos());
+	m_window->spawnContextMenu (ev->globalPos());
 }
 
 // =============================================================================
@@ -900,8 +895,8 @@ void GLRenderer::setCamera (const ECamera cam)
 		return;
 
 	m_camera = cam;
-	cfg::Camera = (int) cam;
-	g_win->updateEditModeActions();
+	m_config->camera = (int) cam;
+	m_window->updateEditModeActions();
 }
 
 // =============================================================================
@@ -996,7 +991,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	delete[] pixeldata;
 
 	// Update everything now.
-	g_win->updateSelection();
+	m_window->updateSelection();
 
 	// Recompile the objects now to update their color
 	for (LDObject* obj : Selection())
@@ -1039,7 +1034,7 @@ void GLRenderer::setEditMode (EditModeType a)
 	if (camera() == EFreeCamera and not m_editmode->allowFreeCamera())
 		setCamera (ETopCamera);
 
-	g_win->updateEditModeActions();
+	m_window->updateEditModeActions();
 	update();
 }
 
@@ -1082,14 +1077,14 @@ void GLRenderer::setPicking (const bool& a)
 		glDisable (GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth (qMax<double> (cfg::LineThickness, 6.5));
+		glLineWidth (qMax<double> (m_config->lineThickness, 6.5));
 	}
 	else
 	{
 		glEnable (GL_DITHER);
 
 		// Restore line thickness
-		glLineWidth (cfg::LineThickness);
+		glLineWidth (m_config->lineThickness);
 	}
 }
 
@@ -1526,22 +1521,22 @@ void GLRenderer::updateOverlayObjects()
 		}
 	}
 
-	if (g_win->R() == this)
-		g_win->refresh();
+	if (m_window->R() == this)
+		m_window->refresh();
 }
 
 // =============================================================================
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not cfg::HighlightObjectBelowCursor and objectAtCursor() == null)
+	if (not m_config->highlightObjectBelowCursor and objectAtCursor() == null)
 		return;
 
 	LDObject* newObject = nullptr;
 	LDObject* oldObject = objectAtCursor();
 	qint32 newIndex;
 
-	if (isCameraMoving() or not cfg::HighlightObjectBelowCursor)
+	if (isCameraMoving() or not m_config->highlightObjectBelowCursor)
 	{
 		newIndex = 0;
 	}
@@ -1575,24 +1570,24 @@ void GLRenderer::highlightCursorObject()
 
 void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
 {
-	if (g_win != null and ev->source() == g_win->getPrimitivesTree() and g_win->getPrimitivesTree()->currentItem() != null)
+	if (m_window != null and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem() != null)
 		ev->acceptProposedAction();
 }
 
 void GLRenderer::dropEvent (QDropEvent* ev)
 {
-	if (g_win != null and ev->source() == g_win->getPrimitivesTree())
+	if (m_window != null and ev->source() == m_window->getPrimitivesTree())
 	{
-		QString primName = static_cast<SubfileListItem*> (g_win->getPrimitivesTree()->currentItem())->primitive()->name;
+		QString primName = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem())->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setColor (MainColor);
 		ref->setFileInfo (GetDocument (primName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
-		LDDocument::current()->insertObj (g_win->getInsertionPoint(), ref);
+		LDDocument::current()->insertObj (m_window->getInsertionPoint(), ref);
 		ref->select();
-		g_win->buildObjList();
-		g_win->R()->refresh();
+		m_window->buildObjList();
+		m_window->R()->refresh();
 		ev->acceptProposedAction();
 	}
 }

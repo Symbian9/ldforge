@@ -33,7 +33,7 @@ class QAbstractButton;
 
 // =============================================================================
 //
-class PartDownloader : public QDialog
+class PartDownloader : public QDialog, public HierarchyElement
 {
 public:
 	enum Source

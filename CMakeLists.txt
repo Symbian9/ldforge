@@ -6,7 +6,6 @@
 ######################################################################
 
 project (ldforge)
-add_subdirectory (codegen)
 cmake_minimum_required (VERSION 2.6)
 
 option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct colors" OFF)
@@ -24,10 +23,15 @@ endif()
 
 find_package (OpenGL REQUIRED)
 
-get_target_property (CODEGEN_EXE codegen LOCATION)
-
 add_custom_target (revision_check ALL
-	COMMAND python "${CMAKE_SOURCE_DIR}/updaterevision.py" hginfo.h
+	COMMAND python "${CMAKE_SOURCE_DIR}/tools/updaterevision.py" hginfo.h
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+add_custom_target (config_collection ALL
+	COMMAND python
+		"${CMAKE_SOURCE_DIR}/tools/configcollector.py"
+		--header configurationvaluebag.h
+		--source configurationvaluebag.cpp
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
@@ -148,11 +152,6 @@ set (LDFORGE_FORMS
 	src/dialogs/openprogressdialog.ui
 )
 
-add_custom_target (codegeneration ALL
-	COMMAND ${CODEGEN_EXE} ${LDFORGE_SOURCES} ${CMAKE_BINARY_DIR}/configuration.inc
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	DEPENDS codegen)
-
 set (LDFORGE_RESOURCES ldforge.qrc)
 # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
 
@@ -208,5 +207,5 @@ else()
 	)
 endif()
 
-add_dependencies (ldforge revision_check codegeneration)
+add_dependencies (ldforge revision_check config_collection)
 install (TARGETS ldforge RUNTIME DESTINATION bin)

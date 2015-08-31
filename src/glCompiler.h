@@ -24,7 +24,7 @@
 
 // =============================================================================
 //
-class GLCompiler : protected QOpenGLFunctions
+class GLCompiler : public HierarchyElement, protected QOpenGLFunctions
 {
 public:
 	struct ObjectVBOInfo

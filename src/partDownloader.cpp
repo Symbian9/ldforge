@@ -31,17 +31,17 @@
 #include "ldDocument.h"
 #include "glRenderer.h"
 
-CFGENTRY (String, DownloadFilePath, "")
-CFGENTRY (Bool, GuessDownloadPaths, true)
-CFGENTRY (Bool, AutoCloseDownloadDialog, true)
+ConfigOption (QString DownloadFilePath)
+ConfigOption (bool GuessDownloadPaths = true)
+ConfigOption (bool AutoCloseDownloadDialog = true)
 
-const QString g_unofficialLibraryURL ("http://ldraw.org/library/unofficial/");
+const char* g_unofficialLibraryURL = "http://ldraw.org/library/unofficial/";
 
 // =============================================================================
 //
 void PartDownloader::staticBegin()
 {
-	PartDownloader dlg;
+	PartDownloader dlg (g_win);
 
 	if (not dlg.checkValidPath())
 		return;
@@ -53,7 +53,7 @@ void PartDownloader::staticBegin()
 //
 QString PartDownloader::getDownloadPath()
 {
-	QString path = cfg::DownloadFilePath;
+	QString path = m_config->downloadFilePath;
 
 	if (DIRSLASH[0] != '/')
 		path.replace (DIRSLASH, "/");
@@ -65,6 +65,7 @@ QString PartDownloader::getDownloadPath()
 //
 PartDownloader::PartDownloader (QWidget* parent) :
 	QDialog (parent),
+	HierarchyElement (parent),
 	m_source (Source (0))
 {
 	setForm (new Ui_DownloadFrom);
@@ -108,7 +109,7 @@ bool PartDownloader::checkValidPath()
 		if (path.isEmpty())
 			return false;
 
-		cfg::DownloadFilePath = path;
+		m_config->downloadFilePath = path;
 	}
 
 	return true;
@@ -144,7 +145,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 	dest = dest.simplified();
 
 	// If the user doesn't want us to guess, stop right here.
-	if (not cfg::GuessDownloadPaths)
+	if (not m_config->guessDownloadPaths)
 		return;
 
 	// Ensure .dat extension
@@ -331,7 +332,7 @@ void PartDownloader::checkIfFinished()
 		for (LDDocument* f : m_files)
 		f->reloadAllSubfiles();
 
-	if (cfg::AutoCloseDownloadDialog and not failed)
+	if (m_config->autoCloseDownloadDialog and not failed)
 	{
 		// Close automatically if desired.
 		accept();

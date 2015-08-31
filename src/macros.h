@@ -84,3 +84,5 @@ public: \
 		++FOR_ENUM_NAME (__LINE__)) \
 	for (ENUM NAME = ENUM (FOR_ENUM_NAME (__LINE__)); NAME != ENUM::NumValues; \
 		NAME = ENUM::NumValues)
+
+#define ConfigOption(...)

@@ -34,9 +34,9 @@ enum class EditModeType
 	LinePath,
 };
 
-class AbstractEditMode
+class AbstractEditMode : public QObject, public HierarchyElement
 {
-	GLRenderer* m_renderer;
+	Q_OBJECT
 
 public:
 	struct MouseEventData
@@ -61,6 +61,9 @@ public:
 	virtual bool			keyReleased (QKeyEvent*) { return false; }
 
 	static AbstractEditMode* createByType (GLRenderer* renderer, EditModeType type);
+
+private:
+	GLRenderer* m_renderer;
 };
 
 //

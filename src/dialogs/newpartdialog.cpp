@@ -20,26 +20,24 @@
 #include <QRadioButton>
 #include <QCheckBox>
 #include "../ldDocument.h"
+#include "../mainwindow.h"
 #include "newpartdialog.h"
 #include "ui_newpartdialog.h"
 
-EXTERN_CFGENTRY (String, DefaultName)
-EXTERN_CFGENTRY (String, DefaultUser)
-EXTERN_CFGENTRY (Bool, UseCALicense)
-
 NewPartDialog::NewPartDialog (QWidget *parent) :
 	QDialog (parent),
+	HierarchyElement (parent),
 	ui (*new Ui_NewPart)
 {
 	ui.setupUi (this);
 
-	QString authortext = cfg::DefaultName;
+	QString authortext = m_config->defaultName;
 
-	if (not cfg::DefaultUser.isEmpty())
-		authortext.append (format (" [%1]", cfg::DefaultUser));
+	if (not m_config->defaultUser.isEmpty())
+		authortext.append (format (" [%1]", m_config->defaultUser));
 
 	ui.author->setText (authortext);
-	ui.useCaLicense->setChecked (cfg::UseCALicense);
+	ui.useCaLicense->setChecked (m_config->useCaLicense);
 }
 
 BFCStatement NewPartDialog::getWinding() const
