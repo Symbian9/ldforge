@@ -51,8 +51,8 @@ const LDFixedCamera g_FixedCameras[6] =
 	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
 };
 
-ConfigOption (QString BackgroundColor = "#FFFFFF")
-ConfigOption (QString MainColor = "#A0A0A0")
+ConfigOption (QColor BackgroundColor = "#FFFFFF")
+ConfigOption (QColor MainColor = "#A0A0A0")
 ConfigOption (float MainColorAlpha = 1.0)
 ConfigOption (int LineThickness = 2)
 ConfigOption (bool BfcRedGreenView = false)
@@ -314,16 +314,15 @@ void GLRenderer::setBackground()
 		return;
 	}
 
-	QColor col (m_config->backgroundColor());
+	QColor color = m_config->backgroundColor();
 
-	if (not col.isValid())
+	if (not color.isValid())
 		return;
 
-	col.setAlpha (255);
-
-	m_darkbg = Luma (col) < 80;
-	m_bgcolor = col;
-	qglClearColor (col);
+	color.setAlpha (255);
+	m_darkbg = Luma (color) < 80;
+	m_bgcolor = color;
+	qglClearColor (color);
 }
 
 // =============================================================================
