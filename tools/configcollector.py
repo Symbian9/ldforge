@@ -118,6 +118,7 @@ class ConfigCollector (object):
 
 	def write_header (self, fp):
 		fp.write ('#pragma once\n')
+		fp.write ('#include <QMap>\n')
 		for qttype in sorted (self.qttypes):
 			fp.write ('#include <%s>\n' % qttype)
 		formatargs = {}
@@ -127,6 +128,7 @@ class ConfigCollector (object):
 		write ('public:\n')
 		write ('\tConfigurationValueBag (class MainWindow* window);\n')
 		write ('\t~ConfigurationValueBag();\n')
+		write ('\tbool existsEntry (const QString& name);\n')
 		write ('\tQVariant defaultValueByName (const QString& name);\n')
 
 		for decl in self.decls:
@@ -136,7 +138,7 @@ class ConfigCollector (object):
 
 		write ('\n')
 		write ('private:\n')
-		write ('\tclass MainWindow* m_window;\n')
+		write ('\tQMap<QString, QVariant> m_defaults;\n')
 		write ('\tclass QSettings* m_settings;\n')
 
 		write ('};\n')
@@ -151,8 +153,13 @@ class ConfigCollector (object):
 		fp.write (
 			'\n'
 			'ConfigurationValueBag::ConfigurationValueBag (MainWindow* window) :\n'
-			'\tm_window (window),\n'
-			'\tm_settings (window->makeSettings (nullptr)) {}\n'
+			'\tm_settings (window->makeSettings (nullptr))\n'
+			'{\n')
+
+		for decl in self.decls:
+			fp.write ('\tm_defaults["{name}"] = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
+
+		fp.write ('}\n'
 			'\n'
 			'ConfigurationValueBag::~ConfigurationValueBag()\n'
 			'{\n'
@@ -163,19 +170,15 @@ class ConfigCollector (object):
 		maptype = 'QMap<QString, QVariant>'
 		fp.write ('QVariant ConfigurationValueBag::defaultValueByName (const QString& name)\n')
 		fp.write ('{\n')
-		fp.write ('\tstatic %s defaults;\n' % maptype)
-		fp.write ('\tif (defaults.isEmpty())\n')
-		fp.write ('\t{\n')
-
-		for decl in self.decls:
-			fp.write ('\t\tdefaults["{name}"] = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
-
-		fp.write ('\t}\n')
-		fp.write ('\n')
-		fp.write ('\t%s::iterator it = defaults.find (name);\n' % maptype)
-		fp.write ('\tif (it != defaults.end())\n')
+		fp.write ('\t%s::iterator it = m_defaults.find (name);\n' % maptype)
+		fp.write ('\tif (it != m_defaults.end())\n')
 		fp.write ('\t\treturn *it;\n')
 		fp.write ('\treturn QVariant();\n')
+		fp.write ('}\n')
+		fp.write ('\n')
+		fp.write ('bool ConfigurationValueBag::existsEntry (const QString& name)\n')
+		fp.write ('{\n')
+		fp.write ('\treturn m_defaults.find (name) != m_defaults.end();\n')
 		fp.write ('}\n')
 		fp.write ('\n')
 

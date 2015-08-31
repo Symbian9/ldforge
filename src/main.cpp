@@ -56,7 +56,6 @@ int main (int argc, char* argv[])
 	paths->deleteLater();
 	InitColors();
 	LoadPrimitives();
-	newFile();
 	win->show();
 
 	// Process the command line

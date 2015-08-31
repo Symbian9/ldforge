@@ -11,18 +11,16 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	{
 		while (parent->parent() != nullptr)
 			parent = parent->parent();
-	
+
 		m_window = qobject_cast<MainWindow*> (parent);
 	}
 
 	if (m_window == nullptr)
 	{
-		fprintf (stderr, "FATAL ERROR: Hierarchy element instance %p should be in the hierarchy of a "
-			"MainWindow but isn't.", this);
-		abort();
+		m_window = g_win;
+		print ("WARNING: Hierarchy element instance %p should be in the hierarchy of a "
+			"MainWindow but isn't.\n", this);
 	}
-	else
-	{
-		m_config = m_window->configBag();
-	}
+
+	m_config = m_window->configBag();
 }

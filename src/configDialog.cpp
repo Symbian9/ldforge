@@ -207,7 +207,7 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)>
 
 		QString optionname (widget->objectName().mid (strlen ("config")));
 
-		if (m_settings->contains (optionname))
+		if (m_config->existsEntry (optionname))
 			func (widget, optionname);
 		else
 			print ("Couldn't find configuration entry named %1", optionname);

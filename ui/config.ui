@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
+    <width>668</width>
     <height>370</height>
    </rect>
   </property>
@@ -286,7 +286,7 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QCheckBox" name="configBFCRedGreenView">
+                 <widget class="QCheckBox" name="configBfcRedGreenView">
                   <property name="whatsThis">
                    <string>Polygons' front sides become green and back sides red.</string>
                   </property>
@@ -375,7 +375,7 @@
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QSpinBox" name="configRoundPosition"/>
+                  <widget class="QSpinBox" name="configRoundPositionPrecision"/>
                  </item>
                  <item row="1" column="1">
                   <widget class="QLabel" name="label_18">
@@ -385,7 +385,7 @@
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QSpinBox" name="configRoundMatrix"/>
+                  <widget class="QSpinBox" name="configRoundMatrixPrecision"/>
                  </item>
                  <item row="0" column="0">
                   <spacer name="horizontalSpacer_5">
@@ -492,7 +492,7 @@
                  <widget class="QLineEdit" name="configDefaultUser"/>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QCheckBox" name="configUseCALicense">
+                 <widget class="QCheckBox" name="configUseCaLicense">
                   <property name="text">
                    <string>Use CA license</string>
                   </property>

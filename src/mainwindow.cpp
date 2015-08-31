@@ -56,10 +56,10 @@
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
 
-ConfigOption (bool colorizeObjectsList = true)
-ConfigOption (QString quickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
-ConfigOption (bool listImplicitFiles = false)
-ConfigOption (QStringList hiddenToolbars)
+ConfigOption (bool ColorizeObjectsList = true)
+ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
+ConfigOption (bool ListImplicitFiles = false)
+ConfigOption (QStringList HiddenToolbars)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
@@ -165,13 +165,15 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 			toolbar->hide();
 	}
 
+	newFile();
+
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
 	if (m_configOptions.firstStart())
 	{
-		(new ConfigDialog (this, ConfigDialog::ProfileTab))->exec();
+		ConfigDialog* dialog = new ConfigDialog (this, ConfigDialog::ProfileTab);
+		dialog->show();
 		m_configOptions.setFirstStart (false);
-		syncSettings();
 	}
 }
 
@@ -1115,8 +1117,6 @@ void MainWindow::loadShortcuts()
 		QKeySequence seq = m_settings->value ("shortcut_" + act->objectName(), act->shortcut()).value<QKeySequence>();
 		act->setShortcut (seq);
 	}
-
-	m_settings->deleteLater();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1132,8 +1132,6 @@ void MainWindow::saveShortcuts()
 		else
 			m_settings->remove (key);
 	});
-
-	m_settings->deleteLater();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1214,7 +1212,6 @@ QSettings* MainWindow::makeSettings (QObject* parent)
 void MainWindow::syncSettings()
 {
 	m_settings->sync();
-	m_settings->deleteLater();
 }
 
 QVariant MainWindow::getConfigValue (QString name)

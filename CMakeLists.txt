@@ -29,6 +29,8 @@ add_custom_target (revision_check ALL
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
+set_source_files_properties (${CMAKE_BINARY_DIR}/configurationvaluebag.cpp PROPERTIES GENERATED TRUE)
+
 set (LDFORGE_SOURCES
 	src/addObjectDialog.cpp
 	src/basics.cpp
@@ -72,7 +74,6 @@ set (LDFORGE_SOURCES
 	src/toolsets/movetoolset.cpp
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
-	${CMAKE_BINARY_DIR}/configurationvaluebag.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -150,7 +151,7 @@ set (LDFORGE_RESOURCES ldforge.qrc)
 # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
 
 if (NOT MSVC)
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall -Wno-maybe-uninitialized")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
 endif()
 
 if (TRANSPARENT_DIRECT_COLORS)
@@ -162,7 +163,7 @@ endif()
 # doesn't set Q_COMPILER_INITIALIZER_LISTS when compiling with clang? What's
 # up with that?
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -DQ_COMPILER_INITIALIZER_LISTS")
+	#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
 endif()
 
 include_directories ("${PROJECT_BINARY_DIR}")
@@ -180,13 +181,15 @@ if (USE_QT5)
 	qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})
 	qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_MOC}
-		${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS})
+		${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS}
+		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
 else()
 	qt4_wrap_cpp (LDFORGE_MOC ${LDFORGE_HEADERS})
 	qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
 	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_RCC}
-		${LDFORGE_FORMS_HEADERS} ${LDFORGE_MOC})
+		${LDFORGE_FORMS_HEADERS} ${LDFORGE_MOC}
+		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
 endif()
 
 if (USE_QT5)

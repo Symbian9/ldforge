@@ -38,9 +38,9 @@
 #include "ui_addhistoryline.h"
 #include "algorithmtoolset.h"
 
-ConfigOption (int roundPositionPrecision = 3)
-ConfigOption (int roundMatrixPrecision = 4)
-ConfigOption (int splitLinesSegments = 5)
+ConfigOption (int RoundPositionPrecision = 3)
+ConfigOption (int RoundMatrixPrecision = 4)
+ConfigOption (int SplitLinesSegments = 5)
 
 AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
 	Toolset (parent)

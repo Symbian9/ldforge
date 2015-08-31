@@ -94,7 +94,7 @@ void FileToolset::closeAll()
 
 void FileToolset::settings()
 {
-	(new ConfigDialog)->exec();
+	(new ConfigDialog (m_window))->exec();
 }
 
 void FileToolset::setLDrawPath()
