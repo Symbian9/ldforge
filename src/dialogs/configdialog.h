@@ -66,11 +66,11 @@ public:
 	QList<LDQuickColor> quickColors;
 
 private:
-	class Ui_ConfigDialog* ui;
+	class Ui_ConfigDialog& ui;
 	QList<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
-	QSettings* m_settings;
+	class QSettings* m_settings;
 
 	void applySettings();
 	void addShortcut (QAction* act);

@@ -49,10 +49,10 @@ const char* g_extProgPathFilter =
 ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::WindowFlags f) :
 	QDialog (parent, f),
 	HierarchyElement (parent),
+	ui (*new Ui_ConfigDialog),
 	m_settings (m_window->makeSettings (this))
 {
-	ui = new Ui_ConfigDialog;
-	ui->setupUi (this);
+	ui.setupUi (this);
 
 	// Set defaults
 	applyToWidgetOptions (
@@ -102,38 +102,38 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 		addShortcut (act);
 	});
 
-	ui->shortcutsList->setSortingEnabled (true);
-	ui->shortcutsList->sortItems();
+	ui.shortcutsList->setSortingEnabled (true);
+	ui.shortcutsList->sortItems();
 	quickColors = LoadQuickColorList();
 	updateQuickColorList();
 	initExtProgs();
 	selectPage (defaulttab);
-	connect (ui->shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
-	connect (ui->shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
-	connect (ui->shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
-	connect (ui->quickColor_add, SIGNAL (clicked()), this, SLOT (slot_setColor()));
-	connect (ui->quickColor_remove, SIGNAL (clicked()), this, SLOT (slot_delColor()));
-	connect (ui->quickColor_edit, SIGNAL (clicked()), this, SLOT (slot_setColor()));
-	connect (ui->quickColor_addSep, SIGNAL (clicked()), this, SLOT (slot_addColorSeparator()));
-	connect (ui->quickColor_moveUp, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
-	connect (ui->quickColor_moveDown, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
-	connect (ui->quickColor_clear, SIGNAL (clicked()), this, SLOT (slot_clearColors()));
-	connect (ui->findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
-	connect (ui->buttonBox, SIGNAL (clicked (QAbstractButton*)),
+	connect (ui.shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
+	connect (ui.shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
+	connect (ui.shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
+	connect (ui.quickColor_add, SIGNAL (clicked()), this, SLOT (slot_setColor()));
+	connect (ui.quickColor_remove, SIGNAL (clicked()), this, SLOT (slot_delColor()));
+	connect (ui.quickColor_edit, SIGNAL (clicked()), this, SLOT (slot_setColor()));
+	connect (ui.quickColor_addSep, SIGNAL (clicked()), this, SLOT (slot_addColorSeparator()));
+	connect (ui.quickColor_moveUp, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
+	connect (ui.quickColor_moveDown, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
+	connect (ui.quickColor_clear, SIGNAL (clicked()), this, SLOT (slot_clearColors()));
+	connect (ui.findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
+	connect (ui.buttonBox, SIGNAL (clicked (QAbstractButton*)),
 		this, SLOT (buttonClicked (QAbstractButton*)));
-	connect (ui->m_pages, SIGNAL (currentChanged (int)), this, SLOT (selectPage (int)));
-	connect (ui->m_pagelist, SIGNAL (currentRowChanged (int)), this, SLOT (selectPage (int)));
+	connect (ui.m_pages, SIGNAL (currentChanged (int)), this, SLOT (selectPage (int)));
+	connect (ui.m_pagelist, SIGNAL (currentRowChanged (int)), this, SLOT (selectPage (int)));
 }
 
 ConfigDialog::~ConfigDialog()
 {
-	delete ui;
+	delete &ui;
 }
 
 void ConfigDialog::selectPage (int row)
 {
-	ui->m_pagelist->setCurrentRow (row);
-	ui->m_pages->setCurrentIndex (row);
+	ui.m_pagelist->setCurrentRow (row);
+	ui.m_pages->setCurrentIndex (row);
 }
 
 //
@@ -152,7 +152,7 @@ void ConfigDialog::addShortcut (QAction* act)
 	if (act->icon().isNull())
 		item->setIcon (GetIcon ("empty"));
 
-	ui->shortcutsList->insertItem (ui->shortcutsList->count(), item);
+	ui.shortcutsList->insertItem (ui.shortcutsList->count(), item);
 }
 
 //
@@ -195,7 +195,7 @@ void ConfigDialog::initExtProgs()
 #endif
 		++row;
 	}
-	ui->extProgs->setLayout (pathsLayout);
+	ui.extProgs->setLayout (pathsLayout);
 }
 
 void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)> func)
@@ -268,9 +268,9 @@ void ConfigDialog::applySettings()
 	}
 
 	// Apply shortcuts
-	for (int i = 0; i < ui->shortcutsList->count(); ++i)
+	for (int i = 0; i < ui.shortcutsList->count(); ++i)
 	{
-		auto item = static_cast<ShortcutListItem*> (ui->shortcutsList->item (i));
+		auto item = static_cast<ShortcutListItem*> (ui.shortcutsList->item (i));
 		item->action()->setShortcut (item->sequence());
 	}
 
@@ -288,7 +288,7 @@ void ConfigDialog::applySettings()
 //
 void ConfigDialog::buttonClicked (QAbstractButton* button)
 {
-	QDialogButtonBox* dbb = ui->buttonBox;
+	QDialogButtonBox* dbb = ui.buttonBox;
 
 	if (button == dbb->button (QDialogButtonBox::Ok))
 	{
@@ -341,13 +341,13 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 			}
 		}
 
-		ui->quickColorList->addItem (item);
+		ui.quickColorList->addItem (item);
 		quickColorItems << item;
 
 		if (sel and &entry == sel)
 		{
-			ui->quickColorList->setCurrentItem (item);
-			ui->quickColorList->scrollToItem (item);
+			ui.quickColorList->setCurrentItem (item);
+			ui.quickColorList->scrollToItem (item);
 		}
 	}
 }
@@ -359,7 +359,7 @@ void ConfigDialog::slot_setColor()
 {
 	LDQuickColor* entry = null;
 	QListWidgetItem* item = null;
-	const bool isNew = static_cast<QPushButton*> (sender()) == ui->quickColor_add;
+	const bool isNew = static_cast<QPushButton*> (sender()) == ui.quickColor_add;
 
 	if (not isNew)
 	{
@@ -402,10 +402,10 @@ void ConfigDialog::slot_setColor()
 //
 void ConfigDialog::slot_delColor()
 {
-	if (ui->quickColorList->selectedItems().isEmpty())
+	if (ui.quickColorList->selectedItems().isEmpty())
 		return;
 
-	QListWidgetItem* item = ui->quickColorList->selectedItems() [0];
+	QListWidgetItem* item = ui.quickColorList->selectedItems() [0];
 	quickColors.removeAt (getItemRow (item, quickColorItems));
 	updateQuickColorList();
 }
@@ -415,12 +415,12 @@ void ConfigDialog::slot_delColor()
 //
 void ConfigDialog::slot_moveColor()
 {
-	const bool up = (static_cast<QPushButton*> (sender()) == ui->quickColor_moveUp);
+	const bool up = (static_cast<QPushButton*> (sender()) == ui.quickColor_moveUp);
 
-	if (ui->quickColorList->selectedItems().isEmpty())
+	if (ui.quickColorList->selectedItems().isEmpty())
 		return;
 
-	QListWidgetItem* item = ui->quickColorList->selectedItems() [0];
+	QListWidgetItem* item = ui.quickColorList->selectedItems() [0];
 	int idx = getItemRow (item, quickColorItems);
 	int dest = up ? (idx - 1) : (idx + 1);
 
@@ -507,10 +507,10 @@ int ConfigDialog::getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& ha
 //
 QListWidgetItem* ConfigDialog::getSelectedQuickColor()
 {
-	if (ui->quickColorList->selectedItems().isEmpty())
+	if (ui.quickColorList->selectedItems().isEmpty())
 		return null;
 
-	return ui->quickColorList->selectedItems() [0];
+	return ui.quickColorList->selectedItems() [0];
 }
 
 //
@@ -520,7 +520,7 @@ QList<ShortcutListItem*> ConfigDialog::getShortcutSelection()
 {
 	QList<ShortcutListItem*> out;
 
-	for (QListWidgetItem* entry : ui->shortcutsList->selectedItems())
+	for (QListWidgetItem* entry : ui.shortcutsList->selectedItems())
 		out << static_cast<ShortcutListItem*> (entry);
 
 	return out;
@@ -609,7 +609,7 @@ void ConfigDialog::slot_findDownloadFolder()
 	QString dpath = QFileDialog::getExistingDirectory();
 
 	if (not dpath.isEmpty())
-		ui->configDownloadFilePath->setText (dpath);
+		ui.configDownloadFilePath->setText (dpath);
 }
 
 //
