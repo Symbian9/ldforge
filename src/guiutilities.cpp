@@ -74,7 +74,7 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 	while (it.hasNext())
 	{
 		it.next();
-		QIcon ico = g_win->guiUtilities()->makeColorIcon (it.key(), 16);
+		QIcon ico = makeColorIcon (it.key(), 16);
 		box->addItem (ico, format ("[%1] %2 (%3 object%4)",
 			it.key(), it.key().name(), it.value(), plural (it.value())));
 		box->setItemData (row, it.key().index());

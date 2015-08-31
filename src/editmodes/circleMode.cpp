@@ -77,8 +77,8 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 void CircleMode::buildCircle()
 {
 	LDObjectList objs;
-	const int segments (g_win->ringToolSegments());
-	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
+	const int segments (m_window->ringToolSegments());
+	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
 	LDDocument* refFile;
@@ -186,7 +186,7 @@ double CircleMode::getAngleOffset() const
 	if (m_drawedVerts.isEmpty())
 		return 0.0;
 
-	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
+	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
 	QPointF originspot (renderer()->coordconv3_2 (m_drawedVerts.first()));
 	QLineF bearing (originspot, renderer()->mousePositionF());
 	QLineF bearing2 (originspot, QPointF (originspot.x(), 0.0));
@@ -213,8 +213,8 @@ void CircleMode::render (QPainter& painter) const
 	QVector<QPointF> innerverts2d, outerverts2d;
 	const double innerdistance (getCircleDrawDist (0));
 	const double outerdistance (m_drawedVerts.size() >= 2 ? getCircleDrawDist (1) : -1);
-	const int divisions (g_win->ringToolHiRes() ? HighResolution : LowResolution);
-	const int segments (g_win->ringToolSegments());
+	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
+	const int segments (m_window->ringToolSegments());
 	const double angleUnit (2 * Pi / divisions);
 	Axis relX, relY;
 	renderer()->getRelativeAxes (relX, relY);

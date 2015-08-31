@@ -44,26 +44,26 @@ void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& bounda
 {
 	// All boundaries obviously share vertices with the object, therefore they're all in the list
 	// of candidates.
-	for (auto it = candidates.begin(); it != candidates.end(); ++it)
+	for (LDObject* candidate : candidates)
 	{
-		if (not isOneOf ((*it)->type(), OBJ_Line, OBJ_CondLine) or (*it)->vertex (0) == (*it)->vertex (1))
+		if (not isOneOf (candidate->type(), OBJ_Line, OBJ_CondLine) or candidate->vertex (0) == candidate->vertex (1))
 			continue;
 
 		int matches = 0;
 
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			if (not isOneOf (obj->vertex (i), (*it)->vertex (0), (*it)->vertex (1)))
+			if (not isOneOf (obj->vertex (i), candidate->vertex (0), candidate->vertex (1)))
 				continue;
 
 			if (++matches == 2)
 			{
 				// Boundary found. If it's an edgeline, add it to the boundaries list, if a
 				// conditional line, select it.
-				if ((*it)->type() == OBJ_CondLine)
-					m_selection << *it;
+				if (candidate->type() == OBJ_CondLine)
+					m_selection << candidate;
 				else
-					boundaries.append (std::make_tuple ((*it)->vertex (0), (*it)->vertex (1)));
+					boundaries.append (std::make_tuple (candidate->vertex (0), candidate->vertex (1)));
 
 				break;
 			}
@@ -78,7 +78,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 		if (type == Set)
 		{
 			CurrentDocument()->clearSelection();
-			g_win->buildObjList();
+			m_window->buildObjList();
 		}
 
 		return;
@@ -178,24 +178,24 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 
 	switch (type)
 	{
-		case Set:
-			CurrentDocument()->clearSelection();
-		case Additive:
-			for (LDObject* obj : m_selection)
-				obj->select();
-			break;
+	case Set:
+		CurrentDocument()->clearSelection();
+	case Additive:
+		for (LDObject* obj : m_selection)
+			obj->select();
+		break;
 
-		case Subtractive:
-			for (LDObject* obj : m_selection)
-				obj->deselect();
-			break;
+	case Subtractive:
+		for (LDObject* obj : m_selection)
+			obj->deselect();
+		break;
 
-		case InternalRecursion:
-			break;
+	case InternalRecursion:
+		break;
 	}
 
 	if (type != InternalRecursion)
-		g_win->buildObjList();
+		m_window->buildObjList();
 }
 
 bool MagicWandMode::mouseReleased (MouseEventData const& data)

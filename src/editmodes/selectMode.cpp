@@ -123,7 +123,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 		if (obj != null)
 		{
 			AddObjectDialog::staticDialog (obj->type(), obj);
-			g_win->endAction();
+			m_window->endAction();
 			return true;
 		}
 	}
