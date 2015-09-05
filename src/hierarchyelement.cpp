@@ -26,8 +26,17 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	m_config = m_window->configBag();
 }
 
-
 GuiUtilities* HierarchyElement::guiUtilities() const
 {
 	return m_window->guiUtilities();
+}
+
+LDDocument* HierarchyElement::currentDocument()
+{
+	return m_window->currentDocument();
+}
+
+const LDObjectList& HierarchyElement::selectedObjects()
+{
+	return m_window->selectedObjects();
 }

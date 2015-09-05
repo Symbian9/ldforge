@@ -49,9 +49,9 @@ Q_DECLARE_OPERATORS_FOR_FLAGS (LDDocumentFlags)
 // The default name is a placeholder, initially suggested name for a file. The
 // primitive generator uses this to give initial names to primitives.
 //
-class LDDocument
+class LDDocument : public QObject, public HierarchyElement
 {
-public:
+	Q_OBJECT
 	PROPERTY (public,	QString,				name,			setName,			STOCK_WRITE)
 	PROPERTY (private,	LDObjectList,		objects, 		setObjects,			STOCK_WRITE)
 	PROPERTY (private,	LDObjectList,		cache, 			setCache,			STOCK_WRITE)
@@ -64,13 +64,8 @@ public:
 	PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,		STOCK_WRITE)
 	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
 
-	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
-	QVector<Vertex> m_vertices;
-	bool m_verticesOutdated;
-	bool m_needVertexMerge;
-
 public:
-	LDDocument();
+	LDDocument (QObject* parent);
 	~LDDocument();
 
 	int addObject (LDObject* obj); // Adds an object to this file at the end of the file.
@@ -134,15 +129,8 @@ public:
 		setImplicit (true);
 	}
 
-	static LDDocument* current();
-	static void setCurrent (LDDocument* f);
-	static void closeInitialFile();
-	static int countExplicitFiles();
-	static LDDocument* createNew();
-
 	// Turns a full path into a relative path
 	static QString shortenName (QString a);
-	static QList<LDDocument*> const& explicitDocuments();
 	void mergeVertices();
 
 protected:
@@ -158,6 +146,11 @@ protected:
 	friend class GLRenderer;
 
 private:
+	
+	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
+	QVector<Vertex> m_vertices;
+	bool m_verticesOutdated;
+	bool m_needVertexMerge;
 	LDObjectList			m_sel;
 	LDGLData*				m_gldata;
 
@@ -165,14 +158,6 @@ private:
 	// stored polygon data and re-builds it.
 	bool					m_needsReCache;
 };
-
-inline LDDocument* CurrentDocument()
-{
-	return LDDocument::current();
-}
-
-// Close all current loaded files and start off blank.
-void newFile();
 
 // Opens the given file as the main file. Everything is closed first.
 void OpenMainModel (QString path);
@@ -202,11 +187,7 @@ bool IsSafeToCloseAll();
 
 LDObjectList LoadFileContents (QFile* f, int* numWarnings, bool* ok = null);
 
-inline const LDObjectList& Selection()
-{
-	return CurrentDocument()->getSelection();
-}
-
+const LDObjectList& selectedObjects();
 void AddRecentFile (QString path);
 void LoadLogoStuds();
 QString Basename (QString path);

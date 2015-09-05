@@ -54,5 +54,6 @@ public:
 	Q_INVOKABLE void undo();
 
 private:
+	int copyToClipboard();
 	void doInline (bool deep);
 };

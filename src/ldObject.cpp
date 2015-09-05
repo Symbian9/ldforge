@@ -293,6 +293,8 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 //
 void LDObject::destroy()
 {
+	print ("Destroying %1\n", this);
+
 	// Don't bother during program termination (FIXME)
 	if (IsExiting() == false)
 	{
@@ -787,7 +789,7 @@ static void changeProperty (LDObject* obj, T* ptr, const T& val)
 		{
 			obj->document()->addToHistory (new EditHistory (idx, before, after));
 			g_win->R()->compileObject (obj);
-			CurrentDocument()->redoVertices();
+			g_win->currentDocument()->redoVertices();
 		}
 	}
 	else

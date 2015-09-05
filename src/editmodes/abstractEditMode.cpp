@@ -62,16 +62,9 @@ AbstractDrawMode::AbstractDrawMode (GLRenderer* renderer) :
 	AbstractEditMode (renderer),
 	m_polybrush (QBrush (QColor (64, 192, 0, 128)))
 {
-	// Disable the context menu - we need the right mouse button
-	// for removing vertices.
-	renderer->setContextMenuPolicy (Qt::NoContextMenu);
-
-	// Use the crosshair cursor when drawing.
+	renderer->setContextMenuPolicy (Qt::NoContextMenu); // We need the right mouse button for removing vertices
 	renderer->setCursor (Qt::CrossCursor);
-
-	// Clear the selection when beginning to draw.
-	CurrentDocument()->clearSelection();
-
+	m_window->currentDocument()->clearSelection();
 	m_window->updateSelection();
 	m_drawedVerts.clear();
 }

@@ -269,7 +269,7 @@ void PartDownloader::buttonClicked (QAbstractButton* btn)
 //
 void PartDownloader::downloadFile (QString dest, QString url, bool primary)
 {
-	const int row = form()->progress->rowCount();
+	int row = form()->progress->rowCount();
 
 	// Don't download files repeadetly.
 	if (filesToDownload().indexOf (dest) != -1)
@@ -312,7 +312,7 @@ void PartDownloader::checkIfFinished()
 		if (not req->isFinished())
 			return;
 
-        if (req->state() == PartDownloadRequest::State::Failed)
+		if (req->state() == PartDownloadRequest::State::Failed)
 			failed = true;
 	}
 
@@ -324,12 +324,12 @@ void PartDownloader::checkIfFinished()
 	// Update everything now
 	if (primaryFile() != null)
 	{
-		LDDocument::setCurrent (primaryFile());
+		g_win->changeDocument (primaryFile());
 		g_win->doFullRefresh();
 		g_win->R()->resetAngles();
 	}
 
-		for (LDDocument* f : m_files)
+	for (LDDocument* f : m_files)
 		f->reloadAllSubfiles();
 
 	if (m_config->autoCloseDownloadDialog() and not failed)

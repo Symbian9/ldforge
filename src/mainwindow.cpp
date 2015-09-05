@@ -53,6 +53,7 @@
 #include "toolsets/toolset.h"
 #include "dialogs/configdialog.h"
 #include "guiutilities.h"
+#include "glCompiler.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
@@ -70,7 +71,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	m_guiUtilities (new GuiUtilities (this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
-	m_settings (makeSettings (this))
+	m_settings (makeSettings (this)),
+	m_currentDocument (nullptr)
 {
 	g_win = this;
 	ui.setupUi (this);
@@ -86,7 +88,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_selectionChanged()));
 	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (slot_editObject (QListWidgetItem*)));
-	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (changeCurrentFile()));
+	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
 	if (ActivePrimitiveScanner() != null)
@@ -98,7 +100,6 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	m_msglog->setRenderer (R());
 	m_renderer->setMessageLog (m_msglog);
 	m_quickColors = LoadQuickColorList();
-	slot_selectionChanged();
 	setStatusBar (new QStatusBar);
 	updateActions();
 
@@ -167,7 +168,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 			toolbar->hide();
 	}
 
-	newFile();
+	createBlankDocument();
+	m_renderer->setDocument (m_currentDocument);
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
@@ -210,12 +212,8 @@ void MainWindow::slot_action()
 //
 void MainWindow::endAction()
 {
-	// Add a step in the history now.
-	CurrentDocument()->addHistoryStep();
-
-	// Update the list item of the current file - we may need to draw an icon
-	// now that marks it as having unsaved changes.
-	updateDocumentListItem (CurrentDocument());
+	m_currentDocument->addHistoryStep();
+	updateDocumentListItem (m_currentDocument);
 	refresh();
 }
 
@@ -324,20 +322,20 @@ void MainWindow::updateTitle()
 	QString title = format (APPNAME " " VERSION_STRING);
 
 	// Append our current file if we have one
-	if (CurrentDocument())
+	if (m_currentDocument)
 	{
 		title += ": ";
-		title += CurrentDocument()->getDisplayName();
+		title += m_currentDocument->getDisplayName();
 
-		if (CurrentDocument()->getObjectCount() > 0 and
-			CurrentDocument()->getObject (0)->type() == OBJ_Comment)
+		if (m_currentDocument->getObjectCount() > 0 and
+			m_currentDocument->getObject (0)->type() == OBJ_Comment)
 		{
 			// Append title
-			LDComment* comm = static_cast <LDComment*> (CurrentDocument()->getObject (0));
+			LDComment* comm = static_cast <LDComment*> (m_currentDocument->getObject (0));
 			title += format (": %1", comm->text());
 		}
 
-		if (CurrentDocument()->hasUnsavedChanges())
+		if (m_currentDocument->hasUnsavedChanges())
 			title += '*';
 	}
 
@@ -357,10 +355,10 @@ void MainWindow::updateTitle()
 //
 int MainWindow::deleteSelection()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return 0;
 
-	LDObjectList selCopy = Selection();
+	LDObjectList selCopy = selectedObjects();
 
 	// Delete the objects that were being selected
 	for (LDObject* obj : selCopy)
@@ -374,7 +372,7 @@ int MainWindow::deleteSelection()
 //
 void MainWindow::buildObjList()
 {
-	if (not CurrentDocument())
+	if (not m_currentDocument)
 		return;
 
 	// Lock the selection while we do this so that refreshing the object list
@@ -387,7 +385,7 @@ void MainWindow::buildObjList()
 
 	ui.objectList->clear();
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : m_currentDocument->objects())
 	{
 		QString descr;
 
@@ -503,10 +501,10 @@ void MainWindow::buildObjList()
 //
 void MainWindow::scrollToSelection()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return;
 
-	LDObject* obj = Selection().last();
+	LDObject* obj = selectedObjects().last();
 	ui.objectList->scrollToItem (obj->qObjListEntry);
 }
 
@@ -514,16 +512,16 @@ void MainWindow::scrollToSelection()
 //
 void MainWindow::slot_selectionChanged()
 {
-	if (g_isSelectionLocked == true or CurrentDocument() == null)
+	if (g_isSelectionLocked == true or m_currentDocument == null)
 		return;
 
-	LDObjectList priorSelection = Selection();
+	LDObjectList priorSelection = selectedObjects();
 
 	// Get the objects from the object list selection
-	CurrentDocument()->clearSelection();
+	m_currentDocument->clearSelection();
 	const QList<QListWidgetItem*> items = ui.objectList->selectedItems();
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : m_currentDocument->objects())
 	{
 		for (QListWidgetItem* item : items)
 		{
@@ -540,7 +538,7 @@ void MainWindow::slot_selectionChanged()
 	updateSelection();
 
 	// Update the GL renderer
-	LDObjectList compound = priorSelection + Selection();
+	LDObjectList compound = priorSelection + selectedObjects();
 	removeDuplicates (compound);
 
 	for (LDObject* obj : compound)
@@ -576,7 +574,7 @@ void MainWindow::slot_quickColor()
 	if (not color.isValid())
 		return;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (not obj->isColored())
 			continue; // uncolored object
@@ -594,11 +592,11 @@ void MainWindow::slot_quickColor()
 int MainWindow::getInsertionPoint()
 {
 	// If we have a selection, put the item after it.
-	if (not Selection().isEmpty())
-		return Selection().last()->lineNumber() + 1;
+	if (not selectedObjects().isEmpty())
+		return selectedObjects().last()->lineNumber() + 1;
 
 	// Otherwise place the object at the end.
-	return CurrentDocument()->getObjectCount();
+	return m_currentDocument->getObjectCount();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -626,7 +624,7 @@ void MainWindow::updateSelection()
 	int top = -1;
 	int bottom = -1;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (obj->qObjListEntry == null)
 			continue;
@@ -666,7 +664,7 @@ LDColor MainWindow::getSelectedColor()
 {
 	LDColor result;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (not obj->isColored())
 			continue; // This one doesn't use color so it doesn't have a say
@@ -711,12 +709,12 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 //
 void MainWindow::spawnContextMenu (const QPoint pos)
 {
-	const bool single = (Selection().size() == 1);
-	LDObject* singleObj = single ? Selection().first() : nullptr;
+	const bool single = (selectedObjects().size() == 1);
+	LDObject* singleObj = single ? selectedObjects().first() : nullptr;
 
 	bool hasSubfiles = false;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (obj->type() == OBJ_Subfile)
 		{
@@ -758,7 +756,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 	contextMenu->addAction (ui.actionModeDraw);
 	contextMenu->addAction (ui.actionModeCircle);
 
-	if (not Selection().isEmpty())
+	if (not selectedObjects().isEmpty())
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui.actionSubfileSelection);
@@ -779,7 +777,7 @@ void MainWindow::deleteByColor (LDColor color)
 {
 	LDObjectList objs;
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : m_currentDocument->objects())
 	{
 		if (not obj->isColored() or obj->color() != color)
 			continue;
@@ -808,7 +806,7 @@ void MainWindow::updateEditModeActions()
 //
 void MainWindow::slot_editObject (QListWidgetItem* listitem)
 {
-	for (LDObject* it : CurrentDocument()->objects())
+	for (LDObject* it : m_currentDocument->objects())
 	{
 		if (it->qObjListEntry == listitem)
 		{
@@ -822,6 +820,9 @@ void MainWindow::slot_editObject (QListWidgetItem* listitem)
 //
 bool MainWindow::save (LDDocument* doc, bool saveAs)
 {
+	if (doc->isImplicit())
+		return false;
+
 	QString path = doc->fullPath();
 	int64 savesize;
 
@@ -847,7 +848,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 
 	if (doc->save (path, &savesize))
 	{
-		if (doc == CurrentDocument())
+		if (doc == m_currentDocument)
 			updateTitle();
 
 		print ("Saved to %1 (%2)", path, MakePrettyFileSize (savesize));
@@ -925,12 +926,15 @@ void MainWindow::updateDocumentList()
 	while (m_tabs->count() > 0)
 		m_tabs->removeTab (0);
 
-	for (LDDocument* f : LDDocument::explicitDocuments())
+	for (LDDocument* document : m_documents)
 	{
-		// Add an item to the list for this file and store the tab index
-		// in the document so we can find documents by tab index.
-		f->setTabIndex (m_tabs->addTab (""));
-		updateDocumentListItem (f);
+		if (not document->isImplicit())
+		{
+			// Add an item to the list for this file and store the tab index
+			// in the document so we can find documents by tab index.
+			document->setTabIndex (m_tabs->addTab (""));
+			updateDocumentListItem (document);
+		}
 	}
 
 	m_updatingTabs = false;
@@ -953,7 +957,7 @@ void MainWindow::updateDocumentListItem (LDDocument* doc)
 
 	// If this is the current file, it also needs to be the selected item on
 	// the list.
-	if (doc == CurrentDocument())
+	if (doc == m_currentDocument)
 		m_tabs->setCurrentIndex (doc->tabIndex());
 
 	m_tabs->setTabText (doc->tabIndex(), doc->getDisplayName());
@@ -969,30 +973,26 @@ void MainWindow::updateDocumentListItem (LDDocument* doc)
 // A file is selected from the list of files on the left of the screen. Find out
 // which file was picked and change to it.
 //
-void MainWindow::changeCurrentFile()
+void MainWindow::tabSelected()
 {
 	if (m_updatingTabs)
 		return;
 
-	LDDocument* file = nullptr;
+	LDDocument* switchee = nullptr;
 	int tabIndex = m_tabs->currentIndex();
 
 	// Find the file pointer of the item that was selected.
-	for (LDDocument* it : LDDocument::explicitDocuments())
+	for (LDDocument* document : m_documents)
 	{
-		if (it->tabIndex() == tabIndex)
+		if (not document->isImplicit() and document->tabIndex() == tabIndex)
 		{
-			file = it;
+			switchee = document;
 			break;
 		}
 	}
 
-	// If we picked the same file we're currently on, we don't need to do
-	// anything.
-	if (file == null or file == CurrentDocument())
-		return;
-
-	LDDocument::setCurrent (file);
+	if (switchee and switchee != m_currentDocument)
+		changeDocument (switchee);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ void MainWindow::refreshObjectList()
 {
 #if 0
 	ui.objectList->clear();
-	LDDocument* f = getCurrentDocument();
+	LDDocument* f = getm_currentDocument;
 
 for (LDObject* obj : *f)
 		ui.objectList->addItem (obj->qObjListEntry);
@@ -1015,9 +1015,9 @@ for (LDObject* obj : *f)
 //
 void MainWindow::updateActions()
 {
-	if (CurrentDocument() != null and CurrentDocument()->history() != null)
+	if (m_currentDocument != null and m_currentDocument->history() != null)
 	{
-		History* his = CurrentDocument()->history();
+		History* his = m_currentDocument->history();
 		int pos = his->position();
 		ui.actionUndo->setEnabled (pos != -1);
 		ui.actionRedo->setEnabled (pos < (long) his->getSize() - 1);
@@ -1153,15 +1153,124 @@ QSettings* MainWindow::makeSettings (QObject* parent)
 	return new QSettings (path, QSettings::IniFormat, parent);
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
 void MainWindow::syncSettings()
 {
 	m_settings->sync();
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
 QVariant MainWindow::getConfigValue (QString name)
 {
 	QVariant value = m_settings->value (name, m_configOptions.defaultValueByName (name));
 	return value;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+void MainWindow::createBlankDocument()
+{
+	// Create a new anonymous file and set it to our current
+	LDDocument* f = newDocument();
+	f->setName ("");
+	changeDocument (f);
+	closeInitialDocument();
+	doFullRefresh();
+	updateActions();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+LDDocument* MainWindow::newDocument (bool cache)
+{
+	m_documents.append (new LDDocument (this));
+	m_documents.last()->setImplicit (cache);
+	return m_documents.last();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+const QList<LDDocument*>& MainWindow::allDocuments()
+{
+	return m_documents;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+LDDocument* MainWindow::currentDocument()
+{
+	return m_currentDocument;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+// TODO: document may be null, this shouldn't be the case
+//
+void MainWindow::changeDocument (LDDocument* document)
+{
+	// Implicit files were loaded for caching purposes and may never be switched to.
+	if (document != null and document->isImplicit())
+		return;
+
+	m_currentDocument = document;
+
+	if (document)
+	{
+		// A ton of stuff needs to be updated
+		updateDocumentListItem (document);
+		buildObjList();
+		updateTitle();
+		m_renderer->setDocument (document);
+		m_renderer->compiler()->needMerge();
+		print ("Changed document to %1", document->getDisplayName());
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+// This little beauty closes the initial file that was open at first when opening a new file over it.
+//
+void MainWindow::closeInitialDocument()
+{
+	if (m_documents.size() == 2 and
+		m_documents[0]->name().isEmpty() and
+		not m_documents[1]->name().isEmpty() and
+		not m_documents[0]->hasUnsavedChanges())
+	{
+		m_documents.first()->dismiss();
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+const LDObjectList& MainWindow::selectedObjects()
+{
+	return m_currentDocument->getSelection();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+void MainWindow::currentDocumentClosed()
+{
+	LDDocument* old = currentDocument();
+
+	// Find a replacement document to use
+	for (LDDocument* doc : m_documents)
+	{
+		if (doc != old and not doc->isImplicit())
+		{
+			changeDocument (doc);
+			break;
+		}
+	}
+
+	if (currentDocument() == old)
+	{
+		// Failed to change to a suitable document, open a new one.
+		createBlankDocument();
+	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

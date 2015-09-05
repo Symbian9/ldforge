@@ -241,7 +241,7 @@ void GLCompiler::stageForCompilation (LDObject* obj)
 //
 void GLCompiler::unstage (LDObject* obj)
 {
-	m_staged.removeOne (obj);
+	m_staged.remove (obj);
 }
 
 // =============================================================================
@@ -259,15 +259,8 @@ void GLCompiler::compileDocument (LDDocument* doc)
 //
 void GLCompiler::compileStaged()
 {
-	removeDuplicates (m_staged);
-
-	for (auto it = m_staged.begin(); it != m_staged.end(); ++it)
-	{
-		if (*it == null)
-			continue;
-
-		compileObject (*it);
-	}
+	for (QSetIterator<LDObject*> it (m_staged); it.hasNext();)
+		compileObject (it.next());
 
 	m_staged.clear();
 }
@@ -292,11 +285,8 @@ void GLCompiler::prepareVBO (int vbonum)
 			continue;
 		}
 
-		if (it.key()->document() == CurrentDocument()
-			and not it.key()->isHidden())
-		{
+		if (it.key()->document() == currentDocument() and not it.key()->isHidden())
 			vbodata += it->data[vbonum];
-		}
 
 		++it;
 	}
@@ -311,17 +301,13 @@ void GLCompiler::prepareVBO (int vbonum)
 
 // =============================================================================
 //
-void GLCompiler::dropObject (LDObject* obj)
+void GLCompiler::dropObjectInfo (LDObject* obj)
 {
-	auto it = m_objectInfo.find (obj);
-
-	if (it != m_objectInfo.end())
+	if (m_objectInfo.contains (obj))
 	{
-		m_objectInfo.erase (it);
+		m_objectInfo.remove (obj);
 		needMerge();
 	}
-
-	unstage (obj);
 }
 
 // =============================================================================
@@ -335,7 +321,7 @@ void GLCompiler::compileObject (LDObject* obj)
 
 	ObjectVBOInfo info;
 	info.isChanged = true;
-	dropObject (obj);
+	dropObjectInfo (obj);
 
 	switch (obj->type())
 	{

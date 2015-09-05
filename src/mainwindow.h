@@ -167,6 +167,14 @@ public:
 	void syncSettings();
 	QVariant getConfigValue (QString name);
 	class QSettings* getSettings() { return m_settings; }
+	void createBlankDocument();
+	LDDocument* newDocument (bool cache = false);
+	const QList<LDDocument*>& allDocuments();
+	LDDocument* currentDocument();
+	void changeDocument (LDDocument* f);
+	void closeInitialDocument();
+	const LDObjectList& selectedObjects();
+	void currentDocumentClosed();
 
 	class ExtProgramToolset* externalPrograms()
 	{
@@ -180,7 +188,7 @@ public:
 
 public slots:
 	void updatePrimitives();
-	void changeCurrentFile();
+	void tabSelected();
 	void closeTab (int tabindex);
 	void ringToolHiResClicked (bool clicked);
 	void circleToolSegmentsChanged();
@@ -207,6 +215,8 @@ private:
 	QMap<QAction*, ToolInfo> m_toolmap;
 	class ExtProgramToolset* m_externalPrograms;
 	class QSettings* m_settings;
+	QList<LDDocument*> m_documents;
+	LDDocument* m_currentDocument;
 
 private slots:
 	void slot_selectionChanged();

@@ -56,7 +56,7 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 {
 	QMap<LDColor, int> counts;
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		if (not obj->isColored() or not obj->color().isValid())
 			continue;

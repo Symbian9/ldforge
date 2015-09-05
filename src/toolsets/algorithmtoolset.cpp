@@ -51,7 +51,7 @@ void AlgorithmToolset::splitQuads()
 {
 	int num = 0;
 
-	for (LDObjectIterator<LDQuad> it (Selection()); it.isValid(); ++it)
+	for (LDObjectIterator<LDQuad> it (selectedObjects()); it.isValid(); ++it)
 	{
 		// Find the index of this quad
 		int index = it->lineNumber();
@@ -63,8 +63,8 @@ void AlgorithmToolset::splitQuads()
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
-		CurrentDocument()->setObject (index, triangles[0]);
-		CurrentDocument()->insertObj (index + 1, triangles[1]);
+		currentDocument()->setObject (index, triangles[0]);
+		currentDocument()->insertObj (index + 1, triangles[1]);
 		num++;
 	}
 
@@ -73,10 +73,10 @@ void AlgorithmToolset::splitQuads()
 
 void AlgorithmToolset::editRaw()
 {
-	if (Selection().size() != 1)
+	if (selectedObjects().size() != 1)
 		return;
 
-	LDObject* obj = Selection()[0];
+	LDObject* obj = selectedObjects()[0];
 	QDialog* dlg = new QDialog;
 	Ui::EditRawUI ui;
 
@@ -101,7 +101,7 @@ void AlgorithmToolset::editRaw()
 
 void AlgorithmToolset::makeBorders()
 {
-	LDObjectList objs = Selection();
+	LDObjectList objs = selectedObjects();
 	int num = 0;
 
 	for (LDObject* obj : objs)
@@ -136,7 +136,7 @@ void AlgorithmToolset::makeBorders()
 				continue;
 
 			long idx = obj->lineNumber() + i + 1;
-			CurrentDocument()->insertObj (idx, lines[i]);
+			currentDocument()->insertObj (idx, lines[i]);
 			++num;
 		}
 	}
@@ -149,7 +149,7 @@ void AlgorithmToolset::roundCoordinates()
 	setlocale (LC_ALL, "C");
 	int num = 0;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 
@@ -212,7 +212,7 @@ void AlgorithmToolset::replaceCoordinates()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -255,7 +255,7 @@ void AlgorithmToolset::flip()
 	if (ui.y->isChecked()) sel << Y;
 	if (ui.z->isChecked()) sel << Z;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -276,7 +276,7 @@ void AlgorithmToolset::demote()
 {
 	int num = 0;
 
-	for (LDObjectIterator<LDCondLine> it (Selection()); it.isValid(); ++it)
+	for (LDObjectIterator<LDCondLine> it (selectedObjects()); it.isValid(); ++it)
 	{
 		it->toEdgeLine();
 		++num;
@@ -285,9 +285,9 @@ void AlgorithmToolset::demote()
 	print (tr ("Converted %1 conditional lines"), num);
 }
 
-bool AlgorithmToolset::isColorUsed (LDColor color) const
+bool AlgorithmToolset::isColorUsed (LDColor color)
 {
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		if (obj->isColored() and obj->color() == color)
 			return true;
@@ -312,7 +312,7 @@ void AlgorithmToolset::autocolor()
 		return;
 	}
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (not obj->isColored())
 			continue;
@@ -346,7 +346,7 @@ void AlgorithmToolset::addHistoryLine()
 		ui->m_comment->text()));
 
 	// Find a spot to place the new comment
-	for (obj = CurrentDocument()->getObject (0);
+	for (obj = currentDocument()->getObject (0);
 		obj and obj->next() and not obj->next()->isScemantic();
 		obj = obj->next())
 	{
@@ -362,12 +362,12 @@ void AlgorithmToolset::addHistoryLine()
 	}
 
 	int idx = obj ? obj->lineNumber() : 0;
-	CurrentDocument()->insertObj (idx++, comment);
+	currentDocument()->insertObj (idx++, comment);
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
-		CurrentDocument()->insertObj (idx, new LDEmpty);
+		currentDocument()->insertObj (idx, new LDEmpty);
 
 	m_window->buildObjList();
 	delete ui;
@@ -384,7 +384,7 @@ void AlgorithmToolset::splitLines()
 
 	m_config->setSplitLinesSegments (segments);
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (not isOneOf (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
@@ -419,7 +419,7 @@ void AlgorithmToolset::splitLines()
 		int ln = obj->lineNumber();
 
 		for (LDObject* seg : newsegs)
-			CurrentDocument()->insertObj (ln++, seg);
+			currentDocument()->insertObj (ln++, seg);
 
 		obj->destroy();
 	}
@@ -430,10 +430,10 @@ void AlgorithmToolset::splitLines()
 
 void AlgorithmToolset::subfileSelection()
 {
-	if (Selection().size() == 0)
+	if (selectedObjects().size() == 0)
 		return;
 
-	QString			parentpath (CurrentDocument()->fullPath());
+	QString			parentpath (currentDocument()->fullPath());
 
 	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
 	BFCStatement	bfctype (BFCStatement::NoCertify);
@@ -445,7 +445,7 @@ void AlgorithmToolset::subfileSelection()
 	QString			subtitle;
 
 	// Comment containing the title of the parent document
-	LDComment*	titleobj = dynamic_cast<LDComment*> (CurrentDocument()->getObject (0));
+	LDComment*	titleobj = dynamic_cast<LDComment*> (currentDocument()->getObject (0));
 
 	// License text for the subfile
 	QString			license (PreferredLicenseText());
@@ -457,7 +457,7 @@ void AlgorithmToolset::subfileSelection()
 	QString			fullsubname;
 
 	// Where to insert the subfile reference?
-	int				refidx (Selection()[0]->lineNumber());
+	int				refidx (selectedObjects()[0]->lineNumber());
 
 	// Determine title of subfile
 	if (titleobj != null)
@@ -471,7 +471,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// If this the parent document isn't already in s/, we need to stuff it into
 	// a subdirectory named s/. Ensure it exists!
-	QString topdirname = Basename (Dirname (CurrentDocument()->fullPath()));
+	QString topdirname = Basename (Dirname (currentDocument()->fullPath()));
 
 	if (topdirname != "s")
 	{
@@ -521,7 +521,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	for (LDObjectIterator<LDBFC> it (CurrentDocument()); it.isValid(); ++it)
+	for (LDObjectIterator<LDBFC> it (currentDocument()); it.isValid(); ++it)
 	{
 		if (isOneOf (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
 		{
@@ -531,11 +531,11 @@ void AlgorithmToolset::subfileSelection()
 	}
 
 	// Get the body of the document in LDraw code
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		code << obj->asText();
 
 	// Create the new subfile document
-	LDDocument* doc = LDDocument::createNew();
+	LDDocument* doc = m_window->newDocument();
 	doc->setImplicit (false);
 	doc->setFullPath (fullsubname);
 	doc->setName (LDDocument::shortenName (fullsubname));
@@ -567,7 +567,7 @@ void AlgorithmToolset::subfileSelection()
 	{
 		// Save was successful. Delete the original selection now from the
 		// main document.
-		for (LDObject* obj : Selection())
+		for (LDObject* obj : selectedObjects())
 			obj->destroy();
 
 		// Add a reference to the new subfile to where the selection was
@@ -576,7 +576,7 @@ void AlgorithmToolset::subfileSelection()
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
-		CurrentDocument()->insertObj (refidx, ref);
+		currentDocument()->insertObj (refidx, ref);
 
 		// Refresh stuff
 		m_window->updateDocumentList();

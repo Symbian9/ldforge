@@ -165,10 +165,6 @@ public:
 	// Clears the bounding box
 	void reset();
 
-	// Calculates the bounding box's values from the objects in the current
-	// document.
-	void calculateFromCurrentDocument();
-
 	// Returns the length of the bounding box on the longest measure.
 	double longestMeasurement() const;
 

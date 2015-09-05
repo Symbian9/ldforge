@@ -38,5 +38,5 @@ public:
 	Q_INVOKABLE void subfileSelection();
 
 private:
-	bool isColorUsed (class LDColor color) const;
+	bool isColorUsed (class LDColor color);
 };

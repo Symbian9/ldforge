@@ -275,9 +275,8 @@ void ConfigDialog::applySettings()
 	}
 
 	m_window->syncSettings();
-	LDDocument::current()->reloadAllSubfiles();
+	currentDocument()->reloadAllSubfiles();
 	LoadLogoStuds();
-
 	m_window->R()->setBackground();
 	m_window->doFullRefresh();
 	m_window->updateDocumentList();

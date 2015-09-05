@@ -21,6 +21,7 @@
 #include "glRenderer.h"
 #include "glShared.h"
 #include <QMap>
+#include <QSet>
 
 // =============================================================================
 //
@@ -36,7 +37,7 @@ public:
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
 	void				compileDocument (LDDocument* doc);
-	void				dropObject (LDObject* obj);
+	void				dropObjectInfo (LDObject* obj);
 	void				initialize();
 	QColor				getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 											EVBOComplement complement) const;
@@ -70,11 +71,11 @@ private:
 	void			compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
 
 	QMap<LDObject*, ObjectVBOInfo>	m_objectInfo;
-	LDObjectList						m_staged; // Objects that need to be compiled
-	GLuint									m_vbo[g_numVBOs];
-	bool									m_vboChanged[g_numVBOs];
-	int										m_vboSizes[g_numVBOs];
-	GLRenderer*								m_renderer;
+	QSet<LDObject*>					m_staged; // Objects that need to be compiled
+	GLuint							m_vbo[g_numVBOs];
+	bool							m_vboChanged[g_numVBOs];
+	int								m_vboSizes[g_numVBOs];
+	GLRenderer*						m_renderer;
 };
 
 #define CHECK_GL_ERROR() { CheckGLErrorImpl (__FILE__, __LINE__); }

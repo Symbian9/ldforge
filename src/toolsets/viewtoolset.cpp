@@ -33,27 +33,27 @@ ViewToolset::ViewToolset (MainWindow *parent) :
 
 void ViewToolset::selectAll()
 {
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 		obj->select();
 }
 
 void ViewToolset::selectByColor()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return;
 
 	QList<LDColor> colors;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (obj->isColored())
 			colors << obj->color();
 	}
 
 	removeDuplicates (colors);
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		if (colors.contains (obj->color()))
 			obj->select();
@@ -62,13 +62,13 @@ void ViewToolset::selectByColor()
 
 void ViewToolset::selectByType()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return;
 
 	QList<LDObjectType> types;
 	QStringList subfilenames;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		types << obj->type();
 
@@ -78,9 +78,9 @@ void ViewToolset::selectByType()
 
 	removeDuplicates (types);
 	removeDuplicates (subfilenames);
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		LDObjectType type = obj->type();
 
@@ -109,7 +109,7 @@ void ViewToolset::screenshot()
 	uchar* imgdata = m_window->R()->getScreencap (w, h);
 	QImage img = GetImageFromScreencap (imgdata, w, h);
 
-	QString root = Basename (CurrentDocument()->name());
+	QString root = Basename (currentDocument()->name());
 
 	if (root.right (4) == ".dat")
 		root.chop (4);
@@ -133,19 +133,19 @@ void ViewToolset::axes()
 
 void ViewToolset::visibilityToggle()
 {
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		obj->setHidden (not obj->isHidden());
 }
 
 void ViewToolset::visibilityHide()
 {
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		obj->setHidden (true);
 }
 
 void ViewToolset::visibilityReveal()
 {
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		obj->setHidden (false);
 }
 
@@ -257,16 +257,16 @@ void ViewToolset::jumpTo()
 	int defval = 0;
 	LDObject* obj;
 
-	if (Selection().size() == 1)
-		defval = Selection()[0]->lineNumber();
+	if (selectedObjects().size() == 1)
+		defval = selectedObjects()[0]->lineNumber();
 
 	int idx = QInputDialog::getInt (null, "Go to line", "Go to line:", defval,
-		1, CurrentDocument()->getObjectCount(), 1, &ok);
+		1, currentDocument()->getObjectCount(), 1, &ok);
 
-	if (not ok or (obj = CurrentDocument()->getObject (idx - 1)) == null)
+	if (not ok or (obj = currentDocument()->getObject (idx - 1)) == null)
 		return;
 
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 	obj->select();
 	m_window->updateSelection();
 }

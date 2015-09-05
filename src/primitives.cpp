@@ -613,8 +613,8 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 	if (divs == HighResolution)
 		descr.insert (0, "Hi-Res ");
 
-	LDDocument* f = LDDocument::createNew();
-	f->setDefaultName (name);
+	LDDocument* document = g_win->newDocument();
+	document->setDefaultName (name);
 
 	QString author = APPNAME;
 	QString license = "";
@@ -637,12 +637,12 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 		 << LDSpawn<LDBFC> (BFCStatement::CertifyCCW)
 		 << LDSpawn<LDEmpty>();
 
-	f->setImplicit (false);
-	f->history()->setIgnoring (false);
-	f->addObjects (objs);
-	f->addObjects (MakePrimitive (type, segs, divs, num));
-	f->addHistoryStep();
-	return f;
+	document->setImplicit (false);
+	document->history()->setIgnoring (false);
+	document->addObjects (objs);
+	document->addObjects (MakePrimitive (type, segs, divs, num));
+	document->addHistoryStep();
+	return document;
 }
 
 // =============================================================================

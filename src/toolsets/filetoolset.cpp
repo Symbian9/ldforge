@@ -39,15 +39,15 @@ void FileToolset::newPart()
 
 	if (dlg->exec() == QDialog::Accepted)
 	{
-		newFile();
-		dlg->fillHeader (CurrentDocument());
+		m_window->createBlankDocument();
+		dlg->fillHeader (currentDocument());
 		m_window->doFullRefresh();
 	}
 }
 
 void FileToolset::newFile()
 {
-	newFile();
+	m_window->createBlankDocument();
 }
 
 void FileToolset::open()
@@ -62,26 +62,26 @@ void FileToolset::open()
 
 void FileToolset::save()
 {
-	m_window->save (CurrentDocument(), false);
+	m_window->save (currentDocument(), false);
 }
 
 void FileToolset::saveAs()
 {
-	m_window->save (CurrentDocument(), true);
+	m_window->save (currentDocument(), true);
 }
 
 void FileToolset::saveAll()
 {
-	for (LDDocument* file : LDDocument::explicitDocuments())
+	for (LDDocument* file : m_window->allDocuments())
 		m_window->save (file, false);
 }
 
 void FileToolset::close()
 {
-	if (not CurrentDocument()->isSafeToClose())
+	if (not currentDocument()->isSafeToClose())
 		return;
 
-	CurrentDocument()->dismiss();
+	currentDocument()->dismiss();
 }
 
 void FileToolset::closeAll()
@@ -128,11 +128,11 @@ void FileToolset::insertFrom()
 
 	LDObjectList objs = LoadFileContents (&f, null);
 
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 
 	for (LDObject* obj : objs)
 	{
-		CurrentDocument()->insertObj (idx, obj);
+		currentDocument()->insertObj (idx, obj);
 		obj->select();
 		m_window->R()->compileObject (obj);
 
@@ -145,7 +145,7 @@ void FileToolset::insertFrom()
 
 void FileToolset::exportTo()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return;
 
 	QString fname = QFileDialog::getSaveFileName();
@@ -161,7 +161,7 @@ void FileToolset::exportTo()
 		return;
 	}
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		QString contents = obj->asText();
 		QByteArray data = contents.toUtf8();
@@ -177,7 +177,7 @@ void FileToolset::scanPrimitives()
 
 void FileToolset::openSubfiles()
 {
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		LDSubfile* ref = dynamic_cast<LDSubfile*> (obj);
 

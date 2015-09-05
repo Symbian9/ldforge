@@ -172,7 +172,7 @@ void DelHistory::redo() const
 //
 void EditHistory::undo() const
 {
-	LDObject* obj = CurrentDocument()->getObject (index());
+	LDObject* obj = g_win->currentDocument()->getObject (index());
 	LDObject* newobj = ParseLine (oldCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);
@@ -182,7 +182,7 @@ void EditHistory::undo() const
 //
 void EditHistory::redo() const
 {
-	LDObject* obj = CurrentDocument()->getObject (index());
+	LDObject* obj = g_win->currentDocument()->getObject (index());
 	LDObject* newobj = ParseLine (newCode());
 	obj->replace (newobj);
 	g_win->R()->compileObject (newobj);

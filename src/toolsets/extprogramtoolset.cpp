@@ -205,7 +205,7 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString fname
 //
 void ExtProgramToolset::writeSelection (QString fname)
 {
-	writeObjects (Selection(), fname);
+	writeObjects (selectedObjects(), fname);
 }
 
 // =============================================================================
@@ -214,7 +214,7 @@ void ExtProgramToolset::writeColorGroup (LDColor color, QString fname)
 {
 	LDObjectList objects;
 
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		if (not obj->isColored() or obj->color() != color)
 			continue;
@@ -325,7 +325,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 		m_window->deleteByColor (color);
 
 	// Insert the new objects
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 
 	for (LDObject* obj : objs)
 	{
@@ -335,7 +335,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 			continue;
 		}
 
-		CurrentDocument()->addObject (obj);
+		currentDocument()->addObject (obj);
 		obj->select();
 	}
 

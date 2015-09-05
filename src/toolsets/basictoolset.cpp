@@ -34,15 +34,11 @@
 BasicToolset::BasicToolset (MainWindow *parent) :
 	Toolset (parent) {}
 
-static int CopyToClipboard()
+int BasicToolset::copyToClipboard()
 {
-	LDObjectList objs = Selection();
-	int num = 0;
-
-	// Clear the clipboard first.
+	LDObjectList objs = selectedObjects();
+	int count = 0;
 	qApp->clipboard()->clear();
-
-	// Now, copy the contents into the clipboard.
 	QString data;
 
 	for (LDObject* obj : objs)
@@ -51,23 +47,23 @@ static int CopyToClipboard()
 			data += "\n";
 
 		data += obj->asText();
-		++num;
+		++count;
 	}
 
 	qApp->clipboard()->setText (data);
-	return num;
+	return count;
 }
 
 void BasicToolset::cut()
 {
-	int num = CopyToClipboard();
+	int num = copyToClipboard();
 	m_window->deleteSelection();
 	print (tr ("%1 objects cut"), num);
 }
 
 void BasicToolset::copy()
 {
-	int num = CopyToClipboard();
+	int num = copyToClipboard();
 	print (tr ("%1 objects copied"), num);
 }
 
@@ -75,13 +71,13 @@ void BasicToolset::paste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
 	int idx = m_window->getInsertionPoint();
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 	int num = 0;
 
 	for (QString line : clipboardText.split ("\n"))
 	{
 		LDObject* pasted = ParseLine (line);
-		CurrentDocument()->insertObj (idx++, pasted);
+		currentDocument()->insertObj (idx++, pasted);
 		pasted->select();
 		++num;
 	}
@@ -99,7 +95,7 @@ void BasicToolset::remove()
 
 void BasicToolset::doInline (bool deep)
 {
-	for (LDObjectIterator<LDSubfile> it (Selection()); it.isValid(); ++it)
+	for (LDObjectIterator<LDSubfile> it (selectedObjects()); it.isValid(); ++it)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
@@ -115,7 +111,7 @@ void BasicToolset::doInline (bool deep)
 				QString line = inlineobj->asText();
 				inlineobj->destroy();
 				LDObject* newobj = ParseLine (line);
-				CurrentDocument()->insertObj (idx++, newobj);
+				currentDocument()->insertObj (idx++, newobj);
 				newobj->select();
 			}
 	
@@ -137,19 +133,19 @@ void BasicToolset::inlineDeep()
 
 void BasicToolset::undo()
 {
-	CurrentDocument()->undo();
+	currentDocument()->undo();
 }
 
 void BasicToolset::redo()
 {
-	CurrentDocument()->redo();
+	currentDocument()->redo();
 }
 
 void BasicToolset::uncolor()
 {
 	int num = 0;
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 	{
 		if (not obj->isColored())
 			continue;
@@ -180,13 +176,13 @@ void BasicToolset::insertRaw()
 	if (dlg->exec() == QDialog::Rejected)
 		return;
 
-	CurrentDocument()->clearSelection();
+	currentDocument()->clearSelection();
 
 	for (QString line : QString (inputbox->toPlainText()).split ("\n"))
 	{
 		LDObject* obj = ParseLine (line);
 
-		CurrentDocument()->insertObj (idx, obj);
+		currentDocument()->insertObj (idx, obj);
 		obj->select();
 		idx++;
 	}
@@ -197,10 +193,10 @@ void BasicToolset::insertRaw()
 
 void BasicToolset::setColor()
 {
-	if (Selection().isEmpty())
+	if (selectedObjects().isEmpty())
 		return;
 
-	LDObjectList objs = Selection();
+	LDObjectList objs = selectedObjects();
 
 	// If all selected objects have the same color, said color is our default
 	// value to the color selection dialog.
@@ -220,7 +216,7 @@ void BasicToolset::setColor()
 
 void BasicToolset::invert()
 {
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		obj->invert();
 }
 
@@ -261,10 +257,10 @@ void BasicToolset::newBFC()
 
 void BasicToolset::edit()
 {
-	if (Selection().size() != 1)
+	if (selectedObjects().size() != 1)
 		return;
 
-	LDObject* obj = Selection().first();
+	LDObject* obj = selectedObjects().first();
 	AddObjectDialog::staticDialog (obj->type(), obj);
 }
 

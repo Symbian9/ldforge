@@ -100,7 +100,8 @@ static bool RendererInitialized (false);
 //
 GLRenderer::GLRenderer (QWidget* parent) :
 	QGLWidget (parent),
-	HierarchyElement (parent)
+	HierarchyElement (parent),
+	m_document (nullptr)
 {
 	m_isPicking = false;
 	m_camera = (ECamera) m_config->camera();
@@ -342,7 +343,7 @@ void GLRenderer::hardRefresh()
 	if (not RendererInitialized)
 		return;
 
-	compiler()->compileDocument (CurrentDocument());
+	compiler()->compileDocument (currentDocument());
 	refresh();
 }
 
@@ -913,10 +914,10 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	// Clear the selection if we do not wish to add to it.
 	if (not additive)
 	{
-		LDObjectList oldsel = Selection();
-		CurrentDocument()->clearSelection();
+		LDObjectList oldSelection = selectedObjects();
+		currentDocument()->clearSelection();
 
-		for (LDObject* obj : oldsel)
+		for (LDObject* obj : oldSelection)
 			compileObject (obj);
 	}
 
@@ -992,7 +993,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	m_window->updateSelection();
 
 	// Recompile the objects now to update their color
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		compileObject (obj);
 
 	if (removedObj)
@@ -1137,8 +1138,11 @@ void GLRenderer::compileObject (LDObject* obj)
 //
 void GLRenderer::forgetObject (LDObject* obj)
 {
-	if (compiler() != null)
-		compiler()->dropObject (obj);
+	compiler()->dropObjectInfo (obj);
+	compiler()->unstage (obj);
+
+	if (m_objectAtCursor == obj)
+		m_objectAtCursor = nullptr;
 }
 
 // =============================================================================
@@ -1582,7 +1586,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		ref->setFileInfo (GetDocument (primName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
-		LDDocument::current()->insertObj (m_window->getInsertionPoint(), ref);
+		currentDocument()->insertObj (m_window->getInsertionPoint(), ref);
 		ref->select();
 		m_window->buildObjList();
 		m_window->R()->refresh();

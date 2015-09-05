@@ -219,19 +219,6 @@ LDBoundingBox::LDBoundingBox()
 
 // =============================================================================
 //
-void LDBoundingBox::calculateFromCurrentDocument()
-{
-	reset();
-
-	if (CurrentDocument() == null)
-		return;
-
-	for (LDObject* obj : CurrentDocument()->objects())
-		calcObject (obj);
-}
-
-// =============================================================================
-//
 void LDBoundingBox::calcObject (LDObject* obj)
 {
 	switch (obj->type())

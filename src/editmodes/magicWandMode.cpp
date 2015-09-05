@@ -26,7 +26,7 @@ MagicWandMode::MagicWandMode (GLRenderer* renderer) :
 	Super (renderer)
 {
 	// Get vertex<->object data
-	for (LDObject* obj : CurrentDocument()->objects())
+	for (LDObject* obj : currentDocument()->objects())
 	{
 		// Note: this deliberately only takes vertex-objects into account.
 		// The magic wand does not process subparts.
@@ -77,7 +77,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 	{
 		if (type == Set)
 		{
-			CurrentDocument()->clearSelection();
+			currentDocument()->clearSelection();
 			m_window->buildObjList();
 		}
 
@@ -179,7 +179,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 	switch (type)
 	{
 	case Set:
-		CurrentDocument()->clearSelection();
+		currentDocument()->clearSelection();
 	case Additive:
 		for (LDObject* obj : m_selection)
 			obj->select();

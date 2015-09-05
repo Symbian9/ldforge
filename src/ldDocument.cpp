@@ -36,20 +36,19 @@ ConfigOption (QStringList RecentFiles)
 ConfigOption (bool TryDownloadMissingFiles = false)
 
 static bool g_loadingMainFile = false;
-static const int g_maxRecentFiles = 10;
+enum { MAX_RECENT_FILES = 10 };
 static bool g_aborted = false;
 static LDDocument* g_logoedStud;
 static LDDocument* g_logoedStud2;
-static QList<LDDocument*> g_allDocuments;
-static QList<LDDocument*> g_explicitDocuments;
-static LDDocument* g_currentDocument;
 static bool g_loadingLogoedStuds = false;
 
 const QStringList g_specialSubdirectories ({ "s", "48", "8" });
 
 // =============================================================================
 //
-LDDocument::LDDocument() :
+LDDocument::LDDocument (QObject* parent) :
+	QObject (parent),
+	HierarchyElement (parent),
 	m_history (new History),
 	m_isImplicit (true),
 	m_flags (0),
@@ -61,21 +60,12 @@ LDDocument::LDDocument() :
 	setTabIndex (-1);
 	m_history->setDocument (this);
 	m_needsReCache = true;
-	g_allDocuments << this;
-}
-
-// =============================================================================
-//
-LDDocument* LDDocument::createNew()
-{
-	return new LDDocument();
 }
 
 // =============================================================================
 //
 LDDocument::~LDDocument()
 {
-	g_allDocuments.removeOne (this);
 	m_flags |= DOCF_IsBeingDestroyed;
 	delete m_history;
 	delete m_gldata;
@@ -91,53 +81,33 @@ void LDDocument::setImplicit (bool const& a)
 
 		if (a == false)
 		{
-			g_explicitDocuments << this;
 			print ("Opened %1", name());
 
 			// Implicit files are not compiled by the GL renderer. Now that this
 			// part is no longer implicit, it needs to be compiled.
-			if (g_win != null)
-				g_win->R()->compiler()->compileDocument (this);
+			m_window->R()->compiler()->compileDocument (this);
 		}
 		else
 		{
-			g_explicitDocuments.removeOne (this);
 			print ("Closed %1", name());
 		}
 
-		if (g_win != null)
-			g_win->updateDocumentList();
+		m_window->updateDocumentList();
 
-		// If the current document just became implicit (e.g. it was 'closed'),
-		// we need to get a new current document.
-		if (current() == this and isImplicit())
-		{
-			if (explicitDocuments().isEmpty())
-				newFile();
-			else
-				setCurrent (explicitDocuments().first());
-		}
+		// If the current document just became implicit (i.e. user closed it), we need to get a new one to show.
+		if (currentDocument() == this and a)
+			m_window->currentDocumentClosed();
 	}
-}
-
-// =============================================================================
-//
-QList<LDDocument*> const& LDDocument::explicitDocuments()
-{
-	return g_explicitDocuments;
 }
 
 // =============================================================================
 //
 LDDocument* FindDocument (QString name)
 {
-	for (LDDocument* file : g_allDocuments)
+	for (LDDocument* document : g_win->allDocuments())
 	{
-		if (file == null)
-			continue;
-
-		if (isOneOf (name, file->name(), file->defaultName()))
-			return file;
+		if (isOneOf (name, document->name(), document->defaultName()))
+			return document;
 	}
 
 	return nullptr;
@@ -178,22 +148,15 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 {
 	QString fullPath;
 
-	// LDraw models use Windows-style path separators. If we're not on Windows,
-	// replace the path separator now before opening any files. Qt expects
-	// forward-slashes as directory separators.
-#ifndef WIN32
+	// LDraw models use backslashes as path separators. Replace those into forward slashes for Qt.
 	relpath.replace ("\\", "/");
-#endif // WIN32
 
-	// Try find it relative to other currently open documents. We want a file
-	// in the immediate vicinity of a current model to override stock LDraw stuff.
+	// Try find it relative to other currently open documents. We want a file in the immediate vicinity of a current
+	// part model to override stock LDraw stuff.
 	QString reltop = Basename (Dirname (relpath));
 
-	for (LDDocument* doc : g_allDocuments)
+	for (LDDocument* doc : g_win->allDocuments())
 	{
-		if (doc == null)
-			continue;
-
 		QString partpath = format ("%1/%2", Dirname (doc->fullPath()), relpath);
 		QFile f (partpath);
 
@@ -229,8 +192,8 @@ static QString FindDocumentPath (QString relpath, bool subdirs)
 
 	if (subdirs)
 	{
-		// Look in sub-directories: parts and p. Also look in net_downloadpath, since that's
-		// where we download parts from the PT to.
+		// Look in sub-directories: parts and p. Also look in the download path, since that's where we download parts
+		// from the PT to.
 		QStringList dirs = { g_win->configBag()->lDrawPath(), g_win->configBag()->downloadFilePath() };
 		for (const QString& topdir : dirs)
 		{
@@ -453,8 +416,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 	if (not fp)
 		return nullptr;
 
-	LDDocument* load = (fileToOverride != null ? fileToOverride : LDDocument::createNew());
-	load->setImplicit (implicit);
+	LDDocument* load = (fileToOverride != null ? fileToOverride : g_win->newDocument (implicit));
 	load->setFullPath (fullpath);
 	load->setName (LDDocument::shortenName (load->fullPath()));
 
@@ -477,7 +439,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 
 	if (g_loadingMainFile)
 	{
-		LDDocument::setCurrent (load);
+		g_win->changeDocument (load);
 		g_win->R()->setDocument (load);
 		print (QObject::tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
 	}
@@ -496,10 +458,9 @@ bool LDDocument::isSafeToClose()
 	// If we have unsaved changes, warn and give the option of saving.
 	if (hasUnsavedChanges())
 	{
-		QString message = format (QObject::tr ("There are unsaved changes to %1. Should it be saved?"), 
-getDisplayName());
+		QString message = format (tr ("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
 
-		int button = msgbox::question (g_win, QObject::tr ("Unsaved Changes"), message,
+		int button = msgbox::question (m_window, QObject::tr ("Unsaved Changes"), message,
 			(msgbox::Yes | msgbox::No | msgbox::Cancel), msgbox::Cancel);
 
 		switch (button)
@@ -509,8 +470,8 @@ getDisplayName());
 				// If we don't have a file path yet, we have to ask the user for one.
 				if (name().length() == 0)
 				{
-					QString newpath = QFileDialog::getSaveFileName (g_win, QObject::tr ("Save As"),
-						CurrentDocument()->name(), QObject::tr ("LDraw files (*.dat *.ldr)"));
+					QString newpath = QFileDialog::getSaveFileName (m_window, QObject::tr ("Save As"),
+						name(), QObject::tr ("LDraw files (*.dat *.ldr)"));
 
 					if (newpath.length() == 0)
 						return false;
@@ -523,7 +484,7 @@ getDisplayName());
 					message = format (QObject::tr ("Failed to save %1 (%2)\nDo you still want to close?"),
 						name(), strerror (errno));
 
-					if (msgbox::critical (g_win, QObject::tr ("Save Failure"), message,
+					if (msgbox::critical (m_window, QObject::tr ("Save Failure"), message,
 						(msgbox::Yes | msgbox::No), msgbox::No) == msgbox::No)
 					{
 						return false;
@@ -547,24 +508,8 @@ getDisplayName());
 //
 void CloseAllDocuments()
 {
-	for (LDDocument* file : g_explicitDocuments)
+	for (LDDocument* file : g_win->allDocuments())
 		file->dismiss();
-}
-
-// =============================================================================
-//
-void newFile()
-{
-	// Create a new anonymous file and set it to our current
-	LDDocument* f = LDDocument::createNew();
-	f->setName ("");
-	f->setImplicit (false);
-	LDDocument::setCurrent (f);
-	LDDocument::closeInitialFile();
-	g_win->R()->setDocument (f);
-	g_win->doFullRefresh();
-	g_win->updateTitle();
-	g_win->updateActions();
 }
 
 // =============================================================================
@@ -584,7 +529,7 @@ void AddRecentFile (QString path)
 	}
 
 	// If there's too many recent files, drop one out.
-	while (recentFiles.size() > (g_maxRecentFiles - 1))
+	while (recentFiles.size() > (MAX_RECENT_FILES - 1))
 		recentFiles.removeAt (0);
 
 	// Add the file
@@ -604,9 +549,9 @@ void OpenMainModel (QString path)
 	LDDocument* file = nullptr;
 	QString shortName = LDDocument::shortenName (path);
 
-	for (LDDocument* doc : g_allDocuments)
+	for (LDDocument* doc : g_win->allDocuments())
 	{
-		if (doc != null and doc->name() == shortName)
+		if (doc->name() == shortName)
 		{
 			documentToReplace = doc;
 			break;
@@ -644,16 +589,9 @@ void OpenMainModel (QString path)
 	}
 
 	file->setImplicit (false);
-
-	// If we have an anonymous, unchanged file open as the only open file
-	// (aside of the one we just opened), close it now.
-	LDDocument::closeInitialFile();
-
-	// Rebuild the object tree view now.
-	LDDocument::setCurrent (file);
+	g_win->closeInitialDocument();
+	g_win->changeDocument (file);
 	g_win->doFullRefresh();
-
-	// Add it to the recent files list.
 	AddRecentFile (path);
 	g_loadingMainFile = false;
 
@@ -709,7 +647,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		{
 			QString newname = shortenName (path);
 			nameComment->setText (format ("Name: %1", newname));
-			g_win->buildObjList();
+			m_window->buildObjList();
 		}
 	}
 
@@ -740,9 +678,8 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	setSavePosition (history()->position());
 	setFullPath (path);
 	setName (shortenName (path));
-
-	g_win->updateDocumentListItem (this);
-	g_win->updateTitle();
+	m_window->updateDocumentListItem (this);
+	m_window->updateTitle();
 	return true;
 }
 
@@ -1041,8 +978,8 @@ void LDDocument::reloadAllSubfiles()
 
 	m_needsReCache = true;
 
-	if (this == CurrentDocument())
-		g_win->buildObjList();
+	if (this == m_window->currentDocument())
+		m_window->buildObjList();
 }
 
 // =============================================================================
@@ -1053,7 +990,7 @@ int LDDocument::addObject (LDObject* obj)
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
-	g_win->R()->compileObject (obj);
+	m_window->R()->compileObject (obj);
 	return getObjectCount() - 1;
 }
 
@@ -1075,7 +1012,7 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
-	g_win->R()->compileObject (obj);
+	m_window->R()->compileObject (obj);
 	
 
 #ifdef DEBUG
@@ -1124,7 +1061,7 @@ void LDDocument::forgetObject (LDObject* obj)
 //
 bool IsSafeToCloseAll()
 {
-	for (LDDocument* f : LDDocument::explicitDocuments())
+	for (LDDocument* f : g_win->allDocuments())
 	{
 		if (not f->isSafeToClose())
 			return false;
@@ -1153,7 +1090,7 @@ void LDDocument::setObject (int idx, LDObject* obj)
 	m_objects[idx]->setDocument (nullptr);
 	obj->setDocument (this);
 	addKnownVertices (obj);
-	g_win->R()->compileObject (obj);
+	m_window->R()->compileObject (obj);
 	m_objects[idx] = obj;
 	needVertexMerge();
 }
@@ -1268,7 +1205,7 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (g_win->configBag()->useLogoStuds() and renderinline)
+	if (m_config->useLogoStuds() and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		LoadLogoStuds();
@@ -1303,63 +1240,6 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 // =============================================================================
 //
-LDDocument* LDDocument::current()
-{
-	return g_currentDocument;
-}
-
-// =============================================================================
-// Sets the given file as the current one on display. At some point in time this
-// was an operation completely unheard of. ;)
-//
-// TODO: f can be temporarily null. This probably should not be the case.
-// =============================================================================
-void LDDocument::setCurrent (LDDocument* f)
-{
-	// Implicit files were loaded for caching purposes and must never be set
-	// current.
-	if (f != null and f->isImplicit())
-		return;
-
-	g_currentDocument = f;
-
-	if (g_win and f)
-	{
-		// A ton of stuff needs to be updated
-		g_win->updateDocumentListItem (f);
-		g_win->buildObjList();
-		g_win->updateTitle();
-		g_win->R()->setDocument (f);
-		g_win->R()->compiler()->needMerge();
-		print ("Changed file to %1", f->getDisplayName());
-	}
-}
-
-// =============================================================================
-//
-int LDDocument::countExplicitFiles()
-{
-	return g_explicitDocuments.size();
-}
-
-// =============================================================================
-// This little beauty closes the initial file that was open at first when opening
-// a new file over it.
-// =============================================================================
-void LDDocument::closeInitialFile()
-{
-	if (g_explicitDocuments.size() == 2 and
-		g_explicitDocuments[0]->name().isEmpty() and
-		not g_explicitDocuments[1]->name().isEmpty() and
-		not g_explicitDocuments[0]->hasUnsavedChanges())
-	{
-		LDDocument* filetoclose = g_explicitDocuments.first();
-		filetoclose->dismiss();
-	}
-}
-
-// =============================================================================
-//
 void LoadLogoStuds()
 {
 	if (g_loadingLogoedStuds or (g_logoedStud and g_logoedStud2))
@@ -1379,7 +1259,7 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 	if (not obj->isSelected() and obj->document() == this)
 	{
 		m_sel << obj;
-		g_win->R()->compileObject (obj);
+		m_window->R()->compileObject (obj);
 		obj->setSelected (true);
 	}
 }
@@ -1391,7 +1271,7 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 	if (obj->isSelected() and obj->document() == this)
 	{
 		m_sel.removeOne (obj);
-		g_win->R()->compileObject (obj);
+		m_window->R()->compileObject (obj);
 		obj->setSelected (false);
 	}
 }
@@ -1402,7 +1282,7 @@ void LDDocument::clearSelection()
 {
 	for (LDObject* obj : m_sel)
 	{
-		g_win->R()->compileObject (obj);
+		m_window->R()->compileObject (obj);
 		obj->setSelected (false);
 	}
 

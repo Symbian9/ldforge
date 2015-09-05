@@ -27,7 +27,7 @@ MoveToolset::MoveToolset (MainWindow* parent) :
 
 void MoveToolset::moveSelection (bool up)
 {
-	LDObjectList objs = Selection();
+	LDObjectList objs = selectedObjects();
 	LDObject::moveObjects (objs, up);
 	m_window->buildObjList();
 }
@@ -65,7 +65,7 @@ void MoveToolset::moveObjects (Vertex vect)
 	// Apply the grid values
 	vect *= gridCoordinateSnap();
 
-	for (LDObject* obj : Selection())
+	for (LDObject* obj : selectedObjects())
 		obj->move (vect);
 }
 
@@ -106,32 +106,32 @@ double MoveToolset::getRotateActionAngle()
 
 void MoveToolset::rotateXPos()
 {
-	RotateObjects (1, 0, 0, getRotateActionAngle(), Selection());
+	RotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateYPos()
 {
-	RotateObjects (0, 1, 0, getRotateActionAngle(), Selection());
+	RotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateZPos()
 {
-	RotateObjects (0, 0, 1, getRotateActionAngle(), Selection());
+	RotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateXNeg()
 {
-	RotateObjects (-1, 0, 0, getRotateActionAngle(), Selection());
+	RotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateYNeg()
 {
-	RotateObjects (0, -1, 0, getRotateActionAngle(), Selection());
+	RotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateZNeg()
 {
-	RotateObjects (0, 0, -1, getRotateActionAngle(), Selection());
+	RotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::configureRotationPoint()
