@@ -70,7 +70,7 @@ void BasicToolset::copy()
 void BasicToolset::paste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
-	int idx = m_window->getInsertionPoint();
+	int idx = m_window->suggestInsertPoint();
 	currentDocument()->clearSelection();
 	int num = 0;
 
@@ -159,7 +159,7 @@ void BasicToolset::uncolor()
 
 void BasicToolset::insertRaw()
 {
-	int idx = m_window->getInsertionPoint();
+	int idx = m_window->suggestInsertPoint();
 
 	QDialog* const dlg = new QDialog;
 	QVBoxLayout* const layout = new QVBoxLayout;
@@ -201,7 +201,7 @@ void BasicToolset::setColor()
 	// If all selected objects have the same color, said color is our default
 	// value to the color selection dialog.
 	LDColor color;
-	LDColor defaultcol = m_window->getSelectedColor();
+	LDColor defaultcol = m_window->getUniformSelectedColor();
 
 	// Show the dialog to the user now and ask for a color.
 	if (ColorSelector::selectColor (m_window, color, defaultcol))
@@ -266,30 +266,30 @@ void BasicToolset::edit()
 
 void BasicToolset::modeSelect()
 {
-	m_window->R()->setEditMode (EditModeType::Select);
+	m_window->renderer()->setEditMode (EditModeType::Select);
 }
 
 void BasicToolset::modeDraw()
 {
-	m_window->R()->setEditMode (EditModeType::Draw);
+	m_window->renderer()->setEditMode (EditModeType::Draw);
 }
 
 void BasicToolset::modeRectangle()
 {
-	m_window->R()->setEditMode (EditModeType::Rectangle);
+	m_window->renderer()->setEditMode (EditModeType::Rectangle);
 }
 
 void BasicToolset::modeCircle()
 {
-	m_window->R()->setEditMode (EditModeType::Circle);
+	m_window->renderer()->setEditMode (EditModeType::Circle);
 }
 
 void BasicToolset::modeMagicWand()
 {
- 	m_window->R()->setEditMode (EditModeType::MagicWand);
+ 	m_window->renderer()->setEditMode (EditModeType::MagicWand);
 }
 
 void BasicToolset::modeLinePath()
 {
-	m_window->R()->setEditMode (EditModeType::LinePath);
+	m_window->renderer()->setEditMode (EditModeType::LinePath);
 }

@@ -1523,7 +1523,7 @@ void GLRenderer::updateOverlayObjects()
 		}
 	}
 
-	if (m_window->R() == this)
+	if (m_window->renderer() == this)
 		m_window->refresh();
 }
 
@@ -1586,10 +1586,10 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		ref->setFileInfo (GetDocument (primName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
-		currentDocument()->insertObj (m_window->getInsertionPoint(), ref);
+		currentDocument()->insertObj (m_window->suggestInsertPoint(), ref);
 		ref->select();
-		m_window->buildObjList();
-		m_window->R()->refresh();
+		m_window->buildObjectList();
+		m_window->renderer()->refresh();
 		ev->acceptProposedAction();
 	}
 }

@@ -141,7 +141,7 @@ void AddHistory::redo() const
 {
 	LDObject* obj = ParseLine (code());
 	parent()->document()->insertObj (index(), obj);
-	g_win->R()->compileObject (obj);
+	g_win->renderer()->compileObject (obj);
 }
 
 // =============================================================================
@@ -157,7 +157,7 @@ void DelHistory::undo() const
 {
 	LDObject* obj = ParseLine (code());
 	parent()->document()->insertObj (index(), obj);
-	g_win->R()->compileObject (obj);
+	g_win->renderer()->compileObject (obj);
 }
 
 // =============================================================================
@@ -175,7 +175,7 @@ void EditHistory::undo() const
 	LDObject* obj = g_win->currentDocument()->getObject (index());
 	LDObject* newobj = ParseLine (oldCode());
 	obj->replace (newobj);
-	g_win->R()->compileObject (newobj);
+	g_win->renderer()->compileObject (newobj);
 }
 
 // =============================================================================
@@ -185,7 +185,7 @@ void EditHistory::redo() const
 	LDObject* obj = g_win->currentDocument()->getObject (index());
 	LDObject* newobj = ParseLine (newCode());
 	obj->replace (newobj);
-	g_win->R()->compileObject (newobj);
+	g_win->renderer()->compileObject (newobj);
 }
 
 // =============================================================================

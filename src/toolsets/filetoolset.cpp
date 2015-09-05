@@ -113,7 +113,7 @@ void FileToolset::exit()
 void FileToolset::insertFrom()
 {
 	QString fname = QFileDialog::getOpenFileName();
-	int idx = m_window->getInsertionPoint();
+	int idx = m_window->suggestInsertPoint();
 
 	if (not fname.length())
 		return;
@@ -134,7 +134,7 @@ void FileToolset::insertFrom()
 	{
 		currentDocument()->insertObj (idx, obj);
 		obj->select();
-		m_window->R()->compileObject (obj);
+		m_window->renderer()->compileObject (obj);
 
 		idx++;
 	}

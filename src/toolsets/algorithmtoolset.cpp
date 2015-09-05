@@ -369,7 +369,7 @@ void AlgorithmToolset::addHistoryLine()
 	if (obj and obj->next() and obj->next()->isScemantic())
 		currentDocument()->insertObj (idx, new LDEmpty);
 
-	m_window->buildObjList();
+	m_window->buildObjectList();
 	delete ui;
 }
 
@@ -424,7 +424,7 @@ void AlgorithmToolset::splitLines()
 		obj->destroy();
 	}
 
-	m_window->buildObjList();
+	m_window->buildObjectList();
 	m_window->refresh();
 }
 

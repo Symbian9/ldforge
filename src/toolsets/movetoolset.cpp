@@ -29,7 +29,7 @@ void MoveToolset::moveSelection (bool up)
 {
 	LDObjectList objs = selectedObjects();
 	LDObject::moveObjects (objs, up);
-	m_window->buildObjList();
+	m_window->buildObjectList();
 }
 
 void MoveToolset::moveUp()

@@ -156,7 +156,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 
 void AbstractDrawMode::finishDraw (LDObjectList const& objs)
 {
-	int pos = m_window->getInsertionPoint();
+	int pos = m_window->suggestInsertPoint();
 
 	if (objs.size() > 0)
 	{

@@ -97,8 +97,8 @@ void ViewToolset::selectByType()
 
 void ViewToolset::resetView()
 {
-	m_window->R()->resetAngles();
-	m_window->R()->update();
+	m_window->renderer()->resetAngles();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::screenshot()
@@ -106,7 +106,7 @@ void ViewToolset::screenshot()
 	setlocale (LC_ALL, "C");
 
 	int w, h;
-	uchar* imgdata = m_window->R()->getScreencap (w, h);
+	uchar* imgdata = m_window->renderer()->getScreencap (w, h);
 	QImage img = GetImageFromScreencap (imgdata, w, h);
 
 	QString root = Basename (currentDocument()->name());
@@ -128,7 +128,7 @@ void ViewToolset::axes()
 {
 	m_config->setDrawAxes (not m_config->drawAxes());
 	m_window->updateActions();
-	m_window->R()->update();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::visibilityToggle()
@@ -152,7 +152,7 @@ void ViewToolset::visibilityReveal()
 void ViewToolset::wireframe()
 {
 	m_config->setDrawWireframe (not m_config->drawWireframe());
-	m_window->R()->refresh();
+	m_window->renderer()->refresh();
 }
 
 void ViewToolset::setOverlay()
@@ -162,33 +162,33 @@ void ViewToolset::setOverlay()
 	if (not dlg.exec())
 		return;
 
-	m_window->R()->setupOverlay ((ECamera) dlg.camera(), dlg.fpath(), dlg.ofsx(),
+	m_window->renderer()->setupOverlay ((ECamera) dlg.camera(), dlg.fpath(), dlg.ofsx(),
 		dlg.ofsy(), dlg.lwidth(), dlg.lheight());
 }
 
 void ViewToolset::clearOverlay()
 {
-	m_window->R()->clearOverlay();
+	m_window->renderer()->clearOverlay();
 }
 
 void ViewToolset::drawAngles()
 {
 	m_config->setDrawAngles (not m_config->drawAngles());
-	m_window->R()->refresh();
+	m_window->renderer()->refresh();
 }
 
 void ViewToolset::setDrawDepth()
 {
-	if (m_window->R()->camera() == EFreeCamera)
+	if (m_window->renderer()->camera() == EFreeCamera)
 		return;
 
 	bool ok;
 	double depth = QInputDialog::getDouble (m_window, "Set Draw Depth",
-		format ("Depth value for %1 Camera:", m_window->R()->getCameraName()),
-		m_window->R()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
+		format ("Depth value for %1 Camera:", m_window->renderer()->getCameraName()),
+		m_window->renderer()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
 
 	if (ok)
-		m_window->R()->setDepthValue (depth);
+		m_window->renderer()->setDepthValue (depth);
 }
 
 #if 0
@@ -248,7 +248,7 @@ void ViewToolset::bfcView()
 		m_config->setRandomColors (false);
 
 	m_window->updateActions();
-	m_window->R()->refresh();
+	m_window->renderer()->refresh();
 }
 
 void ViewToolset::jumpTo()
@@ -279,7 +279,7 @@ void ViewToolset::randomColors()
 		m_config->setBfcRedGreenView (false);
 
 	m_window->updateActions();
-	m_window->R()->refresh();
+	m_window->renderer()->refresh();
 }
 
 void ViewToolset::drawSurfaces()

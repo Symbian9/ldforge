@@ -140,7 +140,7 @@ void LDDocument::openForEditing()
 
 		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be
 		// compiled.
-		m_window->R()->compiler()->compileDocument (this);
+		m_window->renderer()->compiler()->compileDocument (this);
 		m_window->updateDocumentList();
 	}
 }
@@ -412,7 +412,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 	if (g_loadingMainFile)
 	{
 		g_win->changeDocument (load);
-		g_win->R()->setDocument (load);
+		g_win->renderer()->setDocument (load);
 		print (QObject::tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
 	}
 
@@ -622,7 +622,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		{
 			QString newname = shortenName (path);
 			nameComment->setText (format ("Name: %1", newname));
-			m_window->buildObjList();
+			m_window->buildObjectList();
 		}
 	}
 
@@ -954,7 +954,7 @@ void LDDocument::reloadAllSubfiles()
 	m_needsReCache = true;
 
 	if (this == m_window->currentDocument())
-		m_window->buildObjList();
+		m_window->buildObjectList();
 }
 
 // =============================================================================
@@ -965,7 +965,7 @@ int LDDocument::addObject (LDObject* obj)
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
-	m_window->R()->compileObject (obj);
+	m_window->renderer()->compileObject (obj);
 	return getObjectCount() - 1;
 }
 
@@ -987,7 +987,7 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	history()->add (new AddHistory (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
-	m_window->R()->compileObject (obj);
+	m_window->renderer()->compileObject (obj);
 	
 
 #ifdef DEBUG
@@ -1065,7 +1065,7 @@ void LDDocument::setObject (int idx, LDObject* obj)
 	m_objects[idx]->setDocument (nullptr);
 	obj->setDocument (this);
 	addKnownVertices (obj);
-	m_window->R()->compileObject (obj);
+	m_window->renderer()->compileObject (obj);
 	m_objects[idx] = obj;
 	needVertexMerge();
 }
@@ -1234,7 +1234,7 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 	if (not obj->isSelected() and obj->document() == this)
 	{
 		m_sel << obj;
-		m_window->R()->compileObject (obj);
+		m_window->renderer()->compileObject (obj);
 		obj->setSelected (true);
 	}
 }
@@ -1246,7 +1246,7 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 	if (obj->isSelected() and obj->document() == this)
 	{
 		m_sel.removeOne (obj);
-		m_window->R()->compileObject (obj);
+		m_window->renderer()->compileObject (obj);
 		obj->setSelected (false);
 	}
 }
@@ -1257,7 +1257,7 @@ void LDDocument::clearSelection()
 {
 	for (LDObject* obj : m_sel)
 	{
-		m_window->R()->compileObject (obj);
+		m_window->renderer()->compileObject (obj);
 		obj->setSelected (false);
 	}
 

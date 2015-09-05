@@ -304,7 +304,7 @@ void LDObject::destroy()
 
 		// Delete the GL lists
 		if (g_win != null)
-			g_win->R()->forgetObject (this);
+			g_win->renderer()->forgetObject (this);
 
 		// Remove this object from the list of LDObjects
 		g_allObjects.erase (g_allObjects.find (id()));
@@ -475,7 +475,7 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 	// The objects need to be recompiled, otherwise their pick lists are left with
 	// the wrong index colors which messes up selection.
 	for (LDObject* obj : objsToCompile)
-		g_win->R()->compileObject (obj);
+		g_win->renderer()->compileObject (obj);
 }
 
 // =============================================================================
@@ -786,7 +786,7 @@ static void changeProperty (LDObject* obj, T* ptr, const T& val)
 		if (before != after)
 		{
 			obj->document()->addToHistory (new EditHistory (idx, before, after));
-			g_win->R()->compileObject (obj);
+			g_win->renderer()->compileObject (obj);
 			g_win->currentDocument()->redoVertices();
 		}
 	}

@@ -60,7 +60,7 @@ OverlayDialog::OverlayDialog (QWidget* parent, Qt::WindowFlags f) : QDialog (par
 		{ ui->right,  ERightCamera }
 	};
 
-	ECamera cam = g_win->R()->camera();
+	ECamera cam = g_win->renderer()->camera();
 
 	if (cam == EFreeCamera)
 		cam = ETopCamera;
@@ -85,7 +85,7 @@ OverlayDialog::~OverlayDialog()
 // =============================================================================
 void OverlayDialog::fillDefaults (int newcam)
 {
-	LDGLOverlay& info = g_win->R()->getOverlay (newcam);
+	LDGLOverlay& info = g_win->renderer()->getOverlay (newcam);
 	RadioDefault<int> (newcam, m_cameraArgs);
 
 	if (info.img != null)

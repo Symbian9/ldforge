@@ -84,10 +84,10 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 	// Stuff the renderer into its frame
 	QVBoxLayout* rendererLayout = new QVBoxLayout (ui.rendererFrame);
-	rendererLayout->addWidget (R());
+	rendererLayout->addWidget (renderer());
 
-	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_selectionChanged()));
-	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (slot_editObject (QListWidgetItem*)));
+	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (selectionChanged()));
+	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (objectListDoubleClicked (QListWidgetItem*)));
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
@@ -97,7 +97,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		updatePrimitives();
 
 	m_msglog = new MessageManager;
-	m_msglog->setRenderer (R());
+	m_msglog->setRenderer (renderer());
 	m_renderer->setMessageLog (m_msglog);
 	m_quickColors = LoadQuickColorList();
 	setStatusBar (new QStatusBar);
@@ -106,7 +106,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	// Connect all actions and save default sequences
 	applyToActions ([&](QAction* act)
 	{
-		connect (act, SIGNAL (triggered()), this, SLOT (slot_action()));
+		connect (act, SIGNAL (triggered()), this, SLOT (actionTriggered()));
 		g_defaultShortcuts[act] = act->shortcut();
 	});
 
@@ -117,7 +117,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	updateTitle();
 	loadShortcuts();
 	setMinimumSize (300, 200);
-	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (slot_lastSecondCleanup()));
+	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (doLastSecondCleanup()));
 	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
 	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)),
 		this, SLOT (circleToolSegmentsChanged()));
@@ -188,7 +188,7 @@ MainWindow::~MainWindow()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_action()
+void MainWindow::actionTriggered()
 {
 	// Get the name of the sender object and use it to compose the slot name,
 	// then invoke this slot to call the action.
@@ -219,7 +219,7 @@ void MainWindow::endAction()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_lastSecondCleanup()
+void MainWindow::doLastSecondCleanup()
 {
 	delete m_renderer;
 	delete &ui;
@@ -242,7 +242,7 @@ void MainWindow::updateRecentFilesMenu()
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
 
-		connect (recent, SIGNAL (triggered()), this, SLOT (slot_recentFile()));
+		connect (recent, SIGNAL (triggered()), this, SLOT (recentFileClicked()));
 		ui.menuOpenRecent->insertAction (first, recent);
 		m_recentFiles << recent;
 		first = recent;
@@ -293,7 +293,7 @@ void MainWindow::updateColorToolbar()
 			colorButton->setIconSize (QSize (16, 16));
 			colorButton->setToolTip (entry.color().name());
 
-			connect (colorButton, SIGNAL (clicked()), this, SLOT (slot_quickColor()));
+			connect (colorButton, SIGNAL (clicked()), this, SLOT (quickColorClicked()));
 			ui.toolBarColors->addWidget (colorButton);
 			m_colorButtons << colorButton;
 
@@ -370,7 +370,7 @@ int MainWindow::deleteSelection()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::buildObjList()
+void MainWindow::buildObjectList()
 {
 	if (not m_currentDocument)
 		return;
@@ -499,18 +499,20 @@ void MainWindow::buildObjList()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+// Scrolls the object list so that it points to the first selected object.
+//
 void MainWindow::scrollToSelection()
 {
 	if (selectedObjects().isEmpty())
 		return;
 
-	LDObject* obj = selectedObjects().last();
+	LDObject* obj = selectedObjects().first();
 	ui.objectList->scrollToItem (obj->qObjListEntry);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_selectionChanged()
+void MainWindow::selectionChanged()
 {
 	if (g_isSelectionLocked == true or m_currentDocument == null)
 		return;
@@ -542,14 +544,14 @@ void MainWindow::slot_selectionChanged()
 	removeDuplicates (compound);
 
 	for (LDObject* obj : compound)
-		R()->compileObject (obj);
+		renderer()->compileObject (obj);
 
-	R()->update();
+	renderer()->update();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_recentFile()
+void MainWindow::recentFileClicked()
 {
 	QAction* qAct = static_cast<QAction*> (sender());
 	OpenMainModel (qAct->text());
@@ -557,7 +559,7 @@ void MainWindow::slot_recentFile()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_quickColor()
+void MainWindow::quickColorClicked()
 {
 	QToolButton* button = static_cast<QToolButton*> (sender());
 	LDColor color = LDColor::nullColor();
@@ -580,7 +582,7 @@ void MainWindow::slot_quickColor()
 			continue; // uncolored object
 
 		obj->setColor (color);
-		R()->compileObject (obj);
+		renderer()->compileObject (obj);
 	}
 
 	endAction();
@@ -589,7 +591,9 @@ void MainWindow::slot_quickColor()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-int MainWindow::getInsertionPoint()
+// Returns the suggested position to place a new object at.
+//
+int MainWindow::suggestInsertPoint()
 {
 	// If we have a selection, put the item after it.
 	if (not selectedObjects().isEmpty())
@@ -603,15 +607,17 @@ int MainWindow::getInsertionPoint()
 //
 void MainWindow::doFullRefresh()
 {
-	buildObjList();
+	buildObjectList();
 	m_renderer->hardRefresh();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+// Builds the object list and tells the GL renderer to do a soft update.
+//
 void MainWindow::refresh()
 {
-	buildObjList();
+	buildObjectList();
 	m_renderer->update();
 }
 
@@ -660,7 +666,9 @@ void MainWindow::updateSelection()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-LDColor MainWindow::getSelectedColor()
+// Returns the uniform selected color (i.e. 4 if everything selected is red), -1 if there is no such consensus.
+//
+LDColor MainWindow::getUniformSelectedColor()
 {
 	LDColor result;
 
@@ -762,7 +770,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
-	if (R()->camera() != EFreeCamera)
+	if (renderer()->camera() != EFreeCamera)
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui.actionSetDrawDepth);
@@ -793,7 +801,7 @@ void MainWindow::deleteByColor (LDColor color)
 //
 void MainWindow::updateEditModeActions()
 {
-	const EditModeType mode = R()->currentEditModeType();
+	const EditModeType mode = renderer()->currentEditModeType();
 	ui.actionModeSelect->setChecked (mode == EditModeType::Select);
 	ui.actionModeDraw->setChecked (mode == EditModeType::Draw);
 	ui.actionModeRectangle->setChecked (mode == EditModeType::Rectangle);
@@ -804,7 +812,7 @@ void MainWindow::updateEditModeActions()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::slot_editObject (QListWidgetItem* listitem)
+void MainWindow::objectListDoubleClicked (QListWidgetItem* listitem)
 {
 	for (LDObject* it : m_currentDocument->objects())
 	{
@@ -876,6 +884,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 	return false;
 }
 
+// Adds a message to the renderer's message manager.
 void MainWindow::addMessage (QString msg)
 {
 	m_msglog->addLine (msg);
@@ -942,6 +951,8 @@ void MainWindow::updateDocumentList()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+// Update the given document's tab. If no such tab exists, the document list is rebuilt.
+//
 void MainWindow::updateDocumentListItem (LDDocument* doc)
 {
 	bool oldUpdatingTabs = m_updatingTabs;
@@ -997,6 +1008,8 @@ void MainWindow::tabSelected()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+// Updates the object list. Right now this just rebuilds it.
+//
 void MainWindow::refreshObjectList()
 {
 #if 0
@@ -1008,10 +1021,13 @@ for (LDObject* obj : *f)
 
 #endif
 
-	buildObjList();
+	buildObjectList();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+//
+// Updates various actions, undo/redo are set enabled/disabled where appropriate, togglable actions are updated based
+// on configuration, etc.
 //
 void MainWindow::updateActions()
 {
@@ -1031,6 +1047,21 @@ void MainWindow::updateActions()
 	ui.actionDrawSurfaces->setChecked (m_configOptions.drawSurfaces());
 	ui.actionDrawEdgeLines->setChecked (m_configOptions.drawEdgeLines());
 	ui.actionDrawConditionalLines->setChecked (m_configOptions.drawConditionalLines());
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+GLRenderer* MainWindow::renderer()
+{
+	return m_renderer;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+void MainWindow::setQuickColors (const QList<LDQuickColor>& colors)
+{
+	m_quickColors = colors;
+	updateColorToolbar();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1223,7 +1254,7 @@ void MainWindow::changeDocument (LDDocument* document)
 	{
 		// A ton of stuff needs to be updated
 		updateDocumentListItem (document);
-		buildObjList();
+		buildObjectList();
 		updateTitle();
 		m_renderer->setDocument (document);
 		m_renderer->compiler()->needMerge();
@@ -1274,6 +1305,16 @@ void MainWindow::currentDocumentClosed()
 		// Failed to change to a suitable document, open a new one.
 		createBlankDocument();
 	}
+}
+
+ExtProgramToolset* MainWindow::externalPrograms()
+{
+	return m_externalPrograms;
+}
+
+GuiUtilities* MainWindow::guiUtilities()
+{
+	return m_guiUtilities;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

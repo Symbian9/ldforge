@@ -50,20 +50,16 @@ public:
 	static LDQuickColor getSeparator();
 };
 
-//
 // Object list class for MainWindow
-//
 class ObjectList : public QListWidget
 {
 	Q_OBJECT
 
-	protected:
-		void contextMenuEvent (QContextMenuEvent* ev);
+protected:
+	void contextMenuEvent (QContextMenuEvent* ev);
 };
 
-//
 // LDForge's main GUI class.
-//
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -72,127 +68,60 @@ public:
 	explicit MainWindow (QWidget* parent = null, Qt::WindowFlags flags = 0);
 	~MainWindow();
 
-	// Rebuilds the object list.
-	void buildObjList();
-
-	// Updates the window title.
-	void updateTitle();
-
-	// Builds the object list and tells the GL renderer to init a full
-	// refresh.
-	void doFullRefresh();
-
-	// Builds the object list and tells the GL renderer to do a soft update.
-	void refresh();
-
-	// Returns the suggested position to place a new object at.
-	int getInsertionPoint();
-
-	// Updates the quick color toolbar
-	void updateColorToolbar();
-
-	// Rebuilds the recent files submenu
-	void updateRecentFilesMenu();
-
-	// Sets the selection based on what's selected in the object list.
-	void updateSelection();
-
-	// Updates the grids, selects the selected grid and deselects others.
-	void updateGridToolBar();
-
-	// Updates the edit modes, current one is selected and others are deselected.
-	void updateEditModeActions();
-
-	// Rebuilds the document tab list.
-	void updateDocumentList();
-
-	// Updates the document tab for \c doc. If no such tab exists, the
-	// document list is rebuilt instead.
-	void updateDocumentListItem (LDDocument* doc);
-
-	// Returns the uniform selected color (i.e. 4 if everything selected is
-	// red), -1 if there is no such consensus.
-	LDColor getSelectedColor();
-
-	// Automatically scrolls the object list so that it points to the first
-	// selected object.
-	void scrollToSelection();
-
-	// Spawns the context menu at the given position.
-	void spawnContextMenu (const QPoint pos);
-
-	// Deletes all selected objects, returns the count of deleted objects.
-	int deleteSelection();
-
-	// Deletes all objects by the given color number.
-	void deleteByColor (LDColor color);
-
-	// Tries to save the given document.
-	bool save (LDDocument* doc, bool saveAs);
-
-	// Updates various actions, undo/redo are set enabled/disabled where
-	// appropriate, togglable actions are updated based on configuration,
-	// etc.
-	void updateActions();
-
-	// Returns a pointer to the renderer
-	inline GLRenderer* R()
-	{
-		return m_renderer;
-	}
-
-	// Sets the quick color list to the given list of colors.
-	inline void setQuickColors (const QList<LDQuickColor>& colors)
-	{
-		m_quickColors = colors;
-		updateColorToolbar();
-	}
-
-	// Adds a message to the renderer's message manager.
 	void addMessage (QString msg);
-
-	// Updates the object list. Right now this just rebuilds it.
-	void refreshObjectList();
-	void endAction();
-	QTreeWidget* getPrimitivesTree() const;
-	static QKeySequence defaultShortcut (QAction* act);
-	void loadShortcuts();
-	void saveShortcuts();
-	void applyToActions (std::function<void(QAction*)> function);
-
-	bool ringToolHiRes() const;
-	int ringToolSegments() const;
-	ConfigurationValueBag* configBag() { return &m_configOptions; }
-	class QSettings* makeSettings (QObject* parent = nullptr);
-	void syncSettings();
-	QVariant getConfigValue (QString name);
-	class QSettings* getSettings() { return m_settings; }
-	void createBlankDocument();
-	LDDocument* newDocument (bool cache = false);
 	const QList<LDDocument*>& allDocuments();
-	LDDocument* currentDocument();
+	void applyToActions (std::function<void(QAction*)> function);
+	void buildObjectList();
 	void changeDocument (LDDocument* f);
 	void closeInitialDocument();
-	const LDObjectList& selectedObjects();
+	ConfigurationValueBag* configBag() { return &m_configOptions; }
+	void createBlankDocument();
+	LDDocument* currentDocument();
 	void currentDocumentClosed();
-
-	class ExtProgramToolset* externalPrograms()
-	{
-		return m_externalPrograms;
-	}
-
-	class GuiUtilities* guiUtilities()
-	{
-		return m_guiUtilities;
-	}
+	static QKeySequence defaultShortcut (QAction* act);
+	void deleteByColor (LDColor color);
+	int deleteSelection();
+	void doFullRefresh();
+	void endAction();
+	class ExtProgramToolset* externalPrograms();
+	QVariant getConfigValue (QString name);
+	QTreeWidget* getPrimitivesTree() const;
+	class QSettings* getSettings() { return m_settings; }
+	LDColor getUniformSelectedColor();
+	class GuiUtilities* guiUtilities();
+	void loadShortcuts();
+	class QSettings* makeSettings (QObject* parent = nullptr);
+	LDDocument* newDocument (bool cache = false);
+	GLRenderer* renderer();
+	void refresh();
+	void refreshObjectList();
+	bool ringToolHiRes() const;
+	int ringToolSegments() const;
+	bool save (LDDocument* doc, bool saveAs);
+	void saveShortcuts();
+	void scrollToSelection();
+	const LDObjectList& selectedObjects();
+	void setQuickColors (const QList<LDQuickColor>& colors);
+	void spawnContextMenu (const QPoint pos);
+	int suggestInsertPoint();
+	void syncSettings();
+	void updateActions();
+	void updateColorToolbar();
+	void updateDocumentList();
+	void updateDocumentListItem (LDDocument* doc);
+	void updateEditModeActions();
+	void updateGridToolBar();
+	void updateRecentFilesMenu();
+	void updateSelection();
+	void updateTitle();
 
 public slots:
-	void updatePrimitives();
-	void tabSelected();
+	void actionTriggered();
+	void circleToolSegmentsChanged();
 	void closeTab (int tabindex);
 	void ringToolHiResClicked (bool clicked);
-	void circleToolSegmentsChanged();
-	void slot_action();
+	void tabSelected();
+	void updatePrimitives();
 
 protected:
 	void closeEvent (QCloseEvent* ev);
@@ -202,16 +131,16 @@ private:
 
 	ConfigurationValueBag m_configOptions;
 	class GuiUtilities* m_guiUtilities;
-	GLRenderer*			m_renderer;
-	LDObjectList		m_sel;
+	GLRenderer* m_renderer;
+	LDObjectList m_sel;
 	QList<LDQuickColor>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
-	QList<QAction*>		m_recentFiles;
-	MessageManager*		m_msglog;
+	QList<QAction*> m_recentFiles;
+	MessageManager* m_msglog;
 	class Ui_MainWindow& ui;
-	QTabBar*			m_tabs;
-	bool				m_updatingTabs;
-	QVector<Toolset*>	m_toolsets;
+	QTabBar* m_tabs;
+	bool m_updatingTabs;
+	QVector<Toolset*> m_toolsets;
 	QMap<QAction*, ToolInfo> m_toolmap;
 	class ExtProgramToolset* m_externalPrograms;
 	class QSettings* m_settings;
@@ -219,44 +148,39 @@ private:
 	LDDocument* m_currentDocument;
 
 private slots:
-	void slot_selectionChanged();
-	void slot_recentFile();
-	void slot_quickColor();
-	void slot_lastSecondCleanup();
-	void slot_editObject (QListWidgetItem* listitem);
+	void selectionChanged();
+	void recentFileClicked();
+	void quickColorClicked();
+	void doLastSecondCleanup();
+	void objectListDoubleClicked (QListWidgetItem* listitem);
 };
 
-//! Pointer to the instance of MainWindow.
+// Pointer to the instance of MainWindow.
+// TODO: it's going out, slowly but surely.
 extern MainWindow* g_win;
 
-//! Get an icon by name from the resources directory.
+// Get an icon by name from the resources directory.
 QPixmap GetIcon (QString iconName);
 
-//! \returns a list of quick colors based on the configuration entry.
+// Returns a list of quick colors based on the configuration entry.
 QList<LDQuickColor> LoadQuickColorList();
 
-//! Asks the user a yes/no question with the given \c message and the given
-//! window \c title.
-//! \returns true if the user answered yes, false if no.
+// Asks the user a yes/no question with the given message and the given window title.
+// Returns true if the user answered yes, false if no.
 bool Confirm (const QString& title, const QString& message); // Generic confirm prompt
 
-//! An overload of \c confirm(), this asks the user a yes/no question with the
-//! given \c message.
-//! \returns true if the user answered yes, false if no.
+// An overload of confirm(), this asks the user a yes/no question with the given message.
+// Returns true if the user answered yes, false if no.
 bool Confirm (const QString& message);
 
-//! Displays an error prompt with the given \c message
+// Displays an error prompt with the given message
 void Critical (const QString& message);
 
-//! \returns a QImage from the given raw GL \c data
+// Returns a QImage from the given raw GL data
 QImage GetImageFromScreencap (uchar* data, int w, int h);
 
-//!
-//! Takes in pairs of radio buttons and respective values and finds the first
-//! selected one.
-//! \returns returns the value of the first found radio button that was checked
-//! \returns by the user.
-//!
+// Takes in pairs of radio buttons and respective values and finds the first selected one.
+// Returns returns the value of the first found radio button that was checked by the user.
 template<class T>
 T RadioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
 {
@@ -269,10 +193,8 @@ T RadioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
 	return defval;
 }
 
-//!
-//! Takes in pairs of radio buttons and respective values and checks the first
-//! found radio button whose respsective value matches \c expr have the given value.
-//!
+// Takes in pairs of radio buttons and respective values and checks the first found radio button whose respsective value
+// matches expr have the given value.
 template<class T>
 void RadioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
 {

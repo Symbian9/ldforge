@@ -326,7 +326,7 @@ void PartDownloader::checkIfFinished()
 	{
 		g_win->changeDocument (primaryFile());
 		g_win->doFullRefresh();
-		g_win->R()->resetAngles();
+		g_win->renderer()->resetAngles();
 	}
 
 	for (LDDocument* f : m_files)
