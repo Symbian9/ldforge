@@ -30,6 +30,7 @@
 #include "glCompiler.h"
 #include "partDownloader.h"
 #include "ldpaths.h"
+#include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
 
 ConfigOption (QStringList RecentFiles)
@@ -37,7 +38,6 @@ ConfigOption (bool TryDownloadMissingFiles = false)
 
 static bool g_loadingMainFile = false;
 enum { MAX_RECENT_FILES = 10 };
-static bool g_aborted = false;
 static LDDocument* g_logoedStud;
 static LDDocument* g_logoedStud2;
 static bool g_loadingLogoedStuds = false;
@@ -329,140 +329,15 @@ QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
 
 // =============================================================================
 //
-void LDFileLoader::start()
-{
-	setDone (false);
-	setProgress (0);
-	setAborted (false);
-
-	if (isOnForeground())
-	{
-		g_aborted = false;
-
-		// Show a progress dialog if we're loading the main ldDocument.here so we can
-		// show progress updates and keep the WM posted that we're still here.
-		// Of course we cannot exec() the dialog because then the dialog would
-		// block.
-		dlg = new OpenProgressDialog (g_win);
-		dlg->setNumLines (lines().size());
-		dlg->setModal (true);
-		dlg->show();
-
-		// Connect the loader in so we can show updates
-		connect (this, SIGNAL (workDone()), dlg, SLOT (accept()));
-		connect (dlg, SIGNAL (rejected()), this, SLOT (abort()));
-	}
-	else
-		dlg = null;
-
-	// Begin working
-	work (0);
-}
-
-// =============================================================================
-//
-void LDFileLoader::work (int i)
-{
-	// User wishes to abort, so stop here now.
-	if (isAborted())
-	{
-		for (LDObject* obj : m_objects)
-			obj->destroy();
-
-		m_objects.clear();
-		setDone (true);
-		return;
-	}
-
-	// Parse up to 300 lines per iteration
-	int max = i + 300;
-
-	for (; i < max and i < (int) lines().size(); ++i)
-	{
-		QString line = lines()[i];
-
-		// Trim the trailing newline
-		QChar c;
-
-		while (line.endsWith ("\n") or line.endsWith ("\r"))
-			line.chop (1);
-
-		LDObject* obj = ParseLine (line);
-
-		// Check for parse errors and warn about tthem
-		if (obj->type() == OBJ_Error)
-		{
-			print ("Couldn't parse line #%1: %2",
-				progress() + 1, static_cast<LDError*> (obj)->reason());
-
-			if (warnings() != null)
-				(*warnings())++;
-		}
-
-		m_objects << obj;
-		setProgress (i);
-
-		// If we have a dialog pointer, update the progress now
-		if (dlg)
-			dlg->setProgress (i);
-	}
-
-	// If we're done now, tell the environment we're done and stop.
-	if (i >= ((int) lines().size()) - 1)
-	{
-		emit workDone();
-		setDone (true);
-		return;
-	}
-
-	// Otherwise, continue, by recursing back.
-	if (not isDone())
-	{
-		// If we have a dialog to show progress output to, we cannot just call
-		// work() again immediately as the dialog needs some processor cycles as
-		// well. Thus, take a detour through the event loop by using the
-		// meta-object system.
-		//
-		// This terminates the loop here and control goes back to the function
-		// which called the file loader. It will keep processing the event loop
-		// until we're ready (see loadFileContents), thus the event loop will
-		// eventually catch the invokation we throw here and send us back. Though
-		// it's not technically recursion anymore, more like a for loop. :P
-		if (isOnForeground())
-			QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection, Q_ARG (int, i));
-		else
-			work (i);
-	}
-}
-
-// =============================================================================
-//
-void LDFileLoader::abort()
-{
-	setAborted (true);
-
-	if (isOnForeground())
-		g_aborted = true;
-}
-
-// =============================================================================
-//
 LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 {
-	QStringList lines;
 	LDObjectList objs;
 
 	if (numWarnings)
 		*numWarnings = 0;
 
-	// Read in the lines
-	while (not fp->atEnd())
-		lines << QString::fromUtf8 (fp->readLine());
-
-	LDFileLoader* loader = new LDFileLoader;
-	loader->setWarnings (numWarnings);
-	loader->setLines (lines);
-	loader->setOnForeground (g_loadingMainFile);
+	DocumentLoader* loader = new DocumentLoader (g_loadingMainFile);
+	loader->read (fp);
 	loader->start();
 
 	// After start() returns, if the loader isn't done yet, it's delaying
@@ -474,7 +349,7 @@ LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 
 	// If we wanted the success value, supply that now
 	if (ok)
-		*ok = not loader->isAborted();
+		*ok = not loader->hasAborted();
 
 	objs = loader->objects();
 	delete loader;
@@ -483,7 +358,7 @@ LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
 
 // =============================================================================
 //
-LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride)
+LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride, bool* aborted)
 {
 	// Convert the file name to lowercase when searching because some parts contain subfile
 	// subfile references with uppercase file names. I'll assume here that the library will always
@@ -522,6 +397,9 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 	LDObjectList objs = LoadFileContents (fp, &numWarnings, &ok);
 	fp->close();
 	fp->deleteLater();
+
+	if (aborted)
+		*aborted = ok == false;
 
 	if (not ok)
 	{
@@ -669,11 +547,12 @@ void OpenMainModel (QString path)
 		file->clear();
 	}
 
-	file = OpenDocument (path, false, false, file);
+	bool aborted;
+	file = OpenDocument (path, false, false, file, &aborted);
 
 	if (file == null)
 	{
-		if (not g_aborted)
+		if (not aborted)
 		{
 			// Tell the user loading failed.
 			setlocale (LC_ALL, "C");

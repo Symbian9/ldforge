@@ -38,6 +38,7 @@ set (LDFORGE_SOURCES
 	src/crashCatcher.cpp
 	src/dialogs.cpp
 	src/documentation.cpp
+	src/documentloader.cpp
 	src/editHistory.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
@@ -103,6 +104,7 @@ set (LDFORGE_HEADERS
 	src/ldpaths.h
 	src/hierarchyelement.h
 	src/guiutilities.h
+	src/documentloader.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
 	src/dialogs/ldrawpathdialog.h

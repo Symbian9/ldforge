@@ -127,7 +127,7 @@ LDDocument* FindDocument (QString name);
 
 // Opens the given file and parses the LDraw code within. Returns a pointer
 // to the opened file or null on error.
-LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr);
+LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr, bool* aborted = nullptr);
 
 // Opens the given file and returns a pointer to it, potentially looking in /parts and /p
 QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
@@ -152,37 +152,3 @@ void AddRecentFile (QString path);
 void LoadLogoStuds();
 QString Basename (QString path);
 QString Dirname (QString path);
-
-// =============================================================================
-//
-// LDFileLoader
-//
-// Loads the given file and parses it to LDObjects using parseLine. It's a
-// separate class so as to be able to do the work progressively through the
-// event loop, allowing the program to maintain responsivity during loading.
-//
-class LDFileLoader : public QObject
-{
-	Q_OBJECT
-	PROPERTY (private,	LDObjectList,	objects,		setObjects,			STOCK_WRITE)
-	PROPERTY (private,	bool,			isDone,			setDone,			STOCK_WRITE)
-	PROPERTY (private,	int,			progress,		setProgress,		STOCK_WRITE)
-	PROPERTY (private,	bool,			isAborted,		setAborted,			STOCK_WRITE)
-	PROPERTY (public,	QStringList,	lines,			setLines,			STOCK_WRITE)
-	PROPERTY (public,	int*,			warnings,		setWarnings,		STOCK_WRITE)
-	PROPERTY (public,	bool,			isOnForeground,	setOnForeground,	STOCK_WRITE)
-
-	public slots:
-		void start();
-		void abort();
-
-	private:
-		OpenProgressDialog* dlg;
-
-	private slots:
-		void work (int i);
-
-	signals:
-		void progressUpdate (int progress);
-		void workDone();
-};
