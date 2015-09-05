@@ -293,8 +293,6 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 //
 void LDObject::destroy()
 {
-	print ("Destroying %1\n", this);
-
 	// Don't bother during program termination (FIXME)
 	if (IsExiting() == false)
 	{
@@ -882,7 +880,7 @@ void LDSubfile::setFileInfo (LDDocument* const& a)
 	// explicit file), we need to pre-compile the GL polygons for the document
 	// if they don't exist already.
 	if (a != null and
-		a->isImplicit() == false and
+		a->isCache() == false and
 		a->polygonData().isEmpty())
 	{
 		a->initializeCachedData();

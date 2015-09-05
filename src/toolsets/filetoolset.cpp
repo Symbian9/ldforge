@@ -81,7 +81,7 @@ void FileToolset::close()
 	if (not currentDocument()->isSafeToClose())
 		return;
 
-	currentDocument()->dismiss();
+	currentDocument()->close();
 }
 
 void FileToolset::closeAll()
@@ -181,10 +181,8 @@ void FileToolset::openSubfiles()
 	{
 		LDSubfile* ref = dynamic_cast<LDSubfile*> (obj);
 
-		if (ref == null or not ref->fileInfo()->isImplicit())
-			continue;
-
-		ref->fileInfo()->setImplicit (false);
+		if (ref and ref->fileInfo()->isCache())
+			ref->fileInfo()->openForEditing();
 	}
 }
 
@@ -211,7 +209,7 @@ void FileToolset::makePrimitive()
 		dlg->ui->rb_ring->isChecked()     ? Ring : Cone;
 
 	LDDocument* f = GeneratePrimitive (type, segs, divs, num);
-	f->setImplicit (false);
+	f->openForEditing();
 	m_window->save (f, false);
 }
 

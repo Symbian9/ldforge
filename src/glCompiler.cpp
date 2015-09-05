@@ -316,7 +316,7 @@ void GLCompiler::compileObject (LDObject* obj)
 {
 //	print ("Compile %1\n", g_objectOrigins[obj]);
 
-	if (obj == null or obj->document() == null or obj->document()->isImplicit())
+	if (obj == null or obj->document() == null or obj->document()->isCache())
 		return;
 
 	ObjectVBOInfo info;

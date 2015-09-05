@@ -271,7 +271,7 @@ inline ECamera GLRenderer::camera() const
 
 inline LDGLData& GLRenderer::currentDocumentData() const
 {
-	return *document()->getGLData();
+	return *document()->glData();
 }
 
 inline double& GLRenderer::rot (Axis ax)

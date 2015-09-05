@@ -637,7 +637,7 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 		 << LDSpawn<LDBFC> (BFCStatement::CertifyCCW)
 		 << LDSpawn<LDEmpty>();
 
-	document->setImplicit (false);
+	document->openForEditing();
 	document->history()->setIgnoring (false);
 	document->addObjects (objs);
 	document->addObjects (MakePrimitive (type, segs, divs, num));

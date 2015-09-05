@@ -536,7 +536,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// Create the new subfile document
 	LDDocument* doc = m_window->newDocument();
-	doc->setImplicit (false);
+	doc->openForEditing();
 	doc->setFullPath (fullsubname);
 	doc->setName (LDDocument::shortenName (fullsubname));
 
@@ -585,6 +585,6 @@ void AlgorithmToolset::subfileSelection()
 	else
 	{
 		// Failed to save.
-		doc->dismiss();
+		doc->close();
 	}
 }

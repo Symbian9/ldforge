@@ -41,19 +41,16 @@ static bool g_aborted = false;
 static LDDocument* g_logoedStud;
 static LDDocument* g_logoedStud2;
 static bool g_loadingLogoedStuds = false;
-
 const QStringList g_specialSubdirectories ({ "s", "48", "8" });
 
-// =============================================================================
-//
 LDDocument::LDDocument (QObject* parent) :
 	QObject (parent),
 	HierarchyElement (parent),
 	m_history (new History),
-	m_isImplicit (true),
-	m_flags (0),
+	m_isCache (true),
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
+	m_beingDestroyed (false),
 	m_gldata (new LDGLData)
 {
 	setSavePosition (-1);
@@ -62,42 +59,139 @@ LDDocument::LDDocument (QObject* parent) :
 	m_needsReCache = true;
 }
 
-// =============================================================================
-//
 LDDocument::~LDDocument()
 {
-	m_flags |= DOCF_IsBeingDestroyed;
+	m_beingDestroyed = true;
 	delete m_history;
 	delete m_gldata;
 }
 
-// =============================================================================
-//
-void LDDocument::setImplicit (bool const& a)
+QString LDDocument::name() const
 {
-	if (m_isImplicit != a)
+	return m_name;
+}
+
+void LDDocument::setName (QString value)
+{
+	m_name = value;
+}
+
+const LDObjectList& LDDocument::objects() const
+{
+	return m_objects;
+}
+
+History* LDDocument::history() const
+{
+	return m_history;
+}
+
+QString LDDocument::fullPath()
+{
+	return m_fullPath;
+}
+
+void LDDocument::setFullPath (QString value)
+{
+	m_fullPath = value;
+}
+
+int LDDocument::tabIndex() const
+{
+	return m_tabIndex;
+}
+
+void LDDocument::setTabIndex (int value)
+{
+	m_tabIndex = value;
+}
+
+const QList<LDPolygon>& LDDocument::polygonData() const
+{
+	return m_polygonData;
+}
+
+long LDDocument::savePosition() const
+{
+	return m_savePosition;
+}
+
+void LDDocument::setSavePosition (long value)
+{
+	m_savePosition = value;
+}
+
+QString LDDocument::defaultName() const
+{
+	return m_defaultName;
+}
+
+void LDDocument::setDefaultName (QString value)
+{
+	m_defaultName = value;
+}
+
+void LDDocument::openForEditing()
+{
+	if (m_isCache)
 	{
-		m_isImplicit = a;
+		m_isCache = false;
+		print ("Opened %1", name());
 
-		if (a == false)
-		{
-			print ("Opened %1", name());
+		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be
+		// compiled.
+		m_window->R()->compiler()->compileDocument (this);
+		m_window->updateDocumentList();
+	}
+}
 
-			// Implicit files are not compiled by the GL renderer. Now that this
-			// part is no longer implicit, it needs to be compiled.
-			m_window->R()->compiler()->compileDocument (this);
-		}
-		else
-		{
-			print ("Closed %1", name());
-		}
+bool LDDocument::isCache() const
+{
+	return m_isCache;
+}
 
+void LDDocument::addHistoryStep()
+{
+	history()->addStep();
+}
+
+void LDDocument::undo()
+{
+	history()->undo();
+}
+
+void LDDocument::redo()
+{
+	history()->redo();
+}
+
+void LDDocument::clearHistory()
+{
+	history()->clear();
+}
+
+void LDDocument::addToHistory (AbstractHistoryEntry* entry)
+{
+	*history() << entry;
+}
+
+void LDDocument::close()
+{
+	if (not isCache())
+	{
+		m_isCache = true;
+		print ("Closed %1", name());
 		m_window->updateDocumentList();
 
 		// If the current document just became implicit (i.e. user closed it), we need to get a new one to show.
-		if (currentDocument() == this and a)
+		if (currentDocument() == this)
 			m_window->currentDocumentClosed();
 	}
+}
+
+LDGLData* LDDocument::glData()
+{
+	return m_gldata;
 }
 
 // =============================================================================
@@ -431,7 +525,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 
 	if (not ok)
 	{
-		load->dismiss();
+		load->close();
 		return nullptr;
 	}
 
@@ -449,6 +543,8 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 }
 
 // =============================================================================
+//
+// Performs safety checks. Do this before closing any files!
 //
 bool LDDocument::isSafeToClose()
 {
@@ -509,7 +605,7 @@ bool LDDocument::isSafeToClose()
 void CloseAllDocuments()
 {
 	for (LDDocument* file : g_win->allDocuments())
-		file->dismiss();
+		file->close();
 }
 
 // =============================================================================
@@ -588,7 +684,7 @@ void OpenMainModel (QString path)
 		return;
 	}
 
-	file->setImplicit (false);
+	file->openForEditing();
 	g_win->closeInitialDocument();
 	g_win->changeDocument (file);
 	g_win->doFullRefresh();
@@ -630,7 +726,7 @@ void OpenMainModel (QString path)
 //
 bool LDDocument::save (QString path, int64* sizeptr)
 {
-	if (isImplicit())
+	if (isCache())
 		return false;
 
 	if (not path.length())
@@ -1016,7 +1112,7 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	
 
 #ifdef DEBUG
-	if (not isImplicit())
+	if (not isCache())
 		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
 #endif
 }
@@ -1046,7 +1142,7 @@ void LDDocument::forgetObject (LDObject* obj)
 	{
 		obj->deselect();
 
-		if (not isImplicit() and not (flags() & DOCF_IsBeingDestroyed))
+		if (not isCache() and not m_beingDestroyed)
 		{
 			history()->add (new DelHistory (idx, obj));
 			m_objectVertices.remove (obj);
@@ -1116,7 +1212,7 @@ int LDDocument::getObjectCount() const
 //
 bool LDDocument::hasUnsavedChanges() const
 {
-	return not isImplicit() and history()->position() != savePosition();
+	return not isCache() and history()->position() != savePosition();
 }
 
 // =============================================================================

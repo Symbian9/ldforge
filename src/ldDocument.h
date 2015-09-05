@@ -29,17 +29,6 @@ struct LDGLData;
 class GLCompiler;
 
 //
-// Flags for LDDocument
-//
-enum LDDocumentFlag
-{
-	DOCF_IsBeingDestroyed = (1 << 0),
-};
-
-Q_DECLARE_FLAGS (LDDocumentFlags, LDDocumentFlag)
-Q_DECLARE_OPERATORS_FOR_FLAGS (LDDocumentFlags)
-
-//
 // This class stores a document either as a editable file for the user or for
 // subfile caching.
 //
@@ -52,111 +41,82 @@ Q_DECLARE_OPERATORS_FOR_FLAGS (LDDocumentFlags)
 class LDDocument : public QObject, public HierarchyElement
 {
 	Q_OBJECT
-	PROPERTY (public,	QString,				name,			setName,			STOCK_WRITE)
-	PROPERTY (private,	LDObjectList,		objects, 		setObjects,			STOCK_WRITE)
-	PROPERTY (private,	LDObjectList,		cache, 			setCache,			STOCK_WRITE)
-	PROPERTY (private,	History*,			history,		setHistory,			STOCK_WRITE)
-	PROPERTY (public,	QString,				fullPath,		setFullPath,		STOCK_WRITE)
-	PROPERTY (public,	QString,				defaultName,	setDefaultName,		STOCK_WRITE)
-	PROPERTY (public,	bool,				isImplicit,		setImplicit,		CUSTOM_WRITE)
-	PROPERTY (public,	long,				savePosition,	setSavePosition,	STOCK_WRITE)
-	PROPERTY (public,	int,				tabIndex,		setTabIndex,		STOCK_WRITE)
-	PROPERTY (public,	QList<LDPolygon>,	polygonData,	setPolygonData,		STOCK_WRITE)
-	PROPERTY (private,	LDDocumentFlags,	flags,			setFlags,			STOCK_WRITE)
 
 public:
 	LDDocument (QObject* parent);
 	~LDDocument();
 
-	int addObject (LDObject* obj); // Adds an object to this file at the end of the file.
+	void addHistoryStep();
+	void addKnownVertices (LDObject* obj);
+	int addObject (LDObject* obj);
 	void addObjects (const LDObjectList& objs);
+	void addToHistory (AbstractHistoryEntry* entry);
+	void addToSelection (LDObject* obj);
+	void clear();
+	void clearHistory();
 	void clearSelection();
-	void forgetObject (LDObject* obj); // Deletes the given object from the object chain.
+	void close();
+	QString defaultName() const;
+	void forgetObject (LDObject* obj);
+	QString fullPath();
 	QString getDisplayName();
+	LDObject* getObject (int pos) const;
+	int getObjectCount() const;
 	const LDObjectList& getSelection() const;
-	bool hasUnsavedChanges() const; // Does this document have unsaved changes?
+	LDGLData* glData();
+	bool hasUnsavedChanges() const;
+	History* history() const;
 	void initializeCachedData();
 	LDObjectList inlineContents (bool deep, bool renderinline);
-	void insertObj (int pos, LDObject* obj);
-	int getObjectCount() const;
-	LDObject* getObject (int pos) const;
-	bool save (QString path = "", int64* sizeptr = null); // Saves this file to disk.
-	void swapObjects (LDObject* one, LDObject* other);
-	bool isSafeToClose(); // Perform safety checks. Do this before closing any files!
-	void setObject (int idx, LDObject* obj);
 	QList<LDPolygon> inlinePolygons();
-	void vertexChanged (const Vertex& a, const Vertex& b);
 	const QVector<Vertex>& inlineVertices();
-	void clear();
-	void addKnownVertices (LDObject* obj);
-	void redoVertices();
-	void needVertexMerge();
-	void reloadAllSubfiles();
-
-	inline LDDocument& operator<< (LDObject* obj)
-	{
-		addObject (obj);
-		return *this;
-	}
-
-	inline void addHistoryStep()
-	{
-		history()->addStep();
-	}
-
-	inline void undo()
-	{
-		history()->undo();
-	}
-
-	inline void redo()
-	{
-		history()->redo();
-	}
-
-	inline void clearHistory()
-	{
-		history()->clear();
-	}
-
-	inline void addToHistory (AbstractHistoryEntry* entry)
-	{
-		*history() << entry;
-	}
-
-	inline void dismiss()
-	{
-		setImplicit (true);
-	}
-
-	// Turns a full path into a relative path
-	static QString shortenName (QString a);
+	void insertObj (int pos, LDObject* obj);
+	bool isCache() const;
+	bool isSafeToClose();
 	void mergeVertices();
-
-protected:
-	void addToSelection (LDObject* obj);
+	QString name() const;
+	void needVertexMerge();
+	const LDObjectList& objects() const;
+	void openForEditing();
+	const QList<LDPolygon>& polygonData() const;
+	void redo();
+	void redoVertices();
+	void reloadAllSubfiles();
 	void removeFromSelection (LDObject* obj);
+	bool save (QString path = "", int64* sizeptr = null);
+	long savePosition() const;
+	void setDefaultName (QString value);
+	void setFullPath (QString value);
+	void setImplicit (bool value);
+	void setName (QString value);
+	void setObject (int idx, LDObject* obj);
+	void setSavePosition (long value);
+	void setTabIndex (int value);
+	void swapObjects (LDObject* one, LDObject* other);
+	int tabIndex() const;
+	void undo();
+	void vertexChanged (const Vertex& a, const Vertex& b);
 
-	LDGLData* getGLData()
-	{
-		return m_gldata;
-	}
-
-	friend class LDObject;
-	friend class GLRenderer;
+	static QString shortenName (QString a); // Turns a full path into a relative path
 
 private:
-	
-	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
-	QVector<Vertex> m_vertices;
+	QString m_name;
+	QString m_fullPath;
+	QString m_defaultName;
+	LDObjectList m_objects;
+	History* m_history;
+	bool m_isCache;
 	bool m_verticesOutdated;
 	bool m_needVertexMerge;
-	LDObjectList			m_sel;
-	LDGLData*				m_gldata;
-
-	// If set to true, next polygon inline of this document discards the
-	// stored polygon data and re-builds it.
-	bool					m_needsReCache;
+	bool m_needsReCache; // If true, next polygon inline of this document rebuilds stored polygon data.
+	bool m_beingDestroyed;
+	long m_savePosition;
+	int m_tabIndex;
+	QList<LDPolygon> m_polygonData;
+	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
+	QVector<Vertex> m_vertices;
+	LDObjectList m_sel;
+	LDGLData* m_gldata;
 };
 
 // Opens the given file as the main file. Everything is closed first.

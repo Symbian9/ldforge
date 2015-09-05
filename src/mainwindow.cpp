@@ -820,7 +820,7 @@ void MainWindow::slot_editObject (QListWidgetItem* listitem)
 //
 bool MainWindow::save (LDDocument* doc, bool saveAs)
 {
-	if (doc->isImplicit())
+	if (doc->isCache())
 		return false;
 
 	QString path = doc->fullPath();
@@ -928,7 +928,7 @@ void MainWindow::updateDocumentList()
 
 	for (LDDocument* document : m_documents)
 	{
-		if (not document->isImplicit())
+		if (not document->isCache())
 		{
 			// Add an item to the list for this file and store the tab index
 			// in the document so we can find documents by tab index.
@@ -984,7 +984,7 @@ void MainWindow::tabSelected()
 	// Find the file pointer of the item that was selected.
 	for (LDDocument* document : m_documents)
 	{
-		if (not document->isImplicit() and document->tabIndex() == tabIndex)
+		if (not document->isCache() and document->tabIndex() == tabIndex)
 		{
 			switchee = document;
 			break;
@@ -1049,7 +1049,7 @@ void MainWindow::closeTab (int tabindex)
 	if (doc == null)
 		return;
 
-	doc->dismiss();
+	doc->close();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1186,7 +1186,10 @@ void MainWindow::createBlankDocument()
 LDDocument* MainWindow::newDocument (bool cache)
 {
 	m_documents.append (new LDDocument (this));
-	m_documents.last()->setImplicit (cache);
+
+	if (not cache)
+		m_documents.last()->openForEditing();
+
 	return m_documents.last();
 }
 
@@ -1211,7 +1214,7 @@ LDDocument* MainWindow::currentDocument()
 void MainWindow::changeDocument (LDDocument* document)
 {
 	// Implicit files were loaded for caching purposes and may never be switched to.
-	if (document != null and document->isImplicit())
+	if (document != null and document->isCache())
 		return;
 
 	m_currentDocument = document;
@@ -1239,7 +1242,7 @@ void MainWindow::closeInitialDocument()
 		not m_documents[1]->name().isEmpty() and
 		not m_documents[0]->hasUnsavedChanges())
 	{
-		m_documents.first()->dismiss();
+		m_documents.first()->close();
 	}
 }
 
@@ -1259,7 +1262,7 @@ void MainWindow::currentDocumentClosed()
 	// Find a replacement document to use
 	for (LDDocument* doc : m_documents)
 	{
-		if (doc != old and not doc->isImplicit())
+		if (doc != old and not doc->isCache())
 		{
 			changeDocument (doc);
 			break;
