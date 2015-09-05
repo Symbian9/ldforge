@@ -38,6 +38,33 @@ import re
 from pprint import pprint
 
 passbyvalue = {'int', 'bool', 'float', 'double' }
+variantconversions = {
+	'QString': 'toString',
+	'bool': 'toBool',
+	'int': 'toInt',
+	'float': 'toFloat',
+	'double': 'toDouble',
+	'QChar': 'toChar',
+	'QBitArray': 'toBitArray',
+	'QDate': 'toDate',
+	'QDateTime': 'toDateTime',
+	'uint': 'toUInt',
+	'unsigned int': 'toUInt',
+	'QUrl': 'toUrl',
+	'QTime': 'toTime',
+	'QPoint': 'toPoint',
+	'QPointF': 'toPointF',
+	'QSize': 'toSize',
+	'QSizeF': 'toSizeF',
+	'qreal': 'toReal',
+	'QRect': 'toRect',
+	'QRectF': 'toRectF',
+	'QLine': 'toLine',
+	'QLineF': 'toLineF',
+	'QEasingCurve': 'toEasingCurve',
+	'qlonglong': 'toLongLong',
+	'qulonglong': 'toULongLong',
+}
 
 class ConfigCollector (object):
 	def __init__ (self, args):
@@ -98,6 +125,11 @@ class ConfigCollector (object):
 			decl['setter'] = 'set' + caseconversions.convert_case (decl['name'], style='camel')
 			decl['typecref'] = 'const %s&' % decl['type'] if decl['type'] not in passbyvalue else decl['type']
 
+			try:
+				decl['valuefunc'] = variantconversions[decl['type']]
+			except KeyError:
+				decl['valuefunc'] = 'value<' + decl['type'] + '>'
+
 			if enumname not in self.enums:
 				self.enums[enumname] = dict (
 					name = enumname,
@@ -132,7 +164,7 @@ class ConfigCollector (object):
 		write ('\tQVariant defaultValueByName (const QString& name);\n')
 
 		for decl in self.decls:
-			write ('\t{type} {getter}();\n'.format (**decl))
+			write ('\t{type} {getter}() const;\n'.format (**decl))
 		for decl in self.decls:
 			write ('\tvoid {setter} ({typecref} value);\n'.format (**decl))
 
@@ -183,10 +215,10 @@ class ConfigCollector (object):
 		fp.write ('\n')
 
 		for decl in self.decls:
-			fp.write ('{type} ConfigurationValueBag::{getter}()\n'.format (**decl))
+			fp.write ('{type} ConfigurationValueBag::{getter}() const\n'.format (**decl))
 			fp.write ('{\n')
-			fp.write ('\tstatic QVariant defaultvalue = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
-			fp.write ('\treturn m_settings->value ("{name}", defaultvalue).value<{type}>();\n'.format (**decl))
+			fp.write ('\tstatic const QVariant defaultvalue = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
+			fp.write ('\treturn m_settings->value ("{name}", defaultvalue).{valuefunc}();\n'.format (**decl))
 			fp.write ('}\n')
 			fp.write ('\n')
 
