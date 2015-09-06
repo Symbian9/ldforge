@@ -83,7 +83,7 @@ public:
 	void redoVertices();
 	void reloadAllSubfiles();
 	void removeFromSelection (LDObject* obj);
-	bool save (QString path = "", int64* sizeptr = null);
+	bool save (QString path = "", int64* sizeptr = nullptr);
 	long savePosition() const;
 	void setDefaultName (QString value);
 	void setFullPath (QString value);
@@ -130,7 +130,7 @@ LDDocument* FindDocument (QString name);
 LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr, bool* aborted = nullptr);
 
 // Opens the given file and returns a pointer to it, potentially looking in /parts and /p
-QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = null);
+QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = nullptr);
 
 // Close all open files, whether user-opened or subfile caches.
 void CloseAllDocuments();
@@ -145,7 +145,7 @@ LDDocument* GetDocument (QString filename);
 // Is it safe to close all files?
 bool IsSafeToCloseAll();
 
-LDObjectList LoadFileContents (QFile* f, int* numWarnings, bool* ok = null);
+LDObjectList LoadFileContents (QFile* f, int* numWarnings, bool* ok = nullptr);
 
 const LDObjectList& selectedObjects();
 void AddRecentFile (QString path);

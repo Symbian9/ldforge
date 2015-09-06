@@ -66,7 +66,7 @@ public:
 	PROPERTY (private,	QPushButton*,		downloadButton,		setDownloadButton,	STOCK_WRITE)
 
 public:
-	explicit		PartDownloader (QWidget* parent = null);
+	explicit		PartDownloader (QWidget* parent = nullptr);
 	virtual			~PartDownloader();
 
 	void			addFile (LDDocument* f);

@@ -25,7 +25,7 @@ class LDrawPathDialog : public QDialog
 	Q_OBJECT
 
 public:
-	LDrawPathDialog (const QString& defaultPath, bool validDefault, QWidget* parent = null, Qt::WindowFlags f = 0);
+	LDrawPathDialog (const QString& defaultPath, bool validDefault, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~LDrawPathDialog();
 	QString path() const;
 	void setPath (QString path);

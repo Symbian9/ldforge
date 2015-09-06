@@ -91,7 +91,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
-	if (ActivePrimitiveScanner() != null)
+	if (ActivePrimitiveScanner() != nullptr)
 		connect (ActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
 	else
 		updatePrimitives();
@@ -164,7 +164,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
-		if (toolbar != null)
+		if (toolbar != nullptr)
 			toolbar->hide();
 	}
 
@@ -183,7 +183,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 MainWindow::~MainWindow()
 {
-	g_win = null;
+	g_win = nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ void MainWindow::updateRecentFilesMenu()
 
 	m_recentFiles.clear();
 
-	QAction* first = null;
+	QAction* first = nullptr;
 
 	for (const QVariant& it : m_configOptions.recentFiles())
 	{
@@ -264,7 +264,7 @@ QList<LDQuickColor> LoadQuickColorList()
 			LDColor color = colorname.toInt();
 
 			if (color.isValid())
-				colors << LDQuickColor (color, null);
+				colors << LDQuickColor (color, nullptr);
 		}
 	}
 
@@ -514,7 +514,7 @@ void MainWindow::scrollToSelection()
 //
 void MainWindow::selectionChanged()
 {
-	if (g_isSelectionLocked == true or m_currentDocument == null)
+	if (g_isSelectionLocked == true or m_currentDocument == nullptr)
 		return;
 
 	LDObjectList priorSelection = selectedObjects();
@@ -632,7 +632,7 @@ void MainWindow::updateSelection()
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (obj->qObjListEntry == null)
+		if (obj->qObjListEntry == nullptr)
 			continue;
 
 		int row = ui.objectList->row (obj->qObjListEntry);
@@ -1031,7 +1031,7 @@ for (LDObject* obj : *f)
 //
 void MainWindow::updateActions()
 {
-	if (m_currentDocument != null and m_currentDocument->history() != null)
+	if (m_currentDocument != nullptr and m_currentDocument->history() != nullptr)
 	{
 		EditHistory* his = m_currentDocument->history();
 		int pos = his->position();
@@ -1077,7 +1077,7 @@ void MainWindow::closeTab (int tabindex)
 {
 	LDDocument* doc = FindDocument (m_tabs->tabData (tabindex).toString());
 
-	if (doc == null)
+	if (doc == nullptr)
 		return;
 
 	doc->close();
@@ -1258,7 +1258,7 @@ LDDocument* MainWindow::currentDocument()
 void MainWindow::changeDocument (LDDocument* document)
 {
 	// Implicit files were loaded for caching purposes and may never be switched to.
-	if (document != null and document->isCache())
+	if (document != nullptr and document->isCache())
 		return;
 
 	m_currentDocument = document;
@@ -1348,7 +1348,7 @@ LDQuickColor::LDQuickColor (LDColor color, QToolButton* toolButton) :
 //
 LDQuickColor LDQuickColor::getSeparator()
 {
-	return LDQuickColor (LDColor::nullColor(), null);
+	return LDQuickColor (LDColor::nullColor(), nullptr);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1366,7 +1366,7 @@ void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
 
 	for (PrimitiveCategory* cat : g_PrimitiveCategories)
 	{
-		SubfileListItem* parentItem = new SubfileListItem (tw, null);
+		SubfileListItem* parentItem = new SubfileListItem (tw, nullptr);
 		parentItem->setText (0, cat->name());
 		QList<QTreeWidgetItem*> subfileItems;
 

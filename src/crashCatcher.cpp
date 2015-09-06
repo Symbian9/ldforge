@@ -108,7 +108,7 @@ void initCrashCatcher()
 
 	for (int sig : signalsToCatch)
 	{
-		if (sigaction (sig, &sighandler, null) == -1)
+		if (sigaction (sig, &sighandler, nullptr) == -1)
 			fprint (stderr, "Couldn't set signal handler %1: %2", sig, strerror (errno));
 	}
 

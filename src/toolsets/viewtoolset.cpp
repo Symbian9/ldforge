@@ -260,10 +260,10 @@ void ViewToolset::jumpTo()
 	if (selectedObjects().size() == 1)
 		defval = selectedObjects()[0]->lineNumber();
 
-	int idx = QInputDialog::getInt (null, "Go to line", "Go to line:", defval,
+	int idx = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defval,
 		1, currentDocument()->getObjectCount(), 1, &ok);
 
-	if (not ok or (obj = currentDocument()->getObject (idx - 1)) == null)
+	if (not ok or (obj = currentDocument()->getObject (idx - 1)) == nullptr)
 		return;
 
 	currentDocument()->clearSelection();

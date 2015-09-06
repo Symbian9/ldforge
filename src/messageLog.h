@@ -63,7 +63,7 @@ public:
 	};
 
 	// Constructs the message manager.
-	explicit MessageManager (QObject* parent = null);
+	explicit MessageManager (QObject* parent = nullptr);
 
 	// Adds a line with the given \c text to the message manager.
 	void addLine (QString line);

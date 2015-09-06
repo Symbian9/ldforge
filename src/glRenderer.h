@@ -88,7 +88,7 @@ struct LDGLData
 		{
 			if (i < 6)
 			{
-				overlays[i].img = null;
+				overlays[i].img = nullptr;
 				overlays[i].invalid = false;
 				depthValues[i] = 0.0f;
 			}
@@ -148,7 +148,7 @@ public:
 	PROPERTY (private,	bool,				isCameraMoving,	setCameraMoving,	STOCK_WRITE)
 
 public:
-	GLRenderer (QWidget* parent = null);
+	GLRenderer (QWidget* parent = nullptr);
 	~GLRenderer();
 
 	inline ECamera			camera() const;

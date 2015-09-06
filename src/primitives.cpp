@@ -29,8 +29,8 @@
 
 QList<PrimitiveCategory*> g_PrimitiveCategories;
 QList<Primitive> g_primitives;
-static PrimitiveScanner* g_activeScanner = null;
-PrimitiveCategory* g_unmatched = null;
+static PrimitiveScanner* g_activeScanner = nullptr;
+PrimitiveCategory* g_unmatched = nullptr;
 
 static const QStringList g_radialNameRoots =
 {
@@ -125,7 +125,7 @@ PrimitiveScanner::PrimitiveScanner (QObject* parent) :
 //
 PrimitiveScanner::~PrimitiveScanner()
 {
-	g_activeScanner = null;
+	g_activeScanner = nullptr;
 }
 
 // =============================================================================
@@ -145,7 +145,7 @@ void PrimitiveScanner::work()
 		Primitive info;
 		info.name = fname.mid (m_baselen + 1);  // make full path relative
 		info.name.replace ('/', '\\');  // use DOS backslashes, they're expected
-		info.category = null;
+		info.category = nullptr;
 		QByteArray titledata = f.readLine();
 
 		if (titledata != QByteArray())
@@ -182,7 +182,7 @@ void PrimitiveScanner::work()
 		g_primitives = m_prims;
 		PrimitiveCategory::populateCategories();
 		print ("%1 primitives scanned", g_primitives.size());
-		g_activeScanner = null;
+		g_activeScanner = nullptr;
 		emit workDone();
 		deleteLater();
 	}
@@ -224,7 +224,7 @@ void PrimitiveCategory::populateCategories()
 	for (Primitive& prim : g_primitives)
 	{
 		bool matched = false;
-		prim.category = null;
+		prim.category = nullptr;
 
 		// Go over the categories and their regexes, if and when there's a match,
 		// the primitive's category is set to the category the regex beloings to.
@@ -255,13 +255,13 @@ void PrimitiveCategory::populateCategories()
 			}
 
 			// Drop out if a category was decided on.
-			if (prim.category != null)
+			if (prim.category != nullptr)
 				break;
 		}
 
 		// If there was a match, add the primitive to the category.
 		// Otherwise, add it to the list of unmatched primitives.
-		if (prim.category != null)
+		if (prim.category != nullptr)
 			prim.category->prims << prim;
 		else
 			g_unmatched->prims << prim;
@@ -293,7 +293,7 @@ void PrimitiveCategory::loadCategories()
 		return;
 	}
 
-	PrimitiveCategory* cat = null;
+	PrimitiveCategory* cat = nullptr;
 
 	while (not f.atEnd())
 	{
@@ -313,7 +313,7 @@ void PrimitiveCategory::loadCategories()
 
 			cat = new PrimitiveCategory (line);
 		}
-		else if (cat != null)
+		else if (cat != nullptr)
 		{
 			QString cmd = line.left (colon);
 			RegexType type = EFilenameRegex;
@@ -365,7 +365,7 @@ bool PrimitiveCategory::isValidToInclude()
 //
 bool IsPrimitiveLoaderBusy()
 {
-	return g_activeScanner != null;
+	return g_activeScanner != nullptr;
 }
 
 // =============================================================================
@@ -652,7 +652,7 @@ LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num)
 	QString name = MakeRadialFileName (type, segs, divs, num);
 	LDDocument* f = GetDocument (name);
 
-	if (f != null)
+	if (f != nullptr)
 		return f;
 
 	return GeneratePrimitive (type, segs, divs, num);

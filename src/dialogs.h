@@ -43,7 +43,7 @@ class OverlayDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit OverlayDialog (QWidget* parent = null, Qt::WindowFlags f = 0);
+	explicit OverlayDialog (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~OverlayDialog();
 
 	QString         fpath() const;
@@ -87,7 +87,7 @@ class AboutDialog : public QDialog
 	Q_OBJECT
 
 public:
-	AboutDialog (QWidget* parent = null, Qt::WindowFlags f = 0);
+	AboutDialog (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
 private slots:
 	void slot_mail();

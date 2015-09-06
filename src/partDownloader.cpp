@@ -322,7 +322,7 @@ void PartDownloader::checkIfFinished()
 	m_requests.clear();
 
 	// Update everything now
-	if (primaryFile() != null)
+	if (primaryFile() != nullptr)
 	{
 		g_win->changeDocument (primaryFile());
 		g_win->doFullRefresh();
@@ -361,7 +361,7 @@ QPushButton* PartDownloader::getButton (PartDownloader::Button i)
 			return qobject_cast<QPushButton*> (form()->buttonBox->button (QDialogButtonBox::Close));
 	}
 
-	return null;
+	return nullptr;
 }
 
 // =============================================================================
@@ -376,7 +376,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 	m_networkManager (new QNetworkAccessManager),
 	m_isFirstUpdate (true),
 	m_isPrimary (primary),
-	m_filePointer (null)
+	m_filePointer (nullptr)
 {
 	// Make sure that we have a valid destination.
 	QString dirpath = Dirname (filePath());
@@ -480,7 +480,7 @@ void PartDownloadRequest::downloadFinished()
 	{
 		filePointer()->close();
 		delete filePointer();
-		setFilePointer (null);
+		setFilePointer (nullptr);
 
         if (state() == State::Failed)
 			QFile::remove (filePath());
@@ -495,7 +495,7 @@ void PartDownloadRequest::downloadFinished()
 	// Try to load this file now.
 	LDDocument* f = OpenDocument (filePath(), false, not isPrimary());
 
-	if (f == null)
+	if (f == nullptr)
 		return;
 
 	// Iterate through this file and check for errors. If there's any that stems
@@ -506,7 +506,7 @@ void PartDownloadRequest::downloadFinished()
 	{
 		LDError* err = dynamic_cast<LDError*> (obj);
 
-		if (err == null or err->fileReferenced().isEmpty())
+		if (err == nullptr or err->fileReferenced().isEmpty())
 			continue;
 
 		QString dest = err->fileReferenced();
@@ -548,7 +548,7 @@ void PartDownloadRequest::readyRead()
     if (state() == State::Failed)
 		return;
 
-	if (filePointer() == null)
+	if (filePointer() == nullptr)
 	{
 		m_filePath.replace ("\\", "/");
 

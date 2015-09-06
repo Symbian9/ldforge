@@ -159,7 +159,7 @@ void CircleMode::buildCircle()
 		}
 	}
 
-	if (circleOrDisc and refFile != null)
+	if (circleOrDisc and refFile != nullptr)
 	{
 		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setFileInfo (refFile);

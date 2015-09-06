@@ -109,7 +109,7 @@ class PrimitivePrompt : public QDialog
 	Q_OBJECT
 
 public:
-	explicit PrimitivePrompt (QWidget* parent = null, Qt::WindowFlags f = 0);
+	explicit PrimitivePrompt (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~PrimitivePrompt();
 	Ui_MakePrimUI* ui;
 

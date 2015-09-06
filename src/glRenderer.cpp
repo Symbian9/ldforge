@@ -111,7 +111,7 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	m_compiler = new GLCompiler (this);
 	m_objectAtCursor = nullptr;
 	setDrawOnly (false);
-	setMessageLog (null);
+	setMessageLog (nullptr);
 	m_width = m_height = -1;
 	m_position3D = Origin;
 	m_toolTipTimer = new QTimer (this);
@@ -145,9 +145,9 @@ GLRenderer::~GLRenderer()
 		delete info.img;
 
 	if (messageLog())
-		messageLog()->setRenderer (null);
+		messageLog()->setRenderer (nullptr);
 
-	m_compiler->setRenderer (null);
+	m_compiler->setRenderer (nullptr);
 	delete m_compiler;
 	delete m_editmode;
 
@@ -212,7 +212,7 @@ void GLRenderer::initGLData()
 //
 void GLRenderer::needZoomToFit()
 {
-	if (document() != null)
+	if (document() != nullptr)
 		currentDocumentData().needZoomToFit = true;
 }
 
@@ -367,7 +367,7 @@ void GLRenderer::resizeGL (int w, int h)
 //
 void GLRenderer::drawGLScene()
 {
-	if (document() == null)
+	if (document() == nullptr)
 		return;
 
 	if (currentDocumentData().needZoomToFit)
@@ -497,10 +497,10 @@ void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum ty
 	if (count > 0)
 	{
 		glBindBuffer (GL_ARRAY_BUFFER, surfacevbo);
-		glVertexPointer (3, GL_FLOAT, 0, null);
+		glVertexPointer (3, GL_FLOAT, 0, nullptr);
 		CHECK_GL_ERROR();
 		glBindBuffer (GL_ARRAY_BUFFER, colorvbo);
-		glColorPointer (4, GL_FLOAT, 0, null);
+		glColorPointer (4, GL_FLOAT, 0, nullptr);
 		CHECK_GL_ERROR();
 		glDrawArrays (type, 0, count);
 		CHECK_GL_ERROR();
@@ -625,7 +625,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
 
-		if (overlay.img != null)
+		if (overlay.img != nullptr)
 		{
 			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
 					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
@@ -969,7 +969,7 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	{
 		LDObject* obj = LDObject::fromID (idx);
 
-		if (obj == null)
+		if (obj == nullptr)
 			continue;
 
 		// If this is an additive single pick and the object is currently selected,
@@ -1023,7 +1023,7 @@ LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 //
 void GLRenderer::setEditMode (EditModeType a)
 {
-	if (m_editmode != null and m_editmode->type() == a)
+	if (m_editmode != nullptr and m_editmode->type() == a)
 		return;
 
 	delete m_editmode;
@@ -1050,7 +1050,7 @@ void GLRenderer::setDocument (LDDocument* const& a)
 {
 	m_document = a;
 
-	if (a != null)
+	if (a != nullptr)
 	{
 		initOverlaysFromObjects();
 
@@ -1255,7 +1255,7 @@ void GLRenderer::clearOverlay()
 
 	LDGLOverlay& info = currentDocumentData().overlays[camera()];
 	delete info.img;
-	info.img = null;
+	info.img = nullptr;
 
 	updateOverlayObjects();
 }
@@ -1305,7 +1305,7 @@ void GLRenderer::zoomToFit()
 {
 	zoom() = 30.0f;
 
-	if (document() == null or m_width == -1 or m_height == -1)
+	if (document() == nullptr or m_width == -1 or m_height == -1)
 		return;
 
 	bool lastfilled = false;
@@ -1433,13 +1433,13 @@ void GLRenderer::initOverlaysFromObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (ovlobj == null and meta.img != null)
+		if (ovlobj == nullptr and meta.img != nullptr)
 		{
 			delete meta.img;
-			meta.img = null;
+			meta.img = nullptr;
 		}
-		else if (ovlobj != null and
-			(meta.img == null or meta.fname != ovlobj->fileName()) and
+		else if (ovlobj != nullptr and
+			(meta.img == nullptr or meta.fname != ovlobj->fileName()) and
 			not meta.invalid)
 		{
 			setupOverlay (cam, ovlobj->fileName(), ovlobj->x(),
@@ -1460,7 +1460,7 @@ void GLRenderer::updateOverlayObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (meta.img == null and ovlobj != null)
+		if (meta.img == nullptr and ovlobj != nullptr)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
 			LDObject* nextobj = ovlobj->next();
@@ -1472,7 +1472,7 @@ void GLRenderer::updateOverlayObjects()
 			// not, remove the object.
 			ovlobj->destroy();
 		}
-		else if (meta.img != null and ovlobj == null)
+		else if (meta.img != nullptr and ovlobj == nullptr)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
@@ -1512,7 +1512,7 @@ void GLRenderer::updateOverlayObjects()
 			}
 		}
 
-		if (meta.img != null and ovlobj != null)
+		if (meta.img != nullptr and ovlobj != nullptr)
 		{
 			ovlobj->setCamera (cam);
 			ovlobj->setFileName (meta.fname);
@@ -1531,7 +1531,7 @@ void GLRenderer::updateOverlayObjects()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not m_config->highlightObjectBelowCursor() and objectAtCursor() == null)
+	if (not m_config->highlightObjectBelowCursor() and objectAtCursor() == nullptr)
 		return;
 
 	LDObject* newObject = nullptr;
@@ -1553,17 +1553,17 @@ void GLRenderer::highlightCursorObject()
 		newIndex = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
 	}
 
-	if (newIndex != (oldObject != null ? oldObject->id() : 0))
+	if (newIndex != (oldObject != nullptr ? oldObject->id() : 0))
 	{
 		if (newIndex != 0)
 			newObject = LDObject::fromID (newIndex);
 
 		setObjectAtCursor (newObject);
 
-		if (oldObject != null)
+		if (oldObject != nullptr)
 			compileObject (oldObject);
 
-		if (newObject != null)
+		if (newObject != nullptr)
 			compileObject (newObject);
 	}
 
@@ -1572,13 +1572,13 @@ void GLRenderer::highlightCursorObject()
 
 void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
 {
-	if (m_window != null and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem() != null)
+	if (m_window != nullptr and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem() != nullptr)
 		ev->acceptProposedAction();
 }
 
 void GLRenderer::dropEvent (QDropEvent* ev)
 {
-	if (m_window != null and ev->source() == m_window->getPrimitivesTree())
+	if (m_window != nullptr and ev->source() == m_window->getPrimitivesTree())
 	{
 		QString primName = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem())->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();

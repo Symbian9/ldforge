@@ -28,7 +28,7 @@
 class DocumentViewer : public QDialog
 {
 	public:
-		explicit DocumentViewer (QWidget* parent = null, Qt::WindowFlags f = 0) : QDialog (parent, f)
+		explicit DocumentViewer (QWidget* parent = nullptr, Qt::WindowFlags f = 0) : QDialog (parent, f)
 		{
 			te_text = new QTextEdit (this);
 			te_text->setMinimumSize (QSize (400, 300));

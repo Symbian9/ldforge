@@ -311,11 +311,11 @@ QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
 	print ("Opening %1...\n", relpath);
 	QString path = FindDocumentPath (relpath, subdirs);
 
-	if (pathpointer != null)
+	if (pathpointer != nullptr)
 		*pathpointer = path;
 
 	if (path.isEmpty())
-		return null;
+		return nullptr;
 
 	QFile* fp = new QFile (path);
 
@@ -323,7 +323,7 @@ QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
 		return fp;
 
 	fp->deleteLater();
-	return null;
+	return nullptr;
 }
 
 // =============================================================================
@@ -384,7 +384,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 	if (not fp)
 		return nullptr;
 
-	LDDocument* load = (fileToOverride != null ? fileToOverride : g_win->newDocument (implicit));
+	LDDocument* load = (fileToOverride != nullptr ? fileToOverride : g_win->newDocument (implicit));
 	load->setFullPath (fullpath);
 	load->setName (LDDocument::shortenName (load->fullPath()));
 
@@ -533,14 +533,14 @@ void OpenMainModel (QString path)
 
 	// We cannot open this file if the document this would replace is not
 	// safe to close.
-	if (documentToReplace != null and not documentToReplace->isSafeToClose())
+	if (documentToReplace != nullptr and not documentToReplace->isSafeToClose())
 		return;
 
 	g_loadingMainFile = true;
 
 	// If we're replacing an existing document, clear the document and
 	// make it ready for being loaded to.
-	if (documentToReplace != null)
+	if (documentToReplace != nullptr)
 	{
 		file = documentToReplace;
 		file->clear();
@@ -549,7 +549,7 @@ void OpenMainModel (QString path)
 	bool aborted;
 	file = OpenDocument (path, false, false, file, &aborted);
 
-	if (file == null)
+	if (file == nullptr)
 	{
 		if (not aborted)
 		{
@@ -613,7 +613,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	// If the second object in the list holds the file name, update that now.
 	LDObject* nameObject = getObject (1);
 
-	if (nameObject != null and nameObject->type() == OBJ_Comment)
+	if (nameObject != nullptr and nameObject->type() == OBJ_Comment)
 	{
 		LDComment* nameComment = static_cast<LDComment*> (nameObject);
 
@@ -627,7 +627,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 
 	QByteArray data;
 
-	if (sizeptr != null)
+	if (sizeptr != nullptr)
 		*sizeptr = 0;
 
 	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
@@ -636,7 +636,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		QByteArray subdata ((obj->asText() + "\r\n").toUtf8());
 		data.append (subdata);
 
-		if (sizeptr != null)
+		if (sizeptr != nullptr)
 			*sizeptr += subdata.size();
 	}
 
@@ -715,7 +715,7 @@ static Vertex ParseVertex (QStringList& s, const int n)
 	return v;
 }
 
-static int32 StringToNumber (QString a, bool* ok = null)
+static int32 StringToNumber (QString a, bool* ok = nullptr)
 {
 	int base = 10;
 
@@ -933,7 +933,7 @@ void LDDocument::reloadAllSubfiles()
 			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			LDDocument* fileInfo = GetDocument (ref->fileInfo()->name());
 
-			if (fileInfo != null)
+			if (fileInfo != nullptr)
 			{
 				ref->setFileInfo (fileInfo);
 			}
@@ -974,7 +974,7 @@ void LDDocument::addObjects (const LDObjectList& objs)
 {
 	for (LDObject* obj : objs)
 	{
-		if (obj != null)
+		if (obj != nullptr)
 			addObject (obj);
 	}
 }
@@ -1126,7 +1126,7 @@ void LDDocument::initializeCachedData()
 
 			LDPolygon* data = obj->getPolygon();
 
-			if (data != null)
+			if (data != nullptr)
 			{
 				m_polygonData << *data;
 				delete data;
@@ -1184,9 +1184,9 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 		// Ensure logoed studs are loaded first
 		LoadLogoStuds();
 
-		if (name() == "stud.dat" and g_logoedStud != null)
+		if (name() == "stud.dat" and g_logoedStud != nullptr)
 			return g_logoedStud->inlineContents (deep, renderinline);
-		else if (name() == "stud2.dat" and g_logoedStud2 != null)
+		else if (name() == "stud2.dat" and g_logoedStud2 != nullptr)
 			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 

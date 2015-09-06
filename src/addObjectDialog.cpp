@@ -95,7 +95,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			PopulatePrimitives (tw_subfileList, (obj != null ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
+			PopulatePrimitives (tw_subfileList, (obj != nullptr ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -124,7 +124,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 	// Show a color edit dialog for the types that actually use the color
 	if (defaults->isColored())
 	{
-		if (obj != null)
+		if (obj != nullptr)
 			m_color = obj->color();
 		else
 			m_color = (type == OBJ_CondLine or type == OBJ_Line) ? EdgeColor : MainColor;
@@ -152,7 +152,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		case OBJ_Triangle:
 		case OBJ_Quad:
 			// Apply coordinates
-			if (obj != null)
+			if (obj != nullptr)
 			{
 				for (int i = 0; i < coordCount / 3; ++i)
 				{
@@ -190,7 +190,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		// le_matrix->setValidator (new QDoubleValidator);
 		Matrix defaultMatrix = IdentityMatrix;
 
-		if (mo != null)
+		if (mo != nullptr)
 		{
 			mo->position().apply ([&](Axis ax, double value)
 			{
@@ -244,7 +244,7 @@ QString AddObjectDialog::currentSubfileName()
 {
 	SubfileListItem* item = static_cast<SubfileListItem*> (tw_subfileList->currentItem());
 
-	if (item->primitive() == null)
+	if (item->primitive() == nullptr)
 		return ""; // selected a heading
 
 	return item->primitive()->name;
@@ -273,7 +273,7 @@ void AddObjectDialog::slot_subfileTypeChanged()
 template<typename T>
 static T* InitObject (LDObject*& obj)
 {
-	if (obj == null)
+	if (obj == nullptr)
 		obj = new T;
 
 	return static_cast<T*> (obj);
@@ -292,7 +292,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	if (type == OBJ_Empty)
 		return; // Nothing to edit with empties
 
-	const bool newObject = (obj == null);
+	const bool newObject = (obj == nullptr);
 	Matrix transform = IdentityMatrix;
 	AddObjectDialog dlg (type, obj);
 

@@ -88,7 +88,7 @@ void OverlayDialog::fillDefaults (int newcam)
 	LDGLOverlay& info = g_win->renderer()->getOverlay (newcam);
 	RadioDefault<int> (newcam, m_cameraArgs);
 
-	if (info.img != null)
+	if (info.img != nullptr)
 	{
 		ui->filename->setText (info.fname);
 		ui->originX->setValue (info.ox);
@@ -140,7 +140,7 @@ int OverlayDialog::camera() const
 
 void OverlayDialog::slot_fpath()
 {
-	ui->filename->setText (QFileDialog::getOpenFileName (null, "Overlay image"));
+	ui->filename->setText (QFileDialog::getOpenFileName (nullptr, "Overlay image"));
 }
 
 void OverlayDialog::slot_help()
@@ -178,7 +178,7 @@ ExtProgPathPrompt::~ExtProgPathPrompt()
 // =============================================================================
 void ExtProgPathPrompt::findPath()
 {
-	QString path = QFileDialog::getOpenFileName (null, "", "", g_extProgPathFilter);
+	QString path = QFileDialog::getOpenFileName (nullptr, "", "", g_extProgPathFilter);
 
 	if (not path.isEmpty())
 		ui->m_path->setText (path);

@@ -315,7 +315,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 		return;
 	}
 
-	LDObjectList objs = LoadFileContents (&f, null);
+	LDObjectList objs = LoadFileContents (&f, nullptr);
 
 	// If we replace the objects, delete the selection now.
 	if (replace)

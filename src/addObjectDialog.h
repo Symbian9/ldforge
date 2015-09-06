@@ -34,7 +34,7 @@ class AddObjectDialog : public QDialog
 	Q_OBJECT
 
 public:
-	AddObjectDialog (const LDObjectType type, LDObject* obj, QWidget* parent = null);
+	AddObjectDialog (const LDObjectType type, LDObject* obj, QWidget* parent = nullptr);
 	static void staticDialog (const LDObjectType type, LDObject* obj);
 
 	QLabel* lb_typeIcon;

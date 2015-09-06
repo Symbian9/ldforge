@@ -101,8 +101,8 @@ GLCompiler::~GLCompiler()
 	glDeleteBuffers (g_numVBOs, &m_vbo[0]);
 	CHECK_GL_ERROR();
 
-	if (m_renderer != null)
-		m_renderer->setCompiler (null);
+	if (m_renderer != nullptr)
+		m_renderer->setCompiler (nullptr);
 }
 
 // =============================================================================
@@ -248,7 +248,7 @@ void GLCompiler::unstage (LDObject* obj)
 //
 void GLCompiler::compileDocument (LDDocument* doc)
 {
-	if (doc != null)
+	if (doc != nullptr)
 	{
 		for (LDObject* obj : doc->objects())
 			compileObject (obj);
@@ -279,7 +279,7 @@ void GLCompiler::prepareVBO (int vbonum)
 
 	for (auto it = m_objectInfo.begin(); it != m_objectInfo.end();)
 	{
-		if (it.key() == null)
+		if (it.key() == nullptr)
 		{
 			it = m_objectInfo.erase (it);
 			continue;
@@ -316,7 +316,7 @@ void GLCompiler::compileObject (LDObject* obj)
 {
 //	print ("Compile %1\n", g_objectOrigins[obj]);
 
-	if (obj == null or obj->document() == null or obj->document()->isCache())
+	if (obj == nullptr or obj->document() == nullptr or obj->document()->isCache())
 		return;
 
 	ObjectVBOInfo info;

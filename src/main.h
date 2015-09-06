@@ -32,8 +32,5 @@
 #include "format.h"
 #include "hierarchyelement.h"
 
-// Null pointer
-static const std::nullptr_t null = nullptr;
-
 bool IsExiting();
 void Exit();

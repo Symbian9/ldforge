@@ -73,7 +73,7 @@ void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& bounda
 
 void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 {
-	if (obj == null)
+	if (obj == nullptr)
 	{
 		if (type == Set)
 		{

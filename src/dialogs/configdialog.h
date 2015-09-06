@@ -31,7 +31,7 @@ class ShortcutListItem : public QListWidgetItem
 	PROPERTY (public,	QKeySequence,	sequence,	setSequence,	STOCK_WRITE)
 
 public:
-	explicit ShortcutListItem (QListWidget* view = null, int type = Type) :
+	explicit ShortcutListItem (QListWidget* view = nullptr, int type = Type) :
 		QListWidgetItem (view, type) {}
 };
 
@@ -75,7 +75,7 @@ private:
 	void applySettings();
 	void addShortcut (QAction* act);
 	void setButtonBackground (QPushButton* button, QString value);
-	void updateQuickColorList (LDQuickColor* sel = null);
+	void updateQuickColorList (LDQuickColor* sel = nullptr);
 	void setShortcutText (ShortcutListItem* item);
 	int getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& haystack);
 	QString quickColorString();
@@ -107,8 +107,8 @@ class KeySequenceDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit KeySequenceDialog (QKeySequence seq, QWidget* parent = null, Qt::WindowFlags f = 0);
-	static bool staticDialog (ShortcutListItem* item, QWidget* parent = null);
+	explicit KeySequenceDialog (QKeySequence seq, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+	static bool staticDialog (ShortcutListItem* item, QWidget* parent = nullptr);
 
 	QLabel* lb_output;
 	QDialogButtonBox* bbx_buttons;

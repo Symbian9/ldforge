@@ -126,7 +126,7 @@ void FileToolset::insertFrom()
 		return;
 	}
 
-	LDObjectList objs = LoadFileContents (&f, null);
+	LDObjectList objs = LoadFileContents (&f, nullptr);
 
 	currentDocument()->clearSelection();
 

@@ -57,7 +57,7 @@ void RadioGroup::init (Qt::Orientation orient)
 
 	m_buttonGroup = new QButtonGroup;
 	m_oldId = m_curId = 0;
-	m_coreLayout = null;
+	m_coreLayout = nullptr;
 
 	m_coreLayout = new QBoxLayout ( (orient == Qt::Vertical) ? QBoxLayout::LeftToRight : QBoxLayout::TopToBottom);
 	setLayout (m_coreLayout);

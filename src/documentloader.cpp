@@ -87,7 +87,7 @@ void DocumentLoader::start()
 		connect (m_progressDialog, SIGNAL (rejected()), this, SLOT (abort()));
 	}
 	else
-		m_progressDialog = null;
+		m_progressDialog = nullptr;
 
 	// Begin working
 	work (0);

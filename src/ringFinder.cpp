@@ -164,15 +164,15 @@ bool RingFinder::findRings (double r0, double r1)
 
 	// Compare the solutions and find the best one. The solution class has an operator>
 	// overload to compare two solutions.
-	m_bestSolution = null;
+	m_bestSolution = nullptr;
 
 	for (Solution const& sol : m_solutions)
 	{
-		if (m_bestSolution == null or sol.isSuperiorTo (m_bestSolution))
+		if (m_bestSolution == nullptr or sol.isSuperiorTo (m_bestSolution))
 			m_bestSolution = &sol;
 	}
 
-	return (m_bestSolution != null);
+	return (m_bestSolution != nullptr);
 }
 
 //

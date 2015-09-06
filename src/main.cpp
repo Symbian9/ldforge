@@ -33,7 +33,7 @@
 #include "crashCatcher.h"
 #include "ldpaths.h"
 
-MainWindow* g_win = null;
+MainWindow* g_win = nullptr;
 static QString g_versionString, g_fullVersionString;
 static bool g_IsExiting (false);
 

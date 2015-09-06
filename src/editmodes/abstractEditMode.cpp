@@ -95,7 +95,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	{
 		// Find the closest vertex to our cursor
 		double			minimumDistance = 1024.0;
-		const Vertex*	closest = null;
+		const Vertex*	closest = nullptr;
 		Vertex			cursorPosition = renderer()->coordconv2_3 (data.ev->pos(), false);
 		QPoint			cursorPosition2D (data.ev->pos());
 		const Axis		relZ = renderer()->getRelativeZ();
@@ -137,7 +137,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 			}
 		}
 
-		if (closest != null)
+		if (closest != nullptr)
 			addDrawnVertex (*closest);
 
 		return true;

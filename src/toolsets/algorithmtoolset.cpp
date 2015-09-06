@@ -132,7 +132,7 @@ void AlgorithmToolset::makeBorders()
 
 		for (int i = 0; i < countof (lines); ++i)
 		{
-			if (lines[i] == null)
+			if (lines[i] == nullptr)
 				continue;
 
 			long idx = obj->lineNumber() + i + 1;
@@ -153,7 +153,7 @@ void AlgorithmToolset::roundCoordinates()
 	{
 		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 
-		if (mo != null)
+		if (mo != nullptr)
 		{
 			Vertex v = mo->position();
 			Matrix t = mo->transform();
@@ -460,7 +460,7 @@ void AlgorithmToolset::subfileSelection()
 	int				refidx (selectedObjects()[0]->lineNumber());
 
 	// Determine title of subfile
-	if (titleobj != null)
+	if (titleobj != nullptr)
 		subtitle = "~" + titleobj->text();
 	else
 		subtitle = "~subfile";
@@ -516,7 +516,7 @@ void AlgorithmToolset::subfileSelection()
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
-		} while (FindDocument ("s\\" + Basename (fullsubname)) != null or QFile (fullsubname).exists());
+		} while (FindDocument ("s\\" + Basename (fullsubname)) != nullptr or QFile (fullsubname).exists());
 	}
 
 	// Determine the BFC winding type used in the main document - it is to

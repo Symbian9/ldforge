@@ -108,7 +108,7 @@ void ColorSelector::colorButtonClicked()
 	auto it = m_buttonsReversed.find (button);
 	LDColor color;
 
-	if (Q_UNLIKELY (button == null or it == m_buttonsReversed.end()
+	if (Q_UNLIKELY (button == nullptr or it == m_buttonsReversed.end()
 		or not (color = *it).isValid()))
 	{
 		print ("colorButtonClicked() called with invalid sender");

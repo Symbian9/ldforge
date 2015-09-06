@@ -48,7 +48,7 @@ LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
 	m_document (nullptr),
-	qObjListEntry (null),
+	qObjListEntry (nullptr),
 	m_isDestroyed (false)
 {
 	if (document)
@@ -299,11 +299,11 @@ void LDObject::destroy()
 		deselect();
 
 		// If this object was associated to a file, remove it off it now
-		if (document() != null)
+		if (document() != nullptr)
 			document()->forgetObject (this);
 
 		// Delete the GL lists
-		if (g_win != null)
+		if (g_win != nullptr)
 			g_win->renderer()->forgetObject (this);
 
 		// Remove this object from the list of LDObjects
@@ -321,7 +321,7 @@ void LDObject::setDocument (LDDocument* const& a)
 {
 	m_document = a;
 
-	if (a == null)
+	if (a == nullptr)
 		setSelected (false);
 }
 
@@ -391,7 +391,7 @@ LDPolygon* LDObject::getPolygon()
 			: 0;
 
 	if (num == 0)
-		return null;
+		return nullptr;
 
 	LDPolygon* data = new LDPolygon;
 	data->id = id();
@@ -423,7 +423,7 @@ QList<LDPolygon> LDSubfile::inlinePolygons()
 // -----------------------------------------------------------------------------
 long LDObject::lineNumber() const
 {
-	if (document() != null)
+	if (document() != nullptr)
 	{
 		for (int i = 0; i < document()->getObjectCount(); ++i)
 		{
@@ -835,7 +835,7 @@ void LDMatrixObject::setTransform (const Matrix& val)
 //
 void LDObject::select()
 {
-	if (document() != null)
+	if (document() != nullptr)
 		document()->addToSelection (this);
 }
 
@@ -843,7 +843,7 @@ void LDObject::select()
 //
 void LDObject::deselect()
 {
-	if (isSelected() and document() != null)
+	if (isSelected() and document() != nullptr)
 	{
 		document()->removeFromSelection (this);
 
@@ -879,7 +879,7 @@ void LDSubfile::setFileInfo (LDDocument* const& a)
 	// If it's an immediate subfile reference (i.e. this subfile belongs in an
 	// explicit file), we need to pre-compile the GL polygons for the document
 	// if they don't exist already.
-	if (a != null and
+	if (a != nullptr and
 		a->isCache() == false and
 		a->polygonData().isEmpty())
 	{
