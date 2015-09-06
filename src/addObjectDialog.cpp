@@ -73,21 +73,21 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 12;
 		} break;
 
-		case OBJ_BFC:
+		case OBJ_Bfc:
 		{
 			rb_bfcType = new RadioGroup ("Statement", {}, 0, Qt::Vertical);
 
-			for_enum (BFCStatement, i)
+			for_enum (BfcStatement, i)
 			{
 				// Separate these in two columns
-				if (int (i) == int (BFCStatement::NumValues) / 2)
+				if (int (i) == int (BfcStatement::NumValues) / 2)
 					rb_bfcType->rowBreak();
 
-				rb_bfcType->addButton (LDBFC::StatementStrings[int (i)]);
+				rb_bfcType->addButton (LDBfc::statementToString (i));
 			}
 
 			if (obj)
-				rb_bfcType->setValue ((int) static_cast<LDBFC*> (obj)->statement());
+				rb_bfcType->setValue ((int) static_cast<LDBfc*> (obj)->statement());
 		} break;
 
 		case OBJ_Subfile:
@@ -168,7 +168,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			layout->addWidget (le_comment, 0, 1);
 			break;
 
-		case OBJ_BFC:
+		case OBJ_Bfc:
 			layout->addWidget (rb_bfcType, 0, 1);
 			break;
 
@@ -348,12 +348,12 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 			}
 		} break;
 
-		case OBJ_BFC:
+		case OBJ_Bfc:
 		{
-			LDBFC* bfc = InitObject<LDBFC> (obj);
+			LDBfc* bfc = InitObject<LDBfc> (obj);
 			int value = dlg.rb_bfcType->value();
-			if (value == qBound (0, value, int (BFCStatement::NumValues) - 1))
-				bfc->setStatement (BFCStatement (dlg.rb_bfcType->value()));
+			if (value == qBound (0, value, int (BfcStatement::NumValues) - 1))
+				bfc->setStatement (BfcStatement (dlg.rb_bfcType->value()));
 		} break;
 
 		case OBJ_Subfile:

@@ -376,6 +376,7 @@ void MainWindow::buildObjectList()
 	// doesn't trigger selection updating so that the selection doesn't get lost
 	// while this is done.
 	g_isSelectionLocked = true;
+	m_objectsInList.clear();
 
 	for (int i = 0; i < ui.objectList->count(); ++i)
 		delete ui.objectList->item (i);
@@ -436,9 +437,9 @@ void MainWindow::buildObjectList()
 				break;
 			}
 
-			case OBJ_BFC:
+			case OBJ_Bfc:
 			{
-				descr = LDBFC::StatementStrings[int (static_cast<LDBFC*> (obj)->statement())];
+				descr = static_cast<LDBfc*> (obj)->statementToString();
 				break;
 			}
 
@@ -485,7 +486,7 @@ void MainWindow::buildObjectList()
 			item->setForeground (obj->color().faceColor());
 		}
 
-		obj->qObjListEntry = item;
+		m_objectsInList.insert (obj, item);
 		ui.objectList->insertItem (ui.objectList->count(), item);
 	}
 
@@ -504,7 +505,7 @@ void MainWindow::scrollToSelection()
 		return;
 
 	LDObject* obj = selectedObjects().first();
-	ui.objectList->scrollToItem (obj->qObjListEntry);
+	ui.objectList->scrollToItem (m_objectsInList[obj]);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -524,7 +525,7 @@ void MainWindow::selectionChanged()
 	{
 		for (QListWidgetItem* item : items)
 		{
-			if (item == obj->qObjListEntry)
+			if (item == m_objectsInList[obj])
 			{
 				obj->select();
 				break;
@@ -629,10 +630,12 @@ void MainWindow::updateSelection()
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (obj->qObjListEntry == nullptr)
+		QListWidgetItem** itempointer = m_objectsInList.find (obj);
+
+		if (not itempointer)
 			continue;
 
-		int row = ui.objectList->row (obj->qObjListEntry);
+		int row = ui.objectList->row (*itempointer);
 
 		if (top == -1)
 		{
@@ -657,6 +660,7 @@ void MainWindow::updateSelection()
 			ui.objectList->model()->index (bottom, 0));
 	}
 
+	// Select multiple objects at once for performance reasons
 	ui.objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
 	g_isSelectionLocked = false;
 }
@@ -811,14 +815,8 @@ void MainWindow::updateEditModeActions()
 //
 void MainWindow::objectListDoubleClicked (QListWidgetItem* listitem)
 {
-	for (LDObject* it : m_currentDocument->objects())
-	{
-		if (it->qObjListEntry == listitem)
-		{
-			AddObjectDialog::staticDialog (it->type(), it);
-			break;
-		}
-	}
+	LDObject* object = m_objectsInList.reverseLookup (listitem);
+	AddObjectDialog::staticDialog (object->type(), object);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -634,7 +634,7 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 									  divs == HighResolution ?  "48_" : ""))
 		 << LDSpawn<LDComment> (license)
 		 << LDSpawn<LDEmpty>()
-		 << LDSpawn<LDBFC> (BFCStatement::CertifyCCW)
+		 << LDSpawn<LDBfc> (BfcStatement::CertifyCCW)
 		 << LDSpawn<LDEmpty>();
 
 	document->openForEditing();

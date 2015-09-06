@@ -761,24 +761,21 @@ LDObject* ParseLine (QString line)
 				// Handle BFC statements
 				if (tokens.size() > 2 and tokens[1] == "BFC")
 				{
-					for_enum (BFCStatement, i)
+					for_enum (BfcStatement, i)
 					{
-						if (commentTextSimplified == format ("BFC %1",
-							LDBFC::StatementStrings[int (i)]))
-						{
-							return LDSpawn<LDBFC> (i);
-						}
+						if (commentTextSimplified == format ("BFC %1", LDBfc::statementToString (i)))
+							return LDSpawn<LDBfc> (i);
 					}
 
 					// MLCAD is notorious for stuffing these statements in parts it
 					// creates. The above block only handles valid statements, so we
 					// need to handle MLCAD-style invertnext, clip and noclip separately.
 					if (commentTextSimplified == "BFC CERTIFY INVERTNEXT")
-						return LDSpawn<LDBFC> (BFCStatement::InvertNext);
+						return LDSpawn<LDBfc> (BfcStatement::InvertNext);
 					else if (commentTextSimplified == "BFC CERTIFY CLIP")
-						return LDSpawn<LDBFC> (BFCStatement::Clip);
+						return LDSpawn<LDBfc> (BfcStatement::Clip);
 					else if (commentTextSimplified == "BFC CERTIFY NOCLIP")
-						return LDSpawn<LDBFC> (BFCStatement::NoClip);
+						return LDSpawn<LDBfc> (BfcStatement::NoClip);
 				}
 
 				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
@@ -1230,11 +1227,10 @@ void LoadLogoStuds()
 //
 void LDDocument::addToSelection (LDObject* obj) // [protected]
 {
-	if (not obj->isSelected() and obj->document() == this)
+	if (obj->isSelected() and obj->document() == this)
 	{
 		m_sel << obj;
 		m_window->renderer()->compileObject (obj);
-		obj->setSelected (true);
 	}
 }
 
@@ -1242,11 +1238,10 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 //
 void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 {
-	if (obj->isSelected() and obj->document() == this)
+	if (not obj->isSelected() and obj->document() == this)
 	{
 		m_sel.removeOne (obj);
 		m_window->renderer()->compileObject (obj);
-		obj->setSelected (false);
 	}
 }
 
@@ -1256,8 +1251,8 @@ void LDDocument::clearSelection()
 {
 	for (LDObject* obj : m_sel)
 	{
+		obj->deselect();
 		m_window->renderer()->compileObject (obj);
-		obj->setSelected (false);
 	}
 
 	m_sel.clear();

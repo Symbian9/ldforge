@@ -95,7 +95,7 @@ void RadioGroup::rowBreak()
 
 // =============================================================================
 //
-void RadioGroup::addButton (const char* entry)
+void RadioGroup::addButton (QString entry)
 {
 	QRadioButton* button = new QRadioButton (entry);
 	addButton (button);

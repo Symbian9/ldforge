@@ -105,6 +105,7 @@ set (LDFORGE_HEADERS
 	src/hierarchyelement.h
 	src/guiutilities.h
 	src/documentloader.h
+	src/doublemap.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
 	src/dialogs/ldrawpathdialog.h

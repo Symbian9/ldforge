@@ -53,7 +53,7 @@ public:
 	explicit RadioGroup (const QString& title, QList<char const*> entries, int const defaultId,
 		const Qt::Orientation orient = Qt::Vertical, QWidget* parent = nullptr);
 
-	void            addButton	(const char* entry);
+	void            addButton	(QString entry);
 	void            addButton	(QRadioButton* button);
 	Iterator        begin();
 	Iterator        end();

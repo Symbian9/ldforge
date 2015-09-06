@@ -40,15 +40,15 @@ NewPartDialog::NewPartDialog (QWidget *parent) :
 	ui.useCaLicense->setChecked (m_config->useCaLicense());
 }
 
-BFCStatement NewPartDialog::getWinding() const
+BfcStatement NewPartDialog::getWinding() const
 {
 	if (ui.windingCcw->isChecked())
-		return BFCStatement::CertifyCCW;
+		return BfcStatement::CertifyCCW;
 
 	if (ui.windingCw->isChecked())
-		return BFCStatement::CertifyCW;
+		return BfcStatement::CertifyCW;
 
-	return BFCStatement::NoCertify;
+	return BfcStatement::NoCertify;
 }
 
 bool NewPartDialog::useCaLicense() const
@@ -78,7 +78,7 @@ void NewPartDialog::fillHeader (LDDocument* newdoc) const
 		objs << new LDComment (CALicenseText);
 	
 	objs << new LDEmpty();
-	objs << new LDBFC (getWinding());
+	objs << new LDBfc (getWinding());
 	objs << new LDEmpty();
 	newdoc->addObjects (objs);
 }

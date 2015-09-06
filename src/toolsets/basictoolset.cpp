@@ -252,7 +252,7 @@ void BasicToolset::newComment()
 
 void BasicToolset::newBFC()
 {
-	AddObjectDialog::staticDialog (OBJ_BFC, nullptr);
+	AddObjectDialog::staticDialog (OBJ_Bfc, nullptr);
 }
 
 void BasicToolset::edit()

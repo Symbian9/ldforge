@@ -33,7 +33,6 @@ ConfigOption (bool UseCaLicense = true)
 
 // List of all LDObjects
 QMap<int32, LDObject*> g_allObjects;
-static int32 g_idcursor = 1; // 0 shalt be null
 
 enum { MAX_LDOBJECT_IDS = (1 << 24) };
 
@@ -47,20 +46,25 @@ enum { MAX_LDOBJECT_IDS = (1 << 24) };
 LDObject::LDObject (LDDocument* document) :
 	m_isHidden (false),
 	m_isSelected (false),
-	m_document (nullptr),
-	qObjListEntry (nullptr),
-	m_isDestroyed (false)
+	m_isDestroyed (false),
+	m_document (nullptr)
 {
 	if (document)
 		document->addObject (this);
 
 	memset (m_coords, 0, sizeof m_coords);
-	chooseID();
 
-	if (id() != 0)
-		g_allObjects[id()] = this;
+	// Let's hope that nobody goes to create 17 million objects anytime soon...
+	static int32 nextId = 1; // 0 shalt be null
+	if (nextId < MAX_LDOBJECT_IDS)
+		m_id = nextId++;
+	else
+		m_id = 0;
 
-	setRandomColor (QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128));
+	if (m_id != 0)
+		g_allObjects[m_id] = this;
+
+	m_randomColor = QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128);
 }
 
 LDSubfile::LDSubfile (LDDocument* document) :
@@ -73,33 +77,13 @@ LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
 LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
 LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
-LDOBJ_DEFAULT_CTOR (LDBFC, LDObject)
+LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 
 LDObject::~LDObject()
 {
 	if (not m_isDestroyed)
 		print ("Warning: Object #%1 (%2) was not destroyed before being deleted\n", id(), this);
-}
-
-// =============================================================================
-//
-void LDObject::chooseID()
-{
-	// Let's hope that nobody goes to create 17 million objects anytime soon...
-	if (g_idcursor < MAX_LDOBJECT_IDS)
-		setID (g_idcursor++);
-	else
-		setID (0);
-}
-
-// =============================================================================
-//
-void LDObject::setVertexCoord (int i, Axis ax, double value)
-{
-	Vertex v = vertex (i);
-	v.setCoordinate (ax, value);
-	setVertex (i, v);
 }
 
 // =============================================================================
@@ -185,23 +169,9 @@ QString LDEmpty::asText() const
 
 // =============================================================================
 //
-const char* LDBFC::StatementStrings[] =
+QString LDBfc::asText() const
 {
-	"CERTIFY CCW",
-	"CCW",
-	"CERTIFY CW",
-	"CW",
-	"NOCERTIFY",
-	"INVERTNEXT",
-	"CLIP",
-	"CLIP CCW",
-	"CLIP CW",
-	"NOCLIP",
-};
-
-QString LDBFC::asText() const
-{
-	return format ("0 BFC %1", StatementStrings[int (m_statement)]);
+	return format ("0 BFC %1", statementToString());
 }
 
 // =============================================================================
@@ -226,6 +196,8 @@ QList<LDTriangle*> LDQuad::splitToTriangles()
 
 // =============================================================================
 //
+// Replace this LDObject with another LDObject. Object is deleted in the process.
+//
 void LDObject::replace (LDObject* other)
 {
 	int idx = lineNumber();
@@ -241,6 +213,8 @@ void LDObject::replace (LDObject* other)
 }
 
 // =============================================================================
+//
+// Swap this object with another.
 //
 void LDObject::swap (LDObject* other)
 {
@@ -291,6 +265,8 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 
 // =============================================================================
 //
+// Deletes this object
+//
 void LDObject::destroy()
 {
 	deselect();
@@ -311,12 +287,12 @@ void LDObject::destroy()
 
 // =============================================================================
 //
-void LDObject::setDocument (LDDocument* const& a)
+void LDObject::setDocument (LDDocument* document)
 {
-	m_document = a;
+	m_document = document;
 
-	if (a == nullptr)
-		setSelected (false);
+	if (document == nullptr)
+		m_isSelected = false;
 }
 
 // =============================================================================
@@ -414,8 +390,10 @@ QList<LDPolygon> LDSubfile::inlinePolygons()
 }
 
 // =============================================================================
-// -----------------------------------------------------------------------------
-long LDObject::lineNumber() const
+//
+// Index (i.e. line number) of this object
+//
+int LDObject::lineNumber() const
 {
 	if (document())
 	{
@@ -474,12 +452,16 @@ void LDObject::moveObjects (LDObjectList objs, const bool up)
 
 // =============================================================================
 //
+// Get type name by enumerator
+//
 QString LDObject::typeName (LDObjectType type)
 {
 	return LDObject::getDefault (type)->typeName();
 }
 
 // =============================================================================
+//
+// Get a description of a list of LDObjects
 //
 QString LDObject::describeObjects (const LDObjectList& objs)
 {
@@ -513,6 +495,8 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 
 // =============================================================================
 //
+// What object in the current file ultimately references this?
+//
 LDObject* LDObject::topLevelParent()
 {
 	LDObject* it;
@@ -524,6 +508,8 @@ LDObject* LDObject::topLevelParent()
 }
 
 // =============================================================================
+//
+// Object after this in the current file
 //
 LDObject* LDObject::next() const
 {
@@ -537,6 +523,8 @@ LDObject* LDObject::next() const
 
 // =============================================================================
 //
+// Object prior to this in the current file
+//
 LDObject* LDObject::previous() const
 {
 	int idx = lineNumber();
@@ -549,13 +537,15 @@ LDObject* LDObject::previous() const
 
 // =============================================================================
 //
-bool LDObject::previousIsInvertnext (LDBFC*& ptr)
+// Is the previous object INVERTNEXT?
+//
+bool LDObject::previousIsInvertnext (LDBfc*& ptr)
 {
 	LDObject* prev = previous();
 
-	if (prev and prev->type() == OBJ_BFC and static_cast<LDBFC*> (prev)->statement() == BFCStatement::InvertNext)
+	if (prev and prev->type() == OBJ_Bfc and static_cast<LDBfc*> (prev)->statement() == BfcStatement::InvertNext)
 	{
-		ptr = static_cast<LDBFC*> (prev);
+		ptr = static_cast<LDBfc*> (prev);
 		return true;
 	}
 
@@ -563,6 +553,8 @@ bool LDObject::previousIsInvertnext (LDBFC*& ptr)
 }
 
 // =============================================================================
+//
+// Moves this object using the given vertex as a movement List
 //
 void LDObject::move (Vertex vect)
 {
@@ -578,14 +570,66 @@ void LDObject::move (Vertex vect)
 	}
 }
 
+bool LDObject::isHidden() const
+{
+	return m_isHidden;
+}
+
+void LDObject::setHidden (bool value)
+{
+	m_isHidden = value;
+}
+
+LDObject* LDObject::parent() const
+{
+	return m_parent;
+}
+
+void LDObject::setParent (LDObject* parent)
+{
+	m_parent = parent;
+}
+
+bool LDObject::isSelected() const
+{
+	return m_isSelected;
+}
+
+qint32 LDObject::id() const
+{
+	return m_id;
+}
+
+LDColor LDObject::color() const
+{
+	return m_color;
+}
+
+QColor LDObject::randomColor() const
+{
+	return m_randomColor;
+}
+
+LDDocument* LDObject::document() const
+{
+	return m_document;
+}
+
+bool LDObject::isDestroyed() const
+{
+	return m_isDestroyed;
+}
+
 // =============================================================================
+//
+// Returns a default-constructed LDObject by the given type
 //
 LDObject* LDObject::getDefault (const LDObjectType type)
 {
 	switch (type)
 	{
 		case OBJ_Comment:		return LDSpawn<LDComment>();
-		case OBJ_BFC:			return LDSpawn<LDBFC>();
+		case OBJ_Bfc:			return LDSpawn<LDBfc>();
 		case OBJ_Line:			return LDSpawn<LDLine>();
 		case OBJ_CondLine:		return LDSpawn<LDCondLine>();
 		case OBJ_Subfile:		return LDSpawn<LDSubfile>();
@@ -602,7 +646,7 @@ LDObject* LDObject::getDefault (const LDObjectType type)
 // =============================================================================
 //
 void LDObject::invert() {}
-void LDBFC::invert() {}
+void LDBfc::invert() {}
 void LDEmpty::invert() {}
 void LDComment::invert() {}
 void LDError::invert() {}
@@ -687,9 +731,9 @@ void LDSubfile::invert()
 
 	if (idx > 0)
 	{
-		LDBFC* bfc = dynamic_cast<LDBFC*> (previous());
+		LDBfc* bfc = dynamic_cast<LDBfc*> (previous());
 
-		if (bfc and bfc->statement() == BFCStatement::InvertNext)
+		if (bfc and bfc->statement() == BfcStatement::InvertNext)
 		{
 			// This is prefixed with an invertnext, thus remove it.
 			bfc->destroy();
@@ -698,7 +742,7 @@ void LDSubfile::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document()->insertObj (idx, new LDBFC (BFCStatement::InvertNext));
+	document()->insertObj (idx, new LDBfc (BfcStatement::InvertNext));
 }
 
 // =============================================================================
@@ -792,12 +836,14 @@ static void changeProperty (LDObject* obj, T* ptr, const T& val)
 
 // =============================================================================
 //
-void LDObject::setColor (LDColor const& val)
+void LDObject::setColor (LDColor color)
 {
-	changeProperty (this, &m_color, val);
+	changeProperty (this, &m_color, color);
 }
 
 // =============================================================================
+//
+// Get a vertex by index
 //
 const Vertex& LDObject::vertex (int i) const
 {
@@ -806,9 +852,39 @@ const Vertex& LDObject::vertex (int i) const
 
 // =============================================================================
 //
+// Set a vertex to the given value
+//
 void LDObject::setVertex (int i, const Vertex& vert)
 {
 	changeProperty (this, &m_coords[i], vert);
+}
+
+LDMatrixObject::LDMatrixObject (LDDocument* document) :
+	LDObject (document),
+	m_position (Origin) {}
+
+LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document) :
+	LDObject (document),
+	m_position (pos),
+	m_transform (transform) {}
+
+void LDMatrixObject::setCoordinate (const Axis ax, double value)
+{
+	Vertex v = position();
+
+	switch (ax)
+	{
+		case X: v.setX (value); break;
+		case Y: v.setY (value); break;
+		case Z: v.setZ (value); break;
+	}
+
+	setPosition (v);
+}
+
+const Vertex& LDMatrixObject::position() const
+{
+	return m_position;
 }
 
 // =============================================================================
@@ -820,29 +896,182 @@ void LDMatrixObject::setPosition (const Vertex& a)
 
 // =============================================================================
 //
+const Matrix& LDMatrixObject::transform() const
+{
+	return m_transform;
+}
+
 void LDMatrixObject::setTransform (const Matrix& val)
 {
 	changeProperty (this, &m_transform, val);
 }
 
-// =============================================================================
-//
-void LDObject::select()
+LDError::LDError (QString contents, QString reason, LDDocument* document) :
+	LDObject (document),
+	m_contents (contents),
+	m_reason (reason) {}
+
+QString LDError::reason() const
 {
-	if (document())
-		document()->addToSelection (this);
+	return m_reason;
+}
+
+QString LDError::contents() const
+{
+	return m_contents;
+}
+
+QString LDError::fileReferenced() const
+{
+	return m_fileReferenced;
+}
+
+void LDError::setFileReferenced (QString value)
+{
+	m_fileReferenced = value;
+}
+
+LDComment::LDComment (QString text, LDDocument* document) :
+	LDObject (document),
+	m_text (text) {}
+
+QString LDComment::text() const
+{
+	return m_text;
+}
+
+void LDComment::setText (QString value)
+{
+	changeProperty (this, &m_text, value);
+}
+
+LDBfc::LDBfc (const BfcStatement type, LDDocument* document) :
+	LDObject (document),
+	m_statement (type) {}
+
+BfcStatement LDBfc::statement() const
+{
+	return m_statement;
+}
+
+void LDBfc::setStatement (BfcStatement value)
+{
+	m_statement = value;
+}
+
+QString LDBfc::statementToString() const
+{
+	return LDBfc::statementToString (statement());
+}
+
+QString LDBfc::statementToString (BfcStatement statement)
+{
+	static const char* statementStrings[] =
+	{
+		"CERTIFY CCW",
+		"CCW",
+		"CERTIFY CW",
+		"CW",
+		"NOCERTIFY",
+		"INVERTNEXT",
+		"CLIP",
+		"CLIP CCW",
+		"CLIP CW",
+		"NOCLIP",
+	};
+
+	if ((int) statement >= 0 and (int) statement < countof (statementStrings))
+		return QString::fromLatin1 (statementStrings[(int) statement]);
+	else
+		return "";
+}
+
+int LDOverlay::camera() const
+{
+	return m_camera;
+}
+
+void LDOverlay::setCamera (int value)
+{
+	m_camera = value;
+}
+
+int LDOverlay::x() const
+{
+	return m_x;
+}
+
+void LDOverlay::setX (int value)
+{
+	m_x = value;
+}
+
+int LDOverlay::y() const
+{
+	return m_y;
+}
+
+void LDOverlay::setY (int value)
+{
+	m_y = value;
+}
+
+int LDOverlay::width() const
+{
+	return m_width;
+}
+
+void LDOverlay::setWidth (int value)
+{
+	m_width = value;
+}
+
+int LDOverlay::height() const
+{
+	return m_height;
+}
+
+void LDOverlay::setHeight (int value)
+{
+	m_height = value;
+}
+
+QString LDOverlay::fileName() const
+{
+	return m_fileName;
+}
+
+void LDOverlay::setFileName (QString value)
+{
+	m_fileName = value;
 }
 
 // =============================================================================
+//
+// Selects this object.
+//
+void LDObject::select()
+{
+	if (not isSelected() and document())
+	{
+		m_isSelected = true;
+		document()->addToSelection (this);
+	}
+}
+
+// =============================================================================
+//
+// Removes this object from selection
 //
 void LDObject::deselect()
 {
 	if (isSelected() and document())
 	{
+		m_isSelected = false;
 		document()->removeFromSelection (this);
 
 		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
-		LDBFC* invertnext;
+		LDBfc* invertnext;
 
 		if (previousIsInvertnext (invertnext))
 			invertnext->deselect();
@@ -866,18 +1095,22 @@ LDObject* LDObject::createCopy() const
 
 // =============================================================================
 //
-void LDSubfile::setFileInfo (LDDocument* const& a)
+LDDocument* LDSubfile::fileInfo() const
 {
-	changeProperty (this, &m_fileInfo, a);
+	return m_fileInfo;
+}
 
-	// If it's an immediate subfile reference (i.e. this subfile belongs in an
-	// explicit file), we need to pre-compile the GL polygons for the document
-	// if they don't exist already.
-	if (a and
-		a->isCache() == false and
-		a->polygonData().isEmpty())
+void LDSubfile::setFileInfo (LDDocument* document)
+{
+	changeProperty (this, &m_fileInfo, document);
+
+	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
+	// GL polygons for the document if they don't exist already.
+	if (document and
+		document->isCache() == false and
+		document->polygonData().isEmpty())
 	{
-		a->initializeCachedData();
+		document->initializeCachedData();
 	}
 };
 

@@ -436,7 +436,7 @@ void AlgorithmToolset::subfileSelection()
 	QString			parentpath (currentDocument()->fullPath());
 
 	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
-	BFCStatement	bfctype (BFCStatement::NoCertify);
+	BfcStatement	bfctype (BfcStatement::NoCertify);
 
 	// Dirname of the new subfile
 	QString			subdirname (Dirname (parentpath));
@@ -521,9 +521,9 @@ void AlgorithmToolset::subfileSelection()
 
 	// Determine the BFC winding type used in the main document - it is to
 	// be carried over to the subfile.
-	for (LDObjectIterator<LDBFC> it (currentDocument()); it.isValid(); ++it)
+	for (LDObjectIterator<LDBfc> it (currentDocument()); it.isValid(); ++it)
 	{
-		if (isOneOf (it->statement(), BFCStatement::CertifyCCW, BFCStatement::CertifyCW, BFCStatement::NoCertify))
+		if (isOneOf (it->statement(), BfcStatement::CertifyCCW, BfcStatement::CertifyCW, BfcStatement::NoCertify))
 		{
 			bfctype = it->statement();
 			break;
@@ -550,7 +550,7 @@ void AlgorithmToolset::subfileSelection()
 		objs << LDSpawn<LDComment> (license);
 
 	objs << LDSpawn<LDEmpty>();
-	objs << LDSpawn<LDBFC> (bfctype);
+	objs << LDSpawn<LDBfc> (bfctype);
 	objs << LDSpawn<LDEmpty>();
 
 	doc->addObjects (objs);

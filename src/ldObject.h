@@ -55,7 +55,7 @@ class QListWidgetItem;
 class LDSubfile;
 class LDDocument;
 
-class LDBFC;
+class LDBfc;
 
 //
 // Object type codes.
@@ -67,7 +67,7 @@ enum LDObjectType
 	OBJ_Triangle,		//	Object represents a	triangle
 	OBJ_Line,			//	Object represents a	line
 	OBJ_CondLine,		//	Object represents a	conditional line
-	OBJ_BFC,			//	Object represents a	BFC statement
+	OBJ_Bfc,			//	Object represents a	BFC statement
 	OBJ_Overlay,		//	Object contains meta-info about an overlay image.
 	OBJ_Comment,		//	Object represents a	comment
 	OBJ_Error,			//	Object is the result of failed parsing
@@ -89,123 +89,68 @@ MAKE_ITERABLE_ENUM (LDObjectType)
 //
 class LDObject
 {
-	PROPERTY (public,		bool,				isHidden,		setHidden,		STOCK_WRITE)
-	PROPERTY (public,		bool,				isSelected,		setSelected,	STOCK_WRITE)
-	PROPERTY (public,		LDObject*,			parent,			setParent,		STOCK_WRITE)
-	PROPERTY (public,		LDDocument*,		document,		setDocument,	CUSTOM_WRITE)
-	PROPERTY (private,		int32,				id,				setID,			STOCK_WRITE)
-	PROPERTY (public,		LDColor,			color,			setColor,		CUSTOM_WRITE)
-	PROPERTY (private,		QColor,				randomColor,	setRandomColor,	STOCK_WRITE)
-
 public:
 	LDObject (LDDocument* document = nullptr);
 
-	// This object as LDraw code
-	virtual QString				asText() const = 0;
+	virtual QString asText() const = 0; // This object as LDraw code
+	LDColor color() const;
+	LDObject* createCopy() const;
+	virtual LDColor defaultColor() const = 0; // What color does the object default to?
+	void deselect(); 
+	void destroy();
+	LDDocument* document() const;
+	LDPolygon* getPolygon();
+	virtual void getVertices (QVector<Vertex>& verts) const;
+	virtual bool hasMatrix() const = 0; // Does this object have a matrix and position? (see LDMatrixObject)
+	qint32 id() const;
+	virtual void invert() = 0; // Inverts this object (winding is reversed)
+	virtual bool isColored() const = 0;
+	bool isDestroyed() const;
+	bool isHidden() const;
+	virtual bool isScemantic() const = 0; // Does this object have meaning in the part model?
+	bool isSelected() const;
+	int lineNumber() const;
+	void move (Vertex vect);
+	LDObject* next() const;
+	virtual int numVertices() const = 0;
+	LDObject* parent() const;
+	LDObject* previous() const;
+	bool previousIsInvertnext (LDBfc*& ptr);
+	QColor randomColor() const;
+	void replace (LDObject* other);
+	void select();
+	void setColor (LDColor color);
+	void setDocument (LDDocument* document);
+	void setHidden (bool value);
+	void setParent (LDObject* parent);
+	void setVertex (int i, const Vertex& vert);
+	void swap (LDObject* other);
+	LDObject* topLevelParent();
+	virtual LDObjectType type() const = 0;
+	virtual QString typeName() const = 0;
+	const Vertex& vertex (int i) const;
 
-	// Makes a copy of this object
-	LDObject*					createCopy() const;
-
-	// What color does the object default to?
-	virtual LDColor				defaultColor() const = 0;
-
-	// Deletes this object
-	void						destroy();
-
-	// Removes this object from selection
-	void						deselect();
-
-	virtual void				getVertices (QVector<Vertex>& verts) const;
-
-	// Does this object have a matrix and position? (see LDMatrixObject)
-	virtual bool				hasMatrix() const = 0;
-
-	// Inverts this object (winding is reversed)
-	virtual void				invert() = 0;
-
-	// Is this object colored?
-	virtual bool				isColored() const = 0;
-
-	// Does this object have meaning in the part model?
-	virtual bool				isScemantic() const = 0;
-
-	// Index (i.e. line number) of this object
-	long						lineNumber() const;
-
-	// Moves this object using the given vertex as a movement List
-	void						move (Vertex vect);
-
-	// Object after this in the current file
-	LDObject*					next() const;
-
-	// Number of vertices this object has
-	virtual int					numVertices() const = 0;
-
-	// Object prior to this in the current file
-	LDObject*					previous() const;
-
-	// Is the previous object INVERTNEXT?
-	bool						previousIsInvertnext (LDBFC*& ptr);
-
-	// Replace this LDObject with another LDObject. Object is deleted in the process.
-	void						replace (LDObject* other);
-
-	// Selects this object.
-	void						select();
-
-	// Set a vertex to the given value
-	void						setVertex (int i, const Vertex& vert);
-
-	// Set a single coordinate of a vertex
-	void						setVertexCoord (int i, Axis ax, double value);
-
-	// Swap this object with another.
-	void						swap (LDObject* other);
-
-	// What object in the current file ultimately references this?
-	LDObject*					topLevelParent();
-
-	// Type enumerator of this object
-	virtual LDObjectType		type() const = 0;
-
-	// Type name of this object
-	virtual QString				typeName() const = 0;
-
-	// Get a vertex by index
-	const Vertex&				vertex (int i) const;
-
-	// Get type name by enumerator
-	static QString typeName (LDObjectType type);
-
-	// Returns a default-constructed LDObject by the given type
-	static LDObject* getDefault (const LDObjectType type);
-
-	// TODO: move this to LDDocument?
-	static void moveObjects (LDObjectList objs, const bool up);
-
-	// Get a description of a list of LDObjects
 	static QString describeObjects (const LDObjectList& objs);
 	static LDObject* fromID (int id);
-	LDPolygon* getPolygon();
-	bool isDestroyed() const { return m_isDestroyed; }
-
-	// TODO: make this private!
-	QListWidgetItem* qObjListEntry;
+	static LDObject* getDefault (const LDObjectType type);
+	static void moveObjects (LDObjectList objs, const bool up); // TODO: move this to LDDocument?
+	static QString typeName (LDObjectType type);
 
 protected:
 	virtual ~LDObject();
 
 private:
-	Vertex m_coords[4];
+	bool m_isHidden;
+	bool m_isSelected;
 	bool m_isDestroyed;
-	
-	void chooseID();
+	LDObject* m_parent;
+	LDDocument* m_document;
+	qint32 m_id;
+	LDColor m_color;
+	QColor m_randomColor;
+	Vertex m_coords[4];
 };
 
-//
-// Makes a new LDObject. This makes the shared pointer always use the custom
-// deleter so that all deletions go through finalDelete();
-//
 template<typename T, typename... Args>
 T* LDSpawn (Args... args)
 {
@@ -233,39 +178,20 @@ T* LDSpawn (Args... args)
 //
 class LDMatrixObject : public LDObject
 {
-	PROPERTY (public,	Matrix,				transform,		setTransform,	CUSTOM_WRITE)
 	Vertex m_position;
 
 public:
-	LDMatrixObject (LDDocument* document = nullptr) :
-		LDObject (document),
-		m_position (Origin) {}
+	LDMatrixObject (LDDocument* document = nullptr);
+	LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document = nullptr);
 
-	LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document = nullptr) :
-		LDObject (document),
-		m_transform (transform),
-		m_position (pos) {}
-
-	inline const Vertex& position() const
-	{
-		return m_position;
-	}
-
-	void setCoordinate (const Axis ax, double value)
-	{
-		Vertex v = position();
-
-		switch (ax)
-		{
-			case X: v.setX (value); break;
-			case Y: v.setY (value); break;
-			case Z: v.setZ (value); break;
-		}
-
-		setPosition (v);
-	}
-
+	const Vertex& position() const;
+	void setCoordinate (const Axis ax, double value);
 	void setPosition (const Vertex& a);
+	const Matrix& transform() const;
+	void setTransform (const Matrix& value);
+
+private:
+	Matrix m_transform;
 };
 
 //
@@ -282,15 +208,18 @@ class LDError : public LDObject
 	LDOBJ_UNCOLORED
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
-	PROPERTY (public,	QString,	fileReferenced, setFileReferenced,	STOCK_WRITE)
-	PROPERTY (private,	QString,	contents,		setContents,		STOCK_WRITE)
-	PROPERTY (private,	QString,	reason,			setReason,			STOCK_WRITE)
 
 public:
-	LDError (QString contents, QString reason, LDDocument* document = nullptr) :
-		LDObject (document),
-		m_contents (contents),
-		m_reason (reason) {}
+	LDError (QString contents, QString reason, LDDocument* document = nullptr);
+	QString reason() const;
+	QString contents() const;
+	QString fileReferenced() const;
+	void setFileReferenced (QString value);
+
+private:
+	QString m_fileReferenced; // If this error was caused by inability to open a file, what file was that?
+	QString m_contents; // The LDraw code that was being parsed
+	QString m_reason;
 };
 
 //
@@ -313,7 +242,6 @@ class LDEmpty : public LDObject
 //
 class LDComment : public LDObject
 {
-	PROPERTY (public, QString, text, setText, STOCK_WRITE)
 	LDOBJ (Comment)
 	LDOBJ_NAME (comment)
 	LDOBJ_VERTICES (0)
@@ -322,16 +250,19 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDComment (QString text, LDDocument* document = nullptr) :
-		LDObject (document),
-		m_text (text) {}
+	LDComment (QString text, LDDocument* document = nullptr);
+	QString text() const;
+	void setText (QString value);
+
+private:
+	QString m_text;
 };
 
 //
 //
 // Represents a 0 BFC statement in the LDraw code.
 //
-enum class BFCStatement
+enum class BfcStatement
 {
 	CertifyCCW,
 	CCW,
@@ -348,24 +279,27 @@ enum class BFCStatement
 	FirstValue = CertifyCCW
 };
 
-class LDBFC : public LDObject
+class LDBfc : public LDObject
 {
 public:
-	LDOBJ (BFC)
+	LDOBJ (Bfc)
 	LDOBJ_NAME (bfc)
 	LDOBJ_VERTICES (0)
 	LDOBJ_UNCOLORED
-	LDOBJ_CUSTOM_SCEMANTIC { return (statement() == BFCStatement::InvertNext); }
+	LDOBJ_CUSTOM_SCEMANTIC { return (statement() == BfcStatement::InvertNext); }
 	LDOBJ_NO_MATRIX
-	PROPERTY (public, BFCStatement, statement, setStatement, STOCK_WRITE)
 
 public:
-	LDBFC (const BFCStatement type, LDDocument* document = nullptr) :
-		LDObject (document),
-		m_statement (type) {}
+	LDBfc (const BfcStatement type, LDDocument* document = nullptr);
 
-	// Statement strings
-	static const char* StatementStrings[];
+	BfcStatement statement() const;
+	void setStatement (BfcStatement value);
+	QString statementToString() const;
+
+	static QString statementToString (BfcStatement statement);
+
+private:
+	BfcStatement m_statement;
 };
 
 //
@@ -382,26 +316,18 @@ class LDSubfile : public LDMatrixObject
 	LDOBJ_DEFAULTCOLOR (MainColor)
 	LDOBJ_SCEMANTIC
 	LDOBJ_HAS_MATRIX
-	PROPERTY (public, LDDocument*, fileInfo, setFileInfo, CUSTOM_WRITE)
 
 public:
-	enum InlineFlag
-	{
-		DeepInline     = (1 << 0),
-		CacheInline    = (1 << 1),
-		RendererInline = (1 << 2),
-		DeepCacheInline = (DeepInline | CacheInline),
-	};
-
-	Q_DECLARE_FLAGS (InlineFlags, InlineFlag)
-
 	// Inlines this subfile.
+	LDDocument* fileInfo() const;
+	virtual void getVertices (QVector<Vertex>& verts) const override;
 	LDObjectList inlineContents (bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
-	virtual void getVertices (QVector<Vertex>& verts) const override;
-};
+	void setFileInfo (LDDocument* fileInfo);
 
-Q_DECLARE_OPERATORS_FOR_FLAGS (LDSubfile::InlineFlags)
+private:
+	LDDocument* m_fileInfo;
+};
 
 //
 // LDLine
@@ -489,8 +415,7 @@ public:
 //
 // LDOverlay
 //
-// Overlay image meta, stored in the header of parts so as to preserve overlay
-// information.
+// Overlay image meta, stored in the header of parts so as to preserve overlay information.
 //
 class LDOverlay : public LDObject
 {
@@ -500,12 +425,28 @@ class LDOverlay : public LDObject
 	LDOBJ_UNCOLORED
 	LDOBJ_NON_SCEMANTIC
 	LDOBJ_NO_MATRIX
-	PROPERTY (public,	int,		camera,		setCamera,		STOCK_WRITE)
-	PROPERTY (public,	int,		x,			setX,			STOCK_WRITE)
-	PROPERTY (public,	int,		y,			setY,			STOCK_WRITE)
-	PROPERTY (public,	int,		width,		setWidth,		STOCK_WRITE)
-	PROPERTY (public,	int,		height,		setHeight,		STOCK_WRITE)
-	PROPERTY (public,	QString,	fileName,	setFileName,	STOCK_WRITE)
+
+public:
+	int camera() const;
+	QString fileName() const;
+	int height() const;
+	void setCamera (int value);
+	void setFileName (QString value);
+	void setHeight (int value);
+	void setWidth (int value);
+	void setX (int value);
+	void setY (int value);
+	int width() const;
+	int x() const;
+	int y() const;
+
+private:
+	int m_camera;
+	int m_x;
+	int m_y;
+	int m_width;
+	int m_height;
+	QString m_fileName;
 };
 
 // Other common LDraw stuff

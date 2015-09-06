@@ -29,7 +29,7 @@ public:
 
 	QString author() const;
 	void fillHeader (LDDocument* newdoc) const;
-	BFCStatement getWinding() const;
+	BfcStatement getWinding() const;
 	bool useCaLicense() const;
 	QString title() const;
 

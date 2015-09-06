@@ -27,6 +27,7 @@
 #include "ldObject.h"
 #include "colors.h"
 #include "configurationvaluebag.h"
+#include "doublemap.h"
 
 class MessageManager;
 class MainWindow;
@@ -146,6 +147,7 @@ private:
 	class QSettings* m_settings;
 	QList<LDDocument*> m_documents;
 	LDDocument* m_currentDocument;
+	DoubleMap<LDObject*, QListWidgetItem*> m_objectsInList;
 
 private slots:
 	void selectionChanged();
