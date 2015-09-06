@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DownloadFrom</class>
- <widget class="QDialog" name="DownloadFrom">
+ <class>PartDownloader</class>
+ <widget class="QDialog" name="PartDownloader">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -32,18 +32,25 @@
     </widget>
    </item>
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <property name="fieldGrowthPolicy">
-      <enum>QFormLayout::ExpandingFieldsGrow</enum>
-     </property>
+    <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
+      <widget class="QLabel" name="fileNameLabel">
+       <property name="text">
+        <string>File name:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="filename"/>
+     </item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Source:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="1" column="1">
       <widget class="QComboBox" name="source">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -63,20 +70,10 @@
        </item>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="fileNameLabel">
-       <property name="text">
-        <string>File name:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="fname"/>
-     </item>
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="progress">
+    <widget class="QTableWidget" name="progressTable">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -119,12 +116,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>filename</tabstop>
+  <tabstop>source</tabstop>
+  <tabstop>progressTable</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DownloadFrom</receiver>
+   <receiver>PartDownloader</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

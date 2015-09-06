@@ -22,7 +22,7 @@
 #include "../glRenderer.h"
 #include "../ldDocument.h"
 #include "../mainwindow.h"
-#include "../partDownloader.h"
+#include "../partdownloader.h"
 #include "../primitives.h"
 #include "../dialogs/configdialog.h"
 #include "../dialogs/ldrawpathdialog.h"

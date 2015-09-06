@@ -52,7 +52,8 @@ set (LDFORGE_SOURCES
 	src/mainwindow.cpp
 	src/messageLog.cpp
 	src/miscallenous.cpp
-	src/partDownloader.cpp
+	src/partdownloader.cpp
+	src/partdownloadrequest.cpp
 	src/primitives.cpp
 	src/radioGroup.cpp
 	src/ringFinder.cpp
@@ -102,7 +103,8 @@ set (LDFORGE_HEADERS
 	src/mainwindow.h
 	src/messageLog.h
 	src/miscallenous.h
-	src/partDownloader.h
+	src/partdownloader.h
+	src/partdownloadrequest.h
 	src/primitives.h
 	src/radioGroup.h
 	src/ringFinder.h
@@ -131,7 +133,6 @@ set (LDFORGE_FORMS
 	ui/about.ui
 	ui/addhistoryline.ui
 	ui/coverer.ui
-	ui/downloadfrom.ui
 	ui/edger2.ui
 	ui/editraw.ui
 	ui/extprogpath.ui
@@ -145,6 +146,7 @@ set (LDFORGE_FORMS
 	ui/rotpoint.ui
 	ui/ytruder.ui
 	src/mainwindow.ui
+	src/partdownloader.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
 	src/dialogs/ldrawpathdialog.ui

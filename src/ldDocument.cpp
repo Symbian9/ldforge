@@ -28,7 +28,7 @@
 #include "editHistory.h"
 #include "glRenderer.h"
 #include "glCompiler.h"
-#include "partDownloader.h"
+#include "partdownloader.h"
 #include "ldpaths.h"
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
