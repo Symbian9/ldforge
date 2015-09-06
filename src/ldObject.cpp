@@ -340,11 +340,7 @@ LDObjectList LDSubfile::inlineContents (bool deep, bool render)
 
 	// Transform the objects
 	for (LDObject* obj : objs)
-	{
-		// Set the parent now so we know what inlined the object.
-		obj->setParent (this);
 		TransformObject (obj, transform(), position(), color());
-	}
 
 	return objs;
 }
@@ -495,20 +491,6 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 
 // =============================================================================
 //
-// What object in the current file ultimately references this?
-//
-LDObject* LDObject::topLevelParent()
-{
-	LDObject* it;
-	
-	for (it = this; it->parent(); it = it->parent())
-		;
-
-	return it;
-}
-
-// =============================================================================
-//
 // Object after this in the current file
 //
 LDObject* LDObject::next() const
@@ -578,16 +560,6 @@ bool LDObject::isHidden() const
 void LDObject::setHidden (bool value)
 {
 	m_isHidden = value;
-}
-
-LDObject* LDObject::parent() const
-{
-	return m_parent;
-}
-
-void LDObject::setParent (LDObject* parent)
-{
-	m_parent = parent;
 }
 
 bool LDObject::isSelected() const

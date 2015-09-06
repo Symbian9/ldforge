@@ -113,7 +113,6 @@ public:
 	void move (Vertex vect);
 	LDObject* next() const;
 	virtual int numVertices() const = 0;
-	LDObject* parent() const;
 	LDObject* previous() const;
 	bool previousIsInvertnext (LDBfc*& ptr);
 	QColor randomColor() const;
@@ -122,7 +121,6 @@ public:
 	void setColor (LDColor color);
 	void setDocument (LDDocument* document);
 	void setHidden (bool value);
-	void setParent (LDObject* parent);
 	void setVertex (int i, const Vertex& vert);
 	void swap (LDObject* other);
 	LDObject* topLevelParent();
