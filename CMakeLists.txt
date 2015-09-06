@@ -185,14 +185,14 @@ if (USE_QT5)
 	qt5_generate_moc (LDFORGE_MOC ${LDFORGE_HEADERS})
 	qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})
 	qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
-	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_MOC}
+	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS} ${LDFORGE_MOC}
 		${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS}
 		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
 else()
 	qt4_wrap_cpp (LDFORGE_MOC ${LDFORGE_HEADERS})
 	qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
-	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_RCC}
+	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS} ${LDFORGE_RCC}
 		${LDFORGE_FORMS_HEADERS} ${LDFORGE_MOC}
 		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
 endif()
