@@ -188,7 +188,14 @@ void FileToolset::openSubfiles()
 
 void FileToolset::downloadFrom()
 {
-	PartDownloader::staticBegin();
+	PartDownloader* dialog = new PartDownloader (m_window);
+	connect (dialog, &PartDownloader::primaryFileDownloaded, [&]()
+	{
+		m_window->changeDocument (dialog->primaryFile());
+		m_window->doFullRefresh();
+		m_window->renderer()->resetAngles();
+	});
+	dialog->exec();
 }
 
 void FileToolset::makePrimitive()

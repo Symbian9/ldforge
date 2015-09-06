@@ -31,12 +31,12 @@ class QNetworkRequest;
 class QNetworkReply;
 class QAbstractButton;
 
-// =============================================================================
-//
 class PartDownloader : public QDialog, public HierarchyElement
 {
+	Q_OBJECT
+
 public:
-	enum Source
+	enum SourceType
 	{
 		PartsTracker,
 		CustomURL,
@@ -57,39 +57,39 @@ public:
 
 	using RequestList = QList<PartDownloadRequest*>;
 
-	Q_OBJECT
-	PROPERTY (public,	LDDocument*, 		primaryFile,		setPrimaryFile,		STOCK_WRITE)
-	PROPERTY (public,	bool,				isAborted,			setAborted,			STOCK_WRITE)
-	PROPERTY (private,	Ui_DownloadFrom*,	form,				setForm,			STOCK_WRITE)
-	PROPERTY (private,	QStringList,		filesToDownload,	setFilesToDownload,	STOCK_WRITE)
-	PROPERTY (private,	RequestList,		requests,			setRequests,		STOCK_WRITE)
-	PROPERTY (private,	QPushButton*,		downloadButton,		setDownloadButton,	STOCK_WRITE)
+	explicit PartDownloader (QWidget* parent = nullptr);
+	virtual ~PartDownloader();
 
-public:
-	explicit		PartDownloader (QWidget* parent = nullptr);
-	virtual			~PartDownloader();
+	void addFile (LDDocument* f);
+	QPushButton* button (Button i);
+	Q_SLOT void buttonClicked (QAbstractButton* btn);
+	Q_SLOT void checkIfFinished();
+	void checkValidPath();
+	void downloadFile (QString dest, QString url, bool primary);
+	void downloadFromPartsTracker (QString file);
+	QString downloadPath();
+	bool isAborted() const;
+	void modifyDestination (QString& dest) const;
+	LDDocument* primaryFile() const;
+	class QTableWidget* progressTable() const;
+	void setPrimaryFile (LDDocument* document);
+	void setSourceType (SourceType src);
+	Q_SLOT void sourceChanged (int i);
+	SourceType sourceType() const;
+	QString url();
 
-	void			addFile (LDDocument* f);
-	bool			checkValidPath();
-	void			downloadFile (QString dest, QString url, bool primary);
-	void			downloadFromPartsTracker (QString file);
-	QPushButton*	getButton (Button i);
-	QString			getURL();
-	Source			getSource() const;
-	void			setSource (Source src);
-	void			modifyDestination (QString& dest) const;
-
-	QString			getDownloadPath();
-	static void		staticBegin();
-
-public slots:
-	void			buttonClicked (QAbstractButton* btn);
-	void			checkIfFinished();
-	void			sourceChanged (int i);
+signals:
+	void primaryFileDownloaded();
 
 private:
-	Source m_source;
+	class Ui_DownloadFrom& ui;
+	QStringList m_filesToDownload;
+	RequestList m_requests;
+	QPushButton* m_downloadButton;
+	SourceType m_source;
 	QList<LDDocument*> m_files;
+	LDDocument* m_primaryFile;
+	bool m_isAborted;
 };
 
 class PartDownloadRequest : public QObject
@@ -108,7 +108,9 @@ public:
 	explicit PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent);
 	virtual ~PartDownloadRequest();
 
+	Q_SLOT void abort();
 	QString destination() const;
+	Q_SLOT void downloadFinished();
 	bool failed() const;
 	QString filePath() const;
 	bool isFinished() const;
@@ -118,16 +120,12 @@ public:
 	qint64 numBytesRead() const;
 	qint64 numBytesTotal() const;
 	PartDownloader* prompt() const;
+	Q_SLOT void readFromNetworkReply();
 	void setTableRow (int value);
 	int tableRow() const;
+	Q_SLOT void updateDownloadProgress (qint64 recv, qint64 total);
 	void updateToTable();
 	QString url() const;
-
-public slots:
-	void abort();
-	void downloadFinished();
-	void downloadProgress (qint64 recv, qint64 total);
-	void readyRead();
 
 private:
 	int m_tableRow;

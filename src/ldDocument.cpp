@@ -583,20 +583,16 @@ void OpenMainModel (QString path)
 
 	if (g_win->configBag()->tryDownloadMissingFiles() and not unknowns.isEmpty())
 	{
-		PartDownloader dl;
+		PartDownloader dl (g_win);
+		dl.setSourceType (PartDownloader::PartsTracker);
+		dl.setPrimaryFile (file);
 
-		if (dl.checkValidPath())
-		{
-			dl.setSource (PartDownloader::PartsTracker);
-			dl.setPrimaryFile (file);
+		for (QString const& unknown : unknowns)
+			dl.downloadFromPartsTracker (unknown);
 
-			for (QString const& unknown : unknowns)
-				dl.downloadFromPartsTracker (unknown);
-
-			dl.exec();
-			dl.checkIfFinished();
-			file->reloadAllSubfiles();
-		}
+		dl.exec();
+		dl.checkIfFinished();
+		file->reloadAllSubfiles();
 	}
 }
 
