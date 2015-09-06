@@ -79,33 +79,33 @@ set (LDFORGE_SOURCES
 )
 
 set (LDFORGE_HEADERS
-	src/macros.h
-	src/crashCatcher.h
-	src/colors.h
-	src/ringFinder.h
-	src/ldDocument.h
 	src/addObjectDialog.h
-	src/partDownloader.h
-	src/ldObject.h
-    src/ldObjectMath.h
-	src/primitives.h
-	src/miscallenous.h
-	src/messageLog.h
-	src/dialogs.h
-	src/radioGroup.h
-	src/documentation.h
-	src/main.h
 	src/basics.h
-	src/glRenderer.h
-	src/glCompiler.h
-	src/mainwindow.h
-	src/editHistory.h
-	src/format.h
-	src/ldpaths.h
-	src/hierarchyelement.h
-	src/guiutilities.h
+	src/colors.h
+	src/crashCatcher.h
+	src/dialogs.h
+	src/documentation.h
 	src/documentloader.h
 	src/doublemap.h
+	src/editHistory.h
+	src/format.h
+	src/glCompiler.h
+	src/glRenderer.h
+	src/guiutilities.h
+	src/hierarchyelement.h
+	src/ldDocument.h
+	src/ldObject.h
+	src/ldObjectMath.h
+	src/ldpaths.h
+	src/macros.h
+	src/main.h
+	src/mainwindow.h
+	src/messageLog.h
+	src/miscallenous.h
+	src/partDownloader.h
+	src/primitives.h
+	src/radioGroup.h
+	src/ringFinder.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
 	src/dialogs/ldrawpathdialog.h
@@ -114,7 +114,7 @@ set (LDFORGE_HEADERS
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
 	src/editmodes/drawMode.h
-    src/editmodes/linePathMode.h
+	src/editmodes/linePathMode.h
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
