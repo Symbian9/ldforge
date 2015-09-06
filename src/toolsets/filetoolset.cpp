@@ -107,7 +107,7 @@ void FileToolset::setLDrawPath()
 
 void FileToolset::exit()
 {
-	Exit();
+	::exit (EXIT_SUCCESS);
 }
 
 void FileToolset::insertFrom()

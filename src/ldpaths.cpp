@@ -20,7 +20,7 @@ void LDPaths::checkPaths()
 		connect (m_dialog, SIGNAL (pathChanged(QString)), this, SLOT (configurePaths (QString)));
 
 		if (not m_dialog->exec())
-			Exit();
+			exit (1);
 		else
 			m_config->setLDrawPath (m_dialog->path());
 	}

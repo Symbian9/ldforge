@@ -43,7 +43,7 @@ LDrawPathDialog::LDrawPathDialog (const QString& defaultPath, bool validDefault,
 
 	connect (ui.path, SIGNAL (textChanged (QString)), this, SIGNAL (pathChanged (QString)));
 	connect (ui.searchButton, SIGNAL (clicked()), this, SLOT (searchButtonClicked()));
-	connect (ui.buttonBox, SIGNAL (rejected()), this, validDefault ? SLOT (reject()) : SLOT (slot_exit()));
+	connect (ui.buttonBox, SIGNAL (rejected()), this, SLOT (reject()));
 	connect (ui.buttonBox, SIGNAL (accepted()), this, SLOT (accept()));
 	setPath (defaultPath);
 }
@@ -79,11 +79,6 @@ void LDrawPathDialog::searchButtonClicked()
 
 	if (not newpath.isEmpty())
 		setPath (newpath);
-}
-
-void LDrawPathDialog::slot_exit()
-{
-	Exit();
 }
 
 void LDrawPathDialog::setStatusText (const QString& statusText, bool ok)

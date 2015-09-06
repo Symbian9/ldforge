@@ -31,6 +31,3 @@
 #include "version.h"
 #include "format.h"
 #include "hierarchyelement.h"
-
-bool IsExiting();
-void Exit();

@@ -34,9 +34,6 @@
 #include "ldpaths.h"
 
 MainWindow* g_win = nullptr;
-static QString g_versionString, g_fullVersionString;
-static bool g_IsExiting (false);
-
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
@@ -62,18 +59,5 @@ int main (int argc, char* argv[])
 	for (int arg = 1; arg < argc; ++arg)
 		OpenMainModel (QString::fromLocal8Bit (argv[arg]));
 
-	int result = app.exec();
-	g_IsExiting = true;
-	return result;
-}
-
-bool IsExiting()
-{
-	return g_IsExiting;
-}
-
-void Exit()
-{
-	g_IsExiting = true;
-	exit (EXIT_SUCCESS);
+	return app.exec();
 }

@@ -78,8 +78,8 @@ LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 
 LDObject::~LDObject()
 {
-	if (not IsExiting() and not m_isDestroyed)
-		print ("Warning: Object #%1 was not destroyed before getting deleted\n", id());
+	if (not m_isDestroyed)
+		print ("Warning: Object #%1 (%2) was not destroyed before being deleted\n", id(), this);
 }
 
 // =============================================================================
@@ -293,26 +293,20 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 //
 void LDObject::destroy()
 {
-	// Don't bother during program termination (FIXME)
-	if (IsExiting() == false)
-	{
-		deselect();
+	deselect();
 
-		// If this object was associated to a file, remove it off it now
-		if (document())
-			document()->forgetObject (this);
+	// If this object was associated to a file, remove it off it now
+	if (document())
+		document()->forgetObject (this);
 
-		// Delete the GL lists
-		if (g_win)
-			g_win->renderer()->forgetObject (this);
+	// Delete the GL lists
+	if (g_win)
+		g_win->renderer()->forgetObject (this);
 
-		// Remove this object from the list of LDObjects
-		g_allObjects.erase (g_allObjects.find (id()));
+	// Remove this object from the list of LDObjects
+	g_allObjects.erase (g_allObjects.find (id()));
 
-		m_isDestroyed = true;
-	}
-
-	delete this;
+	m_isDestroyed = true;
 }
 
 // =============================================================================
