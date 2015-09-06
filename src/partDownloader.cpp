@@ -312,7 +312,7 @@ void PartDownloader::checkIfFinished()
 		if (not req->isFinished())
 			return;
 
-		if (req->state() == PartDownloadRequest::State::Failed)
+		if (req->failed())
 			failed = true;
 	}
 
@@ -364,14 +364,21 @@ QPushButton* PartDownloader::getButton (PartDownloader::Button i)
 	return nullptr;
 }
 
-// =============================================================================
+void PartDownloader::addFile (LDDocument* f)
+{
+	m_files << f;
+}
+
 //
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
 PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent) :
 	QObject (parent),
-    m_state (State::Requesting),
+	m_state (State::Requesting),
 	m_prompt (parent),
 	m_url (url),
-	m_destinaton (dest),
+	m_destination (dest),
 	m_filePath (parent->getDownloadPath() + DIRSLASH + dest),
 	m_networkManager (new QNetworkAccessManager),
 	m_isFirstUpdate (true),
@@ -380,7 +387,6 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 {
 	// Make sure that we have a valid destination.
 	QString dirpath = Dirname (filePath());
-
 	QDir dir (dirpath);
 
 	if (not dir.exists())
@@ -391,73 +397,127 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 			Critical (format (tr ("Couldn't create the directory %1!"), dirpath));
 	}
 
-	setNetworkReply (networkManager()->get (QNetworkRequest (QUrl (url))));
+	m_networkReply = m_networkManager->get (QNetworkRequest (QUrl (url)));
 	connect (networkReply(), SIGNAL (finished()), this, SLOT (downloadFinished()));
 	connect (networkReply(), SIGNAL (readyRead()), this, SLOT (readyRead()));
 	connect (networkReply(), SIGNAL (downloadProgress (qint64, qint64)),
 		this, SLOT (downloadProgress (qint64, qint64)));
 }
 
-// =============================================================================
-//
 PartDownloadRequest::~PartDownloadRequest() {}
 
-// =============================================================================
-//
+bool PartDownloadRequest::failed() const
+{
+	return m_state == State::Failed;
+}
+
+int PartDownloadRequest::tableRow() const
+{
+	return m_tableRow;
+}
+
+void PartDownloadRequest::setTableRow (int value)
+{
+	m_tableRow = value;
+}
+
+PartDownloader* PartDownloadRequest::prompt() const
+{
+	return m_prompt;
+}
+
+QString PartDownloadRequest::url() const
+{
+	return m_url;
+}
+
+QString PartDownloadRequest::destination() const
+{
+	return m_destination;
+}
+
+QString PartDownloadRequest::filePath() const
+{
+	return m_filePath;
+}
+
+bool PartDownloadRequest::isFirstUpdate() const
+{
+	return m_isFirstUpdate;
+}
+
+qint64 PartDownloadRequest::numBytesRead() const
+{
+	return m_numBytesRead;
+}
+
+qint64 PartDownloadRequest::numBytesTotal() const
+{
+	return m_numBytesTotal;
+}
+
+bool PartDownloadRequest::isPrimary() const
+{
+	return m_isPrimary;
+}
+
+QNetworkReply* PartDownloadRequest::networkReply() const
+{
+	return m_networkReply;
+}
+
 void PartDownloadRequest::updateToTable()
 {
-	int const labelcol = PartDownloader::PartLabelColumn;
-	int const progcol = PartDownloader::ProgressColumn;
 	QTableWidget* table = prompt()->form()->progress;
-	QProgressBar* prog;
 
-	switch (state())
+	switch (m_state)
 	{
-        case State::Requesting:
-        case State::Downloading:
+	case State::Requesting:
+	case State::Downloading:
 		{
-			prog = qobject_cast<QProgressBar*> (table->cellWidget (tableRow(), progcol));
+			QWidget* cellwidget = table->cellWidget (tableRow(), PartDownloader::ProgressColumn);
+			QProgressBar* progressBar = qobject_cast<QProgressBar*> (cellwidget);
 
-			if (not prog)
+			if (not progressBar)
 			{
-				prog = new QProgressBar;
-				table->setCellWidget (tableRow(), progcol, prog);
+				progressBar = new QProgressBar;
+				table->setCellWidget (tableRow(), PartDownloader::ProgressColumn, progressBar);
 			}
 
-			prog->setRange (0, numBytesTotal());
-			prog->setValue (numBytesRead());
-		} break;
+			progressBar->setRange (0, numBytesTotal());
+			progressBar->setValue (numBytesRead());
+		}
+		break;
 
-        case State::Finished:
-        case State::Failed:
+	case State::Finished:
+	case State::Failed:
 		{
-            const QString text = (state() == State::Finished)
+			const QString text = (m_state == State::Finished)
 				? "<b><span style=\"color: #080\">FINISHED</span></b>"
 				: "<b><span style=\"color: #800\">FAILED</span></b>";
 
 			QLabel* lb = new QLabel (text);
 			lb->setAlignment (Qt::AlignCenter);
-			table->setCellWidget (tableRow(), progcol, lb);
-		} break;
+			table->setCellWidget (tableRow(), PartDownloader::ProgressColumn, lb);
+		}
+		break;
 	}
 
-	QLabel* lb = qobject_cast<QLabel*> (table->cellWidget (tableRow(), labelcol));
+	QLabel* label = qobject_cast<QLabel*> (table->cellWidget (tableRow(), PartDownloader::PartLabelColumn));
 
 	if (isFirstUpdate())
 	{
-		lb = new QLabel (format ("<b>%1</b>", destinaton()), table);
-		table->setCellWidget (tableRow(), labelcol, lb);
+		label = new QLabel (format ("<b>%1</b>", destination()), table);
+		table->setCellWidget (tableRow(), PartDownloader::PartLabelColumn, label);
 	}
 
 	// Make sure that the cell is big enough to contain the label
-	if (table->columnWidth (labelcol) < lb->width())
-		table->setColumnWidth (labelcol, lb->width());
+	if (table->columnWidth (PartDownloader::PartLabelColumn) < label->width())
+		table->setColumnWidth (PartDownloader::PartLabelColumn, label->width());
 
-	setFirstUpdate (true);
+	m_isFirstUpdate = false;
 }
 
-// =============================================================================
-//
 void PartDownloadRequest::downloadFinished()
 {
 	if (networkReply()->error() != QNetworkReply::NoError)
@@ -465,28 +525,28 @@ void PartDownloadRequest::downloadFinished()
 		if (isPrimary() and not prompt()->isAborted())
 			Critical (networkReply()->errorString());
 
-		print ("Unable to download %1: %2\n", m_destinaton, networkReply()->errorString());
-        setState (State::Failed);
+		print ("Unable to download %1: %2\n", destination(), networkReply()->errorString());
+		m_state = State::Failed;
 	}
-    else if (state() != State::Failed)
+	else if (m_state != State::Failed)
 	{
-        setState (State::Finished);
+		m_state = State::Finished;
 	}
 
-	setNumBytesRead (numBytesTotal());
+	m_numBytesRead = numBytesTotal();
 	updateToTable();
 
-	if (filePointer())
+	if (m_filePointer)
 	{
-		filePointer()->close();
-		delete filePointer();
-		setFilePointer (nullptr);
+		m_filePointer->close();
+		delete m_filePointer;
+		m_filePointer = nullptr;
 
-        if (state() == State::Failed)
+		if (m_state == State::Failed)
 			QFile::remove (filePath());
 	}
 
-    if (state() != State::Finished)
+	if (m_state != State::Finished)
 	{
 		prompt()->checkIfFinished();
 		return;
@@ -524,42 +584,30 @@ void PartDownloadRequest::downloadFinished()
 	prompt()->checkIfFinished();
 }
 
-// =============================================================================
-//
-void PartDownloader::addFile (LDDocument* f)
-{
-	m_files << f;
-}
-
-// =============================================================================
-//
 void PartDownloadRequest::downloadProgress (int64 recv, int64 total)
 {
-	setNumBytesRead (recv);
-	setNumBytesTotal (total);
-    setState (State::Downloading);
+	m_numBytesRead = recv;
+	m_numBytesTotal = total;
+	m_state = State::Downloading;
 	updateToTable();
 }
 
-// =============================================================================
-//
 void PartDownloadRequest::readyRead()
 {
-    if (state() == State::Failed)
+	if (m_state == State::Failed)
 		return;
 
-	if (filePointer() == nullptr)
+	if (m_filePointer == nullptr)
 	{
 		m_filePath.replace ("\\", "/");
 
-		// We have already asked the user whether we can overwrite so we're good
-		// to go here.
-		setFilePointer (new QFile (filePath().toLocal8Bit()));
+		// We have already asked the user whether we can overwrite so we're good to go here.
+		m_filePointer = new QFile (filePath().toLocal8Bit());
 
-		if (not filePointer()->open (QIODevice::WriteOnly))
+		if (not m_filePointer->open (QIODevice::WriteOnly))
 		{
 			Critical (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
-            setState (State::Failed);
+			m_state = State::Failed;
 			networkReply()->abort();
 			updateToTable();
 			prompt()->checkIfFinished();
@@ -567,18 +615,14 @@ void PartDownloadRequest::readyRead()
 		}
 	}
 
-	filePointer()->write (networkReply()->readAll());
+	m_filePointer->write (networkReply()->readAll());
 }
 
-// =============================================================================
-//
 bool PartDownloadRequest::isFinished() const
 {
-    return isOneOf (state(), State::Finished, State::Failed);
+	return isOneOf (m_state, State::Finished, State::Failed);
 }
 
-// =============================================================================
-//
 void PartDownloadRequest::abort()
 {
 	networkReply()->abort();

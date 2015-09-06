@@ -92,45 +92,55 @@ private:
 	QList<LDDocument*> m_files;
 };
 
-// =============================================================================
-//
 class PartDownloadRequest : public QObject
 {
-public:
-    enum class State
-    {
-        Requesting,
-        Downloading,
-        Finished,
-        Failed,
-    };
-
 	Q_OBJECT
-	PROPERTY (public,	int,						tableRow,		setTableRow,		STOCK_WRITE)
-    PROPERTY (private,	State,                      state,			setState,			STOCK_WRITE)
-	PROPERTY (private,	PartDownloader*,			prompt,			setPrompt,			STOCK_WRITE)
-	PROPERTY (private,	QString,					url,			setURL,				STOCK_WRITE)
-	PROPERTY (private,	QString,					destinaton,		setDestination,		STOCK_WRITE)
-	PROPERTY (private,	QString,					filePath,		setFilePath,		STOCK_WRITE)
-	PROPERTY (private,	QNetworkAccessManager*,		networkManager,	setNetworkManager,	STOCK_WRITE)
-	PROPERTY (private,	QNetworkReply*,				networkReply,	setNetworkReply,	STOCK_WRITE)
-	PROPERTY (private,	bool,						isFirstUpdate,	setFirstUpdate,		STOCK_WRITE)
-	PROPERTY (private,	int64,						numBytesRead,	setNumBytesRead,	STOCK_WRITE)
-	PROPERTY (private,	int64,						numBytesTotal,	setNumBytesTotal,	STOCK_WRITE)
-	PROPERTY (private,	bool,						isPrimary,		setPrimary,			STOCK_WRITE)
-	PROPERTY (private,	QFile*,						filePointer,	setFilePointer,		STOCK_WRITE)
 
 public:
+	enum class State
+	{
+		Requesting,
+		Downloading,
+		Finished,
+		Failed,
+	};
+
 	explicit PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent);
-	PartDownloadRequest (const PartDownloadRequest&) = delete;
 	virtual ~PartDownloadRequest();
-	void updateToTable();
+
+	QString destination() const;
+	bool failed() const;
+	QString filePath() const;
 	bool isFinished() const;
-	void operator= (const PartDownloadRequest&) = delete;
+	bool isFirstUpdate() const;
+	bool isPrimary() const;
+	QNetworkReply* networkReply() const;
+	qint64 numBytesRead() const;
+	qint64 numBytesTotal() const;
+	PartDownloader* prompt() const;
+	void setTableRow (int value);
+	int tableRow() const;
+	void updateToTable();
+	QString url() const;
 
 public slots:
-	void downloadFinished();
-	void readyRead();
-	void downloadProgress (qint64 recv, qint64 total);
 	void abort();
+	void downloadFinished();
+	void downloadProgress (qint64 recv, qint64 total);
+	void readyRead();
+
+private:
+	int m_tableRow;
+	State m_state;
+	PartDownloader* m_prompt;
+	QString m_url;
+	QString m_destination;
+	QString m_filePath;
+	QNetworkAccessManager* m_networkManager;
+	QNetworkReply* m_networkReply;
+	bool m_isFirstUpdate;
+	bool m_isPrimary;
+	qint64 m_numBytesRead;
+	qint64 m_numBytesTotal;
+	QFile* m_filePointer;
 };
