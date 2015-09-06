@@ -103,25 +103,24 @@ void ViewToolset::resetView()
 
 void ViewToolset::screenshot()
 {
-	setlocale (LC_ALL, "C");
-
-	int w, h;
-	uchar* imgdata = m_window->renderer()->getScreencap (w, h);
-	QImage img = GetImageFromScreencap (imgdata, w, h);
-
+	const char* imageformats = "PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;"
+		"PPM images (*.ppm);;X11 Bitmaps (*.xbm);;X11 Pixmaps (*.xpm);;All Files (*.*)";
+	int width = m_window->renderer()->width();
+	int height = m_window->renderer()->height();
+	QByteArray capture = m_window->renderer()->capturePixels();
+	const uchar* imagedata = reinterpret_cast<const uchar*> (capture.constData());
+	// GL and Qt formats have R and B swapped. Also, GL flips Y - correct it as well.
+	QImage image = QImage (imagedata, width, height, QImage::Format_ARGB32).rgbSwapped().mirrored();
 	QString root = Basename (currentDocument()->name());
 
 	if (root.right (4) == ".dat")
 		root.chop (4);
 
 	QString defaultname = (root.length() > 0) ? format ("%1.png", root) : "";
-	QString fname = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname,
-				"PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;All Files (*.*)");
+	QString filename = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname, imageformats);
 
-	if (not fname.isEmpty() and not img.save (fname))
-		Critical (format ("Couldn't open %1 for writing to save screencap: %2", fname, strerror (errno)));
-
-	delete[] imgdata;
+	if (not filename.isEmpty() and not image.save (filename))
+		Critical (format ("Couldn't open %1 for writing to save screencap: %2", filename, strerror (errno)));
 }
 
 void ViewToolset::axes()
@@ -184,7 +183,7 @@ void ViewToolset::setDrawDepth()
 
 	bool ok;
 	double depth = QInputDialog::getDouble (m_window, "Set Draw Depth",
-		format ("Depth value for %1 Camera:", m_window->renderer()->getCameraName()),
+		format ("Depth value for %1:", m_window->renderer()->currentCameraName()),
 		m_window->renderer()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
 
 	if (ok)

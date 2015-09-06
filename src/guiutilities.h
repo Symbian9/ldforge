@@ -28,4 +28,5 @@ public:
 
 	QIcon makeColorIcon (LDColor ldcolor, int size);
 	void fillUsedColorsToComboBox (class QComboBox* box);
+	QColor mainColorRepresentation();
 };

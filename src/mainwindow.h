@@ -137,7 +137,6 @@ private:
 	QList<LDQuickColor>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;
-	MessageManager* m_msglog;
 	class Ui_MainWindow& ui;
 	QTabBar* m_tabs;
 	bool m_updatingTabs;
@@ -176,9 +175,6 @@ bool Confirm (const QString& message);
 
 // Displays an error prompt with the given message
 void Critical (const QString& message);
-
-// Returns a QImage from the given raw GL data
-QImage GetImageFromScreencap (uchar* data, int w, int h);
 
 // Takes in pairs of radio buttons and respective values and finds the first selected one.
 // Returns returns the value of the first found radio button that was checked by the user.

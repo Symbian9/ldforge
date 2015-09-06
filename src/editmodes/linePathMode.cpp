@@ -13,7 +13,7 @@ void LinePathMode::render (QPainter& painter) const
 	points3d << renderer()->position3D();
 
 	for (Vertex const& vrt : points3d)
-		points << renderer()->coordconv3_2 (vrt);
+		points << renderer()->convert3dTo2d (vrt);
 
 	painter.setPen (renderer()->textPen());
 

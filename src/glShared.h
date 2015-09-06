@@ -39,32 +39,37 @@ struct LDPolygon
 	}
 };
 
-enum EVBOSurface
+enum SurfaceVboType
 {
-	VBOSF_Lines,
-	VBOSF_Triangles,
-	VBOSF_Quads,
-	VBOSF_CondLines,
+	LinesVbo,
+	TrianglesVbo,
+	QuadsVbo,
+	ConditionalLinesVbo,
 
-	VBOSF_NumSurfaces,
-	VBOSF_First = VBOSF_Lines
+	NumSurfaceVbos,
+	FirstSurfaceVbo = LinesVbo
 };
 
-enum EVBOComplement
+enum ComplementVboType
 {
-	VBOCM_Surfaces,
-	VBOCM_NormalColors,
-	VBOCM_PickColors,
-	VBOCM_BFCFrontColors,
-	VBOCM_BFCBackColors,
-	VBOCM_RandomColors,
+	SurfacesVboComplement,
+	NormalColorsVboComplement,
+	PickColorsVboComplement,
+	BfcFrontColorsVboComplement,
+	BfcBackColorsVboComplement,
+	RandomColorsVboComplement,
 
-	VBOCM_NumComplements,
-	VBOCM_First = VBOCM_Surfaces
+	NumVboComplements,
+	FirstVboComplement = SurfacesVboComplement
 };
 
-MAKE_ITERABLE_ENUM (EVBOSurface)
-MAKE_ITERABLE_ENUM (EVBOComplement)
+enum
+{
+	NumVbos = NumSurfaceVbos * NumVboComplements
+};
+
+MAKE_ITERABLE_ENUM (SurfaceVboType)
+MAKE_ITERABLE_ENUM (ComplementVboType)
 
 #ifndef USE_QT5
 // Placeholder QOpenGLFunctions for Qt 4.x support
@@ -87,5 +92,3 @@ void glDeleteBuffers (GLuint, GLuint*);
 void glBufferData (GLuint, GLuint, void*, GLuint);
 void glBufferSubData (GLenum, GLint, GLsizei, void*);
 #endif
-
-static const int g_numVBOs = VBOSF_NumSurfaces * VBOCM_NumComplements;

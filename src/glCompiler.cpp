@@ -26,6 +26,7 @@
 #include "miscallenous.h"
 #include "glRenderer.h"
 #include "dialogs.h"
+#include "guiutilities.h"
 
 struct GLErrorInfo
 {
@@ -46,10 +47,6 @@ static const GLErrorInfo g_GLErrors[] =
 };
 
 ConfigOption (QString SelectColorBlend = "#0080FF")
-
-static QList<int>		g_warnedColors;
-static const QColor		g_BFCFrontColor (64, 192, 80);
-static const QColor		g_BFCBackColor (208, 64, 64);
 
 // static QMap<LDObject*, String> g_objectOrigins;
 
@@ -90,7 +87,7 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 void GLCompiler::initialize()
 {
 	initializeOpenGLFunctions();
-	glGenBuffers (g_numVBOs, &m_vbo[0]);
+	glGenBuffers (NumVbos, &m_vbo[0]);
 	CHECK_GL_ERROR();
 }
 
@@ -98,22 +95,8 @@ void GLCompiler::initialize()
 //
 GLCompiler::~GLCompiler()
 {
-	glDeleteBuffers (g_numVBOs, &m_vbo[0]);
+	glDeleteBuffers (NumVbos, &m_vbo[0]);
 	CHECK_GL_ERROR();
-
-	if (m_renderer)
-		m_renderer->setCompiler (nullptr);
-}
-
-// =============================================================================
-//
-uint32 GLCompiler::colorToRGB (const QColor& color)
-{
-	return
-		(color.red()   & 0xFF) << 0x00 |
-		(color.green() & 0xFF) << 0x08 |
-		(color.blue()  & 0xFF) << 0x10 |
-		(color.alpha() & 0xFF) << 0x18;
 }
 
 // =============================================================================
@@ -131,52 +114,53 @@ QColor GLCompiler::indexColorForID (int id) const
 
 // =============================================================================
 //
-QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
-									   EVBOComplement complement) const
+QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const
 {
 	QColor qcol;
+	static const QColor bfcFrontColor (64, 192, 80);
+	static const QColor bfcBackColor (208, 64, 64);
 
 	switch (complement)
 	{
-		case VBOCM_Surfaces:
-		case VBOCM_NumComplements:
-			return QColor();
+	case SurfacesVboComplement:
+	case NumVboComplements:
+		return QColor();
 
-		case VBOCM_BFCFrontColors:
-			qcol = g_BFCFrontColor;
-			break;
+	case BfcFrontColorsVboComplement:
+		qcol = bfcFrontColor;
+		break;
 
-		case VBOCM_BFCBackColors:
-			qcol = g_BFCBackColor;
-			break;
+	case BfcBackColorsVboComplement:
+		qcol = bfcBackColor;
+		break;
 
-		case VBOCM_PickColors:
-			return indexColorForID (topobj->id());
+	case PickColorsVboComplement:
+		return indexColorForID (topobj->id());
 
-		case VBOCM_RandomColors:
-			qcol = topobj->randomColor();
-			break;
+	case RandomColorsVboComplement:
+		qcol = topobj->randomColor();
+		break;
 
-		case VBOCM_NormalColors:
-			if (poly.color == MainColor)
-			{
-				if (topobj->color() == MainColor)
-					qcol = m_renderer->getMainColor();
-				else
-					qcol = topobj->color().faceColor();
-			}
-			else if (poly.color == EdgeColor)
-			{
-				qcol = Luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
-			}
+	case NormalColorsVboComplement:
+		if (poly.color == MainColor)
+		{
+			if (topobj->color() == MainColor)
+				qcol = guiUtilities()->mainColorRepresentation();
 			else
-			{
-				LDColor col = poly.color;
+				qcol = topobj->color().faceColor();
+		}
+		else if (poly.color == EdgeColor)
+		{
+			qcol = Luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
+		}
+		else
+		{
+			LDColor col = poly.color;
 
-				if (col.isValid())
-					qcol = col.faceColor();
-			}
-			break;
+			if (col.isValid())
+				qcol = col.faceColor();
+		}
+		break;
 	}
 
 	if (not qcol.isValid())
@@ -184,15 +168,16 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj,
 		// The color was unknown. Use main color to make the polygon at least
 		// not appear pitch-black.
 		if (poly.num != 2 and poly.num != 5)
-			qcol = m_renderer->getMainColor();
+			qcol = guiUtilities()->mainColorRepresentation();
 		else
 			qcol = Qt::black;
 
 		// Warn about the unknown color, but only once.
-		if (not g_warnedColors.contains (poly.color))
+		static QList<int> warnedColors;
+		if (not warnedColors.contains (poly.color))
 		{
 			print ("Unknown color %1!\n", poly.color);
-			g_warnedColors << poly.color;
+			warnedColors << poly.color;
 		}
 
 		return qcol;
@@ -364,19 +349,19 @@ void GLCompiler::compileObject (LDObject* obj)
 //
 void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
 {
-	EVBOSurface surface;
+	SurfaceVboType surface;
 	int numverts;
 
 	switch (poly.num)
 	{
-		case 2:	surface = VBOSF_Lines;		numverts = 2; break;
-		case 3:	surface = VBOSF_Triangles;	numverts = 3; break;
-		case 4:	surface = VBOSF_Quads;		numverts = 4; break;
-		case 5:	surface = VBOSF_CondLines;	numverts = 2; break;
+		case 2:	surface = LinesVbo;		numverts = 2; break;
+		case 3:	surface = TrianglesVbo;	numverts = 3; break;
+		case 4:	surface = QuadsVbo;		numverts = 4; break;
+		case 5:	surface = ConditionalLinesVbo;	numverts = 2; break;
 		default: return;
 	}
 
-	for (EVBOComplement complement = VBOCM_First; complement < VBOCM_NumComplements; ++complement)
+	for (ComplementVboType complement = FirstVboComplement; complement < NumVboComplements; ++complement)
 	{
 		const int vbonum			= vboNumber (surface, complement);
 		QVector<GLfloat>& vbodata	= objinfo->data[vbonum];
@@ -384,7 +369,7 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 
 		for (int vert = 0; vert < numverts; ++vert)
 		{
-			if (complement == VBOCM_Surfaces)
+			if (complement == SurfacesVboComplement)
 			{
 				// Write coordinates. Apparently Z must be flipped too?
 				vbodata	<< poly.vertices[vert].x()
@@ -405,4 +390,19 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 void GLCompiler::setRenderer (GLRenderer* renderer)
 {
 	m_renderer = renderer;
+}
+
+int GLCompiler::vboNumber (SurfaceVboType surface, ComplementVboType complement)
+{
+	return (surface * NumVboComplements) + complement;
+}
+
+GLuint GLCompiler::vbo (int vbonum) const
+{
+	return m_vbo[vbonum];
+}
+
+int GLCompiler::vboSize (int vbonum) const
+{
+	return m_vboSizes[vbonum];
 }

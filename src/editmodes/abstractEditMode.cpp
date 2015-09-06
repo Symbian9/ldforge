@@ -96,7 +96,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		// Find the closest vertex to our cursor
 		double			minimumDistance = 1024.0;
 		const Vertex*	closest = nullptr;
-		Vertex			cursorPosition = renderer()->coordconv2_3 (data.ev->pos(), false);
+		Vertex			cursorPosition = renderer()->convert2dTo3d (data.ev->pos(), false);
 		QPoint			cursorPosition2D (data.ev->pos());
 		const Axis		relZ = renderer()->getRelativeZ();
 		QVector<Vertex>	vertices = renderer()->document()->inlineVertices();
@@ -114,7 +114,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		{
 			// If the vertex in 2d space is very close to the cursor then we use
 			// it regardless of depth.
-			QPoint vect2d = renderer()->coordconv3_2 (vrt) - cursorPosition2D;
+			QPoint vect2d = renderer()->convert3dTo2d (vrt) - cursorPosition2D;
 			const double distance2DSquared = std::pow (vect2d.x(), 2) + std::pow (vect2d.y(), 2);
 			if (distance2DSquared < 16.0 * 16.0)
 			{
@@ -192,7 +192,7 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 
 	// Convert to 2D
 	for (int i = 0; i < poly3d.size(); ++i)
-		poly[i] = renderer()->coordconv3_2 (poly3d[i]);
+		poly[i] = renderer()->convert3dTo2d (poly3d[i]);
 
 	// Draw the polygon-to-be
 	painter.setBrush (m_polybrush);

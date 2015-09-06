@@ -96,9 +96,6 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	else
 		updatePrimitives();
 
-	m_msglog = new MessageManager;
-	m_msglog->setRenderer (renderer());
-	m_renderer->setMessageLog (m_msglog);
 	m_quickColors = LoadQuickColorList();
 	setStatusBar (new QStatusBar);
 	updateActions();
@@ -448,7 +445,7 @@ void MainWindow::buildObjectList()
 			case OBJ_Overlay:
 			{
 				LDOverlay* ovl = static_cast<LDOverlay*> (obj);
-				descr = format ("[%1] %2 (%3, %4), %5 x %6", g_CameraNames[ovl->camera()],
+				descr = format ("[%1] %2 (%3, %4), %5 x %6", renderer()->cameraName ((ECamera) ovl->camera()),
 					Basename (ovl->fileName()), ovl->x(), ovl->y(),
 					ovl->width(), ovl->height());
 				break;
@@ -887,7 +884,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 // Adds a message to the renderer's message manager.
 void MainWindow::addMessage (QString msg)
 {
-	m_msglog->addLine (msg);
+	m_renderer->messageLog()->addLine (msg);
 }
 
 // ============================================================================
@@ -1328,14 +1325,6 @@ ExtProgramToolset* MainWindow::externalPrograms()
 GuiUtilities* MainWindow::guiUtilities()
 {
 	return m_guiUtilities;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QImage GetImageFromScreencap (uchar* data, int w, int h)
-{
-	// GL and Qt formats have R and B swapped. Also, GL flips Y - correct it as well.
-	return QImage (data, w, h, QImage::Format_ARGB32).rgbSwapped().mirrored();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

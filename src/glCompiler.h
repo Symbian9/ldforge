@@ -30,52 +30,38 @@ class GLCompiler : public HierarchyElement, protected QOpenGLFunctions
 public:
 	struct ObjectVBOInfo
 	{
-		QVector<GLfloat>	data[g_numVBOs];
+		QVector<GLfloat>	data[NumVbos];
 		bool				isChanged;
 	};
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	void				compileDocument (LDDocument* doc);
-	void				dropObjectInfo (LDObject* obj);
-	void				initialize();
-	QColor				getColorForPolygon (LDPolygon& poly, LDObject* topobj,
-											EVBOComplement complement) const;
-	QColor				indexColorForID (int id) const;
-	void				needMerge();
-	void				prepareVBO (int vbonum);
-	void				setRenderer (GLRenderer* compiler);
-	void				stageForCompilation (LDObject* obj);
-	void				unstage (LDObject* obj);
+	void compileDocument (LDDocument* doc);
+	void dropObjectInfo (LDObject* obj);
+	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const;
+	QColor indexColorForID (int id) const;
+	void initialize();
+	void needMerge();
+	void prepareVBO (int vbonum);
+	void setRenderer (GLRenderer* compiler);
+	void stageForCompilation (LDObject* obj);
+	void unstage (LDObject* obj);
+	GLuint vbo (int vbonum) const;
+	int vboSize (int vbonum) const;
 
-	static uint32		colorToRGB (const QColor& color);
-
-	static inline int	vboNumber (EVBOSurface surface, EVBOComplement complement)
-	{
-		return (surface * VBOCM_NumComplements) + complement;
-	}
-
-	inline GLuint		vbo (int vbonum) const
-	{
-		return m_vbo[vbonum];
-	}
-
-	inline int			vboSize (int vbonum) const
-	{
-		return m_vboSizes[vbonum];
-	}
+	static int vboNumber (SurfaceVboType surface, ComplementVboType complement);
 
 private:
-	void			compileStaged();
-	void			compileObject (LDObject* obj);
-	void			compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
+	void compileStaged();
+	void compileObject (LDObject* obj);
+	void compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
 
 	QMap<LDObject*, ObjectVBOInfo>	m_objectInfo;
-	QSet<LDObject*>					m_staged; // Objects that need to be compiled
-	GLuint							m_vbo[g_numVBOs];
-	bool							m_vboChanged[g_numVBOs];
-	int								m_vboSizes[g_numVBOs];
-	GLRenderer*						m_renderer;
+	QSet<LDObject*> m_staged; // Objects that need to be compiled
+	GLuint m_vbo[NumVbos];
+	bool m_vboChanged[NumVbos];
+	int m_vboSizes[NumVbos];
+	GLRenderer* m_renderer;
 };
 
 #define CHECK_GL_ERROR() { CheckGLErrorImpl (__FILE__, __LINE__); }

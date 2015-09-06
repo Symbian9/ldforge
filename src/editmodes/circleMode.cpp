@@ -40,7 +40,7 @@ double CircleMode::getCircleDrawDist (int pos) const
 	if (m_drawedVerts.size() >= pos + 1)
 	{
 		Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] :
-			renderer()->coordconv2_3 (renderer()->mousePosition(), false);
+			renderer()->convert2dTo3d (renderer()->mousePosition(), false);
 		Axis localx, localy;
 		renderer()->getRelativeAxes (localx, localy);
 		double dx = m_drawedVerts[0][localx] - v1[localx];
@@ -187,7 +187,7 @@ double CircleMode::getAngleOffset() const
 		return 0.0;
 
 	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
-	QPointF originspot (renderer()->coordconv3_2 (m_drawedVerts.first()));
+	QPointF originspot (renderer()->convert3dTo2d (m_drawedVerts.first()));
 	QLineF bearing (originspot, renderer()->mousePositionF());
 	QLineF bearing2 (originspot, QPointF (originspot.x(), 0.0));
 	double angleoffset (-bearing.angleTo (bearing2) + 90);
@@ -205,7 +205,7 @@ void CircleMode::render (QPainter& painter) const
 	// If we have not specified the center point of the circle yet, preview it on the screen.
 	if (m_drawedVerts.isEmpty())
 	{
-		renderer()->drawBlip (painter, renderer()->coordconv3_2 (renderer()->position3D()));
+		renderer()->drawBlip (painter, renderer()->convert3dTo2d (renderer()->position3D()));
 		return;
 	}
 
@@ -229,14 +229,14 @@ void CircleMode::render (QPainter& painter) const
 		v.setCoordinate (relX, m_drawedVerts[0][relX] + (cosangle * innerdistance));
 		v.setCoordinate (relY, m_drawedVerts[0][relY] + (sinangle * innerdistance));
 		innerverts << v;
-		innerverts2d << renderer()->coordconv3_2 (v);
+		innerverts2d << renderer()->convert3dTo2d (v);
 
 		if (outerdistance != -1)
 		{
 			v.setCoordinate (relX, m_drawedVerts[0][relX] + (cosangle * outerdistance));
 			v.setCoordinate (relY, m_drawedVerts[0][relY] + (sinangle * outerdistance));
 			outerverts << v;
-			outerverts2d << renderer()->coordconv3_2 (v);
+			outerverts2d << renderer()->convert3dTo2d (v);
 		}
 	}
 
@@ -282,7 +282,7 @@ void CircleMode::render (QPainter& painter) const
 	painter.drawLines (lines);
 
 	// Draw the current radius in the middle of the circle.
-	QPoint origin = renderer()->coordconv3_2 (m_drawedVerts[0]);
+	QPoint origin = renderer()->convert3dTo2d (m_drawedVerts[0]);
 	QString label = QString::number (innerdistance);
 	painter.setPen (renderer()->textPen());
 	painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);

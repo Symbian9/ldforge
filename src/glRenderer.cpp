@@ -68,50 +68,24 @@ ConfigOption (bool DrawSurfaces = true)
 ConfigOption (bool DrawEdgeLines = true)
 ConfigOption (bool DrawConditionalLines = true)
 
-// argh
-const char* g_CameraNames[7] =
-{
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Top"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Front"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Left"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Bottom"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Back"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Right"),
-	QT_TRANSLATE_NOOP ("GLRenderer",  "Free")
-};
-
-struct LDGLAxis
-{
-	const QColor col;
-	const Vertex vert;
-};
-
-// Definitions for visual axes, drawn on the screen
-static const LDGLAxis g_GLAxes[3] =
-{
-	{ QColor (192,  96,  96), Vertex (10000, 0, 0) }, // X
-	{ QColor (48,  192,  48), Vertex (0, 10000, 0) }, // Y
-	{ QColor (48,  112, 192), Vertex (0, 0, 10000) }, // Z
-};
-
-static bool RendererInitialized (false);
-
 // =============================================================================
 //
 GLRenderer::GLRenderer (QWidget* parent) :
 	QGLWidget (parent),
 	HierarchyElement (parent),
-	m_document (nullptr)
+	m_document (nullptr),
+	m_initialized (false)
 {
 	m_isPicking = false;
 	m_camera = (ECamera) m_config->camera();
 	m_drawToolTip = false;
-	m_editmode = AbstractEditMode::createByType (this, EditModeType::Select);
+	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
 	m_compiler = new GLCompiler (this);
 	m_objectAtCursor = nullptr;
 	setDrawOnly (false);
-	setMessageLog (nullptr);
+	m_messageLog = new MessageManager (this);
+	m_messageLog->setRenderer (this);
 	m_width = m_height = -1;
 	m_position3D = Origin;
 	m_toolTipTimer = new QTimer (this);
@@ -125,9 +99,15 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	// Init camera icons
 	for (ECamera cam = EFirstCamera; cam < ENumCameras; ++cam)
 	{
-		QString iconname = format ("camera-%1", tr (g_CameraNames[cam]).toLower());
+		const char* cameraIconNames[ENumCameras] =
+		{
+			"camera-top", "camera-front", "camera-left",
+			"camera-bottom", "camera-back", "camera-right",
+			"camera-free"
+		};
+
 		CameraIcon* info = &m_cameraIcons[cam];
-		info->img = new QPixmap (GetIcon (iconname));
+		info->image = new QPixmap (GetIcon (cameraIconNames[cam]));
 		info->cam = cam;
 	}
 
@@ -138,21 +118,20 @@ GLRenderer::GLRenderer (QWidget* parent) :
 //
 GLRenderer::~GLRenderer()
 {
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < countof (currentDocumentData().overlays); ++i)
 		delete currentDocumentData().overlays[i].img;
 
 	for (CameraIcon& info : m_cameraIcons)
-		delete info.img;
+		delete info.image;
 
 	if (messageLog())
 		messageLog()->setRenderer (nullptr);
 
 	m_compiler->setRenderer (nullptr);
 	delete m_compiler;
-	delete m_editmode;
-
-	glDeleteBuffers (1, &m_axesVBO);
-	glDeleteBuffers (1, &m_axesColorVBO);
+	delete m_currentEditMode;
+	glDeleteBuffers (1, &m_axesVbo);
+	glDeleteBuffers (1, &m_axesColorVbo);
 }
 
 // =============================================================================
@@ -166,16 +145,16 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& info : m_cameraIcons)
 	{
 		// MATH
-		const long x1 = (m_width - (info.cam != EFreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1,
-			y1 = ((i / 3) * 16) + 1;
+		int x1 = (m_width - (info.cam != EFreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
+		int y1 = ((i / 3) * 16) + 1;
 
-		info.srcRect = QRect (0, 0, 16, 16);
-		info.destRect = QRect (x1, y1, 16, 16);
+		info.sourceRect = QRect (0, 0, 16, 16);
+		info.targetRect = QRect (x1, y1, 16, 16);
 		info.selRect = QRect (
-			info.destRect.x(),
-			info.destRect.y(),
-			info.destRect.width() + 1,
-			info.destRect.height() + 1
+			info.targetRect.x(),
+			info.targetRect.y(),
+			info.targetRect.width() + 1,
+			info.targetRect.height() + 1
 		);
 
 		++i;
@@ -190,7 +169,6 @@ void GLRenderer::initGLData()
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable (GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset (1.0f, 1.0f);
-
 	glEnable (GL_DEPTH_TEST);
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_MULTISAMPLE);
@@ -201,11 +179,47 @@ void GLRenderer::initGLData()
 		glEnable (GL_POLYGON_SMOOTH);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 		glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	} else
+	}
+	else
 	{
 		glDisable (GL_LINE_SMOOTH);
 		glDisable (GL_POLYGON_SMOOTH);
 	}
+}
+
+bool GLRenderer::isDrawOnly() const
+{
+	return m_isDrawOnly;
+}
+
+void GLRenderer::setDrawOnly (bool value)
+{
+	m_isDrawOnly = value;
+}
+
+MessageManager* GLRenderer::messageLog() const
+{
+	return m_messageLog;
+}
+
+bool GLRenderer::isPicking() const
+{
+	return m_isPicking;
+}
+
+LDDocument* GLRenderer::document() const
+{
+	return m_document;
+}
+
+GLCompiler* GLRenderer::compiler() const
+{
+	return m_compiler;
+}
+
+LDObject* GLRenderer::objectAtCursor() const
+{
+	return m_objectAtCursor;
 }
 
 // =============================================================================
@@ -220,9 +234,9 @@ void GLRenderer::needZoomToFit()
 //
 void GLRenderer::resetAngles()
 {
-	rot (X) = 30.0f;
-	rot (Y) = 325.f;
-	pan (X) = pan (Y) = rot (Z) = 0.0f;
+	rotation (X) = 30.0f;
+	rotation (Y) = 325.f;
+	panning (X) = panning (Y) = rotation (Z) = 0.0f;
 	needZoomToFit();
 }
 
@@ -256,53 +270,54 @@ void GLRenderer::initializeGL()
 	setFocusPolicy (Qt::WheelFocus);
 	compiler()->initialize();
 	initializeAxes();
-	RendererInitialized = true;
+	m_initialized = true;
 }
 
 // =============================================================================
 //
 void GLRenderer::initializeAxes()
 {
-	float axesdata[18];
+	// Definitions for visual axes, drawn on the screen
+	struct AxisInfo
+	{
+		QColor color;
+		Vertex extrema;
+	};
+
+	static const AxisInfo axisinfo[3] =
+	{
+		{ QColor (192,  96,  96), Vertex (10000, 0, 0) }, // X
+		{ QColor (48,  192,  48), Vertex (0, 10000, 0) }, // Y
+		{ QColor (48,  112, 192), Vertex (0, 0, 10000) }, // Z
+	};
+
+	float axisdata[18];
 	float colordata[18];
-	memset (axesdata, 0, sizeof axesdata);
+	memset (axisdata, 0, sizeof axisdata);
 
 	for (int i = 0; i < 3; ++i)
 	{
+		const AxisInfo& data = axisinfo[i];
+
 		for_axes (ax)
 		{
-			axesdata[(i * 6) + ax] = g_GLAxes[i].vert[ax];
-			axesdata[(i * 6) + 3 + ax] = -g_GLAxes[i].vert[ax];
+			axisdata[(i * 6) + ax] = data.extrema[ax];
+			axisdata[(i * 6) + 3 + ax] = -data.extrema[ax];
 		}
 
-		for (int j = 0; j < 2; ++j)
-		{
-			colordata[(i * 6) + (j * 3) + 0] = g_GLAxes[i].col.red();
-			colordata[(i * 6) + (j * 3) + 1] = g_GLAxes[i].col.green();
-			colordata[(i * 6) + (j * 3) + 2] = g_GLAxes[i].col.blue();
-		}
+		int offset = i * 6;
+		colordata[offset + 0] = colordata[offset + 3] = data.color.red();
+		colordata[offset + 1] = colordata[offset + 4] = data.color.green();
+		colordata[offset + 2] = colordata[offset + 5] = data.color.blue();
 	}
 
-	glGenBuffers (1, &m_axesVBO);
-	glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
-	glBufferData (GL_ARRAY_BUFFER, sizeof axesdata, axesdata, GL_STATIC_DRAW);
-	glGenBuffers (1, &m_axesColorVBO);
-	glBindBuffer (GL_ARRAY_BUFFER, m_axesColorVBO);
+	glGenBuffers (1, &m_axesVbo);
+	glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
+	glBufferData (GL_ARRAY_BUFFER, sizeof axisdata, axisdata, GL_STATIC_DRAW);
+	glGenBuffers (1, &m_axesColorVbo);
+	glBindBuffer (GL_ARRAY_BUFFER, m_axesColorVbo);
 	glBufferData (GL_ARRAY_BUFFER, sizeof colordata, colordata, GL_STATIC_DRAW);
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
-}
-
-// =============================================================================
-//
-QColor GLRenderer::getMainColor()
-{
-	QColor col (m_config->mainColor());
-
-	if (not col.isValid())
-		return QColor (0, 0, 0);
-
-	col.setAlpha (m_config->mainColorAlpha() * 255.f);
-	return col;
 }
 
 // =============================================================================
@@ -321,8 +336,8 @@ void GLRenderer::setBackground()
 		return;
 
 	color.setAlpha (255);
-	m_darkbg = Luma (color) < 80;
-	m_bgcolor = color;
+	m_useDarkBackground = Luma (color) < 80;
+	m_backgroundColor = color;
 	qglClearColor (color);
 }
 
@@ -340,11 +355,11 @@ void GLRenderer::refresh()
 //
 void GLRenderer::hardRefresh()
 {
-	if (not RendererInitialized)
-		return;
-
-	compiler()->compileDocument (currentDocument());
-	refresh();
+	if (m_initialized)
+	{
+		compiler()->compileDocument (currentDocument());
+		refresh();
+	}
 }
 
 // =============================================================================
@@ -388,8 +403,8 @@ void GLRenderer::drawGLScene()
 		glPushMatrix();
 
 		glLoadIdentity();
-		glOrtho (-m_virtWidth, m_virtWidth, -m_virtHeight, m_virtHeight, -100.0f, 100.0f);
-		glTranslatef (pan (X), pan (Y), 0.0f);
+		glOrtho (-m_virtualWidth, m_virtualWidth, -m_virtualHeight, m_virtualHeight, -100.0f, 100.0f);
+		glTranslatef (panning (X), panning (Y), 0.0f);
 
 		if (camera() != EFrontCamera and camera() != EBackCamera)
 		{
@@ -412,10 +427,10 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 
 		glTranslatef (0.0f, 0.0f, -2.0f);
-		glTranslatef (pan (X), pan (Y), -zoom());
-		glRotatef (rot (X), 1.0f, 0.0f, 0.0f);
-		glRotatef (rot (Y), 0.0f, 1.0f, 0.0f);
-		glRotatef (rot (Z), 0.0f, 0.0f, 1.0f);
+		glTranslatef (panning (X), panning (Y), -zoom());
+		glRotatef (rotation (X), 1.0f, 0.0f, 0.0f);
+		glRotatef (rotation (Y), 0.0f, 1.0f, 0.0f);
+		glRotatef (rotation (Z), 0.0f, 0.0f, 1.0f);
 	}
 
 	glEnableClientState (GL_VERTEX_ARRAY);
@@ -423,10 +438,10 @@ void GLRenderer::drawGLScene()
 
 	if (isPicking())
 	{
-		drawVBOs (VBOSF_Triangles, VBOCM_PickColors, GL_TRIANGLES);
-		drawVBOs (VBOSF_Quads, VBOCM_PickColors, GL_QUADS);
-		drawVBOs (VBOSF_Lines, VBOCM_PickColors, GL_LINES);
-		drawVBOs (VBOSF_CondLines, VBOCM_PickColors, GL_LINES);
+		drawVbos (TrianglesVbo, PickColorsVboComplement, GL_TRIANGLES);
+		drawVbos (QuadsVbo, PickColorsVboComplement, GL_QUADS);
+		drawVbos (LinesVbo, PickColorsVboComplement, GL_LINES);
+		drawVbos (ConditionalLinesVbo, PickColorsVboComplement, GL_LINES);
 	}
 	else
 	{
@@ -434,30 +449,36 @@ void GLRenderer::drawGLScene()
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
-			drawVBOs (VBOSF_Triangles, VBOCM_BFCFrontColors, GL_TRIANGLES);
-			drawVBOs (VBOSF_Quads, VBOCM_BFCFrontColors, GL_QUADS);
+			drawVbos (TrianglesVbo, BfcFrontColorsVboComplement, GL_TRIANGLES);
+			drawVbos (QuadsVbo, BfcFrontColorsVboComplement, GL_QUADS);
 			glCullFace (GL_FRONT);
-			drawVBOs (VBOSF_Triangles, VBOCM_BFCBackColors, GL_TRIANGLES);
-			drawVBOs (VBOSF_Quads, VBOCM_BFCBackColors, GL_QUADS);
+			drawVbos (TrianglesVbo, BfcBackColorsVboComplement, GL_TRIANGLES);
+			drawVbos (QuadsVbo, BfcBackColorsVboComplement, GL_QUADS);
 			glDisable (GL_CULL_FACE);
 		}
 		else
 		{
-			EVBOComplement colors = (m_config->randomColors()) ? VBOCM_RandomColors : VBOCM_NormalColors;
-			drawVBOs (VBOSF_Triangles, colors, GL_TRIANGLES);
-			drawVBOs (VBOSF_Quads, colors, GL_QUADS);
+			ComplementVboType colors;
+
+			if (m_config->randomColors())
+				colors = RandomColorsVboComplement;
+			else
+				colors = NormalColorsVboComplement;
+
+			drawVbos (TrianglesVbo, colors, GL_TRIANGLES);
+			drawVbos (QuadsVbo, colors, GL_QUADS);
 		}
 
-		drawVBOs (VBOSF_Lines, VBOCM_NormalColors, GL_LINES);
+		drawVbos (LinesVbo, NormalColorsVboComplement, GL_LINES);
 		glEnable (GL_LINE_STIPPLE);
-		drawVBOs (VBOSF_CondLines, VBOCM_NormalColors, GL_LINES);
+		drawVbos (ConditionalLinesVbo, NormalColorsVboComplement, GL_LINES);
 		glDisable (GL_LINE_STIPPLE);
 
 		if (m_config->drawAxes())
 		{
-			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
+			glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
-			glBindBuffer (GL_ARRAY_BUFFER, m_axesVBO);
+			glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
 			glColorPointer (3, GL_FLOAT, 0, NULL);
 			glDrawArrays (GL_LINES, 0, 6);
 			CHECK_GL_ERROR();
@@ -476,17 +497,17 @@ void GLRenderer::drawGLScene()
 
 // =============================================================================
 //
-void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type)
+void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((isOneOf (surface, VBOSF_Quads, VBOSF_Triangles) and m_config->drawSurfaces() == false) or
-		(surface == VBOSF_Lines and m_config->drawEdgeLines() == false) or
-		(surface == VBOSF_CondLines and m_config->drawConditionalLines() == false))
+	if ((isOneOf (surface, QuadsVbo, TrianglesVbo) and m_config->drawSurfaces() == false)
+		or (surface == LinesVbo and m_config->drawEdgeLines() == false)
+		or (surface == ConditionalLinesVbo and m_config->drawConditionalLines() == false))
 	{
 		return;
 	}
 
-	int surfacenum = m_compiler->vboNumber (surface, VBOCM_Surfaces);
+	int surfacenum = m_compiler->vboNumber (surface, SurfacesVboComplement);
 	int colornum = m_compiler->vboNumber (surface, colors);
 	m_compiler->prepareVBO (surfacenum);
 	m_compiler->prepareVBO (colornum);
@@ -508,24 +529,25 @@ void GLRenderer::drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum ty
 }
 
 // =============================================================================
+//
 // This converts a 2D point on the screen to a 3D point in the model. If 'snap'
 // is true, the 3D point will snap to the current grid.
 //
-Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
+Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 {
 	if (camera() == EFreeCamera)
 		return Origin;
 
 	Vertex pos3d;
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
-	const Axis axisX = cam->axisX;
-	const Axis axisY = cam->axisY;
-	const int negXFac = cam->negX ? -1 : 1,
-				negYFac = cam->negY ? -1 : 1;
+	const Axis axisX = cam->localX;
+	const Axis axisY = cam->localY;
+	const int negXFac = cam->negatedX ? -1 : 1,
+				negYFac = cam->negatedY ? -1 : 1;
 
 	// Calculate cx and cy - these are the LDraw unit coords the cursor is at.
-	double cx = (-m_virtWidth + ((2 * pos2d.x() * m_virtWidth) / m_width) - pan (X));
-	double cy = (m_virtHeight - ((2 * pos2d.y() * m_virtHeight) / m_height) - pan (Y));
+	double cx = (-m_virtualWidth + ((2 * pos2d.x() * m_virtualWidth) / m_width) - panning (X));
+	double cy = (m_virtualHeight - ((2 * pos2d.y() * m_virtualHeight) / m_height) - panning (Y));
 
 	if (snap)
 	{
@@ -548,45 +570,44 @@ Vertex GLRenderer::coordconv2_3 (const QPoint& pos2d, bool snap) const
 
 // =============================================================================
 //
-// Inverse operation for the above - convert a 3D position to a 2D screen
-// position. Don't ask me how this code manages to work, I don't even know.
+// Inverse operation for the above - convert a 3D position to a 2D screen position. Don't ask me how this code manages
+// to work, I don't even know.
 //
-QPoint GLRenderer::coordconv3_2 (const Vertex& pos3d)
+QPoint GLRenderer::convert3dTo2d (const Vertex& pos3d)
 {
-	GLfloat m[16];
+	if (camera() == EFreeCamera)
+		return QPoint (0, 0);
+
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
-	const Axis axisX = cam->axisX;
-	const Axis axisY = cam->axisY;
-	const int negXFac = cam->negX ? -1 : 1,
-				negYFac = cam->negY ? -1 : 1;
-
-	glGetFloatv (GL_MODELVIEW_MATRIX, m);
-
+	const Axis axisX = cam->localX;
+	const Axis axisY = cam->localY;
+	const int negXFac = cam->negatedX ? -1 : 1;
+	const int negYFac = cam->negatedY ? -1 : 1;
+	GLfloat matrix[16];
 	const double x = pos3d.x();
 	const double y = pos3d.y();
 	const double z = pos3d.z();
-
 	Vertex transformed;
-	transformed.setX ((m[0] * x) + (m[1] * y) + (m[2] * z) + m[3]);
-	transformed.setY ((m[4] * x) + (m[5] * y) + (m[6] * z) + m[7]);
-	transformed.setZ ((m[8] * x) + (m[9] * y) + (m[10] * z) + m[11]);
 
-	double rx = (((transformed[axisX] * negXFac) + m_virtWidth + pan (X)) * m_width) / (2 * m_virtWidth);
-	double ry = (((transformed[axisY] * negYFac) - m_virtHeight + pan (Y)) * m_height) / (2 * m_virtHeight);
-
+	glGetFloatv (GL_MODELVIEW_MATRIX, matrix);
+	transformed.setX ((matrix[0] * x) + (matrix[1] * y) + (matrix[2] * z) + matrix[3]);
+	transformed.setY ((matrix[4] * x) + (matrix[5] * y) + (matrix[6] * z) + matrix[7]);
+	transformed.setZ ((matrix[8] * x) + (matrix[9] * y) + (matrix[10] * z) + matrix[11]);
+	double rx = (((transformed[axisX] * negXFac) + m_virtualWidth + panning (X)) * m_width) / (2 * m_virtualWidth);
+	double ry = (((transformed[axisY] * negYFac) - m_virtualHeight + panning (Y)) * m_height) / (2 * m_virtualHeight);
 	return QPoint (rx, -ry);
 }
 
 QPen GLRenderer::textPen() const
 {
-	return QPen (m_darkbg ? Qt::white : Qt::black);
+	return QPen (m_useDarkBackground ? Qt::white : Qt::black);
 }
 
 QPen GLRenderer::linePen() const
 {
 	QPen linepen (m_thinBorderPen);
 	linepen.setWidth (2);
-	linepen.setColor (Luma (m_bgcolor) < 40 ? Qt::white : Qt::black);
+	linepen.setColor (Luma (m_backgroundColor) < 40 ? Qt::white : Qt::black);
 	return linepen;
 }
 
@@ -595,8 +616,8 @@ QPen GLRenderer::linePen() const
 void GLRenderer::paintEvent (QPaintEvent*)
 {
 	doMakeCurrent();
-	m_virtWidth = zoom();
-	m_virtHeight = (m_height * m_virtWidth) / m_width;
+	m_virtualWidth = zoom();
+	m_virtualHeight = (m_height * m_virtualWidth) / m_width;
 	initGLData();
 	drawGLScene();
 
@@ -612,7 +633,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	if (not isPicking())
 	{
 		QString text = format ("Rotation: (%1, %2, %3)\nPanning: (%4, %5), Zoom: %6",
-			rot(X), rot(Y), rot(Z), pan(X), pan(Y), zoom());
+			rotation(X), rotation(Y), rotation(Z), panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
 		paint.setPen (textPen());
 		paint.drawText ((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
@@ -627,12 +648,11 @@ void GLRenderer::paintEvent (QPaintEvent*)
 
 		if (overlay.img)
 		{
-			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
-					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
-
-			QRect targRect (v0.x(), v0.y(), qAbs (v1.x() - v0.x()), qAbs (v1.y() - v0.y())),
-				  srcRect (0, 0, overlay.img->width(), overlay.img->height());
-			paint.drawImage (targRect, *overlay.img, srcRect);
+			QPoint v0 = convert3dTo2d (currentDocumentData().overlays[camera()].v0);
+			QPoint v1 = convert3dTo2d (currentDocumentData().overlays[camera()].v1);
+			QRect targetRect (v0.x(), v0.y(), qAbs (v1.x() - v0.x()), qAbs (v1.y() - v0.y()));
+			QRect sourceRect (0, 0, overlay.img->width(), overlay.img->height());
+			paint.drawImage (targetRect, *overlay.img, sourceRect);
 		}
 
 		// Paint the coordinates onto the screen.
@@ -647,7 +667,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	if (not isPicking())
 	{
 		// Draw edit mode HUD
-		m_editmode->render (paint);
+		m_currentEditMode->render (paint);
 
 		// Draw a background for the selected camera
 		paint.setPen (m_thinBorderPen);
@@ -657,35 +677,27 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		// Draw the camera icons
 		for (CameraIcon& info : m_cameraIcons)
 		{
-			// Don't draw the free camera icon when in draw mode
-			if (&info == &m_cameraIcons[EFreeCamera] and not m_editmode->allowFreeCamera())
+			// Don't draw the free camera icon when we can't use the free camera
+			if (&info == &m_cameraIcons[EFreeCamera] and not m_currentEditMode->allowFreeCamera())
 				continue;
 
-			paint.drawPixmap (info.destRect, *info.img, info.srcRect);
+			paint.drawPixmap (info.targetRect, *info.image, info.sourceRect);
 		}
-
-		QString formatstr = tr ("%1 Camera");
 
 		// Draw a label for the current camera in the bottom left corner
 		{
 			const int margin = 4;
-
-			QString label;
-			label = format (formatstr, tr (g_CameraNames[camera()]));
 			paint.setPen (textPen());
-			paint.drawText (QPoint (margin, height() - (margin + metrics.descent())), label);
+			paint.drawText (QPoint (margin, height() - (margin + metrics.descent())), currentCameraName());
 		}
 
 		// Tool tips
 		if (m_drawToolTip)
 		{
-			if (not m_cameraIcons[m_toolTipCamera].destRect.contains (m_mousePosition))
+			if (not m_cameraIcons[m_toolTipCamera].targetRect.contains (m_mousePosition))
 				m_drawToolTip = false;
 			else
-			{
-				QString label = format (formatstr, tr (g_CameraNames[m_toolTipCamera]));
-				QToolTip::showText (m_globalpos, label);
-			}
+				QToolTip::showText (m_globalpos, currentCameraName());
 		}
 	}
 
@@ -733,12 +745,9 @@ void GLRenderer::clampAngle (double& angle) const
 //
 void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 {
-	const bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (ev->buttons() & Qt::LeftButton);
-
+	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (ev->buttons() & Qt::LeftButton);
 	Qt::MouseButtons releasedbuttons = m_lastButtons & ~ev->buttons();
-
-	if (m_panning)
-		m_panning = false;
+	m_panning = false;
 
 	if (wasLeft)
 	{
@@ -747,7 +756,7 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 		{
 			for (CameraIcon & info : m_cameraIcons)
 			{
-				if (info.destRect.contains (ev->pos()))
+				if (info.targetRect.contains (ev->pos()))
 				{
 					setCamera (info.cam);
 					goto end;
@@ -761,26 +770,26 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 		AbstractEditMode::MouseEventData data;
 		data.ev = ev;
 		data.mouseMoved = mouseHasMoved();
-		data.keymods = m_keymods;
+		data.keymods = m_currentKeyboardModifiers;
 		data.releasedButtons = releasedbuttons;
 
-		if (m_editmode->mouseReleased (data))
+		if (m_currentEditMode->mouseReleased (data))
 			goto end;
 	}
 
 end:
 	update();
-	m_totalmove = 0;
+	m_totalMouseMove = 0;
 }
 
 // =============================================================================
 //
 void GLRenderer::mousePressEvent (QMouseEvent* ev)
 {
-	m_totalmove = 0;
+	m_totalMouseMove = 0;
 	m_lastButtons = ev->buttons();
 
-	if (m_editmode->mousePressed (ev))
+	if (m_currentEditMode->mousePressed (ev))
 		ev->accept();
 }
 
@@ -790,10 +799,10 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 {
 	int dx = ev->x() - m_mousePosition.x();
 	int dy = ev->y() - m_mousePosition.y();
-	m_totalmove += qAbs (dx) + qAbs (dy);
-	setCameraMoving (false);
+	m_totalMouseMove += qAbs (dx) + qAbs (dy);
+	m_isCameraMoving = false;
 
-	if (not m_editmode->mouseMoved (ev))
+	if (not m_currentEditMode->mouseMoved (ev))
 	{
 		const bool left = ev->buttons() & Qt::LeftButton,
 				mid = ev->buttons() & Qt::MidButton,
@@ -801,19 +810,18 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 
 		if (mid or (left and shift))
 		{
-			pan (X) += 0.03f * dx * (zoom() / 7.5f);
-			pan (Y) -= 0.03f * dy * (zoom() / 7.5f);
+			panning (X) += 0.03f * dx * (zoom() / 7.5f);
+			panning (Y) -= 0.03f * dy * (zoom() / 7.5f);
 			m_panning = true;
-			setCameraMoving (true);
+			m_isCameraMoving = true;
 		}
 		else if (left and camera() == EFreeCamera)
 		{
-			rot (X) = rot (X) + dy;
-			rot (Y) = rot (Y) + dx;
-
-			clampAngle (rot (X));
-			clampAngle (rot (Y));
-			setCameraMoving (true);
+			rotation (X) = rotation (X) + dy;
+			rotation (Y) = rotation (Y) + dx;
+			clampAngle (rotation (X));
+			clampAngle (rotation (Y));
+			m_isCameraMoving = true;
 		}
 	}
 
@@ -832,7 +840,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 #endif
 
 	// Calculate 3d position of the cursor
-	m_position3D = (camera() != EFreeCamera) ? coordconv2_3 (m_mousePosition, true) : Origin;
+	m_position3D = (camera() != EFreeCamera) ? convert2dTo3d (m_mousePosition, true) : Origin;
 
 	highlightCursorObject();
 	update();
@@ -843,15 +851,15 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 //
 void GLRenderer::keyPressEvent (QKeyEvent* ev)
 {
-	m_keymods = ev->modifiers();
+	m_currentKeyboardModifiers = ev->modifiers();
 }
 
 // =============================================================================
 //
 void GLRenderer::keyReleaseEvent (QKeyEvent* ev)
 {
-	m_keymods = ev->modifiers();
-	m_editmode->keyReleased (ev);
+	m_currentKeyboardModifiers = ev->modifiers();
+	m_currentEditMode->keyReleased (ev);
 	update();
 }
 
@@ -863,7 +871,7 @@ void GLRenderer::wheelEvent (QWheelEvent* ev)
 
 	zoomNotch (ev->delta() > 0);
 	zoom() = qBound (0.01, zoom(), 10000.0);
-	setCameraMoving (true);
+	m_isCameraMoving = true;
 	update();
 	ev->accept();
 }
@@ -890,7 +898,7 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 void GLRenderer::setCamera (const ECamera cam)
 {
 	// The edit mode may forbid the free camera.
-	if (cam == EFreeCamera and not m_editmode->allowFreeCamera())
+	if (cam == EFreeCamera and not m_currentEditMode->allowFreeCamera())
 		return;
 
 	m_camera = cam;
@@ -1023,14 +1031,14 @@ LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 //
 void GLRenderer::setEditMode (EditModeType a)
 {
-	if (m_editmode and m_editmode->type() == a)
+	if (m_currentEditMode and m_currentEditMode->type() == a)
 		return;
 
-	delete m_editmode;
-	m_editmode = AbstractEditMode::createByType (this, a);
+	delete m_currentEditMode;
+	m_currentEditMode = AbstractEditMode::createByType (this, a);
 
 	// If we cannot use the free camera, use the top one instead.
-	if (camera() == EFreeCamera and not m_editmode->allowFreeCamera())
+	if (camera() == EFreeCamera and not m_currentEditMode->allowFreeCamera())
 		setCamera (ETopCamera);
 
 	m_window->updateEditModeActions();
@@ -1041,16 +1049,16 @@ void GLRenderer::setEditMode (EditModeType a)
 //
 EditModeType GLRenderer::currentEditModeType() const
 {
-	return m_editmode->type();
+	return m_currentEditMode->type();
 }
 
 // =============================================================================
 //
-void GLRenderer::setDocument (LDDocument* const& a)
+void GLRenderer::setDocument (LDDocument* document)
 {
-	m_document = a;
+	m_document = document;
 
-	if (a)
+	if (document)
 	{
 		initOverlaysFromObjects();
 
@@ -1066,9 +1074,9 @@ void GLRenderer::setDocument (LDDocument* const& a)
 
 // =============================================================================
 //
-void GLRenderer::setPicking (const bool& a)
+void GLRenderer::setPicking (bool value)
 {
-	m_isPicking = a;
+	m_isPicking = value;
 	setBackground();
 
 	if (isPicking())
@@ -1092,8 +1100,8 @@ void GLRenderer::setPicking (const bool& a)
 void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 {
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
-	relX = cam->axisX;
-	relY = cam->axisY;
+	relX = cam->localX;
+	relY = cam->localY;
 }
 
 // =============================================================================
@@ -1101,30 +1109,7 @@ void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 Axis GLRenderer::getRelativeZ() const
 {
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
-	return (Axis) (3 - cam->axisX - cam->axisY);
-}
-
-// =============================================================================
-//
-static QList<Vertex> GetVerticesOf (LDObject* obj)
-{
-	QList<Vertex> verts;
-
-	if (obj->numVertices() >= 2)
-	{
-		for (int i = 0; i < obj->numVertices(); ++i)
-			verts << obj->vertex (i);
-	}
-	else if (obj->type() == OBJ_Subfile)
-	{
-		for (LDObject* obj : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
-		{
-			verts << GetVerticesOf (obj);
-			obj->destroy();
-		}
-	}
-
-	return verts;
+	return (Axis) (3 - cam->localX - cam->localY);
 }
 
 // =============================================================================
@@ -1147,20 +1132,15 @@ void GLRenderer::forgetObject (LDObject* obj)
 
 // =============================================================================
 //
-uchar* GLRenderer::getScreencap (int& w, int& h)
+QByteArray GLRenderer::capturePixels()
 {
-	w = m_width;
-	h = m_height;
-	uchar* cap = new uchar[4 * w * h];
-
-	m_screencap = true;
-	update();
-	m_screencap = false;
-
-	// Capture the pixels
-	glReadPixels (0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, cap);
-
-	return cap;
+	QByteArray result;
+	result.resize (4 * width() * height());
+	m_takingScreenCapture = true;
+	update(); // Smile!
+	m_takingScreenCapture = false;
+	glReadPixels (0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<uchar*> (result.data()));
+	return result;
 }
 
 // =============================================================================
@@ -1172,7 +1152,7 @@ void GLRenderer::slot_toolTipTimer()
 	// a tooltip.
 	for (CameraIcon & icon : m_cameraIcons)
 	{
-		if (icon.destRect.contains (m_mousePosition))
+		if (icon.targetRect.contains (m_mousePosition))
 		{
 			m_toolTipCamera = icon.cam;
 			m_drawToolTip = true;
@@ -1190,7 +1170,7 @@ Axis GLRenderer::getCameraAxis (bool y, ECamera camid)
 		camid = camera();
 
 	const LDFixedCamera* cam = &g_FixedCameras[camid];
-	return (y) ? cam->axisY : cam->axisX;
+	return (y) ? cam->localY : cam->localX;
 }
 
 // =============================================================================
@@ -1225,8 +1205,8 @@ bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, i
 
 	const Axis x2d = getCameraAxis (false, cam),
 		y2d = getCameraAxis (true, cam);
-	const double negXFac = g_FixedCameras[cam].negX ? -1 : 1,
-		negYFac = g_FixedCameras[cam].negY ? -1 : 1;
+	const double negXFac = g_FixedCameras[cam].negatedX ? -1 : 1,
+		negYFac = g_FixedCameras[cam].negatedY ? -1 : 1;
 
 	info.v0 = info.v1 = Origin;
 	info.v0.setCoordinate (x2d, -(info.ox * info.lw * negXFac) / img->width());
@@ -1280,9 +1260,26 @@ double GLRenderer::getDepthValue() const
 
 // =============================================================================
 //
-const char* GLRenderer::getCameraName() const
+QString GLRenderer::cameraName (ECamera camera) const
 {
-	return g_CameraNames[camera()];
+	switch (camera)
+	{
+	case ETopCamera: return tr ("Top Camera");
+	case EFrontCamera: return tr ("Front Camera");
+	case ELeftCamera: return tr ("Left Camera");
+	case EBottomCamera: return tr ("Bottom Camera");
+	case EBackCamera: return tr ("Back Camera");
+	case ERightCamera: return tr ("Right Camera");
+	case EFreeCamera: return tr ("Free Camera");
+	default: break;
+	}
+
+	return "";
+}
+
+QString GLRenderer::currentCameraName() const
+{
+	return cameraName (camera());
 }
 
 // =============================================================================
@@ -1400,7 +1397,7 @@ void GLRenderer::zoomAllToFit()
 //
 void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 {
-	if (m_editmode->mouseDoubleClicked (ev))
+	if (m_currentEditMode->mouseDoubleClicked (ev))
 		ev->accept();
 }
 
@@ -1538,7 +1535,7 @@ void GLRenderer::highlightCursorObject()
 	LDObject* oldObject = objectAtCursor();
 	qint32 newIndex;
 
-	if (isCameraMoving() or not m_config->highlightObjectBelowCursor())
+	if (m_isCameraMoving or not m_config->highlightObjectBelowCursor())
 	{
 		newIndex = 0;
 	}
@@ -1558,7 +1555,7 @@ void GLRenderer::highlightCursorObject()
 		if (newIndex != 0)
 			newObject = LDObject::fromID (newIndex);
 
-		setObjectAtCursor (newObject);
+		m_objectAtCursor = newObject;
 
 		if (oldObject)
 			compileObject (oldObject);
@@ -1580,10 +1577,11 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 {
 	if (m_window and ev->source() == m_window->getPrimitivesTree())
 	{
-		QString primName = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem())->primitive()->name;
+		SubfileListItem* item = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem());
+		QString primitiveName = item->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setColor (MainColor);
-		ref->setFileInfo (GetDocument (primName));
+		ref->setFileInfo (GetDocument (primitiveName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
 		currentDocument()->insertObj (m_window->suggestInsertPoint(), ref);
@@ -1599,14 +1597,14 @@ Vertex const& GLRenderer::position3D() const
 	return m_position3D;
 }
 
-LDFixedCamera const& GLRenderer::getFixedCamera (ECamera cam) const
+const LDFixedCamera& GLRenderer::getFixedCamera (ECamera cam) const
 {
 	return g_FixedCameras[cam];
 }
 
 bool GLRenderer::mouseHasMoved() const
 {
-	return m_totalmove >= 10;
+	return m_totalMouseMove >= 10;
 }
 
 QPoint const& GLRenderer::mousePosition() const
@@ -1632,13 +1630,40 @@ int GLRenderer::depthNegateFactor() const
 
 Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
 {
-	return m_keymods;
+	return m_currentKeyboardModifiers;
 }
 
-LDFixedCamera const& GetFixedCamera (ECamera cam)
+ECamera GLRenderer::camera() const
 {
-	if (cam != EFreeCamera)
-		return g_FixedCameras[cam];
-	else
-		return g_FixedCameras[0];
+	return m_camera;
+}
+
+LDGLData& GLRenderer::currentDocumentData() const
+{
+	return *document()->glData();
+}
+
+double& GLRenderer::rotation (Axis ax)
+{
+	return
+		(ax == X) ? currentDocumentData().rotationX :
+		(ax == Y) ? currentDocumentData().rotationY :
+					currentDocumentData().rotationZ;
+}
+
+double& GLRenderer::panning (Axis ax)
+{
+	return (ax == X) ? currentDocumentData().panX[camera()] :
+		currentDocumentData().panY[camera()];
+}
+
+double GLRenderer::panning (Axis ax) const
+{
+	return (ax == X) ? currentDocumentData().panX[camera()] :
+		currentDocumentData().panY[camera()];
+}
+
+double& GLRenderer::zoom()
+{
+	return currentDocumentData().zoom[camera()];
 }

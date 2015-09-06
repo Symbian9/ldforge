@@ -81,3 +81,14 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 		++row;
 	}
 }
+
+QColor GuiUtilities::mainColorRepresentation()
+{
+	QColor col (m_config->mainColor());
+
+	if (not col.isValid())
+		return QColor (0, 0, 0);
+
+	col.setAlpha (m_config->mainColorAlpha() * 255.f);
+	return col;
+}

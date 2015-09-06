@@ -35,6 +35,16 @@ class QLineEdit;
 class QTimer;
 class MagicWandMode;
 
+struct LDFixedCamera
+{
+	int glrotate[3];
+	Axis localX;
+	Axis localY;
+	bool negatedX;
+	bool negatedY;
+	bool negatedDepth; // is greater depth value closer to camera?
+};
+
 //
 // Meta for overlays
 //
@@ -51,36 +61,26 @@ struct LDGLOverlay
 	bool			invalid;
 };
 
-struct LDFixedCamera
-{
-	const char		glrotate[3];
-	const Axis		axisX,
-					axisY;
-	const bool		negX,
-					negY,
-					negatedDepth; // is greater depth value closer to camera?
-};
-
 //
 // Document-specific data
 //
 struct LDGLData
 {
-	double			rotX,
-					rotY,
-					rotZ,
-					panX[7],
-					panY[7],
-					zoom[7];
+	double			rotationX;
+	double			rotationY;
+	double			rotationZ;
+	double			panX[7];
+	double			panY[7];
+	double			zoom[7];
 	double			depthValues[6];
 	LDGLOverlay		overlays[6];
 	bool			init;
 	bool			needZoomToFit;
 
 	LDGLData() :
-		rotX (0.0),
-		rotY (0.0),
-		rotZ (0.0),
+		rotationX (0.0),
+		rotationY (0.0),
+		rotationZ (0.0),
 		init (false),
 		needZoomToFit (true)
 	{
@@ -117,144 +117,149 @@ enum ECamera
 MAKE_ITERABLE_ENUM (ECamera)
 
 //
-// CameraIcon::img is a heap-allocated QPixmap because otherwise it gets
+// CameraIcon::image is a heap-allocated QPixmap because otherwise it gets
 // initialized before program gets to main() and constructs a QApplication
 // and Qt doesn't like that.
 //
 struct CameraIcon
 {
-	QPixmap*		img;
-	QRect			srcRect,
-					destRect,
-					selRect;
+	QPixmap*		image;
+	QRect			sourceRect;
+	QRect			targetRect;
+	QRect			selRect;
 	ECamera			cam;
 };
 
-//
-// The main renderer object, draws the brick on the screen, manages the camera
-// and selection picking. The instance of GLRenderer is accessible as
-// g_win->R()
-//
+// The main renderer object, draws the brick on the screen, manages the camera and selection picking.
 class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
 {
-public:
 	Q_OBJECT
-	PROPERTY (public,	bool,				isDrawOnly,		setDrawOnly,		STOCK_WRITE)
-	PROPERTY (public,	MessageManager*,	messageLog, 	setMessageLog,		STOCK_WRITE)
-	PROPERTY (private,	bool,				isPicking,		setPicking,			CUSTOM_WRITE)
-	PROPERTY (public,	LDDocument*,		document,		setDocument,		CUSTOM_WRITE)
-	PROPERTY (public,	GLCompiler*,		compiler,		setCompiler,		STOCK_WRITE)
-	PROPERTY (public,	LDObject*,	objectAtCursor,	setObjectAtCursor,	STOCK_WRITE)
-	PROPERTY (private,	bool,				isCameraMoving,	setCameraMoving,	STOCK_WRITE)
 
 public:
 	GLRenderer (QWidget* parent = nullptr);
 	~GLRenderer();
 
-	inline ECamera			camera() const;
-	void					clearOverlay();
-	void					compileObject (LDObject* obj);
-	Vertex					coordconv2_3 (const QPoint& pos2d, bool snap) const;
-	QPoint					coordconv3_2 (const Vertex& pos3d);
-	EditModeType			currentEditModeType() const;
-	int						depthNegateFactor() const;
-	void					drawBlip (QPainter& paint, QPointF pos) const;
-	void					drawGLScene();
-	void					forgetObject (LDObject* obj);
-	Axis					getCameraAxis (bool y, ECamera camid = (ECamera) -1);
-	const char*				getCameraName() const;
-	double					getDepthValue() const;
-	LDFixedCamera const&	getFixedCamera (ECamera cam) const;
-	void					getRelativeAxes (Axis& relX, Axis& relY) const;
-	Axis					getRelativeZ() const;
-	LDGLOverlay&			getOverlay (int newcam);
-	uchar*					getScreencap (int& w, int& h);
-	Qt::KeyboardModifiers	keyboardModifiers() const;
-	void					hardRefresh();
-	void					highlightCursorObject();
-	void					initGLData();
-	void					initOverlaysFromObjects();
-	QPen					linePen() const;
-	bool					mouseHasMoved() const;
-	QPoint const&			mousePosition() const;
-	QPointF const&			mousePositionF() const;
-	void					needZoomToFit();
-	void					pick (int mouseX, int mouseY, bool additive);
-	void					pick (QRect const& range, bool additive);
-	LDObject*				pickOneObject (int mouseX, int mouseY);
-	Vertex const&			position3D() const;
-	void					refresh();
-	void					resetAngles();
-	void					resetAllAngles();
-	void					setBackground();
-	void					setCamera (const ECamera cam);
-	void					setDepthValue (double depth);
-	void					setEditMode (EditModeType type);
-	bool					setupOverlay (ECamera cam, QString file, int x, int y, int w, int h);
-	QPen					textPen() const;
-	void					updateOverlayObjects();
-	void					zoomNotch (bool inward);
-
-	QColor					getMainColor();
+	ECamera camera() const;
+	QString cameraName (ECamera camera) const;
+	QByteArray capturePixels();
+	void clearOverlay();
+	void compileObject (LDObject* obj);
+	GLCompiler* compiler() const;
+	Vertex convert2dTo3d (const QPoint& pos2d, bool snap) const;
+	QPoint convert3dTo2d (const Vertex& pos3d);
+	QString currentCameraName() const;
+	EditModeType currentEditModeType() const;
+	int depthNegateFactor() const;
+	LDDocument* document() const;
+	void drawBlip (QPainter& paint, QPointF pos) const;
+	void drawGLScene();
+	void forgetObject (LDObject* obj);
+	Axis getCameraAxis (bool y, ECamera camid = (ECamera) -1);
+	double getDepthValue() const;
+	const LDFixedCamera& getFixedCamera (ECamera cam) const;
+	LDGLOverlay& getOverlay (int newcam);
+	void getRelativeAxes (Axis& relX, Axis& relY) const;
+	Axis getRelativeZ() const;
+	void hardRefresh();
+	void highlightCursorObject();
+	void initGLData();
+	void initOverlaysFromObjects();
+	bool isDrawOnly() const;
+	bool isPicking() const;
+	Qt::KeyboardModifiers keyboardModifiers() const;
+	QPen linePen() const;
+	MessageManager* messageLog() const;
+	bool mouseHasMoved() const;
+	QPoint const& mousePosition() const;
+	QPointF const& mousePositionF() const;
+	void needZoomToFit();
+	LDObject* objectAtCursor() const;
+	void pick (int mouseX, int mouseY, bool additive);
+	void pick (QRect const& range, bool additive);
+	LDObject* pickOneObject (int mouseX, int mouseY);
+	Vertex const& position3D() const;
+	void refresh();
+	void resetAllAngles();
+	void resetAngles();
+	void setBackground();
+	void setCamera (const ECamera cam);
+	void setDepthValue (double depth);
+	void setDocument (LDDocument* document);
+	void setDrawOnly (bool value);
+	void setEditMode (EditModeType type);
+	void setPicking (bool a);
+	bool setupOverlay (ECamera cam, QString file, int x, int y, int w, int h);
+	QPen textPen() const;
+	void updateOverlayObjects();
+	void zoomNotch (bool inward);
 
 protected:
-	void					contextMenuEvent (QContextMenuEvent* ev);
-	void					dragEnterEvent (QDragEnterEvent* ev);
-	void					dropEvent (QDropEvent* ev);
-	void					initializeGL();
-	void					keyPressEvent (QKeyEvent* ev);
-	void					keyReleaseEvent (QKeyEvent* ev);
-	void					leaveEvent (QEvent* ev);
-	void					mouseDoubleClickEvent (QMouseEvent* ev);
-	void					mousePressEvent (QMouseEvent* ev);
-	void					mouseMoveEvent (QMouseEvent* ev);
-	void					mouseReleaseEvent (QMouseEvent* ev);
-	void					paintEvent (QPaintEvent* ev);
-	void					resizeGL (int w, int h);
-	void					wheelEvent (QWheelEvent* ev);
+	void contextMenuEvent (QContextMenuEvent* ev);
+	void dragEnterEvent (QDragEnterEvent* ev);
+	void dropEvent (QDropEvent* ev);
+	void initializeGL();
+	void keyPressEvent (QKeyEvent* ev);
+	void keyReleaseEvent (QKeyEvent* ev);
+	void leaveEvent (QEvent* ev);
+	void mouseDoubleClickEvent (QMouseEvent* ev);
+	void mousePressEvent (QMouseEvent* ev);
+	void mouseMoveEvent (QMouseEvent* ev);
+	void mouseReleaseEvent (QMouseEvent* ev);
+	void paintEvent (QPaintEvent* ev);
+	void resizeGL (int w, int h);
+	void wheelEvent (QWheelEvent* ev);
 
 private:
-	CameraIcon				m_cameraIcons[7];
-	QTimer*					m_toolTipTimer;
-	Qt::MouseButtons		m_lastButtons;
-	Qt::KeyboardModifiers	m_keymods;
-	Vertex					m_position3D;
-	double					m_virtWidth,
-							m_virtHeight;
-	bool					m_darkbg,
-							m_drawToolTip,
-							m_screencap,
-							m_panning;
-	QPoint					m_mousePosition,
-							m_globalpos;
-	QPointF					m_mousePositionF;
-	QPen					m_thinBorderPen;
-	ECamera					m_camera,
-							m_toolTipCamera;
-	GLuint					m_axeslist;
-	int						m_width,
-							m_height,
-							m_totalmove;
-	QColor					m_bgcolor;
-	AbstractEditMode*		m_editmode;
-	GLuint					m_axesVBO;
-	GLuint					m_axesColorVBO;
+	MessageManager* m_messageLog;
+	LDDocument* m_document;
+	GLCompiler* m_compiler;
+	LDObject* m_objectAtCursor;
 
-	void					calcCameraIcons();
-	void					clampAngle (double& angle) const;
-	inline LDGLData&		currentDocumentData() const;
-	void					drawVBOs (EVBOSurface surface, EVBOComplement colors, GLenum type);
-	void					doMakeCurrent();
-	LDOverlay*			findOverlayObject (ECamera cam);
-	inline double&			pan (Axis ax);
-	inline const double&	pan (Axis ax) const;
-	inline double&			rot (Axis ax);
-	inline double&			zoom();
-	void					zoomToFit();
-	void					zoomAllToFit();
+	CameraIcon m_cameraIcons[7];
+	QTimer* m_toolTipTimer;
+	Qt::MouseButtons m_lastButtons;
+	Qt::KeyboardModifiers m_currentKeyboardModifiers;
+	Vertex m_position3D;
+	double m_virtualWidth;
+	double m_virtualHeight;
+	bool m_useDarkBackground;
+	bool m_drawToolTip;
+	bool m_takingScreenCapture;
+	bool m_panning;
+	bool m_initialized;
+	bool m_isDrawOnly;
+	bool m_isPicking;
+	bool m_isCameraMoving;
+	QPoint m_mousePosition;
+	QPoint m_globalpos;
+	QPointF m_mousePositionF;
+	QPen m_thinBorderPen;
+	ECamera m_camera;
+	ECamera m_toolTipCamera;
+	GLuint m_axeslist;
+	int m_width;
+	int m_height;
+	int m_totalMouseMove;
+	QColor m_backgroundColor;
+	AbstractEditMode* m_currentEditMode;
+	GLuint m_axesVbo;
+	GLuint m_axesColorVbo;
+
+	void calcCameraIcons();
+	void clampAngle (double& angle) const;
+	LDGLData& currentDocumentData() const;
+	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
+	void doMakeCurrent();
+	LDOverlay* findOverlayObject (ECamera cam);
+	double& panning (Axis ax);
+	double panning (Axis ax) const;
+	double& rotation (Axis ax);
+	double& zoom();
+	void zoomToFit();
+	void zoomAllToFit();
 
 	template<typename... Args>
-	inline QString format (QString fmtstr, Args... args)
+	QString format (QString fmtstr, Args... args)
 	{
 		return ::format (fmtstr, args...);
 	}
@@ -263,42 +268,3 @@ private slots:
 	void	slot_toolTipTimer();
 	void	initializeAxes();
 };
-
-inline ECamera GLRenderer::camera() const
-{
-	return m_camera;
-}
-
-inline LDGLData& GLRenderer::currentDocumentData() const
-{
-	return *document()->glData();
-}
-
-inline double& GLRenderer::rot (Axis ax)
-{
-	return
-		(ax == X) ? currentDocumentData().rotX :
-		(ax == Y) ? currentDocumentData().rotY :
-					currentDocumentData().rotZ;
-}
-
-inline double& GLRenderer::pan (Axis ax)
-{
-	return (ax == X) ? currentDocumentData().panX[camera()] :
-		currentDocumentData().panY[camera()];
-}
-
-inline double const& GLRenderer::pan (Axis ax) const
-{
-	return (ax == X) ? currentDocumentData().panX[camera()] :
-		currentDocumentData().panY[camera()];
-}
-
-inline double& GLRenderer::zoom()
-{
-	return currentDocumentData().zoom[camera()];
-}
-
-LDFixedCamera const& GetFixedCamera (ECamera cam);
-
-extern const char* g_CameraNames[7];
