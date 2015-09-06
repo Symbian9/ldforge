@@ -66,27 +66,27 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 		QCheckBox* checkbox;
 		QPushButton* button;
 
-		if ((le = qobject_cast<QLineEdit*> (widget)) != nullptr)
+		if ((le = qobject_cast<QLineEdit*> (widget)))
 		{
 			le->setText (value.toString());
 		}
-		else if ((spinbox = qobject_cast<QSpinBox*> (widget)) != nullptr)
+		else if ((spinbox = qobject_cast<QSpinBox*> (widget)))
 		{
 			spinbox->setValue (value.toInt());
 		}
-		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != nullptr)
+		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)))
 		{
 			doublespinbox->setValue (value.toDouble());
 		}
-		else if ((slider = qobject_cast<QSlider*> (widget)) != nullptr)
+		else if ((slider = qobject_cast<QSlider*> (widget)))
 		{
 			slider->setValue (value.toInt());
 		}
-		else if ((checkbox = qobject_cast<QCheckBox*> (widget)) != nullptr)
+		else if ((checkbox = qobject_cast<QCheckBox*> (widget)))
 		{
 			checkbox->setChecked (value.toBool());
 		}
-		else if ((button = qobject_cast<QPushButton*> (widget)) != nullptr)
+		else if ((button = qobject_cast<QPushButton*> (widget)))
 		{
 			setButtonBackground (button, value.toString());
 			connect (button, SIGNAL (clicked()), this, SLOT (setButtonColor()));
@@ -230,17 +230,17 @@ void ConfigDialog::applySettings()
 		QCheckBox* checkbox;
 		QPushButton* button;
 
-		if ((le = qobject_cast<QLineEdit*> (widget)) != nullptr)
+		if ((le = qobject_cast<QLineEdit*> (widget)))
 			value = le->text();
-		else if ((spinbox = qobject_cast<QSpinBox*> (widget)) != nullptr)
+		else if ((spinbox = qobject_cast<QSpinBox*> (widget)))
 			value = spinbox->value();
-		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)) != nullptr)
+		else if ((doublespinbox = qobject_cast<QDoubleSpinBox*> (widget)))
 			value = doublespinbox->value();
-		else if ((slider = qobject_cast<QSlider*> (widget)) != nullptr)
+		else if ((slider = qobject_cast<QSlider*> (widget)))
 			value = slider->value();
-		else if ((checkbox = qobject_cast<QCheckBox*> (widget)) != nullptr)
+		else if ((checkbox = qobject_cast<QCheckBox*> (widget)))
 			value = checkbox->isChecked();
-		else if ((button = qobject_cast<QPushButton*> (widget)) != nullptr)
+		else if ((button = qobject_cast<QPushButton*> (widget)))
 			value = m_buttonColors[button];
 		else
 		{
@@ -380,7 +380,7 @@ void ConfigDialog::slot_setColor()
 	if (not ColorSelector::selectColor (this, value, defaultValue))
 		return;
 
-	if (entry != nullptr)
+	if (entry)
 	{
 		entry->setColor (value);
 	}

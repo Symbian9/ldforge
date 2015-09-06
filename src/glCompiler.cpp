@@ -101,7 +101,7 @@ GLCompiler::~GLCompiler()
 	glDeleteBuffers (g_numVBOs, &m_vbo[0]);
 	CHECK_GL_ERROR();
 
-	if (m_renderer != nullptr)
+	if (m_renderer)
 		m_renderer->setCompiler (nullptr);
 }
 
@@ -248,7 +248,7 @@ void GLCompiler::unstage (LDObject* obj)
 //
 void GLCompiler::compileDocument (LDDocument* doc)
 {
-	if (doc != nullptr)
+	if (doc)
 	{
 		for (LDObject* obj : doc->objects())
 			compileObject (obj);

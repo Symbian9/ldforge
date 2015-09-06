@@ -255,13 +255,13 @@ void PrimitiveCategory::populateCategories()
 			}
 
 			// Drop out if a category was decided on.
-			if (prim.category != nullptr)
+			if (prim.category)
 				break;
 		}
 
 		// If there was a match, add the primitive to the category.
 		// Otherwise, add it to the list of unmatched primitives.
-		if (prim.category != nullptr)
+		if (prim.category)
 			prim.category->prims << prim;
 		else
 			g_unmatched->prims << prim;
@@ -313,7 +313,7 @@ void PrimitiveCategory::loadCategories()
 
 			cat = new PrimitiveCategory (line);
 		}
-		else if (cat != nullptr)
+		else if (cat)
 		{
 			QString cmd = line.left (colon);
 			RegexType type = EFilenameRegex;
@@ -365,7 +365,7 @@ bool PrimitiveCategory::isValidToInclude()
 //
 bool IsPrimitiveLoaderBusy()
 {
-	return g_activeScanner != nullptr;
+	return g_activeScanner;
 }
 
 // =============================================================================
@@ -652,7 +652,7 @@ LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num)
 	QString name = MakeRadialFileName (type, segs, divs, num);
 	LDDocument* f = GetDocument (name);
 
-	if (f != nullptr)
+	if (f)
 		return f;
 
 	return GeneratePrimitive (type, segs, divs, num);

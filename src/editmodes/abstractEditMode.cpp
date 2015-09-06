@@ -137,7 +137,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 			}
 		}
 
-		if (closest != nullptr)
+		if (closest)
 			addDrawnVertex (*closest);
 
 		return true;

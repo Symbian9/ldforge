@@ -120,7 +120,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 		renderer()->document()->clearSelection();
 		LDObject* obj = renderer()->pickOneObject (ev->x(), ev->y());
 
-		if (obj != nullptr)
+		if (obj)
 		{
 			AddObjectDialog::staticDialog (obj->type(), obj);
 			m_window->endAction();

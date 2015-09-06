@@ -88,7 +88,7 @@ void OverlayDialog::fillDefaults (int newcam)
 	LDGLOverlay& info = g_win->renderer()->getOverlay (newcam);
 	RadioDefault<int> (newcam, m_cameraArgs);
 
-	if (info.img != nullptr)
+	if (info.img)
 	{
 		ui->filename->setText (info.fname);
 		ui->originX->setValue (info.ox);

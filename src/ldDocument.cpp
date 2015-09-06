@@ -311,7 +311,7 @@ QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
 	print ("Opening %1...\n", relpath);
 	QString path = FindDocumentPath (relpath, subdirs);
 
-	if (pathpointer != nullptr)
+	if (pathpointer)
 		*pathpointer = path;
 
 	if (path.isEmpty())
@@ -384,7 +384,7 @@ LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* 
 	if (not fp)
 		return nullptr;
 
-	LDDocument* load = (fileToOverride != nullptr ? fileToOverride : g_win->newDocument (implicit));
+	LDDocument* load = (fileToOverride ? fileToOverride : g_win->newDocument (implicit));
 	load->setFullPath (fullpath);
 	load->setName (LDDocument::shortenName (load->fullPath()));
 
@@ -533,14 +533,14 @@ void OpenMainModel (QString path)
 
 	// We cannot open this file if the document this would replace is not
 	// safe to close.
-	if (documentToReplace != nullptr and not documentToReplace->isSafeToClose())
+	if (documentToReplace and not documentToReplace->isSafeToClose())
 		return;
 
 	g_loadingMainFile = true;
 
 	// If we're replacing an existing document, clear the document and
 	// make it ready for being loaded to.
-	if (documentToReplace != nullptr)
+	if (documentToReplace)
 	{
 		file = documentToReplace;
 		file->clear();
@@ -613,7 +613,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	// If the second object in the list holds the file name, update that now.
 	LDObject* nameObject = getObject (1);
 
-	if (nameObject != nullptr and nameObject->type() == OBJ_Comment)
+	if (nameObject and nameObject->type() == OBJ_Comment)
 	{
 		LDComment* nameComment = static_cast<LDComment*> (nameObject);
 
@@ -627,7 +627,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 
 	QByteArray data;
 
-	if (sizeptr != nullptr)
+	if (sizeptr)
 		*sizeptr = 0;
 
 	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
@@ -636,7 +636,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		QByteArray subdata ((obj->asText() + "\r\n").toUtf8());
 		data.append (subdata);
 
-		if (sizeptr != nullptr)
+		if (sizeptr)
 			*sizeptr += subdata.size();
 	}
 
@@ -933,7 +933,7 @@ void LDDocument::reloadAllSubfiles()
 			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			LDDocument* fileInfo = GetDocument (ref->fileInfo()->name());
 
-			if (fileInfo != nullptr)
+			if (fileInfo)
 			{
 				ref->setFileInfo (fileInfo);
 			}
@@ -974,7 +974,7 @@ void LDDocument::addObjects (const LDObjectList& objs)
 {
 	for (LDObject* obj : objs)
 	{
-		if (obj != nullptr)
+		if (obj)
 			addObject (obj);
 	}
 }
@@ -1126,7 +1126,7 @@ void LDDocument::initializeCachedData()
 
 			LDPolygon* data = obj->getPolygon();
 
-			if (data != nullptr)
+			if (data)
 			{
 				m_polygonData << *data;
 				delete data;
@@ -1184,9 +1184,9 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 		// Ensure logoed studs are loaded first
 		LoadLogoStuds();
 
-		if (name() == "stud.dat" and g_logoedStud != nullptr)
+		if (name() == "stud.dat" and g_logoedStud)
 			return g_logoedStud->inlineContents (deep, renderinline);
-		else if (name() == "stud2.dat" and g_logoedStud2 != nullptr)
+		else if (name() == "stud2.dat" and g_logoedStud2)
 			return g_logoedStud2->inlineContents (deep, renderinline);
 	}
 

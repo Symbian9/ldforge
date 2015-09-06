@@ -10,7 +10,7 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 {
 	if (parent)
 	{
-		while (parent->parent() != nullptr)
+		while (parent->parent())
 			parent = parent->parent();
 
 		m_window = qobject_cast<MainWindow*> (parent);

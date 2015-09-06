@@ -127,7 +127,7 @@ void PrintToLog (const QString& msg)
 {
 	for (QString& a : msg.split ("\n", QString::SkipEmptyParts))
 	{
-		if (g_win != nullptr)
+		if (g_win)
 			g_win->addMessage (a);
 
 		// Also print it to stdout

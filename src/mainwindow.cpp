@@ -91,7 +91,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
-	if (ActivePrimitiveScanner() != nullptr)
+	if (ActivePrimitiveScanner())
 		connect (ActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
 	else
 		updatePrimitives();
@@ -164,7 +164,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
-		if (toolbar != nullptr)
+		if (toolbar)
 			toolbar->hide();
 	}
 
@@ -1031,7 +1031,7 @@ for (LDObject* obj : *f)
 //
 void MainWindow::updateActions()
 {
-	if (m_currentDocument != nullptr and m_currentDocument->history() != nullptr)
+	if (m_currentDocument and m_currentDocument->history())
 	{
 		EditHistory* his = m_currentDocument->history();
 		int pos = his->position();
@@ -1258,7 +1258,7 @@ LDDocument* MainWindow::currentDocument()
 void MainWindow::changeDocument (LDDocument* document)
 {
 	// Implicit files were loaded for caching purposes and may never be switched to.
-	if (document != nullptr and document->isCache())
+	if (document and document->isCache())
 		return;
 
 	m_currentDocument = document;

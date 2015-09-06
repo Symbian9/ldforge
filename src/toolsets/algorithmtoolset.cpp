@@ -153,7 +153,7 @@ void AlgorithmToolset::roundCoordinates()
 	{
 		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 
-		if (mo != nullptr)
+		if (mo)
 		{
 			Vertex v = mo->position();
 			Matrix t = mo->transform();
@@ -460,7 +460,7 @@ void AlgorithmToolset::subfileSelection()
 	int				refidx (selectedObjects()[0]->lineNumber());
 
 	// Determine title of subfile
-	if (titleobj != nullptr)
+	if (titleobj)
 		subtitle = "~" + titleobj->text();
 	else
 		subtitle = "~subfile";
@@ -516,7 +516,7 @@ void AlgorithmToolset::subfileSelection()
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
-		} while (FindDocument ("s\\" + Basename (fullsubname)) != nullptr or QFile (fullsubname).exists());
+		} while (FindDocument ("s\\" + Basename (fullsubname)) or QFile (fullsubname).exists());
 	}
 
 	// Determine the BFC winding type used in the main document - it is to

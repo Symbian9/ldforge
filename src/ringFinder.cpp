@@ -172,7 +172,7 @@ bool RingFinder::findRings (double r0, double r1)
 			m_bestSolution = &sol;
 	}
 
-	return (m_bestSolution != nullptr);
+	return (m_bestSolution);
 }
 
 //

@@ -212,7 +212,7 @@ void GLRenderer::initGLData()
 //
 void GLRenderer::needZoomToFit()
 {
-	if (document() != nullptr)
+	if (document())
 		currentDocumentData().needZoomToFit = true;
 }
 
@@ -625,7 +625,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
 
-		if (overlay.img != nullptr)
+		if (overlay.img)
 		{
 			QPoint v0 = coordconv3_2 (currentDocumentData().overlays[camera()].v0),
 					   v1 = coordconv3_2 (currentDocumentData().overlays[camera()].v1);
@@ -1023,7 +1023,7 @@ LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 //
 void GLRenderer::setEditMode (EditModeType a)
 {
-	if (m_editmode != nullptr and m_editmode->type() == a)
+	if (m_editmode and m_editmode->type() == a)
 		return;
 
 	delete m_editmode;
@@ -1050,7 +1050,7 @@ void GLRenderer::setDocument (LDDocument* const& a)
 {
 	m_document = a;
 
-	if (a != nullptr)
+	if (a)
 	{
 		initOverlaysFromObjects();
 
@@ -1433,12 +1433,12 @@ void GLRenderer::initOverlaysFromObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (ovlobj == nullptr and meta.img != nullptr)
+		if (ovlobj == nullptr and meta.img)
 		{
 			delete meta.img;
 			meta.img = nullptr;
 		}
-		else if (ovlobj != nullptr and
+		else if (ovlobj and
 			(meta.img == nullptr or meta.fname != ovlobj->fileName()) and
 			not meta.invalid)
 		{
@@ -1460,7 +1460,7 @@ void GLRenderer::updateOverlayObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (meta.img == nullptr and ovlobj != nullptr)
+		if (meta.img == nullptr and ovlobj)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
 			LDObject* nextobj = ovlobj->next();
@@ -1472,7 +1472,7 @@ void GLRenderer::updateOverlayObjects()
 			// not, remove the object.
 			ovlobj->destroy();
 		}
-		else if (meta.img != nullptr and ovlobj == nullptr)
+		else if (meta.img and ovlobj == nullptr)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
@@ -1512,7 +1512,7 @@ void GLRenderer::updateOverlayObjects()
 			}
 		}
 
-		if (meta.img != nullptr and ovlobj != nullptr)
+		if (meta.img and ovlobj)
 		{
 			ovlobj->setCamera (cam);
 			ovlobj->setFileName (meta.fname);
@@ -1553,17 +1553,17 @@ void GLRenderer::highlightCursorObject()
 		newIndex = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
 	}
 
-	if (newIndex != (oldObject != nullptr ? oldObject->id() : 0))
+	if (newIndex != (oldObject ? oldObject->id() : 0))
 	{
 		if (newIndex != 0)
 			newObject = LDObject::fromID (newIndex);
 
 		setObjectAtCursor (newObject);
 
-		if (oldObject != nullptr)
+		if (oldObject)
 			compileObject (oldObject);
 
-		if (newObject != nullptr)
+		if (newObject)
 			compileObject (newObject);
 	}
 
@@ -1572,13 +1572,13 @@ void GLRenderer::highlightCursorObject()
 
 void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
 {
-	if (m_window != nullptr and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem() != nullptr)
+	if (m_window and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
 		ev->acceptProposedAction();
 }
 
 void GLRenderer::dropEvent (QDropEvent* ev)
 {
-	if (m_window != nullptr and ev->source() == m_window->getPrimitivesTree())
+	if (m_window and ev->source() == m_window->getPrimitivesTree())
 	{
 		QString primName = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem())->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();

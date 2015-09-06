@@ -95,7 +95,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			PopulatePrimitives (tw_subfileList, (obj != nullptr ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
+			PopulatePrimitives (tw_subfileList, (obj ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -124,7 +124,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 	// Show a color edit dialog for the types that actually use the color
 	if (defaults->isColored())
 	{
-		if (obj != nullptr)
+		if (obj)
 			m_color = obj->color();
 		else
 			m_color = (type == OBJ_CondLine or type == OBJ_Line) ? EdgeColor : MainColor;
@@ -152,7 +152,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		case OBJ_Triangle:
 		case OBJ_Quad:
 			// Apply coordinates
-			if (obj != nullptr)
+			if (obj)
 			{
 				for (int i = 0; i < coordCount / 3; ++i)
 				{
@@ -190,7 +190,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		// le_matrix->setValidator (new QDoubleValidator);
 		Matrix defaultMatrix = IdentityMatrix;
 
-		if (mo != nullptr)
+		if (mo)
 		{
 			mo->position().apply ([&](Axis ax, double value)
 			{

@@ -322,7 +322,7 @@ void PartDownloader::checkIfFinished()
 	m_requests.clear();
 
 	// Update everything now
-	if (primaryFile() != nullptr)
+	if (primaryFile())
 	{
 		g_win->changeDocument (primaryFile());
 		g_win->doFullRefresh();
