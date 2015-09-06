@@ -785,7 +785,7 @@ static void changeProperty (LDObject* obj, T* ptr, const T& val)
 
 		if (before != after)
 		{
-			obj->document()->addToHistory (new EditHistory (idx, before, after));
+			obj->document()->addToHistory (new EditHistoryEntry (idx, before, after));
 			g_win->renderer()->compileObject (obj);
 			g_win->currentDocument()->redoVertices();
 		}

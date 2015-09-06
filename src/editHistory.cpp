@@ -23,23 +23,19 @@
 #include "mainwindow.h"
 #include "glRenderer.h"
 
-// =============================================================================
-//
-History::History() :
-	m_position (-1),
-	m_isIgnoring (false) {}
+EditHistory::EditHistory (LDDocument* document) :
+	m_document (document),
+	m_isIgnoring (false),
+	m_position (-1) {}
 
-// =============================================================================
-//
-void History::undo()
+void EditHistory::undo()
 {
 	if (m_changesets.isEmpty() or position() == -1)
 		return;
 
 	// Don't take the changes done here as actual edits to the document
 	setIgnoring (true);
-
-	const Changeset& set = getChangeset (position());
+	const Changeset& set = changesetAt (position());
 
 	// Iterate the list in reverse and undo all actions
 	for (int i = set.size() - 1; i >= 0; --i)
@@ -49,53 +45,42 @@ void History::undo()
 	}
 
 	m_position--;
-	g_win->refresh();
-	g_win->updateActions();
-	dprint ("Position is now %1", position());
 	setIgnoring (false);
+	emit undone();
 }
 
-// =============================================================================
-//
-void History::redo()
+void EditHistory::redo()
 {
 	if (position() == m_changesets.size())
 		return;
 
 	setIgnoring (true);
-	const Changeset& set = getChangeset (position() + 1);
+	const Changeset& set = changesetAt (position() + 1);
 
-	// Redo things - in the order as they were done in the first place
+	// Redo things in original order
 	for (const AbstractHistoryEntry* change : set)
 		change->redo();
 
-	setPosition (position() + 1);
-	g_win->refresh();
-	g_win->updateActions();
-	dprint ("Position is now %1", position());
+	++m_position;
 	setIgnoring (false);
+	emit redone();
 }
 
-// =============================================================================
-//
-void History::clear()
+void EditHistory::clear()
 {
 	for (Changeset set : m_changesets)
-		for (AbstractHistoryEntry* change : set)
-			delete change;
+	for (AbstractHistoryEntry* change : set)
+		delete change;
 
 	m_changesets.clear();
-	dprint ("History: cleared");
 }
 
-// =============================================================================
-//
-void History::addStep()
+void EditHistory::addStep()
 {
 	if (m_currentChangeset.isEmpty())
 		return;
 
-	while (position() < getSize() - 1)
+	while (position() < size() - 1)
 	{
 		Changeset last = m_changesets.last();
 
@@ -105,16 +90,13 @@ void History::addStep()
 		m_changesets.removeLast();
 	}
 
-//	dprint ("History: step added (%1 changes)", m_currentChangeset.size());
 	m_changesets << m_currentChangeset;
 	m_currentChangeset.clear();
-	setPosition (position() + 1);
-	g_win->updateActions();
+	++m_position;
+	emit stepAdded();
 }
 
-// =============================================================================
-//
-void History::add (AbstractHistoryEntry* entry)
+void EditHistory::add (AbstractHistoryEntry* entry)
 {
 	if (isIgnoring())
 	{
@@ -124,80 +106,128 @@ void History::add (AbstractHistoryEntry* entry)
 
 	entry->setParent (this);
 	m_currentChangeset << entry;
-//	dprint ("History: added entry of type %1", entry->getTypeName());
 }
 
-// =============================================================================
-//
-void AddHistory::undo() const
+int EditHistory::size() const
 {
-	LDObject* obj = parent()->document()->getObject (index());
-	obj->destroy();
+	return m_changesets.size();
 }
 
-// =============================================================================
-//
-void AddHistory::redo() const
+const EditHistory::Changeset& EditHistory::changesetAt (int pos) const
 {
-	LDObject* obj = ParseLine (code());
-	parent()->document()->insertObj (index(), obj);
-	g_win->renderer()->compileObject (obj);
+	return m_changesets[pos];
 }
 
-// =============================================================================
+int EditHistory::position()
+{
+	return m_position;
+}
+
+bool EditHistory::isIgnoring() const
+{
+	return m_isIgnoring;
+}
+
+void EditHistory::setIgnoring (bool value)
+{
+	m_isIgnoring = value;
+}
+
+LDDocument* EditHistory::document() const
+{
+	return m_document;
+}
+
 //
-DelHistory::DelHistory (int idx, LDObject* obj) :
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+AbstractHistoryEntry::AbstractHistoryEntry() {}
+AbstractHistoryEntry::~AbstractHistoryEntry() {}
+
+EditHistory* AbstractHistoryEntry::parent() const
+{
+	return m_parent;
+}
+
+void AbstractHistoryEntry::setParent (EditHistory* parent)
+{
+	m_parent = parent;
+}
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+AddHistoryEntry::AddHistoryEntry (int idx, LDObject* obj) :
 	m_index (idx),
 	m_code (obj->asText()) {}
 
-// =============================================================================
-// heh
-//
-void DelHistory::undo() const
+void AddHistoryEntry::undo() const
 {
-	LDObject* obj = ParseLine (code());
-	parent()->document()->insertObj (index(), obj);
-	g_win->renderer()->compileObject (obj);
+	parent()->document()->getObject (m_index)->destroy();
 }
 
-// =============================================================================
-//
-void DelHistory::redo() const
+void AddHistoryEntry::redo() const
 {
-	LDObject* obj = parent()->document()->getObject (index());
-	obj->destroy();
+	parent()->document()->insertObj (m_index, ParseLine (m_code));
 }
 
-// =============================================================================
 //
-void EditHistory::undo() const
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+DelHistoryEntry::DelHistoryEntry (int idx, LDObject* obj) :
+	AddHistoryEntry (idx, obj) {}
+
+void DelHistoryEntry::undo() const
 {
-	LDObject* obj = g_win->currentDocument()->getObject (index());
-	LDObject* newobj = ParseLine (oldCode());
+	AddHistoryEntry::redo();
+}
+
+void DelHistoryEntry::redo() const
+{
+	AddHistoryEntry::undo();
+}
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+EditHistoryEntry::EditHistoryEntry (int idx, QString oldCode, QString newCode) :
+	m_index (idx),
+	m_oldCode (oldCode),
+	m_newCode (newCode) {}
+
+void EditHistoryEntry::undo() const
+{
+	LDObject* obj = parent()->document()->getObject (m_index);
+	LDObject* newobj = ParseLine (m_oldCode);
 	obj->replace (newobj);
-	g_win->renderer()->compileObject (newobj);
 }
 
-// =============================================================================
-//
-void EditHistory::redo() const
+void EditHistoryEntry::redo() const
 {
-	LDObject* obj = g_win->currentDocument()->getObject (index());
-	LDObject* newobj = ParseLine (newCode());
+	LDObject* obj = parent()->document()->getObject (m_index);
+	LDObject* newobj = ParseLine (m_newCode);
 	obj->replace (newobj);
-	g_win->renderer()->compileObject (newobj);
 }
 
-// =============================================================================
 //
-void SwapHistory::undo() const
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+SwapHistoryEntry::SwapHistoryEntry (int a, int b) :
+	m_a (a),
+	m_b (b) {}
+
+
+void SwapHistoryEntry::undo() const
 {
-	LDObject::fromID (a)->swap (LDObject::fromID (b));
+	LDObject::fromID (m_a)->swap (LDObject::fromID (m_b));
 }
 
-// =============================================================================
-//
-void SwapHistory::redo() const
+void SwapHistoryEntry::redo() const
 {
 	undo();
 }

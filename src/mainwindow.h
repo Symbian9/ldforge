@@ -105,7 +105,7 @@ public:
 	void spawnContextMenu (const QPoint pos);
 	int suggestInsertPoint();
 	void syncSettings();
-	void updateActions();
+	Q_SLOT void updateActions();
 	void updateColorToolbar();
 	void updateDocumentList();
 	void updateDocumentListItem (LDDocument* doc);
@@ -119,6 +119,7 @@ public slots:
 	void actionTriggered();
 	void circleToolSegmentsChanged();
 	void closeTab (int tabindex);
+	void historyTraversed();
 	void ringToolHiResClicked (bool clicked);
 	void tabSelected();
 	void updatePrimitives();

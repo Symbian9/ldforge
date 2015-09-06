@@ -20,155 +20,98 @@
 #include "main.h"
 #include "ldObject.h"
 
-#define IMPLEMENT_HISTORY_TYPE(N)					\
-	~N##History() {}								\
-	void undo() const override;						\
-	void redo() const override;						\
-													\
-	History::EHistoryType getType() const override	\
-	{												\
-		return History::E##N##History;				\
-	}												\
-													\
-	QString getTypeName() const override			\
-	{												\
-		return #N;									\
-	}
-
 class AbstractHistoryEntry;
 
-// =============================================================================
-class History
+class EditHistory : public QObject
 {
-	PROPERTY (private,	int,				position,	setPosition,	STOCK_WRITE)
-	PROPERTY (public,	LDDocument*,	document,	setDocument,	STOCK_WRITE)
-	PROPERTY (public,	bool,				isIgnoring,	setIgnoring,	STOCK_WRITE)
+	Q_OBJECT
 
 public:
-	typedef QList<AbstractHistoryEntry*> Changeset;
+	using Changeset = QList<AbstractHistoryEntry*>;
 
-	enum EHistoryType
-	{
-		EDelHistory,
-		EEditHistory,
-		EAddHistory,
-		EMoveHistory,
-		ESwapHistory,
-	};
+	EditHistory (LDDocument* document);
 
-	History();
-	void undo();
-	void redo();
-	void clear();
-
-	void addStep();
 	void add (AbstractHistoryEntry* entry);
+	void addStep();
+	const Changeset& changesetAt (int pos) const;
+	void clear();
+	LDDocument* document() const;
+	bool isIgnoring() const;
+	int position();
+	void redo();
+	void setIgnoring (bool value);
+	int size() const;
+	void undo();
 
-	inline long getSize() const
-	{
-		return m_changesets.size();
-	}
-
-	inline History& operator<< (AbstractHistoryEntry* entry)
-	{
-		add (entry);
-		return *this;
-	}
-
-	inline const Changeset& getChangeset (long pos) const
-	{
-		return m_changesets[pos];
-	}
+signals:
+	void undone();
+	void redone();
+	void stepAdded();
 
 private:
-	Changeset			m_currentChangeset;
-	QList<Changeset>	m_changesets;
+	LDDocument* m_document;
+	Changeset m_currentChangeset;
+	QList<Changeset> m_changesets;
+	bool m_isIgnoring;
+	int m_position;
 };
 
-// =============================================================================
-//
 class AbstractHistoryEntry
 {
-	PROPERTY (public,	History*,	parent,	setParent,	STOCK_WRITE)
-
 public:
-	virtual ~AbstractHistoryEntry() {}
-	virtual void undo() const = 0;
+	AbstractHistoryEntry();
+	virtual ~AbstractHistoryEntry();
+
+	EditHistory* parent() const;
 	virtual void redo() const = 0;
-	virtual History::EHistoryType getType() const = 0;
-	virtual QString getTypeName() const = 0;
-};
-
-// =============================================================================
-//
-class DelHistory : public AbstractHistoryEntry
-{
-	PROPERTY (private,	int,		index,	setIndex,	STOCK_WRITE)
-	PROPERTY (private,	QString,	code,	setCode,	STOCK_WRITE)
-
-public:
-	IMPLEMENT_HISTORY_TYPE (Del)
-	DelHistory (int idx, LDObject* obj);
-};
-
-// =============================================================================
-//
-class EditHistory : public AbstractHistoryEntry
-{
-	PROPERTY (private,	int, 		index,		setIndex,	STOCK_WRITE)
-	PROPERTY (private,	QString,	oldCode,	setOldCode,	STOCK_WRITE)
-	PROPERTY (private,	QString,	newCode,	setNewCode,	STOCK_WRITE)
-
-public:
-	IMPLEMENT_HISTORY_TYPE (Edit)
-
-	EditHistory (int idx, QString oldCode, QString newCode) :
-		m_index (idx),
-		m_oldCode (oldCode),
-		m_newCode (newCode) {}
-};
-
-// =============================================================================
-//
-class AddHistory : public AbstractHistoryEntry
-{
-	PROPERTY (private,	int,		index,	setIndex,	STOCK_WRITE)
-	PROPERTY (private,	QString,	code,	setCode,	STOCK_WRITE)
-
-public:
-	IMPLEMENT_HISTORY_TYPE (Add)
-
-	AddHistory (int idx, LDObject* obj) :
-		m_index (idx),
-		m_code (obj->asText()) {}
-};
-
-// =============================================================================
-//
-class MoveHistory : public AbstractHistoryEntry
-{
-public:
-	IMPLEMENT_HISTORY_TYPE (Move)
-
-	QList<int> indices;
-	Vertex dest;
-
-	MoveHistory (QList<int> indices, Vertex dest) :
-			indices (indices),
-			dest (dest) {}
-};
-
-// =============================================================================
-//
-class SwapHistory : public AbstractHistoryEntry
-{
-public:
-	IMPLEMENT_HISTORY_TYPE (Swap)
-
-	SwapHistory (int a, int b) :
-		a (a),
-		b (b) {}
+	void setParent (EditHistory* parent);
+	virtual void undo() const = 0;
 
 private:
-	int a, b;
+	EditHistory* m_parent;
+};
+
+class AddHistoryEntry : public AbstractHistoryEntry
+{
+public:
+	AddHistoryEntry (int idx, LDObject* obj);
+	void undo() const override;
+	void redo() const override;
+	
+private:
+	int m_index;
+	QString m_code;
+};
+
+class DelHistoryEntry : public AddHistoryEntry
+{
+public:
+	DelHistoryEntry (int idx, LDObject* obj);
+	void undo() const override;
+	void redo() const override;
+};
+
+class EditHistoryEntry : public AbstractHistoryEntry
+{
+public:
+	EditHistoryEntry (int idx, QString oldCode, QString newCode);
+	void undo() const override;
+	void redo() const override;
+	
+private:
+	int m_index;
+	QString m_oldCode;
+	QString m_newCode;
+};
+
+class SwapHistoryEntry : public AbstractHistoryEntry
+{
+public:
+	SwapHistoryEntry (int a, int b);
+	void undo() const override;
+	void redo() const override;
+
+private:
+	int m_a;
+	int m_b;
 };

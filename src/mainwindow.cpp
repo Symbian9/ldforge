@@ -1033,10 +1033,10 @@ void MainWindow::updateActions()
 {
 	if (m_currentDocument != null and m_currentDocument->history() != null)
 	{
-		History* his = m_currentDocument->history();
+		EditHistory* his = m_currentDocument->history();
 		int pos = his->position();
 		ui.actionUndo->setEnabled (pos != -1);
-		ui.actionRedo->setEnabled (pos < (long) his->getSize() - 1);
+		ui.actionRedo->setEnabled (pos < (long) his->size() - 1);
 	}
 
 	ui.actionWireframe->setChecked (m_configOptions.drawWireframe());
@@ -1081,6 +1081,14 @@ void MainWindow::closeTab (int tabindex)
 		return;
 
 	doc->close();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+void MainWindow::historyTraversed()
+{
+	updateActions();
+	refresh();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1216,12 +1224,17 @@ void MainWindow::createBlankDocument()
 //
 LDDocument* MainWindow::newDocument (bool cache)
 {
-	m_documents.append (new LDDocument (this));
+	LDDocument* document = new LDDocument (this);
+	m_documents.append (document);
+
+	connect (document->history(), SIGNAL (undone()), this, SLOT (historyTraversed()));
+	connect (document->history(), SIGNAL (redone()), this, SLOT (historyTraversed()));
+	connect (document->history(), SIGNAL (stepAdded()), this, SLOT (updateActions()));
 
 	if (not cache)
-		m_documents.last()->openForEditing();
+		document->openForEditing();
 
-	return m_documents.last();
+	return document;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

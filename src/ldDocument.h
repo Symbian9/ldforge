@@ -23,7 +23,7 @@
 #include "editHistory.h"
 #include "glShared.h"
 
-class History;
+class EditHistory;
 class OpenProgressDialog;
 struct LDGLData;
 class GLCompiler;
@@ -65,7 +65,7 @@ public:
 	const LDObjectList& getSelection() const;
 	LDGLData* glData();
 	bool hasUnsavedChanges() const;
-	History* history() const;
+	EditHistory* history() const;
 	void initializeCachedData();
 	LDObjectList inlineContents (bool deep, bool renderinline);
 	QList<LDPolygon> inlinePolygons();
@@ -104,7 +104,7 @@ private:
 	QString m_fullPath;
 	QString m_defaultName;
 	LDObjectList m_objects;
-	History* m_history;
+	EditHistory* m_history;
 	bool m_isCache;
 	bool m_verticesOutdated;
 	bool m_needVertexMerge;

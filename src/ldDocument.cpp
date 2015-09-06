@@ -46,7 +46,7 @@ const QStringList g_specialSubdirectories ({ "s", "48", "8" });
 LDDocument::LDDocument (QObject* parent) :
 	QObject (parent),
 	HierarchyElement (parent),
-	m_history (new History),
+	m_history (new EditHistory (this)),
 	m_isCache (true),
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
@@ -55,7 +55,6 @@ LDDocument::LDDocument (QObject* parent) :
 {
 	setSavePosition (-1);
 	setTabIndex (-1);
-	m_history->setDocument (this);
 	m_needsReCache = true;
 }
 
@@ -81,7 +80,7 @@ const LDObjectList& LDDocument::objects() const
 	return m_objects;
 }
 
-History* LDDocument::history() const
+EditHistory* LDDocument::history() const
 {
 	return m_history;
 }
@@ -172,7 +171,7 @@ void LDDocument::clearHistory()
 
 void LDDocument::addToHistory (AbstractHistoryEntry* entry)
 {
-	*history() << entry;
+	history()->add (entry);
 }
 
 void LDDocument::close()
@@ -961,7 +960,7 @@ void LDDocument::reloadAllSubfiles()
 //
 int LDDocument::addObject (LDObject* obj)
 {
-	history()->add (new AddHistory (objects().size(), obj));
+	history()->add (new AddHistoryEntry (objects().size(), obj));
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
@@ -984,7 +983,7 @@ void LDDocument::addObjects (const LDObjectList& objs)
 //
 void LDDocument::insertObj (int pos, LDObject* obj)
 {
-	history()->add (new AddHistory (pos, obj));
+	history()->add (new AddHistoryEntry (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
 	m_window->renderer()->compileObject (obj);
@@ -1023,7 +1022,7 @@ void LDDocument::forgetObject (LDObject* obj)
 
 		if (not isCache() and not m_beingDestroyed)
 		{
-			history()->add (new DelHistory (idx, obj));
+			history()->add (new DelHistoryEntry (idx, obj));
 			m_objectVertices.remove (obj);
 		}
 
@@ -1057,7 +1056,7 @@ void LDDocument::setObject (int idx, LDObject* obj)
 	{
 		QString oldcode = getObject (idx)->asText();
 		QString newcode = obj->asText();
-		*m_history << new EditHistory (idx, oldcode, newcode);
+		m_history->add (new EditHistoryEntry (idx, oldcode, newcode));
 	}
 
 	m_objectVertices.remove (m_objects[idx]);
@@ -1282,7 +1281,7 @@ void LDDocument::swapObjects (LDObject* one, LDObject* other)
 	{
 		m_objects[b] = one;
 		m_objects[a] = other;
-		addToHistory (new SwapHistory (one->id(), other->id()));
+		addToHistory (new SwapHistoryEntry (one->id(), other->id()));
 	}
 }
 
