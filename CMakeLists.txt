@@ -39,6 +39,7 @@ set (LDFORGE_SOURCES
 	src/dialogs.cpp
 	src/documentation.cpp
 	src/documentloader.cpp
+	src/documentmanager.cpp
 	src/editHistory.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
@@ -87,6 +88,7 @@ set (LDFORGE_HEADERS
 	src/dialogs.h
 	src/documentation.h
 	src/documentloader.h
+	src/documentmanager.h
 	src/doublemap.h
 	src/editHistory.h
 	src/format.h

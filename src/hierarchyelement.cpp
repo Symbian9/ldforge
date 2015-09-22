@@ -24,6 +24,7 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	}
 
 	m_config = m_window->configBag();
+	m_documents = m_window->documents();
 }
 
 GuiUtilities* HierarchyElement::guiUtilities() const

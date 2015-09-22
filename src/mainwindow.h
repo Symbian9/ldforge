@@ -79,9 +79,10 @@ public:
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
-	static QKeySequence defaultShortcut (QAction* act);
+	QKeySequence defaultShortcut (QAction* act);
 	void deleteByColor (LDColor color);
 	int deleteSelection();
+	DocumentManager* documents() { return m_documents; }
 	void doFullRefresh();
 	void endAction();
 	class ExtProgramToolset* externalPrograms();
@@ -145,7 +146,7 @@ private:
 	QMap<QAction*, ToolInfo> m_toolmap;
 	class ExtProgramToolset* m_externalPrograms;
 	class QSettings* m_settings;
-	QList<LDDocument*> m_documents;
+	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	DoubleMap<LDObject*, QListWidgetItem*> m_objectsInList;
 

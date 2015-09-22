@@ -54,6 +54,7 @@
 #include "dialogs/configdialog.h"
 #include "guiutilities.h"
 #include "glCompiler.h"
+#include "documentmanager.h"
 
 static bool g_isSelectionLocked = false;
 static QMap<QAction*, QKeySequence> g_defaultShortcuts;
@@ -72,6 +73,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this)),
+	m_documents (new DocumentManager (this)),
 	m_currentDocument (nullptr)
 {
 	g_win = this;
@@ -1132,7 +1134,7 @@ QTreeWidget* MainWindow::getPrimitivesTree() const
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-QKeySequence MainWindow::defaultShortcut (QAction* act) // [static]
+QKeySequence MainWindow::defaultShortcut (QAction* act)
 {
 	return g_defaultShortcuts[act];
 }

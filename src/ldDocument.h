@@ -27,6 +27,7 @@ class EditHistory;
 class OpenProgressDialog;
 struct LDGLData;
 class GLCompiler;
+class DocumentManager;
 
 //
 // This class stores a document either as a editable file for the user or for
@@ -43,7 +44,7 @@ class LDDocument : public QObject, public HierarchyElement
 	Q_OBJECT
 
 public:
-	LDDocument (QObject* parent);
+	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
 	void addHistoryStep();
@@ -117,30 +118,11 @@ private:
 	QVector<Vertex> m_vertices;
 	LDObjectList m_sel;
 	LDGLData* m_gldata;
+	DocumentManager* m_manager;
 };
-
-// Opens the given file as the main file. Everything is closed first.
-void OpenMainModel (QString path);
-
-// Finds an OpenFile by name or null if not open
-LDDocument* FindDocument (QString name);
-
-// Opens the given file and parses the LDraw code within. Returns a pointer
-// to the opened file or null on error.
-LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr, bool* aborted = nullptr);
-
-// Opens the given file and returns a pointer to it, potentially looking in /parts and /p
-QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer = nullptr);
-
-// Close all open files, whether user-opened or subfile caches.
-void CloseAllDocuments();
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
-
-// Retrieves the pointer to the given document by file name. Document is loaded
-// from file if necessary. Can return null if neither succeeds.
-LDDocument* GetDocument (QString filename);
 
 // Is it safe to close all files?
 bool IsSafeToCloseAll();

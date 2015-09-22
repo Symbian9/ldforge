@@ -550,7 +550,7 @@ void ConfigDialog::slot_resetShortcut()
 
 	for (ShortcutListItem* item : sel)
 	{
-		item->setSequence (MainWindow::defaultShortcut (item->action()));
+		item->setSequence (m_window->defaultShortcut (item->action()));
 		setShortcutText (item);
 	}
 }

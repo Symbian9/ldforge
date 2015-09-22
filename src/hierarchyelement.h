@@ -6,6 +6,7 @@ class MainWindow;
 class ConfigurationValueBag;
 class GuiUtilities;
 class LDDocument;
+class DocumentManager;
 
 //
 // Objects that are to take part in the MainWindow's hierarchy multiple-inherit from this class to get a few useful
@@ -23,4 +24,5 @@ public:
 protected:
 	MainWindow* m_window;
 	ConfigurationValueBag* m_config;
+	DocumentManager* m_documents;
 };

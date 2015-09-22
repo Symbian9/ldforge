@@ -36,14 +36,7 @@
 ConfigOption (QStringList RecentFiles)
 ConfigOption (bool TryDownloadMissingFiles = false)
 
-static bool g_loadingMainFile = false;
-enum { MAX_RECENT_FILES = 10 };
-static LDDocument* g_logoedStud;
-static LDDocument* g_logoedStud2;
-static bool g_loadingLogoedStuds = false;
-const QStringList g_specialSubdirectories ({ "s", "48", "8" });
-
-LDDocument::LDDocument (QObject* parent) :
+LDDocument::LDDocument (DocumentManager* parent) :
 	QObject (parent),
 	HierarchyElement (parent),
 	m_history (new EditHistory (this)),
@@ -51,7 +44,8 @@ LDDocument::LDDocument (QObject* parent) :
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
 	m_beingDestroyed (false),
-	m_gldata (new LDGLData)
+	m_gldata (new LDGLData),
+	m_manager (parent)
 {
 	setSavePosition (-1);
 	setTabIndex (-1);
@@ -60,6 +54,9 @@ LDDocument::LDDocument (QObject* parent) :
 
 LDDocument::~LDDocument()
 {
+	for (int i = 0; i < m_objects.size(); ++i)
+		delete m_objects[i];
+
 	m_beingDestroyed = true;
 	delete m_history;
 	delete m_gldata;
@@ -195,232 +192,6 @@ LDGLData* LDDocument::glData()
 
 // =============================================================================
 //
-LDDocument* FindDocument (QString name)
-{
-	for (LDDocument* document : g_win->allDocuments())
-	{
-		if (isOneOf (name, document->name(), document->defaultName()))
-			return document;
-	}
-
-	return nullptr;
-}
-
-// =============================================================================
-//
-QString Dirname (QString path)
-{
-	long lastpos = path.lastIndexOf (DIRSLASH);
-
-	if (lastpos > 0)
-		return path.left (lastpos);
-
-#ifndef _WIN32
-	if (path[0] == DIRSLASH_CHAR)
-		return DIRSLASH;
-#endif // _WIN32
-
-	return "";
-}
-
-// =============================================================================
-//
-QString Basename (QString path)
-{
-	long lastpos = path.lastIndexOf (DIRSLASH);
-
-	if (lastpos != -1)
-		return path.mid (lastpos + 1);
-
-	return path;
-}
-
-// =============================================================================
-//
-static QString FindDocumentPath (QString relpath, bool subdirs)
-{
-	QString fullPath;
-
-	// LDraw models use backslashes as path separators. Replace those into forward slashes for Qt.
-	relpath.replace ("\\", "/");
-
-	// Try find it relative to other currently open documents. We want a file in the immediate vicinity of a current
-	// part model to override stock LDraw stuff.
-	QString reltop = Basename (Dirname (relpath));
-
-	for (LDDocument* doc : g_win->allDocuments())
-	{
-		QString partpath = format ("%1/%2", Dirname (doc->fullPath()), relpath);
-		QFile f (partpath);
-
-		if (f.exists())
-		{
-			// ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
-			QString proptop = Basename (Dirname (partpath));
-
-			bool bogus = false;
-
-			for (QString s : g_specialSubdirectories)
-			{
-				if ((proptop == s and reltop != s) or (reltop == s and proptop != s))
-				{
-					bogus = true;
-					break;
-				}
-			}
-
-			if (not bogus)
-				return partpath;
-		}
-	}
-
-	if (QFile::exists (relpath))
-		return relpath;
-
-	// Try with just the LDraw path first
-	fullPath = format ("%1" DIRSLASH "%2", g_win->configBag()->lDrawPath(), relpath);
-
-	if (QFile::exists (fullPath))
-		return fullPath;
-
-	if (subdirs)
-	{
-		// Look in sub-directories: parts and p. Also look in the download path, since that's where we download parts
-		// from the PT to.
-		QStringList dirs = { g_win->configBag()->lDrawPath(), g_win->configBag()->downloadFilePath() };
-		for (const QString& topdir : dirs)
-		{
-			for (const QString& subdir : QStringList ({ "parts", "p" }))
-			{
-				fullPath = format ("%1" DIRSLASH "%2" DIRSLASH "%3", topdir, subdir, relpath);
-
-				if (QFile::exists (fullPath))
-					return fullPath;
-			}
-		}
-	}
-
-	// Did not find the file.
-	return "";
-}
-
-// =============================================================================
-//
-QFile* OpenLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
-{
-	print ("Opening %1...\n", relpath);
-	QString path = FindDocumentPath (relpath, subdirs);
-
-	if (pathpointer)
-		*pathpointer = path;
-
-	if (path.isEmpty())
-		return nullptr;
-
-	QFile* fp = new QFile (path);
-
-	if (fp->open (QIODevice::ReadOnly))
-		return fp;
-
-	fp->deleteLater();
-	return nullptr;
-}
-
-// =============================================================================
-//
-LDObjectList LoadFileContents (QFile* fp, int* numWarnings, bool* ok)
-{
-	LDObjectList objs;
-
-	if (numWarnings)
-		*numWarnings = 0;
-
-	DocumentLoader* loader = new DocumentLoader (g_loadingMainFile);
-	loader->read (fp);
-	loader->start();
-
-	// After start() returns, if the loader isn't done yet, it's delaying
-	// its next iteration through the event loop. We need to catch this here
-	// by telling the event loop to tick, which will tick the file loader again.
-	// We keep doing this until the file loader is ready.
-	while (not loader->isDone())
-		qApp->processEvents();
-
-	// If we wanted the success value, supply that now
-	if (ok)
-		*ok = not loader->hasAborted();
-
-	objs = loader->objects();
-	delete loader;
-	return objs;
-}
-
-// =============================================================================
-//
-LDDocument* OpenDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride, bool* aborted)
-{
-	// Convert the file name to lowercase when searching because some parts contain subfile
-	// subfile references with uppercase file names. I'll assume here that the library will always
-	// use lowercase file names for the part files.
-	QFile* fp;
-	QString fullpath;
-
-	if (search)
-	{
-		fp = OpenLDrawFile (path.toLower(), true, &fullpath);
-	}
-	else
-	{
-		fp = new QFile (path);
-		fullpath = path;
-
-		if (not fp->open (QIODevice::ReadOnly))
-		{
-			delete fp;
-			return nullptr;
-		}
-	}
-
-	if (not fp)
-		return nullptr;
-
-	LDDocument* load = (fileToOverride ? fileToOverride : g_win->newDocument (implicit));
-	load->setFullPath (fullpath);
-	load->setName (LDDocument::shortenName (load->fullPath()));
-
-	// Loading the file shouldn't count as actual edits to the document.
-	load->history()->setIgnoring (true);
-
-	int numWarnings;
-	bool ok;
-	LDObjectList objs = LoadFileContents (fp, &numWarnings, &ok);
-	fp->close();
-	fp->deleteLater();
-
-	if (aborted)
-		*aborted = ok == false;
-
-	if (not ok)
-	{
-		load->close();
-		return nullptr;
-	}
-
-	load->addObjects (objs);
-
-	if (g_loadingMainFile)
-	{
-		g_win->changeDocument (load);
-		g_win->renderer()->setDocument (load);
-		print (QObject::tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
-	}
-
-	load->history()->setIgnoring (false);
-	return load;
-}
-
-// =============================================================================
-//
 // Performs safety checks. Do this before closing any files!
 //
 bool LDDocument::isSafeToClose()
@@ -475,125 +246,6 @@ bool LDDocument::isSafeToClose()
 	}
 
 	return true;
-}
-
-// =============================================================================
-//
-void CloseAllDocuments()
-{
-	for (LDDocument* file : g_win->allDocuments())
-		file->close();
-}
-
-// =============================================================================
-//
-void AddRecentFile (QString path)
-{
-	QStringList recentFiles = g_win->configBag()->recentFiles();
-	int idx = recentFiles.indexOf (path);
-
-	// If this file already is in the list, pop it out.
-	if (idx != -1)
-	{
-		if (idx == recentFiles.size() - 1)
-			return; // first recent file - abort and do nothing
-
-		recentFiles.removeAt (idx);
-	}
-
-	// If there's too many recent files, drop one out.
-	while (recentFiles.size() > (MAX_RECENT_FILES - 1))
-		recentFiles.removeAt (0);
-
-	// Add the file
-	recentFiles << path;
-	g_win->configBag()->setRecentFiles (recentFiles);
-	g_win->syncSettings();
-	g_win->updateRecentFilesMenu();
-}
-
-// =============================================================================
-// Open an LDraw file and set it as the main model
-// =============================================================================
-void OpenMainModel (QString path)
-{
-	// If there's already a file with the same name, this file must replace it.
-	LDDocument* documentToReplace = nullptr;
-	LDDocument* file = nullptr;
-	QString shortName = LDDocument::shortenName (path);
-
-	for (LDDocument* doc : g_win->allDocuments())
-	{
-		if (doc->name() == shortName)
-		{
-			documentToReplace = doc;
-			break;
-		}
-	}
-
-	// We cannot open this file if the document this would replace is not
-	// safe to close.
-	if (documentToReplace and not documentToReplace->isSafeToClose())
-		return;
-
-	g_loadingMainFile = true;
-
-	// If we're replacing an existing document, clear the document and
-	// make it ready for being loaded to.
-	if (documentToReplace)
-	{
-		file = documentToReplace;
-		file->clear();
-	}
-
-	bool aborted;
-	file = OpenDocument (path, false, false, file, &aborted);
-
-	if (file == nullptr)
-	{
-		if (not aborted)
-		{
-			// Tell the user loading failed.
-			setlocale (LC_ALL, "C");
-			Critical (format (QObject::tr ("Failed to open %1: %2"), path, strerror (errno)));
-		}
-
-		g_loadingMainFile = false;
-		return;
-	}
-
-	file->openForEditing();
-	g_win->closeInitialDocument();
-	g_win->changeDocument (file);
-	g_win->doFullRefresh();
-	AddRecentFile (path);
-	g_loadingMainFile = false;
-
-	// If there were problems loading subfile references, try see if we can find these
-	// files on the parts tracker.
-	QStringList unknowns;
-
-	for (LDObject* obj : file->objects())
-	{
-		if (obj->type() != OBJ_Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty())
-			continue;
-
-		unknowns << static_cast<LDError*> (obj)->fileReferenced();
-	}
-
-	if (g_win->configBag()->tryDownloadMissingFiles() and not unknowns.isEmpty())
-	{
-		PartDownloader dl (g_win);
-		dl.setSourceType (PartDownloader::PartsTracker);
-		dl.setPrimaryFile (file);
-
-		for (QString const& unknown : unknowns)
-			dl.downloadFromPartsTracker (unknown);
-
-		dl.exec();
-		dl.checkIfFinished();
-		file->reloadAllSubfiles();
-	}
 }
 
 // =============================================================================
@@ -900,20 +552,6 @@ LDObject* ParseLine (QString line)
 
 // =============================================================================
 //
-LDDocument* GetDocument (QString filename)
-{
-	// Try find the file in the list of loaded files
-	LDDocument* doc = FindDocument (filename);
-
-	// If it's not loaded, try open it
-	if (not doc)
-		doc = OpenDocument (filename, true, true);
-
-	return doc;
-}
-
-// =============================================================================
-//
 void LDDocument::reloadAllSubfiles()
 {
 	print ("Reloading subfiles of %1", getDisplayName());
@@ -1022,19 +660,6 @@ void LDDocument::forgetObject (LDObject* obj)
 		m_objects.removeAt (idx);
 		obj->setDocument (nullptr);
 	}
-}
-
-// =============================================================================
-//
-bool IsSafeToCloseAll()
-{
-	for (LDDocument* f : g_win->allDocuments())
-	{
-		if (not f->isSafeToClose())
-			return false;
-	}
-
-	return true;
 }
 
 // =============================================================================
@@ -1169,21 +794,10 @@ QList<LDPolygon> LDDocument::inlinePolygons()
 // -----------------------------------------------------------------------------
 LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 {
-	// Possibly substitute with logoed studs:
-	// stud.dat -> stud-logo.dat
-	// stud2.dat -> stud-logo2.dat
-	if (m_config->useLogoStuds() and renderinline)
-	{
-		// Ensure logoed studs are loaded first
-		LoadLogoStuds();
-
-		if (name() == "stud.dat" and g_logoedStud)
-			return g_logoedStud->inlineContents (deep, renderinline);
-		else if (name() == "stud2.dat" and g_logoedStud2)
-			return g_logoedStud2->inlineContents (deep, renderinline);
-	}
-
 	LDObjectList objs, objcache;
+
+	if (m_manager->preInline (this, objs))
+		return objs; // Manager dealt with this inline
 
 	for (LDObject* obj : objects())
 	{
@@ -1203,20 +817,6 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 	}
 
 	return objs;
-}
-
-// =============================================================================
-//
-void LoadLogoStuds()
-{
-	if (g_loadingLogoedStuds or (g_logoedStud and g_logoedStud2))
-		return;
-
-	g_loadingLogoedStuds = true;
-	g_logoedStud = OpenDocument ("stud-logo.dat", true, true);
-	g_logoedStud2 = OpenDocument ("stud2-logo.dat", true, true);
-	print (QObject::tr ("Logoed studs loaded.\n"));
-	g_loadingLogoedStuds = false;
 }
 
 // =============================================================================
