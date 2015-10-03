@@ -26,28 +26,33 @@ void LDPaths::checkPaths()
 	}
 }
 
+#include <QDebug>
 bool LDPaths::isValid (const QDir& dir) const
 {
-	if (dir.exists() && dir.isReadable())
+	if (dir.exists())
 	{
-		QStringList mustHave = { "LDConfig.ldr", "parts", "p" };
-		QStringList contents = dir.entryList (mustHave);
-
-		if (contents.size() == mustHave.size())
-			m_error = "";
+		if (dir.isReadable())
+		{
+			QStringList mustHave = { "LDConfig.ldr", "parts", "p" };
+			QStringList contents = dir.entryList (mustHave);
+	
+			if (contents.size() == mustHave.size())
+				m_error = "";
+			else
+				m_error = "That is not an LDraw directory! It must<br />have LDConfig.ldr, parts/ and p/.";
+		}
 		else
-			m_error = "Not an LDraw directory! Must<br />have LDConfig.ldr, parts/ and p/.";
+			m_error = "That directory cannot be read.";
 	}
 	else
-		m_error = "Directory does not exist or is not readable.";
+		m_error = "That directory does not exist.";
 	
 	return m_error.isEmpty();
 }
 
 bool LDPaths::configurePaths (QString path)
 {
-	QDir dir;
-	dir.cd (path);
+	QDir dir (path);
 	bool ok = isValid (dir);
 
 	if (ok)

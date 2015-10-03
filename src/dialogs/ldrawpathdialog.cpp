@@ -90,7 +90,7 @@ void LDrawPathDialog::setStatusText (const QString& statusText, bool ok)
 	else
 	{
 		ui.status->setText (QString ("<span style=\"color: %1\">%2</span>")
-			.arg (ok ? "#700" : "#270")
+			.arg (ok ? "#270" : "#700")
 			.arg (statusText));
 	}
 }
