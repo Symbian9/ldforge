@@ -151,7 +151,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 		}
 		else if (poly.color == EdgeColor)
 		{
-			qcol = Luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
+			qcol = luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
 		}
 		else
 		{

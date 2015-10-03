@@ -40,6 +40,7 @@
 #include "messageLog.h"
 #include "glCompiler.h"
 #include "primitives.h"
+#include "documentmanager.h"
 
 const LDFixedCamera g_FixedCameras[6] =
 {
@@ -336,7 +337,7 @@ void GLRenderer::setBackground()
 		return;
 
 	color.setAlpha (255);
-	m_useDarkBackground = Luma (color) < 80;
+	m_useDarkBackground = luma (color) < 80;
 	m_backgroundColor = color;
 	qglClearColor (color);
 }
@@ -607,7 +608,7 @@ QPen GLRenderer::linePen() const
 {
 	QPen linepen (m_thinBorderPen);
 	linepen.setWidth (2);
-	linepen.setColor (Luma (m_backgroundColor) < 40 ? Qt::white : Qt::black);
+	linepen.setColor (luma (m_backgroundColor) < 40 ? Qt::white : Qt::black);
 	return linepen;
 }
 
@@ -1581,7 +1582,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		QString primitiveName = item->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setColor (MainColor);
-		ref->setFileInfo (GetDocument (primitiveName));
+		ref->setFileInfo (m_documents->getDocumentByName (primitiveName));
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
 		currentDocument()->insertObj (m_window->suggestInsertPoint(), ref);

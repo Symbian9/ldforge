@@ -70,7 +70,6 @@ public:
 	~MainWindow();
 
 	void addMessage (QString msg);
-	const QList<LDDocument*>& allDocuments();
 	void applyToActions (std::function<void(QAction*)> function);
 	void buildObjectList();
 	void changeDocument (LDDocument* f);
@@ -149,6 +148,8 @@ private:
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	DoubleMap<LDObject*, QListWidgetItem*> m_objectsInList;
+	bool m_isSelectionLocked;
+	QMap<QAction*, QKeySequence> m_defaultShortcuts;
 
 private slots:
 	void selectionChanged();

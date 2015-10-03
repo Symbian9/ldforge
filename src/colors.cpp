@@ -17,43 +17,26 @@
  */
 
 #include <QFile>
+#include <QMessageBox>
 #include "main.h"
 #include "colors.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
+#include "documentmanager.h"
 
-struct ColorDataEntry
-{
-	QString name;
-	QString hexcode;
-	QColor faceColor;
-	QColor edgeColor;
-};
+static ColorData* colorData = nullptr;
 
-static ColorDataEntry ColorData[512];
-
-void InitColors()
+void initColors()
 {
 	print ("Initializing color information.\n");
-
-	// Always make sure there's 16 and 24 available. They're special like that.
-	ColorData[MainColor].faceColor =
-	ColorData[MainColor].hexcode = "#AAAAAA";
-	ColorData[MainColor].edgeColor = Qt::black;
-	ColorData[MainColor].name = "Main color";
-
-	ColorData[EdgeColor].faceColor =
-	ColorData[EdgeColor].edgeColor =
-	ColorData[EdgeColor].hexcode = "#000000";
-	ColorData[EdgeColor].name = "Edge color";
-
-	parseLDConfig();
+	static ColorData colors;
+	colorData = &colors;
 }
 
 bool LDColor::isValid() const
 {
-	if (isLDConfigColor() and ColorData[index()].name.isEmpty())
+	if (isLDConfigColor() and data().name.isEmpty())
 		return false; // Unknown LDConfig color
 
 	return m_index != -1;
@@ -61,7 +44,12 @@ bool LDColor::isValid() const
 
 bool LDColor::isLDConfigColor() const
 {
-	return index() >= 0 and index() < countof (ColorData);
+	return colorData->contains (index());
+}
+
+const ColorData::Entry& LDColor::data() const
+{
+	return colorData->get (index());
 }
 
 QString LDColor::name() const
@@ -69,7 +57,7 @@ QString LDColor::name() const
 	if (isDirect())
 		return "0x" + QString::number (index(), 16).toUpper();
 	else if (isLDConfigColor())
-		return ColorData[index()].name;
+		return data().name;
 	else if (index() == -1)
 		return "null color";
 	else
@@ -97,7 +85,7 @@ QColor LDColor::faceColor() const
 	}
 	else if (isLDConfigColor())
 	{
-		return ColorData[index()].faceColor;
+		return data().faceColor;
 	}
 	else
 	{
@@ -108,21 +96,21 @@ QColor LDColor::faceColor() const
 QColor LDColor::edgeColor() const
 {
 	if (isDirect())
-		return Luma (faceColor()) < 48 ? Qt::white : Qt::black;
+		return ::luma (faceColor()) < 48 ? Qt::white : Qt::black;
 	else if (isLDConfigColor())
-		return ColorData[index()].edgeColor;
+		return data().edgeColor;
 	else
 		return Qt::black;
 }
 
 int LDColor::luma() const
 {
-	return Luma (faceColor());
+	return ::luma (faceColor());
 }
 
 int LDColor::edgeLuma() const
 {
-	return Luma (edgeColor());
+	return ::luma (edgeColor());
 }
 
 qint32 LDColor::index() const
@@ -143,30 +131,65 @@ bool LDColor::isDirect() const
 	return index() >= 0x02000000;
 }
 
-int Luma (const QColor& col)
+int luma (const QColor& col)
 {
 	return (0.2126f * col.red()) + (0.7152f * col.green()) + (0.0722f * col.blue());
 }
 
-int CountLDConfigColors()
+ColorData::ColorData()
 {
-	return countof (ColorData);
+	if (colorData == nullptr)
+		colorData = this;
+
+	// Initialize main and edge colors, they're special like that.
+	m_data[MainColor].faceColor =
+	m_data[MainColor].hexcode = "#AAAAAA";
+	m_data[MainColor].edgeColor = Qt::black;
+	m_data[MainColor].name = "Main color";
+	m_data[EdgeColor].faceColor =
+	m_data[EdgeColor].edgeColor =
+	m_data[EdgeColor].hexcode = "#000000";
+	m_data[EdgeColor].name = "Edge color";
+	loadFromLdconfig();
 }
 
-void parseLDConfig()
+ColorData::~ColorData()
 {
-	QFile* fp = OpenLDrawFile ("LDConfig.ldr", false);
+	if (colorData == this)
+		colorData = nullptr;
+}
 
-	if (fp == nullptr)
+bool ColorData::contains (int code) const
+{
+	return code >= 0 and code < EntryCount;
+}
+
+const ColorData::Entry& ColorData::get (int code) const
+{
+	if (not contains (code))
+		throw std::runtime_error ("Attempted to get non-existant color information");
+
+	return m_data[code];
+}
+
+void ColorData::loadFromLdconfig()
+{
+	if (not g_win)
+		return;
+
+	QString path = g_win->documents()->findDocumentPath ("LDConfig.ldr", false);
+	QFile fp (path);
+
+	if (not fp.open (QIODevice::ReadOnly))
 	{
-		Critical (QObject::tr ("Unable to open LDConfig.ldr for parsing."));
+		QMessageBox::critical (nullptr, "Error", "Unable to open LDConfig.ldr for parsing: " + fp.errorString());
 		return;
 	}
 
-	// Read in the lines
-	while (not fp->atEnd())
+	// TODO: maybe LDConfig can be loaded as a Document? Or would that be overkill?
+	while (not fp.atEnd())
 	{
-		QString line = QString::fromUtf8 (fp->readLine());
+		QString line = QString::fromUtf8 (fp.readLine());
 
 		if (line.isEmpty() or line[0] != '0')
 			continue; // empty or illogical
@@ -175,58 +198,47 @@ void parseLDConfig()
 		line.remove ('\n');
 
 		// Parse the line
-		LDConfigParser pars (line, ' ');
-
-		int code = 0, alpha = 255;
-		QString name, facename, edgename, valuestr;
+		LDConfigParser parser (line, ' ');
+		QString name;
+		QString facename;
+		QString edgename;
+		QString codestring;
 
 		// Check 0 !COLOUR, parse the name
-		if (not pars.compareToken (0, "0") or
-			not pars.compareToken (1, "!COLOUR") or
-			not pars.getToken (name, 2))
-		{
+		if (not parser.compareToken (0, "0") or not parser.compareToken (1, "!COLOUR") or not parser.getToken (name, 2))
 			continue;
-		}
 
 		// Replace underscores in the name with spaces for readability
 		name.replace ("_", " ");
 
-		// Get the CODE tag
-		if (not pars.parseLDConfigTag ("CODE", valuestr))
+		if (not parser.parseTag ("CODE", codestring))
 			continue;
 
-		// Ensure that the code is within [0 - 511]
 		bool ok;
-		code = valuestr.toShort (&ok);
+		int code = codestring.toShort (&ok);
 
-		if (not ok or code < 0 or code >= 512)
+		if (not ok or not contains (code))
 			continue;
 
-		// VALUE and EDGE tags
-		if (not pars.parseLDConfigTag ("VALUE", facename) or not pars.parseLDConfigTag ("EDGE", edgename))
+		if (not parser.parseTag ("VALUE", facename) or not parser.parseTag ("EDGE", edgename))
 			continue;
 
 		// Ensure that our colors are correct
-		QColor faceColor (facename),
-			edgeColor (edgename);
+		QColor faceColor (facename);
+		QColor edgeColor (edgename);
 
 		if (not faceColor.isValid() or not edgeColor.isValid())
 			continue;
 
-		// Parse alpha if given.
-		if (pars.parseLDConfigTag ("ALPHA", valuestr))
-			alpha = qBound (0, valuestr.toInt(), 255);
-
-		ColorDataEntry& entry = ColorData[code];
+		Entry& entry = m_data[code];
 		entry.name = name;
 		entry.faceColor = faceColor;
 		entry.edgeColor = edgeColor;
 		entry.hexcode = facename;
-		entry.faceColor.setAlpha (alpha);
-	}
 
-	fp->close();
-	fp->deleteLater();
+		if (parser.parseTag ("ALPHA", codestring))
+			entry.faceColor.setAlpha (qBound (0, codestring.toInt(), 255));
+	}
 }
 
 // =============================================================================
@@ -280,7 +292,7 @@ bool LDConfigParser::compareToken (int inPos, QString text)
 //
 // Helper function for parseLDConfig
 //
-bool LDConfigParser::parseLDConfigTag (char const* tag, QString& val)
+bool LDConfigParser::parseTag (char const* tag, QString& val)
 {
 	int pos;
 

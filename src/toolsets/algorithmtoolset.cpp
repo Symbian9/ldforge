@@ -32,6 +32,7 @@
 #include "../colors.h"
 #include "../ldObjectMath.h"
 #include "../ldobjectiterator.h"
+#include "../documentmanager.h"
 #include "ui_replcoords.h"
 #include "ui_editraw.h"
 #include "ui_flip.h"
@@ -516,7 +517,7 @@ void AlgorithmToolset::subfileSelection()
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
-		} while (FindDocument ("s\\" + Basename (fullsubname)) or QFile (fullsubname).exists());
+		} while (m_documents->findDocumentByName ("s\\" + Basename (fullsubname)) or QFile (fullsubname).exists());
 	}
 
 	// Determine the BFC winding type used in the main document - it is to

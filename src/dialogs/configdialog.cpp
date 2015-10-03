@@ -36,6 +36,7 @@
 #include "../miscallenous.h"
 #include "../glRenderer.h"
 #include "../guiutilities.h"
+#include "../documentmanager.h"
 #include "colorselector.h"
 #include "configdialog.h"
 #include "ui_configdialog.h"
@@ -276,7 +277,7 @@ void ConfigDialog::applySettings()
 
 	m_window->syncSettings();
 	currentDocument()->reloadAllSubfiles();
-	LoadLogoStuds();
+	m_documents->loadLogoedStuds();
 	m_window->renderer()->setBackground();
 	m_window->doFullRefresh();
 	m_window->updateDocumentList();

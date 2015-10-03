@@ -123,14 +123,5 @@ private:
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
-
-// Is it safe to close all files?
-bool IsSafeToCloseAll();
-
-LDObjectList LoadFileContents (QFile* f, int* numWarnings, bool* ok = nullptr);
-
-const LDObjectList& selectedObjects();
-void AddRecentFile (QString path);
-void LoadLogoStuds();
 QString Basename (QString path);
 QString Dirname (QString path);

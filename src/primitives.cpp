@@ -26,6 +26,7 @@
 #include "miscallenous.h"
 #include "colors.h"
 #include "ldpaths.h"
+#include "documentmanager.h"
 
 QList<PrimitiveCategory*> g_PrimitiveCategories;
 QList<Primitive> g_primitives;
@@ -650,7 +651,7 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num)
 {
 	QString name = MakeRadialFileName (type, segs, divs, num);
-	LDDocument* f = GetDocument (name);
+	LDDocument* f = g_win->documents()->getDocumentByName (name);
 
 	if (f)
 		return f;

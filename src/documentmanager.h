@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#include <QSet>
 #include "main.h"
 #include "hierarchyelement.h"
 
@@ -25,33 +26,32 @@ class DocumentManager : public QObject, public HierarchyElement
 	Q_OBJECT
 
 public:
-	using DocumentMap = QHash<QString, LDDocument*>;
-	using DocumentMapIterator = QHashIterator<QString, LDDocument*>;
+	using Documents = QSet<LDDocument*>;
 
 	DocumentManager (QObject* parent = nullptr);
 	~DocumentManager();
 
 	void addRecentFile (QString path);
+	const Documents& allDocuments() const { return m_documents; }
 	void clear();
-	void closeAllDocuments();
+	LDDocument* createNew();
 	LDDocument* findDocumentByName (QString name);
 	QString findDocumentPath (QString relpath, bool subdirs);
 	LDDocument* getDocumentByName (QString filename);
 	bool isSafeToCloseAll();
+	LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok);
 	void loadLogoedStuds();
-	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride, bool* aborted);
+	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr, bool* aborted = nullptr);
 	QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer);
 	void openMainModel (QString path);
-	bool preInline (LDDocument* doc, LDObjectList& objs);
+	bool preInline (LDDocument* doc, LDObjectList&, bool deep, bool renderinline);
 
 private:
-	DocumentMap m_documents;
-	bool g_loadingMainFile;
-	bool g_loadingLogoedStuds;
-	LDDocument* g_logoedStud;
-	LDDocument* g_logoedStud2;
-
-	LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok);
+	Documents m_documents;
+	bool m_loadingMainFile;
+	bool m_isLoadingLogoedStuds;
+	LDDocument* m_logoedStud;
+	LDDocument* m_logoedStud2;
 };
 
 static const QStringList g_specialSubdirectories ({ "s", "48", "8" });

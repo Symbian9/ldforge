@@ -281,6 +281,7 @@ static T* InitObject (LDObject*& obj)
 
 // =============================================================================
 // =============================================================================
+#include "documentmanager.h"
 void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 {
 	setlocale (LC_ALL, "C");
@@ -363,9 +364,9 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 			if (name.length() == 0)
 				return; // no subfile filename
 
-			LDDocument* file = GetDocument (name);
+			LDDocument* document = g_win->documents()->getDocumentByName (name);
 
-			if (not file)
+			if (not document)
 			{
 				Critical (format ("Couldn't open `%1': %2", name, strerror (errno)));
 				return;
@@ -377,7 +378,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 				ref->setCoordinate (ax, dlg.dsb_coords[ax]->value());
 
 			ref->setTransform (transform);
-			ref->setFileInfo (file);
+			ref->setFileInfo (document);
 		} break;
 
 		default:

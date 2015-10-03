@@ -20,6 +20,28 @@
 #include <QColor>
 #include "basics.h"
 
+class ColorData
+{
+public:
+	struct Entry
+	{
+		QString name;
+		QString hexcode;
+		QColor faceColor;
+		QColor edgeColor;
+	};
+
+	enum { EntryCount = 512 };
+	ColorData();
+	~ColorData();
+	void loadFromLdconfig();
+	bool contains (int code) const;
+	const Entry& get (int code) const;
+
+private:
+	Entry m_data[EntryCount];
+};
+
 class LDColor
 {
 public:
@@ -56,6 +78,8 @@ public:
 	bool operator>= (LDColor other) const { return index() >= other.index(); }
 
 private:
+	const ColorData::Entry& data() const;
+
 	qint32 m_index;
 };
 
@@ -70,7 +94,7 @@ public:
 	bool getToken (QString& val, const int pos);
 	bool findToken (int& result, char const* needle, int args);
 	bool compareToken (int inPos, QString text);
-	bool parseLDConfigTag (char const* tag, QString& val);
+	bool parseTag (char const* tag, QString& val);
 
 	inline QString operator[] (const int idx)
 	{
@@ -82,10 +106,8 @@ private:
 	int m_pos;
 };
 
-void InitColors();
-int Luma (const QColor& col);
-int CountLDConfigColors();
-void parseLDConfig();
+void initColors();
+int luma (const QColor& col);
 
 enum
 {

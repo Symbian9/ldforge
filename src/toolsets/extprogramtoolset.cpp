@@ -34,6 +34,7 @@
 #include "../radioGroup.h"
 #include "../editHistory.h"
 #include "../dialogs.h"
+#include "../documentmanager.h"
 #include "extprogramtoolset.h"
 #include "ui_ytruder.h"
 #include "ui_intersector.h"
@@ -315,7 +316,9 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 		return;
 	}
 
-	LDObjectList objs = LoadFileContents (&f, nullptr);
+	// TODO: I don't like how I need to go to the document manager to load objects from a file...
+	// We're not loading this as a document so it shouldn't be necessary.
+	LDObjectList objs = m_documents->loadFileContents (&f, nullptr, nullptr);
 
 	// If we replace the objects, delete the selection now.
 	if (replace)

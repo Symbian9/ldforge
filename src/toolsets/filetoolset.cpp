@@ -27,6 +27,7 @@
 #include "../dialogs/configdialog.h"
 #include "../dialogs/ldrawpathdialog.h"
 #include "../dialogs/newpartdialog.h"
+#include "../documentmanager.h"
 #include "filetoolset.h"
 #include "ui_makeprim.h"
 
@@ -57,7 +58,7 @@ void FileToolset::open()
 	if (name.isEmpty())
 		return;
 
-	OpenMainModel (name);
+	m_documents->openMainModel (name);
 }
 
 void FileToolset::save()
@@ -72,7 +73,7 @@ void FileToolset::saveAs()
 
 void FileToolset::saveAll()
 {
-	for (LDDocument* file : m_window->allDocuments())
+	for (LDDocument* file : m_documents->allDocuments())
 		m_window->save (file, false);
 }
 
@@ -86,10 +87,8 @@ void FileToolset::close()
 
 void FileToolset::closeAll()
 {
-	if (not IsSafeToCloseAll())
-		return;
-
-	CloseAllDocuments();
+	if (m_documents->isSafeToCloseAll())
+		m_documents->clear();
 }
 
 void FileToolset::settings()
@@ -126,7 +125,8 @@ void FileToolset::insertFrom()
 		return;
 	}
 
-	LDObjectList objs = LoadFileContents (&f, nullptr);
+	// TODO: shouldn't need to go to the document manager to parse a file
+	LDObjectList objs = m_documents->loadFileContents (&f, nullptr, nullptr);
 
 	currentDocument()->clearSelection();
 

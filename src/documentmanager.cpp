@@ -16,24 +16,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
 #include <QFileInfo>
 #include <QFile>
 #include "documentmanager.h"
 #include "ldDocument.h"
 #include "mainwindow.h"
 #include "partdownloader.h"
+#include "documentloader.h"
+#include "glRenderer.h"
+
+ConfigOption (QStringList RecentFiles)
+ConfigOption (bool TryDownloadMissingFiles = false)
 
 enum
 {
-	MAX_RECENT_FILES = 10
+	MaxRecentFiles = 10
 };
 
 DocumentManager::DocumentManager (QObject* parent) :
 	QObject (parent),
-	g_loadingMainFile (false),
-	g_loadingLogoedStuds (false),
-	g_logoedStud (nullptr),
-	g_logoedStud2 (nullptr) {}
+	HierarchyElement (parent),
+	m_loadingMainFile (false),
+	m_isLoadingLogoedStuds (false),
+	m_logoedStud (nullptr),
+	m_logoedStud2 (nullptr) {}
 
 DocumentManager::~DocumentManager()
 {
@@ -42,9 +49,8 @@ DocumentManager::~DocumentManager()
 
 void DocumentManager::clear()
 {
-	for (DocumentMapIterator it (m_documents); it.hasNext();)
+	for (LDDocument* document : m_documents)
 	{
-		LDDocument* document = it.next().value();
 		document->close();
 		delete document;
 	}
@@ -54,12 +60,15 @@ void DocumentManager::clear()
 
 LDDocument* DocumentManager::getDocumentByName (QString filename)
 {
-	// Try find the file in the list of loaded files
 	LDDocument* doc = findDocumentByName (filename);
 
-	// If it's not loaded, try open it
-	if (not doc)
+	if (doc == nullptr)
+	{
+		bool tmp = m_loadingMainFile;
+		m_loadingMainFile = false;
 		doc = openDocument (filename, true, true);
+		m_loadingMainFile = tmp;
+	}
 
 	return doc;
 }
@@ -71,7 +80,7 @@ void DocumentManager::openMainModel (QString path)
 	LDDocument* file = nullptr;
 	QString shortName = LDDocument::shortenName (path);
 
-	for (LDDocument* doc : m_window->allDocuments())
+	for (LDDocument* doc : m_documents)
 	{
 		if (doc->name() == shortName)
 		{
@@ -85,7 +94,7 @@ void DocumentManager::openMainModel (QString path)
 	if (documentToReplace and not documentToReplace->isSafeToClose())
 		return;
 
-	g_loadingMainFile = true;
+	m_loadingMainFile = true;
 
 	// If we're replacing an existing document, clear the document and
 	// make it ready for being loaded to.
@@ -107,7 +116,7 @@ void DocumentManager::openMainModel (QString path)
 			Critical (format (tr ("Failed to open %1: %2"), path, strerror (errno)));
 		}
 
-		g_loadingMainFile = false;
+		m_loadingMainFile = false;
 		return;
 	}
 
@@ -116,7 +125,7 @@ void DocumentManager::openMainModel (QString path)
 	m_window->changeDocument (file);
 	m_window->doFullRefresh();
 	addRecentFile (path);
-	g_loadingMainFile = false;
+	m_loadingMainFile = false;
 
 	// If there were problems loading subfile references, try see if we can find these
 	// files on the parts tracker.
@@ -147,10 +156,8 @@ void DocumentManager::openMainModel (QString path)
 
 LDDocument* DocumentManager::findDocumentByName (QString name)
 {
-	for (DocumentMapIterator it (m_documents); it.hasNext();)
+	for (LDDocument* document : m_documents)
 	{
-		LDDocument* document = it.next().value();
-
 		if (isOneOf (name, document->name(), document->defaultName()))
 			return document;
 	}
@@ -185,48 +192,42 @@ QString Basename (QString path)
 
 QString DocumentManager::findDocumentPath (QString relativePath, bool subdirs)
 {
-	QString fullPath;
-
 	// LDraw models use backslashes as path separators. Replace those into forward slashes for Qt.
 	relativePath.replace ("\\", "/");
 
 	// Try find it relative to other currently open documents. We want a file in the immediate vicinity of a current
 	// part model to override stock LDraw stuff.
-	QString reltop = Basename (Dirname (relativePath));
+	QString relativeTopDir = Basename (Dirname (relativePath));
 
-	for (LDDocument* doc : m_window->allDocuments())
+	for (LDDocument* document : m_documents)
 	{
-		QString partpath = format ("%1/%2", Dirname (doc->fullPath()), relativePath);
-		QFile f (partpath);
+		QString partpath = format ("%1/%2", Dirname (document->fullPath()), relativePath);
+		QFileInfo fileinfo (partpath);
 
-		if (f.exists())
+		if (fileinfo.exists())
 		{
-			// ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
-			QString proptop = Basename (Dirname (partpath));
+			// Ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
+			QString partTopDir = Basename (Dirname (partpath));
 
-			bool bogus = false;
-
-			for (QString s : g_specialSubdirectories)
+			for (QString subdir : g_specialSubdirectories)
 			{
-				if ((proptop == s and reltop != s) or (reltop == s and proptop != s))
-				{
-					bogus = true;
-					break;
-				}
+				if ((partTopDir == subdir) != (relativeTopDir == subdir))
+					goto skipthis;
 			}
 
-			if (not bogus)
-				return partpath;
+			return partpath;
 		}
+skipthis:
+		continue;
 	}
 
-	if (QFile::exists (relativePath))
+	if (QFileInfo::exists (relativePath))
 		return relativePath;
 
 	// Try with just the LDraw path first
-	fullPath = format ("%1" DIRSLASH "%2", m_window->configBag()->lDrawPath(), relativePath);
+	QString fullPath = format ("%1" DIRSLASH "%2", m_window->configBag()->lDrawPath(), relativePath);
 
-	if (QFile::exists (fullPath))
+	if (QFileInfo::exists (fullPath))
 		return fullPath;
 
 	if (subdirs)
@@ -277,7 +278,7 @@ LDObjectList DocumentManager::loadFileContents (QFile* fp, int* numWarnings, boo
 	if (numWarnings)
 		*numWarnings = 0;
 
-	DocumentLoader* loader = new DocumentLoader (g_loadingMainFile);
+	DocumentLoader* loader = new DocumentLoader (m_loadingMainFile);
 	loader->read (fp);
 	loader->start();
 
@@ -348,7 +349,7 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 	load->addObjects (objs);
 
-	if (g_loadingMainFile)
+	if (m_loadingMainFile)
 	{
 		m_window->changeDocument (load);
 		m_window->renderer()->setDocument (load);
@@ -357,12 +358,6 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 	load->history()->setIgnoring (false);
 	return load;
-}
-
-void DocumentManager::closeAllDocuments()
-{
-	for (LDDocument* file : m_window->allDocuments())
-		file->close();
 }
 
 void DocumentManager::addRecentFile (QString path)
@@ -380,7 +375,7 @@ void DocumentManager::addRecentFile (QString path)
 	}
 
 	// If there's too many recent files, drop one out.
-	while (recentFiles.size() > (MAX_RECENT_FILES - 1))
+	while (recentFiles.size() > (MaxRecentFiles - 1))
 		recentFiles.removeAt (0);
 
 	// Add the file
@@ -392,9 +387,9 @@ void DocumentManager::addRecentFile (QString path)
 
 bool DocumentManager::isSafeToCloseAll()
 {
-	for (LDDocument* f : m_window->allDocuments())
+	for (LDDocument* document : m_documents)
 	{
-		if (not f->isSafeToClose())
+		if (not document->isSafeToClose())
 			return false;
 	}
 
@@ -403,17 +398,19 @@ bool DocumentManager::isSafeToCloseAll()
 
 void DocumentManager::loadLogoedStuds()
 {
-	if (g_loadingLogoedStuds or (g_logoedStud and g_logoedStud2))
+	if (m_isLoadingLogoedStuds or (m_logoedStud and m_logoedStud2))
 		return;
 
-	g_loadingLogoedStuds = true;
-	g_logoedStud = openDocument ("stud-logo.dat", true, true);
-	g_logoedStud2 = openDocument ("stud2-logo.dat", true, true);
-	print (tr ("Logoed studs loaded.\n"));
-	g_loadingLogoedStuds = false;
+	m_isLoadingLogoedStuds = true;
+	m_logoedStud = openDocument ("stud-logo.dat", true, true);
+	m_logoedStud2 = openDocument ("stud2-logo.dat", true, true);
+	m_isLoadingLogoedStuds = false;
+
+	if (m_logoedStud and m_logoedStud2)
+		print (tr ("Logoed studs loaded.\n"));
 }
 
-bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs)
+bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs, bool deep, bool renderinline)
 {
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
@@ -423,9 +420,23 @@ bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs)
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();
 
-		if (doc->name() == "stud.dat" and g_logoedStud)
-			return g_logoedStud->inlineContents (deep, renderinline);
-		else if (doc->name() == "stud2.dat" and g_logoedStud2)
-			return g_logoedStud2->inlineContents (deep, renderinline);
+		if (doc->name() == "stud.dat" and m_logoedStud)
+		{
+			objs = m_logoedStud->inlineContents (deep, renderinline);
+			return true;
+		}
+		else if (doc->name() == "stud2.dat" and m_logoedStud2)
+		{
+			objs = m_logoedStud2->inlineContents (deep, renderinline);
+			return true;
+		}
 	}
+	return false;
+}
+
+LDDocument* DocumentManager::createNew()
+{
+	LDDocument* document = new LDDocument (this);
+	m_documents.insert (document);
+	return document;
 }

@@ -18,10 +18,11 @@
 
 #pragma once
 #include "main.h"
+#include "hierarchyelement.h"
 
 class PartDownloader;
 
-class PartDownloadRequest : public QObject
+class PartDownloadRequest : public QObject, public HierarchyElement
 {
 	Q_OBJECT
 

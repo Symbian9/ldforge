@@ -26,9 +26,11 @@
 #include "partdownloader.h"
 #include "partdownloadrequest.h"
 #include "mainwindow.h"
+#include "documentmanager.h"
 
 PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primary, PartDownloader* parent) :
 	QObject (parent),
+	HierarchyElement (parent),
 	m_state (State::Requesting),
 	m_prompt (parent),
 	m_url (url),
@@ -207,16 +209,16 @@ void PartDownloadRequest::downloadFinished()
 	}
 
 	// Try to load this file now.
-	LDDocument* f = OpenDocument (filePath(), false, not isPrimary());
+	LDDocument* document = m_documents->openDocument (filePath(), false, not isPrimary());
 
-	if (f == nullptr)
+	if (document == nullptr)
 		return;
 
 	// Iterate through this file and check for errors. If there's any that stems
 	// from unknown file references, try resolve that by downloading the reference.
 	// This is why downloading a part may end up downloading multiple files, as
 	// it resolves dependencies.
-	for (LDObject* obj : f->objects())
+	for (LDObject* obj : document->objects())
 	{
 		LDError* err = dynamic_cast<LDError*> (obj);
 
@@ -227,12 +229,12 @@ void PartDownloadRequest::downloadFinished()
 		prompt()->downloadFromPartsTracker (dest);
 	}
 
-	prompt()->addFile (f);
+	prompt()->addFile (document);
 
 	if (isPrimary())
 	{
-		AddRecentFile (filePath());
-		prompt()->setPrimaryFile (f);
+		m_documents->addRecentFile (filePath());
+		prompt()->setPrimaryFile (document);
 	}
 
 	prompt()->checkIfFinished();

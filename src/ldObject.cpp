@@ -281,8 +281,8 @@ void LDObject::destroy()
 
 	// Remove this object from the list of LDObjects
 	g_allObjects.erase (g_allObjects.find (id()));
-
 	m_isDestroyed = true;
+	delete this;
 }
 
 // =============================================================================

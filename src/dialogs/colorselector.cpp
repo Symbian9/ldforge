@@ -59,7 +59,7 @@ ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 				color.setAlphaF (m_config->mainColorAlpha());
 			}
 
-			QString color2name (Luma (color) < 80 ? "white" : "black");
+			QString color2name (luma (color) < 80 ? "white" : "black");
 			button->setAutoFillBackground (true);
 			button->setStyleSheet (format ("background-color: rgba(%1, %2, %3, %4); color: %5",
 				color.red(), color.green(), color.blue(), color.alpha(), color2name));

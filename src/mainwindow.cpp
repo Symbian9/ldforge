@@ -56,9 +56,6 @@
 #include "glCompiler.h"
 #include "documentmanager.h"
 
-static bool g_isSelectionLocked = false;
-static QMap<QAction*, QKeySequence> g_defaultShortcuts;
-
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
 ConfigOption (bool ListImplicitFiles = false)
@@ -74,7 +71,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this)),
 	m_documents (new DocumentManager (this)),
-	m_currentDocument (nullptr)
+	m_currentDocument (nullptr),
+	m_isSelectionLocked (false)
 {
 	g_win = this;
 	ui.setupUi (this);
@@ -106,7 +104,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	applyToActions ([&](QAction* act)
 	{
 		connect (act, SIGNAL (triggered()), this, SLOT (actionTriggered()));
-		g_defaultShortcuts[act] = act->shortcut();
+		m_defaultShortcuts[act] = act->shortcut();
 	});
 
 	updateGridToolBar();
@@ -377,7 +375,7 @@ void MainWindow::buildObjectList()
 	// Lock the selection while we do this so that refreshing the object list
 	// doesn't trigger selection updating so that the selection doesn't get lost
 	// while this is done.
-	g_isSelectionLocked = true;
+	m_isSelectionLocked = true;
 	m_objectsInList.clear();
 
 	for (int i = 0; i < ui.objectList->count(); ++i)
@@ -492,7 +490,7 @@ void MainWindow::buildObjectList()
 		ui.objectList->insertItem (ui.objectList->count(), item);
 	}
 
-	g_isSelectionLocked = false;
+	m_isSelectionLocked = false;
 	updateSelection();
 	scrollToSelection();
 }
@@ -514,7 +512,7 @@ void MainWindow::scrollToSelection()
 //
 void MainWindow::selectionChanged()
 {
-	if (g_isSelectionLocked == true or m_currentDocument == nullptr)
+	if (m_isSelectionLocked == true or m_currentDocument == nullptr)
 		return;
 
 	LDObjectList priorSelection = selectedObjects();
@@ -554,7 +552,7 @@ void MainWindow::selectionChanged()
 void MainWindow::recentFileClicked()
 {
 	QAction* qAct = static_cast<QAction*> (sender());
-	OpenMainModel (qAct->text());
+	documents()->openMainModel (qAct->text());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -625,7 +623,7 @@ void MainWindow::refresh()
 //
 void MainWindow::updateSelection()
 {
-	g_isSelectionLocked = true;
+	m_isSelectionLocked = true;
 	QItemSelection itemselect;
 	int top = -1;
 	int bottom = -1;
@@ -664,7 +662,7 @@ void MainWindow::updateSelection()
 
 	// Select multiple objects at once for performance reasons
 	ui.objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
-	g_isSelectionLocked = false;
+	m_isSelectionLocked = false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -695,7 +693,7 @@ LDColor MainWindow::getUniformSelectedColor()
 void MainWindow::closeEvent (QCloseEvent* ev)
 {
 	// Check whether it's safe to close all files.
-	if (not IsSafeToCloseAll())
+	if (not m_documents->isSafeToCloseAll())
 	{
 		ev->ignore();
 		return;
@@ -859,7 +857,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 		print ("Saved to %1 (%2)", path, MakePrettyFileSize (savesize));
 
 		// Add it to recent files
-		AddRecentFile (path);
+		m_documents->addRecentFile (path);
 		return true;
 	}
 
@@ -932,7 +930,7 @@ void MainWindow::updateDocumentList()
 	while (m_tabs->count() > 0)
 		m_tabs->removeTab (0);
 
-	for (LDDocument* document : m_documents)
+	for (LDDocument* document : m_documents->allDocuments())
 	{
 		if (not document->isCache())
 		{
@@ -990,7 +988,7 @@ void MainWindow::tabSelected()
 	int tabIndex = m_tabs->currentIndex();
 
 	// Find the file pointer of the item that was selected.
-	for (LDDocument* document : m_documents)
+	for (LDDocument* document : m_documents->allDocuments())
 	{
 		if (not document->isCache() and document->tabIndex() == tabIndex)
 		{
@@ -1072,12 +1070,10 @@ void MainWindow::updatePrimitives()
 //
 void MainWindow::closeTab (int tabindex)
 {
-	LDDocument* doc = FindDocument (m_tabs->tabData (tabindex).toString());
+	LDDocument* doc = m_documents->findDocumentByName (m_tabs->tabData (tabindex).toString());
 
-	if (doc == nullptr)
-		return;
-
-	doc->close();
+	if (doc)
+		doc->close();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1107,7 +1103,7 @@ void MainWindow::saveShortcuts()
 	{
 		QString const key = "shortcut_" + act->objectName();
 
-		if (g_defaultShortcuts[act] != act->shortcut())
+		if (m_defaultShortcuts[act] != act->shortcut())
 			m_settings->setValue (key, act->shortcut());
 		else
 			m_settings->remove (key);
@@ -1136,7 +1132,7 @@ QTreeWidget* MainWindow::getPrimitivesTree() const
 //
 QKeySequence MainWindow::defaultShortcut (QAction* act)
 {
-	return g_defaultShortcuts[act];
+	return m_defaultShortcuts[act];
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1221,9 +1217,7 @@ void MainWindow::createBlankDocument()
 //
 LDDocument* MainWindow::newDocument (bool cache)
 {
-	LDDocument* document = new LDDocument (this);
-	m_documents.append (document);
-
+	LDDocument* document = m_documents->createNew();
 	connect (document->history(), SIGNAL (undone()), this, SLOT (historyTraversed()));
 	connect (document->history(), SIGNAL (redone()), this, SLOT (historyTraversed()));
 	connect (document->history(), SIGNAL (stepAdded()), this, SLOT (updateActions()));
@@ -1232,13 +1226,6 @@ LDDocument* MainWindow::newDocument (bool cache)
 		document->openForEditing();
 
 	return document;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-const QList<LDDocument*>& MainWindow::allDocuments()
-{
-	return m_documents;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1278,6 +1265,7 @@ void MainWindow::changeDocument (LDDocument* document)
 //
 void MainWindow::closeInitialDocument()
 {
+/*
 	if (m_documents.size() == 2 and
 		m_documents[0]->name().isEmpty() and
 		not m_documents[1]->name().isEmpty() and
@@ -1285,6 +1273,7 @@ void MainWindow::closeInitialDocument()
 	{
 		m_documents.first()->close();
 	}
+*/
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1301,7 +1290,7 @@ void MainWindow::currentDocumentClosed()
 	LDDocument* old = currentDocument();
 
 	// Find a replacement document to use
-	for (LDDocument* doc : m_documents)
+	for (LDDocument* doc : m_documents->allDocuments())
 	{
 		if (doc != old and not doc->isCache())
 		{

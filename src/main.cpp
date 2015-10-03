@@ -32,6 +32,7 @@
 #include "dialogs.h"
 #include "crashCatcher.h"
 #include "ldpaths.h"
+#include "documentmanager.h"
 
 MainWindow* g_win = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
@@ -51,13 +52,13 @@ int main (int argc, char* argv[])
 	LDPaths* paths = new LDPaths (win);
 	paths->checkPaths();
 	paths->deleteLater();
-	InitColors();
+	initColors();
 	LoadPrimitives();
 	win->show();
 
 	// Process the command line
 	for (int arg = 1; arg < argc; ++arg)
-		OpenMainModel (QString::fromLocal8Bit (argv[arg]));
+		win->documents()->openMainModel (QString::fromLocal8Bit (argv[arg]));
 
 	return app.exec();
 }

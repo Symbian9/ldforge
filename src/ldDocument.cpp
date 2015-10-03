@@ -32,9 +32,7 @@
 #include "ldpaths.h"
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
-
-ConfigOption (QStringList RecentFiles)
-ConfigOption (bool TryDownloadMissingFiles = false)
+#include "documentmanager.h"
 
 LDDocument::LDDocument (DocumentManager* parent) :
 	QObject (parent),
@@ -54,10 +52,11 @@ LDDocument::LDDocument (DocumentManager* parent) :
 
 LDDocument::~LDDocument()
 {
-	for (int i = 0; i < m_objects.size(); ++i)
-		delete m_objects[i];
-
 	m_beingDestroyed = true;
+
+	for (int i = 0; i < m_objects.size(); ++i)
+		m_objects[i]->destroy();
+
 	delete m_history;
 	delete m_gldata;
 }
@@ -456,17 +455,11 @@ LDObject* ParseLine (QString line)
 				// Subfile
 				CheckTokenCount (tokens, 15);
 				CheckTokenNumbers (tokens, 1, 13);
-
-				// Try open the file. Disable g_loadingMainFile temporarily since we're
-				// not loading the main file now, but the subfile in question.
-				bool tmp = g_loadingMainFile;
-				g_loadingMainFile = false;
-				LDDocument* load = GetDocument (tokens[14]);
-				g_loadingMainFile = tmp;
+				LDDocument* document = g_win->documents()->getDocumentByName (tokens[14]);
 
 				// If we cannot open the file, mark it an error. Note we cannot use LDParseError
 				// here because the error object needs the document reference.
-				if (not load)
+				if (not document)
 				{
 					LDError* obj = LDSpawn<LDError> (line, format ("Could not open %1", tokens[14]));
 					obj->setFileReferenced (tokens[14]);
@@ -483,7 +476,7 @@ LDObject* ParseLine (QString line)
 					transform[i] = tokens[i + 5].toDouble(); // 5 - 13
 
 				obj->setTransform (transform);
-				obj->setFileInfo (load);
+				obj->setFileInfo (document);
 				return obj;
 			}
 
@@ -562,7 +555,7 @@ void LDDocument::reloadAllSubfiles()
 		if (obj->type() == OBJ_Subfile)
 		{
 			LDSubfile* ref = static_cast<LDSubfile*> (obj);
-			LDDocument* fileInfo = GetDocument (ref->fileInfo()->name());
+			LDDocument* fileInfo = m_documents->getDocumentByName (ref->fileInfo()->name());
 
 			if (fileInfo)
 			{
@@ -794,9 +787,9 @@ QList<LDPolygon> LDDocument::inlinePolygons()
 // -----------------------------------------------------------------------------
 LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 {
-	LDObjectList objs, objcache;
+	LDObjectList objs;
 
-	if (m_manager->preInline (this, objs))
+	if (m_manager->preInline (this, objs, deep, renderinline))
 		return objs; // Manager dealt with this inline
 
 	for (LDObject* obj : objects())
