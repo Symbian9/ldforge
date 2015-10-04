@@ -28,13 +28,13 @@ class StringFormatArg
 {
 public:
 	StringFormatArg (const QString& a) : m_text (a) {}
-	StringFormatArg (const char& a) : m_text (a) {}
-	StringFormatArg (const uchar& a) : m_text (a) {}
-	StringFormatArg (const QChar& a) : m_text (a) {}
+	StringFormatArg (char a) : m_text (a) {}
+	StringFormatArg (uchar a) : m_text (a) {}
+	StringFormatArg (QChar a) : m_text (a) {}
 	StringFormatArg (int a) : m_text (QString::number (a)) {}
 	StringFormatArg (long a) : m_text (QString::number (a)) {}
-	StringFormatArg (const float& a) : m_text (QString::number (a)) {}
-	StringFormatArg (const double& a) : m_text (QString::number (a)) {}
+	StringFormatArg (float a) : m_text (QString::number (a)) {}
+	StringFormatArg (double a) : m_text (QString::number (a)) {}
 	StringFormatArg (const Vertex& a) : m_text (a.toString()) {}
 	StringFormatArg (const Matrix& a) : m_text (a.toString()) {}
 	StringFormatArg (const char* a) : m_text (a) {}

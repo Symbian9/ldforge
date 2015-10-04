@@ -24,18 +24,19 @@
 class ColorSelector : public QDialog, public HierarchyElement
 {
 	Q_OBJECT
-	PROPERTY (private, LDColor, selection, setSelection, STOCK_WRITE)
 
 public:
 	explicit ColorSelector (QWidget* parent, LDColor defaultvalue = LDColor::nullColor());
 	virtual ~ColorSelector();
 	static bool selectColor (QWidget* parent, LDColor& val, LDColor defval = LDColor::nullColor());
+	LDColor selection() const;
 
 private:
 	class Ui_ColorSelUi& ui;
 	QMap<int, QPushButton*> m_buttons;
 	QMap<QPushButton*, int> m_buttonsReversed;
 	bool m_firstResize;
+	LDColor m_selection;
 
 	void drawColorInfo();
 	void selectDirectColor (QColor col);

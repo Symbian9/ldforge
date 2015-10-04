@@ -298,19 +298,23 @@ void LDBoundingBox::calcVertex (const Vertex& vertex)
 	m_vertex1.setX (qMax (vertex.x(), m_vertex1.x()));
 	m_vertex1.setY (qMax (vertex.y(), m_vertex1.y()));
 	m_vertex1.setZ (qMax (vertex.z(), m_vertex1.z()));
-	setEmpty (false);
+	m_isEmpty = false;
 }
 
 // =============================================================================
+//
+// Clears the bounding box
 //
 void LDBoundingBox::reset()
 {
 	m_vertex0 = Vertex (10000.0, 10000.0, 10000.0);
 	m_vertex1 = Vertex (-10000.0, -10000.0, -10000.0);
-	setEmpty (true);
+	m_isEmpty = true;
 }
 
 // =============================================================================
+//
+// Returns the length of the bounding box on the longest measure.
 //
 double LDBoundingBox::longestMeasurement() const
 {
@@ -335,10 +339,27 @@ double LDBoundingBox::longestMeasurement() const
 
 // =============================================================================
 //
+// Yields the center of the bounding box.
+//
 Vertex LDBoundingBox::center() const
 {
 	return Vertex (
 		(m_vertex0.x() + m_vertex1.x()) / 2,
 		(m_vertex0.y() + m_vertex1.y()) / 2,
 		(m_vertex0.z() + m_vertex1.z()) / 2);
+}
+
+bool LDBoundingBox::isEmpty() const
+{
+	return m_isEmpty;
+}
+
+const Vertex& LDBoundingBox::vertex0() const
+{
+	return m_vertex0;
+}
+
+const Vertex& LDBoundingBox::vertex1() const
+{
+	return m_vertex1;
 }

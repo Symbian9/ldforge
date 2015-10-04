@@ -163,36 +163,25 @@ private:
 //
 class LDBoundingBox
 {
-	PROPERTY (private,	bool,		isEmpty,	setEmpty,		STOCK_WRITE)
-	PROPERTY (private,	Vertex,		vertex0,	setVertex0,		STOCK_WRITE)
-	PROPERTY (private,	Vertex,		vertex1,	setVertex1,		STOCK_WRITE)
-
 public:
-	// Constructs an empty bounding box.
 	LDBoundingBox();
 
-	// Clears the bounding box
-	void reset();
-
-	// Returns the length of the bounding box on the longest measure.
-	double longestMeasurement() const;
-
-	// Calculates the given \c obj to the bounding box, adjusting
-	// extremas if necessary.
 	void calcObject (LDObject* obj);
-
-	// Calculates the given \c vertex to the bounding box, adjusting
-	// extremas if necessary.
 	void calcVertex (const Vertex& vertex);
-
-	// Yields the center of the bounding box.
 	Vertex center() const;
+	bool isEmpty() const;
+	double longestMeasurement() const;
+	void reset(); 
+	const Vertex& vertex0() const;
+	const Vertex& vertex1() const;
 
-	// An operator overload for calcObject()
 	LDBoundingBox& operator<< (LDObject* obj);
-
-	// An operator overload for calcVertex()
 	LDBoundingBox& operator<< (const Vertex& v);
+
+private:
+	bool m_isEmpty;
+	Vertex m_vertex0;
+	Vertex m_vertex1;
 };
 
 extern const Vertex Origin;

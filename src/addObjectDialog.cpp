@@ -95,7 +95,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			PopulatePrimitives (tw_subfileList, (obj ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
+			populatePrimitivesTree (tw_subfileList, (obj ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -242,7 +242,7 @@ void AddObjectDialog::setButtonBackground (QPushButton* button, LDColor color)
 // =============================================================================
 QString AddObjectDialog::currentSubfileName()
 {
-	SubfileListItem* item = static_cast<SubfileListItem*> (tw_subfileList->currentItem());
+	PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (tw_subfileList->currentItem());
 
 	if (item->primitive() == nullptr)
 		return ""; // selected a heading

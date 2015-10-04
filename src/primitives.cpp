@@ -362,6 +362,11 @@ bool PrimitiveCategory::isValidToInclude()
 	return true;
 }
 
+QString PrimitiveCategory::name() const
+{
+	return m_name;
+}
+
 // =============================================================================
 //
 bool IsPrimitiveLoaderBusy()

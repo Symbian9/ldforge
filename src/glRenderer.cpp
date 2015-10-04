@@ -1589,7 +1589,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 {
 	if (m_window and ev->source() == m_window->getPrimitivesTree())
 	{
-		SubfileListItem* item = static_cast<SubfileListItem*> (m_window->getPrimitivesTree()->currentItem());
+		PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (m_window->getPrimitivesTree()->currentItem());
 		QString primitiveName = item->primitive()->name;
 		LDSubfile* ref = LDSpawn<LDSubfile>();
 		ref->setColor (MainColor);

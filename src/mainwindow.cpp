@@ -249,20 +249,20 @@ void MainWindow::updateRecentFilesMenu()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-QList<LDQuickColor> LoadQuickColorList()
+QList<ColorToolbarItem> LoadQuickColorList()
 {
-	QList<LDQuickColor> colors;
+	QList<ColorToolbarItem> colors;
 
 	for (QString colorname : g_win->configBag()->quickColorToolbar().split (":"))
 	{
 		if (colorname == "|")
-			colors << LDQuickColor::getSeparator();
+			colors << ColorToolbarItem::makeSeparator();
 		else
 		{
 			LDColor color = colorname.toInt();
 
 			if (color.isValid())
-				colors << LDQuickColor (color, nullptr);
+				colors << ColorToolbarItem (color, nullptr);
 		}
 	}
 
@@ -278,7 +278,7 @@ void MainWindow::updateColorToolbar()
 	ui.toolBarColors->addAction (ui.actionUncolor);
 	ui.toolBarColors->addSeparator();
 
-	for (LDQuickColor& entry : m_quickColors)
+	for (ColorToolbarItem& entry : m_quickColors)
 	{
 		if (entry.isSeparator())
 		{
@@ -568,7 +568,7 @@ void MainWindow::quickColorClicked()
 	QToolButton* button = static_cast<QToolButton*> (sender());
 	LDColor color = LDColor::nullColor();
 
-	for (const LDQuickColor& entry : m_quickColors)
+	for (const ColorToolbarItem& entry : m_quickColors)
 	{
 		if (entry.toolButton() == button)
 		{
@@ -1060,7 +1060,7 @@ GLRenderer* MainWindow::renderer()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::setQuickColors (const QList<LDQuickColor>& colors)
+void MainWindow::setQuickColors (const QList<ColorToolbarItem>& colors)
 {
 	m_quickColors = colors;
 	updateColorToolbar();
@@ -1070,7 +1070,7 @@ void MainWindow::setQuickColors (const QList<LDQuickColor>& colors)
 //
 void MainWindow::updatePrimitives()
 {
-	PopulatePrimitives (ui.primitives);
+	populatePrimitivesTree (ui.primitives);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1325,39 +1325,55 @@ GuiUtilities* MainWindow::guiUtilities()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-LDQuickColor::LDQuickColor (LDColor color, QToolButton* toolButton) :
+ColorToolbarItem::ColorToolbarItem (LDColor color, QToolButton* toolButton) :
 	m_color (color),
 	m_toolButton (toolButton) {}
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-LDQuickColor LDQuickColor::getSeparator()
+ColorToolbarItem ColorToolbarItem::makeSeparator()
 {
-	return LDQuickColor (LDColor::nullColor(), nullptr);
+	return ColorToolbarItem (LDColor::nullColor(), nullptr);
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-bool LDQuickColor::isSeparator() const
+bool ColorToolbarItem::isSeparator() const
 {
 	return color() == LDColor::nullColor();
 }
 
+LDColor ColorToolbarItem::color() const
+{
+	return m_color;
+}
+
+void ColorToolbarItem::setColor (LDColor color)
+{
+	m_color = color;
+}
+
+QToolButton* ColorToolbarItem::toolButton() const
+{
+	return m_toolButton;
+}
+
+void ColorToolbarItem::setToolButton (QToolButton* value)
+{
+	m_toolButton = value;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
+void populatePrimitivesTree (QTreeWidget* tw, QString const& selectByDefault)
 {
 	tw->clear();
 
 	for (PrimitiveCategory* cat : g_PrimitiveCategories)
 	{
-		SubfileListItem* parentItem = new SubfileListItem (tw, nullptr);
+		PrimitiveTreeItem* parentItem = new PrimitiveTreeItem (tw, nullptr);
 		parentItem->setText (0, cat->name());
 		QList<QTreeWidgetItem*> subfileItems;
 
 		for (Primitive& prim : cat->prims)
 		{
-			SubfileListItem* item = new SubfileListItem (parentItem, &prim);
+			PrimitiveTreeItem* item = new PrimitiveTreeItem (parentItem, &prim);
 			item->setText (0, format ("%1 - %2", prim.name, prim.title));
 			subfileItems << item;
 
@@ -1369,4 +1385,17 @@ void PopulatePrimitives (QTreeWidget* tw, QString const& selectByDefault)
 
 		tw->addTopLevelItem (parentItem);
 	}
+}
+
+PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info) :
+	QTreeWidgetItem (parent),
+	m_primitive (info) {}
+
+PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidget* parent, Primitive* info) :
+	QTreeWidgetItem (parent),
+	m_primitive (info) {}
+
+Primitive* PrimitiveTreeItem::primitive() const
+{
+	return m_primitive;
 }

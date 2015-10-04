@@ -47,6 +47,29 @@ const char* g_extProgPathFilter =
 #endif
 	"All files (*.*)(*.*)";
 
+ShortcutListItem::ShortcutListItem (QListWidget* view, int type) :
+	QListWidgetItem (view, type) {}
+
+QAction* ShortcutListItem::action() const
+{
+	return m_action;
+}
+
+void ShortcutListItem::setAction (QAction* action)
+{
+	m_action = action;
+}
+
+QKeySequence ShortcutListItem::sequence() const
+{
+	return m_sequence;
+}
+
+void ShortcutListItem::setSequence (const QKeySequence& sequence)
+{
+	m_sequence = sequence;
+}
+
 ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::WindowFlags f) :
 	QDialog (parent, f),
 	HierarchyElement (parent),
@@ -308,7 +331,7 @@ void ConfigDialog::buttonClicked (QAbstractButton* button)
 //
 // Update the list of color toolbar items in the quick color tab.
 //
-void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
+void ConfigDialog::updateQuickColorList (ColorToolbarItem* sel)
 {
 	for (QListWidgetItem * item : quickColorItems)
 		delete item;
@@ -316,7 +339,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 	quickColorItems.clear();
 
 	// Init table items
-	for (LDQuickColor& entry : quickColors)
+	for (ColorToolbarItem& entry : quickColors)
 	{
 		QListWidgetItem* item = new QListWidgetItem;
 
@@ -357,7 +380,7 @@ void ConfigDialog::updateQuickColorList (LDQuickColor* sel)
 //
 void ConfigDialog::slot_setColor()
 {
-	LDQuickColor* entry = nullptr;
+	ColorToolbarItem* entry = nullptr;
 	QListWidgetItem* item = nullptr;
 	const bool isNew = static_cast<QPushButton*> (sender()) == ui.quickColor_add;
 
@@ -387,7 +410,7 @@ void ConfigDialog::slot_setColor()
 	}
 	else
 	{
-		LDQuickColor newentry (value, nullptr);
+		ColorToolbarItem newentry (value, nullptr);
 		item = getSelectedQuickColor();
 		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : quickColorItems.size();
 		quickColors.insert (idx, newentry);
@@ -437,7 +460,7 @@ void ConfigDialog::slot_moveColor()
 //
 void ConfigDialog::slot_addColorSeparator()
 {
-	quickColors << LDQuickColor::getSeparator();
+	quickColors << ColorToolbarItem::makeSeparator();
 	updateQuickColorList (&quickColors[quickColors.size() - 1]);
 }
 
@@ -631,7 +654,7 @@ QString ConfigDialog::quickColorString()
 {
 	QString val;
 
-	for (const LDQuickColor& entry : quickColors)
+	for (const ColorToolbarItem& entry : quickColors)
 	{
 		if (val.length() > 0)
 			val += ':';

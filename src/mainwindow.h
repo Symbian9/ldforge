@@ -39,16 +39,21 @@ class QProgressBar;
 struct Primitive;
 class Toolset;
 
-class LDQuickColor
+class ColorToolbarItem
 {
-	PROPERTY (public,	LDColor,		color,		setColor,		STOCK_WRITE)
-	PROPERTY (public,	QToolButton*,	toolButton,	setToolButton,	STOCK_WRITE)
-
 public:
-	LDQuickColor (LDColor color, QToolButton* toolButton);
+	ColorToolbarItem (LDColor color, QToolButton* toolButton);
+	LDColor color() const;
 	bool isSeparator() const;
+	void setColor (LDColor color);
+	void setToolButton (QToolButton* value);
+	QToolButton* toolButton() const;
 
-	static LDQuickColor getSeparator();
+	static ColorToolbarItem makeSeparator();
+
+private:
+	LDColor m_color;
+	QToolButton* m_toolButton;
 };
 
 // Object list class for MainWindow
@@ -102,7 +107,7 @@ public:
 	void saveShortcuts();
 	void scrollToSelection();
 	const LDObjectList& selectedObjects();
-	void setQuickColors (const QList<LDQuickColor>& colors);
+	void setQuickColors (const QList<ColorToolbarItem>& colors);
 	void spawnContextMenu (const QPoint pos);
 	int suggestInsertPoint();
 	void syncSettings();
@@ -135,7 +140,7 @@ private:
 	class GuiUtilities* m_guiUtilities;
 	GLRenderer* m_renderer;
 	LDObjectList m_sel;
-	QList<LDQuickColor>	m_quickColors;
+	QList<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;
 	class Ui_MainWindow& ui;
@@ -167,7 +172,7 @@ extern MainWindow* g_win;
 QPixmap GetIcon (QString iconName);
 
 // Returns a list of quick colors based on the configuration entry.
-QList<LDQuickColor> LoadQuickColorList();
+QList<ColorToolbarItem> LoadQuickColorList();
 
 // Asks the user a yes/no question with the given message and the given window title.
 // Returns true if the user answered yes, false if no.
@@ -209,20 +214,15 @@ void RadioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
 	}
 }
 
-// =============================================================================
-//
-class SubfileListItem : public QTreeWidgetItem
+class PrimitiveTreeItem : public QTreeWidgetItem
 {
-	PROPERTY (public, Primitive*,	primitive, setPrimitive, STOCK_WRITE)
-
 public:
-	SubfileListItem (QTreeWidgetItem* parent, Primitive* info) :
-		QTreeWidgetItem (parent),
-		m_primitive (info) {}
+	PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info);
+	PrimitiveTreeItem (QTreeWidget* parent, Primitive* info);
+	Primitive* primitive() const;
 
-	SubfileListItem (QTreeWidget* parent, Primitive* info) :
-		QTreeWidgetItem (parent),
-		m_primitive (info) {}
+private:
+	Primitive* m_primitive;
 };
 
-void PopulatePrimitives (QTreeWidget* tw, const QString& selectByDefault = QString());
+void populatePrimitivesTree (QTreeWidget* tw, const QString& selectByDefault = QString());

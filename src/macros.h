@@ -27,27 +27,6 @@ template <typename T, size_t N>
 char (&countofHelper (T(&)[N]))[N];
 #define countof(x) ((int) sizeof (countofHelper(x)))
 
-#define PROPERTY(ACCESS, TYPE, READ, WRITE, WRITETYPE)			\
-private:														\
-	TYPE m_##READ;												\
-																\
-public:															\
-	inline TYPE const& READ() const								\
-	{															\
-		return m_##READ; 										\
-	}															\
-																\
-ACCESS:															\
-	void WRITE (TYPE const& a) PROPERTY_##WRITETYPE (READ)		\
-
-#define PROPERTY_STOCK_WRITE(READ)								\
-	{															\
-		m_##READ = a;											\
-	}
-
-#define PROPERTY_CUSTOM_WRITE(READ)								\
-	;
-
 #define DEFINE_CLASS(SELF, SUPER) \
 public: \
 	using Self = SELF; \

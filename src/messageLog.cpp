@@ -121,6 +121,16 @@ const QList<MessageManager::Line>& MessageManager::getLines() const
 	return m_lines;
 }
 
+GLRenderer* MessageManager::renderer() const
+{
+	return m_renderer;
+}
+
+void MessageManager::setRenderer (GLRenderer* renderer)
+{
+	m_renderer = renderer;
+}
+
 // =============================================================================
 //
 void PrintToLog (const QString& msg)

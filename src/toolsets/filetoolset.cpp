@@ -200,7 +200,7 @@ void FileToolset::downloadFrom()
 
 void FileToolset::makePrimitive()
 {
-	PrimitivePrompt* dlg = new PrimitivePrompt (g_win);
+	PrimitivePrompt* dlg = new PrimitivePrompt (m_window);
 
 	if (not dlg->exec())
 		return;

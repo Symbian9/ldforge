@@ -36,7 +36,6 @@ struct Primitive
 class PrimitiveCategory : public QObject
 {
 	Q_OBJECT
-	PROPERTY (public, QString, name, setName, STOCK_WRITE)
 
 public:
 	enum RegexType
@@ -56,9 +55,13 @@ public:
 
 	explicit PrimitiveCategory (QString name, QObject* parent = 0);
 	bool isValidToInclude();
+	QString name() const;
 
 	static void loadCategories();
 	static void populateCategories();
+
+private:
+	QString m_name;
 };
 
 //

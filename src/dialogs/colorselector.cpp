@@ -34,11 +34,11 @@ enum { NUM_COLUMNS = 16 };
 ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 	QDialog (parent),
 	HierarchyElement (parent),
-	ui (*new Ui_ColorSelUi)
+	ui (*new Ui_ColorSelUi),
+	m_selection (defaultvalue)
 {
 	m_firstResize = true;
 	ui.setupUi (this);
-	setSelection (defaultvalue);
 
 	QGridLayout* layout = new QGridLayout (this);
 
@@ -123,7 +123,7 @@ void ColorSelector::colorButtonClicked()
 			(*button)->setChecked (false);
 	}
 
-	setSelection (color);
+	m_selection = color;
 	button->setChecked (true);
 	drawColorInfo();
 }
@@ -155,7 +155,7 @@ void ColorSelector::selectDirectColor (QColor color)
 {
 	qint32 colorIndex = (ui.transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
 	colorIndex |= (color.red() << 16) | (color.green() << 8) | (color.blue());
-	setSelection (colorIndex);
+	m_selection = colorIndex;
 	drawColorInfo();
 }
 
@@ -187,4 +187,9 @@ bool ColorSelector::selectColor (QWidget* parent, LDColor& val, LDColor defaultv
 	}
 
 	return false;
+}
+
+LDColor ColorSelector::selection() const
+{
+	return m_selection;
 }

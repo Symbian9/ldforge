@@ -27,12 +27,17 @@ class QDoubleSpinBox;
 // =============================================================================
 class ShortcutListItem : public QListWidgetItem
 {
-	PROPERTY (public,	QAction*,		action,		setAction,		STOCK_WRITE)
-	PROPERTY (public,	QKeySequence,	sequence,	setSequence,	STOCK_WRITE)
-
 public:
-	explicit ShortcutListItem (QListWidget* view = nullptr, int type = Type) :
-		QListWidgetItem (view, type) {}
+	explicit ShortcutListItem (QListWidget* view = nullptr, int type = Type);
+
+	QAction* action() const;
+	QKeySequence sequence() const;
+	void setAction (QAction* action);
+	void setSequence (const QKeySequence& sequence);
+
+private:
+	QAction* m_action;
+	QKeySequence m_sequence;
 };
 
 struct ExternalProgramWidgets
@@ -63,7 +68,7 @@ public:
 	explicit ConfigDialog (QWidget* parent = nullptr, Tab defaulttab = (Tab) 0, Qt::WindowFlags f = 0);
 	virtual ~ConfigDialog();
 
-	QList<LDQuickColor> quickColors;
+	QList<ColorToolbarItem> quickColors;
 
 private:
 	class Ui_ConfigDialog& ui;
@@ -75,7 +80,7 @@ private:
 	void applySettings();
 	void addShortcut (QAction* act);
 	void setButtonBackground (QPushButton* button, QString value);
-	void updateQuickColorList (LDQuickColor* sel = nullptr);
+	void updateQuickColorList (ColorToolbarItem* sel = nullptr);
 	void setShortcutText (ShortcutListItem* item);
 	int getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& haystack);
 	QString quickColorString();

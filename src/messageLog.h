@@ -38,28 +38,27 @@ class QTimer;
 //
 class MessageManager : public QObject
 {
-Q_OBJECT
-PROPERTY (public, GLRenderer*, renderer, setRenderer, STOCK_WRITE)
+	Q_OBJECT
 
 public:
 	// A single line of the message log.
 	class Line
 	{
-		public:
-			// Constructs a line with the given \c text
-			Line (QString text);
+	public:
+		// Constructs a line with the given \c text
+		Line (QString text);
 
-			// Check this line's expiry and update alpha accordingly. @changed
-			// is updated to whether the line has somehow changed since the
-			// last update.
-			//
-			// Returns true if the line is to still stick around, false if it
-			// expired.
-			bool update (bool& changed);
+		// Check this line's expiry and update alpha accordingly. @changed
+		// is updated to whether the line has somehow changed since the
+		// last update.
+		//
+		// Returns true if the line is to still stick around, false if it
+		// expired.
+		bool update (bool& changed);
 
-			QString text;
-			float alpha;
-			QDateTime expiry;
+		QString text;
+		float alpha;
+		QDateTime expiry;
 	};
 
 	// Constructs the message manager.
@@ -71,9 +70,13 @@ public:
 	// Returns all active lines in the message manager.
 	const QList<Line>& getLines() const;
 
+	GLRenderer* renderer() const;
+	void setRenderer (GLRenderer* renderer);
+
 private:
-	QList<Line>	m_lines;
-	QTimer*		m_ticker;
+	QList<Line> m_lines;
+	QTimer* m_ticker;
+	GLRenderer* m_renderer;
 
 private slots:
 	void tick();
