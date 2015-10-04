@@ -48,7 +48,7 @@
            <x>0</x>
            <y>0</y>
            <width>234</width>
-           <height>402</height>
+           <height>407</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>234</width>
-           <height>402</height>
+           <width>264</width>
+           <height>121</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>234</width>
-           <height>402</height>
+           <width>96</width>
+           <height>86</height>
           </rect>
          </property>
          <attribute name="label">
@@ -194,7 +194,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>30</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -536,6 +536,7 @@
    <addaction name="actionModeRectangle"/>
    <addaction name="actionModeCircle"/>
    <addaction name="actionModeLinePath"/>
+   <addaction name="actionModeCurve"/>
   </widget>
   <widget class="QToolBar" name="toolBarColors">
    <property name="windowTitle">
@@ -1692,6 +1693,18 @@
    </property>
    <property name="shortcut">
     <string>P</string>
+   </property>
+  </action>
+  <action name="actionModeCurve">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/beziercurve.png</normaloff>:/icons/beziercurve.png</iconset>
+   </property>
+   <property name="text">
+    <string>Curve Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
    </property>
   </action>
  </widget>

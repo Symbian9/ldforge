@@ -151,7 +151,7 @@ public:
 	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
 	LDDocument* document() const;
-	void drawBlip (QPainter& paint, QPointF pos) const;
+	void drawBlip (QPainter& paint, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawGLScene();
 	void forgetObject (LDObject* obj);
 	Axis getCameraAxis (bool y, ECamera camid = (ECamera) -1);

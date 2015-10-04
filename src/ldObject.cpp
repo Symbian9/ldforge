@@ -79,6 +79,7 @@ LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
 LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
+LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
 LDObject::~LDObject()
 {
@@ -145,12 +146,23 @@ QString LDQuad::asText() const
 QString LDCondLine::asText() const
 {
 	QString val = format ("5 %1", color());
-
+	
 	// Add the coordinates
 	for (int i = 0; i < 4; ++i)
 		val += format (" %1", vertex (i));
 
 	return val;
+}
+
+QString LDBezierCurve::asText() const
+{
+	QString result = format ("0 !LDFORGE BEZIER_CURVE %1", color());
+	
+	// Add the coordinates
+	for (int i = 0; i < 4; ++i)
+		result += format (" %1", vertex (i));
+
+	return result;
 }
 
 // =============================================================================
@@ -256,6 +268,18 @@ LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vert
 //
 LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document) :
 	LDLine (document)
+{
+	setVertex (0, v0);
+	setVertex (1, v1);
+	setVertex (2, v2);
+	setVertex (3, v3);
+}
+
+// =============================================================================
+//
+LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3,
+	LDDocument* document) :
+	LDObject (document)
 {
 	setVertex (0, v0);
 	setVertex (1, v1);
@@ -600,17 +624,18 @@ LDObject* LDObject::getDefault (const LDObjectType type)
 {
 	switch (type)
 	{
-		case OBJ_Comment:		return LDSpawn<LDComment>();
-		case OBJ_Bfc:			return LDSpawn<LDBfc>();
-		case OBJ_Line:			return LDSpawn<LDLine>();
-		case OBJ_CondLine:		return LDSpawn<LDCondLine>();
-		case OBJ_Subfile:		return LDSpawn<LDSubfile>();
-		case OBJ_Triangle:		return LDSpawn<LDTriangle>();
-		case OBJ_Quad:			return LDSpawn<LDQuad>();
-		case OBJ_Empty:			return LDSpawn<LDEmpty>();
-		case OBJ_Error:			return LDSpawn<LDError>();
-		case OBJ_Overlay:		return LDSpawn<LDOverlay>();
-		case OBJ_NumTypes:		break;
+	case OBJ_Comment:		return LDSpawn<LDComment>();
+	case OBJ_Bfc:			return LDSpawn<LDBfc>();
+	case OBJ_Line:			return LDSpawn<LDLine>();
+	case OBJ_CondLine:		return LDSpawn<LDCondLine>();
+	case OBJ_Subfile:		return LDSpawn<LDSubfile>();
+	case OBJ_Triangle:		return LDSpawn<LDTriangle>();
+	case OBJ_Quad:			return LDSpawn<LDQuad>();
+	case OBJ_Empty:			return LDSpawn<LDEmpty>();
+	case OBJ_Error:			return LDSpawn<LDError>();
+	case OBJ_Overlay:		return LDSpawn<LDOverlay>();
+	case OBJ_BezierCurve:	return LDSpawn<LDBezierCurve>();
+	case OBJ_NumTypes:		break;
 	}
 	return nullptr;
 }
@@ -735,6 +760,19 @@ void LDCondLine::invert()
 	Vertex tmp = vertex (0);
 	setVertex (0, vertex (1));
 	setVertex (1, tmp);
+}
+
+// =============================================================================
+//
+void LDBezierCurve::invert()
+{
+	// A Bézier curve's control points probably need to be, though.
+	Vertex tmp = vertex (1);
+	setVertex (1, vertex (0));
+	setVertex (0, tmp);
+	tmp = vertex (3);
+	setVertex (3, vertex (2));
+	setVertex (2, tmp);
 }
 
 // =============================================================================

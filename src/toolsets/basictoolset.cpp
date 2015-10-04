@@ -269,6 +269,11 @@ void BasicToolset::modeSelect()
 	m_window->renderer()->setEditMode (EditModeType::Select);
 }
 
+void BasicToolset::modeCurve()
+{
+	m_window->renderer()->setEditMode (EditModeType::Curve);
+}
+
 void BasicToolset::modeDraw()
 {
 	m_window->renderer()->setEditMode (EditModeType::Draw);

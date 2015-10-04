@@ -72,6 +72,7 @@ enum LDObjectType
 	OBJ_Comment,		//	Object represents a	comment
 	OBJ_Error,			//	Object is the result of failed parsing
 	OBJ_Empty,			//	Object represents an empty line
+	OBJ_BezierCurve,	//	Object represents a Bézier curve
 
 	OBJ_NumTypes,       // Amount of object types
 	OBJ_FirstType = OBJ_Subfile
@@ -445,6 +446,22 @@ private:
 	int m_width;
 	int m_height;
 	QString m_fileName;
+};
+
+class LDBezierCurve : public LDObject
+{
+	LDOBJ (BezierCurve)
+	LDOBJ_NAME (beziercurve)
+	LDOBJ_VERTICES (4)
+	LDOBJ_COLORED
+	LDOBJ_DEFAULTCOLOR (EdgeColor)
+	LDOBJ_SCEMANTIC
+	LDOBJ_NO_MATRIX
+
+public:
+	LDBezierCurve (const Vertex& v0, const Vertex& v1,
+		const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
+	LDLine* toEdgeLine();
 };
 
 // Other common LDraw stuff

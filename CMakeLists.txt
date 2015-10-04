@@ -66,6 +66,7 @@ set (LDFORGE_SOURCES
 	src/dialogs/openprogressdialog.cpp
 	src/editmodes/abstractEditMode.cpp
 	src/editmodes/circleMode.cpp
+	src/editmodes/curvemode.cpp
 	src/editmodes/drawMode.cpp
     src/editmodes/linePathMode.cpp
 	src/editmodes/magicWandMode.cpp
@@ -117,6 +118,7 @@ set (LDFORGE_HEADERS
 	src/dialogs/openprogressdialog.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
+	src/editmodes/curvemode.h
 	src/editmodes/drawMode.h
 	src/editmodes/linePathMode.h
 	src/editmodes/magicWandMode.h

@@ -19,17 +19,14 @@
 #pragma once
 #include "abstractEditMode.h"
 
-class DrawMode : public AbstractDrawMode
+class CurveMode : public AbstractDrawMode
 {
-	DEFINE_CLASS (DrawMode, AbstractDrawMode)
-	bool m_rectdraw;
+	DEFINE_CLASS (CurveMode, AbstractDrawMode)
 
 public:
-	DrawMode (GLRenderer* renderer);
-
-	void render (QPainter& painter) const override;
-	int maxVertices() const override { return 4; }
-	EditModeType type() const override;
+	CurveMode (GLRenderer* renderer);
 	void endDraw() override;
-	bool preAddVertex (Vertex const&) override;
+	void render (QPainter& painter) const override;
+	EditModeType type() const override;
+	int maxVertices() const override { return 4; }
 };

@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource>
+	<file>./icons/add-beziercurve.png</file>
 	<file>./icons/add-bfc.png</file>
 	<file>./icons/add-comment.png</file>
 	<file>./icons/add-condline.png</file>
@@ -15,6 +16,7 @@
 	<file>./icons/arrow-up.png</file>
 	<file>./icons/autocolor.png</file>
 	<file>./icons/axes.png</file>
+	<file>./icons/beziercurve.png</file>
 	<file>./icons/bfc.png</file>
 	<file>./icons/bfc-view.png</file>
 	<file>./icons/brick-new.png</file>

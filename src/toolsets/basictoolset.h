@@ -39,6 +39,7 @@ public:
 	Q_INVOKABLE void modeMagicWand();
 	Q_INVOKABLE void modeRectangle();
 	Q_INVOKABLE void modeSelect();
+	Q_INVOKABLE void modeCurve();
 	Q_INVOKABLE void newBFC();
 	Q_INVOKABLE void newComment();
 	Q_INVOKABLE void newConditionalLine();

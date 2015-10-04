@@ -25,8 +25,10 @@
 #include "circleMode.h"
 #include "magicWandMode.h"
 #include "linePathMode.h"
+#include "curvemode.h"
 #include "../mainwindow.h"
 #include "../glRenderer.h"
+#include "../miscallenous.h"
 
 ConfigOption (bool DrawLineLengths = true)
 ConfigOption (bool DrawAngles = false)
@@ -48,6 +50,7 @@ AbstractEditMode* AbstractEditMode::createByType (GLRenderer* renderer, EditMode
 	case EditModeType::Circle: return new CircleMode (renderer);
 	case EditModeType::MagicWand: return new MagicWandMode (renderer);
 	case EditModeType::LinePath: return new LinePathMode (renderer);
+	case EditModeType::Curve: return new CurveMode (renderer);
 	}
 
 	throw std::logic_error ("bad type given to AbstractEditMode::createByType");
@@ -112,8 +115,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 
 		for (const Vertex& vrt : vertices)
 		{
-			// If the vertex in 2d space is very close to the cursor then we use
-			// it regardless of depth.
+			// If the vertex in 2d space is very close to the cursor then we use it regardless of depth.
 			QPoint vect2d = renderer()->convert3dTo2d (vrt) - cursorPosition2D;
 			const double distance2DSquared = std::pow (vect2d.x(), 2) + std::pow (vect2d.y(), 2);
 			if (distance2DSquared < 16.0 * 16.0)
@@ -147,7 +149,18 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 	{
 		// Remove the last vertex
 		m_drawedVerts.removeLast();
+		return true;
+	}
 
+	if (data.releasedButtons & Qt::LeftButton)
+	{
+		if (m_drawedVerts.size() >= maxVertices())
+		{
+			endDraw();
+			return true;
+		}
+
+		addDrawnVertex (getCursorVertex());
 		return true;
 	}
 
@@ -255,4 +268,37 @@ bool AbstractDrawMode::keyReleased (QKeyEvent *ev)
 	}
 
 	return false;
+}
+
+template<typename T>
+T intervalClamp (T a, T interval)
+{
+	T remainder = a % interval;
+
+	if (remainder >= float (interval / 2))
+		a += interval;
+
+	a -= remainder;
+	return a;
+}
+
+Vertex AbstractDrawMode::getCursorVertex() const
+{
+	Vertex result = renderer()->position3D();
+
+	if (renderer()->keyboardModifiers() & Qt::ControlModifier
+		and not m_drawedVerts.isEmpty())
+	{
+		Vertex const& v0 = m_drawedVerts.last();
+		Vertex const& v1 = result;
+		Axis relX, relY;
+
+		renderer()->getRelativeAxes (relX, relY);
+		QLineF ln (v0[relX], v0[relY], v1[relX], v1[relY]);
+		ln.setAngle (intervalClamp<int> (ln.angle(), 45));
+		result.setCoordinate (relX, Grid::Snap (ln.x2(), Grid::Coordinate));
+		result.setCoordinate (relY, Grid::Snap (ln.y2(), Grid::Coordinate));
+	}
+
+	return result;
 }

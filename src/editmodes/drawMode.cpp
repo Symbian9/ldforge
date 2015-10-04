@@ -21,7 +21,6 @@
 #include "drawMode.h"
 #include "../ldObject.h"
 #include "../glRenderer.h"
-#include "../miscallenous.h"
 
 DrawMode::DrawMode (GLRenderer* renderer) :
 	Super (renderer) {}
@@ -34,7 +33,6 @@ EditModeType DrawMode::type() const
 void DrawMode::render (QPainter& painter) const
 {
 	QVector<Vertex> poly;
-	QFontMetrics metrics = QFontMetrics (QFont());
 
 	for (Vertex const& vert : m_drawedVerts)
 		poly << vert;
@@ -58,27 +56,6 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 
 			return true;
 		}
-	}
-
-	return false;
-}
-
-bool DrawMode::mouseReleased (MouseEventData const& data)
-{
-	if (Super::mouseReleased (data))
-		return true;
-
-	if (data.releasedButtons & Qt::LeftButton)
-	{
-		// If we have 4 verts, stop drawing.
-		if (m_drawedVerts.size() >= 4)
-		{
-			endDraw();
-			return true;
-		}
-
-		addDrawnVertex (getCursorVertex());
-		return true;
 	}
 
 	return false;
@@ -119,37 +96,4 @@ void DrawMode::endDraw()
 	}
 
 	finishDraw (objs);
-}
-
-template<typename T>
-T IntervalClamp (T a, T interval)
-{
-	T remainder = a % interval;
-
-	if (remainder >= float (interval / 2))
-		a += interval;
-
-	a -= remainder;
-	return a;
-}
-
-Vertex DrawMode::getCursorVertex() const
-{
-	Vertex result = renderer()->position3D();
-
-	if (renderer()->keyboardModifiers() & Qt::ControlModifier
-		and not m_drawedVerts.isEmpty())
-	{
-		Vertex const& v0 = m_drawedVerts.last();
-		Vertex const& v1 = result;
-		Axis relX, relY;
-
-		renderer()->getRelativeAxes (relX, relY);
-		QLineF ln (v0[relX], v0[relY], v1[relX], v1[relY]);
-		ln.setAngle (IntervalClamp<int> (ln.angle(), 45));
-		result.setCoordinate (relX, Grid::Snap (ln.x2(), Grid::Coordinate));
-		result.setCoordinate (relY, Grid::Snap (ln.y2(), Grid::Coordinate));
-	}
-
-	return result;
 }

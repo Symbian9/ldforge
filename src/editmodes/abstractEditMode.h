@@ -32,6 +32,7 @@ enum class EditModeType
 	Circle,
 	MagicWand,
 	LinePath,
+	Curve,
 };
 
 class AbstractEditMode : public QObject, public HierarchyElement
@@ -80,24 +81,19 @@ protected:
 public:
 	AbstractDrawMode (GLRenderer* renderer);
 
-	virtual bool allowFreeCamera() const override
-	{
-		return false;
-	}
-
-	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
 	void addDrawnVertex (const Vertex& pos);
-	void finishDraw (const LDObjectList& objs);
-	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d,
-		bool withlengths, bool withangles) const;
-	void drawLength (QPainter& painter, Vertex const& v0, Vertex const& v1,
+	virtual bool allowFreeCamera() const override final { return false; }
+	virtual void endDraw() {}
+	void drawLength (QPainter& painter,
+		const Vertex& v0, const Vertex& v1,
 		const QPointF& v0p, const QPointF& v1p) const;
+	void finishDraw (const LDObjectList& objs);
+	Vertex getCursorVertex() const;
 	bool keyReleased (QKeyEvent* ev) override;
-
-	virtual bool preAddVertex (Vertex const&)
-	{
-		return false;
-	}
+	virtual int maxVertices() const { return 0; }
+	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
+	virtual bool preAddVertex (Vertex const&) { return false; }
+	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withlengths, bool withangles) const;
 };
 
 //

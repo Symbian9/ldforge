@@ -721,13 +721,13 @@ void GLRenderer::paintEvent (QPaintEvent*)
 
 // =============================================================================
 //
-void GLRenderer::drawBlip (QPainter& paint, QPointF pos) const
+void GLRenderer::drawBlip (QPainter& paint, QPointF pos, QColor color) const
 {
 	QPen pen = m_thinBorderPen;
 	const int blipsize = 8;
 	pen.setWidth (1);
 	paint.setPen (pen);
-	paint.setBrush (QColor (64, 192, 0));
+	paint.setBrush (color);
 	paint.drawEllipse (pos.x() - blipsize / 2, pos.y() - blipsize / 2, blipsize, blipsize);
 }
 

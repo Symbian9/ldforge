@@ -13,6 +13,6 @@ public:
 	bool mouseReleased (MouseEventData const& data) override;
 	bool preAddVertex (Vertex const& pos) override;
 	bool keyReleased (QKeyEvent*) override;
-	void endDraw();
+	void endDraw() override;
 };
 

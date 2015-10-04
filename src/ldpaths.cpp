@@ -26,7 +26,6 @@ void LDPaths::checkPaths()
 	}
 }
 
-#include <QDebug>
 bool LDPaths::isValid (const QDir& dir) const
 {
 	if (dir.exists())
