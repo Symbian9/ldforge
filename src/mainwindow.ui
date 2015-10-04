@@ -1696,6 +1696,9 @@
    </property>
   </action>
   <action name="actionModeCurve">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../ldforge.qrc">
      <normaloff>:/icons/beziercurve.png</normaloff>:/icons/beziercurve.png</iconset>

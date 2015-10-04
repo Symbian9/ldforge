@@ -88,10 +88,13 @@ static const int PrimeNumbers[] =
 ConfigOption (int Grid = 1)
 ConfigOption (float GridCoarseCoordinateSnap = 5.0f)
 ConfigOption (float GridCoarseAngleSnap = 45.0f)
+ConfigOption (float GridCoarseBezierCurveSegments = 8)
 ConfigOption (float GridMediumCoordinateSnap = 1.0f)
 ConfigOption (float GridMediumAngleSnap = 22.5f)
+ConfigOption (float GridMediumBezierCurveSegments = 16)
 ConfigOption (float GridFineCoordinateSnap = 0.1f)
 ConfigOption (float GridFineAngleSnap = 7.5f)
+ConfigOption (float GridFineBezierCurveSegments = 32)
 ConfigOption (int RotationPointType = 0)
 ConfigOption (Vertex CustomRotationPoint = Origin)
 
@@ -121,6 +124,19 @@ float gridAngleSnap()
 	}
 
 	return 45.0f;
+}
+
+float gridBezierCurveSegments()
+{
+	ConfigurationValueBag* config = g_win->configBag();
+
+	switch (config->grid())
+	{
+	default:
+	case Grid::Coarse: return config->gridCoarseBezierCurveSegments();
+	case Grid::Medium: return config->gridMediumBezierCurveSegments();
+	case Grid::Fine: return config->gridFineBezierCurveSegments();
+	}
 }
 
 // =============================================================================

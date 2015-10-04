@@ -100,6 +100,7 @@ set (LDFORGE_HEADERS
 	src/ldDocument.h
 	src/ldObject.h
 	src/ldObjectMath.h
+	src/ldobjectiterator.h
 	src/ldpaths.h
 	src/macros.h
 	src/main.h

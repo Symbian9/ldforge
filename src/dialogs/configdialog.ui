@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>668</width>
+    <width>792</width>
     <height>408</height>
    </rect>
   </property>
@@ -743,6 +743,19 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <layout class="QGridLayout" name="gridLayout">
+              <item row="3" column="3">
+               <widget class="QDoubleSpinBox" name="configGridFineCoordinateSnap">
+                <property name="suffix">
+                 <string> LDU</string>
+                </property>
+                <property name="decimals">
+                 <number>5</number>
+                </property>
+                <property name="maximum">
+                 <double>10000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
               <item row="3" column="4">
                <widget class="QDoubleSpinBox" name="configGridFineAngleSnap">
                 <property name="suffix">
@@ -800,6 +813,13 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
+              <item row="2" column="2">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>Medium</string>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="4">
                <widget class="QDoubleSpinBox" name="configGridCoarseAngleSnap">
                 <property name="suffix">
@@ -820,13 +840,6 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                 <property name="pixmap">
                  <pixmap resource="../../ldforge.qrc">:/icons/grid-medium.png</pixmap>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QLabel" name="label_13">
-                <property name="text">
-                 <string>Medium</string>
                 </property>
                </widget>
               </item>
@@ -856,16 +869,6 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
-               <widget class="QLabel" name="label_11">
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="pixmap">
-                 <pixmap resource="../../ldforge.qrc">:/icons/grid-fine.png</pixmap>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="2">
                <widget class="QLabel" name="label_14">
                 <property name="text">
@@ -873,16 +876,13 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </widget>
               </item>
-              <item row="3" column="3">
-               <widget class="QDoubleSpinBox" name="configGridFineCoordinateSnap">
-                <property name="suffix">
-                 <string> LDU</string>
+              <item row="3" column="1">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string/>
                 </property>
-                <property name="decimals">
-                 <number>5</number>
-                </property>
-                <property name="maximum">
-                 <double>10000.000000000000000</double>
+                <property name="pixmap">
+                 <pixmap resource="../../ldforge.qrc">:/icons/grid-fine.png</pixmap>
                 </property>
                </widget>
               </item>
@@ -899,7 +899,7 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                 </property>
                </spacer>
               </item>
-              <item row="1" column="5">
+              <item row="1" column="6">
                <spacer name="horizontalSpacer_10">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -911,6 +911,43 @@ Usually this contains MainColor, EdgeColor and some auxiliary colors used to gro
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item row="0" column="5">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Bézier curve segments</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="5">
+               <widget class="QSpinBox" name="configGridCoarseBezierCurveSegments">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>1000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="5">
+               <widget class="QSpinBox" name="configGridMediumBezierCurveSegments">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>1000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="5">
+               <widget class="QSpinBox" name="configGridFineBezierCurveSegments">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

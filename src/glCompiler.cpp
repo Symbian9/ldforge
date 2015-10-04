@@ -340,7 +340,7 @@ void GLCompiler::compileObject (LDObject* obj)
 	case OBJ_BezierCurve:
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			for (LDPolygon& poly : curve->rasterizePolygons (24))
+			for (LDPolygon& poly : curve->rasterizePolygons (gridBezierCurveSegments()))
 			{
 				poly.id = obj->id();
 				compilePolygon (poly, obj, &info);

@@ -27,7 +27,7 @@ public:
 
 	T* get() const
 	{
-		return (T*) m_list[m_i];
+		return static_cast<T*> (m_list[m_i]);
 	}
 
 	bool isValid() const
@@ -87,7 +87,23 @@ public:
 		rewindTillValid();
 	}
 
+	operator T*()
+	{
+		return get();
+	}
+
 private:
 	const LDObjectList& m_list;
 	int m_i;
 };
+
+template<typename T, typename R>
+QVector<T*> filterByType (const R& stuff)
+{
+	QVector<T*> result;
+
+	for (LDObjectIterator<T> it (stuff); it.isValid(); ++it)
+		result << it;
+
+	return result;
+}

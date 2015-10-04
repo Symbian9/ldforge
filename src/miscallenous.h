@@ -45,6 +45,7 @@ QString Join (QList<StringFormatArg> vals, QString delim = " ");
 // Grid stuff
 float gridCoordinateSnap();
 float gridAngleSnap();
+float gridBezierCurveSegments();
 
 // =============================================================================
 enum class RotationPoint

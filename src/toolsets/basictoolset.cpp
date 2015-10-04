@@ -29,6 +29,7 @@
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"
+#include "../miscallenous.h"
 #include "basictoolset.h"
 
 BasicToolset::BasicToolset (MainWindow *parent) :
@@ -95,15 +96,15 @@ void BasicToolset::remove()
 
 void BasicToolset::doInline (bool deep)
 {
-	for (LDObjectIterator<LDSubfile> it (selectedObjects()); it.isValid(); ++it)
+	for (LDSubfile* ref : filterByType<LDSubfile> (selectedObjects()))
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		int idx = it->lineNumber();
+		int idx = ref->lineNumber();
 
 		if (idx != -1)
 		{
-			LDObjectList objs = it->inlineContents (deep, false);
+			LDObjectList objs = ref->inlineContents (deep, false);
 	
 			// Merge in the inlined objects
 			for (LDObject* inlineobj : objs)
@@ -116,9 +117,12 @@ void BasicToolset::doInline (bool deep)
 			}
 	
 			// Delete the subfile now as it's been inlined.
-			it->destroy();
+			ref->destroy();
 		}
 	}
+
+	for (LDBezierCurve* curve : filterByType<LDBezierCurve> (selectedObjects()))
+		curve->replace (curve->rasterize (gridBezierCurveSegments()));
 }
 
 void BasicToolset::inlineShallow()

@@ -55,6 +55,7 @@
 #include "guiutilities.h"
 #include "glCompiler.h"
 #include "documentmanager.h"
+#include "ldobjectiterator.h"
 
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
@@ -81,6 +82,9 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
 	ui.verticalLayout->insertWidget (0, m_tabs);
+
+	createBlankDocument();
+	m_renderer->setDocument (m_currentDocument);
 
 	// Stuff the renderer into its frame
 	QVBoxLayout* rendererLayout = new QVBoxLayout (ui.rendererFrame);
@@ -164,9 +168,6 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		if (toolbar)
 			toolbar->hide();
 	}
-
-	createBlankDocument();
-	m_renderer->setDocument (m_currentDocument);
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
@@ -310,6 +311,10 @@ void MainWindow::updateGridToolBar()
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
+
+	// Recompile all Bézier curves, the changing grid affects their precision.
+	for (LDObjectIterator<LDBezierCurve> it (m_currentDocument); it.isValid(); ++it)
+		renderer()->compileObject (it);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -810,6 +815,7 @@ void MainWindow::updateEditModeActions()
 	ui.actionModeCircle->setChecked (mode == EditModeType::Circle);
 	ui.actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
 	ui.actionModeLinePath->setChecked (mode == EditModeType::LinePath);
+	ui.actionModeCurve->setChecked (mode == EditModeType::Curve);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
