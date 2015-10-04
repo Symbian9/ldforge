@@ -27,10 +27,11 @@ class RectangleMode : public AbstractDrawMode
 public:
 	RectangleMode (GLRenderer* renderer);
 
-	virtual void render (QPainter& painter) const override;
-	virtual EditModeType type() const override;
-	virtual bool mouseReleased (MouseEventData const& data) override;
-	virtual bool mouseMoved (QMouseEvent*) override;
+	void render (QPainter& painter) const override;
+	EditModeType type() const override;
+	void endDraw() override;
+	bool mouseMoved (QMouseEvent*) override;
+	int maxVertices() const override { return 2; }
 
 private:
 	void updateRectVerts();

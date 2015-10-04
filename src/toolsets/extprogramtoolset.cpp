@@ -170,7 +170,15 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 		{
 			LDSubfile* ref = static_cast<LDSubfile*> (obj);
 			LDObjectList objs = ref->inlineContents (true, false);
+			writeObjects (objs, f);
 
+			for (LDObject* obj : objs)
+				obj->destroy();
+		}
+		else if (obj->type() == OBJ_BezierCurve)
+		{
+			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
+			LDObjectList objs = curve->rasterize();
 			writeObjects (objs, f);
 
 			for (LDObject* obj : objs)

@@ -37,31 +37,19 @@ void RectangleMode::render (QPainter& painter) const
 		QVector<Vertex> ({renderer()->position3D()}), true, false);
 }
 
-bool RectangleMode::mouseReleased (MouseEventData const& data)
+void RectangleMode::endDraw()
 {
-	if (Super::mouseReleased (data))
-		return true;
-
-	if (data.releasedButtons & Qt::LeftButton)
+	if (m_drawedVerts.size() == 2)
 	{
-		if (m_drawedVerts.size() == 2)
-		{
-			LDQuad* quad (LDSpawn<LDQuad>());
-			updateRectVerts();
+		LDQuad* quad = LDSpawn<LDQuad>();
+		updateRectVerts();
 
-			for (int i = 0; i < quad->numVertices(); ++i)
-				quad->setVertex (i, m_rectangleVerts[i]);
+		for (int i = 0; i < quad->numVertices(); ++i)
+			quad->setVertex (i, m_rectangleVerts[i]);
 
-			quad->setColor (MainColor);
-			finishDraw (LDObjectList ({quad}));
-			return true;
-		}
-
-		addDrawnVertex (renderer()->position3D());
-		return true;
+		quad->setColor (MainColor);
+		finishDraw (LDObjectList ({quad}));
 	}
-
-	return false;
 }
 
 //
