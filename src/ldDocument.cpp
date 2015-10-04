@@ -442,6 +442,18 @@ LDObject* ParseLine (QString line)
 						obj->setHeight (tokens[8].toLong());
 						return obj;
 					}
+					else if (tokens[2] == "BEZIER_CURVE")
+					{
+						CheckTokenCount (tokens, 16);
+						CheckTokenNumbers (tokens, 3, 15);
+						LDBezierCurve* obj = LDSpawn<LDBezierCurve>();
+						obj->setColor (StringToNumber (tokens[3]));
+
+						for (int i = 0; i < 4; ++i)
+							obj->setVertex (i, ParseVertex (tokens, 4 + (i * 3)));
+
+						return obj;
+					}
 				}
 
 				// Just a regular comment:

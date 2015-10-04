@@ -1097,7 +1097,11 @@ LDObjectList LDBezierCurve::rasterize (int segments)
 	parms.append (pointAt (1.0));
 
 	for (int i = 0; i < segments; ++i)
-		result << new LDLine (parms[i], parms[i + 1]);
+	{
+		LDLine* line = LDSpawn<LDLine> (parms[i], parms[i + 1]);
+		line->setColor (color());
+		result << line;
+	}
 
 	return result;
 }

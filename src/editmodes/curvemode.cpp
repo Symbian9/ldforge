@@ -80,7 +80,7 @@ void CurveMode::endDraw()
 	if (m_drawedVerts.size() == 4)
 	{
 		LDObjectList objs;
-		objs << new LDBezierCurve (m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);
+		objs << LDSpawn<LDBezierCurve> (m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);
 		finishDraw (objs);
 	}
 }
