@@ -633,7 +633,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 #ifndef RELEASE
 	if (not isPicking())
 	{
-		QString text = format ("Rotation: (%1, %2, %3)\nPanning: (%4, %5), Zoom: %6",
+		QString text = format ("Rotation: (%1°, %2°, %3°)\nPanning: (%4, %5), Zoom: %6",
 			rotation(X), rotation(Y), rotation(Z), panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
 		paint.setPen (textPen());
@@ -721,14 +721,25 @@ void GLRenderer::paintEvent (QPaintEvent*)
 
 // =============================================================================
 //
-void GLRenderer::drawBlip (QPainter& paint, QPointF pos, QColor color) const
+void GLRenderer::drawBlip (QPainter& painter, QPointF pos, QColor color) const
 {
 	QPen pen = m_thinBorderPen;
 	const int blipsize = 8;
 	pen.setWidth (1);
-	paint.setPen (pen);
-	paint.setBrush (color);
-	paint.drawEllipse (pos.x() - blipsize / 2, pos.y() - blipsize / 2, blipsize, blipsize);
+	painter.setPen (pen);
+	painter.setBrush (color);
+	painter.drawEllipse (pos.x() - blipsize / 2, pos.y() - blipsize / 2, blipsize, blipsize);
+}
+
+void GLRenderer::drawBlipCoordinates (QPainter& painter, const Vertex& pos3d)
+{
+	drawBlipCoordinates (painter, pos3d, convert3dTo2d (pos3d));
+}
+
+void GLRenderer::drawBlipCoordinates (QPainter& painter, const Vertex& pos3d, QPointF pos)
+{
+	painter.setPen (textPen());
+	painter.drawText (pos.x(), pos.y() - 8, pos3d.toString (true));
 }
 
 // =============================================================================

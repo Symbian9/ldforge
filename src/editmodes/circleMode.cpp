@@ -205,7 +205,9 @@ void CircleMode::render (QPainter& painter) const
 	// If we have not specified the center point of the circle yet, preview it on the screen.
 	if (m_drawedVerts.isEmpty())
 	{
-		renderer()->drawBlip (painter, renderer()->convert3dTo2d (renderer()->position3D()));
+		QPoint pos2d = renderer()->convert3dTo2d (renderer()->position3D());
+		renderer()->drawBlip (painter, pos2d);
+		renderer()->drawBlipCoordinates (painter, renderer()->position3D(), pos2d);
 		return;
 	}
 
@@ -273,7 +275,7 @@ void CircleMode::render (QPainter& painter) const
 			lines << QLineF (innerverts2d[i], innerverts2d[i + 1]);
 	}
 
-	// Draw a green blips at where the points are
+	// Draw green blips at where the points are
 	for (QPointF const& point : innerverts2d + outerverts2d)
 		renderer()->drawBlip (painter, point);
 

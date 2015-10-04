@@ -154,7 +154,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 
 	if (data.releasedButtons & Qt::LeftButton)
 	{
-		if (m_drawedVerts.size() >= maxVertices())
+		if (maxVertices() and m_drawedVerts.size() >= maxVertices())
 		{
 			endDraw();
 			return true;
@@ -214,13 +214,8 @@ void AbstractDrawMode::renderPolygon (QPainter& painter, const QVector<Vertex>& 
 	// Draw vertex blips
 	for (int i = 0; i < poly3d.size(); ++i)
 	{
-		QPoint& blip = poly[i];
-		painter.setPen (renderer()->linePen());
-		renderer()->drawBlip (painter, blip);
-
-		// Draw their coordinates
-		painter.setPen (renderer()->textPen());
-		painter.drawText (blip.x(), blip.y() - 8, poly3d[i].toString (true));
+		renderer()->drawBlip (painter, poly[i]);
+		renderer()->drawBlipCoordinates (painter, poly3d[i], poly[i]);
 	}
 
 	// Draw line lenghts and angle info if appropriate

@@ -27,7 +27,7 @@ LinePathMode::LinePathMode (GLRenderer *renderer) :
 void LinePathMode::render (QPainter& painter) const
 {
 	QVector<QPointF> points;
-	QList<Vertex> points3d (m_drawedVerts);
+	QList<Vertex> points3d = m_drawedVerts;
 	points3d << renderer()->position3D();
 
 	for (Vertex const& vrt : points3d)
@@ -43,8 +43,12 @@ void LinePathMode::render (QPainter& painter) const
 			drawLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
 		}
 	
-		for (QPointF const& point : points)
+		for (int i = 0; i < points.size(); ++i)
+		{
+			const QPointF& point = points[i];
 			renderer()->drawBlip (painter, point);
+			renderer()->drawBlipCoordinates (painter, points3d[i], point);
+		}
 	}
 }
 
@@ -64,7 +68,7 @@ bool LinePathMode::mouseReleased (MouseEventData const& data)
 
 bool LinePathMode::preAddVertex (Vertex const& pos)
 {
-	// If we picked an the last vertex, stop drawing
+	// If we picked the vertex we last drew, stop drawing
 	if (not m_drawedVerts.isEmpty() and pos == m_drawedVerts.last())
 	{
 		endDraw();

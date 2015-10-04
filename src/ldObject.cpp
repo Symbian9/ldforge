@@ -157,7 +157,7 @@ QString LDCondLine::asText() const
 QString LDBezierCurve::asText() const
 {
 	QString result = format ("0 !LDFORGE BEZIER_CURVE %1", color());
-	
+
 	// Add the coordinates
 	for (int i = 0; i < 4; ++i)
 		result += format (" %1", vertex (i));
