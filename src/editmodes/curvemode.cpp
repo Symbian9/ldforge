@@ -37,12 +37,12 @@ void CurveMode::render (QPainter& painter) const
 		if (m_drawedVerts.size() < 4)
 			curve[m_drawedVerts.size()] = getCursorVertex();
 
-		// Default the control points to their vertex positions
+		// Default the control points to the first vertex position
 		if (m_drawedVerts.size() < 2)
 			curve[2] = curve[0];
 
 		if (m_drawedVerts.size() < 3)
-			curve[3] = curve[1];
+			curve[3] = curve[2];
 
 		for (int i = 0; i < countof(curve); ++i)
 			curve2d[i] = renderer()->convert3dTo2d (curve[i]);

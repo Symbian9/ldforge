@@ -118,6 +118,7 @@ public:
 	bool previousIsInvertnext (LDBfc*& ptr);
 	QColor randomColor() const;
 	void replace (LDObject* other);
+	void replace (const LDObjectList& others);
 	void select();
 	void setColor (LDColor color);
 	void setDocument (LDDocument* document);
@@ -461,7 +462,8 @@ class LDBezierCurve : public LDObject
 public:
 	LDBezierCurve (const Vertex& v0, const Vertex& v1,
 		const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
-	LDLine* toEdgeLine();
+	Vertex pointAt (qreal t) const;
+	LDObjectList rasterize (int segments);
 };
 
 // Other common LDraw stuff

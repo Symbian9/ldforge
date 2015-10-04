@@ -70,9 +70,18 @@ public:
 	void	transform (const Matrix& matr, const Vertex& pos);
 	void	setCoordinate (Axis ax, qreal value);
 
+	Vertex&	operator+= (const Vertex& other);
+	Vertex	operator+ (const Vertex& other) const;
+	Vertex&	operator*= (qreal scalar);
+	Vertex	operator* (qreal scalar) const;
 	bool	operator< (const Vertex& other) const;
 	double	operator[] (Axis ax) const;
 };
+
+inline Vertex operator* (qreal scalar, const Vertex& vertex)
+{
+	return vertex * scalar;
+}
 
 Q_DECLARE_METATYPE (Vertex)
 

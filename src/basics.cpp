@@ -93,6 +93,34 @@ QString Vertex::toString (bool mangled) const
 	return format ("%1 %2 %3", x(), y(), z());
 }
 
+Vertex Vertex::operator* (qreal scalar) const
+{
+	return Vertex (x() * scalar, y() * scalar, z() * scalar);
+}
+
+Vertex& Vertex::operator+= (const Vertex& other)
+{
+	setX (x() + other.x());
+	setY (y() + other.y());
+	setZ (z() + other.z());
+	return *this;
+}
+
+Vertex Vertex::operator+ (const Vertex& other) const
+{
+	Vertex result (*this);
+	result += other;
+	return result;
+}
+
+Vertex& Vertex::operator*= (qreal scalar)
+{
+	setX (x() * scalar);
+	setY (y() * scalar);
+	setZ (z() * scalar);
+	return *this;
+}
+
 bool Vertex::operator< (const Vertex& other) const
 {
 	if (x() != other.x()) return x() < other.x();

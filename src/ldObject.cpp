@@ -224,6 +224,20 @@ void LDObject::replace (LDObject* other)
 	}
 }
 
+void LDObject::replace (const LDObjectList& others)
+{
+	int idx = lineNumber();
+
+	if (idx != -1 and not others.isEmpty())
+	{
+		for (int i = 1; i < others.size(); ++i)
+			document()->insertObj (idx + i, others[i]);
+
+		document()->setObject (idx, others[0]);
+		destroy();
+	}
+}
+
 // =============================================================================
 //
 // Swap this object with another.
@@ -1054,6 +1068,38 @@ QString LDOverlay::fileName() const
 void LDOverlay::setFileName (QString value)
 {
 	m_fileName = value;
+}
+
+Vertex LDBezierCurve::pointAt (qreal t) const
+{
+	if (t >= 0.0 and t <= 1.0)
+	{
+		Vertex result;
+		result += pow (1.0 - t, 3) * vertex (0);
+		result += (3 * pow (1.0 - t, 2) * t) * vertex (2);
+		result += (3 * (1.0 - t) * pow (t, 2)) * vertex (3);
+		result += pow (t, 3) * vertex (1);
+		return result;
+	}
+	else
+		return Vertex();
+}
+
+LDObjectList LDBezierCurve::rasterize (int segments)
+{
+	LDObjectList result;
+	QVector<Vertex> parms;
+	parms.append (pointAt (0.0));
+
+	for (int i = 1; i < segments; ++i)
+		parms.append (pointAt (double (i) / segments));
+
+	parms.append (pointAt (1.0));
+
+	for (int i = 0; i < segments; ++i)
+		result << new LDLine (parms[i], parms[i + 1]);
+
+	return result;
 }
 
 // =============================================================================

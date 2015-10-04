@@ -283,7 +283,13 @@ void AlgorithmToolset::demote()
 		++num;
 	}
 
-	print (tr ("Converted %1 conditional lines"), num);
+	for (LDObjectIterator<LDBezierCurve> it (selectedObjects()); it.isValid(); ++it)
+	{
+		it->replace (it->rasterize (10));
+		++num;
+	}
+
+	print (tr ("Converted %1 conditional lines and Bézier curves"), num);
 }
 
 bool AlgorithmToolset::isColorUsed (LDColor color)
