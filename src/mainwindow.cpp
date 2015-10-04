@@ -407,6 +407,7 @@ void MainWindow::buildObjectList()
 			case OBJ_Triangle:
 			case OBJ_Quad:
 			case OBJ_CondLine:
+			case OBJ_BezierCurve:
 			{
 				for (int i = 0; i < obj->numVertices(); ++i)
 				{

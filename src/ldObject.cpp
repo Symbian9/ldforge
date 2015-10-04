@@ -1087,7 +1087,22 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 
 LDObjectList LDBezierCurve::rasterize (int segments)
 {
+	QVector<LDPolygon> polygons = rasterizePolygons (segments);
 	LDObjectList result;
+
+	for (LDPolygon& poly : polygons)
+	{
+		LDLine* line = LDSpawn<LDLine> (poly.vertices[0], poly.vertices[1]);
+		line->setColor (poly.color);
+		result << line;
+	}
+
+	return result;
+}
+
+QVector<LDPolygon> LDBezierCurve::rasterizePolygons (int segments)
+{
+	QVector<LDPolygon> result;
 	QVector<Vertex> parms;
 	parms.append (pointAt (0.0));
 
@@ -1095,12 +1110,16 @@ LDObjectList LDBezierCurve::rasterize (int segments)
 		parms.append (pointAt (double (i) / segments));
 
 	parms.append (pointAt (1.0));
+	LDPolygon poly;
+	poly.color = color().index();
+	poly.id = id();
+	poly.num = 2;
 
 	for (int i = 0; i < segments; ++i)
 	{
-		LDLine* line = LDSpawn<LDLine> (parms[i], parms[i + 1]);
-		line->setColor (color());
-		result << line;
+		poly.vertices[0] = parms[i];
+		poly.vertices[1] = parms[i + 1];
+		result << poly;
 	}
 
 	return result;
