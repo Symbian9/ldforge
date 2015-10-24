@@ -67,7 +67,7 @@ LDObject::LDObject (LDDocument* document) :
 	m_randomColor = QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128);
 }
 
-LDSubfile::LDSubfile (LDDocument* document) :
+LDSubfileReference::LDSubfileReference (LDDocument* document) :
 	LDMatrixObject (document) {}
 
 LDOBJ_DEFAULT_CTOR (LDEmpty, LDObject)
@@ -96,7 +96,7 @@ QString LDComment::asText() const
 
 // =============================================================================
 //
-QString LDSubfile::asText() const
+QString LDSubfileReference::asText() const
 {
 	QString val = format ("1 %1 %2 ", color(), position());
 	val += transform().toString();
@@ -351,9 +351,9 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 		}
 		break;
 
-	case OBJ_Subfile:
+	case OBJ_SubfileReference:
 		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			Matrix newMatrix = transform * ref->transform();
 			Vertex newpos = ref->position();
 			newpos.transform (transform, pos);
@@ -372,7 +372,7 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 
 // =============================================================================
 // -----------------------------------------------------------------------------
-LDObjectList LDSubfile::inlineContents (bool deep, bool render)
+LDObjectList LDSubfileReference::inlineContents (bool deep, bool render)
 {
 	LDObjectList objs = fileInfo()->inlineContents (deep, render);
 
@@ -410,7 +410,7 @@ LDPolygon* LDObject::getPolygon()
 
 // =============================================================================
 //
-QList<LDPolygon> LDSubfile::inlinePolygons()
+QList<LDPolygon> LDSubfileReference::inlinePolygons()
 {
 	QList<LDPolygon> data = fileInfo()->inlinePolygons();
 
@@ -642,7 +642,7 @@ LDObject* LDObject::getDefault (const LDObjectType type)
 	case OBJ_Bfc:			return LDSpawn<LDBfc>();
 	case OBJ_Line:			return LDSpawn<LDLine>();
 	case OBJ_CondLine:		return LDSpawn<LDCondLine>();
-	case OBJ_Subfile:		return LDSpawn<LDSubfile>();
+	case OBJ_SubfileReference:		return LDSpawn<LDSubfileReference>();
 	case OBJ_Triangle:		return LDSpawn<LDTriangle>();
 	case OBJ_Quad:			return LDSpawn<LDQuad>();
 	case OBJ_Empty:			return LDSpawn<LDEmpty>();
@@ -689,7 +689,7 @@ void LDQuad::invert()
 
 // =============================================================================
 //
-void LDSubfile::invert()
+void LDSubfileReference::invert()
 {
 	if (document() == nullptr)
 		return;
@@ -1180,12 +1180,12 @@ LDObject* LDObject::createCopy() const
 
 // =============================================================================
 //
-LDDocument* LDSubfile::fileInfo() const
+LDDocument* LDSubfileReference::fileInfo() const
 {
 	return m_fileInfo;
 }
 
-void LDSubfile::setFileInfo (LDDocument* document)
+void LDSubfileReference::setFileInfo (LDDocument* document)
 {
 	changeProperty (this, &m_fileInfo, document);
 
@@ -1205,7 +1205,7 @@ void LDObject::getVertices (QVector<Vertex>& verts) const
 		verts << vertex (i);
 }
 
-void LDSubfile::getVertices (QVector<Vertex>& verts) const
+void LDSubfileReference::getVertices (QVector<Vertex>& verts) const
 {
 	verts << fileInfo()->inlineVertices();
 }

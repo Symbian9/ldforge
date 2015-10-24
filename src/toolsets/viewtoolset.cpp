@@ -72,8 +72,8 @@ void ViewToolset::selectByType()
 	{
 		types << obj->type();
 
-		if (types.last() == OBJ_Subfile)
-			subfilenames << static_cast<LDSubfile*> (obj)->fileInfo()->name();
+		if (types.last() == OBJ_SubfileReference)
+			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
 	}
 
 	removeDuplicates (types);
@@ -88,7 +88,7 @@ void ViewToolset::selectByType()
 			continue;
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
-		if (type == OBJ_Subfile and not subfilenames.contains (static_cast<LDSubfile*> (obj)->fileInfo()->name()))
+		if (type == OBJ_SubfileReference and not subfilenames.contains (static_cast<LDSubfileReference*> (obj)->fileInfo()->name()))
 			continue;
 
 		obj->select();

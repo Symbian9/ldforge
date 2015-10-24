@@ -133,7 +133,7 @@ void MessageManager::setRenderer (GLRenderer* renderer)
 
 // =============================================================================
 //
-void PrintToLog (const QString& msg)
+void printToLog (const QString& msg)
 {
 	for (QString& a : msg.split ("\n", QString::SkipEmptyParts))
 	{

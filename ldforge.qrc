@@ -8,7 +8,7 @@
 	<file>./icons/add-line.png</file>
 	<file>./icons/add-quad.png</file>
 	<file>./icons/add-radial.png</file>
-	<file>./icons/add-subfile.png</file>
+	<file>./icons/add-subfilereference.png</file>
 	<file>./icons/add-triangle.png</file>
 	<file>./icons/arrow-down.png</file>
 	<file>./icons/arrow-left.png</file>
@@ -98,7 +98,7 @@
 	<file>./icons/select-type.png</file>
 	<file>./icons/set-contents.png</file>
 	<file>./icons/settings.png</file>
-	<file>./icons/subfile.png</file>
+	<file>./icons/subfilereference.png</file>
 	<file>./icons/triangle.png</file>
 	<file>./icons/uncolorize.png</file>
 	<file>./icons/undo.png</file>

@@ -20,10 +20,9 @@
 #include "basics.h"
 #include "colors.h"
 
-//
+
 // Converts a given value into a string that can be retrieved with text().
 // Used as the argument type to the formatting functions, hence its name.
-//
 class StringFormatArg
 {
 public:
@@ -71,9 +70,8 @@ private:
 	QString m_text;
 };
 
-//
-// Helper function for \c format
-//
+
+// Helper function for format()
 template<typename Arg1, typename... Rest>
 void formatHelper (QString& str, Arg1 arg1, Rest... rest)
 {
@@ -81,22 +79,18 @@ void formatHelper (QString& str, Arg1 arg1, Rest... rest)
 	formatHelper (str, rest...);
 }
 
-//
-// Overload of \c formatHelper() with no template args
-//
+
 static void formatHelper (QString& str) __attribute__ ((unused));
 static void formatHelper (QString& str)
 {
 	(void) str;
 }
 
-//
+
 // Format the message with the given args.
 //
-// The formatting ultimately uses String's arg() method to actually format
-// the args so the format string should be prepared accordingly, with %1
-// referring to the first arg, %2 to the second, etc.
-//
+// The formatting ultimately uses String's arg() method to actually format the args so the format string should be
+// prepared accordingly, with %1 referring to the first arg, %2 to the second, etc.
 template<typename... Args>
 QString format (QString fmtstr, Args... args)
 {
@@ -104,25 +98,19 @@ QString format (QString fmtstr, Args... args)
 	return fmtstr;
 }
 
-//
-// From messageLog.cc - declared here so that I don't need to include
-// messageLog.h here. Prints the given message to log.
-//
-void PrintToLog (const QString& msg);
 
-//
+// From messageLog.cc - declared here so that I don't need to include messageLog.h here.
+void printToLog (const QString& msg);
+
+
 // Format and print the given args to the message log.
-//
 template<typename... Args>
 void print (QString fmtstr, Args... args)
 {
 	formatHelper (fmtstr, args...);
-	PrintToLog (fmtstr);
+	printToLog (fmtstr);
 }
 
-//
-// Format and print the given args to the given file descriptor
-//
 template<typename... Args>
 void fprint (FILE* fp, QString fmtstr, Args... args)
 {
@@ -130,9 +118,7 @@ void fprint (FILE* fp, QString fmtstr, Args... args)
 	fprintf (fp, "%s", qPrintable (fmtstr));
 }
 
-//
-// Overload of fprint with a QIODevice
-//
+
 template<typename... Args>
 void fprint (QIODevice& dev, QString fmtstr, Args... args)
 {
@@ -140,15 +126,14 @@ void fprint (QIODevice& dev, QString fmtstr, Args... args)
 	dev.write (fmtstr.toUtf8());
 }
 
-//
+
 // Exactly like print() except no-op in release builds.
-//
 template<typename... Args>
 #ifndef RELEASE
 void dprint (QString fmtstr, Args... args)
 {
 	formatHelper (fmtstr, args...);
-	PrintToLog (fmtstr);
+	printToLog (fmtstr);
 }
 #else
 void dprint (QString, Args...) {}

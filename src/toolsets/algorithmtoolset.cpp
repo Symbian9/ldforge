@@ -572,7 +572,7 @@ void AlgorithmToolset::subfileSelection()
 			obj->destroy();
 
 		// Add a reference to the new subfile to where the selection was
-		LDSubfile* ref = LDSpawn<LDSubfile>();
+		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 		ref->setColor (MainColor);
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);

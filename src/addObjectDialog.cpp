@@ -90,12 +90,12 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 				rb_bfcType->setValue ((int) static_cast<LDBfc*> (obj)->statement());
 		} break;
 
-		case OBJ_Subfile:
+		case OBJ_SubfileReference:
 		{
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			populatePrimitivesTree (tw_subfileList, (obj ? static_cast<LDSubfile*> (obj)->fileInfo()->name() : ""));
+			populatePrimitivesTree (tw_subfileList, (obj ? static_cast<LDSubfileReference*> (obj)->fileInfo()->name() : ""));
 
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
@@ -104,7 +104,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 
 			if (obj)
 			{
-				LDSubfile* ref = static_cast<LDSubfile*> (obj);
+				LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 				le_subfileName->setText (ref->fileInfo()->name());
 			}
 		} break;
@@ -172,7 +172,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			layout->addWidget (rb_bfcType, 0, 1);
 			break;
 
-		case OBJ_Subfile:
+		case OBJ_SubfileReference:
 			layout->addWidget (tw_subfileList, 1, 1, 1, 2);
 			layout->addWidget (lb_subfileName, 2, 1);
 			layout->addWidget (le_subfileName, 2, 2);
@@ -303,7 +303,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	if (type == OBJ_Subfile)
+	if (type == OBJ_SubfileReference)
 	{
 		QStringList matrixstrvals = dlg.le_matrix->text().split (" ", QString::SkipEmptyParts);
 
@@ -357,7 +357,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 				bfc->setStatement (BfcStatement (dlg.rb_bfcType->value()));
 		} break;
 
-		case OBJ_Subfile:
+		case OBJ_SubfileReference:
 		{
 			QString name = dlg.le_subfileName->text();
 
@@ -372,7 +372,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 				return;
 			}
 
-			LDSubfile* ref = InitObject<LDSubfile> (obj);
+			LDSubfileReference* ref = InitObject<LDSubfileReference> (obj);
 
 			for_axes (ax)
 				ref->setCoordinate (ax, dlg.dsb_coords[ax]->value());

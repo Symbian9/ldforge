@@ -430,9 +430,9 @@ void MainWindow::buildObjectList()
 				break;
 			}
 
-			case OBJ_Subfile:
+			case OBJ_SubfileReference:
 			{
-				LDSubfile* ref = static_cast<LDSubfile*> (obj);
+				LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 
 				descr = format ("%1 %2, (", ref->fileInfo()->getDisplayName(), ref->position().toString (true));
 
@@ -731,7 +731,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (obj->type() == OBJ_Subfile)
+		if (obj->type() == OBJ_SubfileReference)
 		{
 			hasSubfiles = true;
 			break;

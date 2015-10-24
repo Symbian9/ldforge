@@ -108,7 +108,7 @@ void CircleMode::buildCircle()
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
 		{
 			refFile = GetPrimitive (::Ring, segments, divisions, cmp.num);
-			LDSubfile* ref = LDSpawn<LDSubfile>();
+			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
 			ref->setPosition (m_drawedVerts[0]);
@@ -161,7 +161,7 @@ void CircleMode::buildCircle()
 
 	if (circleOrDisc and refFile)
 	{
-		LDSubfile* ref = LDSpawn<LDSubfile>();
+		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 		ref->setFileInfo (refFile);
 		ref->setTransform (transform);
 		ref->setPosition (m_drawedVerts[0]);

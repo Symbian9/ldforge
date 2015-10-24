@@ -179,7 +179,7 @@ void FileToolset::openSubfiles()
 {
 	for (LDObject* obj : selectedObjects())
 	{
-		LDSubfile* ref = dynamic_cast<LDSubfile*> (obj);
+		LDSubfileReference* ref = dynamic_cast<LDSubfileReference*> (obj);
 
 		if (ref and ref->fileInfo()->isCache())
 			ref->fileInfo()->openForEditing();

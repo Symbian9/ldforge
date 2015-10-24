@@ -166,9 +166,9 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 {
 	for (LDObject* obj : objects)
 	{
-		if (obj->type() == OBJ_Subfile)
+		if (obj->type() == OBJ_SubfileReference)
 		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			LDObjectList objs = ref->inlineContents (true, false);
 			writeObjects (objs, f);
 

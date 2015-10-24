@@ -50,8 +50,6 @@ ConfigOption (QString SelectColorBlend = "#0080FF")
 
 // static QMap<LDObject*, String> g_objectOrigins;
 
-// =============================================================================
-//
 void CheckGLErrorImpl (const char* file, int line)
 {
 	QString errmsg;
@@ -72,8 +70,7 @@ void CheckGLErrorImpl (const char* file, int line)
 	print ("OpenGL ERROR: at %1:%2: %3", Basename (QString (file)), line, errmsg);
 }
 
-// =============================================================================
-//
+
 GLCompiler::GLCompiler (GLRenderer* renderer) :
 	HierarchyElement (renderer),
 	m_renderer (renderer)
@@ -82,8 +79,7 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 	memset (m_vboSizes, 0, sizeof m_vboSizes);
 }
 
-// =============================================================================
-//
+
 void GLCompiler::initialize()
 {
 	initializeOpenGLFunctions();
@@ -91,16 +87,14 @@ void GLCompiler::initialize()
 	CHECK_GL_ERROR();
 }
 
-// =============================================================================
-//
+
 GLCompiler::~GLCompiler()
 {
 	glDeleteBuffers (NumVbos, &m_vbo[0]);
 	CHECK_GL_ERROR();
 }
 
-// =============================================================================
-//
+
 QColor GLCompiler::indexColorForID (int id) const
 {
 	// Calculate a color based from this index. This method caters for
@@ -112,8 +106,7 @@ QColor GLCompiler::indexColorForID (int id) const
 	return QColor (r, g, b);
 }
 
-// =============================================================================
-//
+
 QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const
 {
 	QColor qcol;
@@ -202,16 +195,14 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 	return qcol;
 }
 
-// =============================================================================
-//
+
 void GLCompiler::needMerge()
 {
 	for (int i = 0; i < countof (m_vboChanged); ++i)
 		m_vboChanged[i] = true;
 }
 
-// =============================================================================
-//
+
 void GLCompiler::stageForCompilation (LDObject* obj)
 {
 	/*
@@ -222,15 +213,13 @@ void GLCompiler::stageForCompilation (LDObject* obj)
 	m_staged << obj;
 }
 
-// =============================================================================
-//
+
 void GLCompiler::unstage (LDObject* obj)
 {
 	m_staged.remove (obj);
 }
 
-// =============================================================================
-//
+
 void GLCompiler::compileDocument (LDDocument* doc)
 {
 	if (doc)
@@ -240,8 +229,7 @@ void GLCompiler::compileDocument (LDDocument* doc)
 	}
 }
 
-// =============================================================================
-//
+
 void GLCompiler::compileStaged()
 {
 	for (QSetIterator<LDObject*> it (m_staged); it.hasNext();)
@@ -250,8 +238,7 @@ void GLCompiler::compileStaged()
 	m_staged.clear();
 }
 
-// =============================================================================
-//
+
 void GLCompiler::prepareVBO (int vbonum)
 {
 	// Compile anything that still awaits it
@@ -284,8 +271,7 @@ void GLCompiler::prepareVBO (int vbonum)
 	m_vboSizes[vbonum] = vbodata.size();
 }
 
-// =============================================================================
-//
+
 void GLCompiler::dropObjectInfo (LDObject* obj)
 {
 	if (m_objectInfo.contains (obj))
@@ -295,12 +281,9 @@ void GLCompiler::dropObjectInfo (LDObject* obj)
 	}
 }
 
-// =============================================================================
-//
+
 void GLCompiler::compileObject (LDObject* obj)
 {
-//	print ("Compile %1\n", g_objectOrigins[obj]);
-
 	if (obj == nullptr or obj->document() == nullptr or obj->document()->isCache())
 		return;
 
@@ -310,12 +293,12 @@ void GLCompiler::compileObject (LDObject* obj)
 
 	switch (obj->type())
 	{
-		// Note: We cannot split quads into triangles here, it would mess up the
-		// wireframe view. Quads must go into separate vbos.
-		case OBJ_Triangle:
-		case OBJ_Quad:
-		case OBJ_Line:
-		case OBJ_CondLine:
+	// Note: We cannot split quads into triangles here, it would mess up the wireframe view.
+	// Quads must go into separate vbos.
+	case OBJ_Triangle:
+	case OBJ_Quad:
+	case OBJ_Line:
+	case OBJ_CondLine:
 		{
 			LDPolygon* poly = obj->getPolygon();
 			poly->id = obj->id();
@@ -324,9 +307,9 @@ void GLCompiler::compileObject (LDObject* obj)
 			break;
 		}
 
-		case OBJ_Subfile:
+	case OBJ_SubfileReference:
 		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			auto data = ref->inlinePolygons();
 
 			for (LDPolygon& poly : data)
@@ -348,16 +331,15 @@ void GLCompiler::compileObject (LDObject* obj)
 		}
 		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	m_objectInfo[obj] = info;
 	needMerge();
 }
 
-// =============================================================================
-//
+
 void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
 {
 	SurfaceVboType surface;
@@ -365,18 +347,18 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 
 	switch (poly.num)
 	{
-		case 2:	surface = LinesVbo;		numverts = 2; break;
-		case 3:	surface = TrianglesVbo;	numverts = 3; break;
-		case 4:	surface = QuadsVbo;		numverts = 4; break;
-		case 5:	surface = ConditionalLinesVbo;	numverts = 2; break;
-		default: return;
+	case 2:	surface = LinesVbo;				numverts = 2; break;
+	case 3:	surface = TrianglesVbo;			numverts = 3; break;
+	case 4:	surface = QuadsVbo;				numverts = 4; break;
+	case 5:	surface = ConditionalLinesVbo;	numverts = 2; break;
+	default: return;
 	}
 
 	for (ComplementVboType complement = FirstVboComplement; complement < NumVboComplements; ++complement)
 	{
-		const int vbonum			= vboNumber (surface, complement);
-		QVector<GLfloat>& vbodata	= objinfo->data[vbonum];
-		const QColor color			= getColorForPolygon (poly, topobj, complement);
+		const int vbonum = vboNumber (surface, complement);
+		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
+		const QColor color = getColorForPolygon (poly, topobj, complement);
 
 		for (int vert = 0; vert < numverts; ++vert)
 		{
@@ -398,20 +380,24 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	}
 }
 
+
 void GLCompiler::setRenderer (GLRenderer* renderer)
 {
 	m_renderer = renderer;
 }
+
 
 int GLCompiler::vboNumber (SurfaceVboType surface, ComplementVboType complement)
 {
 	return (surface * NumVboComplements) + complement;
 }
 
+
 GLuint GLCompiler::vbo (int vbonum) const
 {
 	return m_vbo[vbonum];
 }
+
 
 int GLCompiler::vboSize (int vbonum) const
 {

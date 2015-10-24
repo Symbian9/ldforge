@@ -325,8 +325,7 @@ static void CheckTokenCount (const QStringList& tokens, int num)
 static void CheckTokenNumbers (const QStringList& tokens, int min, int max)
 {
 	bool ok;
-
-	QRegExp scient ("\\-?[0-9]+\\.[0-9]+e\\-[0-9]+");
+	QRegExp scientificRegex ("\\-?[0-9]+\\.[0-9]+e\\-[0-9]+");
 
 	for (int i = min; i <= max; ++i)
 	{
@@ -345,11 +344,11 @@ static void CheckTokenNumbers (const QStringList& tokens, int min, int max)
 		}
 
 		// Check scientific notation, e.g. 7.99361e-15
-		if (scient.exactMatch (tokens[i]))
+		if (scientificRegex.exactMatch (tokens[i]))
 			return;
 
 		throw QString (format ("Token #%1 was `%2`, expected a number (matched length: %3)",
-			(i + 1), tokens[i], scient.matchedLength()));
+			(i + 1), tokens[i], scientificRegex.matchedLength()));
 	}
 }
 
@@ -478,7 +477,7 @@ LDObject* ParseLine (QString line)
 					return obj;
 				}
 
-				LDSubfile* obj = LDSpawn<LDSubfile>();
+				LDSubfileReference* obj = LDSpawn<LDSubfileReference>();
 				obj->setColor (StringToNumber (tokens[1]));
 				obj->setPosition (ParseVertex (tokens, 2));  // 2 - 4
 
@@ -564,9 +563,9 @@ void LDDocument::reloadAllSubfiles()
 	// Go through all objects in the current file and reload the subfiles
 	for (LDObject* obj : objects())
 	{
-		if (obj->type() == OBJ_Subfile)
+		if (obj->type() == OBJ_SubfileReference)
 		{
-			LDSubfile* ref = static_cast<LDSubfile*> (obj);
+			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			LDDocument* fileInfo = m_documents->getDocumentByName (ref->fileInfo()->name());
 
 			if (fileInfo)
@@ -739,10 +738,10 @@ void LDDocument::initializeCachedData()
 
 		for (LDObject* obj : inlineContents (true, true))
 		{
-			if (obj->type() == OBJ_Subfile)
+			if (obj->type() == OBJ_SubfileReference)
 			{
 				print ("Warning: unable to inline %1 into %2",
-					static_cast<LDSubfile*> (obj)->fileInfo()->getDisplayName(),
+					static_cast<LDSubfileReference*> (obj)->fileInfo()->getDisplayName(),
 					getDisplayName());
 				continue;
 			}
@@ -812,9 +811,9 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
-		if (deep == true and obj->type() == OBJ_Subfile)
+		if (deep == true and obj->type() == OBJ_SubfileReference)
 		{
-			for (LDObject* otherobj : static_cast<LDSubfile*> (obj)->inlineContents (deep, renderinline))
+			for (LDObject* otherobj : static_cast<LDSubfileReference*> (obj)->inlineContents (deep, renderinline))
 				objs << otherobj;
 		}
 		else

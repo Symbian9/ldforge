@@ -52,7 +52,7 @@ public:															\
 #define LDOBJ_NO_MATRIX        LDOBJ_SETMATRIX (false)
 
 class QListWidgetItem;
-class LDSubfile;
+class LDSubfileReference;
 class LDDocument;
 
 class LDBfc;
@@ -62,20 +62,20 @@ class LDBfc;
 //
 enum LDObjectType
 {
-	OBJ_Subfile,		//	Object represents a	sub-file reference
-	OBJ_Quad,			//	Object represents a	quadrilateral
-	OBJ_Triangle,		//	Object represents a	triangle
-	OBJ_Line,			//	Object represents a	line
-	OBJ_CondLine,		//	Object represents a	conditional line
-	OBJ_Bfc,			//	Object represents a	BFC statement
-	OBJ_Overlay,		//	Object contains meta-info about an overlay image.
-	OBJ_Comment,		//	Object represents a	comment
-	OBJ_Error,			//	Object is the result of failed parsing
-	OBJ_Empty,			//	Object represents an empty line
-	OBJ_BezierCurve,	//	Object represents a Bézier curve
+	OBJ_SubfileReference,	//	Object represents a	sub-file reference
+	OBJ_Quad,				//	Object represents a	quadrilateral
+	OBJ_Triangle,			//	Object represents a	triangle
+	OBJ_Line,				//	Object represents a	line
+	OBJ_CondLine,			//	Object represents a	conditional line
+	OBJ_Bfc,				//	Object represents a	BFC statement
+	OBJ_Overlay,			//	Object contains meta-info about an overlay image.
+	OBJ_Comment,			//	Object represents a	comment
+	OBJ_Error,				//	Object is the result of failed parsing
+	OBJ_Empty,				//	Object represents an empty line
+	OBJ_BezierCurve,		//	Object represents a Bézier curve
 
-	OBJ_NumTypes,       // Amount of object types
-	OBJ_FirstType = OBJ_Subfile
+	OBJ_NumTypes,			// Amount of object types
+	OBJ_FirstType = OBJ_SubfileReference
 };
 
 MAKE_ITERABLE_ENUM (LDObjectType)
@@ -303,14 +303,14 @@ private:
 };
 
 //
-// LDSubfile
+// LDReference
 //
 // Represents a single code-1 subfile reference.
 //
-class LDSubfile : public LDMatrixObject
+class LDSubfileReference : public LDMatrixObject
 {
-	LDOBJ (Subfile)
-	LDOBJ_NAME (subfile)
+	LDOBJ (SubfileReference)
+	LDOBJ_NAME (subfilereference)
 	LDOBJ_VERTICES (0)
 	LDOBJ_COLORED
 	LDOBJ_DEFAULTCOLOR (MainColor)

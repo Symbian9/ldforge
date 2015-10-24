@@ -259,8 +259,8 @@ void LDBoundingBox::calcObject (LDObject* obj)
 			calcVertex (obj->vertex (i));
 		break;
 
-	case OBJ_Subfile:
-		for (LDObject* it : static_cast<LDSubfile*> (obj)->inlineContents (true, false))
+	case OBJ_SubfileReference:
+		for (LDObject* it : static_cast<LDSubfileReference*> (obj)->inlineContents (true, false))
 		{
 			calcObject (it);
 			it->destroy();

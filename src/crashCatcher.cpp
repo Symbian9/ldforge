@@ -30,6 +30,7 @@
 #  include <sys/prctl.h>
 # endif
 
+
 // Removes the signal handler from SIGABRT and then aborts.
 static void finalAbort()
 {
@@ -40,7 +41,8 @@ static void finalAbort()
 	abort();
 }
 
-static void HandleCrash (int sig)
+
+static void handleCrash (int sig)
 {
 	static bool isActive = false;
 	printf ("!! Caught signal %d, launching gdb\n", sig);
@@ -91,6 +93,7 @@ static void HandleCrash (int sig)
 	finalAbort();
 }
 
+
 void initCrashCatcher()
 {
 	// List of signals to catch and crash on
@@ -102,7 +105,7 @@ void initCrashCatcher()
 	};
 
 	struct sigaction sighandler;
-	sighandler.sa_handler = &HandleCrash;
+	sighandler.sa_handler = &handleCrash;
 	sighandler.sa_flags = 0;
 	sigemptyset (&sighandler.sa_mask);
 

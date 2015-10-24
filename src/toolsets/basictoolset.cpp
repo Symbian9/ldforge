@@ -95,7 +95,7 @@ void BasicToolset::remove()
 
 void BasicToolset::doInline (bool deep)
 {
-	for (LDSubfile* ref : filterByType<LDSubfile> (selectedObjects()))
+	for (LDSubfileReference* ref : filterByType<LDSubfileReference> (selectedObjects()))
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
@@ -225,7 +225,7 @@ void BasicToolset::invert()
 
 void BasicToolset::newSubfile()
 {
-	AddObjectDialog::staticDialog (OBJ_Subfile, nullptr);
+	AddObjectDialog::staticDialog (OBJ_SubfileReference, nullptr);
 }
 
 void BasicToolset::newLine()
