@@ -44,19 +44,19 @@ void MoveToolset::moveDown()
 
 void MoveToolset::gridCoarse()
 {
-	m_config->setGrid (Grid::Coarse);
+	Config->setGrid (Grid::Coarse);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridMedium()
 {
-	m_config->setGrid (Grid::Medium);
+	Config->setGrid (Grid::Medium);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridFine()
 {
-	m_config->setGrid (Grid::Fine);
+	Config->setGrid (Grid::Fine);
 	m_window->updateGridToolBar();
 }
 

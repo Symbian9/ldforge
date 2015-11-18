@@ -41,6 +41,5 @@ public:
 
 protected:
 	MainWindow* m_window;
-	ConfigurationValueBag* m_config;
 	DocumentManager* m_documents;
 };

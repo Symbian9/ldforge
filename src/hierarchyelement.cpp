@@ -23,8 +23,7 @@
 #include "guiutilities.h"
 
 HierarchyElement::HierarchyElement (QObject* parent) :
-	m_window (nullptr),
-	m_config (nullptr)
+	m_window (nullptr)
 {
 	if (parent)
 	{
@@ -41,7 +40,6 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 			"MainWindow but isn't.\n", this);
 	}
 
-	m_config = m_window->configBag();
 	m_documents = m_window->documents();
 }
 

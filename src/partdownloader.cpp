@@ -28,6 +28,7 @@
 #include "mainwindow.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
+#include "documentmanager.h"
 
 ConfigOption (QString DownloadFilePath)
 ConfigOption (bool GuessDownloadPaths = true)
@@ -73,7 +74,7 @@ void PartDownloader::checkValidPath()
 		if (path.isEmpty())
 			reject();
 		else
-			m_config->setDownloadFilePath (path);
+			Config->setDownloadFilePath (path);
 	}
 }
 
@@ -102,7 +103,7 @@ void PartDownloader::modifyDestination (QString& dest) const
 	dest = dest.simplified();
 
 	// If the user doesn't want us to guess, stop right here.
-	if (not m_config->guessDownloadPaths())
+	if (not Config->guessDownloadPaths())
 		return;
 
 	// Ensure .dat extension
@@ -270,7 +271,7 @@ void PartDownloader::checkIfFinished()
 	for (LDDocument* f : m_files)
 		f->reloadAllSubfiles();
 
-	if (m_config->autoCloseDownloadDialog() and not failed)
+	if (Config->autoCloseDownloadDialog() and not failed)
 	{
 		// Close automatically if desired.
 		accept();
@@ -322,7 +323,7 @@ void PartDownloader::setPrimaryFile (LDDocument* document)
 
 QString PartDownloader::downloadPath()
 {
-	QString path = m_config->downloadFilePath();
+	QString path = Config->downloadFilePath();
 
 	if (DIRSLASH[0] != '/')
 		path.replace (DIRSLASH, "/");

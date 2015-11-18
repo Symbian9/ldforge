@@ -21,7 +21,6 @@
 #include <functional>
 #include "main.h"
 #include "basics.h"
-#include "configurationvaluebag.h"
 
 class LDDocument;
 class QColor;

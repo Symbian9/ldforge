@@ -55,8 +55,8 @@ ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 
 			if (ldcolor == MainColor)
 			{
-				color = QColor (m_config->mainColor());
-				color.setAlphaF (m_config->mainColorAlpha());
+				color = QColor (Config->mainColor());
+				color.setAlphaF (Config->mainColorAlpha());
 			}
 
 			QString color2name (luma (color) < 80 ? "white" : "black");

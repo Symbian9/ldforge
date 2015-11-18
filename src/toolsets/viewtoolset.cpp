@@ -26,6 +26,7 @@
 #include "../colors.h"
 #include "../dialogs.h"
 #include "../glCompiler.h"
+#include "../documentmanager.h"
 #include "viewtoolset.h"
 
 ViewToolset::ViewToolset (MainWindow *parent) :
@@ -125,7 +126,7 @@ void ViewToolset::screenshot()
 
 void ViewToolset::axes()
 {
-	m_config->setDrawAxes (not m_config->drawAxes());
+	Config->setDrawAxes (not Config->drawAxes());
 	m_window->updateActions();
 	m_window->renderer()->update();
 }
@@ -150,7 +151,7 @@ void ViewToolset::visibilityReveal()
 
 void ViewToolset::wireframe()
 {
-	m_config->setDrawWireframe (not m_config->drawWireframe());
+	Config->setDrawWireframe (not Config->drawWireframe());
 	m_window->renderer()->refresh();
 }
 
@@ -172,7 +173,7 @@ void ViewToolset::clearOverlay()
 
 void ViewToolset::drawAngles()
 {
-	m_config->setDrawAngles (not m_config->drawAngles());
+	Config->setDrawAngles (not Config->drawAngles());
 	m_window->renderer()->refresh();
 }
 
@@ -241,10 +242,10 @@ void ViewToolset::testpic()
 
 void ViewToolset::bfcView()
 {
-	m_config->setBfcRedGreenView (not m_config->bfcRedGreenView());
+	Config->setBfcRedGreenView (not Config->bfcRedGreenView());
 
-	if (m_config->bfcRedGreenView())
-		m_config->setRandomColors (false);
+	if (Config->bfcRedGreenView())
+		Config->setRandomColors (false);
 
 	m_window->updateActions();
 	m_window->renderer()->refresh();
@@ -272,10 +273,10 @@ void ViewToolset::jumpTo()
 
 void ViewToolset::randomColors()
 {
-	m_config->setRandomColors (not m_config->randomColors());
+	Config->setRandomColors (not Config->randomColors());
 
-	if (m_config->randomColors())
-		m_config->setBfcRedGreenView (false);
+	if (Config->randomColors())
+		Config->setBfcRedGreenView (false);
 
 	m_window->updateActions();
 	m_window->renderer()->refresh();
@@ -283,18 +284,18 @@ void ViewToolset::randomColors()
 
 void ViewToolset::drawSurfaces()
 {
-	m_config->setDrawSurfaces (not m_config->drawSurfaces());
+	Config->setDrawSurfaces (not Config->drawSurfaces());
 	m_window->updateActions();
 }
 
 void ViewToolset::drawEdgeLines()
 {
-	m_config->setDrawEdgeLines (not m_config->drawEdgeLines());
+	Config->setDrawEdgeLines (not Config->drawEdgeLines());
 	m_window->updateActions();
 }
 
 void ViewToolset::drawConditionalLines()
 {
-	m_config->setDrawConditionalLines (not m_config->drawConditionalLines());
+	Config->setDrawConditionalLines (not Config->drawConditionalLines());
 	m_window->updateActions();
 }

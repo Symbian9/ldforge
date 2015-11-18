@@ -123,5 +123,3 @@ private:
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
-QString Basename (QString path);
-QString Dirname (QString path);

@@ -25,12 +25,11 @@ ConfigOption (QString LDrawPath)
 
 LDPaths::LDPaths (QObject* parent) :
 	QObject (parent),
-	HierarchyElement (parent),
 	m_dialog (nullptr) {}
 
 void LDPaths::checkPaths()
 {
-	QString pathconfig = m_config->lDrawPath();
+	QString pathconfig = Config->lDrawPath();
 
 	if (not configurePaths (pathconfig))
 	{
@@ -40,7 +39,7 @@ void LDPaths::checkPaths()
 		if (not m_dialog->exec())
 			exit (1);
 		else
-			m_config->setLDrawPath (m_dialog->path());
+			Config->setLDrawPath (m_dialog->path());
 	}
 }
 

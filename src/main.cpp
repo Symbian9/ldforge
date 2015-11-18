@@ -35,6 +35,7 @@
 #include "documentmanager.h"
 
 MainWindow* g_win = nullptr;
+ConfigurationValueBag* Config = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
@@ -47,12 +48,17 @@ int main (int argc, char* argv[])
 	QApplication app (argc, argv);
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
-	initCrashCatcher();
-	MainWindow* win = new MainWindow;
-	LDPaths* paths = new LDPaths (win);
+
+	static ConfigurationValueBag configObject;
+	Config = &configObject;
+
+	LDPaths* paths = new LDPaths;
 	paths->checkPaths();
 	paths->deleteLater();
+
+	initCrashCatcher();
 	initColors();
+	MainWindow* win = new MainWindow;
 	LoadPrimitives();
 	win->show();
 

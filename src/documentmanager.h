@@ -54,4 +54,6 @@ private:
 	LDDocument* m_logoedStud2;
 };
 
+QString Basename (QString path);
+QString Dirname (QString path);
 static const QStringList g_specialSubdirectories ({ "s", "48", "8" });

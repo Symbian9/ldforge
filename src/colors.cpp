@@ -24,6 +24,7 @@
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "documentmanager.h"
+#include "ldpaths.h"
 
 static ColorData* colorData = nullptr;
 
@@ -174,10 +175,7 @@ const ColorData::Entry& ColorData::get (int code) const
 
 void ColorData::loadFromLdconfig()
 {
-	if (not g_win)
-		return;
-
-	QString path = g_win->documents()->findDocumentPath ("LDConfig.ldr", false);
+	QString path = LDPaths::ldConfigPath();
 	QFile fp (path);
 
 	if (not fp.open (QIODevice::ReadOnly))

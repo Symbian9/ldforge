@@ -625,10 +625,10 @@ LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num)
 	QString author = APPNAME;
 	QString license = "";
 
-	if (not g_win->configBag()->defaultName().isEmpty())
+	if (not Config->defaultName().isEmpty())
 	{
 		license = PreferredLicenseText();
-		author = format ("%1 [%2]", g_win->configBag()->defaultName(), g_win->configBag()->defaultUser());
+		author = format ("%1 [%2]", Config->defaultName(), Config->defaultUser());
 	}
 
 	LDObjectList objs;

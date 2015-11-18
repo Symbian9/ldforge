@@ -158,7 +158,7 @@ class ConfigCollector (object):
 		write ('class ConfigurationValueBag\n')
 		write ('{\n')
 		write ('public:\n')
-		write ('\tConfigurationValueBag (class MainWindow* window);\n')
+		write ('\tConfigurationValueBag();\n')
 		write ('\t~ConfigurationValueBag();\n')
 		write ('\tbool existsEntry (const QString& name);\n')
 		write ('\tQVariant defaultValueByName (const QString& name);\n')
@@ -184,8 +184,8 @@ class ConfigCollector (object):
 
 		fp.write (
 			'\n'
-			'ConfigurationValueBag::ConfigurationValueBag (MainWindow* window) :\n'
-			'\tm_settings (window->makeSettings (nullptr))\n'
+			'ConfigurationValueBag::ConfigurationValueBag() :\n'
+			'\tm_settings (makeSettings (nullptr))\n'
 			'{\n')
 
 		for decl in self.decls:

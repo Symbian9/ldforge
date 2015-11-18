@@ -37,8 +37,8 @@ QIcon GuiUtilities::makeColorIcon (LDColor ldcolor, int size)
 	if (ldcolor == MainColor)
 	{
 		// Use the user preferences for main color here
-		color = m_config->mainColor();
-		color.setAlphaF (m_config->mainColorAlpha());
+		color = Config->mainColor();
+		color.setAlphaF (Config->mainColorAlpha());
 	}
 
 	// Paint the icon border
@@ -84,11 +84,11 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 
 QColor GuiUtilities::mainColorRepresentation()
 {
-	QColor col (m_config->mainColor());
+	QColor col (Config->mainColor());
 
 	if (not col.isValid())
 		return QColor (0, 0, 0);
 
-	col.setAlpha (m_config->mainColorAlpha() * 255.f);
+	col.setAlpha (Config->mainColorAlpha() * 255.f);
 	return col;
 }

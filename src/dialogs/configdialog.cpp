@@ -74,7 +74,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
-	m_settings (m_window->makeSettings (this))
+	m_settings (makeSettings (this))
 {
 	ui.setupUi (this);
 
@@ -82,7 +82,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	applyToWidgetOptions (
 	[&](QWidget* widget, QString confname)
 	{
-		QVariant value = m_settings->value (confname, m_config->defaultValueByName (confname));
+		QVariant value = m_settings->value (confname, Config->defaultValueByName (confname));
 		QLineEdit* le;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
@@ -232,7 +232,7 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)>
 
 		QString optionname (widget->objectName().mid (strlen ("config")));
 
-		if (m_config->existsEntry (optionname))
+		if (Config->existsEntry (optionname))
 			func (widget, optionname);
 		else
 			print ("Couldn't find configuration entry named %1", optionname);
@@ -277,7 +277,7 @@ void ConfigDialog::applySettings()
 
 	// Rebuild the quick color toolbar
 	m_window->setQuickColors (quickColors);
-	m_config->setQuickColorToolbar (quickColorString());
+	Config->setQuickColorToolbar (quickColorString());
 
 	// Ext program settings
 	for (int i = 0; i < NumExternalPrograms; ++i)

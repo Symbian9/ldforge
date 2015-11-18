@@ -22,12 +22,12 @@
 class QDir;
 class MainWindow;
 
-class LDPaths : public QObject, public HierarchyElement
+class LDPaths : public QObject
 {
 	Q_OBJECT
 
 public:
-	LDPaths (QObject* parent);
+	LDPaths (QObject* parent = nullptr);
 	void checkPaths();
 	bool isValid (const class QDir& path) const;
 

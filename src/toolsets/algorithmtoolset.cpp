@@ -161,12 +161,12 @@ void AlgorithmToolset::roundCoordinates()
 
 			v.apply ([&](Axis, double& a)
 			{
-				RoundToDecimals (a, m_config->roundPositionPrecision());
+				RoundToDecimals (a, Config->roundPositionPrecision());
 			});
 
 			ApplyToMatrix (t, [&](int, double& a)
 			{
-				RoundToDecimals (a, m_config->roundMatrixPrecision());
+				RoundToDecimals (a, Config->roundMatrixPrecision());
 			});
 
 			mo->setPosition (v);
@@ -180,7 +180,7 @@ void AlgorithmToolset::roundCoordinates()
 				Vertex v = obj->vertex (i);
 				v.apply ([&](Axis, double& a)
 				{
-					RoundToDecimals (a, m_config->roundPositionPrecision());
+					RoundToDecimals (a, Config->roundPositionPrecision());
 				});
 				obj->setVertex (i, v);
 				num += 3;
@@ -333,7 +333,7 @@ void AlgorithmToolset::addHistoryLine()
 	QDialog* dlg = new QDialog;
 	Ui_AddHistoryLine* ui = new Ui_AddHistoryLine;
 	ui->setupUi (dlg);
-	ui->m_username->setText (m_config->defaultUser());
+	ui->m_username->setText (Config->defaultUser());
 	ui->m_date->setDate (QDate::currentDate());
 	ui->m_comment->setFocus();
 
@@ -378,12 +378,12 @@ void AlgorithmToolset::splitLines()
 {
 	bool ok;
 	int segments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:",
-		m_config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
+		Config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
 		return;
 
-	m_config->setSplitLinesSegments (segments);
+	Config->setSplitLinesSegments (segments);
 
 	for (LDObject* obj : selectedObjects())
 	{
@@ -544,7 +544,7 @@ void AlgorithmToolset::subfileSelection()
 	LDObjectList objs;
 	objs << LDSpawn<LDComment> (subtitle);
 	objs << LDSpawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
-	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
+	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", Config->defaultName(), Config->defaultUser()));
 	objs << LDSpawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
 
 	if (not license.isEmpty())

@@ -66,7 +66,6 @@ ConfigOption (QStringList HiddenToolbars)
 //
 MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
-	m_configOptions (this),
 	m_guiUtilities (new GuiUtilities (this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
@@ -161,7 +160,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		}
 	}
 
-	for (QVariant const& toolbarname : m_configOptions.hiddenToolbars())
+	for (QVariant const& toolbarname : Config->hiddenToolbars())
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
@@ -171,11 +170,11 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
-	if (m_configOptions.firstStart())
+	if (Config->firstStart())
 	{
 		ConfigDialog* dialog = new ConfigDialog (this, ConfigDialog::ProfileTab);
 		dialog->show();
-		m_configOptions.setFirstStart (false);
+		Config->setFirstStart (false);
 	}
 }
 
@@ -235,7 +234,7 @@ void MainWindow::updateRecentFilesMenu()
 
 	QAction* first = nullptr;
 
-	for (const QVariant& it : m_configOptions.recentFiles())
+	for (const QVariant& it : Config->recentFiles())
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
@@ -253,7 +252,7 @@ QList<ColorToolbarItem> LoadQuickColorList()
 {
 	QList<ColorToolbarItem> colors;
 
-	for (QString colorname : g_win->configBag()->quickColorToolbar().split (":"))
+	for (QString colorname : Config->quickColorToolbar().split (":"))
 	{
 		if (colorname == "|")
 			colors << ColorToolbarItem::makeSeparator();
@@ -307,7 +306,7 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	int grid = m_configOptions.grid();
+	int grid = Config->grid();
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
@@ -482,7 +481,7 @@ void MainWindow::buildObjectList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		else if (m_configOptions.colorizeObjectsList()
+		else if (Config->colorizeObjectsList()
 			and obj->isColored()
 			and obj->color().isValid()
 			and obj->color() != MainColor
@@ -715,7 +714,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 	}
 
 	// Save the configuration before leaving.
-	m_configOptions.setHiddenToolbars (hiddenToolbars);
+	Config->setHiddenToolbars (hiddenToolbars);
 	syncSettings();
 	ev->accept();
 }
@@ -1041,14 +1040,14 @@ void MainWindow::updateActions()
 		ui.actionRedo->setEnabled (pos < (long) his->size() - 1);
 	}
 
-	ui.actionWireframe->setChecked (m_configOptions.drawWireframe());
-	ui.actionAxes->setChecked (m_configOptions.drawAxes());
-	ui.actionBfcView->setChecked (m_configOptions.bfcRedGreenView());
-	ui.actionRandomColors->setChecked (m_configOptions.randomColors());
-	ui.actionDrawAngles->setChecked (m_configOptions.drawAngles());
-	ui.actionDrawSurfaces->setChecked (m_configOptions.drawSurfaces());
-	ui.actionDrawEdgeLines->setChecked (m_configOptions.drawEdgeLines());
-	ui.actionDrawConditionalLines->setChecked (m_configOptions.drawConditionalLines());
+	ui.actionWireframe->setChecked (Config->drawWireframe());
+	ui.actionAxes->setChecked (Config->drawAxes());
+	ui.actionBfcView->setChecked (Config->bfcRedGreenView());
+	ui.actionRandomColors->setChecked (Config->randomColors());
+	ui.actionDrawAngles->setChecked (Config->drawAngles());
+	ui.actionDrawSurfaces->setChecked (Config->drawSurfaces());
+	ui.actionDrawEdgeLines->setChecked (Config->drawEdgeLines());
+	ui.actionDrawConditionalLines->setChecked (Config->drawConditionalLines());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1186,7 +1185,7 @@ void MainWindow::circleToolSegmentsChanged()
 //
 // Accessor to the settings object
 //
-QSettings* MainWindow::makeSettings (QObject* parent)
+QSettings* makeSettings (QObject* parent)
 {
 	QString path = qApp->applicationDirPath() + "/" UNIXNAME ".ini";
 	return new QSettings (path, QSettings::IniFormat, parent);
@@ -1203,7 +1202,7 @@ void MainWindow::syncSettings()
 //
 QVariant MainWindow::getConfigValue (QString name)
 {
-	QVariant value = m_settings->value (name, m_configOptions.defaultValueByName (name));
+	QVariant value = m_settings->value (name, Config->defaultValueByName (name));
 	return value;
 }
 

@@ -26,7 +26,6 @@
 #include <QMetaMethod>
 #include "ldObject.h"
 #include "colors.h"
-#include "configurationvaluebag.h"
 #include "doublemap.h"
 
 class MessageManager;
@@ -79,7 +78,6 @@ public:
 	void buildObjectList();
 	void changeDocument (LDDocument* f);
 	void closeInitialDocument();
-	ConfigurationValueBag* configBag() { return &m_configOptions; }
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
@@ -96,7 +94,6 @@ public:
 	LDColor getUniformSelectedColor();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
-	class QSettings* makeSettings (QObject* parent = nullptr);
 	LDDocument* newDocument (bool cache = false);
 	GLRenderer* renderer();
 	void refresh();
@@ -136,7 +133,6 @@ protected:
 private:
 	struct ToolInfo { QMetaMethod method; Toolset* object; };
 
-	ConfigurationValueBag m_configOptions;
 	class GuiUtilities* m_guiUtilities;
 	GLRenderer* m_renderer;
 	LDObjectList m_sel;
@@ -226,3 +222,4 @@ private:
 };
 
 void populatePrimitivesTree (QTreeWidget* tw, const QString& selectByDefault = QString());
+QSettings* makeSettings (QObject* parent = nullptr);

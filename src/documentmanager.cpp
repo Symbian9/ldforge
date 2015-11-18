@@ -139,7 +139,7 @@ void DocumentManager::openMainModel (QString path)
 		unknowns << static_cast<LDError*> (obj)->fileReferenced();
 	}
 
-	if (m_window->configBag()->tryDownloadMissingFiles() and not unknowns.isEmpty())
+	if (Config->tryDownloadMissingFiles() and not unknowns.isEmpty())
 	{
 		PartDownloader dl (m_window);
 		dl.setSourceType (PartDownloader::PartsTracker);
@@ -225,7 +225,7 @@ skipthis:
 		return relativePath;
 
 	// Try with just the LDraw path first
-	QString fullPath = format ("%1" DIRSLASH "%2", m_window->configBag()->lDrawPath(), relativePath);
+	QString fullPath = format ("%1" DIRSLASH "%2", Config->lDrawPath(), relativePath);
 
 	if (QFileInfo::exists (fullPath))
 		return fullPath;
@@ -234,7 +234,7 @@ skipthis:
 	{
 		// Look in sub-directories: parts and p. Also look in the download path, since that's where we download parts
 		// from the PT to.
-		QStringList dirs = { m_window->configBag()->lDrawPath(), m_window->configBag()->downloadFilePath() };
+		QStringList dirs = { Config->lDrawPath(), Config->downloadFilePath() };
 		for (const QString& topdir : dirs)
 		{
 			for (const QString& subdir : QStringList ({ "parts", "p" }))
@@ -362,7 +362,7 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 void DocumentManager::addRecentFile (QString path)
 {
-	QStringList recentFiles = m_window->configBag()->recentFiles();
+	QStringList recentFiles = Config->recentFiles();
 	int idx = recentFiles.indexOf (path);
 
 	// If this file already is in the list, pop it out.
@@ -380,7 +380,7 @@ void DocumentManager::addRecentFile (QString path)
 
 	// Add the file
 	recentFiles << path;
-	m_window->configBag()->setRecentFiles (recentFiles);
+	Config->setRecentFiles (recentFiles);
 	m_window->syncSettings();
 	m_window->updateRecentFilesMenu();
 }
@@ -415,7 +415,7 @@ bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs, bool deep,
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (m_config->useLogoStuds() and renderinline)
+	if (Config->useLogoStuds() and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();

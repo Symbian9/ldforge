@@ -18,7 +18,6 @@
 
 #pragma once
 #include "toolset.h"
-#include "configurationvaluebag.h"
 
 enum ExtProgramType
 {
