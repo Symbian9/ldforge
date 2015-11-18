@@ -240,14 +240,14 @@ bool Matrix::operator== (const Matrix& other) const
 
 // =============================================================================
 //
-LDBoundingBox::LDBoundingBox()
+BoundingBox::BoundingBox()
 {
 	reset();
 }
 
 // =============================================================================
 //
-void LDBoundingBox::calcObject (LDObject* obj)
+void BoundingBox::calcObject (LDObject* obj)
 {
 	switch (obj->type())
 	{
@@ -274,7 +274,7 @@ void LDBoundingBox::calcObject (LDObject* obj)
 
 // =============================================================================
 //
-LDBoundingBox& LDBoundingBox::operator<< (const Vertex& v)
+BoundingBox& BoundingBox::operator<< (const Vertex& v)
 {
 	calcVertex (v);
 	return *this;
@@ -282,7 +282,7 @@ LDBoundingBox& LDBoundingBox::operator<< (const Vertex& v)
 
 // =============================================================================
 //
-LDBoundingBox& LDBoundingBox::operator<< (LDObject* obj)
+BoundingBox& BoundingBox::operator<< (LDObject* obj)
 {
 	calcObject (obj);
 	return *this;
@@ -290,7 +290,7 @@ LDBoundingBox& LDBoundingBox::operator<< (LDObject* obj)
 
 // =============================================================================
 //
-void LDBoundingBox::calcVertex (const Vertex& vertex)
+void BoundingBox::calcVertex (const Vertex& vertex)
 {
 	m_vertex0.setX (qMin (vertex.x(), m_vertex0.x()));
 	m_vertex0.setY (qMin (vertex.y(), m_vertex0.y()));
@@ -305,7 +305,7 @@ void LDBoundingBox::calcVertex (const Vertex& vertex)
 //
 // Clears the bounding box
 //
-void LDBoundingBox::reset()
+void BoundingBox::reset()
 {
 	m_vertex0 = Vertex (10000.0, 10000.0, 10000.0);
 	m_vertex1 = Vertex (-10000.0, -10000.0, -10000.0);
@@ -316,7 +316,7 @@ void LDBoundingBox::reset()
 //
 // Returns the length of the bounding box on the longest measure.
 //
-double LDBoundingBox::longestMeasurement() const
+double BoundingBox::longestMeasurement() const
 {
 	double xscale = (m_vertex0.x() - m_vertex1.x());
 	double yscale = (m_vertex0.y() - m_vertex1.y());
@@ -341,7 +341,7 @@ double LDBoundingBox::longestMeasurement() const
 //
 // Yields the center of the bounding box.
 //
-Vertex LDBoundingBox::center() const
+Vertex BoundingBox::center() const
 {
 	return Vertex (
 		(m_vertex0.x() + m_vertex1.x()) / 2,
@@ -349,17 +349,17 @@ Vertex LDBoundingBox::center() const
 		(m_vertex0.z() + m_vertex1.z()) / 2);
 }
 
-bool LDBoundingBox::isEmpty() const
+bool BoundingBox::isEmpty() const
 {
 	return m_isEmpty;
 }
 
-const Vertex& LDBoundingBox::vertex0() const
+const Vertex& BoundingBox::vertex0() const
 {
 	return m_vertex0;
 }
 
-const Vertex& LDBoundingBox::vertex1() const
+const Vertex& BoundingBox::vertex1() const
 {
 	return m_vertex1;
 }

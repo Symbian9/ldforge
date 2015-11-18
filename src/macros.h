@@ -65,3 +65,27 @@ public: \
 		NAME = ENUM::NumValues)
 
 #define ConfigOption(...)
+
+// once-statement
+struct OnceGuard
+{
+	bool triggered;
+	OnceGuard() : triggered (false) {}
+
+	bool pass()
+	{
+		if (triggered)
+		{
+			return false;
+		}
+		else
+		{
+			triggered = true;
+			return true;
+		}
+	}
+};
+
+#define TEE_2(A,B) A ## B
+#define TEE(A,B) TEE_2(A,B)
+#define once static OnceGuard TEE(_once_, __LINE__); if (TEE(_once_, __LINE__).pass())

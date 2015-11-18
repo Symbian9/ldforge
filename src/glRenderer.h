@@ -170,6 +170,7 @@ public:
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
 	QPen linePen() const;
+	void makeCurrent();
 	MessageManager* messageLog() const;
 	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
@@ -251,7 +252,6 @@ private:
 	void clampAngle (double& angle) const;
 	LDGLData& currentDocumentData() const;
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
-	void doMakeCurrent();
 	LDOverlay* findOverlayObject (ECamera cam);
 	double& panning (Axis ax);
 	double panning (Axis ax) const;

@@ -161,10 +161,10 @@ private:
 // Defines a bounding box that encompasses a given set of objects.
 // vertex0 is the minimum vertex, vertex1 is the maximum vertex.
 //
-class LDBoundingBox
+class BoundingBox
 {
 public:
-	LDBoundingBox();
+	BoundingBox();
 
 	void calcObject (LDObject* obj);
 	void calcVertex (const Vertex& vertex);
@@ -175,8 +175,8 @@ public:
 	const Vertex& vertex0() const;
 	const Vertex& vertex1() const;
 
-	LDBoundingBox& operator<< (LDObject* obj);
-	LDBoundingBox& operator<< (const Vertex& v);
+	BoundingBox& operator<< (LDObject* obj);
+	BoundingBox& operator<< (const Vertex& v);
 
 private:
 	bool m_isEmpty;

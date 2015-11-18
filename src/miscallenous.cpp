@@ -26,65 +26,6 @@
 #include "ldDocument.h"
 #include "ui_rotpoint.h"
 
-// Prime number table.
-static const int PrimeNumbers[] =
-{
-	2,    3,    5,    7,    11,   13,   17,   19,   23,   29,
-	31,   37,   41,   43,   47,   53,   59,   61,   67,   71,
-	73,   79,   83,   89,   97,   101,  103,  107,  109,  113,
-	127,  131,  137,  139,  149,  151,  157,  163,  167,  173,
-	179,  181,  191,  193,  197,  199,  211,  223,  227,  229,
-	233,  239,  241,  251,  257,  263,  269,  271,  277,  281,
-	283,  293,  307,  311,  313,  317,  331,  337,  347,  349,
-	353,  359,  367,  373,  379,  383,  389,  397,  401,  409,
-	419,  421,  431,  433,  439,  443,  449,  457,  461,  463,
-	467,  479,  487,  491,  499,  503,  509,  521,  523,  541,
-	547,  557,  563,  569,  571,  577,  587,  593,  599,  601,
-	607,  613,  617,  619,  631,  641,  643,  647,  653,  659,
-	661,  673,  677,  683,  691,  701,  709,  719,  727,  733,
-	739,  743,  751,  757,  761,  769,  773,  787,  797,  809,
-	811,  821,  823,  827,  829,  839,  853,  857,  859,  863,
-	877,  881,  883,  887,  907,  911,  919,  929,  937,  941,
-	947,  953,  967,  971,  977,  983,  991,  997, 1009, 1013,
-	1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069,
-	1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151,
-	1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223,
-	1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291,
-	1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373,
-	1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451,
-	1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511,
-	1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583,
-	1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657,
-	1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733,
-	1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811,
-	1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889,
-	1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987,
-	1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053,
-	2063, 2069, 2081, 2083, 2087, 2089, 2099, 2111, 2113, 2129,
-	2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 2213,
-	2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281, 2287,
-	2293, 2297, 2309, 2311, 2333, 2339, 2341, 2347, 2351, 2357,
-	2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417, 2423,
-	2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531,
-	2539, 2543, 2549, 2551, 2557, 2579, 2591, 2593, 2609, 2617,
-	2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687,
-	2689, 2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731, 2741,
-	2749, 2753, 2767, 2777, 2789, 2791, 2797, 2801, 2803, 2819,
-	2833, 2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897, 2903,
-	2909, 2917, 2927, 2939, 2953, 2957, 2963, 2969, 2971, 2999,
-	3001, 3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067, 3079,
-	3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181,
-	3187, 3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253, 3257,
-	3259, 3271, 3299, 3301, 3307, 3313, 3319, 3323, 3329, 3331,
-	3343, 3347, 3359, 3361, 3371, 3373, 3389, 3391, 3407, 3413,
-	3433, 3449, 3457, 3461, 3463, 3467, 3469, 3491, 3499, 3511,
-	3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571,
-};
-
-// =============================================================================
-//
-// Grid stuff
-//
 ConfigOption (int Grid = 1)
 ConfigOption (float GridCoarseCoordinateSnap = 5.0f)
 ConfigOption (float GridCoarseAngleSnap = 45.0f)
@@ -98,29 +39,30 @@ ConfigOption (float GridFineBezierCurveSegments = 32)
 ConfigOption (int RotationPointType = 0)
 ConfigOption (Vertex CustomRotationPoint = Origin)
 
+
 float gridCoordinateSnap()
 {
 	switch (Config->grid())
 	{
+	default:
 	case Grid::Coarse: return Config->gridCoarseCoordinateSnap();
 	case Grid::Medium: return Config->gridMediumCoordinateSnap();
 	case Grid::Fine: return Config->gridFineCoordinateSnap();
 	}
-
-	return 1.0f;
 }
+
 
 float gridAngleSnap()
 {
 	switch (Config->grid())
 	{
+	default:
 	case Grid::Coarse: return Config->gridCoarseAngleSnap();
 	case Grid::Medium: return Config->gridMediumAngleSnap();
 	case Grid::Fine: return Config->gridFineAngleSnap();
 	}
-
-	return 45.0f;
 }
+
 
 float gridBezierCurveSegments()
 {
@@ -133,13 +75,10 @@ float gridBezierCurveSegments()
 	}
 }
 
-// =============================================================================
-//
-// Snap the given coordinate value on the current grid's given axis.
-//
-double Grid::Snap (double value, const Grid::Config type)
+// Snaps the given coordinate value on the current grid's given axis.
+double snapToGrid (double value, const Grid::Config type)
 {
-	double snapvalue = (type == Coordinate) ? gridCoordinateSnap() : gridAngleSnap();
+	double snapvalue = (type == Grid::Coordinate) ? gridCoordinateSnap() : gridAngleSnap();
 	double mult = floor (qAbs<double> (value / snapvalue));
 	double out = mult * snapvalue;
 
@@ -152,43 +91,39 @@ double Grid::Snap (double value, const Grid::Config type)
 	return out;
 }
 
-// =============================================================================
-//
-void Simplify (int& numer, int& denom)
+
+int gcd (int a, int b)
 {
-	bool repeat;
-
-	do
+	if (a > 0 and b > 0)
 	{
-		repeat = false;
-
-		for (int x = 0; x < countof (PrimeNumbers); x++)
+		while (a != b)
 		{
-			int const prime = PrimeNumbers[x];
-
-			if (numer < prime and denom < prime)
-				break;
-
-			if ((numer % prime == 0) and (denom % prime == 0))
-			{
-				numer /= prime;
-				denom /= prime;
-				repeat = true;
-				break;
-			}
+			if (a < b)
+				b -= a;
+			else
+				a -= b;
 		}
-	} while (repeat);
+	}
+
+	return a;
 }
 
-// =============================================================================
-//
-Vertex GetRotationPoint (const LDObjectList& objs)
+
+void simplify (int& numer, int& denom)
+{
+	int factor = gcd (numer, denom);
+	numer /= factor;
+	denom /= factor;
+}
+
+
+Vertex getRotationPoint (const LDObjectList& objs)
 {
 	switch (RotationPoint (Config->rotationPointType()))
 	{
 	case RotationPoint::ObjectOrigin:
 		{
-			LDBoundingBox box;
+			BoundingBox box;
 
 			// Calculate center vertex
 			for (LDObject* obj : objs)
@@ -215,9 +150,8 @@ Vertex GetRotationPoint (const LDObjectList& objs)
 	return Vertex();
 }
 
-// =============================================================================
-//
-void ConfigureRotationPoint()
+
+void configureRotationPoint()
 {
 	QDialog* dlg = new QDialog;
 	Ui::RotPointUI ui;
@@ -260,9 +194,8 @@ void ConfigureRotationPoint()
 	Config->setCustomRotationPoint (custompoint);
 }
 
-// =============================================================================
-//
-QString Join (QList<StringFormatArg> vals, QString delim)
+
+QString joinStrings (QList<StringFormatArg> vals, QString delim)
 {
 	QStringList list;
 
@@ -272,62 +205,29 @@ QString Join (QList<StringFormatArg> vals, QString delim)
 	return list.join (delim);
 }
 
-// =============================================================================
-//
-void RoundToDecimals (double& a, int decimals)
-{
-	static const long e10[] =
-	{
-		1l,
-		10l,
-		100l,
-		1000l,
-		10000l,
-		100000l,
-		1000000l,
-		10000000l,
-		100000000l,
-		1000000000l,
-	};
 
-	if (decimals >= 0 and decimals < countof (e10))
-		a = round (a * e10[decimals]) / e10[decimals];
+void roundToDecimals (double& a, int decimals)
+{
+	static const double factors[] = { 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9 };
+	if (decimals >= 0 and decimals < countof (factors))
+		a = round (a * factors[decimals]) / factors[decimals];
 }
 
-// =============================================================================
-//
-void ApplyToMatrix (Matrix& a, ApplyToMatrixFunction func)
+
+void applyToMatrix (Matrix& a, ApplyToMatrixFunction func)
 {
 	for (int i = 0; i < 9; ++i)
 		func (i, a[i]);
 }
 
-// =============================================================================
-//
-void ApplyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
+void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 {
 	for (int i = 0; i < 9; ++i)
 		func (i, a[i]);
 }
 
-// =============================================================================
-//
-double GetCoordinateOf (const Vertex& a, Axis ax)
-{
-	switch (ax)
-	{
-		case X: return a.x();
-		case Y: return a.y();
-		case Z: return a.z();
-	}
 
-	return 0.0;
-}
-
-
-// =============================================================================
-//
-QString MakePrettyFileSize (qint64 size)
+QString formatFileSize (qint64 size)
 {
 	if (size < 1024LL)
 		return QString::number (size) + " bytes";

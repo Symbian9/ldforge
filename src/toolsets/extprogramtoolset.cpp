@@ -391,7 +391,7 @@ void ExtProgramToolset::ytruder()
 		return;
 
 	// Compose the command-line arguments
-	QString argv = Join (
+	QString argv = joinStrings (
 	{
 		(axis == X) ? "-x" : (axis == Y) ? "-y" : "-z",
 		(mode == Distance) ? "-d" : (mode == Symmetry) ? "-s" : (mode == Projection) ? "-p" : "-r",
@@ -435,7 +435,7 @@ void ExtProgramToolset::rectifier()
 		return;
 
 	// Compose arguments
-	QString argv = Join (
+	QString argv = joinStrings (
 	{
 		(not ui.cb_condense->isChecked()) ? "-q" : "",
 		(not ui.cb_subst->isChecked()) ? "-r" : "",
@@ -512,7 +512,7 @@ void ExtProgramToolset::intersector()
 		return;
 	}
 
-	QString parms = Join (
+	QString parms = joinStrings (
 	{
 		(ui.cb_colorize->isChecked()) ? "-c" : "",
 		(ui.cb_nocondense->isChecked()) ? "-t" : "",
@@ -520,7 +520,7 @@ void ExtProgramToolset::intersector()
 		ui.dsb_prescale->value()
 	});
 
-	QString argv_normal = Join (
+	QString argv_normal = joinStrings (
 	{
 		parms,
 		inDATName,
@@ -528,7 +528,7 @@ void ExtProgramToolset::intersector()
 		outDATName
 	});
 
-	QString argv_inverse = Join (
+	QString argv_inverse = joinStrings (
 	{
 		parms,
 		cutDATName,
@@ -549,7 +549,7 @@ void ExtProgramToolset::intersector()
 
 	if (ui.cb_edges->isChecked()
 		and checkExtProgramPath (Isecalc)
-		and runExtProgram (Isecalc, Join ({inDATName, cutDATName, edgesDATName})))
+		and runExtProgram (Isecalc, joinStrings ({inDATName, cutDATName, edgesDATName})))
 	{
 		insertOutput (edgesDATName, false, {});
 	}
@@ -599,7 +599,7 @@ void ExtProgramToolset::coverer()
 		return;
 	}
 
-	QString argv = Join (
+	QString argv = joinStrings (
 	{
 		(ui.cb_oldsweep->isChecked() ? "-s" : ""),
 		(ui.cb_reverse->isChecked() ? "-r" : ""),
@@ -665,7 +665,7 @@ void ExtProgramToolset::isecalc()
 		return;
 	}
 
-	QString argv = Join (
+	QString argv = joinStrings (
 	{
 		in1DATName,
 		in2DATName,
@@ -702,7 +702,7 @@ void ExtProgramToolset::edger2()
 
 	int unmatched = ui.unmatched->currentIndex();
 
-	QString argv = Join (
+	QString argv = joinStrings (
 	{
 		format ("-p %1", ui.precision->value()),
 		format ("-af %1", ui.flatAngle->value()),

@@ -34,7 +34,7 @@ static void RotateVertex (Vertex& v, const Vertex& rotpoint, const Matrix& trans
 void RotateObjects (const int l, const int m, const int n, double angle, LDObjectList const& objects)
 {
 	QList<Vertex*> queue;
-	const Vertex rotpoint = GetRotationPoint (objects);
+	const Vertex rotpoint = getRotationPoint (objects);
 	const double cosangle = cos (angle),
 				 sinangle = sin (angle);
 

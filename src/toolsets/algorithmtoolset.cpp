@@ -161,12 +161,12 @@ void AlgorithmToolset::roundCoordinates()
 
 			v.apply ([&](Axis, double& a)
 			{
-				RoundToDecimals (a, Config->roundPositionPrecision());
+				roundToDecimals (a, Config->roundPositionPrecision());
 			});
 
-			ApplyToMatrix (t, [&](int, double& a)
+			applyToMatrix (t, [&](int, double& a)
 			{
-				RoundToDecimals (a, Config->roundMatrixPrecision());
+				roundToDecimals (a, Config->roundMatrixPrecision());
 			});
 
 			mo->setPosition (v);
@@ -180,7 +180,7 @@ void AlgorithmToolset::roundCoordinates()
 				Vertex v = obj->vertex (i);
 				v.apply ([&](Axis, double& a)
 				{
-					RoundToDecimals (a, Config->roundPositionPrecision());
+					roundToDecimals (a, Config->roundPositionPrecision());
 				});
 				obj->setVertex (i, v);
 				num += 3;

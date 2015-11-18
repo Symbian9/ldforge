@@ -541,10 +541,10 @@ Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 
 	Vertex pos3d;
 	const LDFixedCamera* cam = &g_FixedCameras[camera()];
-	const Axis axisX = cam->localX;
-	const Axis axisY = cam->localY;
-	const int negXFac = cam->negatedX ? -1 : 1,
-				negYFac = cam->negatedY ? -1 : 1;
+	Axis axisX = cam->localX;
+	Axis axisY = cam->localY;
+	int signX = cam->negatedX ? -1 : 1;
+	int signY = cam->negatedY ? -1 : 1;
 
 	// Calculate cx and cy - these are the LDraw unit coords the cursor is at.
 	double cx = (-m_virtualWidth + ((2 * pos2d.x() * m_virtualWidth) / m_width) - panning (X));
@@ -552,15 +552,15 @@ Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 
 	if (snap)
 	{
-		cx = Grid::Snap (cx, Grid::Coordinate);
-		cy = Grid::Snap (cy, Grid::Coordinate);
+		cx = snapToGrid (cx, Grid::Coordinate);
+		cy = snapToGrid (cy, Grid::Coordinate);
 	}
 
-	cx *= negXFac;
-	cy *= negYFac;
+	cx *= signX;
+	cy *= signY;
 
-	RoundToDecimals (cx, 4);
-	RoundToDecimals (cy, 4);
+	roundToDecimals (cx, 4);
+	roundToDecimals (cy, 4);
 
 	// Create the vertex from the coordinates
 	pos3d.setCoordinate (axisX, cx);
@@ -616,15 +616,16 @@ QPen GLRenderer::linePen() const
 //
 void GLRenderer::paintEvent (QPaintEvent*)
 {
-	doMakeCurrent();
+	makeCurrent();
 	m_virtualWidth = zoom();
 	m_virtualHeight = (m_height * m_virtualWidth) / m_width;
 	initGLData();
 	drawGLScene();
 
-	QPainter paint (this);
+	QPainter painter (this);
 	QFontMetrics metrics = QFontMetrics (QFont());
-	paint.setRenderHint (QPainter::HighQualityAntialiasing);
+	painter.setRenderHint (QPainter::Antialiasing);
+	painter.setRenderHint (QPainter::HighQualityAntialiasing);
 
 	// If we wish to only draw the brick, stop here
 	if (isDrawOnly())
@@ -636,8 +637,8 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		QString text = format ("Rotation: (%1°, %2°, %3°)\nPanning: (%4, %5), Zoom: %6",
 			rotation(X), rotation(Y), rotation(Z), panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
-		paint.setPen (textPen());
-		paint.drawText ((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
+		painter.setPen (textPen());
+		painter.drawText ((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
 			textSize.height(), Qt::AlignCenter, text);
 	}
 #endif
@@ -653,27 +654,27 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			QPoint v1 = convert3dTo2d (currentDocumentData().overlays[camera()].v1);
 			QRect targetRect (v0.x(), v0.y(), qAbs (v1.x() - v0.x()), qAbs (v1.y() - v0.y()));
 			QRect sourceRect (0, 0, overlay.img->width(), overlay.img->height());
-			paint.drawImage (targetRect, *overlay.img, sourceRect);
+			painter.drawImage (targetRect, *overlay.img, sourceRect);
 		}
 
 		// Paint the coordinates onto the screen.
 		QString text = format (tr ("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
 		QFontMetrics metrics = QFontMetrics (font());
 		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
-		paint.setPen (textPen());
-		paint.drawText (m_width - textSize.width(), m_height - 16, textSize.width(),
+		painter.setPen (textPen());
+		painter.drawText (m_width - textSize.width(), m_height - 16, textSize.width(),
 			textSize.height(), Qt::AlignCenter, text);
 	}
 
 	if (not isPicking())
 	{
 		// Draw edit mode HUD
-		m_currentEditMode->render (paint);
+		m_currentEditMode->render (painter);
 
 		// Draw a background for the selected camera
-		paint.setPen (m_thinBorderPen);
-		paint.setBrush (QBrush (QColor (0, 128, 160, 128)));
-		paint.drawRect (m_cameraIcons[camera()].selRect);
+		painter.setPen (m_thinBorderPen);
+		painter.setBrush (QBrush (QColor (0, 128, 160, 128)));
+		painter.drawRect (m_cameraIcons[camera()].selRect);
 
 		// Draw the camera icons
 		for (CameraIcon& info : m_cameraIcons)
@@ -682,14 +683,14 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			if (&info == &m_cameraIcons[EFreeCamera] and not m_currentEditMode->allowFreeCamera())
 				continue;
 
-			paint.drawPixmap (info.targetRect, *info.image, info.sourceRect);
+			painter.drawPixmap (info.targetRect, *info.image, info.sourceRect);
 		}
 
 		// Draw a label for the current camera in the bottom left corner
 		{
 			const int margin = 4;
-			paint.setPen (textPen());
-			paint.drawText (QPoint (margin, height() - (margin + metrics.descent())), currentCameraName());
+			painter.setPen (textPen());
+			painter.drawText (QPoint (margin, height() - (margin + metrics.descent())), currentCameraName());
 		}
 
 		// Tool tips
@@ -712,8 +713,8 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		for (const MessageManager::Line& line : messageLog()->getLines())
 		{
 			penColor.setAlphaF (line.alpha);
-			paint.setPen (penColor);
-			paint.drawText (QPoint (margin, y + margin + metrics.ascent()), line.text);
+			painter.setPen (penColor);
+			painter.drawText (QPoint (margin, y + margin + metrics.ascent()), line.text);
 			y += metrics.height();
 		}
 	}
@@ -879,8 +880,7 @@ void GLRenderer::keyReleaseEvent (QKeyEvent* ev)
 //
 void GLRenderer::wheelEvent (QWheelEvent* ev)
 {
-	doMakeCurrent();
-
+	makeCurrent();
 	zoomNotch (ev->delta() > 0);
 	zoom() = qBound (0.01, zoom(), 10000.0);
 	m_isCameraMoving = true;
@@ -929,7 +929,7 @@ void GLRenderer::pick (int mouseX, int mouseY, bool additive)
 //
 void GLRenderer::pick (QRect const& range, bool additive)
 {
-	doMakeCurrent();
+	makeCurrent();
 
 	// Clear the selection if we do not wish to add to it.
 	if (not additive)
@@ -960,30 +960,25 @@ void GLRenderer::pick (QRect const& range, bool additive)
 	const qint32 numpixels = areawidth * areaheight;
 
 	// Allocate space for the pixel data.
-	uchar* const pixeldata = new uchar[4 * numpixels];
-	uchar* pixelptr = &pixeldata[0];
+	QVector<unsigned char> pixeldata (4 * numpixels);
+	unsigned char* pixelcursor = pixeldata.data();
 
 	// Read pixels from the color buffer.
-	glReadPixels (x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixeldata);
+	glReadPixels (x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixeldata.data());
 
 	LDObject* removedObj = nullptr;
-	QList<qint32> indices;
+	QSet<qint32> indices;
 
 	// Go through each pixel read and add them to the selection.
 	// Note: black is background, those indices are skipped.
 	for (qint32 i = 0; i < numpixels; ++i)
 	{
-		qint32 idx =
-			(*(pixelptr + 0) * 0x10000) +
-			(*(pixelptr + 1) * 0x100) +
-			*(pixelptr + 2);
-		pixelptr += 4;
+		qint32 idx = (pixelcursor[0] * 0x10000) + (pixelcursor[1] * 0x100) + pixelcursor[2];
+		pixelcursor += 4;
 
 		if (idx != 0)
 			indices << idx;
 	}
-
-	removeDuplicates (indices);
 
 	for (qint32 idx : indices)
 	{
@@ -1007,8 +1002,6 @@ void GLRenderer::pick (QRect const& range, bool additive)
 		obj->select();
 	}
 
-	delete[] pixeldata;
-
 	// Update everything now.
 	m_window->updateSelection();
 
@@ -1024,12 +1017,12 @@ void GLRenderer::pick (QRect const& range, bool additive)
 }
 
 //
-// Simpler version of GLRenderer::pick which simply picks whatever object on the screen
+// Simpler version of GLRenderer::pick which simply picks whatever object on the cursor
 //
 LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 {
 	uchar pixel[4];
-	doMakeCurrent();
+	makeCurrent();
 	setPicking (true);
 	drawGLScene();
 	glReadPixels (mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
@@ -1629,9 +1622,9 @@ QPointF const& GLRenderer::mousePositionF() const
 	return m_mousePositionF;
 }
 
-void GLRenderer::doMakeCurrent()
+void GLRenderer::makeCurrent()
 {
-	makeCurrent();
+	QGLWidget::makeCurrent();
 	initializeOpenGLFunctions();
 }
 

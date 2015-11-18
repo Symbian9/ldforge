@@ -26,27 +26,9 @@ class LDDocument;
 class QColor;
 class QAction;
 
-// Simplifies the given fraction.
-void Simplify (int& numer, int& denom);
-
 using ApplyToMatrixFunction = std::function<void (int, double&)>;
 using ApplyToMatrixConstFunction = std::function<void (int, double)>;
 
-void RoundToDecimals (double& a, int decimals);
-void ApplyToMatrix (Matrix& a, ApplyToMatrixFunction func);
-void ApplyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
-
-double GetCoordinateOf (const Vertex& a, Axis ax);
-QString MakePrettyFileSize (qint64 size);
-
-QString Join (QList<StringFormatArg> vals, QString delim = " ");
-
-// Grid stuff
-float gridCoordinateSnap();
-float gridAngleSnap();
-float gridBezierCurveSegments();
-
-// =============================================================================
 enum class RotationPoint
 {
 	ObjectOrigin,
@@ -55,10 +37,6 @@ enum class RotationPoint
 	NumValues
 };
 
-Vertex GetRotationPoint (const LDObjectList& objs);
-void ConfigureRotationPoint();
-
-// =============================================================================
 namespace Grid
 {
 	enum Type
@@ -73,6 +51,18 @@ namespace Grid
 		Coordinate,
 		Angle
 	};
-
-	double Snap (double value, const Grid::Config type);
 }
+
+void applyToMatrix (Matrix& a, ApplyToMatrixFunction func);
+void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
+void configureRotationPoint();
+QString formatFileSize (qint64 size);
+int gcd (int a, int b);
+Vertex getRotationPoint (const LDObjectList& objs);
+float gridAngleSnap();
+float gridBezierCurveSegments();
+float gridCoordinateSnap();
+QString joinStrings (QList<StringFormatArg> vals, QString delim = " ");
+void roundToDecimals (double& a, int decimals);
+void simplify (int& numer, int& denom);
+double snapToGrid (double value, const Grid::Config type);

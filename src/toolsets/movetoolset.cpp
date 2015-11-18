@@ -136,5 +136,5 @@ void MoveToolset::rotateZNeg()
 
 void MoveToolset::configureRotationPoint()
 {
-	ConfigureRotationPoint();
+	configureRotationPoint();
 }

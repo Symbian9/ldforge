@@ -860,7 +860,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 		if (doc == m_currentDocument)
 			updateTitle();
 
-		print ("Saved to %1 (%2)", path, MakePrettyFileSize (savesize));
+		print ("Saved to %1 (%2)", path, formatFileSize (savesize));
 
 		// Add it to recent files
 		m_documents->addRecentFile (path);
@@ -1177,7 +1177,7 @@ void MainWindow::circleToolSegmentsChanged()
 {
 	int numerator (ui.ringToolSegments->value());
 	int denominator (ui.ringToolHiRes->isChecked() ? HighResolution : LowResolution);
-	Simplify (numerator, denominator);
+	simplify (numerator, denominator);
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
 }
 

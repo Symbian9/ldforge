@@ -567,7 +567,7 @@ QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num)
 			denom = divs;
 
 	// Simplify the fractional part, but the denominator must be at least 4.
-	Simplify (numer, denom);
+	simplify (numer, denom);
 
 	if (denom < 4)
 	{
