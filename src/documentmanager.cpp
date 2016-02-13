@@ -298,7 +298,8 @@ LDObjectList DocumentManager::loadFileContents (QFile* fp, int* numWarnings, boo
 	return objs;
 }
 
-LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride, bool* aborted)
+LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride,
+										   bool* aborted)
 {
 	// Convert the file name to lowercase when searching because some parts contain subfile
 	// subfile references with uppercase file names. I'll assume here that the library will always

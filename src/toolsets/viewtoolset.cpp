@@ -89,8 +89,11 @@ void ViewToolset::selectByType()
 			continue;
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
-		if (type == OBJ_SubfileReference and not subfilenames.contains (static_cast<LDSubfileReference*> (obj)->fileInfo()->name()))
+		if (type == OBJ_SubfileReference
+			and not subfilenames.contains (static_cast<LDSubfileReference*> (obj)->fileInfo()->name()))
+		{
 			continue;
+		}
 
 		obj->select();
 	}

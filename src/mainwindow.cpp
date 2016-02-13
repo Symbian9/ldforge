@@ -90,7 +90,8 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	rendererLayout->addWidget (renderer());
 
 	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (selectionChanged()));
-	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this, SLOT (objectListDoubleClicked (QListWidgetItem*)));
+	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this,
+			 SLOT (objectListDoubleClicked (QListWidgetItem*)));
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 

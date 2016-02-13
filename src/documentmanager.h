@@ -41,7 +41,8 @@ public:
 	bool isSafeToCloseAll();
 	LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok);
 	void loadLogoedStuds();
-	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr, bool* aborted = nullptr);
+	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr,
+							  bool* aborted = nullptr);
 	QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer);
 	void openMainModel (QString path);
 	bool preInline (LDDocument* doc, LDObjectList&, bool deep, bool renderinline);
