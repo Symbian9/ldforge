@@ -125,7 +125,7 @@ public:
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
 	void swap (LDObject* other);
-	LDObject* topLevelParent();
+	virtual int triangleCount() const;
 	virtual LDObjectType type() const = 0;
 	virtual QString typeName() const = 0;
 	const Vertex& vertex (int i) const;
@@ -143,7 +143,6 @@ private:
 	bool m_isHidden;
 	bool m_isSelected;
 	bool m_isDestroyed;
-	LDObject* m_parent;
 	LDDocument* m_document;
 	qint32 m_id;
 	LDColor m_color;
@@ -324,6 +323,7 @@ public:
 	LDObjectList inlineContents (bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
 	void setFileInfo (LDDocument* fileInfo);
+	int triangleCount() const override;
 
 private:
 	LDDocument* m_fileInfo;
@@ -387,6 +387,7 @@ class LDTriangle : public LDObject
 
 public:
 	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* document = nullptr);
+	int triangleCount() const override;
 };
 
 //
@@ -410,6 +411,7 @@ public:
 
 	// Split this quad into two triangles
 	QList<LDTriangle*> splitToTriangles();
+	int triangleCount() const override;
 };
 
 //

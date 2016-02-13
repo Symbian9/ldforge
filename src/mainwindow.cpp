@@ -119,8 +119,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	setMinimumSize (300, 200);
 	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (doLastSecondCleanup()));
 	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
-	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)),
-		this, SLOT (circleToolSegmentsChanged()));
+	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)), this, SLOT (circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
 
 	// Examine the toolsets and make a dictionary of tools

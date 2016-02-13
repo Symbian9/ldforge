@@ -41,14 +41,14 @@ LDDocument::LDDocument (DocumentManager* parent) :
 	m_isCache (true),
 	m_verticesOutdated (true),
 	m_needVertexMerge (true),
+	m_needsReCache(true),
 	m_beingDestroyed (false),
+	m_needRecount(false),
+	m_savePosition(-1),
+	m_tabIndex(-1),
+	m_triangleCount(0),
 	m_gldata (new LDGLData),
-	m_manager (parent)
-{
-	setSavePosition (-1);
-	setTabIndex (-1);
-	m_needsReCache = true;
-}
+	m_manager (parent) {}
 
 LDDocument::~LDDocument()
 {
@@ -124,6 +124,21 @@ QString LDDocument::defaultName() const
 void LDDocument::setDefaultName (QString value)
 {
 	m_defaultName = value;
+}
+
+int LDDocument::triangleCount()
+{
+	if (m_needRecount)
+	{
+		m_triangleCount = 0;
+
+		for (LDObject* obj : m_objects)
+			m_triangleCount += obj->triangleCount();
+
+		m_needRecount = false;
+	}
+
+	return m_triangleCount;
 }
 
 void LDDocument::openForEditing()
@@ -599,6 +614,7 @@ int LDDocument::addObject (LDObject* obj)
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
+	m_needRecount = true;
 	m_window->renderer()->compileObject (obj);
 	return getObjectCount() - 1;
 }
@@ -621,6 +637,7 @@ void LDDocument::insertObj (int pos, LDObject* obj)
 	history()->add (new AddHistoryEntry (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
+	m_needRecount = true;
 	m_window->renderer()->compileObject (obj);
 	
 
@@ -662,6 +679,7 @@ void LDDocument::forgetObject (LDObject* obj)
 		}
 
 		m_objects.removeAt (idx);
+		m_needRecount = true;
 		obj->setDocument (nullptr);
 	}
 }
@@ -909,4 +927,9 @@ void LDDocument::redoVertices()
 void LDDocument::needVertexMerge()
 {
 	m_needVertexMerge = true;
+}
+
+void LDDocument::needRecount()
+{
+	m_needRecount = true;
 }

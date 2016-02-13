@@ -6,6 +6,7 @@
 
 
 +	- Pressing Ctrl while drawing now causes the new line to become locked to cardinal directions, ala Gimp.
++	- Added triangle count display to the lower left corner of the viewport.
 -	- Selecting an invertnext'd object no longer selects the invertnext (reverted feature from 0.3, caused too many problems).
 
 

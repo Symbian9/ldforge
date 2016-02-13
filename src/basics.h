@@ -234,3 +234,8 @@ bool isOneOf (T const&)
 {
 	return false;
 }
+
+inline void toggle (bool& a)
+{
+	a = not a;
+}

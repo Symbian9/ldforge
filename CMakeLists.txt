@@ -226,5 +226,12 @@ add_custom_target (config_collection ALL
 		${LDFORGE_SOURCES}
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+add_custom_target(lengthcheck ALL
+	COMMAND python
+		"${CMAKE_SOURCE_DIR}/tools/linelength.py"
+		${LDFORGE_SOURCES}
+		${LDFORGE_HEADERS}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 add_dependencies (ldforge revision_check config_collection)
 install (TARGETS ldforge RUNTIME DESTINATION bin)

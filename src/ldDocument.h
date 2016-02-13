@@ -77,6 +77,7 @@ public:
 	void mergeVertices();
 	QString name() const;
 	void needVertexMerge();
+	void needRecount();
 	const LDObjectList& objects() const;
 	void openForEditing();
 	const QList<LDPolygon>& polygonData() const;
@@ -95,6 +96,7 @@ public:
 	void setTabIndex (int value);
 	void swapObjects (LDObject* one, LDObject* other);
 	int tabIndex() const;
+	int triangleCount();
 	void undo();
 	void vertexChanged (const Vertex& a, const Vertex& b);
 
@@ -111,8 +113,10 @@ private:
 	bool m_needVertexMerge;
 	bool m_needsReCache; // If true, next polygon inline of this document rebuilds stored polygon data.
 	bool m_beingDestroyed;
+	bool m_needRecount;
 	long m_savePosition;
 	int m_tabIndex;
+	int m_triangleCount;
 	QList<LDPolygon> m_polygonData;
 	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
 	QVector<Vertex> m_vertices;

@@ -191,11 +191,11 @@ QString LDBfc::asText() const
 QList<LDTriangle*> LDQuad::splitToTriangles()
 {
 	// Create the two triangles based on this quadrilateral:
-	// 0---3       0---3    3
-	// |   |       |  /    /|
-	// |   |  ==>  | /    / |
-	// |   |       |/    /  |
-	// 1---2       1    1---2
+	// 0───3       0───3    3
+	// │   │  --→  │  ╱    ╱│
+	// │   │  --→  │ ╱    ╱ │
+	// │   │  --→  │╱    ╱  │
+	// 1───2       1    1───2
 	LDTriangle* tri1 (new LDTriangle (vertex (0), vertex (1), vertex (3)));
 	LDTriangle* tri2 (new LDTriangle (vertex (1), vertex (2), vertex (3)));
 
@@ -246,6 +246,26 @@ void LDObject::swap (LDObject* other)
 {
 	if (document() == other->document())
 		document()->swapObjects (this, other);
+}
+
+int LDObject::triangleCount() const
+{
+	return 0;
+}
+
+int LDSubfileReference::triangleCount() const
+{
+	return fileInfo()->triangleCount();
+}
+
+int LDTriangle::triangleCount() const
+{
+	return 1;
+}
+
+int LDQuad::triangleCount() const
+{
+	return 2;
 }
 
 // =============================================================================
@@ -1185,17 +1205,20 @@ LDDocument* LDSubfileReference::fileInfo() const
 	return m_fileInfo;
 }
 
-void LDSubfileReference::setFileInfo (LDDocument* document)
+void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 {
-	changeProperty (this, &m_fileInfo, document);
+	changeProperty (this, &m_fileInfo, newReferee);
+
+	if (document())
+		document()->needRecount();
 
 	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
 	// GL polygons for the document if they don't exist already.
-	if (document and
-		document->isCache() == false and
-		document->polygonData().isEmpty())
+	if (newReferee and
+		newReferee->isCache() == false and
+		newReferee->polygonData().isEmpty())
 	{
-		document->initializeCachedData();
+		newReferee->initializeCachedData();
 	}
 };
 

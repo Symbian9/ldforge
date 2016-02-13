@@ -690,7 +690,13 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		{
 			const int margin = 4;
 			painter.setPen (textPen());
-			painter.drawText (QPoint (margin, height() - (margin + metrics.descent())), currentCameraName());
+			painter.drawText (QPoint (margin, height() - margin - metrics.descent()), currentCameraName());
+
+			if (m_document)
+			{
+				painter.drawText(QPoint(margin, height() - margin - metrics.height() - metrics.descent()),
+					format("△ %1", m_document->triangleCount()));
+			}
 		}
 
 		// Tool tips
