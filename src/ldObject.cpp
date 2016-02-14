@@ -217,7 +217,7 @@ void LDObject::replace (LDObject* other)
 	if (idx != -1)
 	{
 		// Replace the instance of the old object with the new object
-		document()->setObject (idx, other);
+		document()->setObjectAt (idx, other);
 
 		// Remove the old object
 		destroy();
@@ -231,9 +231,9 @@ void LDObject::replace (const LDObjectList& others)
 	if (idx != -1 and not others.isEmpty())
 	{
 		for (int i = 1; i < others.size(); ++i)
-			document()->insertObj (idx + i, others[i]);
+			document()->insertObject (idx + i, others[i]);
 
-		document()->setObject (idx, others[0]);
+		document()->setObjectAt (idx, others[0]);
 		destroy();
 	}
 }
@@ -773,7 +773,7 @@ void LDSubfileReference::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document()->insertObj (idx, new LDBfc (BfcStatement::InvertNext));
+	document()->insertObject (idx, new LDBfc (BfcStatement::InvertNext));
 }
 
 // =============================================================================
@@ -1210,7 +1210,7 @@ void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 	changeProperty (this, &m_fileInfo, newReferee);
 
 	if (document())
-		document()->needRecount();
+		document()->recountTriangles();
 
 	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
 	// GL polygons for the document if they don't exist already.

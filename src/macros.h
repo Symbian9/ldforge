@@ -66,6 +66,11 @@ public: \
 
 #define ConfigOption(...)
 
+#define DEFINE_FLAG_ACCESS_METHODS \
+	bool checkFlag(Flag flag) const { return !!(m_flags & flag); } \
+	void setFlag(Flag flag) { m_flags |= flag; } \
+	void unsetFlag(Flag flag) { m_flags &= ~flag; }
+
 // once-statement
 struct OnceGuard
 {

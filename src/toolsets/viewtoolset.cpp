@@ -129,7 +129,7 @@ void ViewToolset::screenshot()
 
 void ViewToolset::axes()
 {
-	Config->setDrawAxes (not Config->drawAxes());
+	m_config->toggleDrawAxes();
 	m_window->updateActions();
 	m_window->renderer()->update();
 }
@@ -154,7 +154,7 @@ void ViewToolset::visibilityReveal()
 
 void ViewToolset::wireframe()
 {
-	Config->setDrawWireframe (not Config->drawWireframe());
+	m_config->toggleDrawWireframe();
 	m_window->renderer()->refresh();
 }
 
@@ -176,7 +176,7 @@ void ViewToolset::clearOverlay()
 
 void ViewToolset::drawAngles()
 {
-	Config->setDrawAngles (not Config->drawAngles());
+	m_config->toggleDrawAngles();
 	m_window->renderer()->refresh();
 }
 
@@ -245,10 +245,10 @@ void ViewToolset::testpic()
 
 void ViewToolset::bfcView()
 {
-	Config->setBfcRedGreenView (not Config->bfcRedGreenView());
+	m_config->toggleBfcRedGreenView();
 
-	if (Config->bfcRedGreenView())
-		Config->setRandomColors (false);
+	if (m_config->bfcRedGreenView())
+		m_config->setRandomColors (false);
 
 	m_window->updateActions();
 	m_window->renderer()->refresh();
@@ -276,10 +276,10 @@ void ViewToolset::jumpTo()
 
 void ViewToolset::randomColors()
 {
-	Config->setRandomColors (not Config->randomColors());
+	m_config->toggleRandomColors();
 
-	if (Config->randomColors())
-		Config->setBfcRedGreenView (false);
+	if (m_config->randomColors())
+		m_config->setBfcRedGreenView (false);
 
 	m_window->updateActions();
 	m_window->renderer()->refresh();
@@ -287,18 +287,18 @@ void ViewToolset::randomColors()
 
 void ViewToolset::drawSurfaces()
 {
-	Config->setDrawSurfaces (not Config->drawSurfaces());
+	m_config->toggleDrawSurfaces();
 	m_window->updateActions();
 }
 
 void ViewToolset::drawEdgeLines()
 {
-	Config->setDrawEdgeLines (not Config->drawEdgeLines());
+	m_config->toggleDrawEdgeLines();
 	m_window->updateActions();
 }
 
 void ViewToolset::drawConditionalLines()
 {
-	Config->setDrawConditionalLines (not Config->drawConditionalLines());
+	m_config->toggleDrawConditionalLines();
 	m_window->updateActions();
 }

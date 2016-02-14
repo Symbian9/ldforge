@@ -64,8 +64,8 @@ void AlgorithmToolset::splitQuads()
 
 		// Replace the quad with the first triangle and add the second triangle
 		// after the first one.
-		currentDocument()->setObject (index, triangles[0]);
-		currentDocument()->insertObj (index + 1, triangles[1]);
+		currentDocument()->setObjectAt (index, triangles[0]);
+		currentDocument()->insertObject (index + 1, triangles[1]);
 		num++;
 	}
 
@@ -137,7 +137,7 @@ void AlgorithmToolset::makeBorders()
 				continue;
 
 			long idx = obj->lineNumber() + i + 1;
-			currentDocument()->insertObj (idx, lines[i]);
+			currentDocument()->insertObject (idx, lines[i]);
 			++num;
 		}
 	}
@@ -161,12 +161,12 @@ void AlgorithmToolset::roundCoordinates()
 
 			v.apply ([&](Axis, double& a)
 			{
-				roundToDecimals (a, Config->roundPositionPrecision());
+				roundToDecimals (a, m_config->roundPositionPrecision());
 			});
 
 			applyToMatrix (t, [&](int, double& a)
 			{
-				roundToDecimals (a, Config->roundMatrixPrecision());
+				roundToDecimals (a, m_config->roundMatrixPrecision());
 			});
 
 			mo->setPosition (v);
@@ -180,7 +180,7 @@ void AlgorithmToolset::roundCoordinates()
 				Vertex v = obj->vertex (i);
 				v.apply ([&](Axis, double& a)
 				{
-					roundToDecimals (a, Config->roundPositionPrecision());
+					roundToDecimals (a, m_config->roundPositionPrecision());
 				});
 				obj->setVertex (i, v);
 				num += 3;
@@ -333,7 +333,7 @@ void AlgorithmToolset::addHistoryLine()
 	QDialog* dlg = new QDialog;
 	Ui_AddHistoryLine* ui = new Ui_AddHistoryLine;
 	ui->setupUi (dlg);
-	ui->m_username->setText (Config->defaultUser());
+	ui->m_username->setText (m_config->defaultUser());
 	ui->m_date->setDate (QDate::currentDate());
 	ui->m_comment->setFocus();
 
@@ -363,12 +363,12 @@ void AlgorithmToolset::addHistoryLine()
 	}
 
 	int idx = obj ? obj->lineNumber() : 0;
-	currentDocument()->insertObj (idx++, comment);
+	currentDocument()->insertObject (idx++, comment);
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
-		currentDocument()->insertObj (idx, new LDEmpty);
+		currentDocument()->insertObject (idx, new LDEmpty);
 
 	m_window->buildObjectList();
 	delete ui;
@@ -378,12 +378,12 @@ void AlgorithmToolset::splitLines()
 {
 	bool ok;
 	int segments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:",
-		Config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
+		m_config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
 		return;
 
-	Config->setSplitLinesSegments (segments);
+	m_config->setSplitLinesSegments (segments);
 
 	for (LDObject* obj : selectedObjects())
 	{
@@ -420,7 +420,7 @@ void AlgorithmToolset::splitLines()
 		int ln = obj->lineNumber();
 
 		for (LDObject* seg : newsegs)
-			currentDocument()->insertObj (ln++, seg);
+			currentDocument()->insertObject (ln++, seg);
 
 		obj->destroy();
 	}
@@ -544,7 +544,7 @@ void AlgorithmToolset::subfileSelection()
 	LDObjectList objs;
 	objs << LDSpawn<LDComment> (subtitle);
 	objs << LDSpawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
-	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", Config->defaultName(), Config->defaultUser()));
+	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
 	objs << LDSpawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
 
 	if (not license.isEmpty())
@@ -577,7 +577,7 @@ void AlgorithmToolset::subfileSelection()
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
 		ref->setTransform (IdentityMatrix);
-		currentDocument()->insertObj (refidx, ref);
+		currentDocument()->insertObject (refidx, ref);
 
 		// Refresh stuff
 		m_window->updateDocumentList();

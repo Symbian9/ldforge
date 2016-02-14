@@ -31,6 +31,6 @@
 #include "version.h"
 #include "format.h"
 #include "hierarchyelement.h"
-#include "configurationvaluebag.h"
+#include "configuration.h"
 
-extern ConfigurationValueBag* Config;
+extern Configuration* Config;

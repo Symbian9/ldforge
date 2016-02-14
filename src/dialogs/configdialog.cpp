@@ -82,7 +82,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	applyToWidgetOptions (
 	[&](QWidget* widget, QString confname)
 	{
-		QVariant value = m_settings->value (confname, Config->defaultValueByName (confname));
+		QVariant value = m_settings->value (confname, m_config->defaultValueByName (confname));
 		QLineEdit* le;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
@@ -128,7 +128,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 
 	ui.shortcutsList->setSortingEnabled (true);
 	ui.shortcutsList->sortItems();
-	quickColors = LoadQuickColorList();
+	quickColors = guiUtilities()->loadQuickColorList();
 	updateQuickColorList();
 	initExtProgs();
 	selectPage (defaulttab);
@@ -232,7 +232,7 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)>
 
 		QString optionname (widget->objectName().mid (strlen ("config")));
 
-		if (Config->existsEntry (optionname))
+		if (m_config->existsEntry (optionname))
 			func (widget, optionname);
 		else
 			print ("Couldn't find configuration entry named %1", optionname);
@@ -277,7 +277,7 @@ void ConfigDialog::applySettings()
 
 	// Rebuild the quick color toolbar
 	m_window->setQuickColors (quickColors);
-	Config->setQuickColorToolbar (quickColorString());
+	m_config->setQuickColorToolbar (quickColorString());
 
 	// Ext program settings
 	for (int i = 0; i < NumExternalPrograms; ++i)

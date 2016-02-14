@@ -38,12 +38,7 @@ LDDocument::LDDocument (DocumentManager* parent) :
 	QObject (parent),
 	HierarchyElement (parent),
 	m_history (new EditHistory (this)),
-	m_isCache (true),
-	m_verticesOutdated (true),
-	m_needVertexMerge (true),
-	m_needsReCache(true),
-	m_beingDestroyed (false),
-	m_needRecount(false),
+	m_flags(IsCache | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
 	m_savePosition(-1),
 	m_tabIndex(-1),
 	m_triangleCount(0),
@@ -52,7 +47,7 @@ LDDocument::LDDocument (DocumentManager* parent) :
 
 LDDocument::~LDDocument()
 {
-	m_beingDestroyed = true;
+	m_flags |= IsBeingDestroyed;
 
 	for (int i = 0; i < m_objects.size(); ++i)
 		m_objects[i]->destroy();
@@ -128,14 +123,14 @@ void LDDocument::setDefaultName (QString value)
 
 int LDDocument::triangleCount()
 {
-	if (m_needRecount)
+	if (checkFlag(NeedsTriangleRecount))
 	{
 		m_triangleCount = 0;
 
 		for (LDObject* obj : m_objects)
 			m_triangleCount += obj->triangleCount();
 
-		m_needRecount = false;
+		unsetFlag(NeedsTriangleRecount);
 	}
 
 	return m_triangleCount;
@@ -143,9 +138,9 @@ int LDDocument::triangleCount()
 
 void LDDocument::openForEditing()
 {
-	if (m_isCache)
+	if (isCache())
 	{
-		m_isCache = false;
+		m_flags &= ~IsCache;
 		print ("Opened %1", name());
 
 		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be
@@ -157,7 +152,7 @@ void LDDocument::openForEditing()
 
 bool LDDocument::isCache() const
 {
-	return m_isCache;
+	return !!(m_flags & IsCache);
 }
 
 void LDDocument::addHistoryStep()
@@ -189,7 +184,7 @@ void LDDocument::close()
 {
 	if (not isCache())
 	{
-		m_isCache = true;
+		m_flags |= IsCache;
 		print ("Closed %1", name());
 		m_window->updateDocumentList();
 
@@ -600,7 +595,7 @@ void LDDocument::reloadAllSubfiles()
 			obj->replace (ParseLine (static_cast<LDError*> (obj)->contents()));
 	}
 
-	m_needsReCache = true;
+	m_flags |= NeedsRecache;
 
 	if (this == m_window->currentDocument())
 		m_window->buildObjectList();
@@ -614,7 +609,7 @@ int LDDocument::addObject (LDObject* obj)
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
-	m_needRecount = true;
+	setFlag(NeedsTriangleRecount);
 	m_window->renderer()->compileObject (obj);
 	return getObjectCount() - 1;
 }
@@ -632,12 +627,12 @@ void LDDocument::addObjects (const LDObjectList& objs)
 
 // =============================================================================
 //
-void LDDocument::insertObj (int pos, LDObject* obj)
+void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	history()->add (new AddHistoryEntry (pos, obj));
 	m_objects.insert (pos, obj);
 	obj->setDocument (this);
-	m_needRecount = true;
+	setFlag(NeedsTriangleRecount);
 	m_window->renderer()->compileObject (obj);
 	
 
@@ -672,21 +667,21 @@ void LDDocument::forgetObject (LDObject* obj)
 	{
 		obj->deselect();
 
-		if (not isCache() and not m_beingDestroyed)
+		if (not isCache() and not checkFlag(IsBeingDestroyed))
 		{
 			history()->add (new DelHistoryEntry (idx, obj));
 			m_objectVertices.remove (obj);
 		}
 
 		m_objects.removeAt (idx);
-		m_needRecount = true;
+		setFlag(NeedsTriangleRecount);
 		obj->setDocument (nullptr);
 	}
 }
 
 // =============================================================================
 //
-void LDDocument::setObject (int idx, LDObject* obj)
+void LDDocument::setObjectAt (int idx, LDObject* obj)
 {
 	if (idx < 0 or idx >= m_objects.size())
 		return;
@@ -750,7 +745,7 @@ QString LDDocument::getDisplayName()
 //
 void LDDocument::initializeCachedData()
 {
-	if (m_needsReCache)
+	if (checkFlag(NeedsRecache))
 	{
 		m_vertices.clear();
 
@@ -773,10 +768,10 @@ void LDDocument::initializeCachedData()
 			}
 		}
 
-		m_needsReCache = false;
+		unsetFlag(NeedsRecache);
 	}
 
-	if (m_verticesOutdated)
+	if (checkFlag(VerticesOutdated))
 	{
 		m_objectVertices.clear();
 
@@ -784,10 +779,10 @@ void LDDocument::initializeCachedData()
 			addKnownVertices (obj);
 
 		mergeVertices();
-		m_verticesOutdated = false;
+		unsetFlag(VerticesOutdated);
 	}
 
-	if (m_needVertexMerge)
+	if (checkFlag(NeedsVertexMerge))
 		mergeVertices();
 }
 
@@ -801,7 +796,7 @@ void LDDocument::mergeVertices()
 		m_vertices << verts;
 
 	removeDuplicates (m_vertices);
-	m_needVertexMerge = false;
+	unsetFlag(NeedsVertexMerge);
 }
 
 // =============================================================================
@@ -921,15 +916,15 @@ QVector<Vertex> const& LDDocument::inlineVertices()
 
 void LDDocument::redoVertices()
 {
-	m_verticesOutdated = true;
+	setFlag(VerticesOutdated);
 }
 
 void LDDocument::needVertexMerge()
 {
-	m_needVertexMerge = true;
+	setFlag(NeedsVertexMerge);
 }
 
-void LDDocument::needRecount()
+void LDDocument::recountTriangles()
 {
-	m_needRecount = true;
+	setFlag(NeedsTriangleRecount);
 }

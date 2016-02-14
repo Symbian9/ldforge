@@ -170,7 +170,7 @@ void AddHistoryEntry::undo() const
 
 void AddHistoryEntry::redo() const
 {
-	parent()->document()->insertObj (m_index, ParseLine (m_code));
+	parent()->document()->insertObject (m_index, ParseLine (m_code));
 }
 
 //

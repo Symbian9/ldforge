@@ -37,6 +37,7 @@ class QComboBox;
 class QProgressBar;
 struct Primitive;
 class Toolset;
+class Configuration;
 
 class ColorToolbarItem
 {
@@ -70,7 +71,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow (QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
+	explicit MainWindow(Configuration& config, QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
 	~MainWindow();
 
 	void addMessage (QString msg);
@@ -78,6 +79,7 @@ public:
 	void buildObjectList();
 	void changeDocument (LDDocument* f);
 	void closeInitialDocument();
+	Configuration* config();
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
@@ -133,6 +135,7 @@ protected:
 private:
 	struct ToolInfo { QMetaMethod method; Toolset* object; };
 
+	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;
 	GLRenderer* m_renderer;
 	LDObjectList m_sel;
@@ -166,9 +169,6 @@ extern MainWindow* g_win;
 
 // Get an icon by name from the resources directory.
 QPixmap GetIcon (QString iconName);
-
-// Returns a list of quick colors based on the configuration entry.
-QList<ColorToolbarItem> LoadQuickColorList();
 
 // Asks the user a yes/no question with the given message and the given window title.
 // Returns true if the user answered yes, false if no.

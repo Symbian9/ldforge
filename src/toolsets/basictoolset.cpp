@@ -77,7 +77,7 @@ void BasicToolset::paste()
 	for (QString line : clipboardText.split ("\n"))
 	{
 		LDObject* pasted = ParseLine (line);
-		currentDocument()->insertObj (idx++, pasted);
+		currentDocument()->insertObject (idx++, pasted);
 		pasted->select();
 		++num;
 	}
@@ -111,7 +111,7 @@ void BasicToolset::doInline (bool deep)
 				QString line = inlineobj->asText();
 				inlineobj->destroy();
 				LDObject* newobj = ParseLine (line);
-				currentDocument()->insertObj (idx++, newobj);
+				currentDocument()->insertObject (idx++, newobj);
 				newobj->select();
 			}
 	
@@ -185,7 +185,7 @@ void BasicToolset::insertRaw()
 	{
 		LDObject* obj = ParseLine (line);
 
-		currentDocument()->insertObj (idx, obj);
+		currentDocument()->insertObject (idx, obj);
 		obj->select();
 		idx++;
 	}

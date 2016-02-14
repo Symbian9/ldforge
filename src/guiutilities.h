@@ -19,6 +19,7 @@
 #pragma once
 #include "hierarchyelement.h"
 #include "main.h"
+#include "mainwindow.h"
 
 class GuiUtilities : public QObject, public HierarchyElement
 {
@@ -29,4 +30,5 @@ public:
 	QIcon makeColorIcon (LDColor ldcolor, int size);
 	void fillUsedColorsToComboBox (class QComboBox* box);
 	QColor mainColorRepresentation();
+	QList<ColorToolbarItem> loadQuickColorList();
 };

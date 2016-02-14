@@ -391,7 +391,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	if (newObject)
 	{
 		int idx = g_win->suggestInsertPoint();
-		g_win->currentDocument()->insertObj (idx, obj);
+		g_win->currentDocument()->insertObject (idx, obj);
 	}
 
 	g_win->refresh();

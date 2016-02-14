@@ -29,7 +29,7 @@ add_custom_target (revision_check ALL
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
-set_source_files_properties (${CMAKE_BINARY_DIR}/configurationvaluebag.cpp PROPERTIES GENERATED TRUE)
+set_source_files_properties (${CMAKE_BINARY_DIR}/configuration.cpp PROPERTIES GENERATED TRUE)
 
 set (LDFORGE_SOURCES
 	src/addObjectDialog.cpp
@@ -112,6 +112,7 @@ set (LDFORGE_HEADERS
 	src/primitives.h
 	src/radioGroup.h
 	src/ringFinder.h
+	src/transform.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
 	src/dialogs/ldrawpathdialog.h
@@ -193,13 +194,13 @@ if (USE_QT5)
 	qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS}
 		${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS}
-		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
+		${CMAKE_BINARY_DIR}/configuration.cpp)
 else()
 	qt4_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
 	qt4_add_resources (LDFORGE_RCC ${LDFORGE_RESOURCES})
 	add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_RCC}
 		${LDFORGE_FORMS_HEADERS} ${LDFORGE_HEADERS}
-		${CMAKE_BINARY_DIR}/configurationvaluebag.cpp)
+		${CMAKE_BINARY_DIR}/configuration.cpp)
 endif()
 
 set_source_files_properties (${LDFORGE_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -220,8 +221,8 @@ endif()
 add_custom_target (config_collection ALL
 	COMMAND python
 		"${CMAKE_SOURCE_DIR}/tools/configcollector.py"
-		--header ${CMAKE_BINARY_DIR}/configurationvaluebag.h
-		--source ${CMAKE_BINARY_DIR}/configurationvaluebag.cpp
+		--header ${CMAKE_BINARY_DIR}/configuration.h
+		--source ${CMAKE_BINARY_DIR}/configuration.cpp
 		--sourcedir ${CMAKE_SOURCE_DIR}/src
 		${LDFORGE_SOURCES}
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

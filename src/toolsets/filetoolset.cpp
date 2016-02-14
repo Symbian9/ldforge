@@ -98,10 +98,10 @@ void FileToolset::settings()
 
 void FileToolset::setLDrawPath()
 {
-	LDrawPathDialog* dialog = new LDrawPathDialog (Config->lDrawPath(), true);
+	LDrawPathDialog* dialog = new LDrawPathDialog (m_config->lDrawPath(), true);
 
 	if (dialog->exec())
-		Config->setLDrawPath (dialog->path());
+		m_config->setLDrawPath (dialog->path());
 }
 
 void FileToolset::exit()
@@ -132,7 +132,7 @@ void FileToolset::insertFrom()
 
 	for (LDObject* obj : objs)
 	{
-		currentDocument()->insertObj (idx, obj);
+		currentDocument()->insertObject (idx, obj);
 		obj->select();
 		m_window->renderer()->compileObject (obj);
 

@@ -35,7 +35,7 @@
 #include "documentmanager.h"
 
 MainWindow* g_win = nullptr;
-ConfigurationValueBag* Config = nullptr;
+Configuration* Config = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
@@ -49,7 +49,7 @@ int main (int argc, char* argv[])
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
 
-	static ConfigurationValueBag configObject;
+	static Configuration configObject;
 	Config = &configObject;
 
 	LDPaths* paths = new LDPaths;
@@ -58,7 +58,7 @@ int main (int argc, char* argv[])
 
 	initCrashCatcher();
 	initColors();
-	MainWindow* win = new MainWindow;
+	MainWindow* win = new MainWindow(configObject);
 	LoadPrimitives();
 	win->show();
 

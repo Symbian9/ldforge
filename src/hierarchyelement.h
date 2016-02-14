@@ -19,9 +19,9 @@
 #pragma once
 #include <QObject>
 #include "main.h"
+#include "configuration.h"
 
 class MainWindow;
-class ConfigurationValueBag;
 class GuiUtilities;
 class LDDocument;
 class DocumentManager;
@@ -42,4 +42,5 @@ public:
 protected:
 	MainWindow* m_window;
 	DocumentManager* m_documents;
+	Configuration* m_config;
 };

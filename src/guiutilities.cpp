@@ -37,8 +37,8 @@ QIcon GuiUtilities::makeColorIcon (LDColor ldcolor, int size)
 	if (ldcolor == MainColor)
 	{
 		// Use the user preferences for main color here
-		color = Config->mainColor();
-		color.setAlphaF (Config->mainColorAlpha());
+		color = m_config->mainColor();
+		color.setAlphaF (m_config->mainColorAlpha());
 	}
 
 	// Paint the icon border
@@ -84,11 +84,34 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 
 QColor GuiUtilities::mainColorRepresentation()
 {
-	QColor col (Config->mainColor());
+	QColor col (m_config->mainColor());
 
 	if (not col.isValid())
 		return QColor (0, 0, 0);
 
-	col.setAlpha (Config->mainColorAlpha() * 255.f);
+	col.setAlpha (m_config->mainColorAlpha() * 255.f);
 	return col;
+}
+
+//
+// Returns a list of quick colors based on the configuration entry.
+//
+QList<ColorToolbarItem> GuiUtilities::loadQuickColorList()
+{
+	QList<ColorToolbarItem> colors;
+
+	for (QString colorname : m_config->quickColorToolbar().split (":"))
+	{
+		if (colorname == "|")
+			colors << ColorToolbarItem::makeSeparator();
+		else
+		{
+			LDColor color = colorname.toInt();
+
+			if (color.isValid())
+				colors << ColorToolbarItem (color, nullptr);
+		}
+	}
+
+	return colors;
 }

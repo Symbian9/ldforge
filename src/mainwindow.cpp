@@ -64,8 +64,9 @@ ConfigOption (QStringList HiddenToolbars)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
+MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
+	m_config(config),
 	m_guiUtilities (new GuiUtilities (this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
@@ -100,7 +101,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 	else
 		updatePrimitives();
 
-	m_quickColors = LoadQuickColorList();
+	m_quickColors = m_guiUtilities->loadQuickColorList();
 	setStatusBar (new QStatusBar);
 	updateActions();
 
@@ -160,7 +161,7 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 		}
 	}
 
-	for (QVariant const& toolbarname : Config->hiddenToolbars())
+	for (QVariant const& toolbarname : m_config.hiddenToolbars())
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
@@ -170,11 +171,11 @@ MainWindow::MainWindow (QWidget* parent, Qt::WindowFlags flags) :
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
-	if (Config->firstStart())
+	if (m_config.firstStart())
 	{
 		ConfigDialog* dialog = new ConfigDialog (this, ConfigDialog::ProfileTab);
 		dialog->show();
-		Config->setFirstStart (false);
+		m_config.setFirstStart (false);
 	}
 }
 
@@ -234,7 +235,7 @@ void MainWindow::updateRecentFilesMenu()
 
 	QAction* first = nullptr;
 
-	for (const QVariant& it : Config->recentFiles())
+	for (const QVariant& it : m_config.recentFiles())
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
@@ -244,28 +245,6 @@ void MainWindow::updateRecentFilesMenu()
 		m_recentFiles << recent;
 		first = recent;
 	}
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QList<ColorToolbarItem> LoadQuickColorList()
-{
-	QList<ColorToolbarItem> colors;
-
-	for (QString colorname : Config->quickColorToolbar().split (":"))
-	{
-		if (colorname == "|")
-			colors << ColorToolbarItem::makeSeparator();
-		else
-		{
-			LDColor color = colorname.toInt();
-
-			if (color.isValid())
-				colors << ColorToolbarItem (color, nullptr);
-		}
-	}
-
-	return colors;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -306,7 +285,7 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	int grid = Config->grid();
+	int grid = m_config.grid();
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
@@ -481,7 +460,7 @@ void MainWindow::buildObjectList()
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
 		}
-		else if (Config->colorizeObjectsList()
+		else if (m_config.colorizeObjectsList()
 			and obj->isColored()
 			and obj->color().isValid()
 			and obj->color() != MainColor
@@ -714,7 +693,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 	}
 
 	// Save the configuration before leaving.
-	Config->setHiddenToolbars (hiddenToolbars);
+	m_config.setHiddenToolbars (hiddenToolbars);
 	syncSettings();
 	ev->accept();
 }
@@ -1040,14 +1019,14 @@ void MainWindow::updateActions()
 		ui.actionRedo->setEnabled (pos < (long) his->size() - 1);
 	}
 
-	ui.actionWireframe->setChecked (Config->drawWireframe());
-	ui.actionAxes->setChecked (Config->drawAxes());
-	ui.actionBfcView->setChecked (Config->bfcRedGreenView());
-	ui.actionRandomColors->setChecked (Config->randomColors());
-	ui.actionDrawAngles->setChecked (Config->drawAngles());
-	ui.actionDrawSurfaces->setChecked (Config->drawSurfaces());
-	ui.actionDrawEdgeLines->setChecked (Config->drawEdgeLines());
-	ui.actionDrawConditionalLines->setChecked (Config->drawConditionalLines());
+	ui.actionWireframe->setChecked (m_config.drawWireframe());
+	ui.actionAxes->setChecked (m_config.drawAxes());
+	ui.actionBfcView->setChecked (m_config.bfcRedGreenView());
+	ui.actionRandomColors->setChecked (m_config.randomColors());
+	ui.actionDrawAngles->setChecked (m_config.drawAngles());
+	ui.actionDrawSurfaces->setChecked (m_config.drawSurfaces());
+	ui.actionDrawEdgeLines->setChecked (m_config.drawEdgeLines());
+	ui.actionDrawConditionalLines->setChecked (m_config.drawConditionalLines());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1202,7 +1181,7 @@ void MainWindow::syncSettings()
 //
 QVariant MainWindow::getConfigValue (QString name)
 {
-	QVariant value = m_settings->value (name, Config->defaultValueByName (name));
+	QVariant value = m_settings->value (name, m_config.defaultValueByName (name));
 	return value;
 }
 
@@ -1320,6 +1299,11 @@ ExtProgramToolset* MainWindow::externalPrograms()
 GuiUtilities* MainWindow::guiUtilities()
 {
 	return m_guiUtilities;
+}
+
+Configuration* MainWindow::config()
+{
+	return &m_config;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

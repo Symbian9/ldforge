@@ -145,7 +145,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 		}
 		else if (poly.color == EdgeColor)
 		{
-			qcol = luma (QColor (Config->backgroundColor())) > 40 ? Qt::black : Qt::white;
+			qcol = luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
 		}
 		else
 		{
@@ -186,7 +186,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 
 	if (blendAlpha != 0.0)
 	{
-		QColor selcolor (Config->selectColorBlend());
+		QColor selcolor (m_config->selectColorBlend());
 		double denom = blendAlpha + 1.0;
 		qcol.setRed ((qcol.red() + (selcolor.red() * blendAlpha)) / denom);
 		qcol.setGreen ((qcol.green() + (selcolor.green() * blendAlpha)) / denom);

@@ -123,6 +123,7 @@ class ConfigCollector (object):
 			decl['getter'] = caseconversions.convert_case (decl['name'], style='java')
 			decl['varname'] = 'm_' + decl['getter']
 			decl['setter'] = 'set' + caseconversions.convert_case (decl['name'], style='camel')
+			decl['toggler'] = 'toggle' + caseconversions.convert_case (decl['name'], style='camel')
 			decl['typecref'] = 'const %s&' % decl['type'] if decl['type'] not in passbyvalue else decl['type']
 
 			try:
@@ -153,20 +154,24 @@ class ConfigCollector (object):
 		fp.write ('#include <QMap>\n')
 		for qttype in sorted (self.qttypes):
 			fp.write ('#include <%s>\n' % qttype)
+		fp.write ('\n')
 		formatargs = {}
 		write = lambda value: fp.write (value)
-		write ('class ConfigurationValueBag\n')
+		write ('class Configuration\n')
 		write ('{\n')
 		write ('public:\n')
-		write ('\tConfigurationValueBag();\n')
-		write ('\t~ConfigurationValueBag();\n')
+		write ('\tConfiguration();\n')
+		write ('\t~Configuration();\n')
 		write ('\tbool existsEntry (const QString& name);\n')
 		write ('\tQVariant defaultValueByName (const QString& name);\n')
 
 		for decl in self.decls:
 			write ('\t{type} {getter}() const;\n'.format (**decl))
 		for decl in self.decls:
-			write ('\tvoid {setter} ({typecref} value);\n'.format (**decl))
+			write ('\tvoid {setter}({typecref} value);\n'.format (**decl))
+
+		for decl in filter(lambda decl: decl['type'] == 'bool', self.decls):
+			write('\tvoid {toggler}();\n'.format(**decl))
 
 		write ('\n')
 		write ('private:\n')
@@ -184,7 +189,7 @@ class ConfigCollector (object):
 
 		fp.write (
 			'\n'
-			'ConfigurationValueBag::ConfigurationValueBag() :\n'
+			'Configuration::Configuration() :\n'
 			'\tm_settings (makeSettings (nullptr))\n'
 			'{\n')
 
@@ -193,14 +198,14 @@ class ConfigCollector (object):
 
 		fp.write ('}\n'
 			'\n'
-			'ConfigurationValueBag::~ConfigurationValueBag()\n'
+			'Configuration::~Configuration()\n'
 			'{\n'
 			'\tm_settings->deleteLater();\n'
 			'}\n'
 			'\n')
 
 		maptype = 'QMap<QString, QVariant>'
-		fp.write ('QVariant ConfigurationValueBag::defaultValueByName (const QString& name)\n')
+		fp.write ('QVariant Configuration::defaultValueByName (const QString& name)\n')
 		fp.write ('{\n')
 		fp.write ('\t%s::iterator it = m_defaults.find (name);\n' % maptype)
 		fp.write ('\tif (it != m_defaults.end())\n')
@@ -208,14 +213,14 @@ class ConfigCollector (object):
 		fp.write ('\treturn QVariant();\n')
 		fp.write ('}\n')
 		fp.write ('\n')
-		fp.write ('bool ConfigurationValueBag::existsEntry (const QString& name)\n')
+		fp.write ('bool Configuration::existsEntry (const QString& name)\n')
 		fp.write ('{\n')
 		fp.write ('\treturn m_defaults.find (name) != m_defaults.end();\n')
 		fp.write ('}\n')
 		fp.write ('\n')
 
 		for decl in self.decls:
-			fp.write ('{type} ConfigurationValueBag::{getter}() const\n'.format (**decl))
+			fp.write ('{type} Configuration::{getter}() const\n'.format (**decl))
 			fp.write ('{\n')
 			fp.write ('\tstatic const QVariant defaultvalue = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
 			fp.write ('\treturn m_settings->value ("{name}", defaultvalue).{valuefunc}();\n'.format (**decl))
@@ -223,7 +228,7 @@ class ConfigCollector (object):
 			fp.write ('\n')
 
 		for decl in self.decls:
-			fp.write ('void ConfigurationValueBag::{setter} ({typecref} value)\n'.format (**decl))
+			fp.write ('void Configuration::{setter}({typecref} value)\n'.format (**decl))
 			fp.write ('{\n')
 			fp.write ('\tif (value != {default})\n'.format (**decl))
 			fp.write ('\t\tm_settings->setValue ("{name}", QVariant::fromValue<{type}> (value));\n'.format (**decl))
@@ -231,6 +236,13 @@ class ConfigCollector (object):
 			fp.write ('\t\tm_settings->remove ("{name}");\n'.format (**decl))
 			fp.write ('}\n')
 			fp.write ('\n')
+
+		for decl in filter(lambda decl: decl['type'] == 'bool', self.decls):
+			fp.write('void Configuration::{toggler}()\n'.format(**decl))
+			fp.write('{\n')
+			fp.write('\t{setter}(not {getter}());\n'.format(**decl))
+			fp.write('}\n')
+			fp.write('\n')
 
 def main():
 	parser = argparse.ArgumentParser (description='Collects a list of configuration objects')

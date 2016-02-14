@@ -24,6 +24,7 @@
 #include <QVector3D>
 #include <functional>
 #include "macros.h"
+#include "transform.h"
 
 class LDObject;
 class QFile;

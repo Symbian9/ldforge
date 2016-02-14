@@ -44,11 +44,22 @@ class LDDocument : public QObject, public HierarchyElement
 	Q_OBJECT
 
 public:
+	enum Flag
+	{
+		IsCache = (1 << 0),
+		VerticesOutdated = (1 << 1),
+		NeedsVertexMerge = (1 << 2),
+		IsBeingDestroyed = (1 << 3),
+		NeedsRecache = (1 << 4), // The next polygon inline of this document rebuilds stored polygon data.
+		NeedsTriangleRecount = (1 << 5),
+	};
+
+	Q_DECLARE_FLAGS(Flags, Flag)
+
 	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
 	void addHistoryStep();
-	void addKnownVertices (LDObject* obj);
 	int addObject (LDObject* obj);
 	void addObjects (const LDObjectList& objs);
 	void addToHistory (AbstractHistoryEntry* entry);
@@ -71,16 +82,15 @@ public:
 	LDObjectList inlineContents (bool deep, bool renderinline);
 	QList<LDPolygon> inlinePolygons();
 	const QVector<Vertex>& inlineVertices();
-	void insertObj (int pos, LDObject* obj);
+	void insertObject (int pos, LDObject* obj);
 	bool isCache() const;
 	bool isSafeToClose();
-	void mergeVertices();
 	QString name() const;
 	void needVertexMerge();
-	void needRecount();
 	const LDObjectList& objects() const;
 	void openForEditing();
 	const QList<LDPolygon>& polygonData() const;
+	void recountTriangles();
 	void redo();
 	void redoVertices();
 	void reloadAllSubfiles();
@@ -89,9 +99,8 @@ public:
 	long savePosition() const;
 	void setDefaultName (QString value);
 	void setFullPath (QString value);
-	void setImplicit (bool value);
 	void setName (QString value);
-	void setObject (int idx, LDObject* obj);
+	void setObjectAt (int idx, LDObject* obj);
 	void setSavePosition (long value);
 	void setTabIndex (int value);
 	void swapObjects (LDObject* one, LDObject* other);
@@ -108,12 +117,7 @@ private:
 	QString m_defaultName;
 	LDObjectList m_objects;
 	EditHistory* m_history;
-	bool m_isCache;
-	bool m_verticesOutdated;
-	bool m_needVertexMerge;
-	bool m_needsReCache; // If true, next polygon inline of this document rebuilds stored polygon data.
-	bool m_beingDestroyed;
-	bool m_needRecount;
+	Flags m_flags;
 	long m_savePosition;
 	int m_tabIndex;
 	int m_triangleCount;
@@ -123,7 +127,13 @@ private:
 	LDObjectList m_sel;
 	LDGLData* m_gldata;
 	DocumentManager* m_manager;
+
+	DEFINE_FLAG_ACCESS_METHODS
+	void addKnownVertices (LDObject* obj);
+	void mergeVertices();
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(LDDocument::Flags)
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
