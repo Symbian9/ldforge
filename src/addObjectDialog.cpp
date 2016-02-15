@@ -95,8 +95,13 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			coordCount = 3;
 			tw_subfileList = new QTreeWidget();
 			tw_subfileList->setHeaderLabel (tr ("Primitives"));
-			populatePrimitivesTree (tw_subfileList,
-									(obj ? static_cast<LDSubfileReference*> (obj)->fileInfo()->name() : ""));
+
+			QString defaultname;
+
+			if (obj)
+				defaultname = static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
+
+			g_win->primitives()->populateTreeWidget(tw_subfileList, defaultname);
 			connect (tw_subfileList, SIGNAL (itemSelectionChanged()), this, SLOT (slot_subfileTypeChanged()));
 			lb_subfileName = new QLabel ("File:");
 			le_subfileName = new QLineEdit;

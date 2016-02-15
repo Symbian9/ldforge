@@ -172,7 +172,7 @@ void FileToolset::exportTo()
 
 void FileToolset::scanPrimitives()
 {
-	PrimitiveScanner::start();
+	primitives()->startScan();
 }
 
 void FileToolset::openSubfiles()
@@ -200,24 +200,25 @@ void FileToolset::downloadFrom()
 
 void FileToolset::makePrimitive()
 {
-	PrimitivePrompt* dlg = new PrimitivePrompt (m_window);
+	PrimitivePrompt* dialog = new PrimitivePrompt (m_window);
 
-	if (not dlg->exec())
+	if (not dialog->exec())
 		return;
 
-	int segs = dlg->ui->sb_segs->value();
-	int divs = dlg->ui->cb_hires->isChecked() ? HighResolution : LowResolution;
-	int num = dlg->ui->sb_ringnum->value();
-	PrimitiveType type =
-		dlg->ui->rb_circle->isChecked()   ? Circle :
-		dlg->ui->rb_cylinder->isChecked() ? Cylinder :
-		dlg->ui->rb_disc->isChecked()     ? Disc :
-		dlg->ui->rb_ndisc->isChecked()    ? DiscNeg :
-		dlg->ui->rb_ring->isChecked()     ? Ring : Cone;
+	int segs = dialog->ui->sb_segs->value();
+	int divs = dialog->ui->cb_hires->isChecked() ? HighResolution : LowResolution;
+	int num = dialog->ui->sb_ringnum->value();
 
-	LDDocument* f = GeneratePrimitive (type, segs, divs, num);
-	f->openForEditing();
-	m_window->save (f, false);
+	PrimitiveType type =
+		dialog->ui->rb_circle->isChecked()   ? Circle :
+		dialog->ui->rb_cylinder->isChecked() ? Cylinder :
+		dialog->ui->rb_disc->isChecked()     ? Disc :
+		dialog->ui->rb_ndisc->isChecked()    ? DiscNegative :
+		dialog->ui->rb_ring->isChecked()     ? Ring : Cone;
+
+	LDDocument* primitive = primitives()->generatePrimitive(type, segs, divs, num);
+	primitive->openForEditing();
+	m_window->save(primitive, false);
 }
 
 // These are not exactly file tools but I don't want to make another toolset just for 3 very small actions

@@ -22,17 +22,16 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
-#include "mainwindow.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "colors.h"
 #include "basics.h"
-#include "primitives.h"
 #include "glRenderer.h"
 #include "dialogs.h"
 #include "crashCatcher.h"
 #include "ldpaths.h"
 #include "documentmanager.h"
+#include "mainwindow.h"
 
 MainWindow* g_win = nullptr;
 Configuration* Config = nullptr;
@@ -59,7 +58,6 @@ int main (int argc, char* argv[])
 	initCrashCatcher();
 	initColors();
 	MainWindow* win = new MainWindow(configObject);
-	LoadPrimitives();
 	win->show();
 
 	// Process the command line

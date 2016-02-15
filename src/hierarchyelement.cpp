@@ -22,6 +22,8 @@
 #include "mainwindow.h"
 #include "guiutilities.h"
 
+
+
 HierarchyElement::HierarchyElement (QObject* parent) :
 	m_window (nullptr)
 {
@@ -36,7 +38,7 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	if (m_window == nullptr)
 	{
 		m_window = g_win;
-		print ("WARNING: Hierarchy element instance %p should be in the hierarchy of a "
+		print ("WARNING: Hierarchy element instance %1 should be in the hierarchy of a "
 			"MainWindow but isn't.\n", this);
 	}
 
@@ -44,17 +46,30 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	m_config = m_window->config();
 }
 
+
+
 GuiUtilities* HierarchyElement::guiUtilities() const
 {
 	return m_window->guiUtilities();
 }
+
+
 
 LDDocument* HierarchyElement::currentDocument()
 {
 	return m_window->currentDocument();
 }
 
+
+
 const LDObjectList& HierarchyElement::selectedObjects()
 {
 	return m_window->selectedObjects();
+}
+
+
+
+PrimitiveManager* HierarchyElement::primitives()
+{
+	return m_window->primitives();
 }

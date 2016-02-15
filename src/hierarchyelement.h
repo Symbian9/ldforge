@@ -25,6 +25,7 @@ class MainWindow;
 class GuiUtilities;
 class LDDocument;
 class DocumentManager;
+class PrimitiveManager;
 
 //
 // Objects that are to take part in the MainWindow's hierarchy multiple-inherit from this class to get a few useful
@@ -38,6 +39,7 @@ public:
 	const LDObjectList& selectedObjects();
 	LDDocument* currentDocument();
 	GuiUtilities* guiUtilities() const;
+	PrimitiveManager* primitives();
 
 protected:
 	MainWindow* m_window;

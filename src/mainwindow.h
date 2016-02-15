@@ -35,9 +35,9 @@ class QDialogButtonBox;
 class GLRenderer;
 class QComboBox;
 class QProgressBar;
-struct Primitive;
 class Toolset;
 class Configuration;
+class PrimitiveManager;
 
 class ColorToolbarItem
 {
@@ -97,6 +97,7 @@ public:
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
 	LDDocument* newDocument (bool cache = false);
+	PrimitiveManager* primitives();
 	GLRenderer* renderer();
 	void refresh();
 	void refreshObjectList();
@@ -138,6 +139,7 @@ private:
 	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;
 	GLRenderer* m_renderer;
+	PrimitiveManager* m_primitives;
 	LDObjectList m_sel;
 	QList<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
@@ -156,6 +158,7 @@ private:
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;
 
 private slots:
+	void finishInitialization();
 	void selectionChanged();
 	void recentFileClicked();
 	void quickColorClicked();
@@ -180,6 +183,7 @@ bool Confirm (const QString& message);
 
 // Displays an error prompt with the given message
 void Critical (const QString& message);
+void errorPrompt (QWidget *parent, const QString& message);
 
 // Takes in pairs of radio buttons and respective values and finds the first selected one.
 // Returns returns the value of the first found radio button that was checked by the user.
@@ -210,16 +214,4 @@ void RadioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
 	}
 }
 
-class PrimitiveTreeItem : public QTreeWidgetItem
-{
-public:
-	PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info);
-	PrimitiveTreeItem (QTreeWidget* parent, Primitive* info);
-	Primitive* primitive() const;
-
-private:
-	Primitive* m_primitive;
-};
-
-void populatePrimitivesTree (QTreeWidget* tw, const QString& selectByDefault = QString());
 QSettings* makeSettings (QObject* parent = nullptr);

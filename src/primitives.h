@@ -17,10 +17,10 @@
  */
 
 #pragma once
-#include "main.h"
-#include "basics.h"
 #include <QRegExp>
 #include <QDialog>
+#include <QTreeWidgetItem>
+#include "main.h"
 
 class LDDocument;
 class Ui_MakePrimUI;
@@ -28,9 +28,9 @@ class PrimitiveCategory;
 
 struct Primitive
 {
-	QString				name;
-	QString				title;
-	PrimitiveCategory*	category;
+	QString name;
+	QString title;
+	PrimitiveCategory* category;
 };
 
 class PrimitiveCategory : public QObject
@@ -38,27 +38,24 @@ class PrimitiveCategory : public QObject
 	Q_OBJECT
 
 public:
-	enum RegexType
+	enum PatternType
 	{
-		EFilenameRegex,
-		ETitleRegex
+		FilenamePattern,
+		TitlePattern
 	};
 
 	struct RegexEntry
 	{
 		QRegExp		regex;
-		RegexType	type;
+		PatternType	type;
 	};
 
-	QList<RegexEntry> regexes;
-	QList<Primitive> prims;
+	QList<RegexEntry> patterns;
+	QList<Primitive> primitives;
 
 	explicit PrimitiveCategory (QString name, QObject* parent = 0);
 	bool isValidToInclude();
 	QString name() const;
-
-	static void loadCategories();
-	static void populateCategories();
 
 private:
 	QString m_name;
@@ -68,41 +65,38 @@ private:
 // Worker object that scans the primitives folder for primitives and
 // builds an index of them.
 //
-class PrimitiveScanner : public QObject
+class PrimitiveScanner : public QObject, HierarchyElement
 {
 	Q_OBJECT
 
 public:
-	explicit			PrimitiveScanner (QObject* parent = 0);
-	virtual				~PrimitiveScanner();
-	static void			start();
+	PrimitiveScanner(PrimitiveManager* parent);
+	const QList<Primitive>& scannedPrimitives() const;
 
 public slots:
-	void				work();
+	void work();
 
 signals:
-	void				starting (int num);
-	void				workDone();
-	void				update (int i);
+	void starting(int num);
+	void workDone();
+	void update(int i);
 
 private:
-	QList<Primitive>	m_prims;
-	QStringList			m_files;
-	int					m_i;
-	int					m_baselen;
+	PrimitiveManager* m_manager;
+	QList<Primitive> m_prims;
+	QStringList m_files;
+	int m_i;
+	int m_baselen;
 };
 
-extern QList<PrimitiveCategory*> g_PrimitiveCategories;
-
-void LoadPrimitives();
-PrimitiveScanner* ActivePrimitiveScanner();
+extern QList<PrimitiveCategory*> m_categories;
 
 enum PrimitiveType
 {
 	Circle,
 	Cylinder,
 	Disc,
-	DiscNeg,
+	DiscNegative,
 	Ring,
 	Cone,
 };
@@ -120,11 +114,44 @@ public slots:
 	void hiResToggled (bool on);
 };
 
-void MakeCircle (int segs, int divs, double radius, QList<QLineF>& lines);
-LDDocument* GeneratePrimitive (PrimitiveType type, int segs, int divs, int num);
+class PrimitiveManager : public QObject, HierarchyElement
+{
+	Q_OBJECT
 
-// Gets a primitive by the given specs. If the primitive cannot be found, it will
-// be automatically generated.
-LDDocument* GetPrimitive (PrimitiveType type, int segs, int divs, int num);
+public:
+	PrimitiveManager(QObject* parent);
 
-QString MakeRadialFileName (PrimitiveType type, int segs, int divs, int num);
+	PrimitiveScanner* activeScanner();
+	LDDocument* generatePrimitive(PrimitiveType type, int segs, int divs, int num);
+	LDDocument* getPrimitive(PrimitiveType type, int segs, int divs, int num);
+	QString getPrimitivesCfgPath() const;
+	void loadPrimitives();
+	void makeCircle(int segs, int divs, double radius, QList<QLineF>& lines);
+	QString makeRadialFileName(PrimitiveType type, int segs, int divs, int num);
+	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = QString());
+	QString primitiveTypeName(PrimitiveType type);
+	Q_SLOT void scanDone();
+	void startScan();
+
+private:
+	QList<PrimitiveCategory*> m_categories;
+	PrimitiveScanner* m_activeScanner;
+	QList<Primitive> m_primitives;
+	PrimitiveCategory* m_unmatched;
+
+	LDObjectList makePrimitiveBody (PrimitiveType type, int segs, int divs, int num);
+	void loadCategories();
+	void populateCategories();
+	void clearCategories();
+};
+
+class PrimitiveTreeItem : public QTreeWidgetItem
+{
+public:
+	PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info);
+	PrimitiveTreeItem (QTreeWidget* parent, Primitive* info);
+	Primitive* primitive() const;
+
+private:
+	Primitive* m_primitive;
+};

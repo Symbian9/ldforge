@@ -68,6 +68,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	QMainWindow (parent, flags),
 	m_config(config),
 	m_guiUtilities (new GuiUtilities (this)),
+	m_primitives(new PrimitiveManager(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this)),
@@ -96,8 +97,8 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 
-	if (ActivePrimitiveScanner())
-		connect (ActivePrimitiveScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
+	if (m_primitives->activeScanner())
+		connect (m_primitives->activeScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
 	else
 		updatePrimitives();
 
@@ -177,6 +178,13 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 		dialog->show();
 		m_config.setFirstStart (false);
 	}
+
+	QMetaObject::invokeMethod (this, "finishInitialization", Qt::QueuedConnection);
+}
+
+void MainWindow::finishInitialization()
+{
+	m_primitives->loadPrimitives();
 }
 
 MainWindow::~MainWindow()
@@ -908,6 +916,14 @@ void Critical (const QString& message)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+void errorPrompt (QWidget* parent, const QString& message)
+{
+	QMessageBox::critical (parent, MainWindow::tr ("Error"), message,
+		(QMessageBox::Close), QMessageBox::Close);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
 void MainWindow::updateDocumentList()
 {
 	m_updatingTabs = true;
@@ -1031,6 +1047,13 @@ void MainWindow::updateActions()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
+PrimitiveManager* MainWindow::primitives()
+{
+	return m_primitives;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
 GLRenderer* MainWindow::renderer()
 {
 	return m_renderer;
@@ -1048,7 +1071,7 @@ void MainWindow::setQuickColors (const QList<ColorToolbarItem>& colors)
 //
 void MainWindow::updatePrimitives()
 {
-	populatePrimitivesTree (ui.primitives);
+	m_primitives->populateTreeWidget(ui.primitives);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1340,45 +1363,4 @@ QToolButton* ColorToolbarItem::toolButton() const
 void ColorToolbarItem::setToolButton (QToolButton* value)
 {
 	m_toolButton = value;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void populatePrimitivesTree (QTreeWidget* tw, QString const& selectByDefault)
-{
-	tw->clear();
-
-	for (PrimitiveCategory* cat : g_PrimitiveCategories)
-	{
-		PrimitiveTreeItem* parentItem = new PrimitiveTreeItem (tw, nullptr);
-		parentItem->setText (0, cat->name());
-		QList<QTreeWidgetItem*> subfileItems;
-
-		for (Primitive& prim : cat->prims)
-		{
-			PrimitiveTreeItem* item = new PrimitiveTreeItem (parentItem, &prim);
-			item->setText (0, format ("%1 - %2", prim.name, prim.title));
-			subfileItems << item;
-
-			// If this primitive is the one the current object points to,
-			// select it by default
-			if (selectByDefault == prim.name)
-				tw->setCurrentItem (item);
-		}
-
-		tw->addTopLevelItem (parentItem);
-	}
-}
-
-PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info) :
-	QTreeWidgetItem (parent),
-	m_primitive (info) {}
-
-PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidget* parent, Primitive* info) :
-	QTreeWidgetItem (parent),
-	m_primitive (info) {}
-
-Primitive* PrimitiveTreeItem::primitive() const
-{
-	return m_primitive;
 }

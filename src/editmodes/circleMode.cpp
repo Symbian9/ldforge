@@ -91,14 +91,14 @@ void CircleMode::buildCircle()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		refFile = GetPrimitive (::Circle, segments, divisions, 0);
+		refFile = primitives()->getPrimitive(::Circle, segments, divisions, 0);
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		refFile = GetPrimitive (::Disc, segments, divisions, 0);
+		refFile = primitives()->getPrimitive(::Disc, segments, divisions, 0);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
@@ -107,7 +107,7 @@ void CircleMode::buildCircle()
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
 		{
-			refFile = GetPrimitive (::Ring, segments, divisions, cmp.num);
+			refFile = primitives()->getPrimitive(::Ring, segments, divisions, cmp.num);
 			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
@@ -132,8 +132,8 @@ void CircleMode::buildCircle()
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		MakeCircle (segments, divisions, dist0, c0);
-		MakeCircle (segments, divisions, dist1, c1);
+		primitives()->makeCircle(segments, divisions, dist0, c0);
+		primitives()->makeCircle(segments, divisions, dist1, c1);
 
 		for (int i = 0; i < segments; ++i)
 		{
