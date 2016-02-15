@@ -28,18 +28,26 @@
 #include "ldpaths.h"
 #include "documentmanager.h"
 
+
+PrimitiveManager::PrimitiveManager(QObject* parent) :
+	QObject(parent),
+	HierarchyElement(parent),
+	m_activeScanner(nullptr),
+	m_unmatched(nullptr) {}
+
+
 PrimitiveScanner* PrimitiveManager::activeScanner()
 {
 	return m_activeScanner;
 }
+
 
 QString PrimitiveManager::getPrimitivesCfgPath() const
 {
 	return qApp->applicationDirPath() + DIRSLASH "prims.cfg";
 }
 
-// =============================================================================
-//
+
 void PrimitiveManager::loadPrimitives()
 {
 	// Try to load prims.cfg
@@ -78,10 +86,8 @@ void PrimitiveManager::loadPrimitives()
 	}
 }
 
-// =============================================================================
-//
+
 // TODO: replace with QDirIterator
-//
 static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames) __attribute__((deprecated));
 static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames)
 {
@@ -96,90 +102,7 @@ static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames)
 	}
 }
 
-// =============================================================================
-//
-PrimitiveScanner::PrimitiveScanner (PrimitiveManager* parent) :
-	QObject(parent),
-	HierarchyElement(parent),
-	m_manager(parent),
-	m_i(0)
-{
-	QDir dir = LDPaths::primitivesDir();
-	m_baselen = dir.absolutePath().length();
-	GetRecursiveFilenames(dir, m_files);
-	emit starting(m_files.size());
-	print("Scanning primitives...");
-}
 
-const QList<Primitive>& PrimitiveScanner::scannedPrimitives() const
-{
-	return m_prims;
-}
-
-// =============================================================================
-//
-void PrimitiveScanner::work()
-{
-	int max = qMin (m_i + 100, m_files.size());
-
-	for (; m_i < max; ++m_i)
-	{
-		QString filename = m_files[m_i];
-		QFile file (filename);
-
-		if (not file.open (QIODevice::ReadOnly))
-			continue;
-
-		Primitive info;
-		info.name = filename.mid (m_baselen + 1);  // make full path relative
-		info.name.replace ('/', '\\');  // use DOS backslashes, they're expected
-		info.category = nullptr;
-		QByteArray titledata = file.readLine();
-
-		if (titledata != QByteArray())
-			info.title = QString::fromUtf8 (titledata);
-
-		info.title = info.title.simplified();
-
-		if (info.title[0] == '0')
-		{
-			info.title.remove (0, 1);  // remove 0
-			info.title = info.title.simplified();
-		}
-
-		m_prims << info;
-	}
-
-	if (m_i == m_files.size())
-	{
-		// Done with primitives, now save to a config file
-		QString path = m_manager->getPrimitivesCfgPath();
-		QFile configFile (path);
-
-		if (configFile.open (QIODevice::WriteOnly | QIODevice::Text))
-		{
-			for (Primitive& info : m_prims)
-				fprint (configFile, "%1 %2\r\n", info.name, info.title);
-
-			configFile.close();
-		}
-		else
-		{
-			errorPrompt(m_window, format("Couldn't write primitive list %1: %2", path, configFile.errorString()));
-		}
-
-		emit workDone();
-	}
-	else
-	{
-		// Defer to event loop, pick up the work later
-		emit update (m_i);
-		QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
-	}
-}
-
-// =============================================================================
-//
 void PrimitiveManager::startScan()
 {
 	if (m_activeScanner == nullptr)
@@ -190,6 +113,7 @@ void PrimitiveManager::startScan()
 		connect(m_activeScanner, &PrimitiveScanner::workDone, this, &PrimitiveManager::scanDone);
 	}
 }
+
 
 void PrimitiveManager::scanDone()
 {
@@ -203,14 +127,7 @@ void PrimitiveManager::scanDone()
 	}
 }
 
-// =============================================================================
-//
-PrimitiveCategory::PrimitiveCategory (QString name, QObject* parent) :
-	QObject (parent),
-	m_name (name) {}
 
-// =============================================================================
-//
 void PrimitiveManager::clearCategories()
 {
 	for (PrimitiveCategory* category : m_categories)
@@ -219,8 +136,7 @@ void PrimitiveManager::clearCategories()
 	m_categories.clear();
 }
 
-// =============================================================================
-//
+
 void PrimitiveManager::populateCategories()
 {
 	loadCategories();
@@ -272,8 +188,7 @@ void PrimitiveManager::populateCategories()
 			m_unmatched->primitives << primitive;
 	}
 
-	// Sort the categories. Note that we do this here because we need the existing
-	// order for regex matching.
+	// Sort the categories. Note that we only do this here because we needed the original order for pattern matching.
 	qSort (m_categories.begin(), m_categories.end(),
 		[](PrimitiveCategory* const& a, PrimitiveCategory* const& b) -> bool
 		{
@@ -281,8 +196,7 @@ void PrimitiveManager::populateCategories()
 		});
 }
 
-// =============================================================================
-//
+
 void PrimitiveManager::loadCategories()
 {
 	clearCategories();
@@ -359,44 +273,27 @@ void PrimitiveManager::loadCategories()
 	f.close();
 }
 
-// =============================================================================
-//
-bool PrimitiveCategory::isValidToInclude()
-{
-	return not patterns.isEmpty();
-}
 
-QString PrimitiveCategory::name() const
+double getRadialPoint(int i, int divs, double(*func)(double))
 {
-	return m_name;
-}
+	return (*func)((i * 2 * Pi) / divs);
+};
 
-// =============================================================================
-//
-static double getRadialPoint (int i, int divs, double (*func) (double))
-{
-	return (*func) ((i * 2 * Pi) / divs);
-}
 
-// =============================================================================
-//
 // TODO: this doesn't really belong here.
-//
 void PrimitiveManager::makeCircle (int segs, int divs, double radius, QList<QLineF>& lines)
 {
 	for (int i = 0; i < segs; ++i)
 	{
-		double x0 = radius * getRadialPoint (i, divs, cos),
-			x1 = radius * getRadialPoint (i + 1, divs, cos),
-			z0 = radius * getRadialPoint (i, divs, sin),
-			z1 = radius * getRadialPoint (i + 1, divs, sin);
-
-		lines << QLineF (QPointF (x0, z0), QPointF (x1, z1));
+		double x0 = radius * getRadialPoint(i, divs, cos);
+		double x1 = radius * getRadialPoint(i + 1, divs, cos);
+		double z0 = radius * getRadialPoint(i, divs, sin);
+		double z1 = radius * getRadialPoint(i + 1, divs, sin);
+		lines << QLineF(QPointF(x0, z0), QPointF(x1, z1));
 	}
 }
 
-// =============================================================================
-//
+
 LDObjectList PrimitiveManager::makePrimitiveBody(const PrimitiveSpec& spec)
 {
 	LDObjectList objs;
@@ -549,8 +446,7 @@ LDObjectList PrimitiveManager::makePrimitiveBody(const PrimitiveSpec& spec)
 	return objs;
 }
 
-// =============================================================================
-//
+
 QString PrimitiveManager::primitiveTypeName (PrimitiveType type)
 {
 	// Not translated as primitives are in English.
@@ -562,8 +458,7 @@ QString PrimitiveManager::primitiveTypeName (PrimitiveType type)
 		return "Unknown";
 }
 
-// =============================================================================
-//
+
 QString PrimitiveManager::makeRadialFileName(const PrimitiveSpec& spec)
 {
 	int numerator = spec.segments;
@@ -595,8 +490,7 @@ QString PrimitiveManager::makeRadialFileName(const PrimitiveSpec& spec)
 	return prefix + frac + root + numstr + ".dat";
 }
 
-// =============================================================================
-//
+
 LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveSpec& spec)
 {
 	// Make the description
@@ -655,11 +549,8 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveSpec& spec)
 	return document;
 }
 
-// =============================================================================
-//
-// Gets a primitive by the given specs. If the primitive cannot be found, it will
-// be automatically generated.
-//
+
+// Gets a primitive by the given spec. If the primitive cannot be found, it will be automatically generated.
 LDDocument* PrimitiveManager::getPrimitive(const PrimitiveSpec& spec)
 {
 	QString name = makeRadialFileName(spec);
@@ -671,16 +562,7 @@ LDDocument* PrimitiveManager::getPrimitive(const PrimitiveSpec& spec)
 	return generatePrimitive(spec);
 }
 
-// =============================================================================
-//
-PrimitiveManager::PrimitiveManager(QObject* parent) :
-	QObject(parent),
-	HierarchyElement(parent),
-	m_activeScanner(nullptr),
-	m_unmatched(nullptr) {}
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
 void PrimitiveManager::populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault)
 {
 	tree->clear();
@@ -707,20 +589,130 @@ void PrimitiveManager::populateTreeWidget(QTreeWidget* tree, const QString& sele
 	}
 }
 
+
+//
 // ---------------------------------------------------------------------------------------------------------------------
 //
+
+
+PrimitiveCategory::PrimitiveCategory (QString name, QObject* parent) :
+	QObject (parent),
+	m_name (name) {}
+
+
+bool PrimitiveCategory::isValidToInclude()
+{
+	return not patterns.isEmpty();
+}
+
+
+QString PrimitiveCategory::name() const
+{
+	return m_name;
+}
+
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+
+PrimitiveScanner::PrimitiveScanner (PrimitiveManager* parent) :
+	QObject(parent),
+	HierarchyElement(parent),
+	m_manager(parent),
+	m_i(0)
+{
+	QDir dir = LDPaths::primitivesDir();
+	m_baselen = dir.absolutePath().length();
+	GetRecursiveFilenames(dir, m_files);
+	emit starting(m_files.size());
+	print("Scanning primitives...");
+}
+
+
+const QList<Primitive>& PrimitiveScanner::scannedPrimitives() const
+{
+	return m_prims;
+}
+
+
+void PrimitiveScanner::work()
+{
+	int max = qMin (m_i + 100, m_files.size());
+
+	for (; m_i < max; ++m_i)
+	{
+		QString filename = m_files[m_i];
+		QFile file (filename);
+
+		if (not file.open (QIODevice::ReadOnly))
+			continue;
+
+		Primitive info;
+		info.name = filename.mid (m_baselen + 1);  // make full path relative
+		info.name.replace ('/', '\\');  // use DOS backslashes, they're expected
+		info.category = nullptr;
+		QByteArray titledata = file.readLine();
+
+		if (titledata != QByteArray())
+			info.title = QString::fromUtf8 (titledata);
+
+		info.title = info.title.simplified();
+
+		if (info.title[0] == '0')
+		{
+			info.title.remove (0, 1);  // remove 0
+			info.title = info.title.simplified();
+		}
+
+		m_prims << info;
+	}
+
+	if (m_i == m_files.size())
+	{
+		// Done with primitives, now save to a config file
+		QString path = m_manager->getPrimitivesCfgPath();
+		QFile configFile (path);
+
+		if (configFile.open (QIODevice::WriteOnly | QIODevice::Text))
+		{
+			for (Primitive& info : m_prims)
+				fprint (configFile, "%1 %2\r\n", info.name, info.title);
+
+			configFile.close();
+		}
+		else
+		{
+			errorPrompt(m_window, format("Couldn't write primitive list %1: %2", path, configFile.errorString()));
+		}
+
+		emit workDone();
+	}
+	else
+	{
+		// Defer to event loop, pick up the work later
+		emit update (m_i);
+		QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
+	}
+}
+
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+
 PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info) :
 	QTreeWidgetItem (parent),
 	m_primitive (info) {}
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
+
 PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidget* parent, Primitive* info) :
 	QTreeWidgetItem (parent),
 	m_primitive (info) {}
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
+
 Primitive* PrimitiveTreeItem::primitive() const
 {
 	return m_primitive;
