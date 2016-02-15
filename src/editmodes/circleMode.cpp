@@ -77,8 +77,10 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 void CircleMode::buildCircle()
 {
 	LDObjectList objs;
-	const int segments (m_window->ringToolSegments());
-	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
+	PrimitiveSpec spec;
+	spec.segments = m_window->ringToolSegments();
+	spec.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	spec.ringNumber = 0;
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
 	LDDocument* refFile;
@@ -91,23 +93,28 @@ void CircleMode::buildCircle()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		refFile = primitives()->getPrimitive(::Circle, segments, divisions, 0);
+		spec.type = ::Circle;
+		refFile = primitives()->getPrimitive(spec);
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		refFile = primitives()->getPrimitive(::Disc, segments, divisions, 0);
+		spec.type = ::Disc;
+		refFile = primitives()->getPrimitive(spec);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
 	else if (g_RingFinder.findRings (dist0, dist1))
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
+		spec.type = ::Ring;
+
 		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
 		{
-			refFile = primitives()->getPrimitive(::Ring, segments, divisions, cmp.num);
+			spec.ringNumber = cmp.num;
+			refFile = primitives()->getPrimitive(spec);
 			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 			ref->setFileInfo (refFile);
 			ref->setTransform (getCircleDrawMatrix (cmp.scale));
@@ -132,10 +139,10 @@ void CircleMode::buildCircle()
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		primitives()->makeCircle(segments, divisions, dist0, c0);
-		primitives()->makeCircle(segments, divisions, dist1, c1);
+		primitives()->makeCircle(spec.segments, spec.divisions, dist0, c0);
+		primitives()->makeCircle(spec.segments, spec.divisions, dist1, c1);
 
-		for (int i = 0; i < segments; ++i)
+		for (int i = 0; i < spec.segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;

@@ -28,18 +28,6 @@
 #include "ldpaths.h"
 #include "documentmanager.h"
 
-QList<PrimitiveCategory*> m_categories;
-
-static const QStringList g_radialNameRoots =
-{
-	"edge",
-	"cyli",
-	"disc",
-	"ndis",
-	"ring",
-	"con"
-};
-
 PrimitiveScanner* PrimitiveManager::activeScanner()
 {
 	return m_activeScanner;
@@ -409,22 +397,22 @@ void PrimitiveManager::makeCircle (int segs, int divs, double radius, QList<QLin
 
 // =============================================================================
 //
-LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, int divs, int num)
+LDObjectList PrimitiveManager::makePrimitiveBody(const PrimitiveSpec& spec)
 {
 	LDObjectList objs;
 	QList<int> conditionalLineSegments;
 	QList<QLineF> circle;
 
-	makeCircle (segs, divs, 1, circle);
+	makeCircle (spec.segments, spec.divisions, 1, circle);
 
-	for (int i = 0; i < segs; ++i)
+	for (int i = 0; i < spec.segments; ++i)
 	{
 		double x0 = circle[i].x1();
 		double x1 = circle[i].x2();
 		double z0 = circle[i].y1();
 		double z1 = circle[i].y2();
 
-		switch (type)
+		switch (spec.type)
 		{
 		case Circle:
 			{
@@ -446,7 +434,7 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 				double x2, x3, z2, z3;
 				double y0, y1, y2, y3;
 
-				if (type == Cylinder)
+				if (spec.type == Cylinder)
 				{
 					x2 = x1;
 					x3 = x0;
@@ -458,17 +446,17 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 				}
 				else
 				{
-					x2 = x1 * (num + 1);
-					x3 = x0 * (num + 1);
-					z2 = z1 * (num + 1);
-					z3 = z0 * (num + 1);
+					x2 = x1 * (spec.ringNumber + 1);
+					x3 = x0 * (spec.ringNumber + 1);
+					z2 = z1 * (spec.ringNumber + 1);
+					z3 = z0 * (spec.ringNumber + 1);
 
-					x0 *= num;
-					x1 *= num;
-					z0 *= num;
-					z1 *= num;
+					x0 *= spec.ringNumber;
+					x1 *= spec.ringNumber;
+					z0 *= spec.ringNumber;
+					z1 *= spec.ringNumber;
 
-					if (type == Ring)
+					if (spec.type == Ring)
 						y0 = y1 = y2 = y3 = 0.0f;
 					else
 					{
@@ -485,12 +473,12 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 				LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
 				quad->setColor (MainColor);
 
-				if (type == Cylinder)
+				if (spec.type == Cylinder)
 					quad->invert();
 
 				objs << quad;
 
-				if (type == Cylinder or type == Cone)
+				if (spec.type == Cylinder or spec.type == Cone)
 					conditionalLineSegments << i;
 			}
 			break;
@@ -500,7 +488,7 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 			{
 				double x2, z2;
 
-				if (type == Disc)
+				if (spec.type == Disc)
 					x2 = z2 = 0.0f;
 				else
 				{
@@ -516,9 +504,9 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 				// they'll end up upside-down.
 				LDTriangle* seg (LDSpawn<LDTriangle>());
 				seg->setColor (MainColor);
-				seg->setVertex (type == Disc ? 0 : 2, v0);
+				seg->setVertex (spec.type == Disc ? 0 : 2, v0);
 				seg->setVertex (1, v1);
-				seg->setVertex (type == Disc ? 2 : 0, v2);
+				seg->setVertex (spec.type == Disc ? 2 : 0, v2);
 				objs << seg;
 			}
 			break;
@@ -527,26 +515,26 @@ LDObjectList PrimitiveManager::makePrimitiveBody (PrimitiveType type, int segs, 
 
 	// If this is not a full circle, we need a conditional line at the other
 	// end, too.
-	if (segs < divs and not conditionalLineSegments.isEmpty())
-		conditionalLineSegments << segs;
+	if (spec.segments < spec.divisions and not conditionalLineSegments.isEmpty())
+		conditionalLineSegments << spec.segments;
 
 	for (int i : conditionalLineSegments)
 	{
-		Vertex v0 (getRadialPoint (i, divs, cos), 0.0f, getRadialPoint (i, divs, sin));
+		Vertex v0 (getRadialPoint (i, spec.divisions, cos), 0.0f, getRadialPoint (i, spec.divisions, sin));
 		Vertex v1;
-		Vertex v2 (getRadialPoint (i + 1, divs, cos), 0.0f, getRadialPoint (i + 1, divs, sin));
-		Vertex v3 (getRadialPoint (i - 1, divs, cos), 0.0f, getRadialPoint (i - 1, divs, sin));
+		Vertex v2 (getRadialPoint (i + 1, spec.divisions, cos), 0.0f, getRadialPoint (i + 1, spec.divisions, sin));
+		Vertex v3 (getRadialPoint (i - 1, spec.divisions, cos), 0.0f, getRadialPoint (i - 1, spec.divisions, sin));
 
-		if (type == Cylinder)
+		if (spec.type == Cylinder)
 		{
 			v1 = Vertex (v0[X], 1.0f, v0[Z]);
 		}
-		else if (type == Cone)
+		else if (spec.type == Cone)
 		{
-			v1 = Vertex (v0[X] * (num + 1), 0.0f, v0[Z] * (num + 1));
-			v0.setX (v0.x() * num);
+			v1 = Vertex (v0[X] * (spec.ringNumber + 1), 0.0f, v0[Z] * (spec.ringNumber + 1));
+			v0.setX (v0.x() * spec.ringNumber);
 			v0.setY (1.0);
-			v0.setZ (v0.z() * num);
+			v0.setZ (v0.z() * spec.ringNumber);
 		}
 
 		LDCondLine* line = (LDSpawn<LDCondLine>());
@@ -576,10 +564,10 @@ QString PrimitiveManager::primitiveTypeName (PrimitiveType type)
 
 // =============================================================================
 //
-QString PrimitiveManager::makeRadialFileName (PrimitiveType type, int segs, int divs, int num)
+QString PrimitiveManager::makeRadialFileName(const PrimitiveSpec& spec)
 {
-	int numerator = segs;
-	int denominator = divs;
+	int numerator = spec.segments;
+	int denominator = spec.divisions;
 
 	// Simplify the fractional part, but the denominator must be at least 4.
 	simplify (numerator, denominator);
@@ -592,10 +580,11 @@ QString PrimitiveManager::makeRadialFileName (PrimitiveType type, int segs, int 
 	}
 
 	// Compose some general information: prefix, fraction, root, ring number
-	QString prefix = (divs == LowResolution) ? "" : format ("%1/", divs);
+	QString prefix = (spec.divisions == LowResolution) ? "" : format ("%1/", spec.divisions);
 	QString frac = format ("%1-%2", numerator, denominator);
-	QString root = g_radialNameRoots[type];
-	QString numstr = (type == Ring or type == Cone) ? format ("%1", num) : "";
+	static const char* roots[] = { "edge", "cyli", "disc", "ndis", "ring", "con" };
+	QString root = roots[spec.type];
+	QString numstr = (spec.type == Ring or spec.type == Cone) ? format ("%1", spec.ringNumber) : "";
 
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
@@ -608,30 +597,30 @@ QString PrimitiveManager::makeRadialFileName (PrimitiveType type, int segs, int 
 
 // =============================================================================
 //
-LDDocument* PrimitiveManager::generatePrimitive (PrimitiveType type, int segments, int divisions, int number)
+LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveSpec& spec)
 {
 	// Make the description
-	QString fraction = QString::number ((float) segments / divisions);
-	QString name = makeRadialFileName (type, segments, divisions, number);
+	QString fraction = QString::number ((float) spec.segments / spec.divisions);
+	QString name = makeRadialFileName(spec);
 	QString description;
 
 	// Ensure that there's decimals, even if they're 0.
 	if (fraction.indexOf (".") == -1)
 		fraction += ".0";
 
-	if (type == Ring or type == Cone)
+	if (spec.type == Ring or spec.type == Cone)
 	{
 		QString spacing =
-			(number < 10) ? "  " :
-			(number < 100) ? " "  : "";
+			(spec.ringNumber < 10) ? "  " :
+			(spec.ringNumber < 100) ? " "  : "";
 
-		description = format ("%1 %2%3 x %4", primitiveTypeName (type), spacing, number, fraction);
+		description = format ("%1 %2%3 x %4", primitiveTypeName (spec.type), spacing, spec.ringNumber, fraction);
 	}
 	else
-		description = format ("%1 %2", primitiveTypeName (type), fraction);
+		description = format ("%1 %2", primitiveTypeName (spec.type), fraction);
 
 	// Prepend "Hi-Res" if 48/ primitive.
-	if (divisions == HighResolution)
+	if (spec.divisions == HighResolution)
 		description.insert (0, "Hi-Res ");
 
 	LDDocument* document = m_window->newDocument();
@@ -639,6 +628,7 @@ LDDocument* PrimitiveManager::generatePrimitive (PrimitiveType type, int segment
 
 	QString author = APPNAME;
 	QString license = "";
+	bool hires = (spec.divisions == HighResolution);
 
 	if (not m_config->defaultName().isEmpty())
 	{
@@ -651,7 +641,7 @@ LDDocument* PrimitiveManager::generatePrimitive (PrimitiveType type, int segment
 	objs << LDSpawn<LDComment> (description)
 		 << LDSpawn<LDComment> (format ("Name: %1", name))
 		 << LDSpawn<LDComment> (format ("Author: %1", author))
-		 << LDSpawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", divisions == HighResolution ?  "48_" : ""))
+		 << LDSpawn<LDComment> (format ("!LDRAW_ORG Unofficial_%1Primitive", hires ?  "48_" : ""))
 		 << LDSpawn<LDComment> (license)
 		 << LDSpawn<LDEmpty>()
 		 << LDSpawn<LDBfc> (BfcStatement::CertifyCCW)
@@ -660,7 +650,7 @@ LDDocument* PrimitiveManager::generatePrimitive (PrimitiveType type, int segment
 	document->openForEditing();
 	document->history()->setIgnoring (false);
 	document->addObjects (objs);
-	document->addObjects (makePrimitiveBody (type, segments, divisions, number));
+	document->addObjects (makePrimitiveBody(spec));
 	document->addHistoryStep();
 	return document;
 }
@@ -670,44 +660,15 @@ LDDocument* PrimitiveManager::generatePrimitive (PrimitiveType type, int segment
 // Gets a primitive by the given specs. If the primitive cannot be found, it will
 // be automatically generated.
 //
-LDDocument* PrimitiveManager::getPrimitive (PrimitiveType type, int segs, int divs, int num)
+LDDocument* PrimitiveManager::getPrimitive(const PrimitiveSpec& spec)
 {
-	QString name = makeRadialFileName (type, segs, divs, num);
+	QString name = makeRadialFileName(spec);
 	LDDocument* document = m_window->documents()->getDocumentByName (name);
 
 	if (document)
 		return document;
 
-	return generatePrimitive (type, segs, divs, num);
-}
-
-// =============================================================================
-//
-PrimitivePrompt::PrimitivePrompt (QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f)
-{
-	ui = new Ui_MakePrimUI;
-	ui->setupUi (this);
-	connect (ui->cb_hires, SIGNAL (toggled (bool)), this, SLOT (hiResToggled (bool)));
-}
-
-// =============================================================================
-//
-PrimitivePrompt::~PrimitivePrompt()
-{
-	delete ui;
-}
-
-// =============================================================================
-//
-void PrimitivePrompt::hiResToggled (bool on)
-{
-	ui->sb_segs->setMaximum (on ? HighResolution : LowResolution);
-
-	// If the current value is 16 and we switch to hi-res, default the
-	// spinbox to 48.
-	if (on and ui->sb_segs->value() == LowResolution)
-		ui->sb_segs->setValue (HighResolution);
+	return generatePrimitive(spec);
 }
 
 // =============================================================================

@@ -23,14 +23,33 @@
 #include "main.h"
 
 class LDDocument;
-class Ui_MakePrimUI;
+class Ui_GeneratePrimitiveDialog;
 class PrimitiveCategory;
+class PrimitiveScanner;
 
 struct Primitive
 {
 	QString name;
 	QString title;
 	PrimitiveCategory* category;
+};
+
+enum PrimitiveType
+{
+	Circle,
+	Cylinder,
+	Disc,
+	DiscNegative,
+	Ring,
+	Cone,
+};
+
+struct PrimitiveSpec
+{
+	PrimitiveType type;
+	int segments;
+	int divisions;
+	int ringNumber;
 };
 
 class PrimitiveCategory : public QObject
@@ -61,9 +80,39 @@ private:
 	QString m_name;
 };
 
+class PrimitiveManager : public QObject, HierarchyElement
+{
+	Q_OBJECT
+
+public:
+	PrimitiveManager(QObject* parent);
+
+	PrimitiveScanner* activeScanner();
+	LDDocument* generatePrimitive(const PrimitiveSpec &spec);
+	LDDocument* getPrimitive(const PrimitiveSpec &spec);
+	QString getPrimitivesCfgPath() const;
+	void loadPrimitives();
+	void makeCircle(int segs, int divs, double radius, QList<QLineF>& lines);
+	QString makeRadialFileName(const PrimitiveSpec &spec);
+	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = QString());
+	QString primitiveTypeName(PrimitiveType type);
+	Q_SLOT void scanDone();
+	void startScan();
+
+private:
+	QList<PrimitiveCategory*> m_categories;
+	PrimitiveScanner* m_activeScanner;
+	QList<Primitive> m_primitives;
+	PrimitiveCategory* m_unmatched;
+
+	LDObjectList makePrimitiveBody(const PrimitiveSpec &spec);
+	void loadCategories();
+	void populateCategories();
+	void clearCategories();
+};
+
 //
-// Worker object that scans the primitives folder for primitives and
-// builds an index of them.
+// Worker object that scans the primitives folder for primitives and builds an index of them.
 //
 class PrimitiveScanner : public QObject, HierarchyElement
 {
@@ -87,62 +136,6 @@ private:
 	QStringList m_files;
 	int m_i;
 	int m_baselen;
-};
-
-extern QList<PrimitiveCategory*> m_categories;
-
-enum PrimitiveType
-{
-	Circle,
-	Cylinder,
-	Disc,
-	DiscNegative,
-	Ring,
-	Cone,
-};
-
-class PrimitivePrompt : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit PrimitivePrompt (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
-	virtual ~PrimitivePrompt();
-	Ui_MakePrimUI* ui;
-
-public slots:
-	void hiResToggled (bool on);
-};
-
-class PrimitiveManager : public QObject, HierarchyElement
-{
-	Q_OBJECT
-
-public:
-	PrimitiveManager(QObject* parent);
-
-	PrimitiveScanner* activeScanner();
-	LDDocument* generatePrimitive(PrimitiveType type, int segs, int divs, int num);
-	LDDocument* getPrimitive(PrimitiveType type, int segs, int divs, int num);
-	QString getPrimitivesCfgPath() const;
-	void loadPrimitives();
-	void makeCircle(int segs, int divs, double radius, QList<QLineF>& lines);
-	QString makeRadialFileName(PrimitiveType type, int segs, int divs, int num);
-	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = QString());
-	QString primitiveTypeName(PrimitiveType type);
-	Q_SLOT void scanDone();
-	void startScan();
-
-private:
-	QList<PrimitiveCategory*> m_categories;
-	PrimitiveScanner* m_activeScanner;
-	QList<Primitive> m_primitives;
-	PrimitiveCategory* m_unmatched;
-
-	LDObjectList makePrimitiveBody (PrimitiveType type, int segs, int divs, int num);
-	void loadCategories();
-	void populateCategories();
-	void clearCategories();
 };
 
 class PrimitiveTreeItem : public QTreeWidgetItem

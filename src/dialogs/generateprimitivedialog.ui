@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MakePrimUI</class>
- <widget class="QDialog" name="MakePrimUI">
+ <class>GeneratePrimitiveDialog</class>
+ <widget class="QDialog" name="GeneratePrimitiveDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>147</height>
+    <width>413</width>
+    <height>169</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Generate a Primitive</string>
+   <string>Generate Primitive</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -19,7 +19,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QGroupBox" name="gb_type">
+        <widget class="QGroupBox" name="groupbox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -31,7 +31,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
-           <widget class="QRadioButton" name="rb_circle">
+           <widget class="QRadioButton" name="typeCircle">
             <property name="text">
              <string>Circle</string>
             </property>
@@ -44,35 +44,35 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QRadioButton" name="rb_cylinder">
+           <widget class="QRadioButton" name="typeCylinder">
             <property name="text">
              <string>Cylinder</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QRadioButton" name="rb_disc">
+           <widget class="QRadioButton" name="typeDisc">
             <property name="text">
              <string>Disc</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QRadioButton" name="rb_ndisc">
+           <widget class="QRadioButton" name="typeDiscNegative">
             <property name="text">
              <string>Disc Negative</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QRadioButton" name="rb_ring">
+           <widget class="QRadioButton" name="typeRing">
             <property name="text">
              <string>Ring</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QRadioButton" name="rb_cone">
+           <widget class="QRadioButton" name="typeCone">
             <property name="text">
              <string>Cone</string>
             </property>
@@ -99,9 +99,9 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="cb_hires">
+        <widget class="QCheckBox" name="highResolution">
          <property name="text">
-          <string>Hi-res</string>
+          <string>High resolution (48)</string>
          </property>
         </widget>
        </item>
@@ -122,7 +122,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QSpinBox" name="sb_segs">
+          <widget class="QSpinBox" name="segments">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -135,7 +135,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QSpinBox" name="sb_ringnum">
+          <widget class="QSpinBox" name="ringNumber">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -177,7 +177,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>MakePrimUI</receiver>
+   <receiver>GeneratePrimitiveDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -193,7 +193,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>MakePrimUI</receiver>
+   <receiver>GeneratePrimitiveDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -207,9 +207,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_circle</sender>
+   <sender>typeCircle</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -223,9 +223,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_cylinder</sender>
+   <sender>typeCylinder</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -239,9 +239,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_disc</sender>
+   <sender>typeDisc</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -255,9 +255,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_ndisc</sender>
+   <sender>typeDiscNegative</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -271,9 +271,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_ring</sender>
+   <sender>typeRing</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -287,9 +287,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>rb_cone</sender>
+   <sender>typeCone</sender>
    <signal>clicked(bool)</signal>
-   <receiver>sb_ringnum</receiver>
+   <receiver>ringNumber</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

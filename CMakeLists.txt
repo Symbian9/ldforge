@@ -61,6 +61,7 @@ set (LDFORGE_SOURCES
 	src/version.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
+	src/dialogs/generateprimitivedialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
 	src/dialogs/newpartdialog.cpp
 	src/dialogs/openprogressdialog.cpp
@@ -68,7 +69,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/circleMode.cpp
 	src/editmodes/curvemode.cpp
 	src/editmodes/drawMode.cpp
-    src/editmodes/linePathMode.cpp
+	src/editmodes/linePathMode.cpp
 	src/editmodes/magicWandMode.cpp
 	src/editmodes/rectangleMode.cpp
 	src/editmodes/selectMode.cpp
@@ -115,6 +116,7 @@ set (LDFORGE_HEADERS
 	src/transform.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
+	src/dialogs/generateprimitivedialog.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
 	src/dialogs/openprogressdialog.h
@@ -145,7 +147,6 @@ set (LDFORGE_FORMS
 	ui/flip.ui
 	ui/intersector.ui
 	ui/isecalc.ui
-	ui/makeprim.ui
 	ui/overlay.ui
 	ui/rectifier.ui
 	ui/replcoords.ui
@@ -155,6 +156,7 @@ set (LDFORGE_FORMS
 	src/partdownloader.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
+	src/dialogs/generateprimitivedialog.ui
 	src/dialogs/ldrawpathdialog.ui
 	src/dialogs/newpartdialog.ui
 	src/dialogs/openprogressdialog.ui

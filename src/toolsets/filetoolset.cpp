@@ -27,6 +27,7 @@
 #include "../dialogs/configdialog.h"
 #include "../dialogs/ldrawpathdialog.h"
 #include "../dialogs/newpartdialog.h"
+#include "../dialogs/generateprimitivedialog.h"
 #include "../documentmanager.h"
 #include "filetoolset.h"
 #include "ui_makeprim.h"
@@ -200,23 +201,12 @@ void FileToolset::downloadFrom()
 
 void FileToolset::makePrimitive()
 {
-	PrimitivePrompt* dialog = new PrimitivePrompt (m_window);
+	GeneratePrimitiveDialog* dialog = new GeneratePrimitiveDialog(m_window);
 
 	if (not dialog->exec())
 		return;
 
-	int segs = dialog->ui->sb_segs->value();
-	int divs = dialog->ui->cb_hires->isChecked() ? HighResolution : LowResolution;
-	int num = dialog->ui->sb_ringnum->value();
-
-	PrimitiveType type =
-		dialog->ui->rb_circle->isChecked()   ? Circle :
-		dialog->ui->rb_cylinder->isChecked() ? Cylinder :
-		dialog->ui->rb_disc->isChecked()     ? Disc :
-		dialog->ui->rb_ndisc->isChecked()    ? DiscNegative :
-		dialog->ui->rb_ring->isChecked()     ? Ring : Cone;
-
-	LDDocument* primitive = primitives()->generatePrimitive(type, segs, divs, num);
+	LDDocument* primitive = primitives()->generatePrimitive(dialog->spec());
 	primitive->openForEditing();
 	m_window->save(primitive, false);
 }
