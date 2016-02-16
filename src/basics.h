@@ -188,7 +188,7 @@ private:
 extern const Vertex Origin;
 extern const Matrix IdentityMatrix;
 
-static const double Pi = 3.14159265358979323846;
+static const double pi = 3.14159265358979323846;
 
 
 // =============================================================================

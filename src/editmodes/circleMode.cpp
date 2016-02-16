@@ -206,7 +206,7 @@ double CircleMode::getAngleOffset() const
 	double angleoffset (-bearing.angleTo (bearing2) + 90);
 	angleoffset /= (360.0 / divisions); // convert angle to 0-16 scale
 	angleoffset = round (angleoffset); // round to nearest 16th
-	angleoffset *= ((2 * Pi) / divisions); // convert to radians
+	angleoffset *= ((2 * pi) / divisions); // convert to radians
 	angleoffset *= renderer()->depthNegateFactor(); // negate based on camera
 	return angleoffset;
 }
@@ -230,7 +230,7 @@ void CircleMode::render (QPainter& painter) const
 	const double outerdistance (m_drawedVerts.size() >= 2 ? getCircleDrawDist (1) : -1);
 	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
 	const int segments (m_window->ringToolSegments());
-	const double angleUnit (2 * Pi / divisions);
+	const double angleUnit (2 * pi / divisions);
 	Axis relX, relY;
 	renderer()->getRelativeAxes (relX, relY);
 	const double angleoffset (m_drawedVerts.size() < 3 ? getAngleOffset() : m_angleOffset);

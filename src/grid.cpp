@@ -64,7 +64,7 @@ qreal Grid::angleSnap() const
 
 qreal Grid::angleAsRadians() const
 {
-	return (Pi * angleSnap()) / 180;
+	return (pi * angleSnap()) / 180;
 }
 
 

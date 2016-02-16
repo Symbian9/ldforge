@@ -260,7 +260,7 @@ void PrimitiveManager::loadCategories()
 
 double getRadialPoint(int i, int divs, double(*func)(double))
 {
-	return (*func)((i * 2 * Pi) / divs);
+	return (*func)((i * 2 * pi) / divs);
 };
 
 
