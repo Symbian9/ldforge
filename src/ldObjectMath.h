@@ -19,5 +19,25 @@
 #pragma once
 #include "main.h"
 
-void RotateObjects (const int l, const int m, const int n,
-	double angle, LDObjectList const& objects);
+
+enum class RotationPoint
+{
+	ObjectOrigin,
+	WorldOrigin,
+	CustomPoint,
+	NumValues
+};
+
+
+class MathFunctions : public HierarchyElement
+{
+public:
+	MathFunctions(QObject* parent);
+
+	void rotateObjects(int l, int m, int n, double angle, const LDObjectList& objects) const;
+	Vertex getRotationPoint(const LDObjectList& objs) const;
+
+private:
+	void rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix) const;
+};
+

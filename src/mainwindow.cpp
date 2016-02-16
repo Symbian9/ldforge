@@ -57,6 +57,7 @@
 #include "documentmanager.h"
 #include "ldobjectiterator.h"
 #include "grid.h"
+#include "ldObjectMath.h"
 
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
@@ -71,6 +72,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_guiUtilities (new GuiUtilities (this)),
 	m_primitives(new PrimitiveManager(this)),
 	m_grid(new Grid(this)),
+	m_mathFunctions(new MathFunctions(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this)),
@@ -85,7 +87,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
 	ui.verticalLayout->insertWidget (0, m_tabs);
-
 	createBlankDocument();
 	m_renderer->setDocument (m_currentDocument);
 
@@ -192,6 +193,16 @@ void MainWindow::finishInitialization()
 MainWindow::~MainWindow()
 {
 	g_win = nullptr;
+	delete m_guiUtilities;
+	delete m_primitives;
+	delete m_grid;
+	delete m_mathFunctions;
+	delete &ui;
+	delete m_settings;
+	delete m_documents;
+
+	for (Toolset* toolset : m_toolsets)
+		delete toolset;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -249,7 +260,6 @@ void MainWindow::updateRecentFilesMenu()
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
-
 		connect (recent, SIGNAL (triggered()), this, SLOT (recentFileClicked()));
 		ui.menuOpenRecent->insertAction (first, recent);
 		m_recentFiles << recent;
@@ -1337,6 +1347,11 @@ Configuration* MainWindow::config()
 Grid* MainWindow::grid()
 {
 	return m_grid;
+}
+
+MathFunctions* MainWindow::mathFunctions() const
+{
+	return m_mathFunctions;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

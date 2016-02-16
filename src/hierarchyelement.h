@@ -27,6 +27,7 @@ class LDDocument;
 class DocumentManager;
 class PrimitiveManager;
 class Grid;
+class MathFunctions;
 
 //
 // Objects that are to take part in the MainWindow's hierarchy multiple-inherit from this class to get a pointer back
@@ -42,6 +43,7 @@ public:
 	GuiUtilities* guiUtilities() const;
 	PrimitiveManager* primitives();
 	Grid* grid() const;
+	MathFunctions* math() const;
 
 protected:
 	MainWindow* m_window;

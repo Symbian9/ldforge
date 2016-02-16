@@ -29,20 +29,10 @@ class QAction;
 using ApplyToMatrixFunction = std::function<void (int, double&)>;
 using ApplyToMatrixConstFunction = std::function<void (int, double)>;
 
-enum class RotationPoint
-{
-	ObjectOrigin,
-	WorldOrigin,
-	CustomPoint,
-	NumValues
-};
-
 void applyToMatrix (Matrix& a, ApplyToMatrixFunction func);
 void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
-void configureRotationPoint();
 QString formatFileSize (qint64 size);
 int gcd (int a, int b);
-Vertex getRotationPoint (const LDObjectList& objs);
 QString joinStrings (QList<StringFormatArg> vals, QString delim = " ");
 void roundToDecimals (double& a, int decimals);
 void simplify (int& numer, int& denom);

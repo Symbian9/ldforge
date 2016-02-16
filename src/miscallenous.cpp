@@ -47,40 +47,6 @@ void simplify (int& numerator, int& denominator)
 }
 
 
-Vertex getRotationPoint (const LDObjectList& objs)
-{
-	switch (RotationPoint (Config->rotationPointType()))
-	{
-	case RotationPoint::ObjectOrigin:
-		{
-			BoundingBox box;
-
-			// Calculate center vertex
-			for (LDObject* obj : objs)
-			{
-				if (obj->hasMatrix())
-					box << static_cast<LDMatrixObject*> (obj)->position();
-				else
-					box << obj;
-			}
-
-			return box.center();
-		}
-
-	case RotationPoint::WorldOrigin:
-		return Origin;
-
-	case RotationPoint::CustomPoint:
-		return Config->customRotationPoint();
-
-	case RotationPoint::NumValues:
-		break;
-	}
-
-	return Vertex();
-}
-
-
 QString joinStrings (QList<StringFormatArg> vals, QString delim)
 {
 	QStringList list;

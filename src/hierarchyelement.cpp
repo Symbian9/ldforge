@@ -75,3 +75,9 @@ Grid* HierarchyElement::grid() const
 {
 	return m_window->grid();
 }
+
+
+MathFunctions* HierarchyElement::math() const
+{
+	return m_window->mathFunctions();
+}

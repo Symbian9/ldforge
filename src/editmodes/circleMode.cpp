@@ -185,10 +185,10 @@ void CircleMode::buildCircle()
 	if (not objs.isEmpty())
 	{
 		Axis relZ = renderer()->getRelativeZ();;
-		const int l (relZ == X ? 1 : 0);
-		const int m (relZ == Y ? 1 : 0);
-		const int n (relZ == Z ? 1 : 0);
-		RotateObjects (l, m, n, -m_angleOffset, objs);
+		int l = (relZ == X ? 1 : 0);
+		int m = (relZ == Y ? 1 : 0);
+		int n = (relZ == Z ? 1 : 0);
+		math()->rotateObjects (l, m, n, -m_angleOffset, objs);
 	}
 
 	finishDraw (objs);
@@ -199,7 +199,7 @@ double CircleMode::getAngleOffset() const
 	if (m_drawedVerts.isEmpty())
 		return 0.0;
 
-	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
+	int divisions = (m_window->ringToolHiRes() ? HighResolution : LowResolution);
 	QPointF originspot (renderer()->convert3dTo2d (m_drawedVerts.first()));
 	QLineF bearing (originspot, renderer()->mousePositionF());
 	QLineF bearing2 (originspot, QPointF (originspot.x(), 0.0));

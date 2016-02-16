@@ -39,6 +39,7 @@ class Toolset;
 class Configuration;
 class PrimitiveManager;
 class Grid;
+class MathFunctions;
 
 class ColorToolbarItem
 {
@@ -98,6 +99,7 @@ public:
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
+	MathFunctions* mathFunctions() const;
 	LDDocument* newDocument (bool cache = false);
 	PrimitiveManager* primitives();
 	GLRenderer* renderer();
@@ -143,6 +145,7 @@ private:
 	GLRenderer* m_renderer;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
+	MathFunctions* m_mathFunctions;
 	LDObjectList m_sel;
 	QList<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;

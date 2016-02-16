@@ -108,32 +108,32 @@ double MoveToolset::getRotateActionAngle()
 
 void MoveToolset::rotateXPos()
 {
-	RotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateYPos()
 {
-	RotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateZPos()
 {
-	RotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateXNeg()
 {
-	RotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateYNeg()
 {
-	RotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::rotateZNeg()
 {
-	RotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects());
 }
 
 void MoveToolset::configureRotationPoint()

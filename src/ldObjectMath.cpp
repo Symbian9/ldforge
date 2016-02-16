@@ -20,38 +20,39 @@
 #include "ldObject.h"
 #include "miscallenous.h"
 
-// =============================================================================
-//
-static void RotateVertex (Vertex& v, const Vertex& rotpoint, const Matrix& transformer)
+
+MathFunctions::MathFunctions(QObject* parent) :
+	HierarchyElement(parent) {}
+
+
+void MathFunctions::rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix) const
 {
-	v -= rotpoint;
-	v.transform (transformer, Origin);
-	v += rotpoint;
+	vertex -= rotationPoint;
+	vertex.transform (transformationMatrix, Origin);
+	vertex += rotationPoint;
 }
 
-// =============================================================================
-//
-void RotateObjects (const int l, const int m, const int n, double angle, LDObjectList const& objects)
+
+void MathFunctions::rotateObjects(int l, int m, int n, double angle, const LDObjectList& objects) const
 {
-	QList<Vertex*> queue;
-	const Vertex rotpoint = getRotationPoint (objects);
-	const double cosangle = cos (angle),
-				 sinangle = sin (angle);
+	Vertex rotationPoint = getRotationPoint (objects);
+	double cosAngle = cos(angle);
+	double sinAngle = sin(angle);
 
 	// ref: http://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
-	Matrix transform (
+	Matrix transformationMatrix (
 	{
-		(l * l * (1 - cosangle)) + cosangle,
-		(m * l * (1 - cosangle)) - (n * sinangle),
-		(n * l * (1 - cosangle)) + (m * sinangle),
+		(l * l * (1 - cosAngle)) + cosAngle,
+		(m * l * (1 - cosAngle)) - (n * sinAngle),
+		(n * l * (1 - cosAngle)) + (m * sinAngle),
 
-		(l * m * (1 - cosangle)) + (n * sinangle),
-		(m * m * (1 - cosangle)) + cosangle,
-		(n * m * (1 - cosangle)) - (l * sinangle),
+		(l * m * (1 - cosAngle)) + (n * sinAngle),
+		(m * m * (1 - cosAngle)) + cosAngle,
+		(n * m * (1 - cosAngle)) - (l * sinAngle),
 
-		(l * n * (1 - cosangle)) - (m * sinangle),
-		(m * n * (1 - cosangle)) + (l * sinangle),
-		(n * n * (1 - cosangle)) + cosangle
+		(l * n * (1 - cosAngle)) - (m * sinAngle),
+		(m * n * (1 - cosAngle)) + (l * sinAngle),
+		(n * n * (1 - cosAngle)) + cosAngle
 	});
 
 	// Apply the above matrix to everything
@@ -62,7 +63,7 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
-				RotateVertex (v, rotpoint, transform);
+				rotateVertex(v, rotationPoint, transformationMatrix);
 				obj->setVertex (i, v);
 			}
 		}
@@ -72,11 +73,45 @@ void RotateObjects (const int l, const int m, const int n, double angle, LDObjec
 
 			// Transform the position
 			Vertex v = mo->position();
-			RotateVertex (v, rotpoint, transform);
+			rotateVertex(v, rotationPoint, transformationMatrix);
 			mo->setPosition (v);
 
 			// Transform the matrix
-			mo->setTransform (transform * mo->transform());
+			mo->setTransform(transformationMatrix * mo->transform());
 		}
 	}
+}
+
+
+Vertex MathFunctions::getRotationPoint(const LDObjectList& objs) const
+{
+	switch (RotationPoint (m_config->rotationPointType()))
+	{
+	case RotationPoint::ObjectOrigin:
+		{
+			BoundingBox box;
+
+			// Calculate center vertex
+			for (LDObject* obj : objs)
+			{
+				if (obj->hasMatrix())
+					box << static_cast<LDMatrixObject*> (obj)->position();
+				else
+					box << obj;
+			}
+
+			return box.center();
+		}
+
+	case RotationPoint::WorldOrigin:
+		return Vertex();
+
+	case RotationPoint::CustomPoint:
+		return m_config->customRotationPoint();
+
+	case RotationPoint::NumValues:
+		break;
+	}
+
+	return Vertex();
 }
