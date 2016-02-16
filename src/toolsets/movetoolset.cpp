@@ -17,7 +17,7 @@
  */
 
 #include "../ldDocument.h"
-#include "../ldObjectMath.h"
+#include "../mathfunctions.h"
 #include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "movetoolset.h"

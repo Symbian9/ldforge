@@ -48,10 +48,10 @@ set (LDFORGE_SOURCES
 	src/hierarchyelement.cpp
 	src/ldDocument.cpp
 	src/ldObject.cpp
-	src/ldObjectMath.cpp
 	src/ldpaths.cpp
 	src/main.cpp
 	src/mainwindow.cpp
+	src/mathfunctions.cpp
 	src/messageLog.cpp
 	src/miscallenous.cpp
 	src/partdownloader.cpp
@@ -102,12 +102,12 @@ set (LDFORGE_HEADERS
 	src/hierarchyelement.h
 	src/ldDocument.h
 	src/ldObject.h
-	src/ldObjectMath.h
 	src/ldobjectiterator.h
 	src/ldpaths.h
 	src/macros.h
 	src/main.h
 	src/mainwindow.h
+	src/mathfunctions.h
 	src/messageLog.h
 	src/miscallenous.h
 	src/partdownloader.h

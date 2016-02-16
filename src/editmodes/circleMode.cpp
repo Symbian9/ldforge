@@ -25,7 +25,7 @@
 #include "../primitives.h"
 #include "../glRenderer.h"
 #include "../mainwindow.h"
-#include "../ldObjectMath.h"
+#include "../mathfunctions.h"
 #include "../grid.h"
 
 CircleMode::CircleMode (GLRenderer* renderer) :

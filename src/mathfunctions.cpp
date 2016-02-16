@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ldObjectMath.h"
+#include "mathfunctions.h"
 #include "ldObject.h"
 #include "miscallenous.h"
 

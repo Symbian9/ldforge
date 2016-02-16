@@ -30,7 +30,7 @@
 #include "../glRenderer.h"
 #include "../dialogs.h"
 #include "../colors.h"
-#include "../ldObjectMath.h"
+#include "../mathfunctions.h"
 #include "../ldobjectiterator.h"
 #include "../documentmanager.h"
 #include "ui_replcoords.h"

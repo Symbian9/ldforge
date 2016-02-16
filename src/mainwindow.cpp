@@ -57,7 +57,7 @@
 #include "documentmanager.h"
 #include "ldobjectiterator.h"
 #include "grid.h"
-#include "ldObjectMath.h"
+#include "mathfunctions.h"
 
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
