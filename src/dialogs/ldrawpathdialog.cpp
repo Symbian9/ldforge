@@ -85,8 +85,10 @@ void LDrawPathDialog::setStatusText (const QString& statusText, bool ok)
 {
 	okButton()->setEnabled (ok);
 
-	if (statusText.isEmpty() && ok == false)
+	if (statusText.isEmpty() and not ok)
+	{
 		ui.status->setText ("---");
+	}
 	else
 	{
 		ui.status->setText (QString ("<span style=\"color: %1\">%2</span>")

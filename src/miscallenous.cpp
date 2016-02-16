@@ -94,26 +94,22 @@ double snapToGrid (double value, const Grid::Config type)
 
 int gcd (int a, int b)
 {
-	if (a > 0 and b > 0)
+	while (b != 0)
 	{
-		while (a != b)
-		{
-			if (a < b)
-				b -= a;
-			else
-				a -= b;
-		}
+		int temp = a;
+		a = b;
+		b = temp % b;
 	}
 
 	return a;
 }
 
 
-void simplify (int& numer, int& denom)
+void simplify (int& numerator, int& denominator)
 {
-	int factor = gcd (numer, denom);
-	numer /= factor;
-	denom /= factor;
+	int factor = gcd(numerator, denominator);
+	numerator /= factor;
+	denominator /= factor;
 }
 
 
