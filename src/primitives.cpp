@@ -87,22 +87,6 @@ void PrimitiveManager::loadPrimitives()
 }
 
 
-// TODO: replace with QDirIterator
-static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames) __attribute__((deprecated));
-static void GetRecursiveFilenames (QDir dir, QList<QString>& fnames)
-{
-	QFileInfoList flist = dir.entryInfoList (QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-
-	for (const QFileInfo& info : flist)
-	{
-		if (info.isDir())
-			GetRecursiveFilenames (QDir (info.absoluteFilePath()), fnames);
-		else
-			fnames << info.absoluteFilePath();
-	}
-}
-
-
 void PrimitiveManager::startScan()
 {
 	if (m_activeScanner == nullptr)
@@ -621,12 +605,9 @@ PrimitiveScanner::PrimitiveScanner (PrimitiveManager* parent) :
 	QObject(parent),
 	HierarchyElement(parent),
 	m_manager(parent),
-	m_i(0)
+	m_iterator(LDPaths::primitivesDir(), QDirIterator::Subdirectories)
 {
-	QDir dir = LDPaths::primitivesDir();
-	m_baselen = dir.absolutePath().length();
-	GetRecursiveFilenames(dir, m_files);
-	emit starting(m_files.size());
+	m_basePathLength = LDPaths::primitivesDir().absolutePath().length();
 	print("Scanning primitives...");
 }
 
@@ -639,37 +620,35 @@ const QList<Primitive>& PrimitiveScanner::scannedPrimitives() const
 
 void PrimitiveScanner::work()
 {
-	int max = qMin (m_i + 100, m_files.size());
-
-	for (; m_i < max; ++m_i)
+	for (int i = 0; m_iterator.hasNext() and i < 100; ++i)
 	{
-		QString filename = m_files[m_i];
+		QString filename = m_iterator.next();
 		QFile file (filename);
 
 		if (not file.open (QIODevice::ReadOnly))
 			continue;
 
-		Primitive info;
-		info.name = filename.mid (m_baselen + 1);  // make full path relative
-		info.name.replace ('/', '\\');  // use DOS backslashes, they're expected
-		info.category = nullptr;
+		Primitive primitive;
+		primitive.name = filename.mid (m_basePathLength + 1);  // make full path relative
+		primitive.name.replace ('/', '\\');  // use DOS backslashes, they're expected
+		primitive.category = nullptr;
 		QByteArray titledata = file.readLine();
 
 		if (titledata != QByteArray())
-			info.title = QString::fromUtf8 (titledata);
+			primitive.title = QString::fromUtf8 (titledata);
 
-		info.title = info.title.simplified();
+		primitive.title = primitive.title.simplified();
 
-		if (info.title[0] == '0')
+		if (primitive.title[0] == '0')
 		{
-			info.title.remove (0, 1);  // remove 0
-			info.title = info.title.simplified();
+			primitive.title.remove (0, 1);  // remove 0
+			primitive.title = primitive.title.simplified();
 		}
 
-		m_prims << info;
+		m_prims << primitive;
 	}
 
-	if (m_i == m_files.size())
+	if (not m_iterator.hasNext())
 	{
 		// Done with primitives, now save to a config file
 		QString path = m_manager->getPrimitivesCfgPath();
@@ -692,7 +671,6 @@ void PrimitiveScanner::work()
 	else
 	{
 		// Defer to event loop, pick up the work later
-		emit update (m_i);
 		QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
 	}
 }

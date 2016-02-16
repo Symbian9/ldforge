@@ -20,6 +20,7 @@
 #include <QRegExp>
 #include <QDialog>
 #include <QTreeWidgetItem>
+#include <QDirIterator>
 #include "main.h"
 
 class LDDocument;
@@ -126,16 +127,13 @@ public slots:
 	void work();
 
 signals:
-	void starting(int num);
 	void workDone();
-	void update(int i);
 
 private:
 	PrimitiveManager* m_manager;
 	QList<Primitive> m_prims;
-	QStringList m_files;
-	int m_i;
-	int m_baselen;
+	QDirIterator m_iterator;
+	int m_basePathLength;
 };
 
 class PrimitiveTreeItem : public QTreeWidgetItem
