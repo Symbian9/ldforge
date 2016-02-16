@@ -21,6 +21,8 @@
 #include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "movetoolset.h"
+#include "ui_rotpoint.h"
+#include "../grid.h"
 
 MoveToolset::MoveToolset (MainWindow* parent) :
 	Toolset (parent) {}
@@ -63,7 +65,7 @@ void MoveToolset::gridFine()
 void MoveToolset::moveObjects (Vertex vect)
 {
 	// Apply the grid values
-	vect *= gridCoordinateSnap();
+	vect *= grid()->coordinateSnap();
 
 	for (LDObject* obj : selectedObjects())
 		obj->move (vect);
@@ -101,7 +103,7 @@ void MoveToolset::moveZPos()
 
 double MoveToolset::getRotateActionAngle()
 {
-	return (Pi * gridAngleSnap()) / 180;
+	return (Pi * grid()->angleSnap()) / 180;
 }
 
 void MoveToolset::rotateXPos()
@@ -136,5 +138,48 @@ void MoveToolset::rotateZNeg()
 
 void MoveToolset::configureRotationPoint()
 {
-	configureRotationPoint();
+	QDialog* dialog = new QDialog;
+	Ui_RotPointUI ui;
+	ui.setupUi(dialog);
+
+	switch (RotationPoint(m_config->rotationPointType()))
+	{
+	case RotationPoint::ObjectOrigin:
+		ui.objectPoint->setChecked (true);
+		break;
+
+	case RotationPoint::WorldOrigin:
+		ui.worldPoint->setChecked (true);
+		break;
+
+	case RotationPoint::CustomPoint:
+		ui.customPoint->setChecked (true);
+		break;
+
+	case RotationPoint::NumValues:
+		break;
+	}
+
+	Vertex custompoint = m_config->customRotationPoint();
+	ui.customX->setValue(custompoint.x());
+	ui.customY->setValue(custompoint.y());
+	ui.customZ->setValue(custompoint.z());
+
+	if (dialog->exec() == QDialog::Accepted)
+	{
+		RotationPoint pointType;
+
+		if (ui.objectPoint->isChecked())
+			pointType = RotationPoint::ObjectOrigin;
+		else if (ui.objectPoint->isChecked())
+			pointType = RotationPoint::WorldOrigin;
+		else
+			pointType = RotationPoint::CustomPoint;
+
+		custompoint.setX (ui.customX->value());
+		custompoint.setY (ui.customY->value());
+		custompoint.setZ (ui.customZ->value());
+		m_config->setRotationPointType((int) pointType);
+		m_config->setCustomRotationPoint (custompoint);
+	}
 }

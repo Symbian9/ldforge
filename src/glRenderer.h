@@ -50,6 +50,9 @@ struct LDFixedCamera
 //
 struct LDGLOverlay
 {
+	LDGLOverlay();
+	~LDGLOverlay();
+
 	Vertex			v0,
 					v1;
 	int				ox,
@@ -116,13 +119,17 @@ enum ECamera
 
 MAKE_ITERABLE_ENUM (ECamera)
 
-//
+
 // CameraIcon::image is a heap-allocated QPixmap because otherwise it gets
 // initialized before program gets to main() and constructs a QApplication
 // and Qt doesn't like that.
 //
+// TODO: maybe this then shouldn't get allocated before the program gets to main().
 struct CameraIcon
 {
+	CameraIcon();
+	~CameraIcon();
+
 	QPixmap*		image;
 	QRect			sourceRect;
 	QRect			targetRect;

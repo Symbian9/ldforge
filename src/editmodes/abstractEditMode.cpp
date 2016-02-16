@@ -29,6 +29,7 @@
 #include "../mainwindow.h"
 #include "../glRenderer.h"
 #include "../miscallenous.h"
+#include "../grid.h"
 
 ConfigOption (bool DrawLineLengths = true)
 ConfigOption (bool DrawAngles = false)
@@ -291,8 +292,8 @@ Vertex AbstractDrawMode::getCursorVertex() const
 		renderer()->getRelativeAxes (relX, relY);
 		QLineF ln (v0[relX], v0[relY], v1[relX], v1[relY]);
 		ln.setAngle (intervalClamp<int> (ln.angle(), 45));
-		result.setCoordinate (relX, snapToGrid (ln.x2(), Grid::Coordinate));
-		result.setCoordinate (relY, snapToGrid (ln.y2(), Grid::Coordinate));
+		result.setCoordinate (relX, grid()->snap(ln.x2(), Grid::Coordinate));
+		result.setCoordinate (relY, grid()->snap(ln.y2(), Grid::Coordinate));
 	}
 
 	return result;

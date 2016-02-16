@@ -38,6 +38,7 @@ class QProgressBar;
 class Toolset;
 class Configuration;
 class PrimitiveManager;
+class Grid;
 
 class ColorToolbarItem
 {
@@ -94,6 +95,7 @@ public:
 	QTreeWidget* getPrimitivesTree() const;
 	class QSettings* getSettings() { return m_settings; }
 	LDColor getUniformSelectedColor();
+	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
 	LDDocument* newDocument (bool cache = false);
@@ -140,6 +142,7 @@ private:
 	class GuiUtilities* m_guiUtilities;
 	GLRenderer* m_renderer;
 	PrimitiveManager* m_primitives;
+	Grid* m_grid;
 	LDObjectList m_sel;
 	QList<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;

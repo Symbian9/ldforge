@@ -79,7 +79,7 @@ void DocumentLoader::start()
 	{
 		// Show a progress dialog if we're loading the main ldDocument.here so we can show progress updates and keep the
 		// WM posted that we're still here.
-		m_progressDialog = new OpenProgressDialog (g_win);
+		m_progressDialog = new OpenProgressDialog(qobject_cast<QWidget*>(parent()));
 		m_progressDialog->setNumLines (m_lines.size());
 		m_progressDialog->setModal (true);
 		m_progressDialog->show();

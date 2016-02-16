@@ -24,72 +24,6 @@
 #include "mainwindow.h"
 #include "dialogs.h"
 #include "ldDocument.h"
-#include "ui_rotpoint.h"
-
-ConfigOption (int Grid = 1)
-ConfigOption (float GridCoarseCoordinateSnap = 5.0f)
-ConfigOption (float GridCoarseAngleSnap = 45.0f)
-ConfigOption (float GridCoarseBezierCurveSegments = 8)
-ConfigOption (float GridMediumCoordinateSnap = 1.0f)
-ConfigOption (float GridMediumAngleSnap = 22.5f)
-ConfigOption (float GridMediumBezierCurveSegments = 16)
-ConfigOption (float GridFineCoordinateSnap = 0.1f)
-ConfigOption (float GridFineAngleSnap = 7.5f)
-ConfigOption (float GridFineBezierCurveSegments = 32)
-ConfigOption (int RotationPointType = 0)
-ConfigOption (Vertex CustomRotationPoint = Origin)
-
-
-float gridCoordinateSnap()
-{
-	switch (Config->grid())
-	{
-	default:
-	case Grid::Coarse: return Config->gridCoarseCoordinateSnap();
-	case Grid::Medium: return Config->gridMediumCoordinateSnap();
-	case Grid::Fine: return Config->gridFineCoordinateSnap();
-	}
-}
-
-
-float gridAngleSnap()
-{
-	switch (Config->grid())
-	{
-	default:
-	case Grid::Coarse: return Config->gridCoarseAngleSnap();
-	case Grid::Medium: return Config->gridMediumAngleSnap();
-	case Grid::Fine: return Config->gridFineAngleSnap();
-	}
-}
-
-
-float gridBezierCurveSegments()
-{
-	switch (Config->grid())
-	{
-	default:
-	case Grid::Coarse: return Config->gridCoarseBezierCurveSegments();
-	case Grid::Medium: return Config->gridMediumBezierCurveSegments();
-	case Grid::Fine: return Config->gridFineBezierCurveSegments();
-	}
-}
-
-// Snaps the given coordinate value on the current grid's given axis.
-double snapToGrid (double value, const Grid::Config type)
-{
-	double snapvalue = (type == Grid::Coordinate) ? gridCoordinateSnap() : gridAngleSnap();
-	double mult = floor (qAbs<double> (value / snapvalue));
-	double out = mult * snapvalue;
-
-	if (qAbs (value) - (mult * snapvalue) > snapvalue / 2)
-		out += snapvalue;
-
-	if (value < 0)
-		out = -out;
-
-	return out;
-}
 
 
 int gcd (int a, int b)
@@ -144,50 +78,6 @@ Vertex getRotationPoint (const LDObjectList& objs)
 	}
 
 	return Vertex();
-}
-
-
-void configureRotationPoint()
-{
-	QDialog* dlg = new QDialog;
-	Ui::RotPointUI ui;
-	ui.setupUi (dlg);
-
-	switch (RotationPoint (Config->rotationPointType()))
-	{
-	case RotationPoint::ObjectOrigin:
-		ui.objectPoint->setChecked (true);
-		break;
-
-	case RotationPoint::WorldOrigin:
-		ui.worldPoint->setChecked (true);
-		break;
-
-	case RotationPoint::CustomPoint:
-		ui.customPoint->setChecked (true);
-		break;
-
-	case RotationPoint::NumValues:
-		break;
-	}
-
-	Vertex custompoint = Config->customRotationPoint();
-	ui.customX->setValue (custompoint.x());
-	ui.customY->setValue (custompoint.y());
-	ui.customZ->setValue (custompoint.z());
-
-	if (not dlg->exec())
-		return;
-
-	Config->setRotationPointType (int (
-		(ui.objectPoint->isChecked()) ? RotationPoint::ObjectOrigin :
-		(ui.worldPoint->isChecked())  ? RotationPoint::WorldOrigin :
-		RotationPoint::CustomPoint));
-
-	custompoint.setX (ui.customX->value());
-	custompoint.setY (ui.customY->value());
-	custompoint.setZ (ui.customZ->value());
-	Config->setCustomRotationPoint (custompoint);
 }
 
 

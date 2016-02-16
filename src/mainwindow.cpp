@@ -56,6 +56,7 @@
 #include "glCompiler.h"
 #include "documentmanager.h"
 #include "ldobjectiterator.h"
+#include "grid.h"
 
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
@@ -69,6 +70,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_config(config),
 	m_guiUtilities (new GuiUtilities (this)),
 	m_primitives(new PrimitiveManager(this)),
+	m_grid(new Grid(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_settings (makeSettings (this)),
@@ -881,7 +883,10 @@ void MainWindow::addMessage (QString msg)
 // ============================================================================
 void ObjectList::contextMenuEvent (QContextMenuEvent* ev)
 {
-	g_win->spawnContextMenu (ev->globalPos());
+	MainWindow* mainWindow = qobject_cast<MainWindow*>(parent());
+
+	if (mainWindow)
+		mainWindow->spawnContextMenu (ev->globalPos());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1327,6 +1332,11 @@ GuiUtilities* MainWindow::guiUtilities()
 Configuration* MainWindow::config()
 {
 	return &m_config;
+}
+
+Grid* MainWindow::grid()
+{
+	return m_grid;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

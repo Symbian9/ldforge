@@ -41,6 +41,7 @@
 #include "glCompiler.h"
 #include "primitives.h"
 #include "documentmanager.h"
+#include "grid.h"
 
 const LDFixedCamera g_FixedCameras[6] =
 {
@@ -119,12 +120,6 @@ GLRenderer::GLRenderer (QWidget* parent) :
 //
 GLRenderer::~GLRenderer()
 {
-	for (int i = 0; i < countof (currentDocumentData().overlays); ++i)
-		delete currentDocumentData().overlays[i].img;
-
-	for (CameraIcon& info : m_cameraIcons)
-		delete info.image;
-
 	if (messageLog())
 		messageLog()->setRenderer (nullptr);
 
@@ -552,8 +547,8 @@ Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 
 	if (snap)
 	{
-		cx = snapToGrid (cx, Grid::Coordinate);
-		cy = snapToGrid (cy, Grid::Coordinate);
+		cx = grid()->snap(cx, Grid::Coordinate);
+		cy = grid()->snap(cy, Grid::Coordinate);
 	}
 
 	cx *= signX;
@@ -896,9 +891,8 @@ void GLRenderer::wheelEvent (QWheelEvent* ev)
 
 // =============================================================================
 //
-void GLRenderer::leaveEvent (QEvent* ev)
+void GLRenderer::leaveEvent (QEvent*)
 {
-	(void) ev;
 	m_drawToolTip = false;
 	m_toolTipTimer->stop();
 	update();
@@ -913,15 +907,15 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 
 // =============================================================================
 //
-void GLRenderer::setCamera (const ECamera cam)
+void GLRenderer::setCamera (const ECamera camera)
 {
 	// The edit mode may forbid the free camera.
-	if (cam == EFreeCamera and not m_currentEditMode->allowFreeCamera())
-		return;
-
-	m_camera = cam;
-	m_config->setCamera ((int) cam);
-	m_window->updateEditModeActions();
+	if (m_currentEditMode->allowFreeCamera() or camera != EFreeCamera)
+	{
+		m_camera = camera;
+		m_config->setCamera((int) camera);
+		m_window->updateEditModeActions();
+	}
 }
 
 // =============================================================================
@@ -1677,4 +1671,31 @@ double GLRenderer::panning (Axis ax) const
 double& GLRenderer::zoom()
 {
 	return currentDocumentData().zoom[camera()];
+}
+
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+
+LDGLOverlay::LDGLOverlay() :
+	img(nullptr) {}
+
+LDGLOverlay::~LDGLOverlay()
+{
+	delete img;
+}
+
+
+//
+// ---------------------------------------------------------------------------------------------------------------------
+//
+
+CameraIcon::CameraIcon() :
+	image(nullptr) {}
+
+CameraIcon::~CameraIcon()
+{
+	delete image;
 }

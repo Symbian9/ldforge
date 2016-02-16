@@ -23,7 +23,6 @@
 #include "guiutilities.h"
 
 
-
 HierarchyElement::HierarchyElement (QObject* parent) :
 	m_window (nullptr)
 {
@@ -37,15 +36,15 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 
 	if (m_window == nullptr)
 	{
+		// Drat! It doesn't seem to have the MainWindow as a parent! We'll need to force it to be in one.
+		// This shouldn't have any side effects but also shouldn't happen regardless.
 		m_window = g_win;
-		print ("WARNING: Hierarchy element instance %1 should be in the hierarchy of a "
-			"MainWindow but isn't.\n", this);
+		print("Hierarchy element instance %1 should be in the hierarchy of a MainWindow, but isn't.\n", this);
 	}
 
 	m_documents = m_window->documents();
 	m_config = m_window->config();
 }
-
 
 
 GuiUtilities* HierarchyElement::guiUtilities() const
@@ -54,12 +53,10 @@ GuiUtilities* HierarchyElement::guiUtilities() const
 }
 
 
-
 LDDocument* HierarchyElement::currentDocument()
 {
 	return m_window->currentDocument();
 }
-
 
 
 const LDObjectList& HierarchyElement::selectedObjects()
@@ -68,8 +65,13 @@ const LDObjectList& HierarchyElement::selectedObjects()
 }
 
 
-
 PrimitiveManager* HierarchyElement::primitives()
 {
 	return m_window->primitives();
+}
+
+
+Grid* HierarchyElement::grid() const
+{
+	return m_window->grid();
 }

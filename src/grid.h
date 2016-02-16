@@ -17,34 +17,30 @@
  */
 
 #pragma once
-#include <QObject>
-#include "main.h"
-#include "configuration.h"
+#include "hierarchyelement.h"
 
-class MainWindow;
-class GuiUtilities;
-class LDDocument;
-class DocumentManager;
-class PrimitiveManager;
-class Grid;
-
-//
-// Objects that are to take part in the MainWindow's hierarchy multiple-inherit from this class to get a pointer back
-// to the MainWindow class along with a few useful pointers and methods.
-//
-class HierarchyElement
+class Grid : public HierarchyElement
 {
 public:
-	HierarchyElement (QObject* parent);
+	Grid(QObject* parent);
 
-	const LDObjectList& selectedObjects();
-	LDDocument* currentDocument();
-	GuiUtilities* guiUtilities() const;
-	PrimitiveManager* primitives();
-	Grid* grid() const;
+	enum Type
+	{
+		Coarse,
+		Medium,
+		Fine
+	};
 
-protected:
-	MainWindow* m_window;
-	DocumentManager* m_documents;
-	Configuration* m_config;
+	enum Config
+	{
+		Coordinate,
+		Angle
+	};
+
+	qreal angleSnap() const;
+	qreal angleAsRadians() const;
+	int bezierCurveSegments() const;
+	qreal coordinateSnap() const;
+	qreal snap(qreal value, const Grid::Config type) const;
 };
+

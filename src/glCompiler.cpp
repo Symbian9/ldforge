@@ -28,6 +28,7 @@
 #include "dialogs.h"
 #include "guiutilities.h"
 #include "documentmanager.h"
+#include "grid.h"
 
 struct GLErrorInfo
 {
@@ -324,10 +325,10 @@ void GLCompiler::compileObject (LDObject* obj)
 	case OBJ_BezierCurve:
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			for (LDPolygon& poly : curve->rasterizePolygons())
+			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
 			{
-				poly.id = obj->id();
-				compilePolygon (poly, obj, &info);
+				polygon.id = obj->id();
+				compilePolygon (polygon, obj, &info);
 			}
 		}
 		break;

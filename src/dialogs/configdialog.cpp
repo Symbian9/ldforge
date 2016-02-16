@@ -79,20 +79,19 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	ui.setupUi (this);
 
 	// Set defaults
-	applyToWidgetOptions (
-	[&](QWidget* widget, QString confname)
+	applyToWidgetOptions([&](QWidget* widget, QString confname)
 	{
 		QVariant value = m_settings->value (confname, m_config->defaultValueByName (confname));
-		QLineEdit* le;
+		QLineEdit* lineedit;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
 		QSlider* slider;
 		QCheckBox* checkbox;
 		QPushButton* button;
 
-		if ((le = qobject_cast<QLineEdit*> (widget)))
+		if ((lineedit = qobject_cast<QLineEdit*> (widget)))
 		{
-			le->setText (value.toString());
+			lineedit->setText (value.toString());
 		}
 		else if ((spinbox = qobject_cast<QSpinBox*> (widget)))
 		{

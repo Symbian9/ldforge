@@ -29,6 +29,7 @@
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"
+#include "../grid.h"
 #include "basictoolset.h"
 
 BasicToolset::BasicToolset (MainWindow *parent) :
@@ -121,7 +122,7 @@ void BasicToolset::doInline (bool deep)
 	}
 
 	for (LDBezierCurve* curve : filterByType<LDBezierCurve> (selectedObjects()))
-		curve->replace (curve->rasterize());
+		curve->replace (curve->rasterize(grid()->bezierCurveSegments()));
 }
 
 void BasicToolset::inlineShallow()

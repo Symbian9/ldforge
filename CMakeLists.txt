@@ -43,6 +43,7 @@ set (LDFORGE_SOURCES
 	src/editHistory.cpp
 	src/glRenderer.cpp
 	src/glCompiler.cpp
+	src/grid.cpp
 	src/guiutilities.cpp
 	src/hierarchyelement.cpp
 	src/ldDocument.cpp
@@ -96,6 +97,7 @@ set (LDFORGE_HEADERS
 	src/format.h
 	src/glCompiler.h
 	src/glRenderer.h
+	src/grid.h
 	src/guiutilities.h
 	src/hierarchyelement.h
 	src/ldDocument.h

@@ -465,8 +465,8 @@ public:
 	LDBezierCurve (const Vertex& v0, const Vertex& v1,
 		const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
 	Vertex pointAt (qreal t) const;
-	LDObjectList rasterize (int segments = 0);
-	QVector<LDPolygon> rasterizePolygons (int segments = 0);
+	LDObjectList rasterize (int segments);
+	QVector<LDPolygon> rasterizePolygons (int segments);
 };
 
 // Other common LDraw stuff

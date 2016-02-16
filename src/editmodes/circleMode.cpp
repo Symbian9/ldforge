@@ -26,6 +26,7 @@
 #include "../glRenderer.h"
 #include "../mainwindow.h"
 #include "../ldObjectMath.h"
+#include "../grid.h"
 
 CircleMode::CircleMode (GLRenderer* renderer) :
 	Super (renderer) {}
@@ -39,13 +40,18 @@ double CircleMode::getCircleDrawDist (int pos) const
 {
 	if (m_drawedVerts.size() >= pos + 1)
 	{
-		Vertex v1 = (m_drawedVerts.size() >= pos + 2) ? m_drawedVerts[pos + 1] :
-			renderer()->convert2dTo3d (renderer()->mousePosition(), false);
+		Vertex v1;
+
+		if (m_drawedVerts.size() >= pos + 2)
+			v1 = m_drawedVerts[pos + 1];
+		else
+			v1 = renderer()->convert2dTo3d (renderer()->mousePosition(), false);
+
 		Axis localx, localy;
 		renderer()->getRelativeAxes (localx, localy);
 		double dx = m_drawedVerts[0][localx] - v1[localx];
 		double dy = m_drawedVerts[0][localy] - v1[localy];
-		return snapToGrid (sqrt ((dx * dx) + (dy * dy)), Grid::Coordinate);
+		return grid()->snap(hypot(dx, dy), Grid::Coordinate);
 	}
 
 	return 0.0;

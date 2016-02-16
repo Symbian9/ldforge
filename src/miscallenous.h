@@ -37,32 +37,12 @@ enum class RotationPoint
 	NumValues
 };
 
-namespace Grid
-{
-	enum Type
-	{
-		Coarse,
-		Medium,
-		Fine
-	};
-
-	enum Config
-	{
-		Coordinate,
-		Angle
-	};
-}
-
 void applyToMatrix (Matrix& a, ApplyToMatrixFunction func);
 void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
 void configureRotationPoint();
 QString formatFileSize (qint64 size);
 int gcd (int a, int b);
 Vertex getRotationPoint (const LDObjectList& objs);
-float gridAngleSnap();
-float gridBezierCurveSegments();
-float gridCoordinateSnap();
 QString joinStrings (QList<StringFormatArg> vals, QString delim = " ");
 void roundToDecimals (double& a, int decimals);
 void simplify (int& numer, int& denom);
-double snapToGrid (double value, const Grid::Config type);

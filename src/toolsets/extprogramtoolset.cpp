@@ -35,6 +35,7 @@
 #include "../editHistory.h"
 #include "../dialogs.h"
 #include "../documentmanager.h"
+#include "../grid.h"
 #include "extprogramtoolset.h"
 #include "ui_ytruder.h"
 #include "ui_intersector.h"
@@ -178,7 +179,7 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 		else if (obj->type() == OBJ_BezierCurve)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			LDObjectList objs = curve->rasterize();
+			LDObjectList objs = curve->rasterize(grid()->bezierCurveSegments());
 			writeObjects (objs, f);
 
 			for (LDObject* obj : objs)

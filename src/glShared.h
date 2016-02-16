@@ -18,11 +18,10 @@
 
 #pragma once
 
+#include "basics.h"
 #ifdef USE_QT5
 # include <QOpenGLFunctions>
 #endif
-
-#include "basics.h"
 
 class LDObject;
 

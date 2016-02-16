@@ -1107,10 +1107,7 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 
 LDObjectList LDBezierCurve::rasterize (int segments)
 {
-	if (segments == 0)
-		segments = gridBezierCurveSegments();
-
-	QVector<LDPolygon> polygons = rasterizePolygons (segments);
+	QVector<LDPolygon> polygons = rasterizePolygons(segments);
 	LDObjectList result;
 
 	for (LDPolygon& poly : polygons)
@@ -1123,11 +1120,8 @@ LDObjectList LDBezierCurve::rasterize (int segments)
 	return result;
 }
 
-QVector<LDPolygon> LDBezierCurve::rasterizePolygons (int segments)
+QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 {
-	if (segments == 0)
-		segments = gridBezierCurveSegments();
-
 	QVector<LDPolygon> result;
 	QVector<Vertex> parms;
 	parms.append (pointAt (0.0));
