@@ -463,49 +463,6 @@ int LDObject::lineNumber() const
 
 // =============================================================================
 //
-void LDObject::moveObjects (LDObjectList objs, const bool up)
-{
-	if (objs.isEmpty())
-		return;
-
-	// If we move down, we need to iterate the array in reverse order.
-	long const start = up ? 0 : (objs.size() - 1);
-	long const end = up ? objs.size() : -1;
-	long const incr = up ? 1 : -1;
-	LDObjectList objsToCompile;
-	LDDocument* file = objs[0]->document();
-
-	for (long i = start; i != end; i += incr)
-	{
-		LDObject* obj = objs[i];
-
-		long const idx = obj->lineNumber();
-		long const target = idx + (up ? -1 : 1);
-
-		if ((up and idx == 0) or (not up and idx == (long) file->objects().size() - 1l))
-		{
-			// One of the objects hit the extrema. If this happens, this should be the first
-			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
-			// abort the entire operation.
-			return;
-		}
-
-		objsToCompile << obj;
-		objsToCompile << file->getObject (target);
-
-		obj->swap (file->getObject (target));
-	}
-
-	removeDuplicates (objsToCompile);
-
-	// The objects need to be recompiled, otherwise their pick lists are left with
-	// the wrong index colors which messes up selection.
-	for (LDObject* obj : objsToCompile)
-		g_win->renderer()->compileObject (obj);
-}
-
-// =============================================================================
-//
 // Get type name by enumerator
 //
 QString LDObject::typeName (LDObjectType type)

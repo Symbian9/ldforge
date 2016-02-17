@@ -23,6 +23,7 @@
 #include "movetoolset.h"
 #include "ui_rotpoint.h"
 #include "../grid.h"
+#include "../glRenderer.h"
 
 MoveToolset::MoveToolset (MainWindow* parent) :
 	Toolset (parent) {}
@@ -30,7 +31,41 @@ MoveToolset::MoveToolset (MainWindow* parent) :
 void MoveToolset::moveSelection (bool up)
 {
 	LDObjectList objs = selectedObjects();
-	LDObject::moveObjects (objs, up);
+	if (objs.isEmpty())
+		return;
+
+	// If we move down, we need to iterate the array in reverse order.
+	int start = up ? 0 : (objs.size() - 1);
+	int end = up ? objs.size() : -1;
+	int increment = up ? 1 : -1;
+	QSet<LDObject*> objsToCompile;
+	LDDocument* file = objs[0]->document();
+
+	for (int i = start; i != end; i += increment)
+	{
+		LDObject* obj = objs[i];
+
+		int idx = obj->lineNumber();
+		int target = idx + (up ? -1 : 1);
+
+		if ((up and idx == 0) or (not up and idx == file->objects().size() - 1))
+		{
+			// One of the objects hit the extrema. If this happens, this should be the first
+			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
+			// abort the entire operation.
+			return;
+		}
+
+		objsToCompile << obj;
+		objsToCompile << file->getObject(target);
+		obj->swap(file->getObject(target));
+	}
+
+	// The objects need to be recompiled, otherwise their pick lists are left with
+	// the wrong index colors which messes up selection.
+	for (LDObject* obj : objsToCompile)
+		m_window->renderer()->compileObject(obj);
+
 	m_window->buildObjectList();
 }
 

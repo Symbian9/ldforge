@@ -133,7 +133,6 @@ public:
 	static QString describeObjects (const LDObjectList& objs);
 	static LDObject* fromID (int id);
 	static LDObject* getDefault (const LDObjectType type);
-	static void moveObjects (LDObjectList objs, const bool up); // TODO: move this to LDDocument?
 	static QString typeName (LDObjectType type);
 
 protected:
