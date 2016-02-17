@@ -23,25 +23,28 @@
 
 ConfigOption (QString LDrawPath)
 
-LDPaths::LDPaths (QObject* parent) :
-	QObject (parent),
-	m_dialog (nullptr) {}
+LDPaths::LDPaths (Configuration *config, QObject* parent) :
+	QObject(parent),
+	m_config(config),
+	m_dialog(nullptr) {}
+
 
 void LDPaths::checkPaths()
 {
-	QString pathconfig = Config->lDrawPath();
+	QString pathconfig = m_config->lDrawPath();
 
 	if (not configurePaths (pathconfig))
 	{
 		m_dialog = new LDrawPathDialog (pathconfig, false);
-		connect (m_dialog, SIGNAL (pathChanged(QString)), this, SLOT (configurePaths (QString)));
+		connect(m_dialog, &LDrawPathDialog::pathChanged, this, &LDPaths::configurePaths);
 
-		if (not m_dialog->exec())
-			exit (1);
+		if (m_dialog->exec() != QDialog::Accepted)
+			exit(1);
 		else
-			Config->setLDrawPath (m_dialog->path());
+			m_config->setLDrawPath(m_dialog->path());
 	}
 }
+
 
 bool LDPaths::isValid (const QDir& dir) const
 {
@@ -66,6 +69,7 @@ bool LDPaths::isValid (const QDir& dir) const
 	return m_error.isEmpty();
 }
 
+
 bool LDPaths::configurePaths (QString path)
 {
 	QDir dir (path);
@@ -85,11 +89,13 @@ bool LDPaths::configurePaths (QString path)
 	return ok;
 }
 
+
 QString& LDPaths::ldConfigPath()
 {
 	static QString value;
 	return value;
 }
+
 
 QDir& LDPaths::primitivesDir()
 {
@@ -97,11 +103,13 @@ QDir& LDPaths::primitivesDir()
 	return value;
 }
 
+
 QDir& LDPaths::partsDir()
 {
 	static QDir value;
 	return value;
 }
+
 
 QDir& LDPaths::baseDir()
 {

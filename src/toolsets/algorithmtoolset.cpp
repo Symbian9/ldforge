@@ -449,7 +449,7 @@ void AlgorithmToolset::subfileSelection()
 	LDComment*	titleobj = dynamic_cast<LDComment*> (currentDocument()->getObject (0));
 
 	// License text for the subfile
-	QString			license (PreferredLicenseText());
+	QString			license = preferredLicenseText();
 
 	// LDraw code body of the new subfile (i.e. code of the selection)
 	QStringList		code;

@@ -45,6 +45,9 @@ public:
 	Grid* grid() const;
 	MathFunctions* math() const;
 
+	// Utility functions
+	QString preferredLicenseText() const;
+
 protected:
 	MainWindow* m_window;
 	DocumentManager* m_documents;

@@ -20,14 +20,14 @@
 #include "main.h"
 
 class QDir;
-class MainWindow;
+class Configuration;
 
 class LDPaths : public QObject
 {
 	Q_OBJECT
 
 public:
-	LDPaths (QObject* parent = nullptr);
+	LDPaths(Configuration* config, QObject* parent = nullptr);
 	void checkPaths();
 	bool isValid (const class QDir& path) const;
 
@@ -40,6 +40,7 @@ public slots:
 	bool configurePaths (QString path);
 
 private:
+	Configuration* m_config;
 	mutable QString m_error;
 	class LDrawPathDialog* m_dialog;
 };

@@ -73,10 +73,11 @@ void NewPartDialog::fillHeader (LDDocument* newdoc) const
 	objs << new LDComment ("Name: <untitled>.dat");
 	objs << new LDComment ("Author: " + author());
 	objs << new LDComment ("!LDRAW_ORG Unofficial_Part");
+	QString license = preferredLicenseText();
 
-	if (useCaLicense())
-		objs << new LDComment (CALicenseText);
-	
+	if (not license.isEmpty())
+		objs << new LDComment(license);
+
 	objs << new LDEmpty();
 	objs << new LDBfc (getWinding());
 	objs << new LDEmpty();

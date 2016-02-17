@@ -510,7 +510,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveSpec& spec)
 
 	if (not m_config->defaultName().isEmpty())
 	{
-		license = PreferredLicenseText();
+		license = preferredLicenseText();
 		author = format ("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
 	}
 

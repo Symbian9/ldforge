@@ -1136,13 +1136,6 @@ void LDObject::deselect()
 
 // =============================================================================
 //
-QString PreferredLicenseText()
-{
-	return Config->useCaLicense() ? CALicenseText : "";
-}
-
-// =============================================================================
-//
 LDObject* LDObject::createCopy() const
 {
 	LDObject* copy = ParseLine (asText());

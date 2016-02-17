@@ -32,5 +32,3 @@
 #include "format.h"
 #include "hierarchyelement.h"
 #include "configuration.h"
-
-extern Configuration* Config;

@@ -468,14 +468,8 @@ public:
 	QVector<LDPolygon> rasterizePolygons (int segments);
 };
 
-// Other common LDraw stuff
-static const QString CALicenseText ("!LICENSE Redistributable under CCAL version 2.0 : "
-	"see CAreadme.txt");
-
 enum
 {
 	LowResolution = 16,
 	HighResolution = 48
 };
-
-QString PreferredLicenseText();

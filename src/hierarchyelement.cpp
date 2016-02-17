@@ -81,3 +81,10 @@ MathFunctions* HierarchyElement::math() const
 {
 	return m_window->mathFunctions();
 }
+
+
+QString HierarchyElement::preferredLicenseText() const
+{
+	QString caLicenseText = "!LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt";
+	return m_config->useCaLicense() ? caLicenseText : "";
+}
