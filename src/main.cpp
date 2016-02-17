@@ -17,17 +17,8 @@
  */
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QAbstractButton>
-#include <QFile>
-#include <QTextStream>
-#include <QDir>
-#include "ldDocument.h"
-#include "miscallenous.h"
+#include "main.h"
 #include "colors.h"
-#include "basics.h"
-#include "glRenderer.h"
-#include "dialogs.h"
 #include "crashCatcher.h"
 #include "ldpaths.h"
 #include "documentmanager.h"
