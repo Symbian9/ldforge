@@ -22,20 +22,21 @@
 class CircleMode : public AbstractDrawMode
 {
 	DEFINE_CLASS (CircleMode, AbstractDrawMode)
-	double m_angleOffset;
 
 public:
 	CircleMode (GLRenderer* renderer);
 
-	virtual void render (QPainter& painter) const override;
-	virtual EditModeType type() const override;
-
+	void endDraw() override;
 	double getCircleDrawDist (int pos) const;
 	Matrix getCircleDrawMatrix (double scale);
-	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
+	int maxVertices() const override;
 	bool preAddVertex (Vertex const&) override;
+	void render (QPainter& painter) const override;
+	EditModeType type() const override;
 
 private:
+	double m_angleOffset;
+
 	void buildCircle();
 	double getAngleOffset() const;
 };

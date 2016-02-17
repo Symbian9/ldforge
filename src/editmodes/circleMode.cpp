@@ -31,10 +31,12 @@
 CircleMode::CircleMode (GLRenderer* renderer) :
 	Super (renderer) {}
 
+
 EditModeType CircleMode::type() const
 {
 	return EditModeType::Circle;
 }
+
 
 double CircleMode::getCircleDrawDist (int pos) const
 {
@@ -56,6 +58,7 @@ double CircleMode::getCircleDrawDist (int pos) const
 
 	return 0.0;
 }
+
 
 Matrix CircleMode::getCircleDrawMatrix (double scale)
 {
@@ -80,7 +83,8 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 	return transform;
 }
 
-void CircleMode::buildCircle()
+
+void CircleMode::endDraw()
 {
 	LDObjectList objs;
 	PrimitiveSpec spec;
@@ -194,6 +198,7 @@ void CircleMode::buildCircle()
 	finishDraw (objs);
 }
 
+
 double CircleMode::getAngleOffset() const
 {
 	if (m_drawedVerts.isEmpty())
@@ -210,6 +215,7 @@ double CircleMode::getAngleOffset() const
 	angleoffset *= renderer()->depthNegateFactor(); // negate based on camera
 	return angleoffset;
 }
+
 
 void CircleMode::render (QPainter& painter) const
 {
@@ -309,26 +315,15 @@ void CircleMode::render (QPainter& painter) const
 	}
 }
 
-bool CircleMode::mouseReleased (MouseEventData const& data)
-{
-	if (Super::mouseReleased (data))
-		return true;
-
-	if (data.releasedButtons & Qt::LeftButton)
-	{
-		if (m_drawedVerts.size() < 3)
-			addDrawnVertex (renderer()->position3D());
-		else
-			buildCircle();
-
-		return true;
-	}
-
-	return false;
-}
 
 bool CircleMode::preAddVertex (const Vertex&)
 {
 	m_angleOffset = getAngleOffset();
 	return false;
+}
+
+
+int CircleMode::maxVertices() const
+{
+	return 3;
 }
