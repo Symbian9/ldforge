@@ -83,6 +83,8 @@ private:
 	qint32 m_index;
 };
 
+uint qHash(LDColor color);
+
 //
 // Parses ldconfig.ldr
 //

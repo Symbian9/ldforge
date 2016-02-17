@@ -363,3 +363,8 @@ const Vertex& BoundingBox::vertex1() const
 {
 	return m_vertex1;
 }
+
+uint qHash(const Vertex& key)
+{
+	return qHash(static_cast<const QVector3D&>(key));
+}

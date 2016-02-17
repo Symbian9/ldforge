@@ -58,15 +58,6 @@ private:
 	QToolButton* m_toolButton;
 };
 
-// Object list class for MainWindow
-class ObjectList : public QListWidget
-{
-	Q_OBJECT
-
-protected:
-	void contextMenuEvent (QContextMenuEvent* ev);
-};
-
 // LDForge's main GUI class.
 class MainWindow : public QMainWindow
 {
@@ -112,7 +103,7 @@ public:
 	void scrollToSelection();
 	const LDObjectList& selectedObjects();
 	void setQuickColors (const QList<ColorToolbarItem>& colors);
-	void spawnContextMenu (const QPoint pos);
+	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();
 	void syncSettings();
 	Q_SLOT void updateActions();

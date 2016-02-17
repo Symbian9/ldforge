@@ -40,7 +40,7 @@ EditModeType MagicWandMode::type() const
 	return EditModeType::MagicWand;
 }
 
-void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QVector<LDObject*>& candidates)
+void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QSet<LDObject*>& candidates)
 {
 	// All boundaries obviously share vertices with the object, therefore they're all in the list
 	// of candidates.
@@ -110,14 +110,12 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 			return;
 	}
 
-	QVector<LDObject*> candidates;
+	QSet<LDObject*> candidates;
 
 	// Get the list of objects that touch this object, i.e. share a vertex
 	// with this.
 	for (int i = 0; i < obj->numVertices(); ++i)
 		candidates += m_vertices[obj->vertex (i)];
-
-	removeDuplicates (candidates);
 
 	// If we're dealing with surfaces, get a list of boundaries.
 	if (matchesneeded > 1)

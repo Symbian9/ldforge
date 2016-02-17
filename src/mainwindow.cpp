@@ -519,7 +519,7 @@ void MainWindow::selectionChanged()
 	if (m_isSelectionLocked == true or m_currentDocument == nullptr)
 		return;
 
-	LDObjectList priorSelection = selectedObjects();
+	QSet<LDObject*> priorSelection = selectedObjects().toSet();
 
 	// Get the objects from the object list selection
 	m_currentDocument->clearSelection();
@@ -542,10 +542,7 @@ void MainWindow::selectionChanged()
 	updateSelection();
 
 	// Update the GL renderer
-	LDObjectList compound = priorSelection + selectedObjects();
-	removeDuplicates (compound);
-
-	for (LDObject* obj : compound)
+	for (LDObject* obj : (priorSelection + selectedObjects().toSet()))
 		renderer()->compileObject (obj);
 
 	renderer()->update();
@@ -720,7 +717,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::spawnContextMenu (const QPoint pos)
+void MainWindow::spawnContextMenu (const QPoint& position)
 {
 	const bool single = (selectedObjects().size() == 1);
 	LDObject* singleObj = single ? selectedObjects().first() : nullptr;
@@ -781,7 +778,7 @@ void MainWindow::spawnContextMenu (const QPoint pos)
 		contextMenu->addAction (ui.actionSetDrawDepth);
 	}
 
-	contextMenu->exec (pos);
+	contextMenu->exec(position);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -888,15 +885,6 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 void MainWindow::addMessage (QString msg)
 {
 	m_renderer->messageLog()->addLine (msg);
-}
-
-// ============================================================================
-void ObjectList::contextMenuEvent (QContextMenuEvent* ev)
-{
-	MainWindow* mainWindow = qobject_cast<MainWindow*>(parent());
-
-	if (mainWindow)
-		mainWindow->spawnContextMenu (ev->globalPos());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -103,7 +103,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		Vertex			cursorPosition = renderer()->convert2dTo3d (data.ev->pos(), false);
 		QPoint			cursorPosition2D (data.ev->pos());
 		const Axis		relZ = renderer()->getRelativeZ();
-		QVector<Vertex>	vertices = renderer()->document()->inlineVertices();
+		QList<Vertex>	vertices = renderer()->document()->inlineVertices().toList();
 
 		// Sort the vertices in order of distance to camera
 		std::sort (vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool

@@ -1166,13 +1166,13 @@ void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 	}
 };
 
-void LDObject::getVertices (QVector<Vertex>& verts) const
+void LDObject::getVertices (QSet<Vertex>& verts) const
 {
 	for (int i = 0; i < numVertices(); ++i)
-		verts << vertex (i);
+		verts.insert(vertex(i));
 }
 
-void LDSubfileReference::getVertices (QVector<Vertex>& verts) const
+void LDSubfileReference::getVertices (QSet<Vertex>& verts) const
 {
-	verts << fileInfo()->inlineVertices();
+	verts.unite(fileInfo()->inlineVertices());
 }

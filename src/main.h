@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <QSet>
 #include <QString>
 #include <QTextFormat>
 #include "macros.h"

@@ -649,7 +649,7 @@ void LDDocument::addKnownVertices (LDObject* obj)
 	auto it = m_objectVertices.find (obj);
 
 	if (it == m_objectVertices.end())
-		it = m_objectVertices.insert (obj, QVector<Vertex>());
+		it = m_objectVertices.insert (obj, QSet<Vertex>());
 	else
 		it->clear();
 
@@ -792,10 +792,9 @@ void LDDocument::mergeVertices()
 {
 	m_vertices.clear();
 
-	for (QVector<Vertex> const& verts : m_objectVertices)
-		m_vertices << verts;
+	for (const QSet<Vertex>& vertices : m_objectVertices)
+		m_vertices.unite(vertices);
 
-	removeDuplicates (m_vertices);
 	unsetFlag(NeedsVertexMerge);
 }
 
@@ -908,7 +907,7 @@ QString LDDocument::shortenName (QString a) // [static]
 
 // =============================================================================
 //
-QVector<Vertex> const& LDDocument::inlineVertices()
+const QSet<Vertex>& LDDocument::inlineVertices()
 {
 	initializeCachedData();
 	return m_vertices;

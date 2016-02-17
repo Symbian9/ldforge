@@ -24,7 +24,7 @@
 
 class MagicWandMode : public AbstractSelectMode
 {
-	QMap<Vertex, QVector<LDObject*>> m_vertices;
+	QMap<Vertex, QSet<LDObject*>> m_vertices;
 	QVector<LDObject*> m_selection;
 
 	DEFINE_CLASS (MagicWandMode, AbstractSelectMode)
@@ -45,5 +45,5 @@ public:
 	virtual bool mouseReleased (MouseEventData const& data) override;
 
 private:
-	void fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QVector<LDObject*>& candidates);
+	void fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QSet<LDObject *> &candidates);
 };

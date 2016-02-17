@@ -43,7 +43,7 @@ void ViewToolset::selectByColor()
 	if (selectedObjects().isEmpty())
 		return;
 
-	QList<LDColor> colors;
+	QSet<LDColor> colors;
 
 	for (LDObject* obj : selectedObjects())
 	{
@@ -51,7 +51,6 @@ void ViewToolset::selectByColor()
 			colors << obj->color();
 	}
 
-	removeDuplicates (colors);
 	currentDocument()->clearSelection();
 
 	for (LDObject* obj : currentDocument()->objects())
@@ -66,19 +65,17 @@ void ViewToolset::selectByType()
 	if (selectedObjects().isEmpty())
 		return;
 
-	QList<LDObjectType> types;
-	QStringList subfilenames;
+	QSet<LDObjectType> types;
+	QSet<QString> subfilenames;
 
 	for (LDObject* obj : selectedObjects())
 	{
 		types << obj->type();
 
-		if (types.last() == OBJ_SubfileReference)
+		if (obj->type() == OBJ_SubfileReference)
 			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
 	}
 
-	removeDuplicates (types);
-	removeDuplicates (subfilenames);
 	currentDocument()->clearSelection();
 
 	for (LDObject* obj : currentDocument()->objects())

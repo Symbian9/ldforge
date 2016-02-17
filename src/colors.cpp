@@ -132,6 +132,11 @@ bool LDColor::isDirect() const
 	return index() >= 0x02000000;
 }
 
+uint qHash(LDColor color)
+{
+	return color.index();
+}
+
 int luma (const QColor& col)
 {
 	return (0.2126f * col.red()) + (0.7152f * col.green()) + (0.0722f * col.blue());

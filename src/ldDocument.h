@@ -81,7 +81,7 @@ public:
 	void initializeCachedData();
 	LDObjectList inlineContents (bool deep, bool renderinline);
 	QList<LDPolygon> inlinePolygons();
-	const QVector<Vertex>& inlineVertices();
+	const QSet<Vertex>& inlineVertices();
 	void insertObject (int pos, LDObject* obj);
 	bool isCache() const;
 	bool isSafeToClose();
@@ -122,8 +122,8 @@ private:
 	int m_tabIndex;
 	int m_triangleCount;
 	QList<LDPolygon> m_polygonData;
-	QMap<LDObject*, QVector<Vertex>> m_objectVertices;
-	QVector<Vertex> m_vertices;
+	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
+	QSet<Vertex> m_vertices;
 	LDObjectList m_sel;
 	LDGLData* m_gldata;
 	DocumentManager* m_manager;

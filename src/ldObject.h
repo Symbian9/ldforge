@@ -101,7 +101,7 @@ public:
 	void destroy();
 	LDDocument* document() const;
 	LDPolygon* getPolygon();
-	virtual void getVertices (QVector<Vertex>& verts) const;
+	virtual void getVertices (QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const = 0; // Does this object have a matrix and position? (see LDMatrixObject)
 	qint32 id() const;
 	virtual void invert() = 0; // Inverts this object (winding is reversed)
@@ -318,7 +318,7 @@ class LDSubfileReference : public LDMatrixObject
 public:
 	// Inlines this subfile.
 	LDDocument* fileInfo() const;
-	virtual void getVertices (QVector<Vertex>& verts) const override;
+	virtual void getVertices (QSet<Vertex>& verts) const override;
 	LDObjectList inlineContents (bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
 	void setFileInfo (LDDocument* fileInfo);

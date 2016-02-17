@@ -85,6 +85,7 @@ inline Vertex operator* (qreal scalar, const Vertex& vertex)
 }
 
 Q_DECLARE_METATYPE (Vertex)
+uint qHash(const Vertex& key);
 
 //
 // A mathematical 3 x 3 matrix
@@ -209,13 +210,6 @@ template<typename T>
 bool isInteger (T a)
 {
 	return (qAbs (a - floor(a)) < 0.00001) or (qAbs (a - ceil(a)) < 0.00001);
-}
-
-template<typename T>
-void removeDuplicates (T& a)
-{
-	std::sort (a.begin(), a.end());
-	a.erase (std::unique (a.begin(), a.end()), a.end());
 }
 
 //
