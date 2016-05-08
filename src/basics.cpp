@@ -364,7 +364,20 @@ const Vertex& BoundingBox::vertex1() const
 	return m_vertex1;
 }
 
+// http://stackoverflow.com/a/18204188/3629665
+template<typename T>
+inline int rotl10(T x)
+{
+	return (((x) << 10) | (((x) >> 22) & 0x000000ff));
+}
+
+template<typename T>
+inline int rotl20(T x)
+{
+	return (((x) << 20) | (((x) >> 12) & 0x000000ff));
+}
+
 uint qHash(const Vertex& key)
 {
-	return qHash(static_cast<const QVector3D&>(key));
+	return qHash(key.x()) ^ rotl10(qHash(key.y())) ^ rotl20(qHash(key.z()));
 }

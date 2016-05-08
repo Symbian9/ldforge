@@ -77,13 +77,13 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		{
 			rb_bfcType = new RadioGroup ("Statement", {}, 0, Qt::Vertical);
 
-			for_enum (BfcStatement, i)
+			for (BfcStatement statement : iterateEnum<BfcStatement>())
 			{
 				// Separate these in two columns
-				if (int(i) == ENUM_LIMIT(BfcStatement, Count) / 2)
+				if (int(statement) == EnumLimits<BfcStatement>::Count / 2)
 					rb_bfcType->rowBreak();
 
-				rb_bfcType->addButton (LDBfc::statementToString (i));
+				rb_bfcType->addButton (LDBfc::statementToString(statement));
 			}
 
 			if (obj)

@@ -47,39 +47,21 @@ public: \
 	template<> \
 	struct EnumLimits<T> \
 	{\
-		enum { First = FIRST, Last = LAST, Count = LAST - FIRST + 1 };\
+		enum { First = FIRST, Last = LAST, End = LAST + 1, Count = End - FIRST };\
 	}; \
 	inline T operator++ (T& a) { a = (T) ((int) a + 1); return a; } \
 	inline T operator-- (T& a) { a = (T) ((int) a - 1); return a; } \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
 	inline T operator-- (T& a, int) { T result = a; a = (T) ((int) a - 1); return result; }
 
+template<typename T>
+struct EnumLimits {};
+
 #if QT_VERSION >= QT_VERSION_CHECK (5, 0, 0)
 # define USE_QT5
 #endif
 
 #define ConfigOption(...)
-
-#define FOR_ENUM_NAME_HELPER(LINE) enum_iterator_ ## LINE
-#define FOR_ENUM_NAME(LINE) FOR_ENUM_NAME_HELPER(LINE)
-#define FOR_ENUM_TYPE(ENUM) typename std::underlying_type<ENUM>::type
-#define ENUM_LIMIT(ENUM, T) FOR_ENUM_TYPE(ENUM)(EnumLimits<ENUM>::T)
-
-#define for_enum(ENUM, NAME) \
-	for (FOR_ENUM_TYPE(ENUM) FOR_ENUM_NAME(__LINE__) = ENUM_LIMIT(ENUM, First); \
-		FOR_ENUM_NAME (__LINE__) <= ENUM_LIMIT(ENUM, Last); \
-		++FOR_ENUM_NAME (__LINE__)) \
-	for (ENUM NAME = ENUM(FOR_ENUM_NAME(__LINE__)); NAME != ENUM_LIMIT(ENUM, Last) + 1; \
-		NAME = ENUM(EnumLimits<ENUM>::Last + 1))
-
-template<typename T>
-struct EnumLimits {};
-
-template<typename Enum>
-bool valueInEnum(typename std::underlying_type<Enum>::type x)
-{
-	return x >= ENUM_LIMIT(Enum, First) and x <= ENUM_LIMIT(Enum, Last);
-}
 
 #define DEFINE_FLAG_ACCESS_METHODS \
 	bool checkFlag(Flag flag) const { return !!(m_flags & flag); } \

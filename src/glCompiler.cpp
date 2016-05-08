@@ -355,7 +355,7 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	default: return;
 	}
 
-	for_enum(ComplementVboType, complement)
+	for (ComplementVboType complement : iterateEnum<ComplementVboType>())
 	{
 		const int vbonum = vboNumber (surface, complement);
 		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
@@ -390,7 +390,7 @@ void GLCompiler::setRenderer (GLRenderer* renderer)
 
 int GLCompiler::vboNumber (SurfaceVboType surface, ComplementVboType complement)
 {
-	return (surface * ENUM_LIMIT(ComplementVboType, Count)) + complement;
+	return (surface * EnumLimits<ComplementVboType>::Count) + complement;
 }
 
 

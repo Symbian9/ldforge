@@ -234,3 +234,46 @@ inline void toggle (bool& a)
 {
 	a = not a;
 }
+
+//
+// Iterates an enum
+//
+template<typename Enum>
+struct EnumIterShell
+{
+	struct Iterator
+	{
+		Iterator(typename std::underlying_type<Enum>::type i) :
+			i(i) {}
+
+		Iterator& operator++() { ++i; return *this; }
+		bool operator==(Iterator other) { return i == other.i; }
+		bool operator!=(Iterator other) { return i != other.i; }
+		Enum operator*() const { return Enum(i); }
+
+		typename std::underlying_type<Enum>::type i;
+	};
+
+	Iterator begin()
+	{
+		return Iterator(EnumLimits<Enum>::First);
+	};
+
+	Iterator end()
+	{
+		return Iterator(EnumLimits<Enum>::End);
+	}
+};
+
+template<typename Enum>
+EnumIterShell<Enum> iterateEnum()
+{
+	return EnumIterShell<Enum>();
+}
+
+// Is a value inside an enum?
+template<typename Enum>
+bool valueInEnum(typename std::underlying_type<Enum>::type x)
+{
+	return x >= EnumLimits<Enum>::First and x <= EnumLimits<Enum>::Last;
+}

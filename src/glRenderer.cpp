@@ -43,7 +43,7 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-const CameraInfo g_cameraInfo[ENUM_LIMIT(Camera, Count)] =
+const CameraInfo g_cameraInfo[EnumLimits<Camera>::Count] =
 {
 	{{  1,  0, 0 }, X, Z, false, false, false }, // top
 	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
@@ -100,9 +100,9 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
 	// Init camera icons
-	for_enum(Camera, camera)
+	for (Camera camera : iterateEnum<Camera>())
 	{
-		const char* cameraIconNames[ENUM_LIMIT(Camera, Count)] =
+		const char* cameraIconNames[EnumLimits<Camera>::Count] =
 		{
 			"camera-top", "camera-front", "camera-left",
 			"camera-bottom", "camera-back", "camera-right",
@@ -1428,7 +1428,7 @@ LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 //
 void GLRenderer::initOverlaysFromObjects()
 {
-	for_enum(Camera, camera)
+	for (Camera camera : iterateEnum<Camera>())
 	{
 		if (camera == FreeCamera)
 			continue;
@@ -1457,7 +1457,7 @@ void GLRenderer::initOverlaysFromObjects()
 //
 void GLRenderer::updateOverlayObjects()
 {
-	for_enum(Camera, camera)
+	for (Camera camera : iterateEnum<Camera>())
 	{
 		if (camera == FreeCamera)
 			continue;

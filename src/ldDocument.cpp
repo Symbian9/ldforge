@@ -417,10 +417,10 @@ LDObject* ParseLine (QString line)
 				// Handle BFC statements
 				if (tokens.size() > 2 and tokens[1] == "BFC")
 				{
-					for_enum (BfcStatement, i)
+					for (BfcStatement statement : iterateEnum<BfcStatement>())
 					{
-						if (commentTextSimplified == format ("BFC %1", LDBfc::statementToString (i)))
-							return LDSpawn<LDBfc> (i);
+						if (commentTextSimplified == format("BFC %1", LDBfc::statementToString (statement)))
+							return LDSpawn<LDBfc>(statement);
 					}
 
 					// MLCAD is notorious for stuffing these statements in parts it
