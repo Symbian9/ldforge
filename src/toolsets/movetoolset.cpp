@@ -179,19 +179,16 @@ void MoveToolset::configureRotationPoint()
 
 	switch (RotationPoint(m_config->rotationPointType()))
 	{
-	case RotationPoint::ObjectOrigin:
+	case ObjectOrigin:
 		ui.objectPoint->setChecked (true);
 		break;
 
-	case RotationPoint::WorldOrigin:
+	case WorldOrigin:
 		ui.worldPoint->setChecked (true);
 		break;
 
-	case RotationPoint::CustomPoint:
+	case CustomPoint:
 		ui.customPoint->setChecked (true);
-		break;
-
-	case RotationPoint::NumValues:
 		break;
 	}
 
@@ -205,11 +202,11 @@ void MoveToolset::configureRotationPoint()
 		RotationPoint pointType;
 
 		if (ui.objectPoint->isChecked())
-			pointType = RotationPoint::ObjectOrigin;
+			pointType = ObjectOrigin;
 		else if (ui.objectPoint->isChecked())
-			pointType = RotationPoint::WorldOrigin;
+			pointType = WorldOrigin;
 		else
-			pointType = RotationPoint::CustomPoint;
+			pointType = CustomPoint;
 
 		custompoint.setX (ui.customX->value());
 		custompoint.setY (ui.customY->value());

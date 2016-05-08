@@ -44,9 +44,6 @@ enum SurfaceVboType
 	TrianglesVbo,
 	QuadsVbo,
 	ConditionalLinesVbo,
-
-	NumSurfaceVbos,
-	FirstSurfaceVbo = LinesVbo
 };
 
 MAKE_ITERABLE_ENUM (SurfaceVboType, LinesVbo, ConditionalLinesVbo)
@@ -59,9 +56,6 @@ enum ComplementVboType
 	BfcFrontColorsVboComplement,
 	BfcBackColorsVboComplement,
 	RandomColorsVboComplement,
-
-	NumVboComplements,
-	FirstVboComplement = SurfacesVboComplement
 };
 
 MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, RandomColorsVboComplement)

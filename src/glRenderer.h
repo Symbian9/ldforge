@@ -112,10 +112,6 @@ enum Camera
 	BackCamera,
 	RightCamera,
 	FreeCamera,
-
-	NumCameras,
-	ELastFixedCamera = RightCamera,
-	EFirstCamera = TopCamera
 };
 
 MAKE_ITERABLE_ENUM(Camera, TopCamera, FreeCamera)

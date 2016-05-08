@@ -87,7 +87,7 @@ Vertex MathFunctions::getRotationPoint(const LDObjectList& objs) const
 {
 	switch (RotationPoint (m_config->rotationPointType()))
 	{
-	case RotationPoint::ObjectOrigin:
+	case ObjectOrigin:
 		{
 			BoundingBox box;
 
@@ -103,14 +103,11 @@ Vertex MathFunctions::getRotationPoint(const LDObjectList& objs) const
 			return box.center();
 		}
 
-	case RotationPoint::WorldOrigin:
+	case WorldOrigin:
 		return Vertex();
 
-	case RotationPoint::CustomPoint:
+	case CustomPoint:
 		return m_config->customRotationPoint();
-
-	case RotationPoint::NumValues:
-		break;
 	}
 
 	return Vertex();

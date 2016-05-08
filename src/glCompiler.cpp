@@ -118,7 +118,6 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 	switch (complement)
 	{
 	case SurfacesVboComplement:
-	case NumVboComplements:
 		return QColor();
 
 	case BfcFrontColorsVboComplement:
@@ -356,7 +355,7 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	default: return;
 	}
 
-	for (ComplementVboType complement = FirstVboComplement; complement < NumVboComplements; ++complement)
+	for_enum(ComplementVboType, complement)
 	{
 		const int vbonum = vboNumber (surface, complement);
 		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
@@ -391,7 +390,7 @@ void GLCompiler::setRenderer (GLRenderer* renderer)
 
 int GLCompiler::vboNumber (SurfaceVboType surface, ComplementVboType complement)
 {
-	return (surface * NumVboComplements) + complement;
+	return (surface * ENUM_LIMIT(ComplementVboType, Count)) + complement;
 }
 
 

@@ -43,7 +43,7 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-const CameraInfo g_cameraInfo[NumCameras] =
+const CameraInfo g_cameraInfo[ENUM_LIMIT(Camera, Count)] =
 {
 	{{  1,  0, 0 }, X, Z, false, false, false }, // top
 	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
@@ -100,18 +100,18 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
 	// Init camera icons
-	for (Camera cam = EFirstCamera; cam < NumCameras; ++cam)
+	for_enum(Camera, camera)
 	{
-		const char* cameraIconNames[NumCameras] =
+		const char* cameraIconNames[ENUM_LIMIT(Camera, Count)] =
 		{
 			"camera-top", "camera-front", "camera-left",
 			"camera-bottom", "camera-back", "camera-right",
 			"camera-free"
 		};
 
-		CameraIcon* info = &m_cameraIcons[cam];
-		info->image = GetIcon (cameraIconNames[cam]);
-		info->camera = cam;
+		CameraIcon* info = &m_cameraIcons[camera];
+		info->image = GetIcon (cameraIconNames[camera]);
+		info->camera = camera;
 	}
 
 	calcCameraIcons();
@@ -1428,7 +1428,7 @@ LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 //
 void GLRenderer::initOverlaysFromObjects()
 {
-	for (Camera camera = EFirstCamera; camera < NumCameras; ++camera)
+	for_enum(Camera, camera)
 	{
 		if (camera == FreeCamera)
 			continue;
@@ -1457,13 +1457,13 @@ void GLRenderer::initOverlaysFromObjects()
 //
 void GLRenderer::updateOverlayObjects()
 {
-	for (Camera cam = EFirstCamera; cam < NumCameras; ++cam)
+	for_enum(Camera, camera)
 	{
-		if (cam == FreeCamera)
+		if (camera == FreeCamera)
 			continue;
 
-		LDGLOverlay& meta = currentDocumentData().overlays[cam];
-		LDOverlay* ovlobj = findOverlayObject (cam);
+		LDGLOverlay& meta = currentDocumentData().overlays[camera];
+		LDOverlay* ovlobj = findOverlayObject (camera);
 
 		if (meta.image == nullptr and ovlobj)
 		{
@@ -1519,7 +1519,7 @@ void GLRenderer::updateOverlayObjects()
 
 		if (meta.image and ovlobj)
 		{
-			ovlobj->setCamera (cam);
+			ovlobj->setCamera (camera);
 			ovlobj->setFileName (meta.fileName);
 			ovlobj->setX (meta.offsetX);
 			ovlobj->setY (meta.offsetY);
@@ -1607,7 +1607,7 @@ Vertex const& GLRenderer::position3D() const
 
 const CameraInfo& GLRenderer::cameraInfo (Camera camera) const
 {
-	if (camera >= EFirstCamera and camera <= ELastFixedCamera)
+	if (valueInEnum<Camera>(camera))
 		return g_cameraInfo[camera];
 	else
 		return g_cameraInfo[0];

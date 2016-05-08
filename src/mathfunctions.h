@@ -20,12 +20,11 @@
 #include "main.h"
 
 
-enum class RotationPoint
+enum RotationPoint
 {
 	ObjectOrigin,
 	WorldOrigin,
 	CustomPoint,
-	NumValues
 };
 
 
