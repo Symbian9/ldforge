@@ -103,7 +103,7 @@ struct LDGLData
 	}
 };
 
-enum ECamera
+enum Camera
 {
 	ETopCamera,
 	EFrontCamera,
@@ -114,27 +114,19 @@ enum ECamera
 	EFreeCamera,
 
 	ENumCameras,
+	ELastFixedCamera = ERightCamera,
 	EFirstCamera = ETopCamera
 };
 
-MAKE_ITERABLE_ENUM (ECamera)
+MAKE_ITERABLE_ENUM(Camera, ETopCamera, EFreeCamera)
 
-
-// CameraIcon::image is a heap-allocated QPixmap because otherwise it gets
-// initialized before program gets to main() and constructs a QApplication
-// and Qt doesn't like that.
-//
-// TODO: maybe this then shouldn't get allocated before the program gets to main().
 struct CameraIcon
 {
-	CameraIcon();
-	~CameraIcon();
-
-	QPixmap*		image;
-	QRect			sourceRect;
-	QRect			targetRect;
-	QRect			selRect;
-	ECamera			cam;
+	QPixmap image;
+	QRect sourceRect;
+	QRect targetRect;
+	QRect hitRect;
+	Camera camera;
 };
 
 // The main renderer object, draws the brick on the screen, manages the camera and selection picking.
@@ -146,8 +138,8 @@ public:
 	GLRenderer (QWidget* parent = nullptr);
 	~GLRenderer();
 
-	ECamera camera() const;
-	QString cameraName (ECamera camera) const;
+	Camera camera() const;
+	QString cameraName (Camera camera) const;
 	QByteArray capturePixels();
 	void clearOverlay();
 	void compileObject (LDObject* obj);
@@ -163,9 +155,9 @@ public:
 	void drawBlipCoordinates (QPainter& painter, const Vertex& pos3d, QPointF pos);
 	void drawGLScene();
 	void forgetObject (LDObject* obj);
-	Axis getCameraAxis (bool y, ECamera camid = (ECamera) -1);
+	Axis getCameraAxis (bool y, Camera camid = (Camera) -1);
 	double getDepthValue() const;
-	const LDFixedCamera& getFixedCamera (ECamera cam) const;
+	const LDFixedCamera& cameraInfo (Camera camera) const;
 	LDGLOverlay& getOverlay (int newcam);
 	void getRelativeAxes (Axis& relX, Axis& relY) const;
 	Axis getRelativeZ() const;
@@ -192,13 +184,13 @@ public:
 	void resetAllAngles();
 	void resetAngles();
 	void setBackground();
-	void setCamera (const ECamera cam);
+	void setCamera (const Camera cam);
 	void setDepthValue (double depth);
 	void setDocument (LDDocument* document);
 	void setDrawOnly (bool value);
 	void setEditMode (EditModeType type);
 	void setPicking (bool a);
-	bool setupOverlay (ECamera camera, QString fileName, int x, int y, int w, int h);
+	bool setupOverlay (Camera camera, QString fileName, int x, int y, int w, int h);
 	QPen textPen() const;
 	void updateOverlayObjects();
 	void zoomNotch (bool inward);
@@ -244,8 +236,8 @@ private:
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
 	QPen m_thinBorderPen;
-	ECamera m_camera;
-	ECamera m_toolTipCamera;
+	Camera m_camera;
+	Camera m_toolTipCamera;
 	GLuint m_axeslist;
 	int m_width;
 	int m_height;
@@ -259,7 +251,7 @@ private:
 	void clampAngle (double& angle) const;
 	LDGLData& currentDocumentData() const;
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
-	LDOverlay* findOverlayObject (ECamera cam);
+	LDOverlay* findOverlayObject (Camera cam);
 	double& panning (Axis ax);
 	double panning (Axis ax) const;
 	double& rotation (Axis ax);

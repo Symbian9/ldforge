@@ -450,7 +450,7 @@ void MainWindow::buildObjectList()
 			case OBJ_Overlay:
 			{
 				LDOverlay* ovl = static_cast<LDOverlay*> (obj);
-				descr = format ("[%1] %2 (%3, %4), %5 x %6", renderer()->cameraName ((ECamera) ovl->camera()),
+				descr = format ("[%1] %2 (%3, %4), %5 x %6", renderer()->cameraName ((Camera) ovl->camera()),
 					Basename (ovl->fileName()), ovl->x(), ovl->y(),
 					ovl->width(), ovl->height());
 				break;

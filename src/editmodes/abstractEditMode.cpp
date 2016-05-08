@@ -108,7 +108,7 @@ bool AbstractDrawMode::mouseReleased (MouseEventData const& data)
 		// Sort the vertices in order of distance to camera
 		std::sort (vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
 		{
-			if (renderer()->getFixedCamera (renderer()->camera()).negatedDepth)
+			if (renderer()->cameraInfo (renderer()->camera()).negatedDepth)
 				return a[relZ] > b[relZ];
 
 			return a[relZ] < b[relZ];

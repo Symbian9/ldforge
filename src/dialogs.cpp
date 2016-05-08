@@ -60,7 +60,7 @@ OverlayDialog::OverlayDialog (QWidget* parent, Qt::WindowFlags f) : QDialog (par
 		{ ui->right,  ERightCamera }
 	};
 
-	ECamera cam = g_win->renderer()->camera();
+	Camera cam = g_win->renderer()->camera();
 
 	if (cam == EFreeCamera)
 		cam = ETopCamera;

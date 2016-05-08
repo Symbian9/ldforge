@@ -162,7 +162,7 @@ void ViewToolset::setOverlay()
 	if (not dlg.exec())
 		return;
 
-	m_window->renderer()->setupOverlay ((ECamera) dlg.camera(), dlg.fpath(), dlg.ofsx(),
+	m_window->renderer()->setupOverlay ((Camera) dlg.camera(), dlg.fpath(), dlg.ofsx(),
 		dlg.ofsy(), dlg.lwidth(), dlg.lheight());
 }
 

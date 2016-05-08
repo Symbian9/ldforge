@@ -43,7 +43,8 @@ public: \
 #define dvalof(A) dprint ("value of '%1' = %2\n", #A, A)
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
-#define MAKE_ITERABLE_ENUM(T) \
+#define MAKE_ITERABLE_ENUM(T, FIRST, LAST) \
+	namespace EnumLimits { namespace T { enum { First = FIRST, Last = LAST, Count = LAST - FIRST + 1 }; } } \
 	inline T operator++ (T& a) { a = (T) ((int) a + 1); return a; } \
 	inline T operator-- (T& a) { a = (T) ((int) a - 1); return a; } \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \

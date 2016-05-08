@@ -79,7 +79,7 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	m_initialized (false)
 {
 	m_isPicking = false;
-	m_camera = (ECamera) m_config->camera();
+	m_camera = (Camera) m_config->camera();
 	m_drawToolTip = false;
 	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_panning = false;
@@ -99,7 +99,7 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
 	// Init camera icons
-	for (ECamera cam = EFirstCamera; cam < ENumCameras; ++cam)
+	for (Camera cam = EFirstCamera; cam < ENumCameras; ++cam)
 	{
 		const char* cameraIconNames[ENumCameras] =
 		{
@@ -109,8 +109,8 @@ GLRenderer::GLRenderer (QWidget* parent) :
 		};
 
 		CameraIcon* info = &m_cameraIcons[cam];
-		info->image = new QPixmap (GetIcon (cameraIconNames[cam]));
-		info->cam = cam;
+		info->image = GetIcon (cameraIconNames[cam]);
+		info->camera = cam;
 	}
 
 	calcCameraIcons();
@@ -141,12 +141,12 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& info : m_cameraIcons)
 	{
 		// MATH
-		int x1 = (m_width - (info.cam != EFreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
+		int x1 = (m_width - (info.camera != EFreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
 		int y1 = ((i / 3) * 16) + 1;
 
 		info.sourceRect = QRect (0, 0, 16, 16);
 		info.targetRect = QRect (x1, y1, 16, 16);
-		info.selRect = QRect (
+		info.hitRect = QRect (
 			info.targetRect.x(),
 			info.targetRect.y(),
 			info.targetRect.width() + 1,
@@ -240,11 +240,11 @@ void GLRenderer::resetAngles()
 //
 void GLRenderer::resetAllAngles()
 {
-	ECamera oldcam = camera();
+	Camera oldcam = camera();
 
 	for (int i = 0; i < 7; ++i)
 	{
-		setCamera ((ECamera) i);
+		setCamera ((Camera) i);
 		resetAngles();
 	}
 
@@ -669,7 +669,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		// Draw a background for the selected camera
 		painter.setPen (m_thinBorderPen);
 		painter.setBrush (QBrush (QColor (0, 128, 160, 128)));
-		painter.drawRect (m_cameraIcons[camera()].selRect);
+		painter.drawRect (m_cameraIcons[camera()].hitRect);
 
 		// Draw the camera icons
 		for (CameraIcon& info : m_cameraIcons)
@@ -678,7 +678,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 			if (&info == &m_cameraIcons[EFreeCamera] and not m_currentEditMode->allowFreeCamera())
 				continue;
 
-			painter.drawPixmap (info.targetRect, *info.image, info.sourceRect);
+			painter.drawPixmap (info.targetRect, info.image, info.sourceRect);
 		}
 
 		// Draw a label for the current camera in the bottom left corner
@@ -772,7 +772,7 @@ void GLRenderer::mouseReleaseEvent (QMouseEvent* ev)
 			{
 				if (info.targetRect.contains (ev->pos()))
 				{
-					setCamera (info.cam);
+					setCamera (info.camera);
 					goto end;
 				}
 			}
@@ -907,7 +907,7 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 
 // =============================================================================
 //
-void GLRenderer::setCamera (const ECamera camera)
+void GLRenderer::setCamera (const Camera camera)
 {
 	// The edit mode may forbid the free camera.
 	if (m_currentEditMode->allowFreeCamera() or camera != EFreeCamera)
@@ -1159,7 +1159,7 @@ void GLRenderer::slot_toolTipTimer()
 	{
 		if (icon.targetRect.contains (m_mousePosition))
 		{
-			m_toolTipCamera = icon.cam;
+			m_toolTipCamera = icon.camera;
 			m_drawToolTip = true;
 			update();
 			break;
@@ -1169,9 +1169,9 @@ void GLRenderer::slot_toolTipTimer()
 
 // =============================================================================
 //
-Axis GLRenderer::getCameraAxis (bool y, ECamera camid)
+Axis GLRenderer::getCameraAxis (bool y, Camera camid)
 {
-	if (camid == (ECamera) -1)
+	if (camid == (Camera) -1)
 		camid = camera();
 
 	const LDFixedCamera* cam = &g_FixedCameras[camid];
@@ -1180,7 +1180,7 @@ Axis GLRenderer::getCameraAxis (bool y, ECamera camid)
 
 // =============================================================================
 //
-bool GLRenderer::setupOverlay (ECamera camera, QString fileName, int x, int y, int w, int h)
+bool GLRenderer::setupOverlay (Camera camera, QString fileName, int x, int y, int w, int h)
 {
 	QImage* image = new QImage (QImage (fileName).convertToFormat (QImage::Format_ARGB32));
 	LDGLOverlay& info = getOverlay (camera);
@@ -1265,7 +1265,7 @@ double GLRenderer::getDepthValue() const
 
 // =============================================================================
 //
-QString GLRenderer::cameraName (ECamera camera) const
+QString GLRenderer::cameraName (Camera camera) const
 {
 	switch (camera)
 	{
@@ -1408,7 +1408,7 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 
 // =============================================================================
 //
-LDOverlay* GLRenderer::findOverlayObject (ECamera cam)
+LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 {
 	for (LDObject* obj : document()->objects())
 	{
@@ -1427,7 +1427,7 @@ LDOverlay* GLRenderer::findOverlayObject (ECamera cam)
 //
 void GLRenderer::initOverlaysFromObjects()
 {
-	for (ECamera camera = EFirstCamera; camera < ENumCameras; ++camera)
+	for (Camera camera = EFirstCamera; camera < ENumCameras; ++camera)
 	{
 		if (camera == EFreeCamera)
 			continue;
@@ -1456,7 +1456,7 @@ void GLRenderer::initOverlaysFromObjects()
 //
 void GLRenderer::updateOverlayObjects()
 {
-	for (ECamera cam = EFirstCamera; cam < ENumCameras; ++cam)
+	for (Camera cam = EFirstCamera; cam < ENumCameras; ++cam)
 	{
 		if (cam == EFreeCamera)
 			continue;
@@ -1604,9 +1604,12 @@ Vertex const& GLRenderer::position3D() const
 	return m_position3D;
 }
 
-const LDFixedCamera& GLRenderer::getFixedCamera (ECamera cam) const
+const LDFixedCamera& GLRenderer::cameraInfo (Camera camera) const
 {
-	return g_FixedCameras[cam];
+	if (camera >= EFirstCamera and camera <= ELastFixedCamera)
+		return g_FixedCameras[camera];
+	else
+		return g_FixedCameras[0];
 }
 
 bool GLRenderer::mouseHasMoved() const
@@ -1640,7 +1643,7 @@ Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
 	return m_currentKeyboardModifiers;
 }
 
-ECamera GLRenderer::camera() const
+Camera GLRenderer::camera() const
 {
 	return m_camera;
 }
@@ -1685,19 +1688,6 @@ LDGLOverlay::LDGLOverlay() :
 	image(nullptr) {}
 
 LDGLOverlay::~LDGLOverlay()
-{
-	delete image;
-}
-
-
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-CameraIcon::CameraIcon() :
-	image(nullptr) {}
-
-CameraIcon::~CameraIcon()
 {
 	delete image;
 }

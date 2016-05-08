@@ -78,7 +78,7 @@ enum LDObjectType
 	OBJ_FirstType = OBJ_SubfileReference
 };
 
-MAKE_ITERABLE_ENUM (LDObjectType)
+MAKE_ITERABLE_ENUM (LDObjectType, OBJ_SubfileReference, OBJ_BezierCurve)
 
 //
 // LDObject

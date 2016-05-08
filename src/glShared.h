@@ -49,6 +49,8 @@ enum SurfaceVboType
 	FirstSurfaceVbo = LinesVbo
 };
 
+MAKE_ITERABLE_ENUM (SurfaceVboType, LinesVbo, ConditionalLinesVbo)
+
 enum ComplementVboType
 {
 	SurfacesVboComplement,
@@ -62,13 +64,12 @@ enum ComplementVboType
 	FirstVboComplement = SurfacesVboComplement
 };
 
+MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, RandomColorsVboComplement)
+
 enum
 {
-	NumVbos = NumSurfaceVbos * NumVboComplements
+	NumVbos = EnumLimits::SurfaceVboType::Count * EnumLimits::ComplementVboType::Count,
 };
-
-MAKE_ITERABLE_ENUM (SurfaceVboType)
-MAKE_ITERABLE_ENUM (ComplementVboType)
 
 #ifndef USE_QT5
 // Placeholder QOpenGLFunctions for Qt 4.x support
