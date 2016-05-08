@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>276</width>
-    <height>244</height>
+    <width>299</width>
+    <height>277</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Set Overlay</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../ldforge.qrc">
+   <iconset resource="../ldforge.qrc">
     <normaloff>:/icons/overlay.png</normaloff>:/icons/overlay.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -30,7 +30,7 @@
          <string>Top</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-top.png</normaloff>:/icons/camera-top.png</iconset>
         </property>
        </widget>
@@ -41,7 +41,7 @@
          <string>Front</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-front.png</normaloff>:/icons/camera-front.png</iconset>
         </property>
        </widget>
@@ -52,7 +52,7 @@
          <string>Left</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-left.png</normaloff>:/icons/camera-left.png</iconset>
         </property>
        </widget>
@@ -63,7 +63,7 @@
          <string>Bottom</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-bottom.png</normaloff>:/icons/camera-bottom.png</iconset>
         </property>
        </widget>
@@ -74,7 +74,7 @@
          <string>Back</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-back.png</normaloff>:/icons/camera-back.png</iconset>
         </property>
        </widget>
@@ -85,7 +85,7 @@
          <string>Right</string>
         </property>
         <property name="icon">
-         <iconset resource="../../ldforge.qrc">
+         <iconset resource="../ldforge.qrc">
           <normaloff>:/icons/camera-right.png</normaloff>:/icons/camera-right.png</iconset>
         </property>
        </widget>
@@ -122,7 +122,7 @@
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="../../ldforge.qrc">
+             <iconset resource="../ldforge.qrc">
               <normaloff>:/icons/file-open.png</normaloff>:/icons/file-open.png</iconset>
             </property>
            </widget>
@@ -239,7 +239,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../ldforge.qrc"/>
+  <include location="../ldforge.qrc"/>
  </resources>
  <connections>
   <connection>

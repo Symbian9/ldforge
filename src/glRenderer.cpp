@@ -643,13 +643,13 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
 
-		if (overlay.img)
+		if (overlay.image)
 		{
 			QPoint v0 = convert3dTo2d (currentDocumentData().overlays[camera()].v0);
 			QPoint v1 = convert3dTo2d (currentDocumentData().overlays[camera()].v1);
 			QRect targetRect (v0.x(), v0.y(), qAbs (v1.x() - v0.x()), qAbs (v1.y() - v0.y()));
-			QRect sourceRect (0, 0, overlay.img->width(), overlay.img->height());
-			painter.drawImage (targetRect, *overlay.img, sourceRect);
+			QRect sourceRect (0, 0, overlay.image->width(), overlay.image->height());
+			painter.drawImage (targetRect, *overlay.image, sourceRect);
 		}
 
 		// Paint the coordinates onto the screen.
@@ -1180,51 +1180,51 @@ Axis GLRenderer::getCameraAxis (bool y, ECamera camid)
 
 // =============================================================================
 //
-bool GLRenderer::setupOverlay (ECamera cam, QString file, int x, int y, int w, int h)
+bool GLRenderer::setupOverlay (ECamera camera, QString fileName, int x, int y, int w, int h)
 {
-	QImage* img = new QImage (QImage (file).convertToFormat (QImage::Format_ARGB32));
-	LDGLOverlay& info = getOverlay (cam);
+	QImage* image = new QImage (QImage (fileName).convertToFormat (QImage::Format_ARGB32));
+	LDGLOverlay& info = getOverlay (camera);
 
-	if (img->isNull())
+	if (image->isNull())
 	{
 		Critical (tr ("Failed to load overlay image!"));
-		currentDocumentData().overlays[cam].invalid = true;
-		delete img;
+		currentDocumentData().overlays[camera].invalid = true;
+		delete image;
 		return false;
 	}
 
-	delete info.img; // delete the old image
+	delete info.image; // delete the old image
 
-	info.fname = file;
-	info.lw = w;
-	info.lh = h;
-	info.ox = x;
-	info.oy = y;
-	info.img = img;
+	info.fileName = fileName;
+	info.width = w;
+	info.height = h;
+	info.offsetX = x;
+	info.offsetY = y;
+	info.image = image;
 	info.invalid = false;
 
-	if (info.lw == 0)
-		info.lw = (info.lh * img->width()) / img->height();
-	else if (info.lh == 0)
-		info.lh = (info.lw * img->height()) / img->width();
+	if (info.width == 0)
+		info.width = (info.height * image->width()) / image->height();
+	else if (info.height == 0)
+		info.height = (info.width * image->height()) / image->width();
 
-	const Axis x2d = getCameraAxis (false, cam),
-		y2d = getCameraAxis (true, cam);
-	const double negXFac = g_FixedCameras[cam].negatedX ? -1 : 1,
-		negYFac = g_FixedCameras[cam].negatedY ? -1 : 1;
+	Axis localX = getCameraAxis (false, camera);
+	Axis localY = getCameraAxis (true, camera);
+	int signX = g_FixedCameras[camera].negatedX ? -1 : 1;
+	int signY = g_FixedCameras[camera].negatedY ? -1 : 1;
 
 	info.v0 = info.v1 = Origin;
-	info.v0.setCoordinate (x2d, -(info.ox * info.lw * negXFac) / img->width());
-	info.v0.setCoordinate (y2d, (info.oy * info.lh * negYFac) / img->height());
-	info.v1.setCoordinate (x2d, info.v0[x2d] + info.lw);
-	info.v1.setCoordinate (y2d, info.v0[y2d] + info.lh);
+	info.v0.setCoordinate (localX, -(info.offsetX * info.width * signX) / image->width());
+	info.v0.setCoordinate (localY, (info.offsetY * info.height * signY) / image->height());
+	info.v1.setCoordinate (localX, info.v0[localX] + info.width);
+	info.v1.setCoordinate (localY, info.v0[localY] + info.height);
 
 	// Set alpha of all pixels to 0.5
-	for (long i = 0; i < img->width(); ++i)
-	for (long j = 0; j < img->height(); ++j)
+	for (int i = 0; i < image->width(); ++i)
+	for (int j = 0; j < image->height(); ++j)
 	{
-		uint32 pixel = img->pixel (i, j);
-		img->setPixel (i, j, 0x80000000 | (pixel & 0x00FFFFFF));
+		uint32 pixel = image->pixel (i, j);
+		image->setPixel (i, j, 0x80000000 | (pixel & 0x00FFFFFF));
 	}
 
 	updateOverlayObjects();
@@ -1239,8 +1239,8 @@ void GLRenderer::clearOverlay()
 		return;
 
 	LDGLOverlay& info = currentDocumentData().overlays[camera()];
-	delete info.img;
-	info.img = nullptr;
+	delete info.image;
+	info.image = nullptr;
 
 	updateOverlayObjects();
 }
@@ -1427,25 +1427,27 @@ LDOverlay* GLRenderer::findOverlayObject (ECamera cam)
 //
 void GLRenderer::initOverlaysFromObjects()
 {
-	for (ECamera cam = EFirstCamera; cam < ENumCameras; ++cam)
+	for (ECamera camera = EFirstCamera; camera < ENumCameras; ++camera)
 	{
-		if (cam == EFreeCamera)
+		if (camera == EFreeCamera)
 			continue;
 
-		LDGLOverlay& meta = currentDocumentData().overlays[cam];
-		LDOverlay* ovlobj = findOverlayObject (cam);
+		LDGLOverlay& meta = currentDocumentData().overlays[camera];
+		LDOverlay* overlay = findOverlayObject (camera);
 
-		if (ovlobj == nullptr and meta.img)
+		if (overlay == nullptr and meta.image)
 		{
-			delete meta.img;
-			meta.img = nullptr;
+			// The document doesn't have an overlay for this camera but we have an image for it, delete the image.
+			delete meta.image;
+			meta.image = nullptr;
 		}
-		else if (ovlobj and
-			(meta.img == nullptr or meta.fname != ovlobj->fileName()) and
-			not meta.invalid)
+		else if (overlay
+			and (meta.image == nullptr or meta.fileName != overlay->fileName())
+			and not meta.invalid)
 		{
-			setupOverlay (cam, ovlobj->fileName(), ovlobj->x(),
-				ovlobj->y(), ovlobj->width(), ovlobj->height());
+			// Found a valid overlay definition for this camera, set it up for use.
+			setupOverlay (camera, overlay->fileName(), overlay->x(),
+				overlay->y(), overlay->width(), overlay->height());
 		}
 	}
 }
@@ -1462,7 +1464,7 @@ void GLRenderer::updateOverlayObjects()
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
 		LDOverlay* ovlobj = findOverlayObject (cam);
 
-		if (meta.img == nullptr and ovlobj)
+		if (meta.image == nullptr and ovlobj)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
 			LDObject* nextobj = ovlobj->next();
@@ -1474,7 +1476,7 @@ void GLRenderer::updateOverlayObjects()
 			// not, remove the object.
 			ovlobj->destroy();
 		}
-		else if (meta.img and ovlobj == nullptr)
+		else if (meta.image and ovlobj == nullptr)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
@@ -1514,14 +1516,14 @@ void GLRenderer::updateOverlayObjects()
 			}
 		}
 
-		if (meta.img and ovlobj)
+		if (meta.image and ovlobj)
 		{
 			ovlobj->setCamera (cam);
-			ovlobj->setFileName (meta.fname);
-			ovlobj->setX (meta.ox);
-			ovlobj->setY (meta.oy);
-			ovlobj->setWidth (meta.lw);
-			ovlobj->setHeight (meta.lh);
+			ovlobj->setFileName (meta.fileName);
+			ovlobj->setX (meta.offsetX);
+			ovlobj->setY (meta.offsetY);
+			ovlobj->setWidth (meta.width);
+			ovlobj->setHeight (meta.height);
 		}
 	}
 
@@ -1680,11 +1682,11 @@ double& GLRenderer::zoom()
 
 
 LDGLOverlay::LDGLOverlay() :
-	img(nullptr) {}
+	image(nullptr) {}
 
 LDGLOverlay::~LDGLOverlay()
 {
-	delete img;
+	delete image;
 }
 
 

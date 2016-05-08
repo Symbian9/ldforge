@@ -55,12 +55,12 @@ struct LDGLOverlay
 
 	Vertex			v0,
 					v1;
-	int				ox,
-					oy;
-	double			lw,
-					lh;
-	QString			fname;
-	QImage*			img;
+	int				offsetX,
+					offsetY;
+	double			width,
+					height;
+	QString			fileName;
+	QImage*			image;
 	bool			invalid;
 };
 
@@ -91,7 +91,7 @@ struct LDGLData
 		{
 			if (i < 6)
 			{
-				overlays[i].img = nullptr;
+				overlays[i].image = nullptr;
 				overlays[i].invalid = false;
 				depthValues[i] = 0.0f;
 			}
@@ -198,7 +198,7 @@ public:
 	void setDrawOnly (bool value);
 	void setEditMode (EditModeType type);
 	void setPicking (bool a);
-	bool setupOverlay (ECamera cam, QString file, int x, int y, int w, int h);
+	bool setupOverlay (ECamera camera, QString fileName, int x, int y, int w, int h);
 	QPen textPen() const;
 	void updateOverlayObjects();
 	void zoomNotch (bool inward);
