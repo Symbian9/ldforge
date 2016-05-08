@@ -81,6 +81,7 @@ set (LDFORGE_SOURCES
 	src/toolsets/movetoolset.cpp
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
+	src/types/matrix.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -137,6 +138,7 @@ set (LDFORGE_HEADERS
 	src/toolsets/movetoolset.h
 	src/toolsets/toolset.h
 	src/toolsets/viewtoolset.h
+	src/types/matrix.h
 )
 
 set (LDFORGE_FORMS

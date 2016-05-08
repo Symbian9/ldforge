@@ -25,6 +25,7 @@
 #include <functional>
 #include "macros.h"
 #include "transform.h"
+#include "types/matrix.h"
 
 class LDObject;
 class QFile;
@@ -86,78 +87,6 @@ inline Vertex operator* (qreal scalar, const Vertex& vertex)
 
 Q_DECLARE_METATYPE (Vertex)
 uint qHash(const Vertex& key);
-
-//
-// A mathematical 3 x 3 matrix
-//
-class Matrix
-{
-public:
-	Matrix() {}
-	Matrix (const std::initializer_list<double>& vals);
-
-	// Constructs a matrix all 9 elements initialized to the same value.
-	Matrix (double fillval);
-
-	// Constructs a matrix with a C-array.
-	// note: @vals is expected to have exactly 9 elements.
-	Matrix (double vals[]);
-
-	// Calculates the matrix's determinant.
-	double			getDeterminant() const;
-
-	// Multiplies this matrix with @other
-	// note: a.mult(b) is not equivalent to b.mult(a)!
-	Matrix			mult (const Matrix& other) const;
-
-	// Prints the matrix to stdout.
-	void			dump() const;
-
-	// Yields a string representation of the matrix.
-	QString			toString() const;
-
-	// Zeroes the matrix out.
-	void			zero();
-
-	// Assigns the matrix values to the values of @other.
-	Matrix&			operator= (const Matrix& other);
-
-	// Returns a mutable reference to a value by @idx
-	inline double& value (int idx)
-	{
-		return m_vals[idx];
-	}
-
-	// An overload of value() for const matrices.
-	inline const double& value (int idx) const
-	{
-		return m_vals[idx];
-	}
-
-	// An operator overload for mult().
-	inline Matrix operator* (const Matrix& other) const
-	{
-		return mult (other);
-	}
-
-	// An operator overload for value().
-	inline double& operator[] (int idx)
-	{
-		return value (idx);
-	}
-
-	// An operator overload for value() const.
-	inline const double& operator[] (int idx) const
-	{
-		return value (idx);
-	}
-
-	// Checks whether the two matrices have the same values.
-	bool operator== (const Matrix& other) const;
-
-private:
-	double m_vals[9];
-};
 
 //
 // Defines a bounding box that encompasses a given set of objects.
