@@ -43,7 +43,7 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-const LDFixedCamera g_FixedCameras[6] =
+const CameraInfo g_cameraInfo[NumCameras] =
 {
 	{{  1,  0, 0 }, X, Z, false, false, false }, // top
 	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
@@ -51,6 +51,7 @@ const LDFixedCamera g_FixedCameras[6] =
 	{{ -1,  0, 0 }, X, Z, false,  true, true }, // bottom
 	{{  0,  0, 0 }, X, Y,  true,  true, true }, // back
 	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
+	{{  1,  0, 0 }, X, Z, false, false, false }, // free (defensive dummy data)
 };
 
 ConfigOption (QColor BackgroundColor = "#FFFFFF")
@@ -99,9 +100,9 @@ GLRenderer::GLRenderer (QWidget* parent) :
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 
 	// Init camera icons
-	for (Camera cam = EFirstCamera; cam < ENumCameras; ++cam)
+	for (Camera cam = EFirstCamera; cam < NumCameras; ++cam)
 	{
-		const char* cameraIconNames[ENumCameras] =
+		const char* cameraIconNames[NumCameras] =
 		{
 			"camera-top", "camera-front", "camera-left",
 			"camera-bottom", "camera-back", "camera-right",
@@ -141,7 +142,7 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& info : m_cameraIcons)
 	{
 		// MATH
-		int x1 = (m_width - (info.camera != EFreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
+		int x1 = (m_width - (info.camera != FreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
 		int y1 = ((i / 3) * 16) + 1;
 
 		info.sourceRect = QRect (0, 0, 16, 16);
@@ -393,7 +394,7 @@ void GLRenderer::drawGLScene()
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable (GL_DEPTH_TEST);
 
-	if (camera() != EFreeCamera)
+	if (camera() != FreeCamera)
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
@@ -402,15 +403,15 @@ void GLRenderer::drawGLScene()
 		glOrtho (-m_virtualWidth, m_virtualWidth, -m_virtualHeight, m_virtualHeight, -100.0f, 100.0f);
 		glTranslatef (panning (X), panning (Y), 0.0f);
 
-		if (camera() != EFrontCamera and camera() != EBackCamera)
+		if (camera() != FrontCamera and camera() != BackCamera)
 		{
-			glRotatef (90.0f, g_FixedCameras[camera()].glrotate[0],
-				g_FixedCameras[camera()].glrotate[1],
-				g_FixedCameras[camera()].glrotate[2]);
+			glRotatef (90.0f, g_cameraInfo[camera()].glrotate[0],
+				g_cameraInfo[camera()].glrotate[1],
+				g_cameraInfo[camera()].glrotate[2]);
 		}
 
 		// Back camera needs to be handled differently
-		if (camera() == EBackCamera)
+		if (camera() == BackCamera)
 		{
 			glRotatef (180.0f, 1.0f, 0.0f, 0.0f);
 			glRotatef (180.0f, 0.0f, 0.0f, 1.0f);
@@ -531,11 +532,11 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 //
 Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 {
-	if (camera() == EFreeCamera)
+	if (camera() == FreeCamera)
 		return Origin;
 
 	Vertex pos3d;
-	const LDFixedCamera* cam = &g_FixedCameras[camera()];
+	const CameraInfo* cam = &g_cameraInfo[camera()];
 	Axis axisX = cam->localX;
 	Axis axisY = cam->localY;
 	int signX = cam->negatedX ? -1 : 1;
@@ -571,10 +572,10 @@ Vertex GLRenderer::convert2dTo3d (const QPoint& pos2d, bool snap) const
 //
 QPoint GLRenderer::convert3dTo2d (const Vertex& pos3d)
 {
-	if (camera() == EFreeCamera)
+	if (camera() == FreeCamera)
 		return QPoint (0, 0);
 
-	const LDFixedCamera* cam = &g_FixedCameras[camera()];
+	const CameraInfo* cam = &g_cameraInfo[camera()];
 	const Axis axisX = cam->localX;
 	const Axis axisY = cam->localY;
 	const int negXFac = cam->negatedX ? -1 : 1;
@@ -638,7 +639,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 	}
 #endif
 
-	if (camera() != EFreeCamera and not isPicking())
+	if (camera() != FreeCamera and not isPicking())
 	{
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
@@ -675,7 +676,7 @@ void GLRenderer::paintEvent (QPaintEvent*)
 		for (CameraIcon& info : m_cameraIcons)
 		{
 			// Don't draw the free camera icon when we can't use the free camera
-			if (&info == &m_cameraIcons[EFreeCamera] and not m_currentEditMode->allowFreeCamera())
+			if (&info == &m_cameraIcons[FreeCamera] and not m_currentEditMode->allowFreeCamera())
 				continue;
 
 			painter.drawPixmap (info.targetRect, info.image, info.sourceRect);
@@ -829,7 +830,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 			m_panning = true;
 			m_isCameraMoving = true;
 		}
-		else if (left and camera() == EFreeCamera)
+		else if (left and camera() == FreeCamera)
 		{
 			rotation (X) = rotation (X) + dy;
 			rotation (Y) = rotation (Y) + dx;
@@ -854,7 +855,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 #endif
 
 	// Calculate 3d position of the cursor
-	m_position3D = (camera() != EFreeCamera) ? convert2dTo3d (m_mousePosition, true) : Origin;
+	m_position3D = (camera() != FreeCamera) ? convert2dTo3d (m_mousePosition, true) : Origin;
 
 	highlightCursorObject();
 	update();
@@ -910,7 +911,7 @@ void GLRenderer::contextMenuEvent (QContextMenuEvent* ev)
 void GLRenderer::setCamera (const Camera camera)
 {
 	// The edit mode may forbid the free camera.
-	if (m_currentEditMode->allowFreeCamera() or camera != EFreeCamera)
+	if (m_currentEditMode->allowFreeCamera() or camera != FreeCamera)
 	{
 		m_camera = camera;
 		m_config->setCamera((int) camera);
@@ -1043,8 +1044,8 @@ void GLRenderer::setEditMode (EditModeType a)
 	m_currentEditMode = AbstractEditMode::createByType (this, a);
 
 	// If we cannot use the free camera, use the top one instead.
-	if (camera() == EFreeCamera and not m_currentEditMode->allowFreeCamera())
-		setCamera (ETopCamera);
+	if (camera() == FreeCamera and not m_currentEditMode->allowFreeCamera())
+		setCamera (TopCamera);
 
 	m_window->updateEditModeActions();
 	update();
@@ -1104,7 +1105,7 @@ void GLRenderer::setPicking (bool value)
 //
 void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 {
-	const LDFixedCamera* cam = &g_FixedCameras[camera()];
+	const CameraInfo* cam = &g_cameraInfo[camera()];
 	relX = cam->localX;
 	relY = cam->localY;
 }
@@ -1113,7 +1114,7 @@ void GLRenderer::getRelativeAxes (Axis& relX, Axis& relY) const
 //
 Axis GLRenderer::getRelativeZ() const
 {
-	const LDFixedCamera* cam = &g_FixedCameras[camera()];
+	const CameraInfo* cam = &g_cameraInfo[camera()];
 	return (Axis) (3 - cam->localX - cam->localY);
 }
 
@@ -1174,7 +1175,7 @@ Axis GLRenderer::getCameraAxis (bool y, Camera camid)
 	if (camid == (Camera) -1)
 		camid = camera();
 
-	const LDFixedCamera* cam = &g_FixedCameras[camid];
+	const CameraInfo* cam = &g_cameraInfo[camid];
 	return (y) ? cam->localY : cam->localX;
 }
 
@@ -1210,8 +1211,8 @@ bool GLRenderer::setupOverlay (Camera camera, QString fileName, int x, int y, in
 
 	Axis localX = getCameraAxis (false, camera);
 	Axis localY = getCameraAxis (true, camera);
-	int signX = g_FixedCameras[camera].negatedX ? -1 : 1;
-	int signY = g_FixedCameras[camera].negatedY ? -1 : 1;
+	int signX = g_cameraInfo[camera].negatedX ? -1 : 1;
+	int signY = g_cameraInfo[camera].negatedY ? -1 : 1;
 
 	info.v0 = info.v1 = Origin;
 	info.v0.setCoordinate (localX, -(info.offsetX * info.width * signX) / image->width());
@@ -1235,7 +1236,7 @@ bool GLRenderer::setupOverlay (Camera camera, QString fileName, int x, int y, in
 //
 void GLRenderer::clearOverlay()
 {
-	if (camera() == EFreeCamera)
+	if (camera() == FreeCamera)
 		return;
 
 	LDGLOverlay& info = currentDocumentData().overlays[camera()];
@@ -1249,7 +1250,7 @@ void GLRenderer::clearOverlay()
 //
 void GLRenderer::setDepthValue (double depth)
 {
-	if (camera() < EFreeCamera)
+	if (camera() < FreeCamera)
 		currentDocumentData().depthValues[camera()] = depth;
 }
 
@@ -1257,7 +1258,7 @@ void GLRenderer::setDepthValue (double depth)
 //
 double GLRenderer::getDepthValue() const
 {
-	if (camera() < EFreeCamera)
+	if (camera() < FreeCamera)
 		return currentDocumentData().depthValues[camera()];
 	else
 		return 0.0;
@@ -1269,13 +1270,13 @@ QString GLRenderer::cameraName (Camera camera) const
 {
 	switch (camera)
 	{
-	case ETopCamera: return tr ("Top Camera");
-	case EFrontCamera: return tr ("Front Camera");
-	case ELeftCamera: return tr ("Left Camera");
-	case EBottomCamera: return tr ("Bottom Camera");
-	case EBackCamera: return tr ("Back Camera");
-	case ERightCamera: return tr ("Right Camera");
-	case EFreeCamera: return tr ("Free Camera");
+	case TopCamera: return tr ("Top Camera");
+	case FrontCamera: return tr ("Front Camera");
+	case LeftCamera: return tr ("Left Camera");
+	case BottomCamera: return tr ("Bottom Camera");
+	case BackCamera: return tr ("Back Camera");
+	case RightCamera: return tr ("Right Camera");
+	case FreeCamera: return tr ("Free Camera");
 	default: break;
 	}
 
@@ -1427,9 +1428,9 @@ LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 //
 void GLRenderer::initOverlaysFromObjects()
 {
-	for (Camera camera = EFirstCamera; camera < ENumCameras; ++camera)
+	for (Camera camera = EFirstCamera; camera < NumCameras; ++camera)
 	{
-		if (camera == EFreeCamera)
+		if (camera == FreeCamera)
 			continue;
 
 		LDGLOverlay& meta = currentDocumentData().overlays[camera];
@@ -1456,9 +1457,9 @@ void GLRenderer::initOverlaysFromObjects()
 //
 void GLRenderer::updateOverlayObjects()
 {
-	for (Camera cam = EFirstCamera; cam < ENumCameras; ++cam)
+	for (Camera cam = EFirstCamera; cam < NumCameras; ++cam)
 	{
-		if (cam == EFreeCamera)
+		if (cam == FreeCamera)
 			continue;
 
 		LDGLOverlay& meta = currentDocumentData().overlays[cam];
@@ -1604,12 +1605,12 @@ Vertex const& GLRenderer::position3D() const
 	return m_position3D;
 }
 
-const LDFixedCamera& GLRenderer::cameraInfo (Camera camera) const
+const CameraInfo& GLRenderer::cameraInfo (Camera camera) const
 {
 	if (camera >= EFirstCamera and camera <= ELastFixedCamera)
-		return g_FixedCameras[camera];
+		return g_cameraInfo[camera];
 	else
-		return g_FixedCameras[0];
+		return g_cameraInfo[0];
 }
 
 bool GLRenderer::mouseHasMoved() const
@@ -1635,7 +1636,7 @@ void GLRenderer::makeCurrent()
 
 int GLRenderer::depthNegateFactor() const
 {
-	return g_FixedCameras[camera()].negatedDepth ? -1 : 1;
+	return g_cameraInfo[camera()].negatedDepth ? -1 : 1;
 }
 
 Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const

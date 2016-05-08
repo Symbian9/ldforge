@@ -772,7 +772,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
-	if (renderer()->camera() != EFreeCamera)
+	if (renderer()->camera() != FreeCamera)
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui.actionSetDrawDepth);

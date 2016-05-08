@@ -260,7 +260,7 @@ private:
 //
 // Represents a 0 BFC statement in the LDraw code.
 //
-enum class BfcStatement
+enum BfcStatement
 {
 	CertifyCCW,
 	CCW,
@@ -272,10 +272,9 @@ enum class BfcStatement
 	ClipCCW,
 	ClipCW,
 	NoClip,
-
-	NumValues,
-	FirstValue = CertifyCCW
 };
+
+MAKE_ITERABLE_ENUM(BfcStatement, CertifyCCW, NoClip)
 
 class LDBfc : public LDObject
 {

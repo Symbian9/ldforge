@@ -80,7 +80,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			for_enum (BfcStatement, i)
 			{
 				// Separate these in two columns
-				if (int (i) == int (BfcStatement::NumValues) / 2)
+				if (int(i) == ENUM_LIMIT(BfcStatement, Count) / 2)
 					rb_bfcType->rowBreak();
 
 				rb_bfcType->addButton (LDBfc::statementToString (i));
@@ -358,8 +358,8 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		{
 			LDBfc* bfc = InitObject<LDBfc> (obj);
 			int value = dlg.rb_bfcType->value();
-			if (value == qBound (0, value, int (BfcStatement::NumValues) - 1))
-				bfc->setStatement (BfcStatement (dlg.rb_bfcType->value()));
+			if (valueInEnum<BfcStatement>(value))
+				bfc->setStatement(BfcStatement(value));
 		} break;
 
 		case OBJ_SubfileReference:

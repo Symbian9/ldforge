@@ -44,7 +44,11 @@ public: \
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
 #define MAKE_ITERABLE_ENUM(T, FIRST, LAST) \
-	namespace EnumLimits { namespace T { enum { First = FIRST, Last = LAST, Count = LAST - FIRST + 1 }; } } \
+	template<> \
+	struct EnumLimits<T> \
+	{\
+		enum { First = FIRST, Last = LAST, Count = LAST - FIRST + 1 };\
+	}; \
 	inline T operator++ (T& a) { a = (T) ((int) a + 1); return a; } \
 	inline T operator-- (T& a) { a = (T) ((int) a - 1); return a; } \
 	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
@@ -54,18 +58,28 @@ public: \
 # define USE_QT5
 #endif
 
+#define ConfigOption(...)
+
 #define FOR_ENUM_NAME_HELPER(LINE) enum_iterator_ ## LINE
 #define FOR_ENUM_NAME(LINE) FOR_ENUM_NAME_HELPER(LINE)
+#define FOR_ENUM_TYPE(ENUM) typename std::underlying_type<ENUM>::type
+#define ENUM_LIMIT(ENUM, T) FOR_ENUM_TYPE(ENUM)(EnumLimits<ENUM>::T)
 
 #define for_enum(ENUM, NAME) \
-	for (std::underlying_type<ENUM>::type FOR_ENUM_NAME (__LINE__) = \
-		std::underlying_type<ENUM>::type (ENUM::FirstValue); \
-		FOR_ENUM_NAME (__LINE__) < std::underlying_type<ENUM>::type (ENUM::NumValues); \
+	for (FOR_ENUM_TYPE(ENUM) FOR_ENUM_NAME(__LINE__) = ENUM_LIMIT(ENUM, First); \
+		FOR_ENUM_NAME (__LINE__) <= ENUM_LIMIT(ENUM, Last); \
 		++FOR_ENUM_NAME (__LINE__)) \
-	for (ENUM NAME = ENUM (FOR_ENUM_NAME (__LINE__)); NAME != ENUM::NumValues; \
-		NAME = ENUM::NumValues)
+	for (ENUM NAME = ENUM(FOR_ENUM_NAME(__LINE__)); NAME != ENUM_LIMIT(ENUM, Last) + 1; \
+		NAME = ENUM(EnumLimits<ENUM>::Last + 1))
 
-#define ConfigOption(...)
+template<typename T>
+struct EnumLimits {};
+
+template<typename Enum>
+bool valueInEnum(typename std::underlying_type<Enum>::type x)
+{
+	return x >= ENUM_LIMIT(Enum, First) and x <= ENUM_LIMIT(Enum, Last);
+}
 
 #define DEFINE_FLAG_ACCESS_METHODS \
 	bool checkFlag(Flag flag) const { return !!(m_flags & flag); } \

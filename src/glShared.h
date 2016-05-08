@@ -68,7 +68,7 @@ MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, RandomColorsVboCom
 
 enum
 {
-	NumVbos = EnumLimits::SurfaceVboType::Count * EnumLimits::ComplementVboType::Count,
+	NumVbos = ENUM_LIMIT(SurfaceVboType, Count) * ENUM_LIMIT(ComplementVboType, Count),
 };
 
 #ifndef USE_QT5

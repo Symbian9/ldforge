@@ -52,18 +52,18 @@ OverlayDialog::OverlayDialog (QWidget* parent, Qt::WindowFlags f) : QDialog (par
 
 	m_cameraArgs =
 	{
-		{ ui->top,    ETopCamera },
-		{ ui->bottom, EBottomCamera },
-		{ ui->front,  EFrontCamera },
-		{ ui->back,   EBackCamera },
-		{ ui->left,   ELeftCamera },
-		{ ui->right,  ERightCamera }
+		{ ui->top,    TopCamera },
+		{ ui->bottom, BottomCamera },
+		{ ui->front,  FrontCamera },
+		{ ui->back,   BackCamera },
+		{ ui->left,   LeftCamera },
+		{ ui->right,  RightCamera }
 	};
 
 	Camera cam = g_win->renderer()->camera();
 
-	if (cam == EFreeCamera)
-		cam = ETopCamera;
+	if (cam == FreeCamera)
+		cam = TopCamera;
 
 	connect (ui->width, SIGNAL (valueChanged (double)), this, SLOT (slot_dimensionsChanged()));
 	connect (ui->height, SIGNAL (valueChanged (double)), this, SLOT (slot_dimensionsChanged()));
@@ -135,7 +135,7 @@ double OverlayDialog::lheight() const
 
 int OverlayDialog::camera() const
 {
-	return RadioSwitch<int> (ETopCamera, m_cameraArgs);
+	return RadioSwitch<int> (TopCamera, m_cameraArgs);
 }
 
 void OverlayDialog::slot_fpath()

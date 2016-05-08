@@ -35,7 +35,7 @@ class QLineEdit;
 class QTimer;
 class MagicWandMode;
 
-struct LDFixedCamera
+struct CameraInfo
 {
 	int glrotate[3];
 	Axis localX;
@@ -105,20 +105,20 @@ struct LDGLData
 
 enum Camera
 {
-	ETopCamera,
-	EFrontCamera,
-	ELeftCamera,
-	EBottomCamera,
-	EBackCamera,
-	ERightCamera,
-	EFreeCamera,
+	TopCamera,
+	FrontCamera,
+	LeftCamera,
+	BottomCamera,
+	BackCamera,
+	RightCamera,
+	FreeCamera,
 
-	ENumCameras,
-	ELastFixedCamera = ERightCamera,
-	EFirstCamera = ETopCamera
+	NumCameras,
+	ELastFixedCamera = RightCamera,
+	EFirstCamera = TopCamera
 };
 
-MAKE_ITERABLE_ENUM(Camera, ETopCamera, EFreeCamera)
+MAKE_ITERABLE_ENUM(Camera, TopCamera, FreeCamera)
 
 struct CameraIcon
 {
@@ -139,6 +139,7 @@ public:
 	~GLRenderer();
 
 	Camera camera() const;
+	const CameraInfo& cameraInfo (Camera camera) const;
 	QString cameraName (Camera camera) const;
 	QByteArray capturePixels();
 	void clearOverlay();
@@ -157,7 +158,6 @@ public:
 	void forgetObject (LDObject* obj);
 	Axis getCameraAxis (bool y, Camera camid = (Camera) -1);
 	double getDepthValue() const;
-	const LDFixedCamera& cameraInfo (Camera camera) const;
 	LDGLOverlay& getOverlay (int newcam);
 	void getRelativeAxes (Axis& relX, Axis& relY) const;
 	Axis getRelativeZ() const;

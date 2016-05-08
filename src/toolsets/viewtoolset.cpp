@@ -179,7 +179,7 @@ void ViewToolset::drawAngles()
 
 void ViewToolset::setDrawDepth()
 {
-	if (m_window->renderer()->camera() == EFreeCamera)
+	if (m_window->renderer()->camera() == FreeCamera)
 		return;
 
 	bool ok;
