@@ -11,5 +11,6 @@ release
 *.bak
 *.rej
 *.orig
-CMakeLists.txt.user
+CMakeLists.txt.user*
 *.pyc
+doc
