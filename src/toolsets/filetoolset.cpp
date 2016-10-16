@@ -30,7 +30,6 @@
 #include "../dialogs/generateprimitivedialog.h"
 #include "../documentmanager.h"
 #include "filetoolset.h"
-#include "ui_makeprim.h"
 
 FileToolset::FileToolset (MainWindow* parent) :
 	Toolset (parent) {}

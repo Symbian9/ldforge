@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#include <QIODevice>
 #include "basics.h"
 #include "colors.h"
 

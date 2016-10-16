@@ -16,13 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
 #include <QDir>
 #include <QRegExp>
 #include <QFileDialog>
 #include "ldDocument.h"
 #include "mainwindow.h"
 #include "primitives.h"
-#include "ui_makeprim.h"
 #include "miscallenous.h"
 #include "colors.h"
 #include "ldpaths.h"
