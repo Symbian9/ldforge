@@ -68,14 +68,13 @@ public:
 	explicit ConfigDialog (QWidget* parent = nullptr, Tab defaulttab = (Tab) 0, Qt::WindowFlags f = 0);
 	virtual ~ConfigDialog();
 
-	QList<ColorToolbarItem> quickColors;
-
 private:
 	class Ui_ConfigDialog& ui;
 	QList<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
 	class QSettings* m_settings;
+	QVector<ColorToolbarItem> quickColors;
 
 	void applySettings();
 	void addShortcut (QAction* act);

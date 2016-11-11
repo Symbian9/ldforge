@@ -1064,7 +1064,7 @@ GLRenderer* MainWindow::renderer()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::setQuickColors (const QList<ColorToolbarItem>& colors)
+void MainWindow::setQuickColors (const QVector<ColorToolbarItem>& colors)
 {
 	m_quickColors = colors;
 	updateColorToolbar();

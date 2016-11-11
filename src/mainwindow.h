@@ -44,7 +44,7 @@ class MathFunctions;
 class ColorToolbarItem
 {
 public:
-	ColorToolbarItem (LDColor color, QToolButton* toolButton);
+	ColorToolbarItem (LDColor color = LDColor{}, QToolButton* toolButton = nullptr);
 	LDColor color() const;
 	bool isSeparator() const;
 	void setColor (LDColor color);
@@ -102,7 +102,7 @@ public:
 	void saveShortcuts();
 	void scrollToSelection();
 	const LDObjectList& selectedObjects();
-	void setQuickColors (const QList<ColorToolbarItem>& colors);
+	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();
 	void syncSettings();
@@ -138,7 +138,7 @@ private:
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;
 	LDObjectList m_sel;
-	QList<ColorToolbarItem>	m_quickColors;
+	QVector<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;
 	class Ui_MainWindow& ui;

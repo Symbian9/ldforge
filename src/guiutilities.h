@@ -21,6 +21,11 @@
 #include "main.h"
 #include "mainwindow.h"
 
+/*
+ * GuiUtilities
+ *
+ * Contains generic state-aware GUI functions.
+ */
 class GuiUtilities : public QObject, public HierarchyElement
 {
 	Q_OBJECT
@@ -30,5 +35,5 @@ public:
 	QIcon makeColorIcon (LDColor ldcolor, int size);
 	void fillUsedColorsToComboBox (class QComboBox* box);
 	QColor mainColorRepresentation();
-	QList<ColorToolbarItem> loadQuickColorList();
+	QVector<ColorToolbarItem> loadQuickColorList();
 };

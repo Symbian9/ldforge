@@ -27,89 +27,114 @@ GuiUtilities::GuiUtilities (QObject* parent) :
 	QObject (parent),
 	HierarchyElement (parent) {}
 
-QIcon GuiUtilities::makeColorIcon (LDColor ldcolor, int size)
+/*
+ * makeColorIcon
+ *
+ * Creates an icon to represent an LDraw color.
+ */
+QIcon GuiUtilities::makeColorIcon (LDColor ldColor, int size)
 {
-	// Create an image object and link a painter to it.
-	QImage img (size, size, QImage::Format_ARGB32);
-	QPainter painter (&img);
-	QColor color = ldcolor.faceColor();
+	QImage image {size, size, QImage::Format_ARGB32};
+	QPainter painter {&image};
+	QColor color;
 
-	if (ldcolor == MainColor)
+	if (ldColor == MainColor)
 	{
-		// Use the user preferences for main color here
+		// Use the user preferences for the main color.
 		color = m_config->mainColor();
-		color.setAlphaF (m_config->mainColorAlpha());
+		color.setAlphaF(m_config->mainColorAlpha());
 	}
+	else
+		color = ldColor.faceColor();
 
 	// Paint the icon border
-	painter.fillRect (QRect (0, 0, size, size), ldcolor.edgeColor());
+	painter.fillRect(QRect {0, 0, size, size}, ldColor.edgeColor());
 
 	// Paint the checkerboard background, visible with translucent icons
-	painter.drawPixmap (QRect (1, 1, size - 2, size - 2), GetIcon ("checkerboard"), QRect (0, 0, 8, 8));
+	painter.drawPixmap(QRect {1, 1, size - 2, size - 2}, GetIcon("checkerboard"), QRect {0, 0, 8, 8});
 
 	// Paint the color above the checkerboard
-	painter.fillRect (QRect (1, 1, size - 2, size - 2), color);
-	return QIcon (QPixmap::fromImage (img));
+	painter.fillRect (QRect {1, 1, size - 2, size - 2}, color);
+	return QIcon {QPixmap::fromImage(image)};
 }
 
+/*
+ * fillUsedColorsToComboBox
+ *
+ * Fills the provided combo box with the colors used in the current document.
+ */
 void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 {
-	QMap<LDColor, int> counts;
+	QMap<LDColor, int> frequencies;
 
-	for (LDObject* obj : currentDocument()->objects())
+	for (LDObject* object : currentDocument()->objects())
 	{
-		if (not obj->isColored() or not obj->color().isValid())
-			continue;
-
-		if (not counts.contains (obj->color()))
-			counts[obj->color()] = 1;
-		else
-			counts[obj->color()] += 1;
+		if (object->isColored() and object->color().isValid())
+		{
+			if (not frequencies.contains(object->color()))
+				frequencies[object->color()] = 1;
+			else
+				frequencies[object->color()] += 1;
+		}
 	}
 
 	box->clear();
 	int row = 0;
+	QMapIterator<LDColor, int> iterator {frequencies};
 
-	QMapIterator<LDColor, int> it (counts);
-	while (it.hasNext())
+	while (iterator.hasNext())
 	{
-		it.next();
-		QIcon ico = makeColorIcon (it.key(), 16);
-		box->addItem (ico, format ("[%1] %2 (%3 object%4)",
-			it.key(), it.key().name(), it.value(), plural (it.value())));
-		box->setItemData (row, it.key().index());
+		iterator.next();
+		LDColor color = iterator.key();
+		int frequency = iterator.value();
+		QIcon icon = makeColorIcon(color, 16);
+		box->addItem(icon, format("[%1] %2 (%3 object%4)", color.index(), color.name(), frequency, plural(frequency)));
+		box->setItemData(row, color.index());
 		++row;
 	}
 }
 
+/*
+ * mainColorRepresentation
+ *
+ * Returns the user-preferred appearance for the main color.
+ */
 QColor GuiUtilities::mainColorRepresentation()
 {
-	QColor col (m_config->mainColor());
+	QColor result = {m_config->mainColor()};
 
-	if (not col.isValid())
-		return QColor (0, 0, 0);
-
-	col.setAlpha (m_config->mainColorAlpha() * 255.f);
-	return col;
+	if (result.isValid())
+	{
+		result.setAlpha(m_config->mainColorAlpha() * 255.f);
+		return result;
+	}
+	else
+	{
+		return QColor {0, 0, 0};
+	}
 }
 
-//
-// Returns a list of quick colors based on the configuration entry.
-//
-QList<ColorToolbarItem> GuiUtilities::loadQuickColorList()
+/*
+ * loadQuickColorList
+ *
+ * Returns a list of contents for the color toolbar, based on configuration.
+ */
+QVector<ColorToolbarItem> GuiUtilities::loadQuickColorList()
 {
-	QList<ColorToolbarItem> colors;
+	QVector<ColorToolbarItem> colors;
 
-	for (QString colorname : m_config->quickColorToolbar().split (":"))
+	for (QString colorName : m_config->quickColorToolbar().split(":"))
 	{
-		if (colorname == "|")
+		if (colorName == "|")
+		{
 			colors << ColorToolbarItem::makeSeparator();
+		}
 		else
 		{
-			LDColor color = colorname.toInt();
+			LDColor color = colorName.toInt();
 
 			if (color.isValid())
-				colors << ColorToolbarItem (color, nullptr);
+				colors << ColorToolbarItem {color, nullptr};
 		}
 	}
 
