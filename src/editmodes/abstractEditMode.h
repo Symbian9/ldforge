@@ -84,7 +84,7 @@ public:
 	void addDrawnVertex (const Vertex& pos);
 	virtual bool allowFreeCamera() const override final { return false; }
 	virtual void endDraw() {}
-	void drawLength (QPainter& painter,
+	void drawLineLength (QPainter& painter,
 		const Vertex& v0, const Vertex& v1,
 		const QPointF& v0p, const QPointF& v1p) const;
 	void finishDraw (const LDObjectList& objs);

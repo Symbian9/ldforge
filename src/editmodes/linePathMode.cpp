@@ -40,7 +40,7 @@ void LinePathMode::render (QPainter& painter) const
 		for (int i = 0; i < points.size() - 1; ++i)
 		{
 			painter.drawLine (QLineF (points[i], points[i + 1]));
-			drawLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
+			drawLineLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
 		}
 	
 		for (int i = 0; i < points.size(); ++i)
