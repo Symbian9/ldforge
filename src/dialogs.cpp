@@ -39,7 +39,6 @@
 #include "dialogs.h"
 #include "ui_overlay.h"
 #include "ui_extprogpath.h"
-#include "ui_about.h"
 
 extern const char* g_extProgPathFilter;
 
@@ -189,29 +188,4 @@ void ExtProgPathPrompt::findPath()
 QString ExtProgPathPrompt::getPath() const
 {
 	return ui->m_path->text();
-}
-
-// =============================================================================
-// =============================================================================
-AboutDialog::AboutDialog (QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f)
-{
-	Ui::AboutUI ui;
-	ui.setupUi (this);
-	ui.versionInfo->setText (APPNAME " " + QString (fullVersionString()));
-
-	QPushButton* mailButton = new QPushButton;
-	mailButton->setText (tr ("Contact"));
-	mailButton->setIcon (GetIcon ("mail"));
-	ui.buttonBox->addButton (static_cast<QAbstractButton*> (mailButton), QDialogButtonBox::HelpRole);
-	connect (ui.buttonBox, SIGNAL (helpRequested()), this, SLOT (slot_mail()));
-
-	setWindowTitle (format (tr ("About %1"), APPNAME));
-}
-
-// =============================================================================
-// =============================================================================
-void AboutDialog::slot_mail()
-{
-	QDesktopServices::openUrl (QUrl ("mailto:Teemu Piippo <arezey@gmail.com>?subject=LDForge"));
 }

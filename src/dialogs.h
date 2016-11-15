@@ -80,15 +80,3 @@ public slots:
 private:
 	Ui_ExtProgPath* ui;
 };
-
-// =============================================================================
-class AboutDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	AboutDialog (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
-
-private slots:
-	void slot_mail();
-};

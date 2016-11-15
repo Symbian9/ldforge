@@ -30,6 +30,7 @@
 #include "../dialogs/generateprimitivedialog.h"
 #include "../documentmanager.h"
 #include "filetoolset.h"
+#include "ui_about.h"
 
 FileToolset::FileToolset (MainWindow* parent) :
 	Toolset (parent) {}
@@ -218,7 +219,12 @@ void FileToolset::help()
 
 void FileToolset::about()
 {
-	AboutDialog().exec();
+	QDialog *dialog = new QDialog(m_window);
+	Ui::AboutUI ui;
+	ui.setupUi(dialog);
+	ui.versionInfo->setText(APPNAME " " + QString (fullVersionString()));
+	dialog->setWindowTitle(format(tr("About %1"), APPNAME));
+	dialog->exec();
 }
 
 void FileToolset::aboutQt()
