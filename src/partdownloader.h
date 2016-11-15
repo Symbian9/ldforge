@@ -86,10 +86,10 @@ signals:
 private:
 	Ui_PartDownloader& ui;
 	QStringList m_filesToDownload;
-	QList<PartDownloadRequest*> m_requests;
+	QVector<PartDownloadRequest*> m_requests;
 	QPushButton* m_downloadButton;
 	SourceType m_source;
-	QList<LDDocument*> m_files;
+	QVector<LDDocument*> m_files;
 	LDDocument* m_primaryFile;
 	bool m_isAborted;
 };
