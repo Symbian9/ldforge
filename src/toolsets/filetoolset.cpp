@@ -32,17 +32,17 @@
 #include "filetoolset.h"
 #include "ui_about.h"
 
-FileToolset::FileToolset (MainWindow* parent) :
-	Toolset (parent) {}
+FileToolset::FileToolset(MainWindow* parent)
+    : Toolset(parent) {}
 
 void FileToolset::newPart()
 {
-	NewPartDialog* dlg = new NewPartDialog (m_window);
+	NewPartDialog* dialog = new NewPartDialog {m_window};
 
-	if (dlg->exec() == QDialog::Accepted)
+	if (dialog->exec() == QDialog::Accepted)
 	{
 		m_window->createBlankDocument();
-		dlg->fillHeader (currentDocument());
+		dialog->fillHeader(currentDocument());
 		m_window->doFullRefresh();
 	}
 }
@@ -54,36 +54,32 @@ void FileToolset::newFile()
 
 void FileToolset::open()
 {
-	QString name = QFileDialog::getOpenFileName (m_window, "Open File", "", "LDraw files (*.dat *.ldr)");
+	QString name = QFileDialog::getOpenFileName(m_window, "Open File", "", "LDraw files (*.dat *.ldr)");
 
-	if (name.isEmpty())
-		return;
-
-	m_documents->openMainModel (name);
+	if (not name.isEmpty())
+		m_documents->openMainModel (name);
 }
 
 void FileToolset::save()
 {
-	m_window->save (currentDocument(), false);
+	m_window->save(currentDocument(), false);
 }
 
 void FileToolset::saveAs()
 {
-	m_window->save (currentDocument(), true);
+	m_window->save(currentDocument(), true);
 }
 
 void FileToolset::saveAll()
 {
-	for (LDDocument* file : m_documents->allDocuments())
-		m_window->save (file, false);
+	for (LDDocument* document : m_documents->allDocuments())
+		m_window->save(document, false);
 }
 
 void FileToolset::close()
 {
-	if (not currentDocument()->isSafeToClose())
-		return;
-
-	currentDocument()->close();
+	if (currentDocument()->isSafeToClose())
+		currentDocument()->close();
 }
 
 void FileToolset::closeAll()
@@ -94,12 +90,12 @@ void FileToolset::closeAll()
 
 void FileToolset::settings()
 {
-	(new ConfigDialog (m_window))->exec();
+	(new ConfigDialog {m_window})->exec();
 }
 
 void FileToolset::setLDrawPath()
 {
-	LDrawPathDialog* dialog = new LDrawPathDialog (m_config->lDrawPath(), true);
+	LDrawPathDialog* dialog = new LDrawPathDialog {m_config->lDrawPath(), true};
 
 	if (dialog->exec())
 		m_config->setLDrawPath (dialog->path());
@@ -107,41 +103,41 @@ void FileToolset::setLDrawPath()
 
 void FileToolset::exit()
 {
-	::exit (EXIT_SUCCESS);
+	::exit(EXIT_SUCCESS);
 }
 
 void FileToolset::insertFrom()
 {
-	QString fname = QFileDialog::getOpenFileName();
-	int idx = m_window->suggestInsertPoint();
+	QString filePath = QFileDialog::getOpenFileName();
+	int position = m_window->suggestInsertPoint();
 
-	if (not fname.length())
-		return;
-
-	QFile f (fname);
-
-	if (not f.open (QIODevice::ReadOnly))
+	if (not filePath.isEmpty())
 	{
-		Critical (format ("Couldn't open %1 (%2)", fname, f.errorString()));
-		return;
+		QFile file = {filePath};
+
+		if (file.open(QIODevice::ReadOnly))
+		{
+			// TODO: shouldn't need to go to the document manager to parse a file
+			LDObjectList objects = m_documents->loadFileContents(&file, nullptr, nullptr);
+
+			currentDocument()->clearSelection();
+
+			for (LDObject* object : objects)
+			{
+				currentDocument()->insertObject (position, object);
+				object->select();
+				m_window->renderer()->compileObject (object);
+				position++;
+			}
+
+			m_window->refresh();
+			m_window->scrollToSelection();
+		}
+		else
+		{
+			Critical(format("Couldn't open %1 (%2)", filePath, file.errorString()));
+		}
 	}
-
-	// TODO: shouldn't need to go to the document manager to parse a file
-	LDObjectList objs = m_documents->loadFileContents (&f, nullptr, nullptr);
-
-	currentDocument()->clearSelection();
-
-	for (LDObject* obj : objs)
-	{
-		currentDocument()->insertObject (idx, obj);
-		obj->select();
-		m_window->renderer()->compileObject (obj);
-
-		idx++;
-	}
-
-	m_window->refresh();
-	m_window->scrollToSelection();
 }
 
 void FileToolset::exportTo()
@@ -149,25 +145,26 @@ void FileToolset::exportTo()
 	if (selectedObjects().isEmpty())
 		return;
 
-	QString fname = QFileDialog::getSaveFileName();
+	QString filePath = QFileDialog::getSaveFileName();
 
-	if (fname.length() == 0)
+	if (filePath.length() == 0)
 		return;
 
-	QFile file (fname);
+	QFile file = {filePath};
 
-	if (not file.open (QIODevice::WriteOnly | QIODevice::Text))
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
-		Critical (format ("Unable to open %1 for writing (%2)", fname, file.errorString()));
-		return;
+		for (LDObject* obj : selectedObjects())
+		{
+			QString contents = obj->asText();
+			QByteArray data = contents.toUtf8();
+			file.write(data, data.size());
+			file.write("\r\n", 2);
+		}
 	}
-
-	for (LDObject* obj : selectedObjects())
+	else
 	{
-		QString contents = obj->asText();
-		QByteArray data = contents.toUtf8();
-		file.write (data, data.size());
-		file.write ("\r\n", 2);
+		Critical(format("Unable to open %1 for writing (%2)", filePath, file.errorString()));
 	}
 }
 
@@ -178,19 +175,19 @@ void FileToolset::scanPrimitives()
 
 void FileToolset::openSubfiles()
 {
-	for (LDObject* obj : selectedObjects())
+	for (LDObject* object : selectedObjects())
 	{
-		LDSubfileReference* ref = dynamic_cast<LDSubfileReference*> (obj);
+		LDSubfileReference* reference = dynamic_cast<LDSubfileReference*>(object);
 
-		if (ref and ref->fileInfo()->isCache())
-			ref->fileInfo()->openForEditing();
+		if (reference and reference->fileInfo()->isCache())
+			reference->fileInfo()->openForEditing();
 	}
 }
 
 void FileToolset::downloadFrom()
 {
 	PartDownloader* dialog = new PartDownloader (m_window);
-	connect (dialog, &PartDownloader::primaryFileDownloaded, [&]()
+	connect(dialog, &PartDownloader::primaryFileDownloaded, [&]()
 	{
 		m_window->changeDocument (dialog->primaryFile());
 		m_window->doFullRefresh();
@@ -203,12 +200,12 @@ void FileToolset::makePrimitive()
 {
 	GeneratePrimitiveDialog* dialog = new GeneratePrimitiveDialog(m_window);
 
-	if (not dialog->exec())
-		return;
-
-	LDDocument* primitive = primitives()->generatePrimitive(dialog->spec());
-	primitive->openForEditing();
-	m_window->save(primitive, false);
+	if (dialog->exec())
+	{
+		LDDocument* primitive = primitives()->generatePrimitive(dialog->spec());
+		primitive->openForEditing();
+		m_window->save(primitive, false);
+	}
 }
 
 // These are not exactly file tools but I don't want to make another toolset just for 3 very small actions
