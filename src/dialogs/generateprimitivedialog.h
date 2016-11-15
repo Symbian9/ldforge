@@ -29,7 +29,7 @@ class GeneratePrimitiveDialog : public QDialog
 public:
 	GeneratePrimitiveDialog(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~GeneratePrimitiveDialog();
-	PrimitiveSpec spec() const;
+	PrimitiveModel primitiveModel() const;
 
 public slots:
 	void highResolutionToggled (bool on);

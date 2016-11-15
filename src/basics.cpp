@@ -272,3 +272,41 @@ uint qHash(const Vertex& key)
 {
 	return qHash(key.x()) ^ rotl10(qHash(key.y())) ^ rotl20(qHash(key.z()));
 }
+
+/*
+ * getRadialPoint
+ *
+ * Gets an ordinate of a point in circle.
+ * If func == sin, then this gets the Y co-ordinate, if func == cos, then X co-ordinate.
+ */
+double getRadialPoint(int segment, int divisions, double(*func)(double))
+{
+	return (*func)((segment * 2 * pi) / divisions);
+}
+
+/*
+ * makeCircle
+ *
+ * Creates a possibly partial circle rim.
+ * Divisions is how many segments the circle makes if up if it's full.
+ * Segments is now many segments are added.
+ * Radius is the radius of the circle.
+ *
+ * If divisions == segments, this yields a full circle rim.
+ * The rendered circle is returned as a vector of lines.
+ */
+QVector<QLineF> makeCircle(int segments, int divisions, double radius)
+{
+	QVector<QLineF> lines;
+
+	for (int i = 0; i < segments; ++i)
+	{
+		double x0 = radius * getRadialPoint(i, divisions, cos);
+		double x1 = radius * getRadialPoint(i + 1, divisions, cos);
+		double z0 = radius * getRadialPoint(i, divisions, sin);
+		double z1 = radius * getRadialPoint(i + 1, divisions, sin);
+		lines.append(QLineF {QPointF {x0, z0}, QPointF {x1, z1}});
+	}
+
+	return lines;
+}

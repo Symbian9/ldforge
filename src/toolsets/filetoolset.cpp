@@ -186,7 +186,7 @@ void FileToolset::openSubfiles()
 
 void FileToolset::downloadFrom()
 {
-	PartDownloader* dialog = new PartDownloader (m_window);
+	PartDownloader* dialog = new PartDownloader {m_window};
 	connect(dialog, &PartDownloader::primaryFileDownloaded, [&]()
 	{
 		m_window->changeDocument (dialog->primaryFile());
@@ -198,11 +198,11 @@ void FileToolset::downloadFrom()
 
 void FileToolset::makePrimitive()
 {
-	GeneratePrimitiveDialog* dialog = new GeneratePrimitiveDialog(m_window);
+	GeneratePrimitiveDialog* dialog = new GeneratePrimitiveDialog {m_window};
 
 	if (dialog->exec())
 	{
-		LDDocument* primitive = primitives()->generatePrimitive(dialog->spec());
+		LDDocument* primitive = primitives()->generatePrimitive(dialog->primitiveModel());
 		primitive->openForEditing();
 		m_window->save(primitive, false);
 	}

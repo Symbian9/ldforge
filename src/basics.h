@@ -206,3 +206,6 @@ bool valueInEnum(typename std::underlying_type<Enum>::type x)
 {
 	return x >= EnumLimits<Enum>::First and x <= EnumLimits<Enum>::Last;
 }
+
+double getRadialPoint(int segment, int divisions, double(*func)(double));
+QVector<QLineF> makeCircle(int segments, int divisions, double radius);

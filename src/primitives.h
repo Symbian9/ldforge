@@ -35,22 +35,25 @@ struct Primitive
 	PrimitiveCategory* category;
 };
 
-enum PrimitiveType
+struct PrimitiveModel
 {
-	Circle,
-	Cylinder,
-	Disc,
-	DiscNegative,
-	Ring,
-	Cone,
-};
-
-struct PrimitiveSpec
-{
-	PrimitiveType type;
+	enum Type
+	{
+		Circle,
+		Cylinder,
+		Disc,
+		DiscNegative,
+		Ring,
+		Cone,
+	} type;
 	int segments;
 	int divisions;
 	int ringNumber;
+
+	QString typeName() const;
+	LDObjectList generateBody() const;
+	static QString typeName(Type type);
+	QString makeFileName() const;
 };
 
 class PrimitiveCategory : public QObject
@@ -89,16 +92,15 @@ public:
 	PrimitiveManager(QObject* parent);
 
 	PrimitiveScanner* activeScanner();
-	LDDocument* generatePrimitive(const PrimitiveSpec &spec);
-	LDDocument* getPrimitive(const PrimitiveSpec &spec);
+	LDDocument* generatePrimitive(const PrimitiveModel &spec);
+	LDDocument* getPrimitive(const PrimitiveModel &spec);
 	QString getPrimitivesCfgPath() const;
 	void loadPrimitives();
-	void makeCircle(int segs, int divs, double radius, QList<QLineF>& lines);
-	QString makeRadialFileName(const PrimitiveSpec &spec);
-	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = QString());
-	QString primitiveTypeName(PrimitiveType type);
-	Q_SLOT void scanDone();
+	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = {});
 	void startScan();
+
+public slots:
+	void scanDone();
 
 private:
 	QList<PrimitiveCategory*> m_categories;
@@ -106,7 +108,6 @@ private:
 	QList<Primitive> m_primitives;
 	PrimitiveCategory* m_unmatched;
 
-	LDObjectList makePrimitiveBody(const PrimitiveSpec &spec);
 	void loadCategories();
 	void populateCategories();
 	void clearCategories();

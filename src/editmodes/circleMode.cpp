@@ -87,13 +87,13 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 void CircleMode::endDraw()
 {
 	LDObjectList objs;
-	PrimitiveSpec spec;
-	spec.segments = m_window->ringToolSegments();
-	spec.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
-	spec.ringNumber = 0;
+	PrimitiveModel model;
+	model.segments = m_window->ringToolSegments();
+	model.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	model.ringNumber = 0;
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
-	LDDocument* refFile;
+	LDDocument* primitiveFile;
 	Matrix transform;
 	bool circleOrDisc = false;
 
@@ -103,31 +103,31 @@ void CircleMode::endDraw()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		spec.type = ::Circle;
-		refFile = primitives()->getPrimitive(spec);
+		model.type = PrimitiveModel::Circle;
+		primitiveFile = primitives()->getPrimitive(model);
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		spec.type = ::Disc;
-		refFile = primitives()->getPrimitive(spec);
+		model.type = PrimitiveModel::Disc;
+		primitiveFile = primitives()->getPrimitive(model);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
 	else if (g_RingFinder.findRings (dist0, dist1))
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
-		spec.type = ::Ring;
+		model.type = PrimitiveModel::Ring;
 
-		for (const RingFinder::Component& cmp : g_RingFinder.bestSolution()->getComponents())
+		for (const RingFinder::Component& component : g_RingFinder.bestSolution()->getComponents())
 		{
-			spec.ringNumber = cmp.num;
-			refFile = primitives()->getPrimitive(spec);
+			model.ringNumber = component.num;
+			primitiveFile = primitives()->getPrimitive(model);
 			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
-			ref->setFileInfo (refFile);
-			ref->setTransformationMatrix (getCircleDrawMatrix (cmp.scale));
+			ref->setFileInfo (primitiveFile);
+			ref->setTransformationMatrix (getCircleDrawMatrix (component.scale));
 			ref->setPosition (m_drawedVerts[0]);
 			ref->setColor (MainColor);
 			objs << ref;
@@ -136,7 +136,6 @@ void CircleMode::endDraw()
 	else
 	{
 		// Ring finder failed, last resort: draw the ring with quads
-		QList<QLineF> c0, c1;
 		Axis localx, localy, localz;
 		renderer()->getRelativeAxes (localx, localy);
 		localz = (Axis) (3 - localx - localy);
@@ -149,10 +148,10 @@ void CircleMode::endDraw()
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		primitives()->makeCircle(spec.segments, spec.divisions, dist0, c0);
-		primitives()->makeCircle(spec.segments, spec.divisions, dist1, c1);
+		QVector<QLineF> c0 = makeCircle(model.segments, model.divisions, dist0);
+		QVector<QLineF> c1 = makeCircle(model.segments, model.divisions, dist1);
 
-		for (int i = 0; i < spec.segments; ++i)
+		for (int i = 0; i < model.segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;
@@ -176,10 +175,10 @@ void CircleMode::endDraw()
 		}
 	}
 
-	if (circleOrDisc and refFile)
+	if (circleOrDisc and primitiveFile)
 	{
 		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
-		ref->setFileInfo (refFile);
+		ref->setFileInfo (primitiveFile);
 		ref->setTransformationMatrix (transform);
 		ref->setPosition (m_drawedVerts[0]);
 		ref->setColor (MainColor);

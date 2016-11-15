@@ -46,16 +46,16 @@ void GeneratePrimitiveDialog::highResolutionToggled (bool on)
 }
 
 
-PrimitiveSpec GeneratePrimitiveDialog::spec() const
+PrimitiveModel GeneratePrimitiveDialog::primitiveModel() const
 {
-	PrimitiveSpec result;
+	PrimitiveModel result;
 	result.type =
-		ui.typeCircle->isChecked()       ? Circle :
-		ui.typeCylinder->isChecked()     ? Cylinder :
-		ui.typeDisc->isChecked()         ? Disc :
-		ui.typeDiscNegative->isChecked() ? DiscNegative :
-		ui.typeRing->isChecked()         ? Ring :
-										   Cone;
+		ui.typeCircle->isChecked()       ? PrimitiveModel::Circle :
+		ui.typeCylinder->isChecked()     ? PrimitiveModel::Cylinder :
+		ui.typeDisc->isChecked()         ? PrimitiveModel::Disc :
+		ui.typeDiscNegative->isChecked() ? PrimitiveModel::DiscNegative :
+		ui.typeRing->isChecked()         ? PrimitiveModel::Ring :
+		                                   PrimitiveModel::Cone;
 	result.divisions = ui.highResolution->isChecked() ? HighResolution : LowResolution;
 	result.segments = ui.segments->value();
 	result.ringNumber = ui.ringNumber->value();
