@@ -43,13 +43,7 @@ PartDownloader::PartDownloader (QWidget* parent)
     , _source(SourceType{})
 {
 	_ui.setupUi(this);
-
-#ifdef USE_QT5
 	_ui.progressTable->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
-#else
-	_ui.progressTable->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
-#endif
-
 	_downloadButton = new QPushButton {tr("Download")};
 	_ui.buttonBox->addButton(_downloadButton, QDialogButtonBox::ActionRole);
 	button(Abort)->setEnabled(false);

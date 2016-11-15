@@ -256,9 +256,7 @@ void GLRenderer::resetAllAngles()
 //
 void GLRenderer::initializeGL()
 {
-#ifdef USE_QT5
 	initializeOpenGLFunctions();
-#endif
 	setBackground();
 	glLineWidth (m_config->lineThickness());
 	glLineStipple (1, 0x6666);
@@ -847,12 +845,7 @@ void GLRenderer::mouseMoveEvent (QMouseEvent* ev)
 	// Update 2d position
 	m_mousePosition = ev->pos();
 	m_globalpos = ev->globalPos();
-
-#ifndef USE_QT5
-	m_mousePositionF = ev->posF();
-#else
 	m_mousePositionF = ev->localPos();
-#endif
 
 	// Calculate 3d position of the cursor
 	m_position3D = (camera() != FreeCamera) ? convert2dTo3d (m_mousePosition, true) : Origin;

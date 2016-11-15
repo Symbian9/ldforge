@@ -57,10 +57,6 @@ public: \
 template<typename T>
 struct EnumLimits {};
 
-#if QT_VERSION >= QT_VERSION_CHECK (5, 0, 0)
-# define USE_QT5
-#endif
-
 #define ConfigOption(...)
 
 #define DEFINE_FLAG_ACCESS_METHODS \
