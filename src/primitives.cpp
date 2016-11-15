@@ -51,38 +51,31 @@ QString PrimitiveManager::getPrimitivesCfgPath() const
 void PrimitiveManager::loadPrimitives()
 {
 	// Try to load prims.cfg
-	QFile conf (getPrimitivesCfgPath());
+	QFile primitivesFile = {getPrimitivesCfgPath()};
 
-	if (not conf.open (QIODevice::ReadOnly))
+	if (not primitivesFile.open (QIODevice::ReadOnly))
 	{
 		// No prims.cfg, build it
 		startScan();
 	}
 	else
 	{
-		while (not conf.atEnd())
+		while (not primitivesFile.atEnd())
 		{
-			QString line = conf.readLine();
+			QString line = primitivesFile.readLine().simplified();
+			int space = line.indexOf(" ");
 
-			if (line.endsWith ("\n"))
-				line.chop (1);
-
-			if (line.endsWith ("\r"))
-				line.chop (1);
-
-			int space = line.indexOf (" ");
-
-			if (space == -1)
-				continue;
-
-			Primitive info;
-			info.name = line.left (space);
-			info.title = line.mid (space + 1);
-			m_primitives << info;
+			if (space != -1)
+			{
+				Primitive info;
+				info.name = line.left(space);
+				info.title = line.mid(space + 1);
+				m_primitives.append(info);
+			}
 		}
 
 		populateCategories();
-		print ("%1 primitives loaded.\n", m_primitives.size());
+		print(tr("%1 primitives loaded.") + "\n", m_primitives.size());
 	}
 }
 
@@ -92,22 +85,19 @@ void PrimitiveManager::startScan()
 	if (m_activeScanner == nullptr)
 	{
 		loadCategories();
-		m_activeScanner = new PrimitiveScanner(this);
+		m_activeScanner = new PrimitiveScanner {this};
 		m_activeScanner->work();
-		connect(m_activeScanner, &PrimitiveScanner::workDone, this, &PrimitiveManager::scanDone);
-	}
-}
-
-
-void PrimitiveManager::scanDone()
-{
-	if (m_activeScanner)
-	{
-		m_primitives = m_activeScanner->scannedPrimitives();
-		populateCategories();
-		print ("%1 primitives scanned", m_primitives.size());
-		delete m_activeScanner;
-		m_activeScanner = nullptr;
+		connect(m_activeScanner, &PrimitiveScanner::workDone, this, [&]()
+		{
+			if (m_activeScanner)
+			{
+				m_primitives = m_activeScanner->scannedPrimitives();
+				populateCategories();
+				print(tr("%1 primitives scanned"), m_primitives.size());
+				delete m_activeScanner;
+				m_activeScanner = nullptr;
+			}
+		});
 	}
 }
 
@@ -174,9 +164,9 @@ void PrimitiveManager::populateCategories()
 
 	// Sort the categories. Note that we only do this here because we needed the original order for pattern matching.
 	qSort (m_categories.begin(), m_categories.end(),
-		[](PrimitiveCategory* const& a, PrimitiveCategory* const& b) -> bool
+		[](PrimitiveCategory* const& one, PrimitiveCategory* const& other) -> bool
 		{
-			return a->name() < b->name();
+			return one->name() < other->name();
 		});
 }
 
@@ -185,19 +175,19 @@ void PrimitiveManager::loadCategories()
 {
 	clearCategories();
 	QString path = ":/data/primitive-categories.cfg";
-	QFile f (path);
+	QFile categoriesFile = {path};
 
-	if (not f.open (QIODevice::ReadOnly))
+	if (not categoriesFile.open (QIODevice::ReadOnly))
 	{
-		Critical (format (QObject::tr ("Failed to open primitive categories: %1"), f.errorString()));
+		Critical(format(tr("Failed to open primitive categories: %1"), categoriesFile.errorString()));
 		return;
 	}
 
 	PrimitiveCategory* category = nullptr;
 
-	while (not f.atEnd())
+	while (not categoriesFile.atEnd())
 	{
-		QString line = QString::fromUtf8(f.readLine()).trimmed();
+		QString line = QString::fromUtf8(categoriesFile.readLine()).trimmed();
 
 		if (line.length() == 0 or line[0] == '#')
 			continue;
@@ -232,7 +222,7 @@ void PrimitiveManager::loadCategories()
 			}
 			else
 			{
-				print (tr ("Warning: unknown pattern type \"%1\" on line \"%2\""), typechar, line);
+				print(tr("Warning: unknown pattern type \"%1\" on line \"%2\""), typechar, line);
 				continue;
 			}
 
@@ -242,7 +232,7 @@ void PrimitiveManager::loadCategories()
 		}
 		else
 		{
-			print ("Warning: Rules given before the first category name");
+			print("Warning: Rules given before the first category name");
 		}
 	}
 
@@ -250,11 +240,11 @@ void PrimitiveManager::loadCategories()
 		m_categories << category;
 
 	// Add a category for unmatched primitives.
-	// Note: if this function is called the second time, g_unmatched has been
+	// Note: if this function is called the second time, m_unmatched has been
 	// deleted at the beginning of the function and is dangling at this point.
-	m_unmatched = new PrimitiveCategory (tr ("Other"));
-	m_categories << m_unmatched;
-	f.close();
+	m_unmatched = new PrimitiveCategory {tr("Other")};
+	m_categories.append(m_unmatched);
+	categoriesFile.close();
 }
 
 LDObjectList PrimitiveModel::generateBody() const
@@ -295,8 +285,8 @@ LDObjectList PrimitiveModel::generateBody() const
 					x3 = x0;
 					z2 = z1;
 					z3 = z0;
-					y0 = y1 = 0.0f;
-					y2 = y3 = 1.0f;
+					y0 = y1 = 0.0;
+					y2 = y3 = 1.0;
 				}
 				else
 				{
@@ -310,11 +300,13 @@ LDObjectList PrimitiveModel::generateBody() const
 					z1 *= ringNumber;
 
 					if (type == Ring)
-						y0 = y1 = y2 = y3 = 0.0f;
+					{
+						y0 = y1 = y2 = y3 = 0.0;
+					}
 					else
 					{
-						y0 = y1 = 1.0f;
-						y2 = y3 = 0.0f;
+						y0 = y1 = 1.0;
+						y2 = y3 = 0.0;
 					}
 				}
 
@@ -323,7 +315,7 @@ LDObjectList PrimitiveModel::generateBody() const
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
 				LDQuad* quad = LDSpawn<LDQuad>(v0, v1, v2, v3);
-				quad->setColor (MainColor);
+				quad->setColor(MainColor);
 
 				if (type == Cylinder)
 					quad->invert();
@@ -460,7 +452,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	QString description;
 
 	// Ensure that there's decimals, even if they're 0.
-	if (fraction.indexOf (".") == -1)
+	if (fraction.indexOf(".") == -1)
 		fraction += ".0";
 
 	if (spec.type == PrimitiveModel::Ring or spec.type == PrimitiveModel::Cone)
@@ -468,10 +460,10 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 		QString spacing =
 			(spec.ringNumber < 10) ? "  " :
 			(spec.ringNumber < 100) ? " "  : "";
-		description = format ("%1 %2%3 x %4", PrimitiveModel::typeName(spec.type), spacing, spec.ringNumber, fraction);
+		description = format("%1 %2%3 x %4", PrimitiveModel::typeName(spec.type), spacing, spec.ringNumber, fraction);
 	}
 	else
-		description = format ("%1 %2", PrimitiveModel::typeName(spec.type), fraction);
+		description = format("%1 %2", PrimitiveModel::typeName(spec.type), fraction);
 
 	// Prepend "Hi-Res" if 48/ primitive.
 	if (spec.divisions == HighResolution)
@@ -487,7 +479,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	if (not m_config->defaultName().isEmpty())
 	{
 		license = preferredLicenseText();
-		author = format ("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
+		author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
 	}
 
 	LDObjectList objs;
@@ -498,7 +490,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	objs.append(LDSpawn<LDComment>(format("!LDRAW_ORG Unofficial_%1Primitive", hires ?  "48_" : "")));
 	objs.append(LDSpawn<LDComment>(license));
 	objs.append(LDSpawn<LDEmpty>());
-	objs.append(LDSpawn<LDBfc> (BfcStatement::CertifyCCW));
+	objs.append(LDSpawn<LDBfc>(BfcStatement::CertifyCCW));
 	objs.append(LDSpawn<LDEmpty>());
 	document->openForEditing();
 	document->history()->setIgnoring(false);
@@ -537,13 +529,13 @@ void PrimitiveManager::populateTreeWidget(QTreeWidget* tree, const QString& sele
 	{
 		PrimitiveTreeItem* parentItem = new PrimitiveTreeItem {tree, nullptr};
 		parentItem->setText(0, category->name());
-		QList<QTreeWidgetItem*> subfileItems;
+		//QList<QTreeWidgetItem*> subfileItems;
 
 		for (Primitive& primitive : category->primitives)
 		{
 			PrimitiveTreeItem* item = new PrimitiveTreeItem {parentItem, &primitive};
 			item->setText(0, format("%1 - %2", primitive.name, primitive.title));
-			subfileItems.append(item);
+			//subfileItems.append(item);
 
 			// If this primitive is the one the current object points to,
 			// select it by default

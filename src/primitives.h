@@ -99,9 +99,6 @@ public:
 	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = {});
 	void startScan();
 
-public slots:
-	void scanDone();
-
 private:
 	QList<PrimitiveCategory*> m_categories;
 	PrimitiveScanner* m_activeScanner;
