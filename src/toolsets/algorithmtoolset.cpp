@@ -157,7 +157,7 @@ void AlgorithmToolset::roundCoordinates()
 		if (mo)
 		{
 			Vertex v = mo->position();
-			Matrix t = mo->transform();
+			Matrix t = mo->transformationMatrix();
 
 			v.apply ([&](Axis, double& a)
 			{
@@ -170,7 +170,7 @@ void AlgorithmToolset::roundCoordinates()
 			});
 
 			mo->setPosition (v);
-			mo->setTransform (t);
+			mo->setTransformationMatrix (t);
 			num += 12;
 		}
 		else
@@ -576,7 +576,7 @@ void AlgorithmToolset::subfileSelection()
 		ref->setColor (MainColor);
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
-		ref->setTransform (IdentityMatrix);
+		ref->setTransformationMatrix (IdentityMatrix);
 		currentDocument()->insertObject (refidx, ref);
 
 		// Refresh stuff

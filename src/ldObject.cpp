@@ -99,7 +99,7 @@ QString LDComment::asText() const
 QString LDSubfileReference::asText() const
 {
 	QString val = format ("1 %1 %2 ", color(), position());
-	val += transform().toString();
+	val += transformationMatrix().toString();
 	val += ' ';
 	val += fileInfo()->name();
 	return val;
@@ -374,11 +374,11 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 	case OBJ_SubfileReference:
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			Matrix newMatrix = transform * ref->transform();
+			Matrix newMatrix = transform * ref->transformationMatrix();
 			Vertex newpos = ref->position();
 			newpos.transform (transform, pos);
 			ref->setPosition (newpos);
-			ref->setTransform (newMatrix);
+			ref->setTransformationMatrix (newMatrix);
 		}
 		break;
 
@@ -398,7 +398,7 @@ LDObjectList LDSubfileReference::inlineContents (bool deep, bool render)
 
 	// Transform the objects
 	for (LDObject* obj : objs)
-		TransformObject (obj, transform(), position(), color());
+		TransformObject (obj, transformationMatrix(), position(), color());
 
 	return objs;
 }
@@ -437,7 +437,7 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons()
 	for (LDPolygon& entry : data)
 	{
 		for (int i = 0; i < entry.numVertices(); ++i)
-			entry.vertices[i].transform (transform(), position());
+			entry.vertices[i].transform (transformationMatrix(), position());
 	}
 
 	return data;
@@ -710,7 +710,7 @@ void LDSubfileReference::invert()
 		if (axisSet & (1 << Z))
 			matrixModifier[8] = -1;
 
-		setTransform (transform() * matrixModifier);
+		setTransformationMatrix (transformationMatrix() * matrixModifier);
 		return;
 	}
 
@@ -867,7 +867,7 @@ LDMatrixObject::LDMatrixObject (LDDocument* document) :
 LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document) :
 	LDObject (document),
 	m_position (pos),
-	m_transform (transform) {}
+	m_transformationMatrix (transform) {}
 
 void LDMatrixObject::setCoordinate (const Axis ax, double value)
 {
@@ -897,14 +897,14 @@ void LDMatrixObject::setPosition (const Vertex& a)
 
 // =============================================================================
 //
-const Matrix& LDMatrixObject::transform() const
+const Matrix& LDMatrixObject::transformationMatrix() const
 {
-	return m_transform;
+	return m_transformationMatrix;
 }
 
-void LDMatrixObject::setTransform (const Matrix& val)
+void LDMatrixObject::setTransformationMatrix (const Matrix& val)
 {
-	changeProperty (this, &m_transform, val);
+	changeProperty (this, &m_transformationMatrix, val);
 }
 
 LDError::LDError (QString contents, QString reason, LDDocument* document) :

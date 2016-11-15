@@ -435,7 +435,7 @@ void MainWindow::buildObjectList()
 				descr = format ("%1 %2, (", ref->fileInfo()->getDisplayName(), ref->position().toString (true));
 
 				for (int i = 0; i < 9; ++i)
-					descr += format ("%1%2", ref->transform()[i], (i != 8) ? " " : "");
+					descr += format ("%1%2", ref->transformationMatrix()[i], (i != 8) ? " " : "");
 
 				descr += ')';
 				break;

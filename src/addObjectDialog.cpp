@@ -202,7 +202,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 				dsb_coords[ax]->setValue (value);
 			});
 
-			defaultMatrix = mo->transform();
+			defaultMatrix = mo->transformationMatrix();
 		}
 
 		le_matrix->setText (defaultMatrix.toString());
@@ -382,7 +382,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 			for_axes (ax)
 				ref->setCoordinate (ax, dlg.dsb_coords[ax]->value());
 
-			ref->setTransform (transform);
+			ref->setTransformationMatrix (transform);
 			ref->setFileInfo (document);
 		} break;
 

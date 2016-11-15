@@ -1591,7 +1591,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		ref->setColor (MainColor);
 		ref->setFileInfo (m_documents->getDocumentByName (primitiveName));
 		ref->setPosition (Origin);
-		ref->setTransform (IdentityMatrix);
+		ref->setTransformationMatrix (IdentityMatrix);
 		currentDocument()->insertObject (m_window->suggestInsertPoint(), ref);
 		ref->select();
 		m_window->buildObjectList();

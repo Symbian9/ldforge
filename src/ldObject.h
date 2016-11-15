@@ -180,16 +180,16 @@ class LDMatrixObject : public LDObject
 
 public:
 	LDMatrixObject (LDDocument* document = nullptr);
-	LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document = nullptr);
+	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, LDDocument* document = nullptr);
 
 	const Vertex& position() const;
 	void setCoordinate (const Axis ax, double value);
 	void setPosition (const Vertex& a);
-	const Matrix& transform() const;
-	void setTransform (const Matrix& value);
+	void setTransformationMatrix (const Matrix& value);
+	const Matrix& transformationMatrix() const;
 
 private:
-	Matrix m_transform;
+	Matrix m_transformationMatrix;
 };
 
 //

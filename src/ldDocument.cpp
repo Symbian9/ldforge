@@ -496,7 +496,7 @@ LDObject* ParseLine (QString line)
 				for (int i = 0; i < 9; ++i)
 					transform[i] = tokens[i + 5].toDouble(); // 5 - 13
 
-				obj->setTransform (transform);
+				obj->setTransformationMatrix (transform);
 				obj->setFileInfo (document);
 				return obj;
 			}

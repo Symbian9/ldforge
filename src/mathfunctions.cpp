@@ -77,7 +77,7 @@ void MathFunctions::rotateObjects(int l, int m, int n, double angle, const LDObj
 			mo->setPosition (v);
 
 			// Transform the matrix
-			mo->setTransform(transformationMatrix * mo->transform());
+			mo->setTransformationMatrix(transformationMatrix * mo->transformationMatrix());
 		}
 	}
 }

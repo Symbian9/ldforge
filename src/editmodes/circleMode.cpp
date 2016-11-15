@@ -127,7 +127,7 @@ void CircleMode::endDraw()
 			refFile = primitives()->getPrimitive(spec);
 			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 			ref->setFileInfo (refFile);
-			ref->setTransform (getCircleDrawMatrix (cmp.scale));
+			ref->setTransformationMatrix (getCircleDrawMatrix (cmp.scale));
 			ref->setPosition (m_drawedVerts[0]);
 			ref->setColor (MainColor);
 			objs << ref;
@@ -180,7 +180,7 @@ void CircleMode::endDraw()
 	{
 		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
 		ref->setFileInfo (refFile);
-		ref->setTransform (transform);
+		ref->setTransformationMatrix (transform);
 		ref->setPosition (m_drawedVerts[0]);
 		ref->setColor (MainColor);
 		objs << ref;
