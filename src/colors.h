@@ -20,34 +20,43 @@
 #include <QColor>
 #include "basics.h"
 
+/*
+ * ColorData
+ *
+ * This class contains the model data for LDConfig-defined colors.
+ */
 class ColorData
 {
 public:
 	struct Entry
 	{
 		QString name;
-		QString hexcode;
 		QColor faceColor;
 		QColor edgeColor;
 	};
 
-	enum { EntryCount = 512 };
 	ColorData();
 	~ColorData();
 	void loadFromLdconfig();
-	bool contains (int code) const;
-	const Entry& get (int code) const;
+	bool contains(int code) const;
+	const Entry& get(int code) const;
 
 private:
-	Entry m_data[EntryCount];
+	Entry m_data[512];
 };
 
+/*
+ * LDColor
+ *
+ * This class represents an LDraw color. For a color index, this class provides information for that color.
+ * It only contains the index of the color. Therefore it is a wrapper around an integer and should be passed by value.
+ */
 class LDColor
 {
 public:
-	LDColor() : m_index (0) {}
-	LDColor (qint32 index) : m_index (index) {}
-	LDColor (const LDColor& other) : m_index (other.m_index) {}
+	LDColor();
+	LDColor(qint32 index);
+	LDColor(const LDColor& other) = default;
 
 	bool isLDConfigColor() const;
 	bool isValid() const;
@@ -56,26 +65,23 @@ public:
 	QColor faceColor() const;
 	QColor edgeColor() const;
 	qint32 index() const;
-	int luma() const;
-	int edgeLuma() const;
 	bool isDirect() const;
 	QString indexString() const;
 
-	static LDColor nullColor() { return LDColor (-1); }
+	static LDColor nullColor();
 
-	LDColor& operator= (qint32 index) { m_index = index; return *this; }
-	LDColor& operator= (LDColor other) { m_index = other.index(); return *this; }
+	LDColor& operator=(qint32 index) { m_index = index; return *this; }
+	LDColor& operator=(const LDColor &other) = default;
 	LDColor operator++() { return ++m_index; }
-	LDColor operator++ (int) { return m_index++; }
+	LDColor operator++(int) { return m_index++; }
 	LDColor operator--() { return --m_index; }
-	LDColor operator-- (int) { return m_index--; }
-
-	bool operator== (LDColor other) const { return index() == other.index(); }
-	bool operator!= (LDColor other) const { return index() != other.index(); }
-	bool operator< (LDColor other) const { return index() < other.index(); }
-	bool operator<= (LDColor other) const { return index() <= other.index(); }
-	bool operator> (LDColor other) const { return index() > other.index(); }
-	bool operator>= (LDColor other) const { return index() >= other.index(); }
+	LDColor operator--(int) { return m_index--; }
+	bool operator==(LDColor other) const { return index() == other.index(); }
+	bool operator!=(LDColor other) const { return index() != other.index(); }
+	bool operator<(LDColor other) const { return index() < other.index(); }
+	bool operator<=(LDColor other) const { return index() <= other.index(); }
+	bool operator>(LDColor other) const { return index() > other.index(); }
+	bool operator>=(LDColor other) const { return index() >= other.index(); }
 
 private:
 	const ColorData::Entry& data() const;
@@ -85,31 +91,27 @@ private:
 
 uint qHash(LDColor color);
 
-//
-// Parses ldconfig.ldr
-//
+/*
+ * LDConfigParser
+ *
+ * Parses LDConfig.ldr.
+ */
 class LDConfigParser
 {
 public:
-	LDConfigParser (QString inText, char sep);
+	LDConfigParser(QString inputText);
 
-	bool getToken (QString& val, const int pos);
-	bool findToken (int& result, char const* needle, int args);
-	bool compareToken (int inPos, QString text);
-	bool parseTag (char const* tag, QString& val);
-
-	inline QString operator[] (const int idx)
-	{
-		return m_tokens[idx];
-	}
+	bool getToken(QString& tokenText, int position);
+	bool findToken(int& tokenPosition, QString needle, int args);
+	bool compareToken(int inPos, QString text);
+	bool parseTag(QString key, QString& value);
 
 private:
 	QStringList m_tokens;
-	int m_pos;
 };
 
 void initColors();
-int luma (const QColor& col);
+int luma(const QColor& col);
 
 enum
 {
