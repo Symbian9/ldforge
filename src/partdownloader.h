@@ -84,12 +84,12 @@ signals:
 	void primaryFileDownloaded();
 
 private:
-	Ui_PartDownloader& ui;
-	QStringList m_filesToDownload;
-	QVector<PartDownloadRequest*> m_requests;
-	QPushButton* m_downloadButton;
-	SourceType m_source;
-	QVector<LDDocument*> m_files;
-	LDDocument* m_primaryFile;
-	bool m_isAborted;
+	Ui_PartDownloader& _ui;
+	QStringList _filesToDownload;
+	QVector<PartDownloadRequest*> _requests;
+	QPushButton* _downloadButton;
+	SourceType _source;
+	QVector<LDDocument*> _files;
+	LDDocument* _primaryFile;
+	bool _isAborted;
 };

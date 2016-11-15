@@ -39,34 +39,34 @@ const char* g_unofficialLibraryURL = "http://ldraw.org/library/unofficial/";
 PartDownloader::PartDownloader (QWidget* parent)
     : QDialog(parent)
     , HierarchyElement(parent)
-    , ui(*new Ui_PartDownloader)
-    , m_source(SourceType{})
+    , _ui(*new Ui_PartDownloader)
+    , _source(SourceType{})
 {
-	ui.setupUi(this);
+	_ui.setupUi(this);
 
 #ifdef USE_QT5
-	ui.progressTable->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
+	_ui.progressTable->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
 #else
-	ui.progressTable->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
+	_ui.progressTable->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
 #endif
 
-	m_downloadButton = new QPushButton {tr("Download")};
-	ui.buttonBox->addButton(m_downloadButton, QDialogButtonBox::ActionRole);
+	_downloadButton = new QPushButton {tr("Download")};
+	_ui.buttonBox->addButton(_downloadButton, QDialogButtonBox::ActionRole);
 	button(Abort)->setEnabled(false);
-	connect(ui.source, SIGNAL(currentIndexChanged(int)), this, SLOT(sourceChanged(int)));
-	connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(buttonClicked(QAbstractButton*)));
+	connect(_ui.source, SIGNAL(currentIndexChanged(int)), this, SLOT(sourceChanged(int)));
+	connect(_ui.buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(buttonClicked(QAbstractButton*)));
 }
 
 PartDownloader::~PartDownloader()
 {
-	delete &ui;
+	delete &_ui;
 }
 
 void PartDownloader::checkValidPath()
 {
 	QString path = downloadPath();
 
-	if (path.isEmpty() or not QDir (path).exists())
+	if (path.isEmpty() or not QDir {path}.exists())
 	{
 		QMessageBox::information(this, "Notice", "Please input a path for files to download.");
 		path = QFileDialog::getExistingDirectory(this, "Path for downloaded files:");
@@ -85,14 +85,14 @@ QString PartDownloader::url()
 	case PartsTracker:
 		{
 			QString destination;
-			destination = ui.filename->text();
+			destination = _ui.filename->text();
 			modifyDestination(destination);
-			ui.filename->setText(destination);
+			_ui.filename->setText(destination);
 			return g_unofficialLibraryURL + destination;
 		}
 
 	case CustomURL:
-		return ui.filename->text();
+		return _ui.filename->text();
 	}
 
 	return "";
@@ -160,23 +160,23 @@ void PartDownloader::modifyDestination(QString& destination) const
 
 PartDownloader::SourceType PartDownloader::sourceType() const
 {
-	return m_source;
+	return _source;
 }
 
 void PartDownloader::setSourceType(SourceType src)
 {
-	m_source = src;
-	ui.source->setCurrentIndex(int {src});
+	_source = src;
+	_ui.source->setCurrentIndex(int {src});
 }
 
 void PartDownloader::sourceChanged(int sourceType)
 {
 	if (sourceType == CustomURL)
-		ui.fileNameLabel->setText(tr("URL:"));
+		_ui.fileNameLabel->setText(tr("URL:"));
 	else
-		ui.fileNameLabel->setText(tr("File name:"));
+		_ui.fileNameLabel->setText(tr("File name:"));
 
-	m_source = static_cast<SourceType>(sourceType);
+	_source = static_cast<SourceType>(sourceType);
 }
 
 void PartDownloader::buttonClicked(QAbstractButton* button)
@@ -187,16 +187,16 @@ void PartDownloader::buttonClicked(QAbstractButton* button)
 	}
 	else if (button == this->button(Abort))
 	{
-		m_isAborted = true;
+		_isAborted = true;
 
-		for (PartDownloadRequest* request : m_requests)
+		for (PartDownloadRequest* request : _requests)
 			request->abort();
 	}
 	else if (button == this->button(Download))
 	{
-		QString destination = ui.filename->text();
+		QString destination = _ui.filename->text();
 		setPrimaryFile (nullptr);
-		m_isAborted = false;
+		_isAborted = false;
 
 		if (sourceType() == CustomURL)
 			destination = Basename(url());
@@ -216,23 +216,23 @@ void PartDownloader::buttonClicked(QAbstractButton* button)
 
 void PartDownloader::downloadFile(QString destination, QString url, bool isPrimary)
 {
-	int row = ui.progressTable->rowCount();
+	int row = _ui.progressTable->rowCount();
 
 	// Don't download files repeadetly.
-	if (not m_filesToDownload.contains(destination))
+	if (not _filesToDownload.contains(destination))
 	{
 		print ("Downloading %1 from %2\n", destination, url);
 		modifyDestination (destination);
 		PartDownloadRequest* request = new PartDownloadRequest {url, destination, isPrimary, this};
-		m_filesToDownload << destination;
-		m_requests << request;
-		ui.progressTable->insertRow(row);
+		_filesToDownload << destination;
+		_requests << request;
+		_ui.progressTable->insertRow(row);
 		request->setTableRow(row);
 		request->updateToTable();
-		m_downloadButton->setEnabled(false);
-		ui.progressTable->setEnabled(true);
-		ui.filename->setEnabled(false);
-		ui.source->setEnabled(false);
+		_downloadButton->setEnabled(false);
+		_ui.progressTable->setEnabled(true);
+		_ui.filename->setEnabled(false);
+		_ui.source->setEnabled(false);
 		button(Close)->setEnabled(false);
 		button(Abort)->setEnabled(true);
 		button(Download)->setEnabled(false);
@@ -250,7 +250,7 @@ void PartDownloader::checkIfFinished()
 	bool failed = isAborted();
 
 	// If there is some download still working, we're not finished.
-	for (PartDownloadRequest* request : m_requests)
+	for (PartDownloadRequest* request : _requests)
 	{
 		if (not request->isFinished())
 			return;
@@ -258,15 +258,15 @@ void PartDownloader::checkIfFinished()
 		failed |= request->failed();
 	}
 
-	for (PartDownloadRequest* request : m_requests)
+	for (PartDownloadRequest* request : _requests)
 		delete request;
 
-	m_requests.clear();
+	_requests.clear();
 
 	if (primaryFile())
 		emit primaryFileDownloaded();
 
-	for (LDDocument* file : m_files)
+	for (LDDocument* file : _files)
 		file->reloadAllSubfiles();
 
 	if (m_config->autoCloseDownloadDialog() and not failed)
@@ -287,13 +287,13 @@ QAbstractButton* PartDownloader::button(PartDownloader::Button which)
 	switch (which)
 	{
 	case Download:
-		return m_downloadButton;
+		return _downloadButton;
 
 	case Abort:
-		return ui.buttonBox->button(QDialogButtonBox::Abort);
+		return _ui.buttonBox->button(QDialogButtonBox::Abort);
 
 	case Close:
-		return ui.buttonBox->button(QDialogButtonBox::Close);
+		return _ui.buttonBox->button(QDialogButtonBox::Close);
 
 	default:
 		return nullptr;
@@ -302,22 +302,22 @@ QAbstractButton* PartDownloader::button(PartDownloader::Button which)
 
 void PartDownloader::addFile(LDDocument* file)
 {
-	m_files.append(file);
+	_files.append(file);
 }
 
 bool PartDownloader::isAborted() const
 {
-	return m_isAborted;
+	return _isAborted;
 }
 
 LDDocument* PartDownloader::primaryFile() const
 {
-	return m_primaryFile;
+	return _primaryFile;
 }
 
 void PartDownloader::setPrimaryFile (LDDocument* document)
 {
-	m_primaryFile = document;
+	_primaryFile = document;
 }
 
 QString PartDownloader::downloadPath()
@@ -332,5 +332,5 @@ QString PartDownloader::downloadPath()
 
 QTableWidget* PartDownloader::progressTable() const
 {
-	return ui.progressTable;
+	return _ui.progressTable;
 }
