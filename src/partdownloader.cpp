@@ -30,19 +30,19 @@
 #include "glRenderer.h"
 #include "documentmanager.h"
 
-ConfigOption (QString DownloadFilePath)
-ConfigOption (bool GuessDownloadPaths = true)
+ConfigOption(QString DownloadFilePath)
+ConfigOption(bool GuessDownloadPaths = true)
 ConfigOption (bool AutoCloseDownloadDialog = true)
 
 const char* g_unofficialLibraryURL = "http://ldraw.org/library/unofficial/";
 
-PartDownloader::PartDownloader (QWidget* parent) :
-	QDialog (parent),
-	HierarchyElement (parent),
-	ui (*new Ui_PartDownloader),
-	m_source (SourceType (0))
+PartDownloader::PartDownloader (QWidget* parent)
+    : QDialog(parent)
+    , HierarchyElement(parent)
+    , ui(*new Ui_PartDownloader)
+    , m_source(SourceType{})
 {
-	ui.setupUi (this);
+	ui.setupUi(this);
 
 #ifdef USE_QT5
 	ui.progressTable->horizontalHeader()->setSectionResizeMode (QHeaderView::Stretch);
@@ -50,11 +50,11 @@ PartDownloader::PartDownloader (QWidget* parent) :
 	ui.progressTable->horizontalHeader()->setResizeMode (PartLabelColumn, QHeaderView::Stretch);
 #endif
 
-	m_downloadButton = new QPushButton (tr ("Download"));
-	ui.buttonBox->addButton (m_downloadButton, QDialogButtonBox::ActionRole);
-	button (Abort)->setEnabled (false);
-	connect (ui.source, SIGNAL (currentIndexChanged (int)), this, SLOT (sourceChanged (int)));
-	connect (ui.buttonBox, SIGNAL (clicked (QAbstractButton*)), this, SLOT (buttonClicked (QAbstractButton*)));
+	m_downloadButton = new QPushButton {tr("Download")};
+	ui.buttonBox->addButton(m_downloadButton, QDialogButtonBox::ActionRole);
+	button(Abort)->setEnabled(false);
+	connect(ui.source, SIGNAL(currentIndexChanged(int)), this, SLOT(sourceChanged(int)));
+	connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(buttonClicked(QAbstractButton*)));
 }
 
 PartDownloader::~PartDownloader()
@@ -69,94 +69,93 @@ void PartDownloader::checkValidPath()
 	if (path.isEmpty() or not QDir (path).exists())
 	{
 		QMessageBox::information(this, "Notice", "Please input a path for files to download.");
-		path = QFileDialog::getExistingDirectory (this, "Path for downloaded files:");
+		path = QFileDialog::getExistingDirectory(this, "Path for downloaded files:");
 
 		if (path.isEmpty())
 			reject();
 		else
-			m_config->setDownloadFilePath (path);
+			m_config->setDownloadFilePath(path);
 	}
 }
 
 QString PartDownloader::url()
 {
-	QString destination;
-
 	switch (sourceType())
 	{
 	case PartsTracker:
-		destination = ui.filename->text();
-		modifyDestination (destination);
-		ui.filename->setText (destination);
-		return g_unofficialLibraryURL + destination;
+		{
+			QString destination;
+			destination = ui.filename->text();
+			modifyDestination(destination);
+			ui.filename->setText(destination);
+			return g_unofficialLibraryURL + destination;
+		}
 
 	case CustomURL:
 		return ui.filename->text();
 	}
 
-	// Shouldn't happen
 	return "";
 }
 
-void PartDownloader::modifyDestination (QString& dest) const
+void PartDownloader::modifyDestination(QString& destination) const
 {
-	dest = dest.simplified();
+	destination = destination.simplified();
 
 	// If the user doesn't want us to guess, stop right here.
 	if (not m_config->guessDownloadPaths())
 		return;
 
 	// Ensure .dat extension
-	if (dest.right (4) != ".dat")
+	if (destination.right (4) != ".dat")
 	{
-		// Remove the existing extension, if any. It may be we're here over a
-		// typo in the .dat extension.
-		const int dotpos = dest.lastIndexOf (".");
+		// Remove the existing extension, if any. It may be we're here over a typo in the .dat extension.
+		int dotPosition = destination.lastIndexOf(".");
 
-		if ((dotpos != -1) and (dotpos >= dest.length() - 4))
-			dest.chop (dest.length() - dotpos);
+		if ((dotPosition != -1) and (dotPosition >= destination.length() - 4))
+			destination.chop (destination.length() - dotPosition);
 
-		dest += ".dat";
+		destination += ".dat";
 	}
 
-	// If the part starts with s\ or s/, then use parts/s/. Same goes with
-	// 48\ and p/48/.
-	if (isOneOf (dest.left (2), "s\\", "s/"))
+	// If the part starts with s\ or s/, then use parts/s/. Same goes with 48\ and p/48/.
+	if (isOneOf(destination.left(2), "s\\", "s/"))
 	{
-		dest.remove (0, 2);
-		dest.prepend ("parts/s/");
+		destination.remove(0, 2);
+		destination.prepend("parts/s/");
 	}
-	else if (isOneOf (dest.left (3), "48\\", "48/"))
+	else if (isOneOf(destination.left(3), "48\\", "48/"))
 	{
-		dest.remove (0, 3);
-		dest.prepend ("p/48/");
+		destination.remove(0, 3);
+		destination.prepend("p/48/");
 	}
 
 	/* Try determine where to put this part. We have four directories:
-	   parts/, parts/s/, p/, and p/48/. If we haven't already specified
-	   either parts/ or p/, we need to add it automatically. Part files
-	   are numbers wit a possible u prefix for parts with unknown number
-	   which can be followed by any of:
-	   - c** (composites)
-	   - d** (formed stickers)
-	   - p** (patterns)
-	   - a lowercase alphabetic letter for variants
-
-	   Subfiles (usually) have an s** prefix, in which case we use parts/s/.
-	   Note that the regex starts with a '^' so it won't catch already fully
-	   given part file names. */
+	 * parts/, parts/s/, p/, and p/48/. If we haven't already specified
+	 * either parts/ or p/, we need to add it automatically. Part files
+	 * are numbers wit a possible u prefix for parts with unknown number
+	 * which can be followed by any of:
+	 * - c** (composites)
+	 * - d** (formed stickers)
+	 * - p** (patterns)
+	 * - a lowercase alphabetic letter for variants
+	 *
+	 * Subfiles (usually) have an s** prefix, in which case we use parts/s/.
+	 * Note that the regex starts with a '^' so it won't catch already fully
+	 * given part file names.
+	 */
 	QString partRegex = "^u?[0-9]+(c[0-9][0-9]+)*(d[0-9][0-9]+)*[a-z]?(p[0-9a-z][0-9a-z]+)*";
 	QString subpartRegex = partRegex + "s[0-9][0-9]+";
 
 	partRegex += "\\.dat$";
 	subpartRegex += "\\.dat$";
 
-	if (QRegExp (subpartRegex).exactMatch (dest))
-		dest.prepend ("parts/s/");
-	else if (QRegExp (partRegex).exactMatch (dest))
-		dest.prepend ("parts/");
-	else if (not dest.startsWith ("parts/") and not dest.startsWith ("p/"))
-		dest.prepend ("p/");
+	if (QRegExp {subpartRegex}.exactMatch(destination))
+		destination.prepend("parts/s/");
+	else if (QRegExp {partRegex}.exactMatch(destination))
+		destination.prepend("parts/");
+	else if (not destination.startsWith("parts/") and not destination.startsWith("p/"))
+		destination.prepend("p/");
 }
 
 PartDownloader::SourceType PartDownloader::sourceType() const
@@ -164,86 +163,86 @@ PartDownloader::SourceType PartDownloader::sourceType() const
 	return m_source;
 }
 
-void PartDownloader::setSourceType (SourceType src)
+void PartDownloader::setSourceType(SourceType src)
 {
 	m_source = src;
-	ui.source->setCurrentIndex (int (src));
+	ui.source->setCurrentIndex(int {src});
 }
 
-void PartDownloader::sourceChanged (int i)
+void PartDownloader::sourceChanged(int sourceType)
 {
-	if (i == CustomURL)
-		ui.fileNameLabel->setText (tr ("URL:"));
+	if (sourceType == CustomURL)
+		ui.fileNameLabel->setText(tr("URL:"));
 	else
-		ui.fileNameLabel->setText (tr ("File name:"));
+		ui.fileNameLabel->setText(tr("File name:"));
 
-	m_source = SourceType (i);
+	m_source = static_cast<SourceType>(sourceType);
 }
 
-void PartDownloader::buttonClicked (QAbstractButton* btn)
+void PartDownloader::buttonClicked(QAbstractButton* button)
 {
-	if (btn == button (Close))
+	if (button == this->button(Close))
 	{
 		reject();
 	}
-	else if (btn == button (Abort))
+	else if (button == this->button(Abort))
 	{
 		m_isAborted = true;
 
-		for (PartDownloadRequest* req : m_requests)
-			req->abort();
+		for (PartDownloadRequest* request : m_requests)
+			request->abort();
 	}
-	else if (btn == button (Download))
+	else if (button == this->button(Download))
 	{
-		QString dest = ui.filename->text();
+		QString destination = ui.filename->text();
 		setPrimaryFile (nullptr);
 		m_isAborted = false;
 
 		if (sourceType() == CustomURL)
-			dest = Basename (url());
+			destination = Basename(url());
 
-		modifyDestination (dest);
+		modifyDestination(destination);
 
-		if (QFile::exists (downloadPath() + DIRSLASH + dest))
+		if (QFile::exists(downloadPath() + DIRSLASH + destination))
 		{
-			const QString overwritemsg = format (tr ("%1 already exists in download directory. Overwrite?"), dest);
-			if (not Confirm (tr ("Overwrite?"), overwritemsg))
+			QString message = format(tr("%1 already exists in download directory. Overwrite?"), destination);
+			if (not Confirm(tr("Overwrite?"), message))
 				return;
 		}
 
-		downloadFile (dest, url(), true);
+		downloadFile (destination, url(), true);
 	}
 }
 
-void PartDownloader::downloadFile (QString dest, QString url, bool primary)
+void PartDownloader::downloadFile(QString destination, QString url, bool isPrimary)
 {
 	int row = ui.progressTable->rowCount();
 
 	// Don't download files repeadetly.
-	if (m_filesToDownload.indexOf (dest) != -1)
-		return;
-
-	print ("Downloading %1 from %2\n", dest, url);
-	modifyDestination (dest);
-	PartDownloadRequest* req = new PartDownloadRequest (url, dest, primary, this);
-	m_filesToDownload << dest;
-	m_requests << req;
-	ui.progressTable->insertRow (row);
-	req->setTableRow (row);
-	req->updateToTable();
-	m_downloadButton->setEnabled (false);
-	ui.progressTable->setEnabled (true);
-	ui.filename->setEnabled (false);
-	ui.source->setEnabled (false);
-	button (Close)->setEnabled (false);
-	button (Abort)->setEnabled (true);
-	button (Download)->setEnabled (false);
+	if (not m_filesToDownload.contains(destination))
+	{
+		print ("Downloading %1 from %2\n", destination, url);
+		modifyDestination (destination);
+		PartDownloadRequest* request = new PartDownloadRequest {url, destination, isPrimary, this};
+		m_filesToDownload << destination;
+		m_requests << request;
+		ui.progressTable->insertRow(row);
+		request->setTableRow(row);
+		request->updateToTable();
+		m_downloadButton->setEnabled(false);
+		ui.progressTable->setEnabled(true);
+		ui.filename->setEnabled(false);
+		ui.source->setEnabled(false);
+		button(Close)->setEnabled(false);
+		button(Abort)->setEnabled(true);
+		button(Download)->setEnabled(false);
+	}
 }
 
 void PartDownloader::downloadFromPartsTracker (QString file)
 {
-	modifyDestination (file);
-	downloadFile (file, g_unofficialLibraryURL + file, false);
+	modifyDestination(file);
+	downloadFile(file, g_unofficialLibraryURL + file, false);
 }
 
 void PartDownloader::checkIfFinished()
@@ -251,25 +250,24 @@ void PartDownloader::checkIfFinished()
 	bool failed = isAborted();
 
 	// If there is some download still working, we're not finished.
-	for (PartDownloadRequest* req : m_requests)
+	for (PartDownloadRequest* request : m_requests)
 	{
-		if (not req->isFinished())
+		if (not request->isFinished())
 			return;
 
-		if (req->failed())
-			failed = true;
+		failed |= request->failed();
 	}
 
-	for (PartDownloadRequest* req : m_requests)
-		delete req;
+	for (PartDownloadRequest* request : m_requests)
+		delete request;
 
 	m_requests.clear();
 
 	if (primaryFile())
 		emit primaryFileDownloaded();
 
-	for (LDDocument* f : m_files)
-		f->reloadAllSubfiles();
+	for (LDDocument* file : m_files)
+		file->reloadAllSubfiles();
 
 	if (m_config->autoCloseDownloadDialog() and not failed)
 	{
@@ -279,31 +277,32 @@ void PartDownloader::checkIfFinished()
 	else
 	{
 		// Allow the prompt be closed now.
-		button (Abort)->setEnabled (false);
-		button (Close)->setEnabled (true);
+		button(Abort)->setEnabled(false);
+		button(Close)->setEnabled(true);
 	}
 }
 
-QPushButton* PartDownloader::button (PartDownloader::Button i)
+QAbstractButton* PartDownloader::button(PartDownloader::Button which)
 {
-	switch (i)
+	switch (which)
 	{
-		case Download:
-			return m_downloadButton;
+	case Download:
+		return m_downloadButton;
 
-		case Abort:
-			return qobject_cast<QPushButton*> (ui.buttonBox->button (QDialogButtonBox::Abort));
+	case Abort:
+		return ui.buttonBox->button(QDialogButtonBox::Abort);
 
-		case Close:
-			return qobject_cast<QPushButton*> (ui.buttonBox->button (QDialogButtonBox::Close));
+	case Close:
+		return ui.buttonBox->button(QDialogButtonBox::Close);
+
+	default:
+		return nullptr;
 	}
-
-	return nullptr;
 }
 
-void PartDownloader::addFile (LDDocument* f)
+void PartDownloader::addFile(LDDocument* file)
 {
-	m_files << f;
+	m_files.append(file);
 }
 
 bool PartDownloader::isAborted() const
@@ -326,7 +325,7 @@ QString PartDownloader::downloadPath()
 	QString path = m_config->downloadFilePath();
 
 	if (DIRSLASH[0] != '/')
-		path.replace (DIRSLASH, "/");
+		path.replace(DIRSLASH, "/");
 
 	return path;
 }

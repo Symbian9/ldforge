@@ -25,11 +25,12 @@
 class LDDocument;
 class QFile;
 class PartDownloadRequest;
-class Ui_DownloadFrom;
+class Ui_PartDownloader;
 class QNetworkAccessManager;
 class QNetworkRequest;
 class QNetworkReply;
 class QAbstractButton;
+class QTableWidget;
 
 class PartDownloader : public QDialog, public HierarchyElement
 {
@@ -55,36 +56,37 @@ public:
 		ProgressColumn,
 	};
 
-	using RequestList = QList<PartDownloadRequest*>;
-
-	explicit PartDownloader (QWidget* parent = nullptr);
+	explicit PartDownloader(QWidget* parent = nullptr);
 	virtual ~PartDownloader();
 
-	void addFile (LDDocument* f);
-	QPushButton* button (Button i);
-	Q_SLOT void buttonClicked (QAbstractButton* btn);
-	Q_SLOT void checkIfFinished();
+	void addFile(LDDocument* file);
+	QAbstractButton *button(Button which);
 	void checkValidPath();
-	void downloadFile (QString dest, QString url, bool primary);
+	void downloadFile (QString dest, QString url, bool isPrimary);
 	void downloadFromPartsTracker (QString file);
 	QString downloadPath();
 	bool isAborted() const;
 	void modifyDestination (QString& dest) const;
 	LDDocument* primaryFile() const;
-	class QTableWidget* progressTable() const;
+	QTableWidget* progressTable() const;
 	void setPrimaryFile (LDDocument* document);
 	void setSourceType (SourceType src);
-	Q_SLOT void sourceChanged (int i);
 	SourceType sourceType() const;
 	QString url();
+
+public slots:
+	void buttonClicked (QAbstractButton* btn);
+	void checkIfFinished();
+	void sourceChanged (int i);
+
 
 signals:
 	void primaryFileDownloaded();
 
 private:
-	class Ui_PartDownloader& ui;
+	Ui_PartDownloader& ui;
 	QStringList m_filesToDownload;
-	RequestList m_requests;
+	QList<PartDownloadRequest*> m_requests;
 	QPushButton* m_downloadButton;
 	SourceType m_source;
 	QList<LDDocument*> m_files;
