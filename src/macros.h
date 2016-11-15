@@ -40,7 +40,7 @@ public: \
 # define DIRSLASH_CHAR '/'
 #endif // WIN32
 
-#define dvalof(A) dprint ("value of '%1' = %2\n", #A, A)
+#define printValueOf(A) dprint ("value of '%1' = %2\n", #A, A)
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
 #define MAKE_ITERABLE_ENUM(T, FIRST, LAST) \
@@ -63,27 +63,3 @@ struct EnumLimits {};
 	bool checkFlag(Flag flag) const { return !!(m_flags & flag); } \
 	void setFlag(Flag flag) { m_flags |= flag; } \
 	void unsetFlag(Flag flag) { m_flags &= ~flag; }
-
-// once-statement
-struct OnceGuard
-{
-	bool triggered;
-	OnceGuard() : triggered (false) {}
-
-	bool pass()
-	{
-		if (triggered)
-		{
-			return false;
-		}
-		else
-		{
-			triggered = true;
-			return true;
-		}
-	}
-};
-
-#define TEE_2(A,B) A ## B
-#define TEE(A,B) TEE_2(A,B)
-#define once static OnceGuard TEE(_once_, __LINE__); if (TEE(_once_, __LINE__).pass())
