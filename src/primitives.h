@@ -102,7 +102,7 @@ public:
 private:
 	QList<PrimitiveCategory*> m_categories;
 	PrimitiveScanner* m_activeScanner;
-	QList<Primitive> m_primitives;
+	QVector<Primitive> m_primitives;
 	PrimitiveCategory* m_unmatched;
 
 	void loadCategories();
@@ -110,16 +110,18 @@ private:
 	void clearCategories();
 };
 
-//
-// Worker object that scans the primitives folder for primitives and builds an index of them.
-//
+/*
+ * PrimitiveScanner
+ *
+ * Worker object that scans the primitives folder for primitives and builds an index of them.
+ */
 class PrimitiveScanner : public QObject, HierarchyElement
 {
 	Q_OBJECT
 
 public:
 	PrimitiveScanner(PrimitiveManager* parent);
-	const QList<Primitive>& scannedPrimitives() const;
+	const QVector<Primitive>& scannedPrimitives() const;
 
 public slots:
 	void work();
@@ -129,7 +131,7 @@ signals:
 
 private:
 	PrimitiveManager* m_manager;
-	QList<Primitive> m_prims;
+	QVector<Primitive> m_scannedPrimitives;
 	QDirIterator m_iterator;
 	int m_basePathLength;
 };

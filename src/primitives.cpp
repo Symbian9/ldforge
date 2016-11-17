@@ -570,12 +570,12 @@ QString PrimitiveCategory::name() const
 }
 
 
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-
-PrimitiveScanner::PrimitiveScanner (PrimitiveManager* parent) :
+/*
+ * PrimitiveScanner :: PrimitiveScanner
+ *
+ * Constructs a primitive scanner.
+ */
+PrimitiveScanner::PrimitiveScanner(PrimitiveManager* parent) :
 	QObject(parent),
 	HierarchyElement(parent),
 	m_manager(parent),
@@ -585,53 +585,57 @@ PrimitiveScanner::PrimitiveScanner (PrimitiveManager* parent) :
 	print("Scanning primitives...");
 }
 
-
-const QList<Primitive>& PrimitiveScanner::scannedPrimitives() const
+/*
+ * PrimitiveScanner :: scannedPrimitives
+ *
+ * Returns a vector containing all the primitives found.
+ */
+const QVector<Primitive> &PrimitiveScanner::scannedPrimitives() const
 {
-	return m_prims;
+	return m_scannedPrimitives;
 }
 
-
+/*
+ * PrimitiveScanner :: work
+ *
+ * Does one step of work, processes up to 100 primitives.
+ * If the scanner does not finish work by this function call, it will ask the event loop to call this method again.
+ */
 void PrimitiveScanner::work()
 {
 	for (int i = 0; m_iterator.hasNext() and i < 100; ++i)
 	{
 		QString filename = m_iterator.next();
-		QFile file (filename);
+		QFile file = {filename};
 
-		if (not file.open (QIODevice::ReadOnly))
-			continue;
-
-		Primitive primitive;
-		primitive.name = filename.mid (m_basePathLength + 1);  // make full path relative
-		primitive.name.replace ('/', '\\');  // use DOS backslashes, they're expected
-		primitive.category = nullptr;
-		QByteArray titledata = file.readLine();
-
-		if (titledata != QByteArray())
-			primitive.title = QString::fromUtf8 (titledata);
-
-		primitive.title = primitive.title.simplified();
-
-		if (primitive.title[0] == '0')
+		if (file.open (QIODevice::ReadOnly))
 		{
-			primitive.title.remove (0, 1);  // remove 0
-			primitive.title = primitive.title.simplified();
-		}
+			Primitive primitive;
+			primitive.name = filename.mid(m_basePathLength + 1); // make full path relative
+			primitive.name.replace('/', '\\'); // use DOS backslashes, they're expected
+			primitive.category = nullptr;
+			primitive.title = QString::fromUtf8(file.readLine().simplified());
 
-		m_prims << primitive;
+			if (primitive.title[0] == '0')
+			{
+				primitive.title.remove(0, 1);  // remove 0
+				primitive.title = primitive.title.simplified();
+			}
+
+			m_scannedPrimitives << primitive;
+		}
 	}
 
 	if (not m_iterator.hasNext())
 	{
-		// Done with primitives, now save to a config file
+		// If there are no more primitives to iterate, we're done. Now save this information into a cache file.
 		QString path = m_manager->getPrimitivesCfgPath();
-		QFile configFile (path);
+		QFile configFile = {path};
 
-		if (configFile.open (QIODevice::WriteOnly | QIODevice::Text))
+		if (configFile.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
-			for (Primitive& info : m_prims)
-				fprint (configFile, "%1 %2\r\n", info.name, info.title);
+			for (Primitive& primitive : m_scannedPrimitives)
+				fprint(configFile, "%1 %2\r\n", primitive.name, primitive.title);
 
 			configFile.close();
 		}
@@ -644,7 +648,7 @@ void PrimitiveScanner::work()
 	}
 	else
 	{
-		// Defer to event loop, pick up the work later
+		// Otherwise, defer to event loop, pick up the work later.
 		QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
 	}
 }
