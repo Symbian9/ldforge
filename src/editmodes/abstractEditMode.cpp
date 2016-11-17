@@ -212,7 +212,7 @@ void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& p
 	// Draw vertex blips
 	for (int i = 0; i < polygon3d.size(); ++i)
 	{
-		renderer()->drawBlip(painter, polygon2d[i]);
+		renderer()->drawPoint(painter, polygon2d[i]);
 		renderer()->drawBlipCoordinates(painter, polygon3d[i], polygon2d[i]);
 	}
 

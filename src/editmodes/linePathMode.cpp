@@ -46,7 +46,7 @@ void LinePathMode::render (QPainter& painter) const
 		for (int i = 0; i < points.size(); ++i)
 		{
 			const QPointF& point = points[i];
-			renderer()->drawBlip (painter, point);
+			renderer()->drawPoint (painter, point);
 			renderer()->drawBlipCoordinates (painter, points3d[i], point);
 		}
 	}

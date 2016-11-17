@@ -57,10 +57,10 @@ void CurveMode::render (QPainter& painter) const
 		for (int i = 0; i < qMin (countof(curve), m_drawedVerts.size() + 1); ++i)
 		{
 			if (i < 2)
-				renderer()->drawBlip (painter, curve2d[i]);
+				renderer()->drawPoint (painter, curve2d[i]);
 			else
 				// Give control points a different color
-				renderer()->drawBlip (painter, curve2d[i], QColor (0, 112, 112));
+				renderer()->drawPoint (painter, curve2d[i], QColor (0, 112, 112));
 			renderer()->drawBlipCoordinates (painter, curve[i], curve2d[i]);
 		}
 
@@ -72,7 +72,7 @@ void CurveMode::render (QPainter& painter) const
 	{
 		// Even if we have nothing, still draw the vertex at the cursor
 		QPoint vertex2d = renderer()->convert3dTo2d (getCursorVertex());
-		renderer()->drawBlip (painter, vertex2d);
+		renderer()->drawPoint (painter, vertex2d);
 		renderer()->drawBlipCoordinates (painter, getCursorVertex(), vertex2d);
 	}
 }

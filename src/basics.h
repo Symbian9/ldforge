@@ -53,6 +53,8 @@ enum Axis
 	Z
 };
 
+static const Axis axes[] = {X, Y, Z};
+
 //
 // Derivative of QVector3D: this class is used for the vertices.
 //

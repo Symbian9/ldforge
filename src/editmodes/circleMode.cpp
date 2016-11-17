@@ -224,7 +224,7 @@ void CircleMode::render (QPainter& painter) const
 	if (m_drawedVerts.isEmpty())
 	{
 		QPoint pos2d = renderer()->convert3dTo2d (renderer()->position3D());
-		renderer()->drawBlip (painter, pos2d);
+		renderer()->drawPoint (painter, pos2d);
 		renderer()->drawBlipCoordinates (painter, renderer()->position3D(), pos2d);
 		return;
 	}
@@ -295,7 +295,7 @@ void CircleMode::render (QPainter& painter) const
 
 	// Draw green blips at where the points are
 	for (QPointF const& point : innerverts2d + outerverts2d)
-		renderer()->drawBlip (painter, point);
+		renderer()->drawPoint (painter, point);
 
 	// Draw edge lines
 	painter.setPen (renderer()->linePen());
