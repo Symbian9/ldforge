@@ -926,16 +926,13 @@ void GLRenderer::pick (int mouseX, int mouseY, bool additive)
 void GLRenderer::pick(const QRect& range, bool additive)
 {
 	makeCurrent();
+	QSet<LDObject*> priorSelection = selectedObjects().toSet();
+	QSet<LDObject*> newSelection;
 
-	// Clear the selection if we do not wish to add to it.
-	if (not additive)
-	{
-		LDObjectList oldSelection = selectedObjects();
-		currentDocument()->clearSelection();
-
-		for (LDObject* object : oldSelection)
-			compileObject(object);
-	}
+	// If we're doing an additive selection, we start off with the existing selection.
+	// Otherwise we start selecting from scratch.
+	if (additive)
+		newSelection = priorSelection;
 
 	// Paint the picking scene
 	setPicking(true);
@@ -962,10 +959,10 @@ void GLRenderer::pick(const QRect& range, bool additive)
 	// Read pixels from the color buffer.
 	glReadPixels(x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
-	LDObject* unselectedObject = nullptr;
 	QSet<int32_t> indices;
 
 	// Go through each pixel read and add them to the selection.
+	// Each pixel maps to an LDObject index injectively.
 	// Note: black is background, those indices are skipped.
 	for (unsigned char *pixelCursor = pixelData.begin(); pixelCursor < pixelData.end(); pixelCursor += 4)
 	{
@@ -976,38 +973,37 @@ void GLRenderer::pick(const QRect& range, bool additive)
 			indices.insert(index);
 	}
 
+	// For each index read, resolve the LDObject behind it and add it to the selection.
 	for (int32_t index : indices)
 	{
-		LDObject* object = LDObject::fromID (index);
+		LDObject* object = LDObject::fromID(index);
 
-		if (object == nullptr)
-			continue;
-
-		// If this is an additive single pick and the object is currently selected,
-		// we remove it from selection instead.
-		if (additive)
+		if (object != nullptr)
 		{
-			if (object->isSelected())
-			{
-				object->deselect();
-				unselectedObject = object;
-				break;
-			}
+			// If this is an additive single pick and the object is currently selected,
+			// we remove it from selection instead.
+			if (additive and newSelection.contains(object))
+				newSelection.remove(object);
+			else
+				newSelection.insert(object);
 		}
-
-		object->select();
 	}
 
-	// Update everything now.
+	// Select all objects that we now have selected that were not selected before.
+	for (LDObject* object : newSelection - priorSelection)
+	{
+		object->select();
+		compileObject(object);
+	}
+
+	// Likewise, deselect whatever was selected that isn't anymore.
+	for (LDObject* object : priorSelection - newSelection)
+	{
+		object->deselect();
+		compileObject(object);
+	}
+
 	m_window->updateSelection();
-
-	// Recompile the objects now to update their color
-	for (LDObject* obj : selectedObjects())
-		compileObject (obj);
-
-	if (unselectedObject)
-		compileObject(unselectedObject);
-
 	setPicking(false);
 	repaint();
 }
