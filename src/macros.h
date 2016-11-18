@@ -59,7 +59,7 @@ struct EnumLimits {};
 
 #define ConfigOption(...)
 
-#define DEFINE_FLAG_ACCESS_METHODS \
-	bool checkFlag(Flag flag) const { return !!(m_flags & flag); } \
-	void setFlag(Flag flag) { m_flags |= flag; } \
-	void unsetFlag(Flag flag) { m_flags &= ~flag; }
+#define DEFINE_FLAG_ACCESS_METHODS(FLAGS) \
+	bool checkFlag(decltype(FLAGS) flag) const { return !!(FLAGS & flag); } \
+	void setFlag(decltype(FLAGS) flag) { FLAGS |= flag; } \
+	void unsetFlag(decltype(FLAGS) flag) { FLAGS &= ~flag; }

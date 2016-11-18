@@ -128,7 +128,7 @@ private:
 	LDGLData* m_gldata;
 	DocumentManager* m_manager;
 
-	DEFINE_FLAG_ACCESS_METHODS
+	DEFINE_FLAG_ACCESS_METHODS(m_flags)
 	void addKnownVertices (LDObject* obj);
 	void mergeVertices();
 };
