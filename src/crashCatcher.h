@@ -20,7 +20,7 @@
 #include "main.h"
 
 #ifdef Q_OS_UNIX
-void initCrashCatcher();
+void initializeCrashHandler();
 #else
-void initCrashCatcher() {}
+void initializeCrashHandler() {}
 #endif

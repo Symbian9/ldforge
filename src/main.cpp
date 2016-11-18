@@ -43,7 +43,7 @@ int main (int argc, char* argv[])
 	paths->checkPaths();
 	paths->deleteLater();
 
-	initCrashCatcher();
+	initializeCrashHandler();
 	initColors();
 	MainWindow* win = new MainWindow(configObject);
 	win->show();

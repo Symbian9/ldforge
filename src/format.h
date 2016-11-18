@@ -46,7 +46,7 @@ public:
 	}
 
 	template<typename T>
-	StringFormatArg (const QList<T>& a)
+	StringFormatArg (const QVector<T>& a)
 	{
 		m_text = "{";
 

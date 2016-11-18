@@ -5,7 +5,7 @@ from os.path import realpath
 for filename in argv[1:]:
 	with open(filename, 'r') as fp:
 		try:
-			exceeders = [(i + 1) for i, ln in enumerate(fp.read().splitlines()) if len(ln.replace('\t', '    ')) > 120]
+			exceeders = [(i + 1) for i, ln in enumerate(fp.read().splitlines()) if len(ln.replace('\t', '    ')) > 140]
 
 			for linenumber in exceeders:
 				stderr.write('%s:%d: warning: line length exceeds 120 characters\n' % (realpath(filename), linenumber))

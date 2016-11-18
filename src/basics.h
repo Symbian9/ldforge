@@ -23,6 +23,7 @@
 #include <QMetaType>
 #include <QVector3D>
 #include <functional>
+#include <math.h>
 #include "macros.h"
 #include "transform.h"
 #include "types/matrix.h"

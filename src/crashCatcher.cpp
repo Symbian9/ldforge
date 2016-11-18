@@ -21,8 +21,8 @@
 #ifdef Q_OS_UNIX
 # include <QProcess>
 # include <QTemporaryFile>
-# include <unistd.h>
 # include <signal.h>
+# include <unistd.h>
 # include "crashCatcher.h"
 # include "dialogs.h"
 
@@ -30,74 +30,92 @@
 #  include <sys/prctl.h>
 # endif
 
-
-// Removes the signal handler from SIGABRT and then aborts.
+/*
+ * finalAbort
+ *
+ * Removes the signal handler from SIGABRT and then aborts.
+ * This really aborts instead of falling back into the crash handler.
+ */
+//
 static void finalAbort()
 {
 	struct sigaction sighandler;
 	sighandler.sa_handler = SIG_DFL;
 	sighandler.sa_flags = 0;
-	sigaction (SIGABRT, &sighandler, 0);
+	sigaction(SIGABRT, &sighandler, 0);
 	abort();
 }
 
-
-static void handleCrash (int sig)
+/*
+ * handleCrash
+ *
+ * Handles a crash signal. Launches gdb and gets debug info for a post-mortem.
+ */
+static void handleCrash(int signal)
 {
 	static bool isActive = false;
-	printf ("!! Caught signal %d, launching gdb\n", sig);
+	printf("!! Caught signal %d, launching gdb\n", signal);
 
 	if (isActive)
 	{
-		printf ("Caught signal while crash catcher is active! Execution cannot continue.\n");
+		printf("Caught signal while crash catcher is active! Execution cannot continue.\n");
 		finalAbort();
 	}
 
-	pid_t const pid (getpid());
-	QProcess proc;
 	QTemporaryFile commandsFile;
 	isActive = true;
 
 	if (commandsFile.open())
 	{
-		commandsFile.write (format ("attach %1\n", pid).toLocal8Bit());
-		commandsFile.write (QString ("backtrace full\n").toLocal8Bit());
-		commandsFile.write (QString ("detach\n").toLocal8Bit());
-		commandsFile.write (QString ("quit").toLocal8Bit());
+		commandsFile.write(format("attach %1\n", getpid()).toLocal8Bit());
+		commandsFile.write("backtrace full\n");
+		commandsFile.write("detach\n");
+		commandsFile.write("quit");
 		commandsFile.close();
-	}
 
-	proc.start ("gdb", {"-x", commandsFile.fileName()});
+		QProcess process;
+		process.start("gdb", {"-x", commandsFile.fileName()});
 
-	// Linux doesn't allow ptrace to be used on anything but direct child processes
-	// so we need to use prctl to register an exception to this to allow GDB attach to us.
-	// We need to do this now and no earlier because only now we actually know GDB's PID.
+		// Linux doesn't allow ptrace to be used on anything but direct child processes, so we need to use prctl to register an exception
+		// to this to allow GDB attach to us.
 #ifdef Q_OS_LINUX
-	prctl (PR_SET_PTRACER, proc.pid(), 0, 0, 0);
+		prctl(PR_SET_PTRACER, process.pid(), 0, 0, 0);
 #endif
 
-	proc.waitForFinished (1000);
-	QString output (proc.readAllStandardOutput());
-	QString err (proc.readAllStandardError());
-	QFile f (UNIXNAME "-crash.log");
+		process.waitForFinished(1000);
+		QString output = process.readAllStandardOutput();
+		QString errorOutput = process.readAllStandardError();
+		QFile file {UNIXNAME "-crash.log"};
 
-	if (f.open (QIODevice::WriteOnly))
+		if (file.open(QIODevice::WriteOnly))
+		{
+			fprint(file, format("=== Program crashed with signal %1 ===\n\n"
+			                    "GDB stdout:\n%3\nGDB stderr:\n%4\n", signal, output, errorOutput));
+			file.close();
+			printf("Backtrace written to " UNIXNAME "-crash.log. Aborting.\n");
+		}
+		else
+		{
+			printf("Unable to write a crashlog.\n");
+		}
+	}
+	else
 	{
-		fprint (f, format ("=== Program crashed with signal %1 ===\n\n"
-			"GDB stdout:\n%3\nGDB stderr:\n%4\n", sig,
-			output, err));
-		f.close();
+		printf("Unable to write commands to temporary file.");
 	}
 
-	printf ("Backtrace written to " UNIXNAME "-crash.log. Aborting.\n");
 	finalAbort();
 }
 
-
-void initCrashCatcher()
+/*
+ * initializeCrashHandler
+ *
+ * Creates handlers for crash signals, so that we can create backtraces for them.
+ */
+void initializeCrashHandler()
 {
 	// List of signals to catch and crash on
-	static const int signalsToCatch[] = {
+	QVector<int> signalsToCatch = {
 		SIGSEGV, // segmentation fault
 		SIGABRT, // abort() calls
 		SIGFPE, // floating point exceptions (e.g. division by zero)
@@ -109,13 +127,13 @@ void initCrashCatcher()
 	sighandler.sa_flags = 0;
 	sigemptyset (&sighandler.sa_mask);
 
-	for (int sig : signalsToCatch)
+	for (int signal : signalsToCatch)
 	{
-		if (sigaction (sig, &sighandler, nullptr) == -1)
-			fprint (stderr, "Couldn't set signal handler %1: %2", sig, strerror (errno));
+		if (sigaction(signal, &sighandler, nullptr) == -1)
+			fprint(stderr, "Couldn't set signal handler %1: %2", signal, strerror(errno));
 	}
 
-	print ("Crash catcher hooked to signals: %1\n", signalsToCatch);
+	print("Crash catcher hooked to signals: %1\n", signalsToCatch);
 }
 
 #endif // Q_OS_UNIX
