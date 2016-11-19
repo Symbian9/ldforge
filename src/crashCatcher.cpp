@@ -96,12 +96,12 @@ static void handleCrash(int signal)
 		}
 		else
 		{
-			printf("Unable to write a crashlog.\n");
+			printf("Unable to write a crashlog: %s\n", file.errorString().toUtf8().constData());
 		}
 	}
 	else
 	{
-		printf("Unable to write commands to temporary file.");
+		printf("Unable to write commands to temporary file: %s", commandsFile.errorString().toUtf8().constData());
 	}
 
 	finalAbort();
