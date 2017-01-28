@@ -75,13 +75,13 @@ void roundToDecimals(double& value, int decimals)
 void applyToMatrix (Matrix& a, ApplyToMatrixFunction func)
 {
 	for (int i = 0; i < 9; ++i)
-		func (i, a[i]);
+		func(i, a.value(i));
 }
 
 void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 {
 	for (int i = 0; i < 9; ++i)
-		func (i, a[i]);
+		func(i, a.value(i));
 }
 
 

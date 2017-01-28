@@ -19,41 +19,73 @@
 #pragma once
 #include <QString>
 
-/**
- * @brief The Matrix class
+/*
  * A mathematical 3 x 3 matrix
  */
 class Matrix
 {
 public:
+	class RowView;
+	class ConstRowView;
+
 	Matrix();
 	Matrix (const std::initializer_list<double>& values);
 	Matrix (double fillval);
 	Matrix (double values[]);
 
+	double* begin();
+	const double* begin() const;
 	double determinant() const;
-	Matrix multiply (const Matrix& other) const;
 	void dump() const;
+	double* end();
+	const double* end() const;
+	Matrix multiply(const Matrix& other) const;
 	QString toString() const;
+	double& value(int index);
+	const double& value(int index) const;
 	void zero();
+
 	bool operator==(const Matrix& other) const;
 	bool operator!=(const Matrix& other) const;
-
-	/// @returns a mutable reference to a value by @c idx.
-	inline double& value (int idx) { return m_values[idx]; }
-
-	/// @returns a const reference to a value by @c idx.
-	inline const double& value (int idx) const { return m_values[idx]; }
-
-	/// @returns this matrix multiplied by @c other.
-	inline Matrix operator* (const Matrix& other) const { return multiply (other); }
-
-	/// @returns a mutable reference to a value by @c idx.
-	inline double& operator[] (int idx) { return value(idx); }
-
-	/// @returns a const reference to a value by @c idx.
-	inline const double& operator[] (int idx) const { return value (idx); }
+	Matrix operator*(const Matrix& other) const;
+	RowView operator[](int row);
+	ConstRowView operator[](int row) const;
+	double& operator()(int row, int column);
+	const double& operator()(int row, int column) const;
 
 private:
 	double m_values[9];
+};
+
+/*
+ * A structure that provides a view into a row in a matrix.
+ * This is returned by operator[] so that the matrix can be accessed by A[i][j]
+ */
+class Matrix::RowView
+{
+public:
+	RowView(Matrix &matrix, int row);
+	double& operator[](int column);
+	Matrix& matrix() const;
+	int row();
+
+private:
+	Matrix& _matrix;
+	const int _row;
+};
+
+/*
+ * Const version of the above
+ */
+class Matrix::ConstRowView
+{
+public:
+	ConstRowView(const Matrix &matrix, int row);
+	const double& operator[](int column);
+	const Matrix& matrix() const;
+	int row();
+
+private:
+	const Matrix& _matrix;
+	const int _row;
 };

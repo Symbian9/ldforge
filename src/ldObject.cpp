@@ -702,13 +702,13 @@ void LDSubfileReference::invert()
 		Matrix matrixModifier = IdentityMatrix;
 
 		if (axisSet & (1 << X))
-			matrixModifier[0] = -1;
+			matrixModifier(0, 0) = -1;
 
 		if (axisSet & (1 << Y))
-			matrixModifier[4] = -1;
+			matrixModifier(1, 1) = -1;
 
 		if (axisSet & (1 << Z))
-			matrixModifier[8] = -1;
+			matrixModifier(2, 2) = -1;
 
 		setTransformationMatrix (transformationMatrix() * matrixModifier);
 		return;

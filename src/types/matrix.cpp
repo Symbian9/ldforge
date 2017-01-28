@@ -20,15 +20,13 @@
 #include "../format.h"
 #include "matrix.h"
 
-/**
- * @brief Matrix::Matrix
- * Default-constructor for a matrix -- does not actually initialize the member values.
+/*
+ * Default-constructor for a matrix
  */
-Matrix::Matrix() {}
+Matrix::Matrix() :
+    m_values{0} {}
 
-/**
- * @brief Matrix::Matrix
- * @param values
+/*
  * Initializes the matrix from a C array
  * Note: the array must have (at least) 9 values!
  */
@@ -38,20 +36,13 @@ Matrix::Matrix (double values[])
 		m_values[i] = values[i];
 }
 
-/**
- * @brief Matrix::Matrix
- * @param fillvalue
+/*
  * Constructs a matrix from a single fill value.
  */
-Matrix::Matrix (double fillvalue)
-{
-	for (int i = 0; i < 9; ++i)
-		m_values[i] = fillvalue;
-}
+Matrix::Matrix (double fillvalue) :
+    m_values {fillvalue} {}
 
-/**
- * @brief Matrix::Matrix
- * @param values
+/*
  * Constructs a matrix from an initializer list.
  * Note: the initializer list must have exactly 9 values.
  */
@@ -61,8 +52,7 @@ Matrix::Matrix (const std::initializer_list<double>& values)
 		memcpy (&m_values[0], values.begin(), sizeof m_values);
 }
 
-/**
- * @brief Matrix::dump
+/*
  * Prints the matrix out.
  */
 void Matrix::dump() const
@@ -76,9 +66,8 @@ void Matrix::dump() const
 	}
 }
 
-/**
- * @brief Matrix::toString
- * @return a string representation of the matrix
+/*
+ * Returns a string representation of the matrix
  */
 QString Matrix::toString() const
 {
@@ -95,8 +84,7 @@ QString Matrix::toString() const
 	return val;
 }
 
-/**
- * @brief Matrix::zero
+/*
  * Fills the matrix with zeros
  */
 void Matrix::zero()
@@ -104,28 +92,24 @@ void Matrix::zero()
 	memset (&m_values[0], 0, sizeof m_values);
 }
 
-/**
- * @brief Matrix::multiply
- * @param other
- * @return this matrix multiplied with @c other.
- * @note @c a.mult(b) is not equivalent to @c b.mult(a)
+/*
+ * Performs matrix multiplication.
+ * Note: A*B is not equivalent to B*A!
  */
 Matrix Matrix::multiply (const Matrix& other) const
 {
 	Matrix result;
-	result.zero();
 
 	for (int i = 0; i < 3; ++i)
 	for (int j = 0; j < 3; ++j)
 	for (int k = 0; k < 3; ++k)
-		result[(i * 3) + j] += m_values[(i * 3) + k] * other[(k * 3) + j];
+		result[i][j] += (*this)[i][k] * other[k][j];
 
 	return result;
 }
 
-/**
- * @brief Matrix::determinant
- * @return the matrix's determinant
+/*
+ * Returns the matrix's determinant
  */
 double Matrix::determinant() const
 {
@@ -137,10 +121,48 @@ double Matrix::determinant() const
 		   (value (0) * value (5) * value (7));
 }
 
-/**
- * @brief Matrix::operator ==
- * @param other
- * @return whether the two matrices are equal
+/*
+ * Returns a value in matrix value (index math must be done manually)
+ */
+double& Matrix::value(int index)
+{
+	return m_values[index];
+}
+
+/*
+ * Returns a value in matrix value (index math must be done manually)
+ */
+const double& Matrix::value(int index) const
+{
+	return m_values[index];
+}
+
+/*
+ * Performs matrix multiplication
+ */
+Matrix Matrix::operator*(const Matrix &other) const
+{
+	return multiply(other);
+}
+
+/*
+ * Returns a row of the matrix
+ */
+Matrix::RowView Matrix::operator[](int row)
+{
+	return RowView {*this, row};
+}
+
+/*
+ * Returns a row of the matrix
+ */
+Matrix::ConstRowView Matrix::operator[](int row) const
+{
+	return ConstRowView {*this, row};
+}
+
+/*
+ * Checks whether the two matrices are equal
  */
 bool Matrix::operator==(const Matrix& other) const
 {
@@ -162,3 +184,70 @@ bool Matrix::operator!=(const Matrix& other) const
 	return not operator==(other);
 }
 
+double& Matrix::operator()(int row, int column)
+{
+	return m_values[row * 3 + column];
+}
+
+const double& Matrix::operator()(int row, int column) const
+{
+	return m_values[row * 3 + column];
+}
+
+double* Matrix::begin()
+{
+	return m_values;
+}
+
+const double* Matrix::begin() const
+{
+	return m_values;
+}
+
+double* Matrix::end()
+{
+	return m_values + countof(m_values);
+}
+
+const double* Matrix::end() const
+{
+	return m_values + countof(m_values);
+}
+
+Matrix::RowView::RowView(Matrix &matrix, int row) :
+    _matrix {matrix},
+    _row {row} {}
+
+double& Matrix::RowView::operator[](int column)
+{
+	return _matrix.value(_row * 3 + column);
+}
+
+Matrix& Matrix::RowView::matrix() const
+{
+	return _matrix;
+}
+
+int Matrix::RowView::row()
+{
+	return _row;
+}
+
+Matrix::ConstRowView::ConstRowView(const Matrix &matrix, int row) :
+    _matrix {matrix},
+    _row {row} {}
+
+const double& Matrix::ConstRowView::operator[](int column)
+{
+	return _matrix.value(_row * 3 + column);
+}
+
+const Matrix& Matrix::ConstRowView::matrix() const
+{
+	return _matrix;
+}
+
+int Matrix::ConstRowView::row()
+{
+	return _row;
+}

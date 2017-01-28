@@ -494,7 +494,7 @@ LDObject* ParseLine (QString line)
 				Matrix transform;
 
 				for (int i = 0; i < 9; ++i)
-					transform[i] = tokens[i + 5].toDouble(); // 5 - 13
+					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
 
 				obj->setTransformationMatrix (transform);
 				obj->setFileInfo (document);

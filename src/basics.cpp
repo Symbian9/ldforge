@@ -37,11 +37,11 @@ Vertex::Vertex (qreal xpos, qreal ypos, qreal zpos) :
 	QVector3D(xpos, ypos, zpos) {}
 
 
-void Vertex::transform (const Matrix& matr, const Vertex& pos)
+void Vertex::transform (const Matrix& matrix, const Vertex& pos)
 {
-	double x2 = (matr[0] * x()) + (matr[1] * y()) + (matr[2] * z()) + pos.x();
-	double y2 = (matr[3] * x()) + (matr[4] * y()) + (matr[5] * z()) + pos.y();
-	double z2 = (matr[6] * x()) + (matr[7] * y()) + (matr[8] * z()) + pos.z();
+	double x2 = (matrix(0, 0) * x()) + (matrix(0, 1) * y()) + (matrix(0, 2) * z()) + pos.x();
+	double y2 = (matrix(1, 0) * x()) + (matrix(1, 1) * y()) + (matrix(1, 2) * z()) + pos.y();
+	double z2 = (matrix(2, 0) * x()) + (matrix(2, 1) * y()) + (matrix(2, 2) * z()) + pos.z();
 	setX (x2);
 	setY (y2);
 	setZ (z2);

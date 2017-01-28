@@ -72,12 +72,12 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 
 	Matrix transform = templates[renderer()->camera() % 3];
 
-	for (int i = 0; i < 9; ++i)
+	for (double& value : transform)
 	{
-		if (transform[i] == 2)
-			transform[i] = scale;
-		else if (transform[i] == 1 and renderer()->camera() >= 3)
-			transform[i] = -1;
+		if (value == 2)
+			value = scale;
+		else if (value == 1 and renderer()->camera() >= 3)
+			value = -1;
 	}
 
 	return transform;
