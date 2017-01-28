@@ -208,11 +208,10 @@ protected:
 	void wheelEvent(QWheelEvent* ev);
 
 private:
-	MessageManager* m_messageLog;
-	LDDocument* m_document;
+	MessageManager* m_messageLog = nullptr;
+	LDDocument* m_document = nullptr;
 	GLCompiler* m_compiler;
-	LDObject* m_objectAtCursor;
-
+	LDObject* m_objectAtCursor = nullptr;
 	CameraIcon m_cameraIcons[7];
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
@@ -220,14 +219,14 @@ private:
 	Vertex m_position3D;
 	double m_virtualWidth;
 	double m_virtualHeight;
-	bool m_useDarkBackground;
-	bool m_drawToolTip;
-	bool m_takingScreenCapture;
-	bool m_panning;
-	bool m_initialized;
-	bool m_isDrawOnly;
-	bool m_isPicking;
-	bool m_isCameraMoving;
+	bool m_useDarkBackground = false;
+	bool m_drawToolTip = false;
+	bool m_takingScreenCapture = false;
+	bool m_panning = false;
+	bool m_initialized = false;
+	bool m_isDrawOnly = false;
+	bool m_isDrawingSelectionScene = false;
+	bool m_isCameraMoving = false;
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
@@ -235,11 +234,11 @@ private:
 	Camera m_camera;
 	Camera m_toolTipCamera;
 	GLuint m_axeslist;
-	int m_width;
-	int m_height;
+	int m_width = 0;
+	int m_height = 0;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;
-	AbstractEditMode* m_currentEditMode;
+	AbstractEditMode* m_currentEditMode = nullptr;
 	GLuint m_axesVbo;
 	GLuint m_axesColorVbo;
 

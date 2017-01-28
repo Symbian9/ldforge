@@ -75,25 +75,15 @@ ConfigOption (bool DrawConditionalLines = true)
 //
 GLRenderer::GLRenderer (QWidget* parent) :
 	QGLWidget (parent),
-	HierarchyElement (parent),
-	m_document (nullptr),
-	m_initialized (false)
+	HierarchyElement (parent)
 {
-	m_isPicking = false;
 	m_camera = (Camera) m_config->camera();
-	m_drawToolTip = false;
 	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
-	m_panning = false;
 	m_compiler = new GLCompiler (this);
-	m_objectAtCursor = nullptr;
-	setDrawOnly (false);
 	m_messageLog = new MessageManager (this);
 	m_messageLog->setRenderer (this);
-	m_width = m_height = -1;
-	m_position3D = Origin;
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
-	m_isCameraMoving = false;
 	m_thinBorderPen = QPen (QColor (0, 0, 0, 208), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	m_thinBorderPen.setWidth (1);
 	setAcceptDrops (true);
@@ -197,11 +187,6 @@ void GLRenderer::setDrawOnly (bool value)
 MessageManager* GLRenderer::messageLog() const
 {
 	return m_messageLog;
-}
-
-bool GLRenderer::isPicking() const
-{
-	return m_isPicking;
 }
 
 LDDocument* GLRenderer::document() const
@@ -317,7 +302,7 @@ void GLRenderer::initializeAxes()
 //
 void GLRenderer::setBackground()
 {
-	if (not isPicking())
+	if (not m_isDrawingSelectionScene)
 	{
 		// Otherwise use the background that the user wants.
 		QColor color = m_config->backgroundColor();
@@ -385,7 +370,7 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (m_config->drawWireframe() and not isPicking())
+	if (m_config->drawWireframe() and not m_isDrawingSelectionScene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -429,7 +414,7 @@ void GLRenderer::drawGLScene()
 	glEnableClientState (GL_VERTEX_ARRAY);
 	glEnableClientState (GL_COLOR_ARRAY);
 
-	if (isPicking())
+	if (m_isDrawingSelectionScene)
 	{
 		drawVbos (TrianglesVbo, PickColorsVboComplement, GL_TRIANGLES);
 		drawVbos (QuadsVbo, PickColorsVboComplement, GL_QUADS);
@@ -623,11 +608,10 @@ void GLRenderer::paintEvent(QPaintEvent*)
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	// If we wish to only draw the brick, stop here
-	if (isDrawOnly())
+	if (isDrawOnly() or m_isDrawingSelectionScene)
 		return;
 
 #ifndef RELEASE
-	if (not isPicking())
 	{
 		QString text = format("Rotation: (%1°, %2°, %3°)\nPanning: (%4, %5), Zoom: %6",
 			rotation(X), rotation(Y), rotation(Z), panning(X), panning(Y), zoom());
@@ -638,7 +622,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 	}
 #endif
 
-	if (camera() != FreeCamera and not isPicking())
+	if (camera() != FreeCamera)
 	{
 		// Paint the overlay image if we have one
 		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
@@ -661,7 +645,6 @@ void GLRenderer::paintEvent(QPaintEvent*)
 		                 textSize.width(), textSize.height(), Qt::AlignCenter, text);
 	}
 
-	if (not isPicking())
 	{
 		// Draw edit mode HUD
 		m_currentEditMode->render(painter);
@@ -1075,10 +1058,10 @@ void GLRenderer::setDocument (LDDocument* document)
 //
 void GLRenderer::setPicking(bool value)
 {
-	m_isPicking = value;
+	m_isDrawingSelectionScene = value;
 	setBackground();
 
-	if (isPicking())
+	if (m_isDrawingSelectionScene)
 	{
 		glDisable(GL_DITHER);
 
