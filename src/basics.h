@@ -22,6 +22,7 @@
 #include <QStringList>
 #include <QMetaType>
 #include <QVector3D>
+#include <QVector>
 #include <functional>
 #include <math.h>
 #include "macros.h"
@@ -212,3 +213,23 @@ bool valueInEnum(typename std::underlying_type<Enum>::type x)
 
 double getRadialPoint(int segment, int divisions, double(*func)(double));
 QVector<QLineF> makeCircle(int segments, int divisions, double radius);
+
+//
+// Get the amount of elements in something.
+//
+template<typename T, size_t N>
+int length(T(&)[N])
+{
+	return N;
+}
+
+static inline int length(const QString& string)
+{
+	return string.size();
+}
+
+template<typename T>
+int length(const QVector<T>& vector)
+{
+	return vector.size();
+}

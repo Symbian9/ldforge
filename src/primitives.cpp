@@ -405,7 +405,7 @@ QString PrimitiveModel::typeName(PrimitiveModel::Type type)
 	// Not translated as primitives are in English.
 	const char* names[] = {"Circle", "Cylinder", "Disc", "Disc Negative", "Ring", "Cone"};
 
-	if (type >= 0 and type < countof(names))
+	if (type >= 0 and type < length(names))
 		return names[type];
 	else
 		return "Unknown";

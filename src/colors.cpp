@@ -272,7 +272,7 @@ ColorData::~ColorData()
  */
 bool ColorData::contains(int code) const
 {
-	return code >= 0 and code < countof(m_data);
+	return code >= 0 and code < length(m_data);
 }
 
 /*

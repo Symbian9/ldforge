@@ -199,7 +199,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 
 void GLCompiler::needMerge()
 {
-	for (int i = 0; i < countof (m_vboChanged); ++i)
+	for (int i = 0; i < length (m_vboChanged); ++i)
 		m_vboChanged[i] = true;
 }
 

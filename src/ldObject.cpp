@@ -981,7 +981,7 @@ QString LDBfc::statementToString (BfcStatement statement)
 		"NOCLIP",
 	};
 
-	if ((int) statement >= 0 and (int) statement < countof (statementStrings))
+	if ((int) statement >= 0 and (int) statement < length (statementStrings))
 		return QString::fromLatin1 (statementStrings[(int) statement]);
 	else
 		return "";

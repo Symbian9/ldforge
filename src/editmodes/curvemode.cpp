@@ -30,7 +30,7 @@ void CurveMode::render (QPainter& painter) const
 		Vertex curve[4];
 		QPoint curve2d[4];
 
-		for (int i = 0; i < qMin (countof(curve), m_drawedVerts.size()); ++i)
+		for (int i = 0; i < qMin (length(curve), m_drawedVerts.size()); ++i)
 			curve[i] = m_drawedVerts[i];
 
 		// Factor the cursor into the preview
@@ -44,7 +44,7 @@ void CurveMode::render (QPainter& painter) const
 		if (m_drawedVerts.size() < 3)
 			curve[3] = curve[2];
 
-		for (int i = 0; i < countof(curve); ++i)
+		for (int i = 0; i < length(curve); ++i)
 			curve2d[i] = renderer()->convert3dTo2d (curve[i]);
 
 		painter.setPen (QColor (0, 112, 112));
@@ -54,7 +54,7 @@ void CurveMode::render (QPainter& painter) const
 		if (m_drawedVerts.size() >= 3)
 			painter.drawLine (curve2d[1], curve2d[3]);
 
-		for (int i = 0; i < qMin (countof(curve), m_drawedVerts.size() + 1); ++i)
+		for (int i = 0; i < qMin (length(curve), m_drawedVerts.size() + 1); ++i)
 		{
 			if (i < 2)
 				renderer()->drawPoint (painter, curve2d[i]);

@@ -23,10 +23,6 @@
 # define __attribute__(X)
 #endif
 
-template <typename T, size_t N>
-char (&countofHelper (T(&)[N]))[N];
-#define countof(x) ((int) sizeof (countofHelper(x)))
-
 #define DEFINE_CLASS(SELF, SUPER) \
 public: \
 	using Self = SELF; \

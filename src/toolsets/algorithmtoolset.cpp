@@ -131,7 +131,7 @@ void AlgorithmToolset::makeBorders()
 			lines[3] = nullptr;
 		}
 
-		for (int i = 0; i < countof (lines); ++i)
+		for (int i = 0; i < length (lines); ++i)
 		{
 			if (lines[i] == nullptr)
 				continue;
