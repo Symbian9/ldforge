@@ -47,6 +47,7 @@ set (LDFORGE_SOURCES
 	src/main.cpp
 	src/mainwindow.cpp
 	src/mathfunctions.cpp
+	src/matrixinput.cpp
 	src/messageLog.cpp
 	src/miscallenous.cpp
 	src/partdownloader.cpp
@@ -104,6 +105,7 @@ set (LDFORGE_HEADERS
 	src/main.h
 	src/mainwindow.h
 	src/mathfunctions.h
+	src/matrixinput.h
 	src/messageLog.h
 	src/miscallenous.h
 	src/partdownloader.h

@@ -28,6 +28,7 @@ class QSpinBox;
 class QLabel;
 class QTreeWidget;
 class QDoubleSpinBox;
+class MatrixInput;
 
 class AddObjectDialog : public QDialog
 {
@@ -55,7 +56,7 @@ public:
 	QTreeWidget* tw_subfileList;
 	QLineEdit* le_subfileName;
 	QLabel* lb_subfileName;
-	QLineEdit* le_matrix;
+	MatrixInput* matrix;
 
 private:
 	void setButtonBackground (QPushButton* button, LDColor color);

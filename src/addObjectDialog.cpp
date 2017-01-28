@@ -32,6 +32,7 @@
 #include "dialogs/colorselector.h"
 #include "editHistory.h"
 #include "radioGroup.h"
+#include "matrixinput.h"
 #include "miscallenous.h"
 #include "primitives.h"
 
@@ -191,9 +192,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 	{
 		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
 		QLabel* lb_matrix = new QLabel ("Matrix:");
-		le_matrix = new QLineEdit;
-		// le_matrix->setValidator (new QDoubleValidator);
-		Matrix defaultMatrix = Matrix::identity;
+		matrix = new MatrixInput;
 
 		if (mo)
 		{
@@ -201,13 +200,13 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 			{
 				dsb_coords[ax]->setValue (value);
 			});
-
-			defaultMatrix = mo->transformationMatrix();
+			matrix->setValue(mo->transformationMatrix());
 		}
+		else
+			matrix->setValue(Matrix::identity);
 
-		le_matrix->setText (defaultMatrix.toString());
 		layout->addWidget (lb_matrix, 4, 1);
-		layout->addWidget (le_matrix, 4, 2, 1, 3);
+		layout->addWidget (matrix, 4, 2, 1, 3);
 	}
 
 	if (defaults->isColored())
@@ -309,17 +308,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		return;
 
 	if (type == OBJ_SubfileReference)
-	{
-		QStringList stringValues = dlg.le_matrix->text().split (" ", QString::SkipEmptyParts);
-
-		if (countof(stringValues) == 9)
-		{
-			int i = 0;
-
-			for (QString stringValue : stringValues)
-				transform.value(i++) = stringValue.toFloat();
-		}
-	}
+		transform = dlg.matrix->value();
 
 	switch (type)
 	{
