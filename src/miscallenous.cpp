@@ -58,11 +58,17 @@ QString joinStrings (QList<StringFormatArg> vals, QString delim)
 }
 
 
-void roundToDecimals (double& a, int decimals)
+void roundToDecimals(double& value, int decimals)
 {
-	static const double factors[] = { 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9 };
-	if (decimals >= 0 and decimals < countof(factors))
-		a = round (a * factors[decimals]) / factors[decimals];
+	if (decimals == 0)
+	{
+		value = round(value);
+	}
+	else if (decimals > 0)
+	{
+		qreal coefficient = pow(10, decimals);
+		value = round(value * coefficient) / coefficient;
+	}
 }
 
 
@@ -81,12 +87,8 @@ void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 
 QString formatFileSize (qint64 size)
 {
-	if (size < 1024LL)
-		return QString::number (size) + " bytes";
-	else if (size < (1024LL * 1024LL))
-		return QString::number (double (size) / 1024LL, 'f', 1) + " Kb";
-	else if (size < (1024LL * 1024LL * 1024LL))
-		return QString::number (double (size) / (1024LL * 1024LL), 'f', 1) + " Mb";
-	else
-		return QString::number (double (size) / (1024LL * 1024LL * 1024LL), 'f', 1) + " Gb";
+	static const QString suffixes[] = {" bytes", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+	int magnitude = floor(log10(size) + 1e-10);
+	magnitude = qMin(magnitude, countof(suffixes));
+	return QString::number(size) + suffixes[magnitude];
 }

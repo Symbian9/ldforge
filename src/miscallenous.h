@@ -34,5 +34,5 @@ void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func);
 QString formatFileSize (qint64 size);
 int gcd (int a, int b);
 QString joinStrings (QList<StringFormatArg> vals, QString delim = " ");
-void roundToDecimals (double& a, int decimals);
+void roundToDecimals (double& value, int decimals);
 void simplify (int& numer, int& denom);
