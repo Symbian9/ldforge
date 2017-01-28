@@ -147,10 +147,10 @@ void FileToolset::exportTo()
 
 	QString filePath = QFileDialog::getSaveFileName();
 
-	if (filePath.length() == 0)
+	if (filePath.isEmpty())
 		return;
 
-	QFile file = {filePath};
+	QFile file {filePath};
 
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text))
 	{

@@ -92,6 +92,11 @@ inline Vertex operator* (qreal scalar, const Vertex& vertex)
 Q_DECLARE_METATYPE (Vertex)
 uint qHash(const Vertex& key);
 
+static inline qreal abs(const QVector3D &vector)
+{
+	return vector.length();
+}
+
 //
 // Defines a bounding box that encompasses a given set of objects.
 // vertex0 is the minimum vertex, vertex1 is the maximum vertex.

@@ -189,7 +189,7 @@ void PrimitiveManager::loadCategories()
 	{
 		QString line = QString::fromUtf8(categoriesFile.readLine()).trimmed();
 
-		if (line.length() == 0 or line[0] == '#')
+		if (line.isEmpty() or line[0] == '#')
 			continue;
 
 		int colon = line.indexOf (":");
@@ -436,7 +436,7 @@ QString PrimitiveModel::makeFileName() const
 
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
-	int extra = (frac.length() + numberString.length() + root.length()) - 8;
+	int extra = (length(frac) + length(numberString) + length(root)) - 8;
 	root.chop(qBound(0, extra, 2));
 
 	// Stick them all together and return the result.
@@ -581,7 +581,7 @@ PrimitiveScanner::PrimitiveScanner(PrimitiveManager* parent) :
 	m_manager(parent),
 	m_iterator(LDPaths::primitivesDir(), QDirIterator::Subdirectories)
 {
-	m_basePathLength = LDPaths::primitivesDir().absolutePath().length();
+	m_basePathLength = length(LDPaths::primitivesDir().absolutePath());
 	print("Scanning primitives...");
 }
 

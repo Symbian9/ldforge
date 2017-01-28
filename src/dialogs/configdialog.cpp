@@ -655,7 +655,7 @@ QString ConfigDialog::quickColorString()
 
 	for (const ColorToolbarItem& entry : quickColors)
 	{
-		if (val.length() > 0)
+		if (not val.isEmpty())
 			val += ':';
 
 		if (entry.isSeparator())

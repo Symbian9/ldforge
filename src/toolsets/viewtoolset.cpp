@@ -117,7 +117,7 @@ void ViewToolset::screenshot()
 	if (root.right (4) == ".dat")
 		root.chop (4);
 
-	QString defaultname = (root.length() > 0) ? format ("%1.png", root) : "";
+	QString defaultname = (not root.isEmpty()) ? format ("%1.png", root) : "";
 	QString filename = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname, imageformats);
 
 	if (not filename.isEmpty() and not image.save (filename))

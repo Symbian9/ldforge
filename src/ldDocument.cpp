@@ -221,12 +221,12 @@ bool LDDocument::isSafeToClose()
 			case msgbox::Yes:
 			{
 				// If we don't have a file path yet, we have to ask the user for one.
-				if (name().length() == 0)
+				if (name().isEmpty())
 				{
 					QString newpath = QFileDialog::getSaveFileName (m_window, QObject::tr ("Save As"),
 						name(), QObject::tr ("LDraw files (*.dat *.ldr)"));
 
-					if (newpath.length() == 0)
+					if (newpath.isEmpty())
 						return false;
 
 					setName (newpath);
@@ -264,7 +264,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	if (isCache())
 		return false;
 
-	if (not path.length())
+	if (path.isEmpty())
 		path = fullPath();
 
 	// If the second object in the list holds the file name, update that now.
@@ -401,7 +401,7 @@ LDObject* ParseLine (QString line)
 			return LDSpawn<LDEmpty>();
 		}
 
-		if (tokens[0].length() != 1 or not tokens[0][0].isDigit())
+		if (length(tokens[0]) != 1 or not tokens[0][0].isDigit())
 			throw QString ("Illogical line code");
 
 		int num = tokens[0][0].digitValue();

@@ -269,7 +269,7 @@ void AddObjectDialog::slot_subfileTypeChanged()
 {
 	QString name = currentSubfileName();
 
-	if (name.length() > 0)
+	if (not name.isEmpty())
 		le_subfileName->setText (name);
 }
 
@@ -366,7 +366,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		{
 			QString name = dlg.le_subfileName->text();
 
-			if (name.length() == 0)
+			if (name.isEmpty())
 				return; // no subfile filename
 
 			LDDocument* document = g_win->documents()->getDocumentByName (name);

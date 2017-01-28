@@ -513,7 +513,7 @@ void AlgorithmToolset::subfileSelection()
 			digits.setNum (subidx++);
 
 			// pad it with a zero
-			if (digits.length() == 1)
+			if (length(digits) == 1)
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
