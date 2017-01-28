@@ -369,14 +369,14 @@ void DocumentManager::addRecentFile (QString path)
 	// If this file already is in the list, pop it out.
 	if (idx != -1)
 	{
-		if (idx == recentFiles.size() - 1)
+		if (idx == length(recentFiles) - 1)
 			return; // first recent file - abort and do nothing
 
 		recentFiles.removeAt (idx);
 	}
 
 	// If there's too many recent files, drop one out.
-	while (recentFiles.size() > (MaxRecentFiles - 1))
+	while (length(recentFiles) > (MaxRecentFiles - 1))
 		recentFiles.removeAt (0);
 
 	// Add the file

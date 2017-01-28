@@ -74,7 +74,7 @@ void AlgorithmToolset::splitQuads()
 
 void AlgorithmToolset::editRaw()
 {
-	if (selectedObjects().size() != 1)
+	if (length(selectedObjects()) != 1)
 		return;
 
 	LDObject* obj = selectedObjects()[0];
@@ -431,7 +431,7 @@ void AlgorithmToolset::splitLines()
 
 void AlgorithmToolset::subfileSelection()
 {
-	if (selectedObjects().size() == 0)
+	if (selectedObjects().isEmpty())
 		return;
 
 	QString			parentpath (currentDocument()->fullPath());

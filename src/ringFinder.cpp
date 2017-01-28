@@ -192,8 +192,8 @@ bool RingFinder::Solution::isSuperiorTo (const Solution* other) const
 {
 	// If one solution has less components than the other one, it is definitely
 	// better.
-	if (getComponents().size() != other->getComponents().size())
-		return getComponents().size() < other->getComponents().size();
+	if (length(getComponents()) != length(other->getComponents()))
+		return length(getComponents()) < length(other->getComponents());
 
 	// Calculate the maximum ring number. Since the solutions have equal
 	// ring counts, the solutions with lesser maximum rings should result
@@ -201,10 +201,10 @@ bool RingFinder::Solution::isSuperiorTo (const Solution* other) const
 	int maxA = 0,
 		maxB = 0;
 
-	for (int i = 0; i < getComponents().size(); ++i)
+	for (const Component& component : getComponents())
 	{
-		maxA = qMax (getComponents()[i].num, maxA);
-		maxB = qMax (other->getComponents()[i].num, maxB);
+		maxA = qMax (component.num, maxA);
+		maxB = qMax (component.num, maxB);
 	}
 
 	if (maxA != maxB)

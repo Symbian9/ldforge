@@ -312,7 +312,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 	{
 		QStringList matrixstrvals = dlg.le_matrix->text().split (" ", QString::SkipEmptyParts);
 
-		if (matrixstrvals.size() == 9)
+		if (length(matrixstrvals) == 9)
 		{
 			double matrixvals[9];
 			int i = 0;

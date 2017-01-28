@@ -38,7 +38,7 @@ void EditHistory::undo()
 	const Changeset& set = changesetAt (position());
 
 	// Iterate the list in reverse and undo all actions
-	for (int i = set.size() - 1; i >= 0; --i)
+	for (int i = length(set) - 1; i >= 0; --i)
 	{
 		AbstractHistoryEntry* change = set[i];
 		change->undo();
@@ -51,7 +51,7 @@ void EditHistory::undo()
 
 void EditHistory::redo()
 {
-	if (position() == m_changesets.size())
+	if (position() == length(m_changesets))
 		return;
 
 	setIgnoring (true);
@@ -110,7 +110,7 @@ void EditHistory::add (AbstractHistoryEntry* entry)
 
 int EditHistory::size() const
 {
-	return m_changesets.size();
+	return length(m_changesets);
 }
 
 const EditHistory::Changeset& EditHistory::changesetAt (int pos) const

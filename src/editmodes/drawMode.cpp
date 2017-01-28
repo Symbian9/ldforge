@@ -38,7 +38,7 @@ void DrawMode::render (QPainter& painter) const
 		poly << vert;
 
 	// Draw the cursor vertex as the last one in the list.
-	if (poly.size() < 4)
+	if (length(poly) < 4)
 		poly << getCursorVertex();
 
 	renderPolygon (painter, poly, true, true);
@@ -51,7 +51,7 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 	{
 		if (vert == pos)
 		{
-			if (m_drawedVerts.size() >= 2)
+			if (length(m_drawedVerts) >= 2)
 				endDraw();
 
 			return true;
@@ -67,7 +67,7 @@ void DrawMode::endDraw()
 	QList<Vertex>& verts = m_drawedVerts;
 	LDObjectList objs;
 
-	switch (verts.size())
+	switch (length(verts))
 	{
 		case 2:
 		{
@@ -81,13 +81,13 @@ void DrawMode::endDraw()
 		case 3:
 		case 4:
 		{
-			LDObject* obj = (verts.size() == 3) ?
+			LDObject* obj = (length(verts) == 3) ?
 				static_cast<LDObject*> (LDSpawn<LDTriangle>()) :
 				static_cast<LDObject*> (LDSpawn<LDQuad>());
 
 			obj->setColor (MainColor);
 
-			for (int i = 0; i < verts.size(); ++i)
+			for (int i = 0; i < length(verts); ++i)
 				obj->setVertex (i, verts[i]);
 
 			objs << obj;

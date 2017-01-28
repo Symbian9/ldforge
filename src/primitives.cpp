@@ -75,7 +75,7 @@ void PrimitiveManager::loadPrimitives()
 		}
 
 		populateCategories();
-		print(tr("%1 primitives loaded.") + "\n", m_primitives.size());
+		print(tr("%1 primitives loaded.") + "\n", length(m_primitives));
 	}
 }
 
@@ -93,7 +93,7 @@ void PrimitiveManager::startScan()
 			{
 				m_primitives = m_activeScanner->scannedPrimitives();
 				populateCategories();
-				print(tr("%1 primitives scanned"), m_primitives.size());
+				print(tr("%1 primitives scanned"), length(m_primitives));
 				delete m_activeScanner;
 				m_activeScanner = nullptr;
 			}

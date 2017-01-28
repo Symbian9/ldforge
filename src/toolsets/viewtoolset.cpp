@@ -254,21 +254,20 @@ void ViewToolset::bfcView()
 void ViewToolset::jumpTo()
 {
 	bool ok;
-	int defval = 0;
-	LDObject* obj;
+	int defaultValue = (length(selectedObjects()) == 1) ? selectedObjects()[0]->lineNumber() : 0;
+	int index = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defaultValue, 1, currentDocument()->getObjectCount(), 1, &ok);
 
-	if (selectedObjects().size() == 1)
-		defval = selectedObjects()[0]->lineNumber();
+	if (ok)
+	{
+		LDObject *object = currentDocument()->getObject(index - 1);
 
-	int idx = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defval,
-		1, currentDocument()->getObjectCount(), 1, &ok);
-
-	if (not ok or (obj = currentDocument()->getObject (idx - 1)) == nullptr)
-		return;
-
-	currentDocument()->clearSelection();
-	obj->select();
-	m_window->updateSelection();
+		if (object)
+		{
+			currentDocument()->clearSelection();
+			object->select();
+			m_window->updateSelection();
+		}
+	}
 }
 
 void ViewToolset::randomColors()

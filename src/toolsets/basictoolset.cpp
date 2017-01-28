@@ -261,11 +261,11 @@ void BasicToolset::newBFC()
 
 void BasicToolset::edit()
 {
-	if (selectedObjects().size() != 1)
-		return;
-
-	LDObject* obj = selectedObjects().first();
-	AddObjectDialog::staticDialog (obj->type(), obj);
+	if (length(selectedObjects()) == 1)
+	{
+		LDObject* obj = selectedObjects().first();
+		AddObjectDialog::staticDialog (obj->type(), obj);
+	}
 }
 
 void BasicToolset::modeSelect()

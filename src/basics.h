@@ -225,11 +225,23 @@ int length(T(&)[N])
 
 static inline int length(const QString& string)
 {
-	return string.size();
+	return string.length();
 }
 
 template<typename T>
 int length(const QVector<T>& vector)
+{
+	return vector.size();
+}
+
+template<typename T>
+int length(const QList<T>& vector)
+{
+	return vector.size();
+}
+
+template<typename T>
+int length(const std::initializer_list<T>& vector)
 {
 	return vector.size();
 }

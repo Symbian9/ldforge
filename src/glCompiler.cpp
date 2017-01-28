@@ -265,11 +265,11 @@ void GLCompiler::prepareVBO (int vbonum)
 	}
 
 	glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);
-	glBufferData (GL_ARRAY_BUFFER, vbodata.size() * sizeof(GLfloat), vbodata.constData(), GL_STATIC_DRAW);
+	glBufferData (GL_ARRAY_BUFFER, length(vbodata) * sizeof(GLfloat), vbodata.constData(), GL_STATIC_DRAW);
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
 	CHECK_GL_ERROR();
 	m_vboChanged[vbonum] = false;
-	m_vboSizes[vbonum] = vbodata.size();
+	m_vboSizes[vbonum] = length(vbodata);
 }
 
 

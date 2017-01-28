@@ -158,7 +158,7 @@ void FileToolset::exportTo()
 		{
 			QString contents = obj->asText();
 			QByteArray data = contents.toUtf8();
-			file.write(data, data.size());
+			file.write(data, length(data));
 			file.write("\r\n", 2);
 		}
 	}

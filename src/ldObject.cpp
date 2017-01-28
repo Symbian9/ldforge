@@ -230,7 +230,7 @@ void LDObject::replace (const LDObjectList& others)
 
 	if (idx != -1 and not others.isEmpty())
 	{
-		for (int i = 1; i < others.size(); ++i)
+		for (int i = 1; i < length(others); ++i)
 			document()->insertObject (idx + i, others[i]);
 
 		document()->setObjectAt (idx, others[0]);

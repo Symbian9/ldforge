@@ -57,7 +57,7 @@ Matrix::Matrix (double fillvalue)
  */
 Matrix::Matrix (const std::initializer_list<double>& values)
 {
-	if (values.size() == 9)
+	if (length(values) == 9)
 		memcpy (&m_values[0], values.begin(), sizeof m_values);
 }
 

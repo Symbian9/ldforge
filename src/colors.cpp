@@ -378,7 +378,7 @@ LDConfigParser::LDConfigParser(QString inputText)
  */
 bool LDConfigParser::getToken(QString& tokenText, int position)
 {
-	if (position >= m_tokens.size())
+	if (position >= length(m_tokens))
 	{
 		return false;
 	}
@@ -399,7 +399,7 @@ bool LDConfigParser::getToken(QString& tokenText, int position)
  */
 bool LDConfigParser::findToken(int& tokenPosition, QString needle, int args)
 {
-	for (int i = 0; i < (m_tokens.size() - args); ++i)
+	for (int i = 0; i < (length(m_tokens) - args); ++i)
 	{
 		if (m_tokens[i] == needle)
 		{

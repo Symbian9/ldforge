@@ -49,7 +49,7 @@ LDDocument::~LDDocument()
 {
 	m_flags |= IsBeingDestroyed;
 
-	for (int i = 0; i < m_objects.size(); ++i)
+	for (int i = 0; i < length(m_objects); ++i)
 		m_objects[i]->destroy();
 
 	delete m_history;
@@ -294,7 +294,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 		data.append (subdata);
 
 		if (sizeptr)
-			*sizeptr += subdata.size();
+			*sizeptr += length(subdata);
 	}
 
 	QFile f (path);
@@ -326,8 +326,8 @@ void LDDocument::clear()
 //
 static void CheckTokenCount (const QStringList& tokens, int num)
 {
-	if (tokens.size() != num)
-		throw QString (format ("Bad amount of tokens, expected %1, got %2", num, tokens.size()));
+	if (length(tokens) != num)
+		throw QString (format ("Bad amount of tokens, expected %1, got %2", num, length(tokens)));
 }
 
 // =============================================================================
@@ -395,7 +395,7 @@ LDObject* ParseLine (QString line)
 	{
 		QStringList tokens = line.split (" ", QString::SkipEmptyParts);
 
-		if (tokens.size() <= 0)
+		if (length(tokens) <= 0)
 		{
 			// Line was empty, or only consisted of whitespace
 			return LDSpawn<LDEmpty>();
@@ -415,7 +415,7 @@ LDObject* ParseLine (QString line)
 				QString commentTextSimplified (commentText.simplified());
 
 				// Handle BFC statements
-				if (tokens.size() > 2 and tokens[1] == "BFC")
+				if (length(tokens) > 2 and tokens[1] == "BFC")
 				{
 					for (BfcStatement statement : iterateEnum<BfcStatement>())
 					{
@@ -434,7 +434,7 @@ LDObject* ParseLine (QString line)
 						return LDSpawn<LDBfc> (BfcStatement::NoClip);
 				}
 
-				if (tokens.size() > 2 and tokens[1] == "!LDFORGE")
+				if (length(tokens) > 2 and tokens[1] == "!LDFORGE")
 				{
 					// Handle LDForge-specific types, they're embedded into comments too
 					if (tokens[2] == "OVERLAY")
@@ -605,7 +605,7 @@ void LDDocument::reloadAllSubfiles()
 //
 int LDDocument::addObject (LDObject* obj)
 {
-	history()->add (new AddHistoryEntry (objects().size(), obj));
+	history()->add (new AddHistoryEntry (length(objects()), obj));
 	m_objects << obj;
 	addKnownVertices (obj);
 	obj->setDocument (this);
@@ -683,7 +683,7 @@ void LDDocument::forgetObject (LDObject* obj)
 //
 void LDDocument::setObjectAt (int idx, LDObject* obj)
 {
-	if (idx < 0 or idx >= m_objects.size())
+	if (idx < 0 or idx >= length(m_objects))
 		return;
 
 	// Mark this change to history
@@ -708,7 +708,7 @@ void LDDocument::setObjectAt (int idx, LDObject* obj)
 //
 LDObject* LDDocument::getObject (int pos) const
 {
-	if (pos < m_objects.size())
+	if (pos < length(m_objects))
 		return m_objects[pos];
 	else
 		return nullptr;
@@ -718,7 +718,7 @@ LDObject* LDDocument::getObject (int pos) const
 //
 int LDDocument::getObjectCount() const
 {
-	return objects().size();
+	return length(objects());
 }
 
 // =============================================================================

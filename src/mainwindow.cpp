@@ -365,7 +365,7 @@ int MainWindow::deleteSelection()
 		obj->destroy();
 
 	refresh();
-	return selCopy.size();
+	return length(selCopy);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -719,7 +719,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 //
 void MainWindow::spawnContextMenu (const QPoint& position)
 {
-	const bool single = (selectedObjects().size() == 1);
+	const bool single = (length(selectedObjects()) == 1);
 	LDObject* singleObj = single ? selectedObjects().first() : nullptr;
 
 	bool hasSubfiles = false;
@@ -1277,7 +1277,7 @@ void MainWindow::changeDocument (LDDocument* document)
 void MainWindow::closeInitialDocument()
 {
 /*
-	if (m_documents.size() == 2 and
+	if (length(m_documents) == 2 and
 		m_documents[0]->name().isEmpty() and
 		not m_documents[1]->name().isEmpty() and
 		not m_documents[0]->hasUnsavedChanges())

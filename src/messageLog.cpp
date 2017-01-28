@@ -78,7 +78,7 @@ bool MessageManager::Line::update (bool& changed)
 void MessageManager::addLine (QString line)
 {
 	// If there's too many entries, pop the excess out
-	while (m_lines.size() >= MaxMessages)
+	while (length(m_lines) >= MaxMessages)
 		m_lines.removeFirst();
 
 	m_lines << Line (line);
@@ -100,7 +100,7 @@ void MessageManager::tick()
 
 	bool changed = false;
 
-	for (int i = 0; i < m_lines.size(); ++i)
+	for (int i = 0; i < length(m_lines); ++i)
 	{
 		bool lineChanged;
 

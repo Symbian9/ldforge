@@ -25,36 +25,36 @@ CurveMode::CurveMode (GLRenderer* renderer) :
 
 void CurveMode::render (QPainter& painter) const
 {
-	if (m_drawedVerts.size() >= 1)
+	if (length(m_drawedVerts) >= 1)
 	{
 		Vertex curve[4];
 		QPoint curve2d[4];
 
-		for (int i = 0; i < qMin (length(curve), m_drawedVerts.size()); ++i)
+		for (int i = 0; i < qMin (length(curve), length(m_drawedVerts)); ++i)
 			curve[i] = m_drawedVerts[i];
 
 		// Factor the cursor into the preview
-		if (m_drawedVerts.size() < 4)
-			curve[m_drawedVerts.size()] = getCursorVertex();
+		if (length(m_drawedVerts) < 4)
+			curve[length(m_drawedVerts)] = getCursorVertex();
 
 		// Default the control points to the first vertex position
-		if (m_drawedVerts.size() < 2)
+		if (length(m_drawedVerts) < 2)
 			curve[2] = curve[0];
 
-		if (m_drawedVerts.size() < 3)
+		if (length(m_drawedVerts) < 3)
 			curve[3] = curve[2];
 
 		for (int i = 0; i < length(curve); ++i)
 			curve2d[i] = renderer()->convert3dTo2d (curve[i]);
 
 		painter.setPen (QColor (0, 112, 112));
-		if (m_drawedVerts.size() >= 2)
+		if (length(m_drawedVerts) >= 2)
 			painter.drawLine (curve2d[0], curve2d[2]);
 
-		if (m_drawedVerts.size() >= 3)
+		if (length(m_drawedVerts) >= 3)
 			painter.drawLine (curve2d[1], curve2d[3]);
 
-		for (int i = 0; i < qMin (length(curve), m_drawedVerts.size() + 1); ++i)
+		for (int i = 0; i < qMin (length(curve), length(m_drawedVerts) + 1); ++i)
 		{
 			if (i < 2)
 				renderer()->drawPoint (painter, curve2d[i]);
@@ -84,7 +84,7 @@ EditModeType CurveMode::type() const
 
 void CurveMode::endDraw()
 {
-	if (m_drawedVerts.size() == 4)
+	if (length(m_drawedVerts) == 4)
 	{
 		LDObjectList objs;
 		objs << LDSpawn<LDBezierCurve> (m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);

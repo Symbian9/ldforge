@@ -40,11 +40,11 @@ EditModeType CircleMode::type() const
 
 double CircleMode::getCircleDrawDist (int pos) const
 {
-	if (m_drawedVerts.size() >= pos + 1)
+	if (length(m_drawedVerts) >= pos + 1)
 	{
 		Vertex v1;
 
-		if (m_drawedVerts.size() >= pos + 2)
+		if (length(m_drawedVerts) >= pos + 2)
 			v1 = m_drawedVerts[pos + 1];
 		else
 			v1 = renderer()->convert2dTo3d (renderer()->mousePosition(), false);
@@ -232,13 +232,13 @@ void CircleMode::render (QPainter& painter) const
 	QVector<Vertex> innerverts, outerverts;
 	QVector<QPointF> innerverts2d, outerverts2d;
 	const double innerdistance (getCircleDrawDist (0));
-	const double outerdistance (m_drawedVerts.size() >= 2 ? getCircleDrawDist (1) : -1);
+	const double outerdistance (length(m_drawedVerts) >= 2 ? getCircleDrawDist (1) : -1);
 	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
 	const int segments (m_window->ringToolSegments());
 	const double angleUnit (2 * pi / divisions);
 	Axis relX, relY;
 	renderer()->getRelativeAxes (relX, relY);
-	const double angleoffset (m_drawedVerts.size() < 3 ? getAngleOffset() : m_angleOffset);
+	const double angleoffset (length(m_drawedVerts) < 3 ? getAngleOffset() : m_angleOffset);
 
 	// Calculate the preview positions of vertices
 	for (int i = 0; i < segments + 1; ++i)
@@ -307,7 +307,7 @@ void CircleMode::render (QPainter& painter) const
 	painter.setPen (renderer()->textPen());
 	painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
 
-	if (m_drawedVerts.size() >= 2)
+	if (length(m_drawedVerts) >= 2)
 	{
 		painter.drawText (origin.x() - (metrics.width (label) / 2),
 			origin.y() + metrics.height(), QString::number (outerdistance));
