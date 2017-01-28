@@ -57,7 +57,7 @@ Matrix::Matrix (double fillvalue)
  */
 Matrix::Matrix (const std::initializer_list<double>& values)
 {
-	if (length(values) == 9)
+	if (countof(values) == 9)
 		memcpy (&m_values[0], values.begin(), sizeof m_values);
 }
 
@@ -144,7 +144,7 @@ double Matrix::determinant() const
  */
 bool Matrix::operator==(const Matrix& other) const
 {
-	for (int i = 0; i < length(m_values); ++i)
+	for (int i = 0; i < countof(m_values); ++i)
 	{
 		if (not qFuzzyCompare(m_values[i], other.m_values[i]))
 			return false;

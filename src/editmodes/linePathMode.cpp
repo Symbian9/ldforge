@@ -35,15 +35,15 @@ void LinePathMode::render (QPainter& painter) const
 
 	painter.setPen (renderer()->textPen());
 
-	if (length(points) == length(points3d))
+	if (countof(points) == countof(points3d))
 	{
-		for (int i = 0; i < length(points) - 1; ++i)
+		for (int i = 0; i < countof(points) - 1; ++i)
 		{
 			painter.drawLine (QLineF (points[i], points[i + 1]));
 			drawLineLength (painter, points3d[i], points3d[i + 1], points[i], points[i + 1]);
 		}
 	
-		for (int i = 0; i < length(points); ++i)
+		for (int i = 0; i < countof(points); ++i)
 		{
 			const QPointF& point = points[i];
 			renderer()->drawPoint (painter, point);
@@ -82,7 +82,7 @@ void LinePathMode::endDraw()
 {
 	LDObjectList objs;
 
-	for (int i = 0; i < length(m_drawedVerts) - 1; ++i)
+	for (int i = 0; i < countof(m_drawedVerts) - 1; ++i)
 	{
 		LDLine* line = LDSpawn<LDLine>();
 		line->setVertex (0, m_drawedVerts[i]);

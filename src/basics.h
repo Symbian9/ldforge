@@ -223,30 +223,30 @@ QVector<QLineF> makeCircle(int segments, int divisions, double radius);
 // Get the amount of elements in something.
 //
 template<typename T, size_t N>
-int length(T(&)[N])
+int countof(T(&)[N])
 {
 	return N;
 }
 
-static inline int length(const QString& string)
+static inline int countof(const QString& string)
 {
 	return string.length();
 }
 
 template<typename T>
-int length(const QVector<T>& vector)
+int countof(const QVector<T>& vector)
 {
 	return vector.size();
 }
 
 template<typename T>
-int length(const QList<T>& vector)
+int countof(const QList<T>& vector)
 {
 	return vector.size();
 }
 
 template<typename T>
-int length(const std::initializer_list<T>& vector)
+int countof(const std::initializer_list<T>& vector)
 {
 	return vector.size();
 }

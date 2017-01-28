@@ -365,7 +365,7 @@ int MainWindow::deleteSelection()
 		obj->destroy();
 
 	refresh();
-	return length(selCopy);
+	return countof(selCopy);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -719,7 +719,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 //
 void MainWindow::spawnContextMenu (const QPoint& position)
 {
-	const bool single = (length(selectedObjects()) == 1);
+	const bool single = (countof(selectedObjects()) == 1);
 	LDObject* singleObj = single ? selectedObjects().first() : nullptr;
 
 	bool hasSubfiles = false;

@@ -106,8 +106,8 @@ void PartDownloader::modifyDestination(QString& destination) const
 		// Remove the existing extension, if any. It may be we're here over a typo in the .dat extension.
 		int dotPosition = destination.lastIndexOf(".");
 
-		if ((dotPosition != -1) and (dotPosition >= length(destination) - 4))
-			destination.chop(length(destination) - dotPosition);
+		if ((dotPosition != -1) and (dotPosition >= countof(destination) - 4))
+			destination.chop(countof(destination) - dotPosition);
 
 		destination += ".dat";
 	}

@@ -33,13 +33,13 @@ EditModeType RectangleMode::type() const
 
 void RectangleMode::render (QPainter& painter) const
 {
-	renderPolygon (painter, (length(m_drawedVerts) > 0) ? m_rectangleVerts :
+	renderPolygon (painter, (countof(m_drawedVerts) > 0) ? m_rectangleVerts :
 		QVector<Vertex> ({renderer()->position3D()}), true, false);
 }
 
 void RectangleMode::endDraw()
 {
-	if (length(m_drawedVerts) == 2)
+	if (countof(m_drawedVerts) == 2)
 	{
 		LDQuad* quad = LDSpawn<LDQuad>();
 		updateRectVerts();
@@ -72,7 +72,7 @@ void RectangleMode::updateRectVerts()
 	}
 
 	Vertex v0 = m_drawedVerts[0],
-		   v1 = (length(m_drawedVerts) >= 2) ? m_drawedVerts[1] : renderer()->position3D();
+		   v1 = (countof(m_drawedVerts) >= 2) ? m_drawedVerts[1] : renderer()->position3D();
 
 	const Axis localx = renderer()->getCameraAxis (false),
 			   localy = renderer()->getCameraAxis (true),

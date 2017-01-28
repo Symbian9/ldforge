@@ -74,7 +74,7 @@ void AlgorithmToolset::splitQuads()
 
 void AlgorithmToolset::editRaw()
 {
-	if (length(selectedObjects()) != 1)
+	if (countof(selectedObjects()) != 1)
 		return;
 
 	LDObject* obj = selectedObjects()[0];
@@ -131,7 +131,7 @@ void AlgorithmToolset::makeBorders()
 			lines[3] = nullptr;
 		}
 
-		for (int i = 0; i < length (lines); ++i)
+		for (int i = 0; i < countof (lines); ++i)
 		{
 			if (lines[i] == nullptr)
 				continue;
@@ -513,7 +513,7 @@ void AlgorithmToolset::subfileSelection()
 			digits.setNum (subidx++);
 
 			// pad it with a zero
-			if (length(digits) == 1)
+			if (countof(digits) == 1)
 				digits.prepend ("0");
 
 			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";

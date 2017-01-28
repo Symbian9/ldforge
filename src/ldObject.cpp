@@ -230,7 +230,7 @@ void LDObject::replace (const LDObjectList& others)
 
 	if (idx != -1 and not others.isEmpty())
 	{
-		for (int i = 1; i < length(others); ++i)
+		for (int i = 1; i < countof(others); ++i)
 			document()->insertObject (idx + i, others[i]);
 
 		document()->setObjectAt (idx, others[0]);
@@ -981,7 +981,7 @@ QString LDBfc::statementToString (BfcStatement statement)
 		"NOCLIP",
 	};
 
-	if ((int) statement >= 0 and (int) statement < length (statementStrings))
+	if ((int) statement >= 0 and (int) statement < countof (statementStrings))
 		return QString::fromLatin1 (statementStrings[(int) statement]);
 	else
 		return "";

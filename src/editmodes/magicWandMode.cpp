@@ -152,7 +152,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 				}
 			}
 
-			if (length(matches) < matchesneeded)
+			if (countof(matches) < matchesneeded)
 				throw 0; // Not enough matches.
 
 			// Check if a boundary gets in between the objects.

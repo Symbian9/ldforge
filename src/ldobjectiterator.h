@@ -40,7 +40,7 @@ public:
 
 	bool outOfBounds() const
 	{
-		return m_i < 0 or m_i >= length(m_list);
+		return m_i < 0 or m_i >= countof(m_list);
 	}
 
 	T* get() const

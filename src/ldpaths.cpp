@@ -55,7 +55,7 @@ bool LDPaths::isValid (const QDir& dir) const
 			QStringList mustHave = { "LDConfig.ldr", "parts", "p" };
 			QStringList contents = dir.entryList (mustHave);
 	
-			if (length(contents) == length(mustHave))
+			if (countof(contents) == countof(mustHave))
 				m_error = "";
 			else
 				m_error = "That is not an LDraw directory! It must<br />have LDConfig.ldr, parts/ and p/.";

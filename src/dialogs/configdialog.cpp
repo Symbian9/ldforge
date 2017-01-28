@@ -411,7 +411,7 @@ void ConfigDialog::slot_setColor()
 	{
 		ColorToolbarItem newentry (value, nullptr);
 		item = getSelectedQuickColor();
-		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : length(quickColorItems);
+		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : countof(quickColorItems);
 		quickColors.insert (idx, newentry);
 		entry = &quickColors[idx];
 	}
@@ -446,7 +446,7 @@ void ConfigDialog::slot_moveColor()
 	int idx = getItemRow (item, quickColorItems);
 	int dest = up ? (idx - 1) : (idx + 1);
 
-	if (dest < 0 or dest >= length(quickColorItems))
+	if (dest < 0 or dest >= countof(quickColorItems))
 		return; // destination out of bounds
 
 	qSwap (quickColors[dest], quickColors[idx]);
@@ -460,7 +460,7 @@ void ConfigDialog::slot_moveColor()
 void ConfigDialog::slot_addColorSeparator()
 {
 	quickColors << ColorToolbarItem::makeSeparator();
-	updateQuickColorList (&quickColors[length(quickColors) - 1]);
+	updateQuickColorList (&quickColors[countof(quickColors) - 1]);
 }
 
 //
@@ -555,7 +555,7 @@ void ConfigDialog::slot_setShortcut()
 {
 	QList<ShortcutListItem*> sel = getShortcutSelection();
 
-	if (length(sel) < 1)
+	if (countof(sel) < 1)
 		return;
 
 	ShortcutListItem* item = sel[0];

@@ -61,7 +61,7 @@ QString joinStrings (QList<StringFormatArg> vals, QString delim)
 void roundToDecimals (double& a, int decimals)
 {
 	static const double factors[] = { 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9 };
-	if (decimals >= 0 and decimals < length (factors))
+	if (decimals >= 0 and decimals < countof(factors))
 		a = round (a * factors[decimals]) / factors[decimals];
 }
 

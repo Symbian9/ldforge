@@ -75,7 +75,7 @@ void PrimitiveManager::loadPrimitives()
 		}
 
 		populateCategories();
-		print(tr("%1 primitives loaded.") + "\n", length(m_primitives));
+		print(tr("%1 primitives loaded.") + "\n", countof(m_primitives));
 	}
 }
 
@@ -93,7 +93,7 @@ void PrimitiveManager::startScan()
 			{
 				m_primitives = m_activeScanner->scannedPrimitives();
 				populateCategories();
-				print(tr("%1 primitives scanned"), length(m_primitives));
+				print(tr("%1 primitives scanned"), countof(m_primitives));
 				delete m_activeScanner;
 				m_activeScanner = nullptr;
 			}
@@ -405,7 +405,7 @@ QString PrimitiveModel::typeName(PrimitiveModel::Type type)
 	// Not translated as primitives are in English.
 	const char* names[] = {"Circle", "Cylinder", "Disc", "Disc Negative", "Ring", "Cone"};
 
-	if (type >= 0 and type < length(names))
+	if (type >= 0 and type < countof(names))
 		return names[type];
 	else
 		return "Unknown";
@@ -436,7 +436,7 @@ QString PrimitiveModel::makeFileName() const
 
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
-	int extra = (length(frac) + length(numberString) + length(root)) - 8;
+	int extra = (countof(frac) + countof(numberString) + countof(root)) - 8;
 	root.chop(qBound(0, extra, 2));
 
 	// Stick them all together and return the result.
@@ -581,7 +581,7 @@ PrimitiveScanner::PrimitiveScanner(PrimitiveManager* parent) :
 	m_manager(parent),
 	m_iterator(LDPaths::primitivesDir(), QDirIterator::Subdirectories)
 {
-	m_basePathLength = length(LDPaths::primitivesDir().absolutePath());
+	m_basePathLength = countof(LDPaths::primitivesDir().absolutePath());
 	print("Scanning primitives...");
 }
 

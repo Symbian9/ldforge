@@ -95,7 +95,7 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 	if (Super::mouseReleased(data))
 		return true;
 
-	if ((data.releasedButtons & Qt::MidButton) and (length(m_drawedVerts) < 4) and (not data.mouseMoved))
+	if ((data.releasedButtons & Qt::MidButton) and (countof(m_drawedVerts) < 4) and (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
 		double minimumDistance = 1024.0;
@@ -155,7 +155,7 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 
 	if (data.releasedButtons & Qt::LeftButton)
 	{
-		if (maxVertices() and length(m_drawedVerts) >= maxVertices())
+		if (maxVertices() and countof(m_drawedVerts) >= maxVertices())
 			endDraw();
 		else
 			addDrawnVertex (getCursorVertex());
@@ -169,7 +169,7 @@ void AbstractDrawMode::finishDraw(LDObjectList const& objs)
 {
 	int pos = m_window->suggestInsertPoint();
 
-	if (length(objs) > 0)
+	if (countof(objs) > 0)
 	{
 		for (LDObject* obj : objs)
 		{
@@ -198,11 +198,11 @@ void AbstractDrawMode::drawLineLength(QPainter &painter, const Vertex &v0, const
 void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& polygon3d,
 	bool drawLineLengths, bool drawAngles ) const
 {
-	QVector<QPoint> polygon2d (length(polygon3d));
+	QVector<QPoint> polygon2d (countof(polygon3d));
 	QFontMetrics metrics = QFontMetrics(QFont());
 
 	// Convert to 2D
-	for (int i = 0; i < length(polygon3d); ++i)
+	for (int i = 0; i < countof(polygon3d); ++i)
 		polygon2d[i] = renderer()->convert3dTo2d(polygon3d[i]);
 
 	// Draw the polygon-to-be
@@ -210,21 +210,21 @@ void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& p
 	painter.drawPolygon(QPolygonF{polygon2d});
 
 	// Draw vertex blips
-	for (int i = 0; i < length(polygon3d); ++i)
+	for (int i = 0; i < countof(polygon3d); ++i)
 	{
 		renderer()->drawPoint(painter, polygon2d[i]);
 		renderer()->drawBlipCoordinates(painter, polygon3d[i], polygon2d[i]);
 	}
 
 	// Draw line lenghts and angle info if appropriate
-	if (length(polygon3d) >= 2 and (drawLineLengths or drawAngles))
+	if (countof(polygon3d) >= 2 and (drawLineLengths or drawAngles))
 	{
 		painter.setPen (renderer()->textPen());
 
-		for (int i = 0; i < length(polygon3d); ++i)
+		for (int i = 0; i < countof(polygon3d); ++i)
 		{
-			int j = (i + 1) % length(polygon3d);
-			int prior = (i - 1 >= 0) ? (i - 1) : (length(polygon3d) - 1);
+			int j = (i + 1) % countof(polygon3d);
+			int prior = (i - 1 >= 0) ? (i - 1) : (countof(polygon3d) - 1);
 
 			if (drawLineLengths)
 				drawLineLength(painter, polygon3d[i], polygon3d[j], polygon2d[i], polygon2d[j]);

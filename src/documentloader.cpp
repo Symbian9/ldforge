@@ -80,7 +80,7 @@ void DocumentLoader::start()
 		// Show a progress dialog if we're loading the main ldDocument.here so we can show progress updates and keep the
 		// WM posted that we're still here.
 		m_progressDialog = new OpenProgressDialog(qobject_cast<QWidget*>(parent()));
-		m_progressDialog->setNumLines (length(m_lines));
+		m_progressDialog->setNumLines (countof(m_lines));
 		m_progressDialog->setModal (true);
 		m_progressDialog->show();
 		connect (this, SIGNAL (workDone()), m_progressDialog, SLOT (accept()));
@@ -109,7 +109,7 @@ void DocumentLoader::work (int i)
 	// Parse up to 200 lines per iteration
 	int max = i + 200;
 
-	for (; i < max and i < (int) length(m_lines); ++i)
+	for (; i < max and i < (int) countof(m_lines); ++i)
 	{
 		QString line = m_lines[i];
 
@@ -134,7 +134,7 @@ void DocumentLoader::work (int i)
 	if (m_progressDialog)
 		m_progressDialog->setProgress (i);
 
-	if (i >= length(m_lines) - 1)
+	if (i >= countof(m_lines) - 1)
 	{
 		emit workDone();
 		m_isDone = true;

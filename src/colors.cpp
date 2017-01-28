@@ -272,7 +272,7 @@ ColorData::~ColorData()
  */
 bool ColorData::contains(int code) const
 {
-	return code >= 0 and code < length(m_data);
+	return code >= 0 and code < countof(m_data);
 }
 
 /*
@@ -378,7 +378,7 @@ LDConfigParser::LDConfigParser(QString inputText)
  */
 bool LDConfigParser::getToken(QString& tokenText, int position)
 {
-	if (position >= length(m_tokens))
+	if (position >= countof(m_tokens))
 	{
 		return false;
 	}
@@ -399,7 +399,7 @@ bool LDConfigParser::getToken(QString& tokenText, int position)
  */
 bool LDConfigParser::findToken(int& tokenPosition, QString needle, int args)
 {
-	for (int i = 0; i < (length(m_tokens) - args); ++i)
+	for (int i = 0; i < (countof(m_tokens) - args); ++i)
 	{
 		if (m_tokens[i] == needle)
 		{

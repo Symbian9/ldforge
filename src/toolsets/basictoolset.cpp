@@ -261,7 +261,7 @@ void BasicToolset::newBFC()
 
 void BasicToolset::edit()
 {
-	if (length(selectedObjects()) == 1)
+	if (countof(selectedObjects()) == 1)
 	{
 		LDObject* obj = selectedObjects().first();
 		AddObjectDialog::staticDialog (obj->type(), obj);
