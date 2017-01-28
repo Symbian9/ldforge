@@ -52,6 +52,8 @@ public:
 	double& operator()(int row, int column);
 	const double& operator()(int row, int column) const;
 
+	static const Matrix identity;
+
 private:
 	double m_values[9];
 };

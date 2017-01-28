@@ -193,7 +193,7 @@ AddObjectDialog::AddObjectDialog (const LDObjectType type, LDObject* obj, QWidge
 		QLabel* lb_matrix = new QLabel ("Matrix:");
 		le_matrix = new QLineEdit;
 		// le_matrix->setValidator (new QDoubleValidator);
-		Matrix defaultMatrix = IdentityMatrix;
+		Matrix defaultMatrix = Matrix::identity;
 
 		if (mo)
 		{
@@ -299,7 +299,7 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 		return; // Nothing to edit with empties
 
 	const bool newObject = (obj == nullptr);
-	Matrix transform = IdentityMatrix;
+	Matrix transform = Matrix::identity;
 	AddObjectDialog dlg (type, obj);
 
 	if (obj and obj->type() != type)

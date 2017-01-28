@@ -26,7 +26,6 @@
 
 MainWindow* g_win = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
-const Matrix IdentityMatrix ({1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f});
 
 ConfigOption (bool FirstStart = true)
 

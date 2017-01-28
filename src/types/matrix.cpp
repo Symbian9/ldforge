@@ -20,6 +20,8 @@
 #include "../format.h"
 #include "matrix.h"
 
+const Matrix Matrix::identity {1, 0, 0, 0, 1, 0, 0, 0, 1};
+
 /*
  * Default-constructor for a matrix
  */

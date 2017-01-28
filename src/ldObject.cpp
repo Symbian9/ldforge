@@ -699,7 +699,7 @@ void LDSubfileReference::invert()
 	{
 		// Subfile has all vertices zero on one specific plane, so it is flat.
 		// Let's flip it.
-		Matrix matrixModifier = IdentityMatrix;
+		Matrix matrixModifier = Matrix::identity;
 
 		if (axisSet & (1 << X))
 			matrixModifier(0, 0) = -1;

@@ -576,7 +576,7 @@ void AlgorithmToolset::subfileSelection()
 		ref->setColor (MainColor);
 		ref->setFileInfo (doc);
 		ref->setPosition (Origin);
-		ref->setTransformationMatrix (IdentityMatrix);
+		ref->setTransformationMatrix (Matrix::identity);
 		currentDocument()->insertObject (refidx, ref);
 
 		// Refresh stuff
