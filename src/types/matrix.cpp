@@ -27,16 +27,6 @@ Matrix::Matrix() :
     m_values{0} {}
 
 /*
- * Initializes the matrix from a C array
- * Note: the array must have (at least) 9 values!
- */
-Matrix::Matrix (double values[])
-{
-	for (int i = 0; i < 9; ++i)
-		m_values[i] = values[i];
-}
-
-/*
  * Constructs a matrix from a single fill value.
  */
 Matrix::Matrix (double fillvalue) :
@@ -48,8 +38,15 @@ Matrix::Matrix (double fillvalue) :
  */
 Matrix::Matrix (const std::initializer_list<double>& values)
 {
-	if (countof(values) == 9)
-		memcpy (&m_values[0], values.begin(), sizeof m_values);
+	int i = 0;
+
+	for (double value : values)
+	{
+		if (i < 9)
+			m_values[i++] = value;
+		else
+			break;
+	}
 }
 
 /*
@@ -89,7 +86,8 @@ QString Matrix::toString() const
  */
 void Matrix::zero()
 {
-	memset (&m_values[0], 0, sizeof m_values);
+	for (double& value : m_values)
+		value = 0;
 }
 
 /*
@@ -103,7 +101,7 @@ Matrix Matrix::multiply (const Matrix& other) const
 	for (int i = 0; i < 3; ++i)
 	for (int j = 0; j < 3; ++j)
 	for (int k = 0; k < 3; ++k)
-		result[i][j] += (*this)[i][k] * other[k][j];
+		result(i, j) += (*this)(i, k) * other(k, j);
 
 	return result;
 }

@@ -310,17 +310,14 @@ void AddObjectDialog::staticDialog (const LDObjectType type, LDObject* obj)
 
 	if (type == OBJ_SubfileReference)
 	{
-		QStringList matrixstrvals = dlg.le_matrix->text().split (" ", QString::SkipEmptyParts);
+		QStringList stringValues = dlg.le_matrix->text().split (" ", QString::SkipEmptyParts);
 
-		if (countof(matrixstrvals) == 9)
+		if (countof(stringValues) == 9)
 		{
-			double matrixvals[9];
 			int i = 0;
 
-			for (QString val : matrixstrvals)
-				matrixvals[i++] = val.toFloat();
-
-			transform = Matrix (matrixvals);
+			for (QString stringValue : stringValues)
+				transform.value(i++) = stringValue.toFloat();
 		}
 	}
 

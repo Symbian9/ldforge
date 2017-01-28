@@ -31,7 +31,6 @@ public:
 	Matrix();
 	Matrix (const std::initializer_list<double>& values);
 	Matrix (double fillval);
-	Matrix (double values[]);
 
 	double* begin();
 	const double* begin() const;
