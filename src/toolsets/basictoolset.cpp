@@ -37,12 +37,12 @@ BasicToolset::BasicToolset (MainWindow *parent) :
 
 int BasicToolset::copyToClipboard()
 {
-	LDObjectList objs = selectedObjects();
+	const QSet<LDObject*>& objects = selectedObjects();
 	int count = 0;
 	qApp->clipboard()->clear();
 	QString data;
 
-	for (LDObject* obj : objs)
+	for (LDObject* obj : objects)
 	{
 		if (not data.isEmpty())
 			data += "\n";
@@ -79,7 +79,7 @@ void BasicToolset::paste()
 	{
 		LDObject* pasted = ParseLine (line);
 		currentDocument()->insertObject (idx++, pasted);
-		pasted->select();
+		currentDocument()->addToSelection(pasted);
 		++num;
 	}
 
@@ -96,33 +96,36 @@ void BasicToolset::remove()
 
 void BasicToolset::doInline (bool deep)
 {
-	for (LDSubfileReference* ref : filterByType<LDSubfileReference> (selectedObjects()))
+	for (LDSubfileReference* reference : filterByType<LDSubfileReference> (selectedObjects()))
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		int idx = ref->lineNumber();
+		int idx = reference->lineNumber();
 
 		if (idx != -1)
 		{
-			LDObjectList objs = ref->inlineContents (deep, false);
-	
+			Model inlined;
+			reference->inlineContents(inlined, deep, false);
+
 			// Merge in the inlined objects
-			for (LDObject* inlineobj : objs)
+			print("Inlined %1 objects.\n", countof(inlined.objects()));
+			for (LDObject* inlinedObject : inlined.objects())
 			{
-				QString line = inlineobj->asText();
-				inlineobj->destroy();
-				LDObject* newobj = ParseLine (line);
-				currentDocument()->insertObject (idx++, newobj);
-				newobj->select();
+				currentDocument()->insertObject (idx++, inlinedObject);
+				currentDocument()->addToSelection(inlinedObject);
 			}
-	
+
 			// Delete the subfile now as it's been inlined.
-			ref->destroy();
+			currentDocument()->remove(reference);
 		}
 	}
 
 	for (LDBezierCurve* curve : filterByType<LDBezierCurve> (selectedObjects()))
-		curve->replace (curve->rasterize(grid()->bezierCurveSegments()));
+	{
+		Model curveModel;
+		curve->rasterize(curveModel, grid()->bezierCurveSegments());
+		currentDocument()->replace(curve, curveModel);
+	}
 }
 
 void BasicToolset::inlineShallow()
@@ -187,7 +190,7 @@ void BasicToolset::insertRaw()
 		LDObject* obj = ParseLine (line);
 
 		currentDocument()->insertObject (idx, obj);
-		obj->select();
+		currentDocument()->addToSelection(obj);
 		idx++;
 	}
 
@@ -200,7 +203,7 @@ void BasicToolset::setColor()
 	if (selectedObjects().isEmpty())
 		return;
 
-	LDObjectList objs = selectedObjects();
+	QSet<LDObject*> objs = selectedObjects();
 
 	// If all selected objects have the same color, said color is our default
 	// value to the color selection dialog.
@@ -263,7 +266,7 @@ void BasicToolset::edit()
 {
 	if (countof(selectedObjects()) == 1)
 	{
-		LDObject* obj = selectedObjects().first();
+		LDObject* obj = *selectedObjects().begin();
 		AddObjectDialog::staticDialog (obj->type(), obj);
 	}
 }

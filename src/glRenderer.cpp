@@ -909,7 +909,7 @@ void GLRenderer::pick (int mouseX, int mouseY, bool additive)
 void GLRenderer::pick(const QRect& range, bool additive)
 {
 	makeCurrent();
-	QSet<LDObject*> priorSelection = selectedObjects().toSet();
+	QSet<LDObject*> priorSelection = selectedObjects();
 	QSet<LDObject*> newSelection;
 
 	// If we're doing an additive selection, we start off with the existing selection.
@@ -975,14 +975,14 @@ void GLRenderer::pick(const QRect& range, bool additive)
 	// Select all objects that we now have selected that were not selected before.
 	for (LDObject* object : newSelection - priorSelection)
 	{
-		object->select();
+		m_document->addToSelection(object);
 		compileObject(object);
 	}
 
 	// Likewise, deselect whatever was selected that isn't anymore.
 	for (LDObject* object : priorSelection - newSelection)
 	{
-		object->deselect();
+		m_document->removeFromSelection(object);
 		compileObject(object);
 	}
 
@@ -1447,11 +1447,11 @@ void GLRenderer::updateOverlayObjects()
 			LDObject* nextobj = ovlobj->next();
 
 			if (nextobj and nextobj->type() == OBJ_Empty)
-				nextobj->destroy();
+				document()->remove(nextobj);
 
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
-			ovlobj->destroy();
+			document()->remove(ovlobj);
 		}
 		else if (meta.image and ovlobj == nullptr)
 		{
@@ -1489,7 +1489,7 @@ void GLRenderer::updateOverlayObjects()
 				document()->insertObject (i, ovlobj);
 
 				if (found)
-					document()->insertObject (i + 1, LDSpawn<LDEmpty>());
+					document()->emplaceAt<LDEmpty>(i + 1);
 			}
 		}
 
@@ -1563,13 +1563,9 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 	{
 		PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (m_window->getPrimitivesTree()->currentItem());
 		QString primitiveName = item->primitive()->name;
-		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
-		ref->setColor (MainColor);
+		LDSubfileReference* ref = currentDocument()->emplaceAt<LDSubfileReference>(m_window->suggestInsertPoint());
 		ref->setFileInfo (m_documents->getDocumentByName (primitiveName));
-		ref->setPosition (Origin);
-		ref->setTransformationMatrix (Matrix::identity);
-		currentDocument()->insertObject (m_window->suggestInsertPoint(), ref);
-		ref->select();
+		currentDocument()->addToSelection(ref);
 		m_window->buildObjectList();
 		m_window->renderer()->refresh();
 		ev->acceptProposedAction();

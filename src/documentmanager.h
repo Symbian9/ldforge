@@ -21,6 +21,8 @@
 #include "main.h"
 #include "hierarchyelement.h"
 
+class Model;
+
 class DocumentManager : public QObject, public HierarchyElement
 {
 	Q_OBJECT
@@ -39,13 +41,13 @@ public:
 	QString findDocumentPath (QString relpath, bool subdirs);
 	LDDocument* getDocumentByName (QString filename);
 	bool isSafeToCloseAll();
-	LDObjectList loadFileContents (QFile* fp, int* numWarnings, bool* ok);
+	void loadFileContents(QIODevice* fp, Model& model, int* numWarnings, bool* ok);
 	void loadLogoedStuds();
 	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr,
 							  bool* aborted = nullptr);
 	QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer);
 	void openMainModel (QString path);
-	bool preInline (LDDocument* doc, LDObjectList&, bool deep, bool renderinline);
+	bool preInline (LDDocument* doc, Model& model, bool deep, bool renderinline);
 
 private:
 	Documents m_documents;

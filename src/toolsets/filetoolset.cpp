@@ -118,14 +118,15 @@ void FileToolset::insertFrom()
 		if (file.open(QIODevice::ReadOnly))
 		{
 			// TODO: shouldn't need to go to the document manager to parse a file
-			LDObjectList objects = m_documents->loadFileContents(&file, nullptr, nullptr);
+			Model model;
+			m_documents->loadFileContents(&file, model, nullptr, nullptr);
 
 			currentDocument()->clearSelection();
 
-			for (LDObject* object : objects)
+			for (LDObject* object : model.objects())
 			{
 				currentDocument()->insertObject (position, object);
-				object->select();
+				currentDocument()->addToSelection(object);
 				m_window->renderer()->compileObject (object);
 				position++;
 			}

@@ -18,6 +18,7 @@
 
 #pragma once
 #include "main.h"
+#include "model.h"
 
 //
 // DocumentLoader
@@ -30,13 +31,13 @@ class DocumentLoader : public QObject
 	Q_OBJECT
 
 public:
-	DocumentLoader (bool onForeground = false, QObject* parent = 0);
+	DocumentLoader (Model* model, bool onForeground = false, QObject* parent = 0);
 
 	Q_SLOT void abort();
 	bool hasAborted();
 	bool isDone() const;
 	bool isOnForeground() const;
-	const LDObjectList& objects() const;
+	const QVector<LDObject*>& objects() const;
 	int progress() const;
 	void read (QIODevice* fp);
 	Q_SLOT void start();
@@ -44,7 +45,7 @@ public:
 
 private:
 	class OpenProgressDialog* m_progressDialog;
-	LDObjectList m_objects;
+	Model* _model;
 	QStringList m_lines;
 	int m_progress;
 	int m_warningCount;

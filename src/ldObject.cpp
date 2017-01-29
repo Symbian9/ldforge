@@ -37,20 +37,19 @@ QMap<int32, LDObject*> g_allObjects;
 enum { MAX_LDOBJECT_IDS = (1 << 24) };
 
 #define LDOBJ_DEFAULT_CTOR(T,BASE) \
-	T :: T (LDDocument* document) : \
-		BASE (document) {}
+	T :: T (Model* model) : \
+	    BASE {model} {}
 
 // =============================================================================
 // LDObject constructors
 //
-LDObject::LDObject (LDDocument* document) :
+LDObject::LDObject (Model* model) :
 	m_isHidden (false),
-	m_isSelected (false),
-	m_isDestroyed (false),
-	m_document (nullptr)
+    m_isSelected (false),
+    _model (nullptr)
 {
-	if (document)
-		document->addObject (this);
+	if (model)
+		model->addObject (this);
 
 	memset (m_coords, 0, sizeof m_coords);
 
@@ -67,8 +66,8 @@ LDObject::LDObject (LDDocument* document) :
 	m_randomColor = QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128);
 }
 
-LDSubfileReference::LDSubfileReference (LDDocument* document) :
-	LDMatrixObject (document) {}
+LDSubfileReference::LDSubfileReference (Model* model) :
+    LDMatrixObject (model) {}
 
 LDOBJ_DEFAULT_CTOR (LDEmpty, LDObject)
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
@@ -83,8 +82,12 @@ LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
 LDObject::~LDObject()
 {
-	if (not m_isDestroyed)
-		print ("Warning: Object #%1 (%2) was not destroyed before being deleted\n", id(), this);
+	// Delete the GL lists
+	if (g_win)
+		g_win->renderer()->forgetObject(this);
+
+	// Remove this object from the list of LDObjects
+	g_allObjects.erase(g_allObjects.find(id()));
 }
 
 // =============================================================================
@@ -217,10 +220,7 @@ void LDObject::replace (LDObject* other)
 	if (idx != -1)
 	{
 		// Replace the instance of the old object with the new object
-		document()->setObjectAt (idx, other);
-
-		// Remove the old object
-		destroy();
+		model()->setObjectAt(idx, other);
 	}
 }
 
@@ -231,10 +231,9 @@ void LDObject::replace (const LDObjectList& others)
 	if (idx != -1 and not others.isEmpty())
 	{
 		for (int i = 1; i < countof(others); ++i)
-			document()->insertObject (idx + i, others[i]);
+			model()->insertObject (idx + i, others[i]);
 
-		document()->setObjectAt (idx, others[0]);
-		destroy();
+		model()->setObjectAt(idx, others[0]);
 	}
 }
 
@@ -244,8 +243,8 @@ void LDObject::replace (const LDObjectList& others)
 //
 void LDObject::swap (LDObject* other)
 {
-	if (document() == other->document())
-		document()->swapObjects (this, other);
+	if (model() == other->model())
+		model()->swapObjects (this, other);
 }
 
 int LDObject::triangleCount() const
@@ -323,34 +322,9 @@ LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v
 
 // =============================================================================
 //
-// Deletes this object
-//
-void LDObject::destroy()
+void LDObject::setDocument (Model* model)
 {
-	deselect();
-
-	// If this object was associated to a file, remove it off it now
-	if (document())
-		document()->forgetObject (this);
-
-	// Delete the GL lists
-	if (g_win)
-		g_win->renderer()->forgetObject (this);
-
-	// Remove this object from the list of LDObjects
-	g_allObjects.erase (g_allObjects.find (id()));
-	m_isDestroyed = true;
-	delete this;
-}
-
-// =============================================================================
-//
-void LDObject::setDocument (LDDocument* document)
-{
-	m_document = document;
-
-	if (document == nullptr)
-		m_isSelected = false;
+	_model = model;
 }
 
 // =============================================================================
@@ -392,15 +366,16 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 
 // =============================================================================
 // -----------------------------------------------------------------------------
-LDObjectList LDSubfileReference::inlineContents (bool deep, bool render)
+void LDSubfileReference::inlineContents(Model& model, bool deep, bool render)
 {
-	LDObjectList objs = fileInfo()->inlineContents (deep, render);
+	Model inlined;
+	fileInfo()->inlineContents(inlined, deep, render);
 
 	// Transform the objects
-	for (LDObject* obj : objs)
-		TransformObject (obj, transformationMatrix(), position(), color());
+	for (LDObject* object : inlined)
+		TransformObject(object, transformationMatrix(), position(), color());
 
-	return objs;
+	model.merge(inlined);
 }
 
 // =============================================================================
@@ -449,11 +424,11 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons()
 //
 int LDObject::lineNumber() const
 {
-	if (document())
+	if (model())
 	{
-		for (int i = 0; i < document()->getObjectCount(); ++i)
+		for (int i = 0; i < model()->size(); ++i)
 		{
-			if (document()->getObject (i) == this)
+			if (model()->getObject(i) == this)
 				return i;
 		}
 	}
@@ -510,12 +485,7 @@ QString LDObject::describeObjects (const LDObjectList& objs)
 //
 LDObject* LDObject::next() const
 {
-	int idx = lineNumber();
-
-	if (idx == -1 or idx == document()->getObjectCount() - 1)
-		return nullptr;
-
-	return document()->getObject (idx + 1);
+	return model()->getObject(lineNumber() + 1);
 }
 
 // =============================================================================
@@ -524,12 +494,7 @@ LDObject* LDObject::next() const
 //
 LDObject* LDObject::previous() const
 {
-	int idx = lineNumber();
-
-	if (idx <= 0)
-		return nullptr;
-
-	return document()->getObject (idx - 1);
+	return model()->getObject(lineNumber() - 1);
 }
 
 // =============================================================================
@@ -597,14 +562,9 @@ QColor LDObject::randomColor() const
 	return m_randomColor;
 }
 
-LDDocument* LDObject::document() const
+Model* LDObject::model() const
 {
-	return m_document;
-}
-
-bool LDObject::isDestroyed() const
-{
-	return m_isDestroyed;
+	return _model;
 }
 
 // =============================================================================
@@ -668,14 +628,15 @@ void LDQuad::invert()
 //
 void LDSubfileReference::invert()
 {
-	if (document() == nullptr)
+	if (model() == nullptr)
 		return;
 
 	// Check whether subfile is flat
 	int axisSet = (1 << X) | (1 << Y) | (1 << Z);
-	LDObjectList objs = fileInfo()->inlineContents (true, false);
+	Model model;
+	fileInfo()->inlineContents(model, true, false);
 
-	for (LDObject* obj : objs)
+	for (LDObject* obj : model.objects())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
@@ -724,13 +685,13 @@ void LDSubfileReference::invert()
 		if (bfc and bfc->statement() == BfcStatement::InvertNext)
 		{
 			// This is prefixed with an invertnext, thus remove it.
-			bfc->destroy();
+			this->model()->remove(bfc);
 			return;
 		}
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	document()->insertObject (idx, new LDBfc (BfcStatement::InvertNext));
+	this->model()->insertObject (idx, new LDBfc (BfcStatement::InvertNext));
 }
 
 // =============================================================================
@@ -768,7 +729,7 @@ void LDBezierCurve::invert()
 
 // =============================================================================
 //
-LDLine* LDCondLine::toEdgeLine()
+LDLine* LDCondLine::becomeEdgeLine()
 {
 	LDLine* replacement = new LDLine;
 
@@ -776,20 +737,15 @@ LDLine* LDCondLine::toEdgeLine()
 		replacement->setVertex (i, vertex (i));
 
 	replacement->setColor (color());
-	replace (replacement);
+	model()->replace(this, replacement);
 	return replacement;
 }
 
 // =============================================================================
 //
-LDObject* LDObject::fromID (int id)
+LDObject* LDObject::fromID(int32 id)
 {
-	auto it = g_allObjects.find (id);
-
-	if (it != g_allObjects.end())
-		return *it;
-
-	return nullptr;
+	return g_allObjects.value(id);
 }
 
 // =============================================================================
@@ -809,29 +765,22 @@ void LDOverlay::invert() {}
 // makes history stuff work out of the box.
 //
 template<typename T>
-static void changeProperty (LDObject* obj, T* ptr, const T& val)
+static void changeProperty(LDObject* object, T* property, const T& value)
 {
-	int idx;
-
-	if (*ptr == val)
+	if (*property == value)
 		return;
 
-	if (obj->document() and (idx = obj->lineNumber()) != -1)
-	{
-		QString before = obj->asText();
-		*ptr = val;
-		QString after = obj->asText();
+	int position = object->lineNumber();
 
-		if (before != after)
-		{
-			obj->document()->addToHistory (new EditHistoryEntry (idx, before, after));
-			g_win->renderer()->compileObject (obj);
-			g_win->currentDocument()->redoVertices();
-		}
+	if (position != -1)
+	{
+		QString before = object->asText();
+		*property = value;
+		emit object->codeChanged(position, before, object->asText());
 	}
 	else
 	{
-		*ptr = val;
+		*property = value;
 	}
 }
 
@@ -860,12 +809,12 @@ void LDObject::setVertex (int i, const Vertex& vert)
 	changeProperty (this, &m_coords[i], vert);
 }
 
-LDMatrixObject::LDMatrixObject (LDDocument* document) :
-	LDObject (document),
+LDMatrixObject::LDMatrixObject (Model* model) :
+    LDObject (model),
 	m_position (Origin) {}
 
-LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, LDDocument* document) :
-	LDObject (document),
+LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, Model* model) :
+    LDObject (model),
 	m_position (pos),
 	m_transformationMatrix (transform) {}
 
@@ -907,8 +856,8 @@ void LDMatrixObject::setTransformationMatrix (const Matrix& val)
 	changeProperty (this, &m_transformationMatrix, val);
 }
 
-LDError::LDError (QString contents, QString reason, LDDocument* document) :
-	LDObject (document),
+LDError::LDError (QString contents, QString reason, Model* model) :
+    LDObject (model),
 	m_contents (contents),
 	m_reason (reason) {}
 
@@ -1062,19 +1011,16 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 		return Vertex();
 }
 
-LDObjectList LDBezierCurve::rasterize (int segments)
+void LDBezierCurve::rasterize(Model& model, int segments)
 {
 	QVector<LDPolygon> polygons = rasterizePolygons(segments);
-	LDObjectList result;
 
 	for (LDPolygon& poly : polygons)
 	{
 		LDLine* line = LDSpawn<LDLine> (poly.vertices[0], poly.vertices[1]);
 		line->setColor (poly.color);
-		result << line;
+		model.addObject(line);
 	}
-
-	return result;
 }
 
 QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
@@ -1104,43 +1050,16 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 
 // =============================================================================
 //
-// Selects this object.
-//
-void LDObject::select()
-{
-	if (not isSelected() and document())
-	{
-		m_isSelected = true;
-		document()->addToSelection (this);
-	}
-}
-
-// =============================================================================
-//
-// Removes this object from selection
-//
-void LDObject::deselect()
-{
-	if (isSelected() and document())
-	{
-		m_isSelected = false;
-		document()->removeFromSelection (this);
-
-		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
-		LDBfc* invertnext;
-
-		if (previousIsInvertnext (invertnext))
-			invertnext->deselect();
-	}
-}
-
-// =============================================================================
-//
 LDObject* LDObject::createCopy() const
 {
 	LDObject* copy = ParseLine (asText());
 	return copy;
 }
+
+LDSubfileReference::LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix,
+                                       const Vertex& position, Model* model) :
+    LDMatrixObject {transformationMatrix, position, model},
+    m_fileInfo {reference} {}
 
 // =============================================================================
 //
@@ -1153,8 +1072,8 @@ void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 {
 	changeProperty (this, &m_fileInfo, newReferee);
 
-	if (document())
-		document()->recountTriangles();
+	if (model())
+		model()->recountTriangles();
 
 	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
 	// GL polygons for the document if they don't exist already.

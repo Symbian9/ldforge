@@ -40,18 +40,13 @@ LDDocument::LDDocument (DocumentManager* parent) :
 	m_history (new EditHistory (this)),
 	m_flags(IsCache | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
 	m_savePosition(-1),
-	m_tabIndex(-1),
-	m_triangleCount(0),
+    m_tabIndex(-1),
 	m_gldata (new LDGLData),
 	m_manager (parent) {}
 
 LDDocument::~LDDocument()
 {
 	m_flags |= IsBeingDestroyed;
-
-	for (int i = 0; i < countof(m_objects); ++i)
-		m_objects[i]->destroy();
-
 	delete m_history;
 	delete m_gldata;
 }
@@ -64,11 +59,6 @@ QString LDDocument::name() const
 void LDDocument::setName (QString value)
 {
 	m_name = value;
-}
-
-const LDObjectList& LDDocument::objects() const
-{
-	return m_objects;
 }
 
 EditHistory* LDDocument::history() const
@@ -119,21 +109,6 @@ QString LDDocument::defaultName() const
 void LDDocument::setDefaultName (QString value)
 {
 	m_defaultName = value;
-}
-
-int LDDocument::triangleCount()
-{
-	if (checkFlag(NeedsTriangleRecount))
-	{
-		m_triangleCount = 0;
-
-		for (LDObject* obj : m_objects)
-			m_triangleCount += obj->triangleCount();
-
-		unsetFlag(NeedsTriangleRecount);
-	}
-
-	return m_triangleCount;
 }
 
 void LDDocument::openForEditing()
@@ -312,14 +287,6 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	m_window->updateDocumentListItem (this);
 	m_window->updateTitle();
 	return true;
-}
-
-// =============================================================================
-//
-void LDDocument::clear()
-{
-	for (LDObject* obj : objects())
-		forgetObject (obj);
 }
 
 // =============================================================================
@@ -575,18 +542,13 @@ void LDDocument::reloadAllSubfiles()
 	{
 		if (obj->type() == OBJ_SubfileReference)
 		{
-			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			LDDocument* fileInfo = m_documents->getDocumentByName (ref->fileInfo()->name());
+			LDSubfileReference* reference = static_cast<LDSubfileReference*> (obj);
+			LDDocument* fileInfo = m_documents->getDocumentByName (reference->fileInfo()->name());
 
 			if (fileInfo)
-			{
-				ref->setFileInfo (fileInfo);
-			}
+				reference->setFileInfo (fileInfo);
 			else
-			{
-				ref->replace (LDSpawn<LDError> (ref->asText(),
-					format ("Could not open %1", ref->fileInfo()->name())));
-			}
+				emplaceReplacement<LDError>(reference, reference->asText(), format("Could not open %1", reference->fileInfo()->name()));
 		}
 
 		// Reparse gibberish files. It could be that they are invalid because
@@ -603,25 +565,12 @@ void LDDocument::reloadAllSubfiles()
 
 // =============================================================================
 //
-int LDDocument::addObject (LDObject* obj)
+void LDDocument::addObjects (const LDObjectList& objects)
 {
-	history()->add (new AddHistoryEntry (countof(objects()), obj));
-	m_objects << obj;
-	addKnownVertices (obj);
-	obj->setDocument (this);
-	setFlag(NeedsTriangleRecount);
-	m_window->renderer()->compileObject (obj);
-	return getObjectCount() - 1;
-}
-
-// =============================================================================
-//
-void LDDocument::addObjects (const LDObjectList& objs)
-{
-	for (LDObject* obj : objs)
+	for (LDObject* object : objects)
 	{
-		if (obj)
-			addObject (obj);
+		if (object)
+			addObject (object);
 	}
 }
 
@@ -630,16 +579,22 @@ void LDDocument::addObjects (const LDObjectList& objs)
 void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	history()->add (new AddHistoryEntry (pos, obj));
-	m_objects.insert (pos, obj);
-	obj->setDocument (this);
-	setFlag(NeedsTriangleRecount);
+	Model::insertObject(pos, obj);
 	m_window->renderer()->compileObject (obj);
-	
+	connect(obj, SIGNAL(codeChanged(int,QString,QString)), this, SLOT(objectChanged(int,QString,QString)));
 
 #ifdef DEBUG
 	if (not isCache())
 		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
 #endif
+}
+
+void LDDocument::objectChanged(int position, QString before, QString after)
+{
+	LDObject* object = static_cast<LDObject*>(sender());
+	addToHistory(new EditHistoryEntry {position, before, after});
+	m_window->renderer()->compileObject(object);
+	m_window->currentDocument()->redoVertices();
 }
 
 // =============================================================================
@@ -657,61 +612,18 @@ void LDDocument::addKnownVertices (LDObject* obj)
 	needVertexMerge();
 }
 
-// =============================================================================
-//
-void LDDocument::forgetObject (LDObject* obj)
+LDObject* LDDocument::withdrawAt(int position)
 {
-	int idx = obj->lineNumber();
+	LDObject* object = getObject(position);
 
-	if (m_objects[idx] == obj)
+	if (not isCache() and not checkFlag(IsBeingDestroyed))
 	{
-		obj->deselect();
-
-		if (not isCache() and not checkFlag(IsBeingDestroyed))
-		{
-			history()->add (new DelHistoryEntry (idx, obj));
-			m_objectVertices.remove (obj);
-		}
-
-		m_objects.removeAt (idx);
-		setFlag(NeedsTriangleRecount);
-		obj->setDocument (nullptr);
-	}
-}
-
-// =============================================================================
-//
-void LDDocument::setObjectAt (int idx, LDObject* obj)
-{
-	if (idx < 0 or idx >= countof(m_objects))
-		return;
-
-	// Mark this change to history
-	if (not m_history->isIgnoring())
-	{
-		QString oldcode = getObject (idx)->asText();
-		QString newcode = obj->asText();
-		m_history->add (new EditHistoryEntry (idx, oldcode, newcode));
+		history()->add(new DelHistoryEntry {position, object});
+		m_objectVertices.remove(object);
 	}
 
-	m_objectVertices.remove (m_objects[idx]);
-	m_objects[idx]->deselect();
-	m_objects[idx]->setDocument (nullptr);
-	obj->setDocument (this);
-	addKnownVertices (obj);
-	m_window->renderer()->compileObject (obj);
-	m_objects[idx] = obj;
-	needVertexMerge();
-}
-
-// =============================================================================
-//
-LDObject* LDDocument::getObject (int pos) const
-{
-	if (pos < countof(m_objects))
-		return m_objects[pos];
-	else
-		return nullptr;
+	m_selection.remove(object);
+	return Model::withdrawAt(position);
 }
 
 // =============================================================================
@@ -748,8 +660,10 @@ void LDDocument::initializeCachedData()
 	if (checkFlag(NeedsRecache))
 	{
 		m_vertices.clear();
+		Model model;
+		inlineContents(model, true, true);
 
-		for (LDObject* obj : inlineContents (true, true))
+		for (LDObject* obj : model.objects())
 		{
 			if (obj->type() == OBJ_SubfileReference)
 			{
@@ -774,8 +688,10 @@ void LDDocument::initializeCachedData()
 	if (checkFlag(VerticesOutdated))
 	{
 		m_objectVertices.clear();
+		Model model;
+		inlineContents(model, true, false);
 
-		for (LDObject* obj : inlineContents (true, false))
+		for (LDObject* obj : model)
 			addKnownVertices (obj);
 
 		mergeVertices();
@@ -808,12 +724,10 @@ QList<LDPolygon> LDDocument::inlinePolygons()
 
 // =============================================================================
 // -----------------------------------------------------------------------------
-LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
+void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 {
-	LDObjectList objs;
-
-	if (m_manager->preInline (this, objs, deep, renderinline))
-		return objs; // Manager dealt with this inline
+	if (m_manager->preInline(this, model, deep, renderinline))
+		return; // Manager dealt with this inline
 
 	for (LDObject* obj : objects())
 	{
@@ -823,26 +737,27 @@ LDObjectList LDDocument::inlineContents (bool deep, bool renderinline)
 
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
-		if (deep == true and obj->type() == OBJ_SubfileReference)
-		{
-			for (LDObject* otherobj : static_cast<LDSubfileReference*> (obj)->inlineContents (deep, renderinline))
-				objs << otherobj;
-		}
+		if (deep and obj->type() == OBJ_SubfileReference)
+			static_cast<LDSubfileReference*>(obj)->inlineContents(model, deep, renderinline);
 		else
-			objs << obj->createCopy();
+			model.addObject(obj->createCopy());
 	}
-
-	return objs;
 }
 
 // =============================================================================
 //
 void LDDocument::addToSelection (LDObject* obj) // [protected]
 {
-	if (obj->isSelected() and obj->document() == this)
+	if (not m_selection.contains(obj) and obj->model() == this)
 	{
-		m_sel << obj;
+		m_selection.insert(obj);
 		m_window->renderer()->compileObject (obj);
+
+		// If this object is inverted with INVERTNEXT, select the INVERTNEXT as well.
+		LDBfc* invertnext;
+
+		if (obj->previousIsInvertnext(invertnext))
+			addToSelection(invertnext);
 	}
 }
 
@@ -850,10 +765,16 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 //
 void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 {
-	if (not obj->isSelected() and obj->document() == this)
+	if (m_selection.contains(obj))
 	{
-		m_sel.removeOne (obj);
+		m_selection.remove(obj);
 		m_window->renderer()->compileObject (obj);
+
+		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
+		LDBfc* invertnext;
+
+		if (obj->previousIsInvertnext(invertnext))
+			removeFromSelection(invertnext);
 	}
 }
 
@@ -861,34 +782,31 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 //
 void LDDocument::clearSelection()
 {
-	for (LDObject* obj : m_sel)
+	for (LDObject* object : m_selection)
+		m_window->renderer()->compileObject(object);
+
+	m_selection.clear();
+}
+
+// =============================================================================
+//
+const QSet<LDObject*>& LDDocument::getSelection() const
+{
+	return m_selection;
+}
+
+// =============================================================================
+//
+bool LDDocument::swapObjects (LDObject* one, LDObject* other)
+{
+	if (Model::swapObjects(one, other))
 	{
-		obj->deselect();
-		m_window->renderer()->compileObject (obj);
+		addToHistory(new SwapHistoryEntry {one->id(), other->id()});
+		return true;
 	}
-
-	m_sel.clear();
-}
-
-// =============================================================================
-//
-const LDObjectList& LDDocument::getSelection() const
-{
-	return m_sel;
-}
-
-// =============================================================================
-//
-void LDDocument::swapObjects (LDObject* one, LDObject* other)
-{
-	int a = m_objects.indexOf (one);
-	int b = m_objects.indexOf (other);
-
-	if (a != b and a != -1 and b != -1)
+	else
 	{
-		m_objects[b] = one;
-		m_objects[a] = other;
-		addToHistory (new SwapHistoryEntry (one->id(), other->id()));
+		return false;
 	}
 }
 
@@ -923,7 +841,3 @@ void LDDocument::needVertexMerge()
 	setFlag(NeedsVertexMerge);
 }
 
-void LDDocument::recountTriangles()
-{
-	setFlag(NeedsTriangleRecount);
-}

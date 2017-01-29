@@ -51,8 +51,9 @@ AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
 void AlgorithmToolset::splitQuads()
 {
 	int num = 0;
+	QVector<LDObject*> selected = selectedObjects().toList().toVector();
 
-	for (LDObjectIterator<LDQuad> it (selectedObjects()); it.isValid(); ++it)
+	for (LDObjectIterator<LDQuad> it (selected); it.isValid(); ++it)
 	{
 		// Find the index of this quad
 		int index = it->lineNumber();
@@ -77,7 +78,7 @@ void AlgorithmToolset::editRaw()
 	if (countof(selectedObjects()) != 1)
 		return;
 
-	LDObject* obj = selectedObjects()[0];
+	LDObject* obj = *(selectedObjects().begin());
 	QDialog* dlg = new QDialog;
 	Ui::EditRawUI ui;
 
@@ -102,10 +103,9 @@ void AlgorithmToolset::editRaw()
 
 void AlgorithmToolset::makeBorders()
 {
-	LDObjectList objs = selectedObjects();
 	int num = 0;
 
-	for (LDObject* obj : objs)
+	for (LDObject* obj : selectedObjects())
 	{
 		const LDObjectType type = obj->type();
 
@@ -277,9 +277,9 @@ void AlgorithmToolset::demote()
 {
 	int num = 0;
 
-	for (LDObjectIterator<LDCondLine> it (selectedObjects()); it.isValid(); ++it)
+	for (LDCondLine* line : filterByType<LDCondLine>(selectedObjects()))
 	{
-		it->toEdgeLine();
+		line->becomeEdgeLine();
 		++num;
 	}
 
@@ -422,7 +422,7 @@ void AlgorithmToolset::splitLines()
 		for (LDObject* seg : newsegs)
 			currentDocument()->insertObject (ln++, seg);
 
-		obj->destroy();
+		currentDocument()->remove(obj);
 	}
 
 	m_window->buildObjectList();
@@ -458,7 +458,8 @@ void AlgorithmToolset::subfileSelection()
 	QString			fullsubname;
 
 	// Where to insert the subfile reference?
-	int				refidx (selectedObjects()[0]->lineNumber());
+	// TODO: the selection really should be sorted by position...
+	int				refidx = (*selectedObjects().begin())->lineNumber();
 
 	// Determine title of subfile
 	if (titleobj)
@@ -568,8 +569,8 @@ void AlgorithmToolset::subfileSelection()
 	{
 		// Save was successful. Delete the original selection now from the
 		// main document.
-		for (LDObject* obj : selectedObjects())
-			obj->destroy();
+		for (LDObject* object : selectedObjects())
+			currentDocument()->remove(object);
 
 		// Add a reference to the new subfile to where the selection was
 		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();

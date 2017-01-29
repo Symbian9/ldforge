@@ -271,15 +271,13 @@ QFile* DocumentManager::openLDrawFile (QString relpath, bool subdirs, QString* p
 	return nullptr;
 }
 
-LDObjectList DocumentManager::loadFileContents (QFile* fp, int* numWarnings, bool* ok)
+void DocumentManager::loadFileContents(QIODevice* input, Model& model, int* numWarnings, bool* ok)
 {
-	LDObjectList objs;
-
 	if (numWarnings)
 		*numWarnings = 0;
 
-	DocumentLoader* loader = new DocumentLoader (m_loadingMainFile);
-	loader->read (fp);
+	DocumentLoader* loader = new DocumentLoader {&model, m_loadingMainFile};
+	loader->read(input);
 	loader->start();
 
 	// After start() returns, if the loader isn't done yet, it's delaying
@@ -292,10 +290,6 @@ LDObjectList DocumentManager::loadFileContents (QFile* fp, int* numWarnings, boo
 	// If we wanted the success value, supply that now
 	if (ok)
 		*ok = not loader->hasAborted();
-
-	objs = loader->objects();
-	delete loader;
-	return objs;
 }
 
 LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride,
@@ -335,7 +329,9 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 	int numWarnings;
 	bool ok;
-	LDObjectList objs = loadFileContents (fp, &numWarnings, &ok);
+	Model model;
+	loadFileContents(fp, model, &numWarnings, &ok);
+	load->merge(model);
 	fp->close();
 	fp->deleteLater();
 
@@ -347,8 +343,6 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 		load->close();
 		return nullptr;
 	}
-
-	load->addObjects (objs);
 
 	if (m_loadingMainFile)
 	{
@@ -411,7 +405,7 @@ void DocumentManager::loadLogoedStuds()
 		print (tr ("Logoed studs loaded.\n"));
 }
 
-bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs, bool deep, bool renderinline)
+bool DocumentManager::preInline (LDDocument* doc, Model& model, bool deep, bool renderinline)
 {
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
@@ -423,12 +417,12 @@ bool DocumentManager::preInline (LDDocument* doc, LDObjectList& objs, bool deep,
 
 		if (doc->name() == "stud.dat" and m_logoedStud)
 		{
-			objs = m_logoedStud->inlineContents (deep, renderinline);
+			m_logoedStud->inlineContents(model, deep, renderinline);
 			return true;
 		}
 		else if (doc->name() == "stud2.dat" and m_logoedStud2)
 		{
-			objs = m_logoedStud2->inlineContents (deep, renderinline);
+			m_logoedStud2->inlineContents(model, deep, renderinline);
 			return true;
 		}
 	}

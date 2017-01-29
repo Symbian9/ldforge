@@ -191,7 +191,7 @@ void CircleMode::endDraw()
 		int l = (relZ == X ? 1 : 0);
 		int m = (relZ == Y ? 1 : 0);
 		int n = (relZ == Z ? 1 : 0);
-		math()->rotateObjects (l, m, n, -m_angleOffset, objs);
+		math()->rotateObjects (l, m, n, -m_angleOffset, objs.toVector());
 	}
 
 	finishDraw (objs);

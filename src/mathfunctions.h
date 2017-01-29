@@ -33,8 +33,8 @@ class MathFunctions : public HierarchyElement
 public:
 	MathFunctions(QObject* parent);
 
-	void rotateObjects(int l, int m, int n, double angle, const LDObjectList& objects) const;
-	Vertex getRotationPoint(const LDObjectList& objs) const;
+	void rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& objects) const;
+	Vertex getRotationPoint(const QVector<LDObject*>& objs) const;
 
 private:
 	void rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix) const;

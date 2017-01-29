@@ -258,7 +258,7 @@ void GLCompiler::prepareVBO (int vbonum)
 			continue;
 		}
 
-		if (it.key()->document() == currentDocument() and not it.key()->isHidden())
+		if (it.key()->model() == currentDocument() and not it.key()->isHidden())
 			vbodata += it->data[vbonum];
 
 		++it;
@@ -285,7 +285,7 @@ void GLCompiler::dropObjectInfo (LDObject* obj)
 
 void GLCompiler::compileObject (LDObject* obj)
 {
-	if (obj == nullptr or obj->document() == nullptr or obj->document()->isCache())
+	if (obj == nullptr)
 		return;
 
 	ObjectVBOInfo info;

@@ -180,12 +180,12 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 		currentDocument()->clearSelection();
 	case Additive:
 		for (LDObject* obj : m_selection)
-			obj->select();
+			currentDocument()->addToSelection(obj);
 		break;
 
 	case Subtractive:
 		for (LDObject* obj : m_selection)
-			obj->deselect();
+			currentDocument()->removeFromSelection(obj);
 		break;
 
 	case InternalRecursion:

@@ -101,7 +101,7 @@ public:
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
 	void scrollToSelection();
-	const LDObjectList& selectedObjects();
+	const QSet<LDObject*>& selectedObjects();
 	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();

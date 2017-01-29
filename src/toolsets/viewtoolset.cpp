@@ -35,7 +35,7 @@ ViewToolset::ViewToolset (MainWindow *parent) :
 void ViewToolset::selectAll()
 {
 	for (LDObject* obj : currentDocument()->objects())
-		obj->select();
+		currentDocument()->addToSelection(obj);
 }
 
 void ViewToolset::selectByColor()
@@ -56,7 +56,7 @@ void ViewToolset::selectByColor()
 	for (LDObject* obj : currentDocument()->objects())
 	{
 		if (colors.contains (obj->color()))
-			obj->select();
+			currentDocument()->addToSelection(obj);
 	}
 }
 
@@ -92,7 +92,7 @@ void ViewToolset::selectByType()
 			continue;
 		}
 
-		obj->select();
+		currentDocument()->addToSelection(obj);
 	}
 }
 
@@ -254,7 +254,7 @@ void ViewToolset::bfcView()
 void ViewToolset::jumpTo()
 {
 	bool ok;
-	int defaultValue = (countof(selectedObjects()) == 1) ? selectedObjects()[0]->lineNumber() : 0;
+	int defaultValue = (countof(selectedObjects()) == 1) ? (*selectedObjects().begin())->lineNumber() : 0;
 	int index = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defaultValue, 1, currentDocument()->getObjectCount(), 1, &ok);
 
 	if (ok)
@@ -264,7 +264,7 @@ void ViewToolset::jumpTo()
 		if (object)
 		{
 			currentDocument()->clearSelection();
-			object->select();
+			currentDocument()->addToSelection(object);
 			m_window->updateSelection();
 		}
 	}

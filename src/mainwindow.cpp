@@ -358,14 +358,14 @@ int MainWindow::deleteSelection()
 	if (selectedObjects().isEmpty())
 		return 0;
 
-	LDObjectList selCopy = selectedObjects();
+	QSet<LDObject*> selectionCopy = selectedObjects();
 
 	// Delete the objects that were being selected
-	for (LDObject* obj : selCopy)
-		obj->destroy();
+	for (LDObject* object : selectionCopy)
+		m_currentDocument->remove(object);
 
 	refresh();
-	return countof(selCopy);
+	return countof(selectionCopy);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -508,7 +508,8 @@ void MainWindow::scrollToSelection()
 	if (selectedObjects().isEmpty())
 		return;
 
-	LDObject* obj = selectedObjects().first();
+	// TODO: Need a way to properly figure out the first selected object!
+	LDObject* obj = *selectedObjects().begin();
 	ui.objectList->scrollToItem (m_objectsInList[obj]);
 }
 
@@ -519,7 +520,7 @@ void MainWindow::selectionChanged()
 	if (m_isSelectionLocked == true or m_currentDocument == nullptr)
 		return;
 
-	QSet<LDObject*> priorSelection = selectedObjects().toSet();
+	QSet<LDObject*> priorSelection = selectedObjects();
 
 	// Get the objects from the object list selection
 	m_currentDocument->clearSelection();
@@ -531,7 +532,7 @@ void MainWindow::selectionChanged()
 		{
 			if (item == m_objectsInList[obj])
 			{
-				obj->select();
+				m_currentDocument->addToSelection(obj);
 				break;
 			}
 		}
@@ -542,7 +543,7 @@ void MainWindow::selectionChanged()
 	updateSelection();
 
 	// Update the GL renderer
-	for (LDObject* obj : (priorSelection + selectedObjects().toSet()))
+	for (LDObject* obj : priorSelection + selectedObjects())
 		renderer()->compileObject (obj);
 
 	renderer()->update();
@@ -595,8 +596,9 @@ void MainWindow::quickColorClicked()
 int MainWindow::suggestInsertPoint()
 {
 	// If we have a selection, put the item after it.
+	// TODO: fix this properly!
 	if (not selectedObjects().isEmpty())
-		return selectedObjects().last()->lineNumber() + 1;
+		return (*(selectedObjects().end() - 1))->lineNumber() + 1;
 
 	// Otherwise place the object at the end.
 	return m_currentDocument->getObjectCount();
@@ -720,7 +722,7 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 void MainWindow::spawnContextMenu (const QPoint& position)
 {
 	const bool single = (countof(selectedObjects()) == 1);
-	LDObject* singleObj = single ? selectedObjects().first() : nullptr;
+	LDObject* singleObj = single ? *selectedObjects().begin() : nullptr;
 
 	bool hasSubfiles = false;
 
@@ -785,18 +787,18 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 //
 void MainWindow::deleteByColor (LDColor color)
 {
-	LDObjectList objs;
+	LDObjectList unwanted;
 
-	for (LDObject* obj : m_currentDocument->objects())
+	for (LDObject* object : m_currentDocument->objects())
 	{
-		if (not obj->isColored() or obj->color() != color)
+		if (not object->isColored() or object->color() != color)
 			continue;
 
-		objs << obj;
+		unwanted.append(object);
 	}
 
-	for (LDObject* obj : objs)
-		obj->destroy();
+	for (LDObject* obj : unwanted)
+		m_currentDocument->remove(obj);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1289,7 +1291,7 @@ void MainWindow::closeInitialDocument()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-const LDObjectList& MainWindow::selectedObjects()
+const QSet<LDObject*>& MainWindow::selectedObjects()
 {
 	return m_currentDocument->getSelection();
 }

@@ -38,7 +38,7 @@ class HierarchyElement
 public:
 	HierarchyElement (QObject* parent);
 
-	const LDObjectList& selectedObjects();
+	const QSet<LDObject*>& selectedObjects();
 	LDDocument* currentDocument();
 	GuiUtilities* guiUtilities() const;
 	PrimitiveManager* primitives();

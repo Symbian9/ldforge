@@ -23,10 +23,12 @@
 #include "glShared.h"
 #include "colors.h"
 
+class Model;
+
 #define LDOBJ(T)												\
 public:															\
 	static constexpr LDObjectType SubclassType = OBJ_##T;		\
-	LD##T (LDDocument* document = nullptr);						\
+	LD##T (Model* model = nullptr);								\
 																\
 	virtual LDObjectType type() const override					\
 	{															\
@@ -88,25 +90,24 @@ MAKE_ITERABLE_ENUM (LDObjectType, OBJ_SubfileReference, OBJ_BezierCurve)
 // which is a token of the object's type. The object can be casted into
 // sub-classes based on this enumerator.
 //
-class LDObject
+class LDObject : public QObject
 {
+    Q_OBJECT
+
 public:
-	LDObject (LDDocument* document = nullptr);
+    LDObject (Model* model = nullptr);
 
 	virtual QString asText() const = 0; // This object as LDraw code
 	LDColor color() const;
 	LDObject* createCopy() const;
 	virtual LDColor defaultColor() const = 0; // What color does the object default to?
-	void deselect(); 
-	void destroy();
-	LDDocument* document() const;
+	Model* model() const;
 	LDPolygon* getPolygon();
 	virtual void getVertices (QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const = 0; // Does this object have a matrix and position? (see LDMatrixObject)
 	qint32 id() const;
 	virtual void invert() = 0; // Inverts this object (winding is reversed)
 	virtual bool isColored() const = 0;
-	bool isDestroyed() const;
 	bool isHidden() const;
 	virtual bool isScemantic() const = 0; // Does this object have meaning in the part model?
 	bool isSelected() const;
@@ -119,9 +120,8 @@ public:
 	QColor randomColor() const;
 	void replace (LDObject* other);
 	void replace (const LDObjectList& others);
-	void select();
 	void setColor (LDColor color);
-	void setDocument (LDDocument* document);
+	void setDocument (Model* model);
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
 	void swap (LDObject* other);
@@ -131,18 +131,21 @@ public:
 	const Vertex& vertex (int i) const;
 
 	static QString describeObjects (const LDObjectList& objs);
-	static LDObject* fromID (int id);
+	static LDObject* fromID(int32 id);
 	static LDObject* getDefault (const LDObjectType type);
 	static QString typeName (LDObjectType type);
 
+signals:
+	void codeChanged(int position, QString before, QString after);
+
 protected:
+	friend class Model;
 	virtual ~LDObject();
 
 private:
 	bool m_isHidden;
 	bool m_isSelected;
-	bool m_isDestroyed;
-	LDDocument* m_document;
+	Model* _model;
 	qint32 m_id;
 	LDColor m_color;
 	QColor m_randomColor;
@@ -179,8 +182,8 @@ class LDMatrixObject : public LDObject
 	Vertex m_position;
 
 public:
-	LDMatrixObject (LDDocument* document = nullptr);
-	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, LDDocument* document = nullptr);
+	LDMatrixObject (Model* model = nullptr);
+	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, Model* model = nullptr);
 
 	const Vertex& position() const;
 	void setCoordinate (const Axis ax, double value);
@@ -208,7 +211,7 @@ class LDError : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDError (QString contents, QString reason, LDDocument* document = nullptr);
+	LDError (QString contents, QString reason, Model* model = nullptr);
 	QString reason() const;
 	QString contents() const;
 	QString fileReferenced() const;
@@ -248,7 +251,7 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDComment (QString text, LDDocument* document = nullptr);
+	LDComment (QString text, LDDocument* model = nullptr);
 	QString text() const;
 	void setText (QString value);
 
@@ -287,7 +290,7 @@ public:
 	LDOBJ_NO_MATRIX
 
 public:
-	LDBfc (const BfcStatement type, LDDocument* document = nullptr);
+    LDBfc (const BfcStatement type, LDDocument* model = nullptr);
 
 	BfcStatement statement() const;
 	void setStatement (BfcStatement value);
@@ -315,10 +318,12 @@ class LDSubfileReference : public LDMatrixObject
 	LDOBJ_HAS_MATRIX
 
 public:
+	LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
+
 	// Inlines this subfile.
 	LDDocument* fileInfo() const;
 	virtual void getVertices (QSet<Vertex>& verts) const override;
-	LDObjectList inlineContents (bool deep, bool render);
+	void inlineContents(Model& model, bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
 	void setFileInfo (LDDocument* fileInfo);
 	int triangleCount() const override;
@@ -343,7 +348,7 @@ class LDLine : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDLine (Vertex v1, Vertex v2, LDDocument* document = nullptr);
+	LDLine (Vertex v1, Vertex v2, LDDocument* model = nullptr);
 };
 
 //
@@ -362,8 +367,8 @@ class LDCondLine : public LDLine
 	LDOBJ_NO_MATRIX
 
 public:
-	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
-	LDLine* toEdgeLine();
+	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* model = nullptr);
+	LDLine* becomeEdgeLine();
 };
 
 //
@@ -384,7 +389,7 @@ class LDTriangle : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* document = nullptr);
+	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* model = nullptr);
 	int triangleCount() const override;
 };
 
@@ -405,7 +410,7 @@ class LDQuad : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* document = nullptr);
+	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* model = nullptr);
 
 	// Split this quad into two triangles
 	QList<LDTriangle*> splitToTriangles();
@@ -461,9 +466,9 @@ class LDBezierCurve : public LDObject
 
 public:
 	LDBezierCurve (const Vertex& v0, const Vertex& v1,
-		const Vertex& v2, const Vertex& v3, LDDocument* document = nullptr);
+	    const Vertex& v2, const Vertex& v3, LDDocument* model = nullptr);
 	Vertex pointAt (qreal t) const;
-	LDObjectList rasterize (int segments);
+	void rasterize(Model& model, int segments);
 	QVector<LDPolygon> rasterizePolygons (int segments);
 };
 

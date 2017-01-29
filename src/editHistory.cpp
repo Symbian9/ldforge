@@ -165,7 +165,8 @@ AddHistoryEntry::AddHistoryEntry (int idx, LDObject* obj) :
 
 void AddHistoryEntry::undo() const
 {
-	parent()->document()->getObject (m_index)->destroy();
+	LDObject* object = parent()->document()->getObject(m_index);
+	parent()->document()->remove(object);
 }
 
 void AddHistoryEntry::redo() const
@@ -201,16 +202,16 @@ EditHistoryEntry::EditHistoryEntry (int idx, QString oldCode, QString newCode) :
 
 void EditHistoryEntry::undo() const
 {
-	LDObject* obj = parent()->document()->getObject (m_index);
-	LDObject* newobj = ParseLine (m_oldCode);
-	obj->replace (newobj);
+	LDObject* object = parent()->document()->getObject (m_index);
+	LDObject* newObject = ParseLine (m_oldCode);
+	parent()->document()->replace(object, newObject);
 }
 
 void EditHistoryEntry::redo() const
 {
-	LDObject* obj = parent()->document()->getObject (m_index);
-	LDObject* newobj = ParseLine (m_newCode);
-	obj->replace (newobj);
+	LDObject* object = parent()->document()->getObject (m_index);
+	LDObject* newObject = ParseLine (m_newCode);
+	parent()->document()->replace(object, newObject);
 }
 
 //

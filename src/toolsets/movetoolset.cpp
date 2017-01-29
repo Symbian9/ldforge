@@ -30,7 +30,9 @@ MoveToolset::MoveToolset (MainWindow* parent) :
 
 void MoveToolset::moveSelection (bool up)
 {
-	LDObjectList objs = selectedObjects();
+	// TODO: order these!
+	LDObjectList objs = selectedObjects().toList();
+
 	if (objs.isEmpty())
 		return;
 
@@ -39,7 +41,7 @@ void MoveToolset::moveSelection (bool up)
 	int end = up ? countof(objs) : -1;
 	int increment = up ? 1 : -1;
 	QSet<LDObject*> objsToCompile;
-	LDDocument* file = objs[0]->document();
+	Model* model = (*objs.begin())->model();
 
 	for (int i = start; i != end; i += increment)
 	{
@@ -48,7 +50,7 @@ void MoveToolset::moveSelection (bool up)
 		int idx = obj->lineNumber();
 		int target = idx + (up ? -1 : 1);
 
-		if ((up and idx == 0) or (not up and idx == countof(file->objects()) - 1))
+		if ((up and idx == 0) or (not up and idx == countof(model->objects()) - 1))
 		{
 			// One of the objects hit the extrema. If this happens, this should be the first
 			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
@@ -57,8 +59,8 @@ void MoveToolset::moveSelection (bool up)
 		}
 
 		objsToCompile << obj;
-		objsToCompile << file->getObject(target);
-		obj->swap(file->getObject(target));
+		objsToCompile << model->getObject(target);
+		obj->swap(model->getObject(target));
 	}
 
 	// The objects need to be recompiled, otherwise their pick lists are left with
@@ -143,32 +145,32 @@ double MoveToolset::getRotateActionAngle()
 
 void MoveToolset::rotateXPos()
 {
-	math()->rotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateYPos()
 {
-	math()->rotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateZPos()
 {
-	math()->rotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateXNeg()
 {
-	math()->rotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateYNeg()
 {
-	math()->rotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateZNeg()
 {
-	math()->rotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects());
+	math()->rotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::configureRotationPoint()

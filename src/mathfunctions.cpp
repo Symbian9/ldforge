@@ -33,7 +33,7 @@ void MathFunctions::rotateVertex(Vertex& vertex, const Vertex& rotationPoint, co
 }
 
 
-void MathFunctions::rotateObjects(int l, int m, int n, double angle, const LDObjectList& objects) const
+void MathFunctions::rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& objects) const
 {
 	Vertex rotationPoint = getRotationPoint (objects);
 	double cosAngle = cos(angle);
@@ -83,7 +83,7 @@ void MathFunctions::rotateObjects(int l, int m, int n, double angle, const LDObj
 }
 
 
-Vertex MathFunctions::getRotationPoint(const LDObjectList& objs) const
+Vertex MathFunctions::getRotationPoint(const QVector<LDObject*>& objs) const
 {
 	switch (RotationPoint (m_config->rotationPointType()))
 	{

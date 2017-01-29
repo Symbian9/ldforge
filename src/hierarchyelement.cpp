@@ -59,7 +59,7 @@ LDDocument* HierarchyElement::currentDocument()
 }
 
 
-const LDObjectList& HierarchyElement::selectedObjects()
+const QSet<LDObject*>& HierarchyElement::selectedObjects()
 {
 	return m_window->selectedObjects();
 }

@@ -24,14 +24,14 @@ template<typename T>
 class LDObjectIterator
 {
 public:
-	LDObjectIterator (LDDocument* doc) :
-		m_list (doc->objects()),
+	LDObjectIterator (Model* model) :
+	    m_list (model->objects()),
 		m_i (-1)
 	{
 		seekTillValid();
 	}
 
-	LDObjectIterator (const LDObjectList& objs) :
+	LDObjectIterator (const QVector<LDObject*>& objs) :
 		m_list (objs),
 		m_i (-1)
 	{
@@ -111,7 +111,7 @@ public:
 	}
 
 private:
-	const LDObjectList& m_list;
+	const QVector<LDObject*>& m_list;
 	int m_i;
 };
 
@@ -120,8 +120,12 @@ QVector<T*> filterByType (const R& stuff)
 {
 	QVector<T*> result;
 
-	for (LDObjectIterator<T> it (stuff); it.isValid(); ++it)
-		result << it;
+	for (LDObject* object : stuff)
+	{
+		T* casted = dynamic_cast<T*>(object);
+		if (casted != nullptr)
+			result << casted;
+	}
 
 	return result;
 }

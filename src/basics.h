@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QMetaType>
+#include <QSet>
 #include <QVector3D>
 #include <QVector>
 #include <functional>
@@ -242,6 +243,12 @@ template<typename T>
 int countof(const QList<T>& vector)
 {
 	return vector.size();
+}
+
+template<typename T>
+int countof(const QSet<T>& set)
+{
+	return set.size();
 }
 
 template<typename T>

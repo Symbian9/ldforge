@@ -151,11 +151,13 @@ void BoundingBox::calcObject (LDObject* obj)
 		break;
 
 	case OBJ_SubfileReference:
-		for (LDObject* it : static_cast<LDSubfileReference*> (obj)->inlineContents (true, false))
-		{
-			calcObject (it);
-			it->destroy();
-		}
+	    {
+		    Model model;
+			static_cast<LDSubfileReference*>(obj)->inlineContents(model, true, false);
+
+			for (LDObject* it : model.objects())
+				calcObject(it);
+	    }
 		break;
 
 	default:

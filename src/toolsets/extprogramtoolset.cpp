@@ -170,20 +170,16 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 		if (obj->type() == OBJ_SubfileReference)
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			LDObjectList objs = ref->inlineContents (true, false);
-			writeObjects (objs, f);
-
-			for (LDObject* obj : objs)
-				obj->destroy();
+			Model model;
+			ref->inlineContents(model, true, false);
+			writeObjects(model.objects().toList(), f);
 		}
 		else if (obj->type() == OBJ_BezierCurve)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			LDObjectList objs = curve->rasterize(grid()->bezierCurveSegments());
-			writeObjects (objs, f);
-
-			for (LDObject* obj : objs)
-				obj->destroy();
+			Model model;
+			curve->rasterize(model, grid()->bezierCurveSegments());
+			writeObjects(model.objects().toList(), f);
 		}
 		else
 			f.write ((obj->asText() + "\r\n").toUtf8());
@@ -215,7 +211,7 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString fname
 //
 void ExtProgramToolset::writeSelection (QString fname)
 {
-	writeObjects (selectedObjects(), fname);
+	writeObjects (selectedObjects().toList(), fname);
 }
 
 // =============================================================================
@@ -327,7 +323,8 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 
 	// TODO: I don't like how I need to go to the document manager to load objects from a file...
 	// We're not loading this as a document so it shouldn't be necessary.
-	LDObjectList objs = m_documents->loadFileContents (&f, nullptr, nullptr);
+	Model model;
+	m_documents->loadFileContents(&f, model, nullptr, nullptr);
 
 	// If we replace the objects, delete the selection now.
 	if (replace)
@@ -339,16 +336,10 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 	// Insert the new objects
 	currentDocument()->clearSelection();
 
-	for (LDObject* obj : objs)
+	for (LDObject* object : model.objects())
 	{
-		if (not obj->isScemantic())
-		{
-			obj->destroy();
-			continue;
-		}
-
-		currentDocument()->addObject (obj);
-		obj->select();
+		if (object->isScemantic())
+			currentDocument()->addObject(object);
 	}
 
 	m_window->doFullRefresh();

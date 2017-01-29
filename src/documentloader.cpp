@@ -23,8 +23,9 @@
 #include "mainwindow.h"
 #include "dialogs/openprogressdialog.h"
 
-DocumentLoader::DocumentLoader (bool onForeground, QObject *parent) :
+DocumentLoader::DocumentLoader (Model* model, bool onForeground, QObject *parent) :
 	QObject (parent),
+    _model(model),
 	m_warningCount (0),
 	m_isDone (false),
 	m_hasAborted (false),
@@ -55,9 +56,9 @@ bool DocumentLoader::isOnForeground() const
 	return m_isOnForeground;
 }
 
-const LDObjectList& DocumentLoader::objects() const
+const QVector<LDObject*>& DocumentLoader::objects() const
 {
-	return m_objects;
+	return _model->objects();
 }
 
 void DocumentLoader::read (QIODevice* fp)
@@ -98,10 +99,6 @@ void DocumentLoader::work (int i)
 	// User wishes to abort, so stop here now.
 	if (hasAborted())
 	{
-		for (LDObject* obj : m_objects)
-			obj->destroy();
-
-		m_objects.clear();
 		m_isDone = true;
 		return;
 	}
@@ -126,7 +123,7 @@ void DocumentLoader::work (int i)
 			++m_warningCount;
 		}
 
-		m_objects << obj;
+		_model->addObject(obj);
 	}
 
 	m_progress = i;
