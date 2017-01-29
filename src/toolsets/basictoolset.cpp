@@ -22,7 +22,6 @@
 #include <QDialogButtonBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include "../addObjectDialog.h"
 #include "../glRenderer.h"
 #include "../ldDocument.h"
 #include "../ldObject.h"
@@ -228,37 +227,37 @@ void BasicToolset::invert()
 
 void BasicToolset::newSubfile()
 {
-	AddObjectDialog::staticDialog (OBJ_SubfileReference, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newLine()
 {
-	AddObjectDialog::staticDialog (OBJ_Line, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newTriangle()
 {
-	AddObjectDialog::staticDialog (OBJ_Triangle, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newQuadrilateral()
 {
-	AddObjectDialog::staticDialog (OBJ_Quad, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newConditionalLine()
 {
-	AddObjectDialog::staticDialog (OBJ_CondLine, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newComment()
 {
-	AddObjectDialog::staticDialog (OBJ_Comment, nullptr);
+	// TODO:
 }
 
 void BasicToolset::newBFC()
 {
-	AddObjectDialog::staticDialog (OBJ_Bfc, nullptr);
+	// TODO:
 }
 
 void BasicToolset::edit()
@@ -266,7 +265,7 @@ void BasicToolset::edit()
 	if (countof(selectedObjects()) == 1)
 	{
 		LDObject* obj = *selectedObjects().begin();
-		AddObjectDialog::staticDialog (obj->type(), obj);
+		// TODO:
 	}
 }
 

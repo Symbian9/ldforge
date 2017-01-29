@@ -36,7 +36,6 @@
 #include "miscallenous.h"
 #include "editHistory.h"
 #include "dialogs.h"
-#include "addObjectDialog.h"
 #include "messageLog.h"
 #include "glCompiler.h"
 #include "primitives.h"

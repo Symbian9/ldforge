@@ -44,7 +44,6 @@
 #include "colors.h"
 #include "editHistory.h"
 #include "radioGroup.h"
-#include "addObjectDialog.h"
 #include "messageLog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"
@@ -819,8 +818,8 @@ void MainWindow::updateEditModeActions()
 //
 void MainWindow::objectListDoubleClicked (QListWidgetItem* listitem)
 {
-	LDObject* object = m_objectsInList.reverseLookup (listitem);
-	AddObjectDialog::staticDialog (object->type(), object);
+	LDObject* object = m_objectsInList.reverseLookup(listitem);
+	// TODO: ...
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

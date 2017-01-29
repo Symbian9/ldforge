@@ -27,7 +27,6 @@ include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties (${CMAKE_BINARY_DIR}/configuration.cpp PROPERTIES GENERATED TRUE)
 
 set (LDFORGE_SOURCES
-	src/addObjectDialog.cpp
 	src/basics.cpp
 	src/colors.cpp
 	src/crashCatcher.cpp
@@ -82,7 +81,6 @@ set (LDFORGE_SOURCES
 )
 
 set (LDFORGE_HEADERS
-	src/addObjectDialog.h
 	src/basics.h
 	src/colors.h
 	src/crashCatcher.h

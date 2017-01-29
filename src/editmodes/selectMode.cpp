@@ -19,7 +19,6 @@
 #include <QMouseEvent>
 #include "selectMode.h"
 #include "../glRenderer.h"
-#include "../addObjectDialog.h"
 #include "../mainwindow.h"
 #include "../glRenderer.h"
 
@@ -122,7 +121,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 
 		if (obj)
 		{
-			AddObjectDialog::staticDialog (obj->type(), obj);
+			// TODO:
 			m_window->endAction();
 			return true;
 		}
