@@ -148,22 +148,6 @@ private:
 	Vertex m_coords[4];
 };
 
-template<typename T, typename... Args>
-T* LDSpawn (Args... args)
-{
-	static_assert (std::is_base_of<LDObject, T>::value,
-		"spawn may only be used with LDObject-derivatives");
-	T* result = new T (args..., nullptr);
-
-	// Set default color. Relying on virtual functions, this cannot be done in the c-tor.
-	// TODO: store -1 as the default color
-	if (result->isColored())
-		result->setColor (result->defaultColor());
-
-	return result;
-}
-
-//
 //
 // Common code for objects with matrices. This class is multiple-derived in
 // and thus not used directly other than as a common storage point for matrices

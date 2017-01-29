@@ -929,9 +929,8 @@ void LDBezierCurve::rasterize(Model& model, int segments)
 
 	for (LDPolygon& poly : polygons)
 	{
-		LDLine* line = LDSpawn<LDLine> (poly.vertices[0], poly.vertices[1]);
+		LDLine* line = model.emplace<LDLine>(poly.vertices[0], poly.vertices[1]);
 		line->setColor (poly.color);
-		model.addObject(line);
 	}
 }
 

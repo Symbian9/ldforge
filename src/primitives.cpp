@@ -247,9 +247,8 @@ void PrimitiveManager::loadCategories()
 	categoriesFile.close();
 }
 
-LDObjectList PrimitiveModel::generateBody() const
+void PrimitiveModel::generateBody(Model& model) const
 {
-	LDObjectList objects;
 	QVector<int> conditionalLineSegments;
 	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
 
@@ -263,12 +262,11 @@ LDObjectList PrimitiveModel::generateBody() const
 		switch (type)
 		{
 		case Circle:
-			{
-				LDLine* line = LDSpawn<LDLine>();
+		    {
+			    LDLine* line = model.emplace<LDLine>();
 				line->setVertex(0, Vertex {x0, 0.0f, z0});
 				line->setVertex(1, Vertex {x1, 0.0f, z1});
 				line->setColor(EdgeColor);
-				objects.append(line);
 			}
 			break;
 
@@ -314,13 +312,11 @@ LDObjectList PrimitiveModel::generateBody() const
 				Vertex v1 = {x1, y1, z1};
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
-				LDQuad* quad = LDSpawn<LDQuad>(v0, v1, v2, v3);
+				LDQuad* quad = model.emplace<LDQuad>(v0, v1, v2, v3);
 				quad->setColor(MainColor);
 
 				if (type == Cylinder)
 					quad->invert();
-
-				objects.append(quad);
 
 				if (type == Cylinder or type == Cone)
 					conditionalLineSegments.append(i);
@@ -348,12 +344,11 @@ LDObjectList PrimitiveModel::generateBody() const
 
 				// Disc negatives need to go the other way around, otherwise
 				// they'll end up upside-down.
-				LDTriangle* segment = LDSpawn<LDTriangle>();
+				LDTriangle* segment = model.emplace<LDTriangle>();
 				segment->setColor(MainColor);
 				segment->setVertex(type == Disc ? 0 : 2, v0);
 				segment->setVertex(1, v1);
 				segment->setVertex(type == Disc ? 2 : 0, v2);
-				objects.append(segment);
 			}
 			break;
 		}
@@ -381,16 +376,13 @@ LDObjectList PrimitiveModel::generateBody() const
 			v0 = {v0[X] * ringNumber, 1.0, v0[Z] * ringNumber};
 		}
 
-		LDCondLine* line = LDSpawn<LDCondLine>();
+		LDCondLine* line = model.emplace<LDCondLine>();
 		line->setColor(EdgeColor);
 		line->setVertex(0, v0);
 		line->setVertex(1, v1);
 		line->setVertex(2, v2);
 		line->setVertex(3, v3);
-		objects.append(line);
 	}
-
-	return objects;
 }
 
 
@@ -482,20 +474,17 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 		author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
 	}
 
-	LDObjectList objs;
-
-	objs.append(LDSpawn<LDComment>(description));
-	objs.append(LDSpawn<LDComment>(format("Name: %1", fileName)));
-	objs.append(LDSpawn<LDComment>(format("Author: %1", author)));
-	objs.append(LDSpawn<LDComment>(format("!LDRAW_ORG Unofficial_%1Primitive", hires ?  "48_" : "")));
-	objs.append(LDSpawn<LDComment>(license));
-	objs.append(LDSpawn<LDEmpty>());
-	objs.append(LDSpawn<LDBfc>(BfcStatement::CertifyCCW));
-	objs.append(LDSpawn<LDEmpty>());
 	document->openForEditing();
 	document->history()->setIgnoring(false);
-	document->addObjects(objs);
-	document->addObjects(spec.generateBody());
+	document->emplace<LDComment>(description);
+	document->emplace<LDComment>(format("Name: %1", fileName));
+	document->emplace<LDComment>(format("Author: %1", author));
+	document->emplace<LDComment>(format("!LDRAW_ORG Unofficial_%1Primitive", hires ?  "48_" : ""));
+	document->emplace<LDComment>(license);
+	document->emplace<LDEmpty>();
+	document->emplace<LDBfc>(BfcStatement::CertifyCCW);
+	document->emplace<LDEmpty>();
+	spec.generateBody(*document);
 	document->addHistoryStep();
 	return document;
 }

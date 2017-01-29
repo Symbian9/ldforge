@@ -22,6 +22,7 @@
 #include <QTreeWidgetItem>
 #include <QDirIterator>
 #include "main.h"
+#include "model.h"
 
 class LDDocument;
 class Ui_GeneratePrimitiveDialog;
@@ -51,7 +52,7 @@ struct PrimitiveModel
 	int ringNumber;
 
 	QString typeName() const;
-	LDObjectList generateBody() const;
+	void generateBody(Model& model) const;
 	static QString typeName(Type type);
 	QString makeFileName() const;
 };
