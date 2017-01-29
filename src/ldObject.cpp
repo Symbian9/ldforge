@@ -191,26 +191,6 @@ QString LDBfc::asText() const
 
 // =============================================================================
 //
-QList<LDTriangle*> LDQuad::splitToTriangles()
-{
-	// Create the two triangles based on this quadrilateral:
-	// 0───3       0───3    3
-	// │   │  --→  │  ╱    ╱│
-	// │   │  --→  │ ╱    ╱ │
-	// │   │  --→  │╱    ╱  │
-	// 1───2       1    1───2
-	LDTriangle* tri1 (new LDTriangle (vertex (0), vertex (1), vertex (3)));
-	LDTriangle* tri2 (new LDTriangle (vertex (1), vertex (2), vertex (3)));
-
-	// The triangles also inherit the quad's color
-	tri1->setColor (color());
-	tri2->setColor (color());
-
-	return {tri1, tri2};
-}
-
-// =============================================================================
-//
 // Replace this LDObject with another LDObject. Object is deleted in the process.
 //
 void LDObject::replace (LDObject* other)
@@ -278,7 +258,7 @@ LDLine::LDLine (Vertex v1, Vertex v2, LDDocument* document) :
 
 // =============================================================================
 //
-LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document) :
+LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* document) :
 	LDObject (document)
 {
 	setVertex (0, v1);

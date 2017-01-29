@@ -389,7 +389,7 @@ class LDTriangle : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, LDDocument* model = nullptr);
+	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 	int triangleCount() const override;
 };
 
@@ -412,8 +412,6 @@ class LDQuad : public LDObject
 public:
 	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* model = nullptr);
 
-	// Split this quad into two triangles
-	QList<LDTriangle*> splitToTriangles();
 	int triangleCount() const override;
 };
 

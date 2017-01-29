@@ -578,9 +578,9 @@ void LDDocument::addObjects (const LDObjectList& objects)
 //
 void LDDocument::insertObject (int pos, LDObject* obj)
 {
-	history()->add (new AddHistoryEntry (pos, obj));
 	Model::insertObject(pos, obj);
-	m_window->renderer()->compileObject (obj);
+	history()->add(new AddHistoryEntry {pos, obj});
+	m_window->renderer()->compileObject(obj);
 	connect(obj, SIGNAL(codeChanged(int,QString,QString)), this, SLOT(objectChanged(int,QString,QString)));
 
 #ifdef DEBUG
@@ -729,18 +729,18 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 	if (m_manager->preInline(this, model, deep, renderinline))
 		return; // Manager dealt with this inline
 
-	for (LDObject* obj : objects())
+	for (LDObject* object : objects())
 	{
 		// Skip those without scemantic meaning
-		if (not obj->isScemantic())
+		if (not object->isScemantic())
 			continue;
 
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
-		if (deep and obj->type() == OBJ_SubfileReference)
-			static_cast<LDSubfileReference*>(obj)->inlineContents(model, deep, renderinline);
+		if (deep and object->type() == OBJ_SubfileReference)
+			static_cast<LDSubfileReference*>(object)->inlineContents(model, deep, renderinline);
 		else
-			model.addObject(obj->createCopy());
+			model.addObject(object->createCopy());
 	}
 }
 

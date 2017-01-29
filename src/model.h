@@ -57,6 +57,14 @@ public:
 			return nullptr;
 	}
 
+	template<typename T, typename... Args>
+	T* emplaceReplacementAt(int position, Args&& ...args)
+	{
+		T* replacement = constructObject<T>(args...);
+		setObjectAt(position, replacement);
+		return replacement;
+	}
+
 protected:
 	template<typename T, typename... Args>
 	T* constructObject(Args&& ...args)

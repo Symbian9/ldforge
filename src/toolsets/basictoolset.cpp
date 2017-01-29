@@ -108,7 +108,6 @@ void BasicToolset::doInline (bool deep)
 			reference->inlineContents(inlined, deep, false);
 
 			// Merge in the inlined objects
-			print("Inlined %1 objects.\n", countof(inlined.objects()));
 			for (LDObject* inlinedObject : inlined.objects())
 			{
 				currentDocument()->insertObject (idx++, inlinedObject);

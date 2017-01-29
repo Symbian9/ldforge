@@ -50,27 +50,40 @@ AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
 
 void AlgorithmToolset::splitQuads()
 {
-	int num = 0;
-	QVector<LDObject*> selected = selectedObjects().toList().toVector();
+	int count = 0;
 
-	for (LDObjectIterator<LDQuad> it (selected); it.isValid(); ++it)
+	for (LDObject* object : selectedObjects().toList())
 	{
+		if (object->numVertices() != 4)
+			continue;
+
+		Vertex v0 = object->vertex(0);
+		Vertex v1 = object->vertex(1);
+		Vertex v2 = object->vertex(2);
+		Vertex v3 = object->vertex(3);
+		LDColor color = object->color();
+
 		// Find the index of this quad
-		int index = it->lineNumber();
-
+		int index = object->lineNumber();
 		if (index == -1)
-			return;
+			continue;
 
-		QList<LDTriangle*> triangles = it->splitToTriangles();
+		// Create the two triangles based on this quadrilateral:
+		// 0───3       0───3    3
+		// │   │  --→  │  ╱    ╱│
+		// │   │  --→  │ ╱    ╱ │
+		// │   │  --→  │╱    ╱  │
+		// 1───2       1    1───2
+		LDTriangle* triangle1 = currentDocument()->emplaceReplacementAt<LDTriangle>(index, v0, v1, v3);
+		LDTriangle* triangle2 = currentDocument()->emplaceAt<LDTriangle>(index + 1, v1, v2, v3);
 
-		// Replace the quad with the first triangle and add the second triangle
-		// after the first one.
-		currentDocument()->setObjectAt (index, triangles[0]);
-		currentDocument()->insertObject (index + 1, triangles[1]);
-		num++;
+		// The triangles also inherit the quad's color
+		triangle1->setColor(color);
+		triangle2->setColor(color);
+		count += 1;
 	}
 
-	print ("%1 quadrilaterals split", num);
+	print ("%1 quadrilaterals split", count);
 }
 
 void AlgorithmToolset::editRaw()
