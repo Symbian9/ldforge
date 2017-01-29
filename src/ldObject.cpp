@@ -793,9 +793,9 @@ void LDError::setFileReferenced (QString value)
 	m_fileReferenced = value;
 }
 
-LDComment::LDComment (QString text, LDDocument* document) :
-	LDObject (document),
-	m_text (text) {}
+LDComment::LDComment (QString text, Model* model) :
+    LDObject {model},
+    m_text {text} {}
 
 QString LDComment::text() const
 {
@@ -807,9 +807,9 @@ void LDComment::setText (QString value)
 	changeProperty (this, &m_text, value);
 }
 
-LDBfc::LDBfc (const BfcStatement type, LDDocument* document) :
-	LDObject (document),
-	m_statement (type) {}
+LDBfc::LDBfc (const BfcStatement type, Model* model) :
+    LDObject {model},
+    m_statement {type} {}
 
 BfcStatement LDBfc::statement() const
 {

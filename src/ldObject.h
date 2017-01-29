@@ -248,7 +248,7 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDComment (QString text, LDDocument* model = nullptr);
+	LDComment (QString text, Model* model = nullptr);
 	QString text() const;
 	void setText (QString value);
 
@@ -287,7 +287,7 @@ public:
 	LDOBJ_NO_MATRIX
 
 public:
-    LDBfc (const BfcStatement type, LDDocument* model = nullptr);
+    LDBfc (const BfcStatement type, Model* model = nullptr);
 
 	BfcStatement statement() const;
 	void setStatement (BfcStatement value);

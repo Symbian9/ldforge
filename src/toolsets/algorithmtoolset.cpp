@@ -116,46 +116,38 @@ void AlgorithmToolset::editRaw()
 
 void AlgorithmToolset::makeBorders()
 {
-	int num = 0;
+	int count = 0;
 
-	for (LDObject* obj : selectedObjects())
+	for (LDObject* object : selectedObjects())
 	{
-		const LDObjectType type = obj->type();
+		const LDObjectType type = object->type();
 
 		if (type != OBJ_Quad and type != OBJ_Triangle)
 			continue;
 
-		LDLine* lines[4];
+		Model lines;
 
 		if (type == OBJ_Quad)
 		{
-			LDQuad* quad = static_cast<LDQuad*> (obj);
-			lines[0] = LDSpawn<LDLine> (quad->vertex (0), quad->vertex (1));
-			lines[1] = LDSpawn<LDLine> (quad->vertex (1), quad->vertex (2));
-			lines[2] = LDSpawn<LDLine> (quad->vertex (2), quad->vertex (3));
-			lines[3] = LDSpawn<LDLine> (quad->vertex (3), quad->vertex (0));
+			LDQuad* quad = static_cast<LDQuad*>(object);
+			lines.emplace<LDLine>(quad->vertex (0), quad->vertex (1));
+			lines.emplace<LDLine>(quad->vertex (1), quad->vertex (2));
+			lines.emplace<LDLine>(quad->vertex (2), quad->vertex (3));
+			lines.emplace<LDLine>(quad->vertex (3), quad->vertex (0));
 		}
 		else
 		{
-			LDTriangle* tri = static_cast<LDTriangle*> (obj);
-			lines[0] = LDSpawn<LDLine> (tri->vertex (0), tri->vertex (1));
-			lines[1] = LDSpawn<LDLine> (tri->vertex (1), tri->vertex (2));
-			lines[2] = LDSpawn<LDLine> (tri->vertex (2), tri->vertex (0));
-			lines[3] = nullptr;
+			LDTriangle* triangle = static_cast<LDTriangle*>(object);
+			lines.emplace<LDLine>(triangle->vertex (0), triangle->vertex (1));
+			lines.emplace<LDLine>(triangle->vertex (1), triangle->vertex (2));
+			lines.emplace<LDLine>(triangle->vertex (2), triangle->vertex (0));
 		}
 
-		for (int i = 0; i < countof (lines); ++i)
-		{
-			if (lines[i] == nullptr)
-				continue;
-
-			long idx = obj->lineNumber() + i + 1;
-			currentDocument()->insertObject (idx, lines[i]);
-			++num;
-		}
+		count += countof(lines.objects());
+		currentDocument()->merge(lines, object->lineNumber() + 1);
 	}
 
-	print (tr ("Added %1 border lines"), num);
+	print(tr("Added %1 border lines"), count);
 }
 
 void AlgorithmToolset::roundCoordinates()
@@ -390,52 +382,45 @@ void AlgorithmToolset::addHistoryLine()
 void AlgorithmToolset::splitLines()
 {
 	bool ok;
-	int segments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:",
+	int numSegments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:",
 		m_config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
 		return;
 
-	m_config->setSplitLinesSegments (segments);
+	m_config->setSplitLinesSegments (numSegments);
 
 	for (LDObject* obj : selectedObjects())
 	{
 		if (not isOneOf (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
-		QVector<LDObject*> newsegs;
+		Model segments;
 
-		for (int i = 0; i < segments; ++i)
+		for (int i = 0; i < numSegments; ++i)
 		{
-			LDObject* segment;
-			Vertex v0, v1;
+			Vertex v0;
+			Vertex v1;
 
 			v0.apply ([&](Axis ax, double& a)
 			{
 				double len = obj->vertex (1)[ax] - obj->vertex (0)[ax];
-				a = (obj->vertex (0)[ax] + ((len * i) / segments));
+				a = (obj->vertex (0)[ax] + ((len * i) / numSegments));
 			});
 
 			v1.apply ([&](Axis ax, double& a)
 			{
 				double len = obj->vertex (1)[ax] - obj->vertex (0)[ax];
-				a = (obj->vertex (0)[ax] + ((len * (i + 1)) / segments));
+				a = (obj->vertex (0)[ax] + ((len * (i + 1)) / numSegments));
 			});
 
 			if (obj->type() == OBJ_Line)
-				segment = LDSpawn<LDLine> (v0, v1);
+				segments.emplace<LDLine>(v0, v1);
 			else
-				segment = LDSpawn<LDCondLine> (v0, v1, obj->vertex (2), obj->vertex (3));
-
-			newsegs << segment;
+				segments.emplace<LDCondLine>(v0, v1, obj->vertex (2), obj->vertex (3));
 		}
 
-		int ln = obj->lineNumber();
-
-		for (LDObject* seg : newsegs)
-			currentDocument()->insertObject (ln++, seg);
-
-		currentDocument()->remove(obj);
+		currentDocument()->replace(obj, segments);
 	}
 
 	m_window->buildObjectList();
@@ -472,7 +457,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// Where to insert the subfile reference?
 	// TODO: the selection really should be sorted by position...
-	int				refidx = (*selectedObjects().begin())->lineNumber();
+	int				referencePosition = (*selectedObjects().begin())->lineNumber();
 
 	// Determine title of subfile
 	if (titleobj)
@@ -545,53 +530,40 @@ void AlgorithmToolset::subfileSelection()
 		}
 	}
 
-	// Get the body of the document in LDraw code
-	for (LDObject* obj : selectedObjects())
-		code << obj->asText();
-
 	// Create the new subfile document
-	LDDocument* doc = m_window->newDocument();
-	doc->openForEditing();
-	doc->setFullPath (fullsubname);
-	doc->setName (LDDocument::shortenName (fullsubname));
+	LDDocument* subfile = m_window->newDocument();
+	subfile->openForEditing();
+	subfile->setFullPath(fullsubname);
+	subfile->setName(LDDocument::shortenName(fullsubname));
 
-	LDObjectList objs;
-	objs << LDSpawn<LDComment> (subtitle);
-	objs << LDSpawn<LDComment> ("Name: "); // This gets filled in when the subfile is saved
-	objs << LDSpawn<LDComment> (format ("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
-	objs << LDSpawn<LDComment> ("!LDRAW_ORG Unofficial_Subpart");
+	Model header;
+	header.emplace<LDComment>(subtitle);
+	header.emplace<LDComment>("Name: "); // This gets filled in when the subfile is saved
+	header.emplace<LDComment>(format("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
+	header.emplace<LDComment>("!LDRAW_ORG Unofficial_Subpart");
 
 	if (not license.isEmpty())
-		objs << LDSpawn<LDComment> (license);
+		header.emplace<LDComment>(license);
 
-	objs << LDSpawn<LDEmpty>();
-	objs << LDSpawn<LDBfc> (bfctype);
-	objs << LDSpawn<LDEmpty>();
+	header.emplace<LDEmpty>();
+	header.emplace<LDBfc>(bfctype);
+	header.emplace<LDEmpty>();
+	subfile->merge(header);
 
-	doc->addObjects (objs);
-
-	// Add the actual subfile code to the new document
-	for (QString line : code)
-	{
-		LDObject* obj = ParseLine (line);
-		doc->addObject (obj);
-	}
+	// Copy the body over to the new document
+	for (LDObject* object : selectedObjects())
+		subfile->addObject(object->createCopy());
 
 	// Try save it
-	if (m_window->save (doc, true))
+	if (m_window->save(subfile, true))
 	{
 		// Save was successful. Delete the original selection now from the
 		// main document.
-		for (LDObject* object : selectedObjects())
+		for (LDObject* object : selectedObjects().toList())
 			currentDocument()->remove(object);
 
 		// Add a reference to the new subfile to where the selection was
-		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
-		ref->setColor (MainColor);
-		ref->setFileInfo (doc);
-		ref->setPosition (Origin);
-		ref->setTransformationMatrix (Matrix::identity);
-		currentDocument()->insertObject (refidx, ref);
+		currentDocument()->emplaceAt<LDSubfileReference>(referencePosition, subfile, Matrix::identity, Origin);
 
 		// Refresh stuff
 		m_window->updateDocumentList();
@@ -600,6 +572,6 @@ void AlgorithmToolset::subfileSelection()
 	else
 	{
 		// Failed to save.
-		doc->close();
+		subfile->close();
 	}
 }
