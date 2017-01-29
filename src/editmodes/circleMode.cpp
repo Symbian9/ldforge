@@ -125,10 +125,7 @@ void CircleMode::endDraw()
 		{
 			primitiveModel.ringNumber = component.num;
 			primitiveFile = primitives()->getPrimitive(primitiveModel);
-			LDSubfileReference* ref = model.emplace<LDSubfileReference>();
-			ref->setFileInfo(primitiveFile);
-			ref->setTransformationMatrix(getCircleDrawMatrix(component.scale));
-			ref->setPosition(m_drawedVerts[0]);
+			model.emplace<LDSubfileReference>(primitiveFile, getCircleDrawMatrix(component.scale), m_drawedVerts.first());
 		}
 	}
 	else
@@ -172,13 +169,7 @@ void CircleMode::endDraw()
 	}
 
 	if (circleOrDisc and primitiveFile)
-	{
-		LDSubfileReference* ref = model.emplace<LDSubfileReference>();
-		ref->setFileInfo (primitiveFile);
-		ref->setTransformationMatrix (transform);
-		ref->setPosition (m_drawedVerts[0]);
-		ref->setColor (MainColor);
-	}
+		model.emplace<LDSubfileReference>(primitiveFile, transform, m_drawedVerts.first());
 
 	if (not model.isEmpty())
 	{

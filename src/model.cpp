@@ -31,13 +31,11 @@ void Model::insertObject(int position, LDObject* object)
 	if (object->model() and object->model() != this)
 		object->model()->withdraw(object);
 
-	if (not object->model())
-	{
-		_objects.insert(position, object);
-		_needsTriangleRecount = true;
-		object->setDocument(this);
-		print("Object %1 added to position %2", object->id(), position);
-	}
+	// TODO: check that the object isn't in the vector once there's a cheap way to do so!
+	_objects.insert(position, object);
+	_needsTriangleRecount = true;
+	object->setDocument(this);
+	print("Object %1 added to position %2", object->id(), position);
 }
 
 bool Model::swapObjects(LDObject* one, LDObject* other)
@@ -91,12 +89,6 @@ void Model::removeAt(int position)
 {
 	LDObject* object = withdrawAt(position);
 	delete object;
-}
-
-void Model::replace(LDObject* object, LDObject* newObject)
-{
-	if (object->model() == this)
-		setObjectAt(object->lineNumber(), newObject);
 }
 
 void Model::replace(LDObject *object, Model &model)

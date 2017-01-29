@@ -117,10 +117,7 @@ public:
 	LDObject* previous() const;
 	bool previousIsInvertnext (LDBfc*& ptr);
 	QColor randomColor() const;
-	void replace (LDObject* other);
-	void replace (const LDObjectList& others);
 	void setColor (LDColor color);
-	void setDocument (Model* model);
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
 	void swap (LDObject* other);
@@ -138,6 +135,7 @@ protected:
 	friend class Model;
 	LDObject (Model* model = nullptr);
 	virtual ~LDObject();
+	void setDocument(Model* model);
 
 private:
 	bool m_isHidden;

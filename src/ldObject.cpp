@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include <assert.h>
 #include "main.h"
 #include "ldObject.h"
 #include "ldDocument.h"
@@ -44,14 +44,12 @@ enum { MAX_LDOBJECT_IDS = (1 << 24) };
 // LDObject constructors
 //
 LDObject::LDObject (Model* model) :
-	m_isHidden (false),
-    m_isSelected (false),
-    _model (nullptr)
+    m_isHidden {false},
+    m_isSelected {false},
+    _model {model},
+    m_coords {Origin}
 {
-	if (model)
-		model->addObject (this);
-
-	memset (m_coords, 0, sizeof m_coords);
+	assert(_model != nullptr);
 
 	// Let's hope that nobody goes to create 17 million objects anytime soon...
 	static int32 nextId = 1; // 0 shalt be null
@@ -187,34 +185,6 @@ QString LDEmpty::asText() const
 QString LDBfc::asText() const
 {
 	return format ("0 BFC %1", statementToString());
-}
-
-// =============================================================================
-//
-// Replace this LDObject with another LDObject. Object is deleted in the process.
-//
-void LDObject::replace (LDObject* other)
-{
-	int idx = lineNumber();
-
-	if (idx != -1)
-	{
-		// Replace the instance of the old object with the new object
-		model()->setObjectAt(idx, other);
-	}
-}
-
-void LDObject::replace (const LDObjectList& others)
-{
-	int idx = lineNumber();
-
-	if (idx != -1 and not others.isEmpty())
-	{
-		for (int i = 1; i < countof(others); ++i)
-			model()->insertObject (idx + i, others[i]);
-
-		model()->setObjectAt(idx, others[0]);
-	}
 }
 
 // =============================================================================

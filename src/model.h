@@ -18,7 +18,6 @@ public:
 	void replace(LDObject *object, Model& model);
 	void clear();
 	void merge(Model& other, int position = -1);
-	void replace(LDObject* object, LDObject* newObject);
 	int size() const;
 	const QVector<LDObject*>& objects() const;
 	LDObject* getObject(int position) const;
