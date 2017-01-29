@@ -418,49 +418,6 @@ int LDObject::lineNumber() const
 
 // =============================================================================
 //
-// Get type name by enumerator
-//
-QString LDObject::typeName (LDObjectType type)
-{
-	return LDObject::getDefault (type)->typeName();
-}
-
-// =============================================================================
-//
-// Get a description of a list of LDObjects
-//
-QString LDObject::describeObjects (const LDObjectList& objs)
-{
-	QString text;
-
-	if (objs.isEmpty())
-		return "nothing"; // :)
-
-	for (LDObjectType objType = OBJ_FirstType; objType < OBJ_NumTypes; ++objType)
-	{
-		int count = 0;
-
-		for (LDObject* obj : objs)
-		{
-			if (obj->type() == objType)
-				count++;
-		}
-
-		if (count == 0)
-			continue;
-
-		if (not text.isEmpty())
-			text += ", ";
-
-		QString noun = format ("%1%2", typeName (objType), plural (count));
-		text += format ("%1 %2", count, noun);
-	}
-
-	return text;
-}
-
-// =============================================================================
-//
 // Object after this in the current file
 //
 LDObject* LDObject::next() const
@@ -545,30 +502,6 @@ QColor LDObject::randomColor() const
 Model* LDObject::model() const
 {
 	return _model;
-}
-
-// =============================================================================
-//
-// Returns a default-constructed LDObject by the given type
-//
-LDObject* LDObject::getDefault (const LDObjectType type)
-{
-	switch (type)
-	{
-	case OBJ_Comment:		return LDSpawn<LDComment>();
-	case OBJ_Bfc:			return LDSpawn<LDBfc>();
-	case OBJ_Line:			return LDSpawn<LDLine>();
-	case OBJ_CondLine:		return LDSpawn<LDCondLine>();
-	case OBJ_SubfileReference:		return LDSpawn<LDSubfileReference>();
-	case OBJ_Triangle:		return LDSpawn<LDTriangle>();
-	case OBJ_Quad:			return LDSpawn<LDQuad>();
-	case OBJ_Empty:			return LDSpawn<LDEmpty>();
-	case OBJ_Error:			return LDSpawn<LDError>();
-	case OBJ_Overlay:		return LDSpawn<LDOverlay>();
-	case OBJ_BezierCurve:	return LDSpawn<LDBezierCurve>();
-	case OBJ_NumTypes:		break;
-	}
-	return nullptr;
 }
 
 // =============================================================================

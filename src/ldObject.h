@@ -130,10 +130,7 @@ public:
 	virtual QString typeName() const = 0;
 	const Vertex& vertex (int i) const;
 
-	static QString describeObjects (const LDObjectList& objs);
 	static LDObject* fromID(int32 id);
-	static LDObject* getDefault (const LDObjectType type);
-	static QString typeName (LDObjectType type);
 
 signals:
 	void codeChanged(int position, QString before, QString after);
