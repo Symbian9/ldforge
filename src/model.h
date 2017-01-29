@@ -5,7 +5,7 @@
 class Model
 {
 public:
-	Model();
+	Model(DocumentManager* manager);
 	Model(const Model& other) = delete;
 	~Model();
 
@@ -27,6 +27,10 @@ public:
 	QVector<LDObject*>::iterator begin();
 	QVector<LDObject*>::iterator end();
 	bool isEmpty() const;
+	DocumentManager* documentManager() const;
+	LDObject* insertFromString(int position, QString line);
+	LDObject* addFromString(QString line);
+	LDObject* replaceWithFromString(LDObject* object, QString line);
 
 	template<typename T, typename... Args>
 	T* emplace(Args&& ...args)
@@ -85,6 +89,7 @@ protected:
 	virtual LDObject* withdrawAt(int position);
 
 	QVector<LDObject*> _objects;
+	DocumentManager* _manager;
 	mutable int _triangleCount = 0;
 	mutable bool _needsTriangleRecount;
 };

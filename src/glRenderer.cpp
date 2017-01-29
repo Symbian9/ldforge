@@ -1438,68 +1438,71 @@ void GLRenderer::updateOverlayObjects()
 			continue;
 
 		LDGLOverlay& meta = currentDocumentData().overlays[camera];
-		LDOverlay* ovlobj = findOverlayObject (camera);
+		LDOverlay* overlayObject = findOverlayObject (camera);
 
-		if (meta.image == nullptr and ovlobj)
+		if (meta.image == nullptr and overlayObject)
 		{
 			// If this is the last overlay image, we need to remove the empty space after it as well.
-			LDObject* nextobj = ovlobj->next();
+			LDObject* nextobj = overlayObject->next();
 
 			if (nextobj and nextobj->type() == OBJ_Empty)
 				document()->remove(nextobj);
 
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
-			document()->remove(ovlobj);
+			document()->remove(overlayObject);
+			overlayObject = nullptr;
 		}
-		else if (meta.image and ovlobj == nullptr)
+		else if (meta.image and overlayObject == nullptr)
 		{
 			// Inverse case: image is there but the overlay object is
 			// not, thus create the object.
-			ovlobj = LDSpawn<LDOverlay>();
-
+			//
 			// Find a suitable position to place this object. We want to place
 			// this into the header, which is everything up to the first scemantic
 			// object. If we find another overlay object, place this object after
 			// the last one found. Otherwise, place it before the first schemantic
 			// object and put an empty object after it (though don't do this if
 			// there was no schemantic elements at all)
-			int i, lastOverlay = -1;
+			int i;
+			int lastOverlayPosition = -1;
 			bool found = false;
 
 			for (i = 0; i < document()->getObjectCount(); ++i)
 			{
-				LDObject* obj = document()->getObject (i);
+				LDObject* object = document()->getObject (i);
 
-				if (obj->isScemantic())
+				if (object->isScemantic())
 				{
 					found = true;
 					break;
 				}
 
-				if (obj->type() == OBJ_Overlay)
-					lastOverlay = i;
+				if (object->type() == OBJ_Overlay)
+					lastOverlayPosition = i;
 			}
 
-			if (lastOverlay != -1)
-				document()->insertObject (lastOverlay + 1, ovlobj);
+			if (lastOverlayPosition != -1)
+			{
+				overlayObject = document()->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
+			}
 			else
 			{
-				document()->insertObject (i, ovlobj);
+				overlayObject = document()->emplaceAt<LDOverlay>(i);
 
 				if (found)
 					document()->emplaceAt<LDEmpty>(i + 1);
 			}
 		}
 
-		if (meta.image and ovlobj)
+		if (meta.image and overlayObject)
 		{
-			ovlobj->setCamera (camera);
-			ovlobj->setFileName (meta.fileName);
-			ovlobj->setX (meta.offsetX);
-			ovlobj->setY (meta.offsetY);
-			ovlobj->setWidth (meta.width);
-			ovlobj->setHeight (meta.height);
+			overlayObject->setCamera (camera);
+			overlayObject->setFileName (meta.fileName);
+			overlayObject->setX (meta.offsetX);
+			overlayObject->setY (meta.offsetY);
+			overlayObject->setWidth (meta.width);
+			overlayObject->setHeight (meta.height);
 		}
 	}
 

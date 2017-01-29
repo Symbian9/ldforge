@@ -170,14 +170,14 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 		if (obj->type() == OBJ_SubfileReference)
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			Model model;
+			Model model {m_documents};
 			ref->inlineContents(model, true, false);
 			writeObjects(model.objects().toList(), f);
 		}
 		else if (obj->type() == OBJ_BezierCurve)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			Model model;
+			Model model {m_documents};
 			curve->rasterize(model, grid()->bezierCurveSegments());
 			writeObjects(model.objects().toList(), f);
 		}
@@ -323,7 +323,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 
 	// TODO: I don't like how I need to go to the document manager to load objects from a file...
 	// We're not loading this as a document so it shouldn't be necessary.
-	Model model;
+	Model model {m_documents};
 	m_documents->loadFileContents(&f, model, nullptr, nullptr);
 
 	// If we replace the objects, delete the selection now.

@@ -329,7 +329,7 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 	int numWarnings;
 	bool ok;
-	Model model;
+	Model model {this};
 	loadFileContents(fp, model, &numWarnings, &ok);
 	load->merge(model);
 	fp->close();

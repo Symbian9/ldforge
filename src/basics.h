@@ -107,7 +107,6 @@ class BoundingBox
 public:
 	BoundingBox();
 
-	void calcObject (LDObject* obj);
 	void calcVertex (const Vertex& vertex);
 	Vertex center() const;
 	bool isEmpty() const;
@@ -116,7 +115,6 @@ public:
 	const Vertex& vertex0() const;
 	const Vertex& vertex1() const;
 
-	BoundingBox& operator<< (LDObject* obj);
 	BoundingBox& operator<< (const Vertex& v);
 
 private:

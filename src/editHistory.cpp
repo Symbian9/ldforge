@@ -171,7 +171,7 @@ void AddHistoryEntry::undo() const
 
 void AddHistoryEntry::redo() const
 {
-	parent()->document()->insertObject (m_index, ParseLine (m_code));
+	parent()->document()->insertFromString(m_index, m_code);
 }
 
 //
@@ -203,15 +203,13 @@ EditHistoryEntry::EditHistoryEntry (int idx, QString oldCode, QString newCode) :
 void EditHistoryEntry::undo() const
 {
 	LDObject* object = parent()->document()->getObject (m_index);
-	LDObject* newObject = ParseLine (m_oldCode);
-	parent()->document()->replace(object, newObject);
+	parent()->document()->replaceWithFromString(object, m_oldCode);
 }
 
 void EditHistoryEntry::redo() const
 {
 	LDObject* object = parent()->document()->getObject (m_index);
-	LDObject* newObject = ParseLine (m_newCode);
-	parent()->document()->replace(object, newObject);
+	parent()->document()->replaceWithFromString(object, m_newCode);
 }
 
 //

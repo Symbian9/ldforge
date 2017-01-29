@@ -72,17 +72,16 @@ void BasicToolset::paste()
 	const QString clipboardText = qApp->clipboard()->text();
 	int idx = m_window->suggestInsertPoint();
 	currentDocument()->clearSelection();
-	int num = 0;
+	int count = 0;
 
-	for (QString line : clipboardText.split ("\n"))
+	for (QString line : clipboardText.split("\n"))
 	{
-		LDObject* pasted = ParseLine (line);
-		currentDocument()->insertObject (idx++, pasted);
+		LDObject* pasted = currentDocument()->insertFromString(idx++, line);
 		currentDocument()->addToSelection(pasted);
-		++num;
+		++count;
 	}
 
-	print (tr ("%1 objects pasted"), num);
+	print(tr("%1 objects pasted"), count);
 	m_window->refresh();
 	m_window->scrollToSelection();
 }
@@ -103,7 +102,7 @@ void BasicToolset::doInline (bool deep)
 
 		if (idx != -1)
 		{
-			Model inlined;
+			Model inlined {m_documents};
 			reference->inlineContents(inlined, deep, false);
 
 			// Merge in the inlined objects
@@ -120,7 +119,7 @@ void BasicToolset::doInline (bool deep)
 
 	for (LDBezierCurve* curve : filterByType<LDBezierCurve> (selectedObjects()))
 	{
-		Model curveModel;
+		Model curveModel {m_documents};
 		curve->rasterize(curveModel, grid()->bezierCurveSegments());
 		currentDocument()->replace(curve, curveModel);
 	}
@@ -164,7 +163,7 @@ void BasicToolset::uncolor()
 
 void BasicToolset::insertRaw()
 {
-	int idx = m_window->suggestInsertPoint();
+	int position = m_window->suggestInsertPoint();
 
 	QDialog* const dlg = new QDialog;
 	QVBoxLayout* const layout = new QVBoxLayout;
@@ -185,11 +184,9 @@ void BasicToolset::insertRaw()
 
 	for (QString line : QString (inputbox->toPlainText()).split ("\n"))
 	{
-		LDObject* obj = ParseLine (line);
-
-		currentDocument()->insertObject (idx, obj);
-		currentDocument()->addToSelection(obj);
-		idx++;
+		LDObject* object = currentDocument()->insertFromString(position, line);
+		currentDocument()->addToSelection(object);
+		position += 1;
 	}
 
 	m_window->refresh();

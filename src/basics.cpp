@@ -138,46 +138,9 @@ BoundingBox::BoundingBox()
 
 // =============================================================================
 //
-void BoundingBox::calcObject (LDObject* obj)
-{
-	switch (obj->type())
-	{
-	case OBJ_Line:
-	case OBJ_Triangle:
-	case OBJ_Quad:
-	case OBJ_CondLine:
-		for (int i = 0; i < obj->numVertices(); ++i)
-			calcVertex (obj->vertex (i));
-		break;
-
-	case OBJ_SubfileReference:
-	    {
-		    Model model;
-			static_cast<LDSubfileReference*>(obj)->inlineContents(model, true, false);
-
-			for (LDObject* it : model.objects())
-				calcObject(it);
-	    }
-		break;
-
-	default:
-		break;
-	}
-}
-
-// =============================================================================
-//
 BoundingBox& BoundingBox::operator<< (const Vertex& v)
 {
 	calcVertex (v);
-	return *this;
-}
-
-// =============================================================================
-//
-BoundingBox& BoundingBox::operator<< (LDObject* obj)
-{
-	calcObject (obj);
 	return *this;
 }
 

@@ -95,9 +95,14 @@ Vertex MathFunctions::getRotationPoint(const QVector<LDObject*>& objs) const
 			for (LDObject* obj : objs)
 			{
 				if (obj->hasMatrix())
+				{
 					box << static_cast<LDMatrixObject*> (obj)->position();
+				}
 				else
-					box << obj;
+				{
+					for (int i = 0; i < obj->numVertices(); ++i)
+						box << obj->vertex(i);
+				}
 			}
 
 			return box.center();

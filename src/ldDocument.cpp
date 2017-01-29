@@ -36,6 +36,7 @@
 
 LDDocument::LDDocument (DocumentManager* parent) :
 	QObject (parent),
+    Model {parent},
 	HierarchyElement (parent),
 	m_history (new EditHistory (this)),
 	m_flags(IsCache | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
@@ -291,248 +292,6 @@ bool LDDocument::save (QString path, int64* sizeptr)
 
 // =============================================================================
 //
-static void CheckTokenCount (const QStringList& tokens, int num)
-{
-	if (countof(tokens) != num)
-		throw QString (format ("Bad amount of tokens, expected %1, got %2", num, countof(tokens)));
-}
-
-// =============================================================================
-//
-static void CheckTokenNumbers (const QStringList& tokens, int min, int max)
-{
-	bool ok;
-	QRegExp scientificRegex ("\\-?[0-9]+\\.[0-9]+e\\-[0-9]+");
-
-	for (int i = min; i <= max; ++i)
-	{
-		// Check for floating point
-		tokens[i].toDouble (&ok);
-		if (ok)
-			return;
-
-		// Check hex
-		if (tokens[i].startsWith ("0x"))
-		{
-			tokens[i].mid (2).toInt (&ok, 16);
-
-			if (ok)
-				return;
-		}
-
-		// Check scientific notation, e.g. 7.99361e-15
-		if (scientificRegex.exactMatch (tokens[i]))
-			return;
-
-		throw QString (format ("Token #%1 was `%2`, expected a number (matched length: %3)",
-			(i + 1), tokens[i], scientificRegex.matchedLength()));
-	}
-}
-
-// =============================================================================
-//
-static Vertex ParseVertex (QStringList& s, const int n)
-{
-	Vertex v;
-	v.apply ([&] (Axis ax, double& a) { a = s[n + ax].toDouble(); });
-	return v;
-}
-
-static int32 StringToNumber (QString a, bool* ok = nullptr)
-{
-	int base = 10;
-
-	if (a.startsWith ("0x"))
-	{
-		a.remove (0, 2);
-		base = 16;
-	}
-
-	return a.toLong (ok, base);
-}
-
-// =============================================================================
-// This is the LDraw code parser function. It takes in a string containing LDraw
-// code and returns the object parsed from it. parseLine never returns null,
-// the object will be LDError if it could not be parsed properly.
-// =============================================================================
-LDObject* ParseLine (QString line)
-{
-	try
-	{
-		QStringList tokens = line.split (" ", QString::SkipEmptyParts);
-
-		if (countof(tokens) <= 0)
-		{
-			// Line was empty, or only consisted of whitespace
-			return LDSpawn<LDEmpty>();
-		}
-
-		if (countof(tokens[0]) != 1 or not tokens[0][0].isDigit())
-			throw QString ("Illogical line code");
-
-		int num = tokens[0][0].digitValue();
-
-		switch (num)
-		{
-			case 0:
-			{
-				// Comment
-				QString commentText (line.mid (line.indexOf ("0") + 2));
-				QString commentTextSimplified (commentText.simplified());
-
-				// Handle BFC statements
-				if (countof(tokens) > 2 and tokens[1] == "BFC")
-				{
-					for (BfcStatement statement : iterateEnum<BfcStatement>())
-					{
-						if (commentTextSimplified == format("BFC %1", LDBfc::statementToString (statement)))
-							return LDSpawn<LDBfc>(statement);
-					}
-
-					// MLCAD is notorious for stuffing these statements in parts it
-					// creates. The above block only handles valid statements, so we
-					// need to handle MLCAD-style invertnext, clip and noclip separately.
-					if (commentTextSimplified == "BFC CERTIFY INVERTNEXT")
-						return LDSpawn<LDBfc> (BfcStatement::InvertNext);
-					else if (commentTextSimplified == "BFC CERTIFY CLIP")
-						return LDSpawn<LDBfc> (BfcStatement::Clip);
-					else if (commentTextSimplified == "BFC CERTIFY NOCLIP")
-						return LDSpawn<LDBfc> (BfcStatement::NoClip);
-				}
-
-				if (countof(tokens) > 2 and tokens[1] == "!LDFORGE")
-				{
-					// Handle LDForge-specific types, they're embedded into comments too
-					if (tokens[2] == "OVERLAY")
-					{
-						CheckTokenCount (tokens, 9);
-						CheckTokenNumbers (tokens, 5, 8);
-
-						LDOverlay* obj = LDSpawn<LDOverlay>();
-						obj->setFileName (tokens[3]);
-						obj->setCamera (tokens[4].toLong());
-						obj->setX (tokens[5].toLong());
-						obj->setY (tokens[6].toLong());
-						obj->setWidth (tokens[7].toLong());
-						obj->setHeight (tokens[8].toLong());
-						return obj;
-					}
-					else if (tokens[2] == "BEZIER_CURVE")
-					{
-						CheckTokenCount (tokens, 16);
-						CheckTokenNumbers (tokens, 3, 15);
-						LDBezierCurve* obj = LDSpawn<LDBezierCurve>();
-						obj->setColor (StringToNumber (tokens[3]));
-
-						for (int i = 0; i < 4; ++i)
-							obj->setVertex (i, ParseVertex (tokens, 4 + (i * 3)));
-
-						return obj;
-					}
-				}
-
-				// Just a regular comment:
-				LDComment* obj = LDSpawn<LDComment>();
-				obj->setText (commentText);
-				return obj;
-			}
-
-			case 1:
-			{
-				// Subfile
-				CheckTokenCount (tokens, 15);
-				CheckTokenNumbers (tokens, 1, 13);
-				LDDocument* document = g_win->documents()->getDocumentByName (tokens[14]);
-
-				// If we cannot open the file, mark it an error. Note we cannot use LDParseError
-				// here because the error object needs the document reference.
-				if (not document)
-				{
-					LDError* obj = LDSpawn<LDError> (line, format ("Could not open %1", tokens[14]));
-					obj->setFileReferenced (tokens[14]);
-					return obj;
-				}
-
-				LDSubfileReference* obj = LDSpawn<LDSubfileReference>();
-				obj->setColor (StringToNumber (tokens[1]));
-				obj->setPosition (ParseVertex (tokens, 2));  // 2 - 4
-
-				Matrix transform;
-
-				for (int i = 0; i < 9; ++i)
-					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
-
-				obj->setTransformationMatrix (transform);
-				obj->setFileInfo (document);
-				return obj;
-			}
-
-			case 2:
-			{
-				CheckTokenCount (tokens, 8);
-				CheckTokenNumbers (tokens, 1, 7);
-
-				// Line
-				LDLine* obj (LDSpawn<LDLine>());
-				obj->setColor (StringToNumber (tokens[1]));
-
-				for (int i = 0; i < 2; ++i)
-					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 7
-
-				return obj;
-			}
-
-			case 3:
-			{
-				CheckTokenCount (tokens, 11);
-				CheckTokenNumbers (tokens, 1, 10);
-
-				// Triangle
-				LDTriangle* obj (LDSpawn<LDTriangle>());
-				obj->setColor (StringToNumber (tokens[1]));
-
-				for (int i = 0; i < 3; ++i)
-					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 10
-
-				return obj;
-			}
-
-			case 4:
-			case 5:
-			{
-				CheckTokenCount (tokens, 14);
-				CheckTokenNumbers (tokens, 1, 13);
-
-				// Quadrilateral / Conditional line
-				LDObject* obj;
-
-				if (num == 4)
-					obj = LDSpawn<LDQuad>();
-				else
-					obj = LDSpawn<LDCondLine>();
-
-				obj->setColor (StringToNumber (tokens[1]));
-
-				for (int i = 0; i < 4; ++i)
-					obj->setVertex (i, ParseVertex (tokens, 2 + (i * 3)));   // 2 - 13
-
-				return obj;
-			}
-
-			default:
-				throw QString ("Unknown line code number");
-		}
-	}
-	catch (QString& e)
-	{
-		// Strange line we couldn't parse
-		return LDSpawn<LDError> (line, e);
-	}
-}
-
-// =============================================================================
-//
 void LDDocument::reloadAllSubfiles()
 {
 	print ("Reloading subfiles of %1", getDisplayName());
@@ -554,7 +313,7 @@ void LDDocument::reloadAllSubfiles()
 		// Reparse gibberish files. It could be that they are invalid because
 		// of loading errors. Circumstances may be different now.
 		if (obj->type() == OBJ_Error)
-			obj->replace (ParseLine (static_cast<LDError*> (obj)->contents()));
+			replaceWithFromString(obj, static_cast<LDError*> (obj)->contents());
 	}
 
 	m_flags |= NeedsRecache;
@@ -660,7 +419,7 @@ void LDDocument::initializeCachedData()
 	if (checkFlag(NeedsRecache))
 	{
 		m_vertices.clear();
-		Model model;
+		Model model {m_documents};
 		inlineContents(model, true, true);
 
 		for (LDObject* obj : model.objects())
@@ -688,7 +447,7 @@ void LDDocument::initializeCachedData()
 	if (checkFlag(VerticesOutdated))
 	{
 		m_objectVertices.clear();
-		Model model;
+		Model model {m_documents};
 		inlineContents(model, true, false);
 
 		for (LDObject* obj : model)
@@ -740,7 +499,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 		if (deep and object->type() == OBJ_SubfileReference)
 			static_cast<LDSubfileReference*>(object)->inlineContents(model, deep, renderinline);
 		else
-			model.addObject(object->createCopy());
+			model.addFromString(object->asText());
 	}
 }
 

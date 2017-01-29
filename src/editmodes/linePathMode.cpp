@@ -80,10 +80,10 @@ bool LinePathMode::preAddVertex (Vertex const& pos)
 
 void LinePathMode::endDraw()
 {
-	Model model;
+	Model model {m_documents};
 
 	for (int i = 0; i < countof(m_drawedVerts) - 1; ++i)
-		LDLine* line = model.emplace<LDLine>(m_drawedVerts[i], m_drawedVerts[i + 1]);
+		model.emplace<LDLine>(m_drawedVerts[i], m_drawedVerts[i + 1]);
 
 	finishDraw(model);
 }

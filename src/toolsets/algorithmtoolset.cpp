@@ -110,8 +110,7 @@ void AlgorithmToolset::editRaw()
 		return;
 
 	// Reinterpret it from the text of the input field
-	LDObject* newobj = ParseLine (ui.code->text());
-	obj->replace (newobj);
+	currentDocument()->replaceWithFromString(obj, ui.code->text());
 }
 
 void AlgorithmToolset::makeBorders()
@@ -125,7 +124,7 @@ void AlgorithmToolset::makeBorders()
 		if (type != OBJ_Quad and type != OBJ_Triangle)
 			continue;
 
-		Model lines;
+		Model lines {m_documents};
 
 		if (type == OBJ_Quad)
 		{
@@ -395,7 +394,7 @@ void AlgorithmToolset::splitLines()
 		if (not isOneOf (obj->type(), OBJ_Line, OBJ_CondLine))
 			continue;
 
-		Model segments;
+		Model segments {m_documents};
 
 		for (int i = 0; i < numSegments; ++i)
 		{
@@ -536,7 +535,7 @@ void AlgorithmToolset::subfileSelection()
 	subfile->setFullPath(fullsubname);
 	subfile->setName(LDDocument::shortenName(fullsubname));
 
-	Model header;
+	Model header {m_documents};
 	header.emplace<LDComment>(subtitle);
 	header.emplace<LDComment>("Name: "); // This gets filled in when the subfile is saved
 	header.emplace<LDComment>(format("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
@@ -552,7 +551,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// Copy the body over to the new document
 	for (LDObject* object : selectedObjects())
-		subfile->addObject(object->createCopy());
+		subfile->addFromString(object->asText());
 
 	// Try save it
 	if (m_window->save(subfile, true))

@@ -117,8 +117,7 @@ void FileToolset::insertFrom()
 
 		if (file.open(QIODevice::ReadOnly))
 		{
-			// TODO: shouldn't need to go to the document manager to parse a file
-			Model model;
+			Model model {m_documents};
 			m_documents->loadFileContents(&file, model, nullptr, nullptr);
 
 			currentDocument()->clearSelection();

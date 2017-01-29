@@ -86,7 +86,7 @@ void CurveMode::endDraw()
 {
 	if (countof(m_drawedVerts) == 4)
 	{
-		Model model;
+		Model model {m_documents};
 		model.emplace<LDBezierCurve>(m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);
 		finishDraw(model);
 	}

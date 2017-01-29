@@ -86,7 +86,7 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 
 void CircleMode::endDraw()
 {
-	Model model;
+	Model model {m_documents};
 	PrimitiveModel primitiveModel;
 	primitiveModel.segments = m_window->ringToolSegments();
 	primitiveModel.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;

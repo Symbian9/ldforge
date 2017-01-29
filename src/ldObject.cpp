@@ -347,7 +347,7 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 // -----------------------------------------------------------------------------
 void LDSubfileReference::inlineContents(Model& model, bool deep, bool render)
 {
-	Model inlined;
+	Model inlined {this->model()->documentManager()};
 	fileInfo()->inlineContents(inlined, deep, render);
 
 	// Transform the objects
@@ -545,7 +545,7 @@ void LDSubfileReference::invert()
 
 	// Check whether subfile is flat
 	int axisSet = (1 << X) | (1 << Y) | (1 << Z);
-	Model model;
+	Model model {this->model()->documentManager()};
 	fileInfo()->inlineContents(model, true, false);
 
 	for (LDObject* obj : model.objects())
@@ -958,14 +958,6 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 	}
 
 	return result;
-}
-
-// =============================================================================
-//
-LDObject* LDObject::createCopy() const
-{
-	LDObject* copy = ParseLine (asText());
-	return copy;
 }
 
 LDSubfileReference::LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix,

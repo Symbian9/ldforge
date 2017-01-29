@@ -65,16 +65,14 @@ void DrawMode::endDraw()
 {
 	// Clean the selection and create the object
 	QList<Vertex>& verts = m_drawedVerts;
-	Model model;
+	Model model {m_documents};
 
 	switch (countof(verts))
 	{
-		case 2:
-		{
+	    case 2:
 			// 2 verts - make a line
-		    LDLine* obj = model.emplace<LDLine>(verts[0], verts[1]);
-			break;
-		}
+		    model.emplace<LDLine>(verts[0], verts[1]);
+		    break;
 
 		case 3:
 		case 4:

@@ -98,8 +98,7 @@ public:
     LDObject (Model* model = nullptr);
 
 	virtual QString asText() const = 0; // This object as LDraw code
-	LDColor color() const;
-	LDObject* createCopy() const;
+    LDColor color() const;
 	virtual LDColor defaultColor() const = 0; // What color does the object default to?
 	Model* model() const;
 	LDPolygon* getPolygon();
