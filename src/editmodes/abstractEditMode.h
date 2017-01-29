@@ -18,6 +18,7 @@
 
 #pragma once
 #include "../main.h"
+#include "../model.h"
 
 class QPainter;
 class GLRenderer;
@@ -87,7 +88,7 @@ public:
 	void drawLineLength (QPainter& painter,
 		const Vertex& v0, const Vertex& v1,
 		const QPointF& v0p, const QPointF& v1p) const;
-	void finishDraw (const LDObjectList& objs);
+	void finishDraw (Model& model);
 	Vertex getCursorVertex() const;
 	bool keyReleased (QKeyEvent* ev) override;
 	virtual int maxVertices() const { return 0; }

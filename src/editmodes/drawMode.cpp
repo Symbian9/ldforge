@@ -65,35 +65,30 @@ void DrawMode::endDraw()
 {
 	// Clean the selection and create the object
 	QList<Vertex>& verts = m_drawedVerts;
-	LDObjectList objs;
+	Model model;
 
 	switch (countof(verts))
 	{
 		case 2:
 		{
 			// 2 verts - make a line
-			LDLine* obj = LDSpawn<LDLine> (verts[0], verts[1]);
-			obj->setColor (EdgeColor);
-			objs << obj;
+		    LDLine* obj = model.emplace<LDLine>(verts[0], verts[1]);
 			break;
 		}
 
 		case 3:
 		case 4:
 		{
-			LDObject* obj = (countof(verts) == 3) ?
-				static_cast<LDObject*> (LDSpawn<LDTriangle>()) :
-				static_cast<LDObject*> (LDSpawn<LDQuad>());
-
-			obj->setColor (MainColor);
+		    LDObject* obj = (countof(verts) == 3) ?
+			            static_cast<LDObject*>(model.emplace<LDTriangle>()) :
+			            static_cast<LDObject*>(model.emplace<LDQuad>());
 
 			for (int i = 0; i < countof(verts); ++i)
 				obj->setVertex (i, verts[i]);
 
-			objs << obj;
 			break;
 		}
 	}
 
-	finishDraw (objs);
+	finishDraw (model);
 }

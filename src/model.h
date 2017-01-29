@@ -26,6 +26,7 @@ public:
 	int triangleCount() const;
 	QVector<LDObject*>::iterator begin();
 	QVector<LDObject*>::iterator end();
+	bool isEmpty() const;
 
 	template<typename T, typename... Args>
 	T* emplace(Args&& ...args)

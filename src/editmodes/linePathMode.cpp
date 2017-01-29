@@ -80,17 +80,12 @@ bool LinePathMode::preAddVertex (Vertex const& pos)
 
 void LinePathMode::endDraw()
 {
-	LDObjectList objs;
+	Model model;
 
 	for (int i = 0; i < countof(m_drawedVerts) - 1; ++i)
-	{
-		LDLine* line = LDSpawn<LDLine>();
-		line->setVertex (0, m_drawedVerts[i]);
-		line->setVertex (1, m_drawedVerts[i + 1]);
-		objs << line;
-	}
+		LDLine* line = model.emplace<LDLine>(m_drawedVerts[i], m_drawedVerts[i + 1]);
 
-	finishDraw (objs);
+	finishDraw(model);
 }
 
 bool LinePathMode::keyReleased (QKeyEvent* ev)

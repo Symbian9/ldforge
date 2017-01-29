@@ -41,14 +41,14 @@ void RectangleMode::endDraw()
 {
 	if (countof(m_drawedVerts) == 2)
 	{
-		LDQuad* quad = LDSpawn<LDQuad>();
+		Model model;
+		LDQuad* quad = model.emplace<LDQuad>();
 		updateRectVerts();
 
 		for (int i = 0; i < quad->numVertices(); ++i)
-			quad->setVertex (i, m_rectangleVerts[i]);
+			quad->setVertex(i, m_rectangleVerts[i]);
 
-		quad->setColor (MainColor);
-		finishDraw (LDObjectList ({quad}));
+		finishDraw(model);
 	}
 }
 

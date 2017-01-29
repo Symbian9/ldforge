@@ -86,11 +86,11 @@ Matrix CircleMode::getCircleDrawMatrix (double scale)
 
 void CircleMode::endDraw()
 {
-	LDObjectList objs;
-	PrimitiveModel model;
-	model.segments = m_window->ringToolSegments();
-	model.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
-	model.ringNumber = 0;
+	Model model;
+	PrimitiveModel primitiveModel;
+	primitiveModel.segments = m_window->ringToolSegments();
+	primitiveModel.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	primitiveModel.ringNumber = 0;
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
 	LDDocument* primitiveFile;
@@ -103,34 +103,32 @@ void CircleMode::endDraw()
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
-		model.type = PrimitiveModel::Circle;
-		primitiveFile = primitives()->getPrimitive(model);
+		primitiveModel.type = PrimitiveModel::Circle;
+		primitiveFile = primitives()->getPrimitive(primitiveModel);
 		transform = getCircleDrawMatrix (dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
 	{
 		// If either radii is 0, use a disc.
-		model.type = PrimitiveModel::Disc;
-		primitiveFile = primitives()->getPrimitive(model);
+		primitiveModel.type = PrimitiveModel::Disc;
+		primitiveFile = primitives()->getPrimitive(primitiveModel);
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
 	else if (g_RingFinder.findRings (dist0, dist1))
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
-		model.type = PrimitiveModel::Ring;
+		primitiveModel.type = PrimitiveModel::Ring;
 
 		for (const RingFinder::Component& component : g_RingFinder.bestSolution()->getComponents())
 		{
-			model.ringNumber = component.num;
-			primitiveFile = primitives()->getPrimitive(model);
-			LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
-			ref->setFileInfo (primitiveFile);
-			ref->setTransformationMatrix (getCircleDrawMatrix (component.scale));
-			ref->setPosition (m_drawedVerts[0]);
-			ref->setColor (MainColor);
-			objs << ref;
+			primitiveModel.ringNumber = component.num;
+			primitiveFile = primitives()->getPrimitive(primitiveModel);
+			LDSubfileReference* ref = model.emplace<LDSubfileReference>();
+			ref->setFileInfo(primitiveFile);
+			ref->setTransformationMatrix(getCircleDrawMatrix(component.scale));
+			ref->setPosition(m_drawedVerts[0]);
 		}
 	}
 	else
@@ -148,10 +146,10 @@ void CircleMode::endDraw()
 		templ.setCoordinate (localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
-		QVector<QLineF> c0 = makeCircle(model.segments, model.divisions, dist0);
-		QVector<QLineF> c1 = makeCircle(model.segments, model.divisions, dist1);
+		QVector<QLineF> c0 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist0);
+		QVector<QLineF> c1 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist1);
 
-		for (int i = 0; i < model.segments; ++i)
+		for (int i = 0; i < primitiveModel.segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;
@@ -164,37 +162,34 @@ void CircleMode::endDraw()
 			v3.setCoordinate (localx, v3[localx] + c1[i].x1());
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
-			LDQuad* quad (LDSpawn<LDQuad> (v0, v1, v2, v3));
+			LDQuad* quad = model.emplace<LDQuad>(v0, v1, v2, v3);
 			quad->setColor (MainColor);
 
 			// Ensure the quads always are BFC-front towards the camera
 			if (renderer()->camera() % 3 <= 0)
 				quad->invert();
-
-			objs << quad;
 		}
 	}
 
 	if (circleOrDisc and primitiveFile)
 	{
-		LDSubfileReference* ref = LDSpawn<LDSubfileReference>();
+		LDSubfileReference* ref = model.emplace<LDSubfileReference>();
 		ref->setFileInfo (primitiveFile);
 		ref->setTransformationMatrix (transform);
 		ref->setPosition (m_drawedVerts[0]);
 		ref->setColor (MainColor);
-		objs << ref;
 	}
 
-	if (not objs.isEmpty())
+	if (not model.isEmpty())
 	{
 		Axis relZ = renderer()->getRelativeZ();;
 		int l = (relZ == X ? 1 : 0);
 		int m = (relZ == Y ? 1 : 0);
 		int n = (relZ == Z ? 1 : 0);
-		math()->rotateObjects (l, m, n, -m_angleOffset, objs.toVector());
+		math()->rotateObjects(l, m, n, -m_angleOffset, model.objects());
 	}
 
-	finishDraw (objs);
+	finishDraw (model);
 }
 
 

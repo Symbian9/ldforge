@@ -192,3 +192,8 @@ LDObject* Model::withdrawAt(int position)
 	_needsTriangleRecount = true;
 	return object;
 }
+
+bool Model::isEmpty() const
+{
+	return _objects.isEmpty();
+}

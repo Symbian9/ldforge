@@ -165,17 +165,14 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 	return false;
 }
 
-void AbstractDrawMode::finishDraw(LDObjectList const& objs)
+void AbstractDrawMode::finishDraw(Model& model)
 {
 	int pos = m_window->suggestInsertPoint();
 
-	if (countof(objs) > 0)
+	if (countof(model.objects()) > 0)
 	{
-		for (LDObject* obj : objs)
-		{
+		for (LDObject* obj : model)
 			renderer()->document()->insertObject (pos++, obj);
-			renderer()->compileObject (obj);
-		}
 
 		m_window->refresh();
 		m_window->endAction();

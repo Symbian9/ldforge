@@ -86,8 +86,8 @@ void CurveMode::endDraw()
 {
 	if (countof(m_drawedVerts) == 4)
 	{
-		LDObjectList objs;
-		objs << LDSpawn<LDBezierCurve> (m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);
-		finishDraw (objs);
+		Model model;
+		model.emplace<LDBezierCurve>(m_drawedVerts[0], m_drawedVerts[1], m_drawedVerts[2], m_drawedVerts[3]);
+		finishDraw(model);
 	}
 }

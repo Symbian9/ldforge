@@ -345,7 +345,7 @@ class LDLine : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDLine (Vertex v1, Vertex v2, LDDocument* model = nullptr);
+	LDLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };
 
 //
@@ -364,7 +364,7 @@ class LDCondLine : public LDLine
 	LDOBJ_NO_MATRIX
 
 public:
-	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* model = nullptr);
+	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 	LDLine* becomeEdgeLine();
 };
 
@@ -407,7 +407,7 @@ class LDQuad : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* model = nullptr);
+	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 
 	int triangleCount() const override;
 };
@@ -460,8 +460,7 @@ class LDBezierCurve : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDBezierCurve (const Vertex& v0, const Vertex& v1,
-	    const Vertex& v2, const Vertex& v3, LDDocument* model = nullptr);
+	LDBezierCurve (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 	Vertex pointAt (qreal t) const;
 	void rasterize(Model& model, int segments);
 	QVector<LDPolygon> rasterizePolygons (int segments);

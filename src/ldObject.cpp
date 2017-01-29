@@ -249,8 +249,8 @@ int LDQuad::triangleCount() const
 
 // =============================================================================
 //
-LDLine::LDLine (Vertex v1, Vertex v2, LDDocument* document) :
-	LDObject (document)
+LDLine::LDLine (Vertex v1, Vertex v2, Model* model) :
+    LDObject {model}
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -258,8 +258,8 @@ LDLine::LDLine (Vertex v1, Vertex v2, LDDocument* document) :
 
 // =============================================================================
 //
-LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* document) :
-	LDObject (document)
+LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
+    LDObject {model}
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -268,8 +268,8 @@ LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Mo
 
 // =============================================================================
 //
-LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, LDDocument* document) :
-	LDObject (document)
+LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model) :
+    LDObject {model}
 {
 	setVertex (0, v1);
 	setVertex (1, v2);
@@ -279,8 +279,8 @@ LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vert
 
 // =============================================================================
 //
-LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, LDDocument* document) :
-	LDLine (document)
+LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
+    LDLine {model}
 {
 	setVertex (0, v0);
 	setVertex (1, v1);
@@ -290,9 +290,8 @@ LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, co
 
 // =============================================================================
 //
-LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3,
-	LDDocument* document) :
-	LDObject (document)
+LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
+    LDObject {model}
 {
 	setVertex (0, v0);
 	setVertex (1, v1);
