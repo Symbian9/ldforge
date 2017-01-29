@@ -28,7 +28,6 @@ class Model;
 #define LDOBJ(T)												\
 public:															\
 	static constexpr LDObjectType SubclassType = OBJ_##T;		\
-	LD##T (Model* model = nullptr);								\
 																\
 	virtual LDObjectType type() const override					\
 	{															\
@@ -37,6 +36,9 @@ public:															\
 																\
 	virtual QString asText() const override;					\
 	virtual void invert() override;								\
+protected:														\
+	friend class Model;											\
+	LD##T (Model* model = nullptr);								\
 
 #define LDOBJ_NAME(N)          public: virtual QString typeName() const override { return #N; }
 #define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
@@ -95,8 +97,6 @@ class LDObject : public QObject
     Q_OBJECT
 
 public:
-    LDObject (Model* model = nullptr);
-
 	virtual QString asText() const = 0; // This object as LDraw code
     LDColor color() const;
 	virtual LDColor defaultColor() const = 0; // What color does the object default to?
@@ -136,6 +136,7 @@ signals:
 
 protected:
 	friend class Model;
+	LDObject (Model* model = nullptr);
 	virtual ~LDObject();
 
 private:
@@ -162,14 +163,15 @@ class LDMatrixObject : public LDObject
 	Vertex m_position;
 
 public:
-	LDMatrixObject (Model* model = nullptr);
-	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, Model* model = nullptr);
-
 	const Vertex& position() const;
 	void setCoordinate (const Axis ax, double value);
 	void setPosition (const Vertex& a);
 	void setTransformationMatrix (const Matrix& value);
 	const Matrix& transformationMatrix() const;
+
+protected:
+	LDMatrixObject (Model* model = nullptr);
+	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, Model* model = nullptr);
 
 private:
 	Matrix m_transformationMatrix;
@@ -191,11 +193,13 @@ class LDError : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDError (QString contents, QString reason, Model* model = nullptr);
 	QString reason() const;
 	QString contents() const;
 	QString fileReferenced() const;
 	void setFileReferenced (QString value);
+
+protected:
+	LDError (QString contents, QString reason, Model* model = nullptr);
 
 private:
 	QString m_fileReferenced; // If this error was caused by inability to open a file, what file was that?
@@ -231,9 +235,11 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDComment (QString text, Model* model = nullptr);
 	QString text() const;
 	void setText (QString value);
+
+protected:
+	LDComment (QString text, Model* model = nullptr);
 
 private:
 	QString m_text;
@@ -270,13 +276,14 @@ public:
 	LDOBJ_NO_MATRIX
 
 public:
-    LDBfc (const BfcStatement type, Model* model = nullptr);
-
 	BfcStatement statement() const;
 	void setStatement (BfcStatement value);
 	QString statementToString() const;
 
 	static QString statementToString (BfcStatement statement);
+
+protected:
+	LDBfc (const BfcStatement type, Model* model = nullptr);
 
 private:
 	BfcStatement m_statement;
@@ -298,8 +305,6 @@ class LDSubfileReference : public LDMatrixObject
 	LDOBJ_HAS_MATRIX
 
 public:
-	LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
-
 	// Inlines this subfile.
 	LDDocument* fileInfo() const;
 	virtual void getVertices (QSet<Vertex>& verts) const override;
@@ -307,6 +312,9 @@ public:
 	QList<LDPolygon> inlinePolygons();
 	void setFileInfo (LDDocument* fileInfo);
 	int triangleCount() const override;
+
+protected:
+	LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
 
 private:
 	LDDocument* m_fileInfo;
@@ -327,7 +335,7 @@ class LDLine : public LDObject
 	LDOBJ_SCEMANTIC
 	LDOBJ_NO_MATRIX
 
-public:
+protected:
 	LDLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };
 
@@ -347,8 +355,10 @@ class LDCondLine : public LDLine
 	LDOBJ_NO_MATRIX
 
 public:
-	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 	LDLine* becomeEdgeLine();
+
+protected:
+	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
 //
@@ -369,8 +379,10 @@ class LDTriangle : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 	int triangleCount() const override;
+
+protected:
+	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 };
 
 //
@@ -390,9 +402,10 @@ class LDQuad : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
-
 	int triangleCount() const override;
+
+protected:
+	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 };
 
 //
@@ -443,10 +456,12 @@ class LDBezierCurve : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
-	LDBezierCurve (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 	Vertex pointAt (qreal t) const;
 	void rasterize(Model& model, int segments);
 	QVector<LDPolygon> rasterizePolygons (int segments);
+
+protected:
+	LDBezierCurve (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
 enum

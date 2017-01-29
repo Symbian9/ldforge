@@ -68,18 +68,16 @@ QString NewPartDialog::title() const
 
 void NewPartDialog::fillHeader (LDDocument* newdoc) const
 {
-	LDObjectList objs;
-	objs << new LDComment (title());
-	objs << new LDComment ("Name: <untitled>.dat");
-	objs << new LDComment ("Author: " + author());
-	objs << new LDComment ("!LDRAW_ORG Unofficial_Part");
+	newdoc->emplace<LDComment>(title());
+	newdoc->emplace<LDComment>("Name: <untitled>.dat");
+	newdoc->emplace<LDComment>("Author: " + author());
+	newdoc->emplace<LDComment>("!LDRAW_ORG Unofficial_Part");
 	QString license = preferredLicenseText();
 
 	if (not license.isEmpty())
-		objs << new LDComment(license);
+		newdoc->emplace<LDComment>(license);
 
-	objs << new LDEmpty();
-	objs << new LDBfc (getWinding());
-	objs << new LDEmpty();
-	newdoc->addObjects (objs);
+	newdoc->emplace<LDEmpty>();
+	newdoc->emplace<LDBfc>(getWinding());
+	newdoc->emplace<LDEmpty>();
 }

@@ -344,12 +344,6 @@ void AlgorithmToolset::addHistoryLine()
 	if (not dlg->exec())
 		return;
 
-	// Create the comment object based on input
-	LDComment* comment = new LDComment (format ("!HISTORY %1 [%2] %3",
-		ui->m_date->date().toString ("yyyy-MM-dd"),
-		ui->m_username->text(),
-		ui->m_comment->text()));
-
 	// Find a spot to place the new comment
 	for (obj = currentDocument()->getObject (0);
 		obj and obj->next() and not obj->next()->isScemantic();
@@ -367,12 +361,17 @@ void AlgorithmToolset::addHistoryLine()
 	}
 
 	int idx = obj ? obj->lineNumber() : 0;
-	currentDocument()->insertObject (idx++, comment);
+
+	// Create the comment object based on input
+	currentDocument()->emplaceAt<LDComment>(idx++, format("!HISTORY %1 [%2] %3",
+	    ui->m_date->date().toString ("yyyy-MM-dd"),
+	    ui->m_username->text(),
+	    ui->m_comment->text()));
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
-		currentDocument()->insertObject (idx, new LDEmpty);
+		currentDocument()->emplaceAt<LDEmpty>(idx);
 
 	m_window->buildObjectList();
 	delete ui;

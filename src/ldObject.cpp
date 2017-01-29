@@ -603,7 +603,7 @@ void LDSubfileReference::invert()
 	}
 
 	// Not inverted, thus prefix it with a new invertnext.
-	this->model()->insertObject (idx, new LDBfc (BfcStatement::InvertNext));
+	this->model()->emplaceAt<LDBfc>(idx, BfcStatement::InvertNext);
 }
 
 // =============================================================================
@@ -643,13 +643,12 @@ void LDBezierCurve::invert()
 //
 LDLine* LDCondLine::becomeEdgeLine()
 {
-	LDLine* replacement = new LDLine;
+	LDLine* replacement = model()->emplaceReplacement<LDLine>(this);
 
 	for (int i = 0; i < replacement->numVertices(); ++i)
 		replacement->setVertex (i, vertex (i));
 
 	replacement->setColor (color());
-	model()->replace(this, replacement);
 	return replacement;
 }
 
