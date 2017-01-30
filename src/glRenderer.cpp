@@ -1468,7 +1468,7 @@ void GLRenderer::updateOverlayObjects()
 			int lastOverlayPosition = -1;
 			bool found = false;
 
-			for (i = 0; i < document()->getObjectCount(); ++i)
+			for (i = 0; i < document()->size(); ++i)
 			{
 				LDObject* object = document()->getObject (i);
 

@@ -387,13 +387,6 @@ LDObject* LDDocument::withdrawAt(int position)
 
 // =============================================================================
 //
-int LDDocument::getObjectCount() const
-{
-	return countof(objects());
-}
-
-// =============================================================================
-//
 bool LDDocument::hasUnsavedChanges() const
 {
 	return not isCache() and history()->position() != savePosition();

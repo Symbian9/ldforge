@@ -326,8 +326,8 @@ void MainWindow::updateTitle()
 		title += ": ";
 		title += m_currentDocument->getDisplayName();
 
-		if (m_currentDocument->getObjectCount() > 0 and
-			m_currentDocument->getObject (0)->type() == OBJ_Comment)
+		if (m_currentDocument->size() > 0 and
+		    m_currentDocument->getObject(0)->type() == OBJ_Comment)
 		{
 			// Append title
 			LDComment* comm = static_cast <LDComment*> (m_currentDocument->getObject (0));
@@ -600,7 +600,7 @@ int MainWindow::suggestInsertPoint()
 		return (*(selectedObjects().end() - 1))->lineNumber() + 1;
 
 	// Otherwise place the object at the end.
-	return m_currentDocument->getObjectCount();
+	return m_currentDocument->size();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

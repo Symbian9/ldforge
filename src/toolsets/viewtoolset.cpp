@@ -255,7 +255,7 @@ void ViewToolset::jumpTo()
 {
 	bool ok;
 	int defaultValue = (countof(selectedObjects()) == 1) ? (*selectedObjects().begin())->lineNumber() : 0;
-	int index = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defaultValue, 1, currentDocument()->getObjectCount(), 1, &ok);
+	int index = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defaultValue, 1, currentDocument()->size(), 1, &ok);
 
 	if (ok)
 	{

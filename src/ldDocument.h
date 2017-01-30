@@ -70,7 +70,6 @@ public:
 	void forgetObject (LDObject* obj);
 	QString fullPath();
 	QString getDisplayName();
-	int getObjectCount() const;
 	const QSet<LDObject*>& getSelection() const;
 	LDGLData* glData();
 	bool hasUnsavedChanges() const;
