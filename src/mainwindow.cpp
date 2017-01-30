@@ -21,7 +21,6 @@
 #include <QEvent>
 #include <QContextMenuEvent>
 #include <QMenuBar>
-#include <QStatusBar>
 #include <QSplitter>
 #include <QListWidget>
 #include <QToolButton>
@@ -105,7 +104,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 		updatePrimitives();
 
 	m_quickColors = m_guiUtilities->loadQuickColorList();
-	setStatusBar (new QStatusBar);
 	updateActions();
 
 	// Connect all actions and save default sequences
