@@ -16,26 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDialog>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QDialogButtonBox>
 #include <QFileDialog>
-#include <QLabel>
-#include <QPushButton>
-#include <QBoxLayout>
-#include <QGridLayout>
-#include <QProgressBar>
-#include <QCheckBox>
-#include <QDesktopServices>
-#include <QMessageBox>
-#include <QUrl>
 #include "dialogs.h"
-#include "radioGroup.h"
 #include "mainwindow.h"
 #include "glRenderer.h"
 #include "documentation.h"
-#include "ldDocument.h"
 #include "dialogs.h"
 #include "ui_overlay.h"
 #include "ui_extprogpath.h"

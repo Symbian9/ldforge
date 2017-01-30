@@ -19,13 +19,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/glu.h>
 #include <GL/glext.h>
-#include <QGLWidget>
-#include <QWheelEvent>
-#include <QMouseEvent>
 #include <QContextMenuEvent>
-#include <QInputDialog>
 #include <QToolTip>
-#include <QTextDocument>
 #include <QTimer>
 #include <GL/glu.h>
 #include "main.h"

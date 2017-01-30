@@ -17,9 +17,6 @@
  */
 
 #include <QApplication>
-#include <QDir>
-#include <QRegExp>
-#include <QFileDialog>
 #include "ldDocument.h"
 #include "mainwindow.h"
 #include "primitives.h"

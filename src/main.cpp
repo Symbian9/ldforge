@@ -17,8 +17,6 @@
  */
 
 #include <QApplication>
-#include "main.h"
-#include "colors.h"
 #include "crashCatcher.h"
 #include "ldpaths.h"
 #include "documentmanager.h"

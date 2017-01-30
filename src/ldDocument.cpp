@@ -18,18 +18,10 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QDir>
-#include <QTime>
-#include <QApplication>
-#include "main.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
-#include "editHistory.h"
-#include "glRenderer.h"
 #include "glCompiler.h"
-#include "partdownloader.h"
-#include "ldpaths.h"
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"

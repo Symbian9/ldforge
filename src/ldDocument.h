@@ -24,10 +24,7 @@
 #include "glShared.h"
 #include "model.h"
 
-class EditHistory;
-class OpenProgressDialog;
 struct LDGLData;
-class GLCompiler;
 class DocumentManager;
 
 //

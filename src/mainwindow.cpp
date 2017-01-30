@@ -16,38 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QGridLayout>
 #include <QMessageBox>
-#include <QEvent>
 #include <QContextMenuEvent>
-#include <QMenuBar>
-#include <QSplitter>
-#include <QListWidget>
 #include <QToolButton>
-#include <QComboBox>
-#include <QDialogButtonBox>
-#include <QToolBar>
-#include <QProgressBar>
-#include <QLabel>
 #include <QFileDialog>
 #include <QPushButton>
-#include <QCoreApplication>
-#include <QTimer>
-#include <QMetaMethod>
 #include <QSettings>
 #include "main.h"
 #include "glRenderer.h"
 #include "mainwindow.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
-#include "colors.h"
-#include "editHistory.h"
-#include "radioGroup.h"
 #include "messageLog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
-#include "toolsets/extprogramtoolset.h"
 #include "toolsets/toolset.h"
 #include "dialogs/configdialog.h"
 #include "guiutilities.h"

@@ -18,12 +18,7 @@
 
 #include <QFile>
 #include <QMessageBox>
-#include "main.h"
 #include "colors.h"
-#include "ldDocument.h"
-#include "miscallenous.h"
-#include "mainwindow.h"
-#include "documentmanager.h"
 #include "ldpaths.h"
 
 static ColorData* colorData = nullptr;

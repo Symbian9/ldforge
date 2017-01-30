@@ -17,7 +17,6 @@
  */
 
 #include <assert.h>
-#include "main.h"
 #include "documentmanager.h"
 #include "ldObject.h"
 #include "ldDocument.h"

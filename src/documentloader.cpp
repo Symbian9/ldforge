@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QFile>
 #include "documentloader.h"
 #include "ldDocument.h"
 #include "ldObject.h"

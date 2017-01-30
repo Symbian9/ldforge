@@ -18,7 +18,6 @@
 
 #include <QApplication>
 #include <QFileInfo>
-#include <QFile>
 #include "documentmanager.h"
 #include "ldDocument.h"
 #include "mainwindow.h"

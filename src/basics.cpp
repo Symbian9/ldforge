@@ -16,13 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QObject>
-#include <QStringList>
-#include <QTextStream>
-#include <QFile>
-#include <assert.h>
-#include "main.h"
-#include "basics.h"
 #include "miscallenous.h"
 #include "ldObject.h"
 #include "ldDocument.h"

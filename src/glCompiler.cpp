@@ -20,12 +20,7 @@
 #include <GL/glu.h>
 #include <GL/glext.h>
 #include "glCompiler.h"
-#include "ldObject.h"
-#include "colors.h"
-#include "ldDocument.h"
 #include "miscallenous.h"
-#include "glRenderer.h"
-#include "dialogs.h"
 #include "guiutilities.h"
 #include "documentmanager.h"
 #include "grid.h"

@@ -16,15 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDir>
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QTableWidget>
 #include "partdownloader.h"
 #include "partdownloadrequest.h"
 #include "ui_partdownloader.h"
-#include "basics.h"
 #include "mainwindow.h"
 #include "ldDocument.h"
 #include "glRenderer.h"
