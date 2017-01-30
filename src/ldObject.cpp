@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include "main.h"
+#include "documentmanager.h"
 #include "ldObject.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
@@ -955,7 +956,7 @@ void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 	{
 		newReferee->initializeCachedData();
 	}
-};
+}
 
 void LDObject::getVertices (QSet<Vertex>& verts) const
 {
@@ -966,4 +967,62 @@ void LDObject::getVertices (QSet<Vertex>& verts) const
 void LDSubfileReference::getVertices (QSet<Vertex>& verts) const
 {
 	verts.unite(fileInfo()->inlineVertices());
+}
+
+QString LDObject::objectListText() const
+{
+	if (numVertices() > 0)
+	{
+		QString result;
+
+		for (int i = 0; i < numVertices(); ++i)
+		{
+			if (i != 0)
+				result += ", ";
+
+			result += vertex(i).toString (true);
+		}
+
+		return result;
+	}
+	else
+	{
+		return typeName();
+	}
+}
+
+QString LDEmpty::objectListText() const
+{
+	return "";
+}
+
+QString LDError::objectListText() const
+{
+	return "ERROR: " + asText();
+}
+
+QString LDSubfileReference::objectListText() const
+{
+	QString result = format ("%1 %2, (", fileInfo()->getDisplayName(), position().toString(true));
+
+	for (int i = 0; i < 9; ++i)
+		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");
+
+	result += ')';
+	return result;
+}
+
+QString LDOverlay::objectListText() const
+{
+	return format("[%1] %2 (%3, %4), %5 x %6", static_cast<int>(camera()), Basename(fileName()), x(), y(), width(), height());
+}
+
+QString LDComment::objectListText() const
+{
+	return text().simplified();
+}
+
+QString LDBfc::objectListText() const
+{
+	return statementToString();
 }

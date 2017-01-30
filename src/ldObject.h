@@ -114,6 +114,7 @@ public:
 	void move (Vertex vect);
 	LDObject* next() const;
 	virtual int numVertices() const = 0;
+	virtual QString objectListText() const;
 	LDObject* previous() const;
 	bool previousIsInvertnext (LDBfc*& ptr);
 	QColor randomColor() const;
@@ -195,6 +196,7 @@ public:
 	QString contents() const;
 	QString fileReferenced() const;
 	void setFileReferenced (QString value);
+	QString objectListText() const override;
 
 protected:
 	LDError (QString contents, QString reason, Model* model = nullptr);
@@ -217,6 +219,9 @@ class LDEmpty : public LDObject
 	LDOBJ_UNCOLORED
 	LDOBJ_NON_SCEMANTIC
 	LDOBJ_NO_MATRIX
+
+public:
+	QString objectListText() const override;
 };
 
 //
@@ -233,6 +238,7 @@ class LDComment : public LDObject
 	LDOBJ_NO_MATRIX
 
 public:
+	QString objectListText() const override;
 	QString text() const;
 	void setText (QString value);
 
@@ -274,6 +280,7 @@ public:
 	LDOBJ_NO_MATRIX
 
 public:
+    QString objectListText() const override;
 	BfcStatement statement() const;
 	void setStatement (BfcStatement value);
 	QString statementToString() const;
@@ -308,6 +315,7 @@ public:
 	virtual void getVertices (QSet<Vertex>& verts) const override;
 	void inlineContents(Model& model, bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
+	QString objectListText() const override;
 	void setFileInfo (LDDocument* fileInfo);
 	int triangleCount() const override;
 
@@ -424,6 +432,7 @@ public:
 	int camera() const;
 	QString fileName() const;
 	int height() const;
+	QString objectListText() const override;
 	void setCamera (int value);
 	void setFileName (QString value);
 	void setHeight (int value);
