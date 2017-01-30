@@ -450,3 +450,8 @@ LDObject* Model::replaceWithFromString(LDObject* object, QString line)
 	else
 		return nullptr;
 }
+
+int countof(Model& model)
+{
+	return model.size();
+}

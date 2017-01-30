@@ -92,3 +92,5 @@ protected:
 	mutable int _triangleCount = 0;
 	mutable bool _needsTriangleRecount;
 };
+
+int countof(Model& model);

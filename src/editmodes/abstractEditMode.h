@@ -36,6 +36,9 @@ enum class EditModeType
 	Curve,
 };
 
+/*
+ * Base class of all editing modes.
+ */
 class AbstractEditMode : public QObject, public HierarchyElement
 {
 	Q_OBJECT
@@ -50,7 +53,6 @@ public:
 	};
 
 	AbstractEditMode (GLRenderer* renderer);
-	virtual ~AbstractEditMode();
 
 	virtual bool			allowFreeCamera() const = 0;
 	virtual void			render (QPainter&) const {}
@@ -68,9 +70,9 @@ private:
 	GLRenderer* m_renderer;
 };
 
-//
-// Base class for draw-like edit modes
-//
+/*
+ * Base class for draw-like edit modes
+ */
 class AbstractDrawMode : public AbstractEditMode
 {
 	DEFINE_CLASS (AbstractDrawMode, AbstractEditMode)
@@ -82,24 +84,22 @@ protected:
 public:
 	AbstractDrawMode (GLRenderer* renderer);
 
-	void addDrawnVertex (const Vertex& pos);
-	virtual bool allowFreeCamera() const override final { return false; }
-	virtual void endDraw() {}
-	void drawLineLength (QPainter& painter,
-		const Vertex& v0, const Vertex& v1,
-		const QPointF& v0p, const QPointF& v1p) const;
-	void finishDraw (Model& model);
+	void addDrawnVertex(const Vertex& pos);
+	bool allowFreeCamera() const override final;
+	virtual void endDraw();
+	void drawLineLength(QPainter& painter, const Vertex& v0, const Vertex& v1, const QPointF& v0p, const QPointF& v1p) const;
+	void finishDraw(Model& model);
 	Vertex getCursorVertex() const;
-	bool keyReleased (QKeyEvent* ev) override;
-	virtual int maxVertices() const { return 0; }
-	bool mouseReleased (const AbstractEditMode::MouseEventData& data) override;
-	virtual bool preAddVertex (Vertex const&) { return false; }
-	void renderPolygon (QPainter& painter, const QVector<Vertex>& poly3d, bool withlengths, bool withangles) const;
+	bool keyReleased(QKeyEvent* ev) override;
+	virtual int maxVertices() const;
+	bool mouseReleased(const AbstractEditMode::MouseEventData& data) override;
+	virtual bool preAddVertex(Vertex const&);
+	void renderPolygon(QPainter& painter, const QVector<Vertex>& poly3d, bool withlengths, bool withangles) const;
 };
 
-//
-// Base class for select-like edit modes
-//
+/*
+ * Base class for select-like edit modes
+ */
 class AbstractSelectMode : public AbstractEditMode
 {
 	DEFINE_CLASS (AbstractSelectMode, AbstractEditMode)

@@ -34,13 +34,17 @@
 ConfigOption (bool DrawLineLengths = true)
 ConfigOption (bool DrawAngles = false)
 
+/*
+ * Base class constructor of the abstract editing mode.
+ */
 AbstractEditMode::AbstractEditMode(GLRenderer* renderer) :
 	QObject(renderer),
 	HierarchyElement(renderer),
 	m_renderer(renderer) {}
 
-AbstractEditMode::~AbstractEditMode() {}
-
+/*
+ * Constructs an edit mode by type.
+ */
 AbstractEditMode* AbstractEditMode::createByType(GLRenderer* renderer, EditModeType type)
 {
 	switch (type)
@@ -57,31 +61,41 @@ AbstractEditMode* AbstractEditMode::createByType(GLRenderer* renderer, EditModeT
 	throw std::logic_error("bad type given to AbstractEditMode::createByType");
 }
 
+/*
+ * Returns the edit mode's corresponding renderer pointer.
+ */
 GLRenderer* AbstractEditMode::renderer() const
 {
 	return m_renderer;
 }
 
+/*
+ * Base class constructor of the abstract drwaing mode.
+ */
 AbstractDrawMode::AbstractDrawMode(GLRenderer* renderer) :
-	AbstractEditMode(renderer),
-    m_polybrush{QBrush{QColor{64, 192, 0, 128}}}
+    AbstractEditMode {renderer},
+    m_polybrush {QBrush {QColor {64, 192, 0, 128}}}
 {
-	renderer->setContextMenuPolicy (Qt::NoContextMenu); // We need the right mouse button for removing vertices
-	renderer->setCursor (Qt::CrossCursor);
+	renderer->setContextMenuPolicy(Qt::NoContextMenu); // We need the right mouse button for removing vertices
+	renderer->setCursor(Qt::CrossCursor);
 	m_window->currentDocument()->clearSelection();
 	m_window->updateSelection();
 	m_drawedVerts.clear();
 }
 
-AbstractSelectMode::AbstractSelectMode (GLRenderer* renderer) :
-	AbstractEditMode (renderer)
+/*
+ * Base class constructor of the abstract selection mode.
+ */
+AbstractSelectMode::AbstractSelectMode(GLRenderer* renderer) :
+    AbstractEditMode {renderer}
 {
 	renderer->unsetCursor();
 	renderer->setContextMenuPolicy (Qt::DefaultContextMenu);
 }
 
-// =============================================================================
-//
+/*
+ * Possibly adds this vertex into the list of drawn vertices.
+ */
 void AbstractDrawMode::addDrawnVertex(const Vertex& position)
 {
 	if (preAddVertex(position))
@@ -90,38 +104,43 @@ void AbstractDrawMode::addDrawnVertex(const Vertex& position)
 	m_drawedVerts << position;
 }
 
+/*
+ * Handles mouse relese events.
+ */
 bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 {
 	if (Super::mouseReleased(data))
 		return true;
 
+	// If the user presses the middle mouse button, seek the closest existing vertex to the cursor and clamp to that.
 	if ((data.releasedButtons & Qt::MidButton) and (countof(m_drawedVerts) < 4) and (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
 		double minimumDistance = 1024.0;
 		const Vertex* closest = nullptr;
-		Vertex cursorPosition = renderer()->convert2dTo3d (data.ev->pos(), false);
-		QPoint cursorPosition2D (data.ev->pos());
+		Vertex cursorPosition = renderer()->convert2dTo3d(data.ev->pos(), false);
+		QPoint cursorPosition2D = data.ev->pos();
 		const Axis depthAxis = renderer()->getRelativeZ();
 		QList<Vertex> vertices = renderer()->document()->inlineVertices().toList();
 
 		// Sort the vertices in order of distance to camera
-		std::sort (vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
+		std::sort(vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
 		{
-			if (renderer()->cameraInfo (renderer()->camera()).negatedDepth)
+			if (renderer()->cameraInfo(renderer()->camera()).negatedDepth)
 				return a[depthAxis] > b[depthAxis];
 			else
 				return a[depthAxis] < b[depthAxis];
 		});
 
-		for (const Vertex& vrt : vertices)
+		for (const Vertex& vertex : vertices)
 		{
 			// If the vertex in 2d space is very close to the cursor then we use it regardless of depth.
-			QPoint vect2d = renderer()->convert3dTo2d (vrt) - cursorPosition2D;
-			const double distance2DSquared = std::pow (vect2d.x(), 2) + std::pow (vect2d.y(), 2);
+			QPoint vect2d = renderer()->convert3dTo2d(vertex) - cursorPosition2D;
+			double distance2DSquared = std::pow (vect2d.x(), 2) + std::pow (vect2d.y(), 2);
+
 			if (distance2DSquared < 16.0 * 16.0)
 			{
-				closest = &vrt;
+				closest = &vertex;
 				break;
 			}
 
@@ -131,49 +150,53 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 
 			// Not very close to the cursor. Compare using true distance,
 			// including depth.
-			const double distanceSquared = (vrt - cursorPosition).lengthSquared();
+			double distanceSquared = (vertex - cursorPosition).lengthSquared();
 
 			if (distanceSquared < minimumDistance)
 			{
 				minimumDistance = distanceSquared;
-				closest = &vrt;
+				closest = &vertex;
 			}
 		}
 
 		if (closest)
-			addDrawnVertex (*closest);
+			addDrawnVertex(*closest);
 
 		return true;
 	}
 
+	// If the user presses the right mouse button, remove the previously drawn vertex.
 	if ((data.releasedButtons & Qt::RightButton) and not m_drawedVerts.isEmpty())
 	{
-		// Remove the last vertex
 		m_drawedVerts.removeLast();
 		return true;
 	}
 
+	// If the user presses the left mouse button, insert the vertex or stop drawing, whichever is appropriate.
 	if (data.releasedButtons & Qt::LeftButton)
 	{
 		if (maxVertices() and countof(m_drawedVerts) >= maxVertices())
 			endDraw();
 		else
 			addDrawnVertex (getCursorVertex());
+
 		return true;
 	}
 
+	// Otherwise we did not handle this mouse event.
 	return false;
 }
 
+/*
+ * Finalises the draw operation. The provided model is merged into the main document.
+ */
 void AbstractDrawMode::finishDraw(Model& model)
 {
-	int pos = m_window->suggestInsertPoint();
+	int position = m_window->suggestInsertPoint();
 
-	if (countof(model.objects()) > 0)
+	if (countof(model) > 0)
 	{
-		for (LDObject* obj : model)
-			renderer()->document()->insertObject (pos++, obj);
-
+		renderer()->document()->merge(model, position);
 		m_window->refresh();
 		m_window->endAction();
 	}
@@ -181,22 +204,33 @@ void AbstractDrawMode::finishDraw(Model& model)
 	m_drawedVerts.clear();
 }
 
-void AbstractDrawMode::drawLineLength(QPainter &painter, const Vertex &v0, const Vertex &v1,
-	const QPointF& v0p, const QPointF& v1p) const
+/*
+ * Renders the length of the provided line.
+ * - v0 and v1 are the line vertices in 3D space.
+ * - v0p and v1p are the line vertices in 2D space (so that this function does not have to calculate them separately)
+ */
+void AbstractDrawMode::drawLineLength(QPainter &painter, const Vertex &v0, const Vertex &v1, const QPointF& v0p, const QPointF& v1p) const
 {
 	if (not m_config->drawLineLengths())
 		return;
 
 	const QString label = QString::number(abs(v1 - v0), 'f', 2);
-	QPoint origin = QLineF (v0p, v1p).pointAt (0.5).toPoint();
+	QPoint origin = QLineF {v0p, v1p}.pointAt(0.5).toPoint();
 	painter.drawText (origin, label);
 }
 
-void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& polygon3d,
-	bool drawLineLengths, bool drawAngles ) const
+/*
+ * Renders a polygon preview.
+ *
+ * painter: QPainter instance that is currently being rendered to.
+ * polygon3d: The polygon as a vector of 3D vertices.
+ * drawLineLengths: if true, lengths of polygon sides are also previewed, assuming the user has enabled the relevant option.
+ * drawAngles: if true, the angles between polygon sides are also previewed, assuming the user has enabled the relevant option.
+ */
+void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& polygon3d, bool drawLineLengths, bool drawAngles) const
 {
-	QVector<QPoint> polygon2d (countof(polygon3d));
-	QFontMetrics metrics = QFontMetrics(QFont());
+	QVector<QPoint> polygon2d {countof(polygon3d)};
+	QFontMetrics metrics {QFont {}};
 
 	// Convert to 2D
 	for (int i = 0; i < countof(polygon3d); ++i)
@@ -216,7 +250,7 @@ void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& p
 	// Draw line lenghts and angle info if appropriate
 	if (countof(polygon3d) >= 2 and (drawLineLengths or drawAngles))
 	{
-		painter.setPen (renderer()->textPen());
+		painter.setPen(renderer()->textPen());
 
 		for (int i = 0; i < countof(polygon3d); ++i)
 		{
@@ -244,12 +278,16 @@ void AbstractDrawMode::renderPolygon(QPainter& painter, const QVector<Vertex>& p
 	}
 }
 
-bool AbstractDrawMode::keyReleased (QKeyEvent *ev)
+/*
+ * Key release event handler
+ */
+bool AbstractDrawMode::keyReleased(QKeyEvent *event)
 {
-	if (Super::keyReleased (ev))
+	if (Super::keyReleased(event))
 		return true;
 
-	if (not m_drawedVerts.isEmpty() and ev->key() == Qt::Key_Backspace)
+	// Map backspace to removing the previously drawn vertex.
+	if (not m_drawedVerts.isEmpty() and event->key() == Qt::Key_Backspace)
 	{
 		m_drawedVerts.removeLast();
 		return true;
@@ -258,34 +296,36 @@ bool AbstractDrawMode::keyReleased (QKeyEvent *ev)
 	return false;
 }
 
-//
-// roundToInterval
-//
-// Rounds 'a' to the nearest multiple of 'interval'.
-//
+/*
+ * Rounds the input value to the nearest multiple of the provided interval.
+ */
 template<typename T>
-T roundToInterval (T a, T interval)
+T roundToInterval(T value, T interval)
 {
-	T remainder = a % interval;
+	T remainder = value % interval;
 
 	if (remainder >= interval / 2.0)
-		a += interval;
+		value += interval;
 
-	a -= remainder;
-	return a;
+	value -= remainder;
+	return value;
 }
 
+/*
+ * Computes the position for the vertex currently being drawn.
+ */
 Vertex AbstractDrawMode::getCursorVertex() const
 {
 	Vertex result = renderer()->position3D();
 
+	// If the Ctrl key is pressed, then the vertex is locked to 45 degree angles relative to the previously drawn vertex.
 	if ((renderer()->keyboardModifiers() & Qt::ControlModifier) and not m_drawedVerts.isEmpty())
 	{
-		Vertex const& vertex0 = m_drawedVerts.last();
-		Vertex const& vertex1 = result;
-		Axis relativeX, relativeY;
-
-		renderer()->getRelativeAxes (relativeX, relativeY);
+		const Vertex& vertex0 = m_drawedVerts.last();
+		const Vertex& vertex1 = result;
+		Axis relativeX;
+		Axis relativeY;
+		renderer()->getRelativeAxes(relativeX, relativeY);
 		QLineF line = {vertex0[relativeX], vertex0[relativeY], vertex1[relativeX], vertex1[relativeY]};
 		line.setAngle(roundToInterval<int>(line.angle(), 45));
 		result.setCoordinate(relativeX, grid()->snap(line.x2(), Grid::Coordinate));
@@ -294,3 +334,36 @@ Vertex AbstractDrawMode::getCursorVertex() const
 
 	return result;
 }
+
+/*
+ * No draw mode can operate on the free camera, since 3D ⟷ 2D point conversions are not possible with it.
+ */
+bool AbstractDrawMode::allowFreeCamera() const
+{
+	return false;
+}
+
+/*
+ * This virtual method allows drawing modes to specify how many vertices at most can be drawn. Returning 0 means unlimited.
+ */
+int AbstractDrawMode::maxVertices() const
+{
+	return 0;
+}
+
+/*
+ * This virtual method is a hook that allows drawing modes to veto vertex insertion. Returning true means that the vertex insertion
+ * was handled separately and the vertex will not be added.
+ */
+bool AbstractDrawMode::preAddVertex (Vertex const&)
+{
+	return false;
+}
+
+/*
+ * This virtual method is overridden by subclasses to implement the actions taken by the edit mode.
+ * The editing mode is to call finishDraw with the prepared model.
+ *
+ * TODO: the two method names are too similar and should be renamed.
+ */
+void AbstractDrawMode::endDraw() {}
