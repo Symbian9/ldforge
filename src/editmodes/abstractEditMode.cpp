@@ -297,21 +297,6 @@ bool AbstractDrawMode::keyReleased(QKeyEvent *event)
 }
 
 /*
- * Rounds the input value to the nearest multiple of the provided interval.
- */
-template<typename T>
-T roundToInterval(T value, T interval)
-{
-	T remainder = value % interval;
-
-	if (remainder >= interval / 2.0)
-		value += interval;
-
-	value -= remainder;
-	return value;
-}
-
-/*
  * Computes the position for the vertex currently being drawn.
  */
 Vertex AbstractDrawMode::getCursorVertex() const

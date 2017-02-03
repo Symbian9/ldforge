@@ -38,5 +38,5 @@ private:
 	double m_angleOffset;
 
 	void buildCircle();
-	double getAngleOffset() const;
+	double orientation() const;
 };

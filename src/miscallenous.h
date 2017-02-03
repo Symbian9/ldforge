@@ -36,3 +36,12 @@ int gcd (int a, int b);
 QString joinStrings (QList<StringFormatArg> vals, QString delim = " ");
 void roundToDecimals (double& value, int decimals);
 void simplify (int& numer, int& denom);
+
+/*
+ * Rounds the input value to the nearest multiple of the provided interval.
+ */
+template<typename T>
+T roundToInterval(T value, double interval)
+{
+	return static_cast<T>(round(value / interval) * interval);
+}

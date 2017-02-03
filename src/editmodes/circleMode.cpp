@@ -26,10 +26,11 @@
 #include "../glRenderer.h"
 #include "../mainwindow.h"
 #include "../mathfunctions.h"
+#include "../miscallenous.h"
 #include "../grid.h"
 
-CircleMode::CircleMode (GLRenderer* renderer) :
-	Super (renderer) {}
+CircleMode::CircleMode(GLRenderer* renderer) :
+	Super {renderer} {}
 
 
 EditModeType CircleMode::type() const
@@ -38,19 +39,19 @@ EditModeType CircleMode::type() const
 }
 
 
-double CircleMode::getCircleDrawDist (int pos) const
+double CircleMode::getCircleDrawDist(int position) const
 {
-	if (countof(m_drawedVerts) >= pos + 1)
+	if (countof(m_drawedVerts) >= position + 1)
 	{
 		Vertex v1;
 
-		if (countof(m_drawedVerts) >= pos + 2)
-			v1 = m_drawedVerts[pos + 1];
+		if (countof(m_drawedVerts) >= position + 2)
+			v1 = m_drawedVerts[position + 1];
 		else
 			v1 = renderer()->convert2dTo3d (renderer()->mousePosition(), false);
 
 		Axis localx, localy;
-		renderer()->getRelativeAxes (localx, localy);
+		renderer()->getRelativeAxes(localx, localy);
 		double dx = m_drawedVerts[0][localx] - v1[localx];
 		double dy = m_drawedVerts[0][localy] - v1[localy];
 		return grid()->snap(hypot(dx, dy), Grid::Coordinate);
@@ -60,7 +61,7 @@ double CircleMode::getCircleDrawDist (int pos) const
 }
 
 
-Matrix CircleMode::getCircleDrawMatrix (double scale)
+Matrix CircleMode::getCircleDrawMatrix(double scale)
 {
 	// Matrix templates. 2 is substituted with the scale value, 1 is inverted to -1 if needed.
 	static const Matrix templates[3] =
@@ -98,14 +99,14 @@ void CircleMode::endDraw()
 	bool circleOrDisc = false;
 
 	if (dist1 < dist0)
-		qSwap (dist0, dist1);
+		qSwap(dist0, dist1);
 
 	if (dist0 == dist1)
 	{
 		// If the radii are the same, there's no ring space to fill. Use a circle.
 		primitiveModel.type = PrimitiveModel::Circle;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = getCircleDrawMatrix (dist0);
+		transform = getCircleDrawMatrix(dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
@@ -116,7 +117,7 @@ void CircleMode::endDraw()
 		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
-	else if (g_RingFinder.findRings (dist0, dist1))
+	else if (g_RingFinder.findRings(dist0, dist1))
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		primitiveModel.type = PrimitiveModel::Ring;
@@ -134,13 +135,13 @@ void CircleMode::endDraw()
 		Axis localx, localy, localz;
 		renderer()->getRelativeAxes (localx, localy);
 		localz = (Axis) (3 - localx - localy);
-		double x0 (m_drawedVerts[0][localx]);
-		double y0 (m_drawedVerts[0][localy]);
+		double x0 = m_drawedVerts[0][localx];
+		double y0 = m_drawedVerts[0][localy];
 
 		Vertex templ;
-		templ.setCoordinate (localx, x0);
-		templ.setCoordinate (localy, y0);
-		templ.setCoordinate (localz, renderer()->getDepthValue());
+		templ.setCoordinate(localx, x0);
+		templ.setCoordinate(localy, y0);
+		templ.setCoordinate(localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
 		QVector<QLineF> c0 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist0);
@@ -160,7 +161,7 @@ void CircleMode::endDraw()
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
 			LDQuad* quad = model.emplace<LDQuad>(v0, v1, v2, v3);
-			quad->setColor (MainColor);
+			quad->setColor(MainColor);
 
 			// Ensure the quads always are BFC-front towards the camera
 			if (renderer()->camera() % 3 <= 0)
@@ -183,22 +184,30 @@ void CircleMode::endDraw()
 	finishDraw (model);
 }
 
-
-double CircleMode::getAngleOffset() const
+/*
+ * Which way around will we place our circle primitive? This only makes a difference if we're not drawing a full circle.
+ * Result is an angle offset in radians.
+ */
+double CircleMode::orientation() const
 {
-	if (m_drawedVerts.isEmpty())
+	if (not m_drawedVerts.isEmpty())
+	{
+		int divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+		QPointF originSpot = renderer()->convert3dTo2d(m_drawedVerts.first());
+		// Line from the origin of the circle to current mouse position
+		QLineF hand1 = {originSpot, renderer()->mousePositionF()};
+		// Line from the origin spot to
+		QLineF hand2 = {{0, 0}, {1, 0}};
+		// Calculate the angle between these hands and round it to whole divisions.
+		double angleoffset = roundToInterval(-hand1.angleTo(hand2), 360.0 / divisions);
+		// Take the camera's depth coefficient into account here. This way, the preview is flipped if the
+		// primitive also would be.
+		return angleoffset * pi / 180.0 * renderer()->depthNegateFactor();
+	}
+	else
+	{
 		return 0.0;
-
-	int divisions = (m_window->ringToolHiRes() ? HighResolution : LowResolution);
-	QPointF originspot (renderer()->convert3dTo2d (m_drawedVerts.first()));
-	QLineF bearing (originspot, renderer()->mousePositionF());
-	QLineF bearing2 (originspot, QPointF (originspot.x(), 0.0));
-	double angleoffset (-bearing.angleTo (bearing2) + 90);
-	angleoffset /= (360.0 / divisions); // convert angle to 0-16 scale
-	angleoffset = round (angleoffset); // round to nearest 16th
-	angleoffset *= ((2 * pi) / divisions); // convert to radians
-	angleoffset *= renderer()->depthNegateFactor(); // negate based on camera
-	return angleoffset;
+	}
 }
 
 
@@ -209,22 +218,22 @@ void CircleMode::render (QPainter& painter) const
 	// If we have not specified the center point of the circle yet, preview it on the screen.
 	if (m_drawedVerts.isEmpty())
 	{
-		QPoint pos2d = renderer()->convert3dTo2d (renderer()->position3D());
-		renderer()->drawPoint (painter, pos2d);
-		renderer()->drawBlipCoordinates (painter, renderer()->position3D(), pos2d);
+		QPoint position2d = renderer()->convert3dTo2d(renderer()->position3D());
+		renderer()->drawPoint(painter, position2d);
+		renderer()->drawBlipCoordinates(painter, renderer()->position3D(), position2d);
 		return;
 	}
 
 	QVector<Vertex> innerverts, outerverts;
 	QVector<QPointF> innerverts2d, outerverts2d;
-	const double innerdistance (getCircleDrawDist (0));
-	const double outerdistance (countof(m_drawedVerts) >= 2 ? getCircleDrawDist (1) : -1);
-	const int divisions (m_window->ringToolHiRes() ? HighResolution : LowResolution);
-	const int segments (m_window->ringToolSegments());
-	const double angleUnit (2 * pi / divisions);
+	double innerdistance = getCircleDrawDist(0);
+	double outerdistance = countof(m_drawedVerts) >= 2 ? getCircleDrawDist (1) : -1;
+	int divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	int segments = m_window->ringToolSegments();
+	double angleUnit = 2 * pi / divisions;
 	Axis relX, relY;
-	renderer()->getRelativeAxes (relX, relY);
-	const double angleoffset (countof(m_drawedVerts) < 3 ? getAngleOffset() : m_angleOffset);
+	renderer()->getRelativeAxes(relX, relY);
+	double angleoffset = (countof(m_drawedVerts) < 3 ? orientation() : m_angleOffset);
 
 	// Calculate the preview positions of vertices
 	for (int i = 0; i < segments + 1; ++i)
@@ -246,12 +255,12 @@ void CircleMode::render (QPainter& painter) const
 		}
 	}
 
-	QVector<QLineF> lines (segments);
+	QVector<QLineF> lines {segments};
 
 	if (outerdistance != -1 and outerdistance != innerdistance)
 	{
-		painter.setBrush (m_polybrush);
-		painter.setPen (Qt::NoPen);
+		painter.setBrush(m_polybrush);
+		painter.setPen(Qt::NoPen);
 
 		// Compile polygons
 		for (int i = 0; i < segments; ++i)
@@ -262,48 +271,48 @@ void CircleMode::render (QPainter& painter) const
 				<< outerverts2d[i + 1]
 				<< outerverts2d[i];
 			painter.drawPolygon (QPolygonF (points));
-			lines << QLineF (innerverts2d[i], innerverts2d[i + 1]);
-			lines << QLineF (outerverts2d[i], outerverts2d[i + 1]);
+			lines.append({innerverts2d[i], innerverts2d[i + 1]});
+			lines.append({outerverts2d[i], outerverts2d[i + 1]});
 		}
 
 		// Add bordering edges for unclosed rings/discs
 		if (segments != divisions)
 		{
-			lines << QLineF (innerverts2d.first(), outerverts2d.first());
-			lines << QLineF (innerverts2d.last(), outerverts2d.last());
+			lines.append({innerverts2d.first(), outerverts2d.first()});
+			lines.append({innerverts2d.last(), outerverts2d.last()});
 		}
 	}
 	else
 	{
 		for (int i = 0; i < segments; ++i)
-			lines << QLineF (innerverts2d[i], innerverts2d[i + 1]);
+			lines.append({innerverts2d[i], innerverts2d[i + 1]});
 	}
 
 	// Draw green blips at where the points are
-	for (QPointF const& point : innerverts2d + outerverts2d)
-		renderer()->drawPoint (painter, point);
+	for (const QPointF& point : innerverts2d + outerverts2d)
+		renderer()->drawPoint(painter, point);
 
 	// Draw edge lines
-	painter.setPen (renderer()->linePen());
-	painter.drawLines (lines);
+	painter.setPen(renderer()->linePen());
+	painter.drawLines(lines);
 
 	// Draw the current radius in the middle of the circle.
 	QPoint origin = renderer()->convert3dTo2d (m_drawedVerts[0]);
 	QString label = QString::number (innerdistance);
-	painter.setPen (renderer()->textPen());
-	painter.drawText (origin.x() - (metrics.width (label) / 2), origin.y(), label);
+	painter.setPen(renderer()->textPen());
+	painter.drawText(origin.x() - (metrics.width(label) / 2), origin.y(), label);
 
 	if (countof(m_drawedVerts) >= 2)
 	{
-		painter.drawText (origin.x() - (metrics.width (label) / 2),
-			origin.y() + metrics.height(), QString::number (outerdistance));
+		painter.drawText(origin.x() - (metrics.width(label) / 2),
+			origin.y() + metrics.height(), QString::number(outerdistance));
 	}
 }
 
 
 bool CircleMode::preAddVertex (const Vertex&)
 {
-	m_angleOffset = getAngleOffset();
+	m_angleOffset = orientation();
 	return false;
 }
 
