@@ -27,7 +27,7 @@ public:
 	CircleMode (GLRenderer* renderer);
 
 	void endDraw() override;
-	double getCircleDrawDist (int pos) const;
+	double getCircleDrawDist (int position) const;
 	Matrix getCircleDrawMatrix (double scale);
 	int maxVertices() const override;
 	bool preAddVertex (Vertex const&) override;
