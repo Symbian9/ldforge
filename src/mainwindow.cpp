@@ -732,7 +732,7 @@ void MainWindow::objectListDoubleClicked (QListWidgetItem* listitem)
 //
 bool MainWindow::save (LDDocument* doc, bool saveAs)
 {
-	if (doc->isCache())
+	if (doc->isFrozen())
 		return false;
 
 	QString path = doc->fullPath();
@@ -843,7 +843,7 @@ void MainWindow::updateDocumentList()
 
 	for (LDDocument* document : m_documents->allDocuments())
 	{
-		if (not document->isCache())
+		if (not document->isFrozen())
 		{
 			// Add an item to the list for this file and store the tab index
 			// in the document so we can find documents by tab index.
@@ -901,7 +901,7 @@ void MainWindow::tabSelected()
 	// Find the file pointer of the item that was selected.
 	for (LDDocument* document : m_documents->allDocuments())
 	{
-		if (not document->isCache() and document->tabIndex() == tabIndex)
+		if (not document->isFrozen() and document->tabIndex() == tabIndex)
 		{
 			switchee = document;
 			break;
@@ -1141,9 +1141,22 @@ LDDocument* MainWindow::newDocument (bool cache)
 	connect (document->history(), SIGNAL (stepAdded()), this, SLOT (updateActions()));
 
 	if (not cache)
-		document->openForEditing();
+		openDocumentForEditing(document);
 
 	return document;
+}
+
+void MainWindow::openDocumentForEditing(LDDocument* document)
+{
+	if (document->isFrozen())
+	{
+		document->setFrozen(false);
+		print ("Opened %1", document->name());
+
+		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be compiled.
+		m_renderer->compiler()->compileDocument(document);
+		updateDocumentList();
+	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1160,7 +1173,7 @@ LDDocument* MainWindow::currentDocument()
 void MainWindow::changeDocument (LDDocument* document)
 {
 	// Implicit files were loaded for caching purposes and may never be switched to.
-	if (document and document->isCache())
+	if (document and document->isFrozen())
 		return;
 
 	m_currentDocument = document;
@@ -1210,7 +1223,7 @@ void MainWindow::currentDocumentClosed()
 	// Find a replacement document to use
 	for (LDDocument* doc : m_documents->allDocuments())
 	{
-		if (doc != old and not doc->isCache())
+		if (doc != old and not doc->isFrozen())
 		{
 			changeDocument (doc);
 			break;

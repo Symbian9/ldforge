@@ -471,7 +471,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 		author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
 	}
 
-	document->openForEditing();
+	document->setFrozen(false);
 	document->history()->setIgnoring(false);
 	document->emplace<LDComment>(description);
 	document->emplace<LDComment>(format("Name: %1", fileName));
@@ -496,10 +496,13 @@ LDDocument* PrimitiveManager::getPrimitive(const PrimitiveModel& model)
 	QString name = model.makeFileName();
 	LDDocument* document = m_window->documents()->getDocumentByName (name);
 
-	if (document)
-		return document;
-	else
-		return generatePrimitive(model);
+	if (not document)
+	{
+		document = generatePrimitive(model);
+		m_window->openDocumentForEditing(document);
+	}
+
+	return document;
 }
 
 /*

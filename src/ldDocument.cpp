@@ -31,7 +31,7 @@ LDDocument::LDDocument (DocumentManager* parent) :
     Model {parent},
 	HierarchyElement (parent),
 	m_history (new EditHistory (this)),
-	m_flags(IsCache | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
+    m_flags(IsFrozen | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
 	m_savePosition(-1),
     m_tabIndex(-1),
 	m_gldata (new LDGLData),
@@ -104,23 +104,17 @@ void LDDocument::setDefaultName (QString value)
 	m_defaultName = value;
 }
 
-void LDDocument::openForEditing()
+void LDDocument::setFrozen(bool value)
 {
-	if (isCache())
-	{
-		m_flags &= ~IsCache;
-		print ("Opened %1", name());
-
-		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be
-		// compiled.
-		m_window->renderer()->compiler()->compileDocument (this);
-		m_window->updateDocumentList();
-	}
+	if (value)
+		m_flags |= IsFrozen;
+	else
+		m_flags &= ~IsFrozen;
 }
 
-bool LDDocument::isCache() const
+bool LDDocument::isFrozen() const
 {
-	return !!(m_flags & IsCache);
+	return !!(m_flags & IsFrozen);
 }
 
 void LDDocument::addHistoryStep()
@@ -150,9 +144,9 @@ void LDDocument::addToHistory (AbstractHistoryEntry* entry)
 
 void LDDocument::close()
 {
-	if (not isCache())
+	if (not isFrozen())
 	{
-		m_flags |= IsCache;
+		m_flags |= IsFrozen;
 		print ("Closed %1", name());
 		m_window->updateDocumentList();
 
@@ -229,7 +223,7 @@ bool LDDocument::isSafeToClose()
 //
 bool LDDocument::save (QString path, int64* sizeptr)
 {
-	if (isCache())
+	if (isFrozen())
 		return false;
 
 	if (path.isEmpty())
@@ -335,7 +329,7 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 	connect(obj, SIGNAL(codeChanged(int,QString,QString)), this, SLOT(objectChanged(int,QString,QString)));
 
 #ifdef DEBUG
-	if (not isCache())
+	if (not isFrozen())
 		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
 #endif
 }
@@ -367,7 +361,7 @@ LDObject* LDDocument::withdrawAt(int position)
 {
 	LDObject* object = getObject(position);
 
-	if (not isCache() and not checkFlag(IsBeingDestroyed))
+	if (not isFrozen() and not checkFlag(IsBeingDestroyed))
 	{
 		history()->add(new DelHistoryEntry {position, object});
 		m_objectVertices.remove(object);
@@ -381,7 +375,7 @@ LDObject* LDDocument::withdrawAt(int position)
 //
 bool LDDocument::hasUnsavedChanges() const
 {
-	return not isCache() and history()->position() != savePosition();
+	return not isFrozen() and history()->position() != savePosition();
 }
 
 // =============================================================================

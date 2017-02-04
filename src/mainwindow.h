@@ -92,6 +92,7 @@ public:
 	void loadShortcuts();
 	MathFunctions* mathFunctions() const;
 	LDDocument* newDocument (bool cache = false);
+	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
 	GLRenderer* renderer();
 	void refresh();

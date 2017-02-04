@@ -119,7 +119,7 @@ void DocumentManager::openMainModel (QString path)
 		return;
 	}
 
-	file->openForEditing();
+	m_window->openDocumentForEditing(file);
 	m_window->closeInitialDocument();
 	m_window->changeDocument (file);
 	m_window->doFullRefresh();

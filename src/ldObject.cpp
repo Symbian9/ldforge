@@ -950,7 +950,7 @@ void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
 	// GL polygons for the document if they don't exist already.
 	if (newReferee and
-		newReferee->isCache() == false and
+		newReferee->isFrozen() == false and
 		newReferee->polygonData().isEmpty())
 	{
 		newReferee->initializeCachedData();

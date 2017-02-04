@@ -530,7 +530,6 @@ void AlgorithmToolset::subfileSelection()
 
 	// Create the new subfile document
 	LDDocument* subfile = m_window->newDocument();
-	subfile->openForEditing();
 	subfile->setFullPath(fullsubname);
 	subfile->setName(LDDocument::shortenName(fullsubname));
 

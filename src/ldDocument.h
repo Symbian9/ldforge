@@ -44,7 +44,7 @@ class LDDocument : public QObject, public Model, public HierarchyElement
 public:
 	enum Flag
 	{
-		IsCache = (1 << 0),
+		IsFrozen = (1 << 0), // Document may not be modified
 		VerticesOutdated = (1 << 1),
 		NeedsVertexMerge = (1 << 2),
 		IsBeingDestroyed = (1 << 3),
@@ -76,12 +76,11 @@ public:
 	QList<LDPolygon> inlinePolygons();
 	const QSet<Vertex>& inlineVertices();
 	void insertObject (int pos, LDObject* obj);
-	bool isCache() const;
+	bool isFrozen() const;
 	bool isSafeToClose();
 	QString name() const;
 	void needVertexMerge();
 	void objectRemoved(LDObject* object, int index);
-	void openForEditing();
 	const QList<LDPolygon>& polygonData() const;
 	void recountTriangles();
 	void redo();
@@ -91,6 +90,7 @@ public:
 	bool save (QString path = "", int64* sizeptr = nullptr);
 	long savePosition() const;
 	void setDefaultName (QString value);
+	void setFrozen(bool value);
 	void setFullPath (QString value);
 	void setName (QString value);
 	void setSavePosition (long value);

@@ -179,8 +179,8 @@ void FileToolset::openSubfiles()
 	{
 		LDSubfileReference* reference = dynamic_cast<LDSubfileReference*>(object);
 
-		if (reference and reference->fileInfo()->isCache())
-			reference->fileInfo()->openForEditing();
+		if (reference and reference->fileInfo()->isFrozen())
+			m_window->openDocumentForEditing(reference->fileInfo());
 	}
 }
 
@@ -203,7 +203,7 @@ void FileToolset::makePrimitive()
 	if (dialog->exec())
 	{
 		LDDocument* primitive = primitives()->generatePrimitive(dialog->primitiveModel());
-		primitive->openForEditing();
+		m_window->openDocumentForEditing(primitive);
 		m_window->save(primitive, false);
 	}
 }
