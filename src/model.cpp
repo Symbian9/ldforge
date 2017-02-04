@@ -1,3 +1,21 @@
+/*
+ *  LDForge: LDraw parts authoring CAD
+ *  Copyright (C) 2013 - 2017 Teemu Piippo
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "model.h"
 #include "ldObject.h"
 #include "documentmanager.h"
@@ -11,21 +29,33 @@ Model::~Model()
 		delete _objects[i];
 }
 
+/*
+ * Takes an existing object and migrates it to the end of this model. The object is removed from its old model in the process.
+ */
 void Model::addObject(LDObject *object)
 {
 	insertObject(size(), object);
 }
 
+/*
+ * Returns the amount of objects in this model.
+ */
 int Model::size() const
 {
 	return _objects.size();
 }
 
+/*
+ * Returns the vector of objects in this model.
+ */
 const QVector<LDObject*>& Model::objects() const
 {
 	return _objects;
 }
 
+/*
+ * Takes an existing object and migrates it to this model, at the specified position.
+ */
 void Model::insertObject(int position, LDObject* object)
 {
 	if (object->model() and object->model() != this)
@@ -35,9 +65,11 @@ void Model::insertObject(int position, LDObject* object)
 	_objects.insert(position, object);
 	_needsTriangleRecount = true;
 	object->setDocument(this);
-	print("Object %1 added to position %2", object->id(), position);
 }
 
+/*
+ * Swaps one object with another, assuming they both are in this model.
+ */
 bool Model::swapObjects(LDObject* one, LDObject* other)
 {
 	int a = _objects.indexOf(one);
@@ -55,6 +87,9 @@ bool Model::swapObjects(LDObject* one, LDObject* other)
 	}
 }
 
+/*
+ * Assigns a new object to the specified position in the model. The object that already is in the position is deleted in the process.
+ */
 bool Model::setObjectAt(int idx, LDObject* obj)
 {
 	if (idx < 0 or idx >= countof(_objects))
@@ -69,6 +104,9 @@ bool Model::setObjectAt(int idx, LDObject* obj)
 	}
 }
 
+/*
+ * Returns the object at the specified position, or null if not found.
+ */
 LDObject* Model::getObject(int position) const
 {
 	if (position >= 0 and position < countof(_objects))
@@ -77,20 +115,28 @@ LDObject* Model::getObject(int position) const
 		return nullptr;
 }
 
+/*
+ * Removes the given object from the model.
+ */
 void Model::remove(LDObject* object)
 {
 	int position = object->lineNumber();
-	printf("Going to remove %d from %p at %d (there are %d objects)\n", object->id(), this, position, countof(objects()));
 	if (_objects[position] == object)
 		removeAt(position);
 }
 
+/*
+ * Removes the object at the provided position.
+ */
 void Model::removeAt(int position)
 {
 	LDObject* object = withdrawAt(position);
 	delete object;
 }
 
+/*
+ * Replaces the given object with the contents of a model.
+ */
 void Model::replace(LDObject *object, Model &model)
 {
 	if (object->model() == this)
@@ -104,11 +150,17 @@ void Model::replace(LDObject *object, Model &model)
 	}
 }
 
+/*
+ * Signals the model to recount its triangles.
+ */
 void Model::recountTriangles()
 {
 	_needsTriangleRecount = true;
 }
 
+/*
+ * Returns the triangle count in the model.
+ */
 int Model::triangleCount() const
 {
 	if (_needsTriangleRecount)
@@ -124,6 +176,9 @@ int Model::triangleCount() const
 	return _triangleCount;
 }
 
+/*
+ * Merges the given model into this model, starting at the given position. The other model is emptied in the process.
+ */
 void Model::merge(Model& other, int position)
 {
 	if (position < 0)
@@ -142,34 +197,45 @@ void Model::merge(Model& other, int position)
 	other.clear();
 }
 
+/*
+ * Returns the begin-iterator into this model, so that models can be used in foreach-loops.
+ */
 QVector<LDObject*>::iterator Model::begin()
 {
 	return _objects.begin();
 }
 
+/*
+ * Returns the end-iterator into this mode, so that models can be used in foreach-loops.
+ */
 QVector<LDObject*>::iterator Model::end()
 {
 	return _objects.end();
 }
 
+/*
+ * Removes all objects in this model.
+ */
 void Model::clear()
 {
 	for (int i = _objects.size() - 1; i >= 0; i -= 1)
 		removeAt(i);
 
-	_needsTriangleRecount = true;
+	_triangleCount = 0;
+	_needsTriangleRecount = false;
 }
 
 /*
  * Drops the object from the model. The object becomes a free object as a result (thus violating the invariant that every object
  * has a model!). The caller must immediately add the withdrawn object to another model.
+ *
+ * This private method is only used to implement public API.
  */
 void Model::withdraw(LDObject* object)
 {
 	if (object->model() == this)
 	{
 		int position = object->lineNumber();
-		print("Withdrawing %1 from %2 at %3\n", object->id(), this, position);
 
 		if (_objects[position] == object)
 			withdrawAt(position);
@@ -187,11 +253,17 @@ LDObject* Model::withdrawAt(int position)
 	return object;
 }
 
+/*
+ * Returns whether or not this model is empty.
+ */
 bool Model::isEmpty() const
 {
 	return _objects.isEmpty();
 }
 
+/*
+ * Returns the model's associated document manager. This pointer is used to resolve subfile references.
+ */
 DocumentManager* Model::documentManager() const
 {
 	return _manager;
@@ -434,11 +506,18 @@ LDObject* Model::insertFromString(int position, QString line)
 	}
 }
 
+/*
+ * Given an LDraw object string, parses it and inserts it into the model.
+ */
 LDObject* Model::addFromString(QString line)
 {
 	return insertFromString(size(), line);
 }
 
+/*
+ * Replaces the given object with a new one that is parsed from the given LDraw object string.
+ * If the parsing fails, the object is replaced with an error object.
+ */
 LDObject* Model::replaceWithFromString(LDObject* object, QString line)
 {
 	if (object and object->model() == this)
