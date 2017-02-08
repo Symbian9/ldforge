@@ -728,17 +728,6 @@ void GLRenderer::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPo
 
 // =============================================================================
 //
-void GLRenderer::clampAngle(double& angle) const
-{
-	while (angle < 0)
-		angle += 360.0;
-
-	while (angle > 360.0)
-		angle -= 360.0;
-}
-
-// =============================================================================
-//
 void GLRenderer::mouseReleaseEvent(QMouseEvent* ev)
 {
 	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (ev->buttons() & Qt::LeftButton);

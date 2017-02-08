@@ -239,7 +239,6 @@ private:
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
-	void clampAngle (double& angle) const;
 	LDGLData& currentDocumentData() const;
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
 	LDOverlay* findOverlayObject (Camera cam);
