@@ -552,12 +552,10 @@ Vertex GLRenderer::convert2dTo3d (const QPoint& position2d, bool snap) const
 	}
 }
 
-// =============================================================================
-//
-// Inverse operation for the above - convert a 3D position to a 2D screen position. Don't ask me how this code manages
-// to work, I don't even know.
-//
-QPoint GLRenderer::convert3dTo2d(const Vertex& position3d)
+/*
+ * Inverse operation for the above - convert a 3D position to a 2D screen position.
+ */
+QPoint GLRenderer::convert3dTo2d(const Vertex& position3d) const
 {
 	if (camera() == FreeCamera)
 	{
@@ -570,16 +568,8 @@ QPoint GLRenderer::convert3dTo2d(const Vertex& position3d)
 		Axis axisY = camera->localY;
 		int signX = camera->negatedX ? -1 : 1;
 		int signY = camera->negatedY ? -1 : 1;
-		GLfloat matrix[16];
-		double x = position3d.x();
-		double y = position3d.y();
-		double z = position3d.z();
-		glGetFloatv (GL_MODELVIEW_MATRIX, matrix);
-		Vertex transformed = {(matrix[0] * x) + (matrix[1] * y) + (matrix[2] * z) + matrix[3],
-							  (matrix[4] * x) + (matrix[5] * y) + (matrix[6] * z) + matrix[7],
-							  (matrix[8] * x) + (matrix[9] * y) + (matrix[10] * z) + matrix[11]};
-		int rx = (((transformed[axisX] * signX) + m_virtualWidth + panning (X)) * m_width) / (2 * m_virtualWidth);
-		int ry = (((transformed[axisY] * signY) - m_virtualHeight + panning (Y)) * m_height) / (2 * m_virtualHeight);
+		int rx = (((position3d[axisX] * signX) + m_virtualWidth + panning(X)) * m_width) / (2 * m_virtualWidth);
+		int ry = (((position3d[axisY] * signY) - m_virtualHeight + panning(Y)) * m_height) / (2 * m_virtualHeight);
 		return {rx, -ry};
 	}
 }

@@ -137,7 +137,7 @@ public:
 	void compileObject(LDObject* obj);
 	GLCompiler* compiler() const;
 	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
-	QPoint convert3dTo2d(const Vertex& pos3d);
+	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	QString currentCameraName() const;
 	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
