@@ -197,7 +197,7 @@ void AbstractDrawMode::finishDraw(Model& model)
 
 	if (countof(model) > 0)
 	{
-		renderer()->model()->merge(model, position);
+		currentDocument()->merge(model, position);
 		m_window->refresh();
 		m_window->endAction();
 	}

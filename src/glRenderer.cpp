@@ -177,11 +177,6 @@ void GLRenderer::setDrawOnly (bool value)
 	m_isDrawOnly = value;
 }
 
-Model* GLRenderer::model() const
-{
-	return m_model;
-}
-
 GLCompiler* GLRenderer::compiler() const
 {
 	return m_compiler;
@@ -1239,10 +1234,6 @@ void GLRenderer::zoomNotch (bool inward)
 void GLRenderer::zoomToFit()
 {
 	zoom() = 30.0f;
-
-	if (model() == nullptr or m_width == -1 or m_height == -1)
-		return;
-
 	bool lastfilled = false;
 	bool firstrun = true;
 	enum { black = 0xFF000000 };
@@ -1343,7 +1334,7 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 //
 LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 {
-	for (LDObject* obj : model()->objects())
+	for (LDObject* obj : m_model->objects())
 	{
 		LDOverlay* overlay = dynamic_cast<LDOverlay*> (obj);
 
@@ -1403,11 +1394,11 @@ void GLRenderer::updateOverlayObjects()
 			LDObject* nextobj = overlayObject->next();
 
 			if (nextobj and nextobj->type() == OBJ_Empty)
-				model()->remove(nextobj);
+				m_model->remove(nextobj);
 
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
-			model()->remove(overlayObject);
+			m_model->remove(overlayObject);
 			overlayObject = nullptr;
 		}
 		else if (meta.image and overlayObject == nullptr)
@@ -1425,9 +1416,9 @@ void GLRenderer::updateOverlayObjects()
 			int lastOverlayPosition = -1;
 			bool found = false;
 
-			for (i = 0; i < model()->size(); ++i)
+			for (i = 0; i < m_model->size(); ++i)
 			{
-				LDObject* object = model()->getObject (i);
+				LDObject* object = m_model->getObject (i);
 
 				if (object->isScemantic())
 				{
@@ -1441,14 +1432,14 @@ void GLRenderer::updateOverlayObjects()
 
 			if (lastOverlayPosition != -1)
 			{
-				overlayObject = model()->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
+				overlayObject = m_model->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
 			}
 			else
 			{
-				overlayObject = model()->emplaceAt<LDOverlay>(i);
+				overlayObject = m_model->emplaceAt<LDOverlay>(i);
 
 				if (found)
-					model()->emplaceAt<LDEmpty>(i + 1);
+					m_model->emplaceAt<LDEmpty>(i + 1);
 			}
 		}
 

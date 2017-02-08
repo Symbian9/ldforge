@@ -104,7 +104,6 @@ public:
 	QString currentCameraName() const;
 	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
-	Model* model() const;
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d);
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos);
