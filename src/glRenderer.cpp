@@ -67,10 +67,10 @@ ConfigOption (bool DrawConditionalLines = true)
 
 // =============================================================================
 //
-GLRenderer::GLRenderer(LDDocument* document, QWidget* parent) :
+GLRenderer::GLRenderer(Model* model, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
-    m_document {document}
+    m_model {model}
 {
 	m_camera = (Camera) m_config->camera();
 	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
@@ -82,14 +82,8 @@ GLRenderer::GLRenderer(LDDocument* document, QWidget* parent) :
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 	initOverlaysFromObjects();
-
-	if (not currentDocumentData().init)
-	{
-		resetAllAngles();
-		currentDocumentData().init = true;
-	}
-
-	currentDocumentData().needZoomToFit = true;
+	resetAllAngles();
+	m_needZoomToFit = true;
 
 	// Init camera icons
 	for (Camera camera : iterateEnum<Camera>())
@@ -183,9 +177,9 @@ void GLRenderer::setDrawOnly (bool value)
 	m_isDrawOnly = value;
 }
 
-LDDocument* GLRenderer::document() const
+Model* GLRenderer::model() const
 {
-	return m_document;
+	return m_model;
 }
 
 GLCompiler* GLRenderer::compiler() const
@@ -202,8 +196,7 @@ LDObject* GLRenderer::objectAtCursor() const
 //
 void GLRenderer::needZoomToFit()
 {
-	if (document())
-		currentDocumentData().needZoomToFit = true;
+	m_needZoomToFit = true;
 }
 
 // =============================================================================
@@ -218,7 +211,7 @@ void GLRenderer::resetAngles()
 		glLoadIdentity();
 		glRotatef(30, 1, 0, 0);
 		glRotatef(330, 0, 1, 0);
-		glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix.data());
+		glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
 		glPopMatrix();
 	}
 	panning(X) = panning(Y) = 0.0f;
@@ -343,7 +336,7 @@ void GLRenderer::hardRefresh()
 {
 	if (m_initialized)
 	{
-		compiler()->compileDocument (currentDocument());
+		compiler()->compileModel (currentDocument());
 		refresh();
 	}
 }
@@ -366,12 +359,9 @@ void GLRenderer::resizeGL (int w, int h)
 //
 void GLRenderer::drawGLScene()
 {
-	if (document() == nullptr)
-		return;
-
-	if (currentDocumentData().needZoomToFit)
+	if (m_needZoomToFit)
 	{
-		currentDocumentData().needZoomToFit = false;
+		m_needZoomToFit = false;
 		zoomAllToFit();
 	}
 
@@ -411,7 +401,7 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
-		glMultMatrixf(currentDocumentData().rotationMatrix.constData());
+		glMultMatrixf(m_rotationMatrix.constData());
 	}
 
 	glEnableClientState (GL_VERTEX_ARRAY);
@@ -490,8 +480,8 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 
 	int surfaceVboNumber = m_compiler->vboNumber(surface, SurfacesVboComplement);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
-	m_compiler->prepareVBO(surfaceVboNumber);
-	m_compiler->prepareVBO(colorVboNumber);
+	m_compiler->prepareVBO(surfaceVboNumber, currentDocument());
+	m_compiler->prepareVBO(colorVboNumber, currentDocument());
 	GLuint surfaceVbo = m_compiler->vbo(surfaceVboNumber);
 	GLuint colorVbo = m_compiler->vbo(colorVboNumber);
 	GLsizei count = m_compiler->vboSize(surfaceVboNumber) / 3;
@@ -607,7 +597,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 #ifndef RELEASE
 	{
 		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4",
-		    currentDocumentData().rotationMatrix, panning(X), panning(Y), zoom());
+		    m_rotationMatrix, panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect(0, 0, m_width, m_height, Qt::AlignCenter, text);
 		painter.setPen(textPen());
 		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
@@ -618,12 +608,12 @@ void GLRenderer::paintEvent(QPaintEvent*)
 	if (camera() != FreeCamera)
 	{
 		// Paint the overlay image if we have one
-		const LDGLOverlay& overlay = currentDocumentData().overlays[camera()];
+		const LDGLOverlay& overlay = m_overlays[camera()];
 
 		if (overlay.image)
 		{
-			QPoint v0 = convert3dTo2d(currentDocumentData().overlays[camera()].v0);
-			QPoint v1 = convert3dTo2d(currentDocumentData().overlays[camera()].v1);
+			QPoint v0 = convert3dTo2d(m_overlays[camera()].v0);
+			QPoint v1 = convert3dTo2d(m_overlays[camera()].v1);
 			QRect targetRect = {v0.x(), v0.y(), qAbs(v1.x() - v0.x()), qAbs(v1.y() - v0.y())};
 			QRect sourceRect = {0, 0, overlay.image->width(), overlay.image->height()};
 			painter.drawImage(targetRect, *overlay.image, sourceRect);
@@ -664,10 +654,10 @@ void GLRenderer::paintEvent(QPaintEvent*)
 			painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
 
 			// Also render triangle count.
-			if (m_document)
+			if (m_model)
 			{
 				QPoint renderPoint = {margin, height() - margin - metrics.height() - metrics.descent()};
-				painter.drawText(renderPoint, format("△ %1", m_document->triangleCount()));
+				painter.drawText(renderPoint, format("△ %1", m_model->triangleCount()));
 			}
 		}
 
@@ -803,8 +793,8 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 			glLoadIdentity();
 			// 0.6 is an arbitrary rotation sensitivity scalar
 			glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
-			glMultMatrixf(currentDocumentData().rotationMatrix.constData());
-			glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix.data());
+			glMultMatrixf(m_rotationMatrix.constData());
+			glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
 			glPopMatrix();
 			m_isCameraMoving = true;
 		}
@@ -961,14 +951,14 @@ void GLRenderer::pick(const QRect& range, bool additive)
 	// Select all objects that we now have selected that were not selected before.
 	for (LDObject* object : newSelection - priorSelection)
 	{
-		m_document->addToSelection(object);
+		currentDocument()->addToSelection(object);
 		compileObject(object);
 	}
 
 	// Likewise, deselect whatever was selected that isn't anymore.
 	for (LDObject* object : priorSelection - newSelection)
 	{
-		m_document->removeFromSelection(object);
+		currentDocument()->removeFromSelection(object);
 		compileObject(object);
 	}
 
@@ -1131,7 +1121,7 @@ bool GLRenderer::setupOverlay (Camera camera, QString fileName, int x, int y, in
 	if (image->isNull())
 	{
 		Critical (tr ("Failed to load overlay image!"));
-		currentDocumentData().overlays[camera].invalid = true;
+		m_overlays[camera].invalid = true;
 		delete image;
 		return false;
 	}
@@ -1181,7 +1171,7 @@ void GLRenderer::clearOverlay()
 	if (camera() == FreeCamera)
 		return;
 
-	LDGLOverlay& info = currentDocumentData().overlays[camera()];
+	LDGLOverlay& info = m_overlays[camera()];
 	delete info.image;
 	info.image = nullptr;
 
@@ -1193,7 +1183,7 @@ void GLRenderer::clearOverlay()
 void GLRenderer::setDepthValue (double depth)
 {
 	if (camera() < FreeCamera)
-		currentDocumentData().depthValues[camera()] = depth;
+		m_depthValues[camera()] = depth;
 }
 
 // =============================================================================
@@ -1201,7 +1191,7 @@ void GLRenderer::setDepthValue (double depth)
 double GLRenderer::getDepthValue() const
 {
 	if (camera() < FreeCamera)
-		return currentDocumentData().depthValues[camera()];
+		return m_depthValues[camera()];
 	else
 		return 0.0;
 }
@@ -1234,7 +1224,7 @@ QString GLRenderer::currentCameraName() const
 //
 LDGLOverlay& GLRenderer::getOverlay (int newcam)
 {
-	return currentDocumentData().overlays[newcam];
+	return m_overlays[newcam];
 }
 
 // =============================================================================
@@ -1250,7 +1240,7 @@ void GLRenderer::zoomToFit()
 {
 	zoom() = 30.0f;
 
-	if (document() == nullptr or m_width == -1 or m_height == -1)
+	if (model() == nullptr or m_width == -1 or m_height == -1)
 		return;
 
 	bool lastfilled = false;
@@ -1353,7 +1343,7 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 //
 LDOverlay* GLRenderer::findOverlayObject (Camera cam)
 {
-	for (LDObject* obj : document()->objects())
+	for (LDObject* obj : model()->objects())
 	{
 		LDOverlay* overlay = dynamic_cast<LDOverlay*> (obj);
 
@@ -1375,7 +1365,7 @@ void GLRenderer::initOverlaysFromObjects()
 		if (camera == FreeCamera)
 			continue;
 
-		LDGLOverlay& meta = currentDocumentData().overlays[camera];
+		LDGLOverlay& meta = m_overlays[camera];
 		LDOverlay* overlay = findOverlayObject (camera);
 
 		if (overlay == nullptr and meta.image)
@@ -1404,7 +1394,7 @@ void GLRenderer::updateOverlayObjects()
 		if (camera == FreeCamera)
 			continue;
 
-		LDGLOverlay& meta = currentDocumentData().overlays[camera];
+		LDGLOverlay& meta = m_overlays[camera];
 		LDOverlay* overlayObject = findOverlayObject (camera);
 
 		if (meta.image == nullptr and overlayObject)
@@ -1413,11 +1403,11 @@ void GLRenderer::updateOverlayObjects()
 			LDObject* nextobj = overlayObject->next();
 
 			if (nextobj and nextobj->type() == OBJ_Empty)
-				document()->remove(nextobj);
+				model()->remove(nextobj);
 
 			// If the overlay object was there and the overlay itself is
 			// not, remove the object.
-			document()->remove(overlayObject);
+			model()->remove(overlayObject);
 			overlayObject = nullptr;
 		}
 		else if (meta.image and overlayObject == nullptr)
@@ -1435,9 +1425,9 @@ void GLRenderer::updateOverlayObjects()
 			int lastOverlayPosition = -1;
 			bool found = false;
 
-			for (i = 0; i < document()->size(); ++i)
+			for (i = 0; i < model()->size(); ++i)
 			{
-				LDObject* object = document()->getObject (i);
+				LDObject* object = model()->getObject (i);
 
 				if (object->isScemantic())
 				{
@@ -1451,14 +1441,14 @@ void GLRenderer::updateOverlayObjects()
 
 			if (lastOverlayPosition != -1)
 			{
-				overlayObject = document()->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
+				overlayObject = model()->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
 			}
 			else
 			{
-				overlayObject = document()->emplaceAt<LDOverlay>(i);
+				overlayObject = model()->emplaceAt<LDOverlay>(i);
 
 				if (found)
-					document()->emplaceAt<LDEmpty>(i + 1);
+					model()->emplaceAt<LDEmpty>(i + 1);
 			}
 		}
 
@@ -1590,36 +1580,27 @@ Camera GLRenderer::camera() const
 	return m_camera;
 }
 
-LDGLData& GLRenderer::currentDocumentData() const
-{
-	return *document()->glData();
-}
-
 double& GLRenderer::panning (Axis ax)
 {
-	return (ax == X) ? currentDocumentData().panX[camera()] :
-		currentDocumentData().panY[camera()];
+	return (ax == X) ? m_panX[camera()] :
+		m_panY[camera()];
 }
 
 double GLRenderer::panning (Axis ax) const
 {
-	return (ax == X) ? currentDocumentData().panX[camera()] :
-		currentDocumentData().panY[camera()];
+	return (ax == X) ? m_panX[camera()] :
+	    m_panY[camera()];
 }
 
 double& GLRenderer::zoom()
 {
-	return currentDocumentData().zoom[camera()];
+	return m_zoom[camera()];
 }
 
 
 //
 // ---------------------------------------------------------------------------------------------------------------------
 //
-
-
-LDGLOverlay::LDGLOverlay() :
-	image(nullptr) {}
 
 LDGLOverlay::~LDGLOverlay()
 {

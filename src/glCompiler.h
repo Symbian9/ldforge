@@ -36,13 +36,13 @@ public:
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	void compileDocument (LDDocument* doc);
+	void compileModel (Model* model);
 	void dropObjectInfo (LDObject* obj);
 	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const;
 	QColor indexColorForID (int id) const;
 	void initialize();
 	void needMerge();
-	void prepareVBO (int vbonum);
+	void prepareVBO (int vbonum, Model* model);
 	void setRenderer (GLRenderer* compiler);
 	void stageForCompilation (LDObject* obj);
 	void unstage (LDObject* obj);

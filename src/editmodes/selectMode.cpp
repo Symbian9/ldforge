@@ -20,7 +20,7 @@
 #include "selectMode.h"
 #include "../glRenderer.h"
 #include "../mainwindow.h"
-#include "../glRenderer.h"
+#include "../ldDocument.h"
 
 SelectMode::SelectMode (GLRenderer* renderer) :
 	Super (renderer),
@@ -116,7 +116,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 
 	if (ev->buttons() & Qt::LeftButton)
 	{
-		renderer()->document()->clearSelection();
+		currentDocument()->clearSelection();
 		LDObject* obj = renderer()->pickOneObject (ev->x(), ev->y());
 
 		if (obj)

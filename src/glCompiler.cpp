@@ -216,11 +216,11 @@ void GLCompiler::unstage (LDObject* obj)
 }
 
 
-void GLCompiler::compileDocument (LDDocument* doc)
+void GLCompiler::compileModel (Model* model)
 {
-	if (doc)
+	if (model)
 	{
-		for (LDObject* obj : doc->objects())
+		for (LDObject* obj : model->objects())
 			compileObject (obj);
 	}
 }
@@ -235,7 +235,7 @@ void GLCompiler::compileStaged()
 }
 
 
-void GLCompiler::prepareVBO (int vbonum)
+void GLCompiler::prepareVBO (int vbonum, Model* model)
 {
 	// Compile anything that still awaits it
 	compileStaged();
@@ -253,7 +253,7 @@ void GLCompiler::prepareVBO (int vbonum)
 			continue;
 		}
 
-		if (it.key()->model() == currentDocument() and not it.key()->isHidden())
+		if (it.key()->model() == model and not it.key()->isHidden())
 			vbodata += it->data[vbonum];
 
 		++it;

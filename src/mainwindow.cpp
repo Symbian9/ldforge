@@ -1149,7 +1149,7 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 		print ("Opened %1", document->name());
 
 		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be compiled.
-		getRendererForDocument(document)->compiler()->compileDocument(document);
+		getRendererForDocument(document)->compiler()->compileModel(document);
 		updateDocumentList();
 	}
 }

@@ -19,9 +19,7 @@
 #pragma once
 #include <QGLWidget>
 #include "main.h"
-#include "macros.h"
-#include "ldObject.h"
-#include "ldDocument.h"
+#include "model.h"
 #include "glShared.h"
 #include "editmodes/abstractEditMode.h"
 
@@ -50,7 +48,6 @@ struct CameraInfo
 //
 struct LDGLOverlay
 {
-	LDGLOverlay();
 	~LDGLOverlay();
 
 	Vertex			v0,
@@ -60,42 +57,8 @@ struct LDGLOverlay
 	double			width,
 					height;
 	QString			fileName;
-	QImage*			image;
-	bool			invalid;
-};
-
-//
-// Document-specific data
-//
-struct LDGLData
-{
-	QGenericMatrix<4, 4, GLfloat> rotationMatrix;
-	double			panX[7];
-	double			panY[7];
-	double			zoom[7];
-	double			depthValues[6];
-	LDGLOverlay		overlays[6];
-	bool			init;
-	bool			needZoomToFit;
-
-	LDGLData() :
-		init (false),
-		needZoomToFit (true)
-	{
-		for (int i = 0; i < 7; ++i)
-		{
-			if (i < 6)
-			{
-				overlays[i].image = nullptr;
-				overlays[i].invalid = false;
-				depthValues[i] = 0.0f;
-			}
-
-			zoom[i] = 30.0;
-			panX[i] = 0.0;
-			panY[i] = 0.0;
-		}
-	}
+	QImage*			image = nullptr;
+	bool			invalid = false;
 };
 
 enum Camera
@@ -126,7 +89,7 @@ class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public Hierarch
 	Q_OBJECT
 
 public:
-	GLRenderer(LDDocument* document, QWidget* parent = nullptr);
+	GLRenderer(Model* model, QWidget* parent = nullptr);
 	~GLRenderer();
 
 	Camera camera() const;
@@ -141,7 +104,7 @@ public:
 	QString currentCameraName() const;
 	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
-	LDDocument* document() const;
+	Model* model() const;
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d);
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos);
@@ -201,7 +164,7 @@ protected:
 	void wheelEvent(QWheelEvent* ev);
 
 private:
-	LDDocument* m_document = nullptr;
+	Model* const m_model;
 	GLCompiler* m_compiler;
 	LDObject* m_objectAtCursor = nullptr;
 	CameraIcon m_cameraIcons[7];
@@ -211,6 +174,12 @@ private:
 	Vertex m_position3D;
 	double m_virtualWidth;
 	double m_virtualHeight;
+	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
+	double m_panX[7] = {0};
+	double m_panY[7] = {0};
+	double m_zoom[7] = {30};
+	double m_depthValues[6];
+	LDGLOverlay m_overlays[6];
 	bool m_useDarkBackground = false;
 	bool m_drawToolTip = false;
 	bool m_takingScreenCapture = false;
@@ -219,6 +188,7 @@ private:
 	bool m_isDrawOnly = false;
 	bool m_isDrawingSelectionScene = false;
 	bool m_isCameraMoving = false;
+	bool m_needZoomToFit = true;
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
@@ -235,7 +205,6 @@ private:
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
-	LDGLData& currentDocumentData() const;
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
 	LDOverlay* findOverlayObject (Camera cam);
 	double& panning (Axis ax);

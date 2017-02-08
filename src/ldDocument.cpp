@@ -34,14 +34,12 @@ LDDocument::LDDocument (DocumentManager* parent) :
     m_flags(IsFrozen | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
 	m_savePosition(-1),
     m_tabIndex(-1),
-	m_gldata (new LDGLData),
 	m_manager (parent) {}
 
 LDDocument::~LDDocument()
 {
 	m_flags |= IsBeingDestroyed;
 	delete m_history;
-	delete m_gldata;
 }
 
 QString LDDocument::name() const
@@ -149,11 +147,6 @@ void LDDocument::close()
 		m_flags |= IsFrozen;
 		m_manager->documentClosed(this);
 	}
-}
-
-LDGLData* LDDocument::glData()
-{
-	return m_gldata;
 }
 
 // =============================================================================

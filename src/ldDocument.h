@@ -68,7 +68,6 @@ public:
 	QString fullPath();
 	QString getDisplayName();
 	const QSet<LDObject*>& getSelection() const;
-	LDGLData* glData();
 	bool hasUnsavedChanges() const;
 	EditHistory* history() const;
 	void initializeCachedData();
@@ -121,7 +120,6 @@ private:
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
 	QSet<LDObject*> m_selection;
-	LDGLData* m_gldata;
 	DocumentManager* m_manager;
 
 	DEFINE_FLAG_ACCESS_METHODS(m_flags)

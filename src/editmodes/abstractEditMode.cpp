@@ -27,6 +27,7 @@
 #include "linePathMode.h"
 #include "curvemode.h"
 #include "../mainwindow.h"
+#include "../ldDocument.h"
 #include "../glRenderer.h"
 #include "../miscallenous.h"
 #include "../grid.h"
@@ -121,7 +122,7 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 		Vertex cursorPosition = renderer()->convert2dTo3d(data.ev->pos(), false);
 		QPoint cursorPosition2D = data.ev->pos();
 		const Axis depthAxis = renderer()->getRelativeZ();
-		QList<Vertex> vertices = renderer()->document()->inlineVertices().toList();
+		QList<Vertex> vertices = currentDocument()->inlineVertices().toList();
 
 		// Sort the vertices in order of distance to camera
 		std::sort(vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
@@ -196,7 +197,7 @@ void AbstractDrawMode::finishDraw(Model& model)
 
 	if (countof(model) > 0)
 	{
-		renderer()->document()->merge(model, position);
+		renderer()->model()->merge(model, position);
 		m_window->refresh();
 		m_window->endAction();
 	}
