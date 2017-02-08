@@ -49,6 +49,9 @@ public:
 	void openMainModel (QString path);
 	bool preInline (LDDocument* doc, Model& model, bool deep, bool renderinline);
 
+signals:
+	void documentClosed(LDDocument* document);
+
 private:
 	Documents m_documents;
 	bool m_loadingMainFile;

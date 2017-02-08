@@ -147,12 +147,7 @@ void LDDocument::close()
 	if (not isFrozen())
 	{
 		m_flags |= IsFrozen;
-		print ("Closed %1", name());
-		m_window->updateDocumentList();
-
-		// If the current document just became implicit (i.e. user closed it), we need to get a new one to show.
-		if (currentDocument() == this)
-			m_window->currentDocumentClosed();
+		m_manager->documentClosed(this);
 	}
 }
 

@@ -38,7 +38,8 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 		// Drat! It doesn't seem to have the MainWindow as a parent! We'll need to force it to be in one.
 		// This shouldn't have any side effects but also shouldn't happen regardless.
 		m_window = g_win;
-		print("Hierarchy element instance %1 should be in the hierarchy of a MainWindow, but isn't.\n", this);
+		print("Hierarchy element instance %1 should have a MainWindow parent, but it is %2 (%3).\n", this,
+		      parent, parent ? parent->metaObject()->className() : "nullptr");
 	}
 
 	m_documents = m_window->documents();

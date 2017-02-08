@@ -62,24 +62,25 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_isSelectionLocked (false)
 {
 	g_win = this;
+	m_messageLog = new MessageManager {this};
 	ui.setupUi (this);
 	m_updatingTabs = false;
-	m_renderer = new GLRenderer (this);
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
 	ui.verticalLayout->insertWidget (0, m_tabs);
 	createBlankDocument();
-	m_renderer->setDocument (m_currentDocument);
-
-	// Stuff the renderer into its frame
-	QVBoxLayout* rendererLayout = new QVBoxLayout (ui.rendererFrame);
-	rendererLayout->addWidget (renderer());
+	print("Setting current widget...");
+	GLRenderer* renderer_ = getRendererForDocument(m_currentDocument);
+	print("Choosing: %1", renderer_);
+	ui.rendererStack->setCurrentWidget(renderer_);
+	print("Set: %1", renderer());
 
 	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (selectionChanged()));
 	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this,
 			 SLOT (objectListDoubleClicked (QListWidgetItem*)));
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
+	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
 
 	if (m_primitives->activeScanner())
 		connect (m_primitives->activeScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
@@ -103,7 +104,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	updateTitle();
 	loadShortcuts();
 	setMinimumSize (300, 200);
-	connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (doLastSecondCleanup()));
 	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
 	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)), this, SLOT (circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
@@ -179,7 +179,6 @@ MainWindow::~MainWindow()
 	delete m_mathFunctions;
 	delete &ui;
 	delete m_settings;
-	delete m_documents;
 
 	for (Toolset* toolset : m_toolsets)
 		delete toolset;
@@ -214,14 +213,6 @@ void MainWindow::endAction()
 	m_currentDocument->addHistoryStep();
 	updateDocumentListItem (m_currentDocument);
 	refresh();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::doLastSecondCleanup()
-{
-	delete m_renderer;
-	delete &ui;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -514,7 +505,7 @@ int MainWindow::suggestInsertPoint()
 void MainWindow::doFullRefresh()
 {
 	buildObjectList();
-	m_renderer->hardRefresh();
+	renderer()->hardRefresh();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -524,7 +515,7 @@ void MainWindow::doFullRefresh()
 void MainWindow::refresh()
 {
 	buildObjectList();
-	m_renderer->update();
+	renderer()->update();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -788,10 +779,9 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 	return false;
 }
 
-// Adds a message to the renderer's message manager.
 void MainWindow::addMessage (QString msg)
 {
-	m_renderer->messageLog()->addLine (msg);
+	messageLog()->addLine (msg);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -830,6 +820,11 @@ void errorPrompt (QWidget* parent, const QString& message)
 {
 	QMessageBox::critical (parent, MainWindow::tr ("Error"), message,
 		(QMessageBox::Close), QMessageBox::Close);
+}
+
+MessageManager* MainWindow::messageLog() const
+{
+	return m_messageLog;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -966,7 +961,7 @@ PrimitiveManager* MainWindow::primitives()
 //
 GLRenderer* MainWindow::renderer()
 {
-	return m_renderer;
+	return static_cast<GLRenderer*>(ui.rendererStack->currentWidget());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1154,7 +1149,7 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 		print ("Opened %1", document->name());
 
 		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be compiled.
-		m_renderer->compiler()->compileDocument(document);
+		getRendererForDocument(document)->compiler()->compileDocument(document);
 		updateDocumentList();
 	}
 }
@@ -1177,6 +1172,8 @@ void MainWindow::changeDocument (LDDocument* document)
 		return;
 
 	m_currentDocument = document;
+	GLRenderer* renderer = getRendererForDocument(document);
+	ui.rendererStack->setCurrentWidget(renderer);
 
 	if (document)
 	{
@@ -1184,10 +1181,48 @@ void MainWindow::changeDocument (LDDocument* document)
 		updateDocumentListItem (document);
 		buildObjectList();
 		updateTitle();
-		m_renderer->setDocument (document);
-		m_renderer->compiler()->needMerge();
 		print ("Changed document to %1", document->getDisplayName());
 	}
+}
+
+/*
+ * Returns the associated renderer for the given document
+ */
+GLRenderer* MainWindow::getRendererForDocument(LDDocument *document)
+{
+	GLRenderer* renderer = m_renderers.value(document);
+
+	if (not renderer)
+	{
+		print("MainWindow: Couldn't find a renderer for %1, creating one now", document->getDisplayName());
+		renderer = new GLRenderer {document, this};
+		print("Created renderer: %1", renderer);
+		m_renderers[document] = renderer;
+		ui.rendererStack->addWidget(renderer);
+		connect(m_messageLog, SIGNAL(changed()), renderer, SLOT(update()));
+	}
+
+	return renderer;
+}
+
+void MainWindow::documentClosed(LDDocument *document)
+{
+	print ("Closed %1", document->name());
+	updateDocumentList();
+
+	// If the current document just became implicit (i.e. user closed it), we need to get a new one to show.
+	if (currentDocument() == document)
+		currentDocumentClosed();
+
+	GLRenderer* renderer = m_renderers.value(document);
+
+	if (renderer)
+	{
+		ui.rendererStack->removeWidget(renderer);
+		renderer->deleteLater();
+	}
+
+	m_renderers.remove(document);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

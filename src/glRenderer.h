@@ -126,7 +126,7 @@ class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public Hierarch
 	Q_OBJECT
 
 public:
-	GLRenderer (QWidget* parent = nullptr);
+	GLRenderer(LDDocument* document, QWidget* parent = nullptr);
 	~GLRenderer();
 
 	Camera camera() const;
@@ -161,7 +161,6 @@ public:
 	Qt::KeyboardModifiers keyboardModifiers() const;
 	QPen linePen() const;
 	void makeCurrent();
-	MessageManager* messageLog() const;
 	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;
@@ -177,7 +176,6 @@ public:
 	void setBackground();
 	void setCamera(Camera cam);
 	void setDepthValue(double depth);
-	void setDocument(LDDocument* document);
 	void setDrawOnly(bool value);
 	void setEditMode(EditModeType type);
 	void setPicking(bool a);
@@ -203,7 +201,6 @@ protected:
 	void wheelEvent(QWheelEvent* ev);
 
 private:
-	MessageManager* m_messageLog = nullptr;
 	LDDocument* m_document = nullptr;
 	GLCompiler* m_compiler;
 	LDObject* m_objectAtCursor = nullptr;

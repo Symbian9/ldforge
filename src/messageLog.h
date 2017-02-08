@@ -62,7 +62,7 @@ public:
 	};
 
 	// Constructs the message manager.
-	explicit MessageManager (QObject* parent = nullptr);
+	explicit MessageManager(QObject* parent = nullptr);
 
 	// Adds a line with the given \c text to the message manager.
 	void addLine (QString line);
@@ -70,13 +70,12 @@ public:
 	// Returns all active lines in the message manager.
 	const QList<Line>& getLines() const;
 
-	GLRenderer* renderer() const;
-	void setRenderer (GLRenderer* renderer);
+signals:
+	void changed();
 
 private:
 	QList<Line> m_lines;
 	QTimer* m_ticker;
-	GLRenderer* m_renderer;
 
 private slots:
 	void tick();

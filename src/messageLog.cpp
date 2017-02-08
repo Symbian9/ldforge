@@ -31,8 +31,8 @@ enum
 
 // -------------------------------------------------------------------------------------------------
 //
-MessageManager::MessageManager (QObject* parent) :
-	QObject (parent)
+MessageManager::MessageManager(QObject* parent) :
+    QObject {parent}
 {
 	m_ticker = new QTimer;
 	m_ticker->start (100);
@@ -81,11 +81,8 @@ void MessageManager::addLine (QString line)
 	while (countof(m_lines) >= MaxMessages)
 		m_lines.removeFirst();
 
-	m_lines << Line (line);
-
-	// Update the renderer view
-	if (renderer())
-		renderer()->update();
+	m_lines.append(Line {line});
+	emit changed();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -110,8 +107,8 @@ void MessageManager::tick()
 		changed |= lineChanged;
 	}
 
-	if (changed and renderer())
-		renderer()->update();
+	if (changed and parent())
+		emit this->changed();
 }
 
 // =============================================================================
@@ -119,16 +116,6 @@ void MessageManager::tick()
 const QList<MessageManager::Line>& MessageManager::getLines() const
 {
 	return m_lines;
-}
-
-GLRenderer* MessageManager::renderer() const
-{
-	return m_renderer;
-}
-
-void MessageManager::setRenderer (GLRenderer* renderer)
-{
-	m_renderer = renderer;
 }
 
 // =============================================================================

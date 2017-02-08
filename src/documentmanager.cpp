@@ -346,7 +346,6 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 	if (m_loadingMainFile)
 	{
 		m_window->changeDocument (load);
-		m_window->renderer()->setDocument (load);
 		print (tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
 	}
 

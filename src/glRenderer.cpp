@@ -67,21 +67,29 @@ ConfigOption (bool DrawConditionalLines = true)
 
 // =============================================================================
 //
-GLRenderer::GLRenderer (QWidget* parent) :
-	QGLWidget (parent),
-	HierarchyElement (parent)
+GLRenderer::GLRenderer(LDDocument* document, QWidget* parent) :
+    QGLWidget {parent},
+    HierarchyElement {parent},
+    m_document {document}
 {
 	m_camera = (Camera) m_config->camera();
 	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_compiler = new GLCompiler (this);
-	m_messageLog = new MessageManager (this);
-	m_messageLog->setRenderer (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	m_thinBorderPen = QPen (QColor (0, 0, 0, 208), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	m_thinBorderPen.setWidth (1);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
+	initOverlaysFromObjects();
+
+	if (not currentDocumentData().init)
+	{
+		resetAllAngles();
+		currentDocumentData().init = true;
+	}
+
+	currentDocumentData().needZoomToFit = true;
 
 	// Init camera icons
 	for (Camera camera : iterateEnum<Camera>())
@@ -105,9 +113,6 @@ GLRenderer::GLRenderer (QWidget* parent) :
 //
 GLRenderer::~GLRenderer()
 {
-	if (messageLog())
-		messageLog()->setRenderer (nullptr);
-
 	m_compiler->setRenderer (nullptr);
 	delete m_compiler;
 	delete m_currentEditMode;
@@ -176,11 +181,6 @@ bool GLRenderer::isDrawOnly() const
 void GLRenderer::setDrawOnly (bool value)
 {
 	m_isDrawOnly = value;
-}
-
-MessageManager* GLRenderer::messageLog() const
-{
-	return m_messageLog;
 }
 
 LDDocument* GLRenderer::document() const
@@ -682,13 +682,13 @@ void GLRenderer::paintEvent(QPaintEvent*)
 	}
 
 	// Message log
-	if (messageLog())
+	if (m_window->messageLog())
 	{
 		int y = 0;
 		int margin = 2;
 		QColor penColor = textPen().color();
 
-		for (const MessageManager::Line& line : messageLog()->getLines())
+		for (const MessageManager::Line& line : m_window->messageLog()->getLines())
 		{
 			penColor.setAlphaF(line.alpha);
 			painter.setPen(penColor);
@@ -880,7 +880,6 @@ void GLRenderer::setCamera(Camera camera)
 	{
 		m_camera = camera;
 		m_config->setCamera(int {camera});
-		m_window->updateEditModeActions();
 	}
 }
 
@@ -1019,26 +1018,6 @@ void GLRenderer::setEditMode(EditModeType a)
 EditModeType GLRenderer::currentEditModeType() const
 {
 	return m_currentEditMode->type();
-}
-
-// =============================================================================
-//
-void GLRenderer::setDocument (LDDocument* document)
-{
-	m_document = document;
-
-	if (document)
-	{
-		initOverlaysFromObjects();
-
-		if (not currentDocumentData().init)
-		{
-			resetAllAngles();
-			currentDocumentData().init = true;
-		}
-
-		currentDocumentData().needZoomToFit = true;
-	}
 }
 
 // =============================================================================

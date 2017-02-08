@@ -87,10 +87,12 @@ public:
 	QTreeWidget* getPrimitivesTree() const;
 	class QSettings* getSettings() { return m_settings; }
 	LDColor getUniformSelectedColor();
+	GLRenderer* getRendererForDocument(LDDocument* document);
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
 	MathFunctions* mathFunctions() const;
+	MessageManager* messageLog() const;
 	LDDocument* newDocument (bool cache = false);
 	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
@@ -125,6 +127,7 @@ public slots:
 	void ringToolHiResClicked (bool clicked);
 	void tabSelected();
 	void updatePrimitives();
+	void documentClosed(LDDocument* document);
 
 protected:
 	void closeEvent (QCloseEvent* ev);
@@ -134,7 +137,8 @@ private:
 
 	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;
-	GLRenderer* m_renderer;
+	MessageManager* m_messageLog = nullptr;
+	QMap<LDDocument*, GLRenderer*> m_renderers;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;
@@ -160,7 +164,6 @@ private slots:
 	void selectionChanged();
 	void recentFileClicked();
 	void quickColorClicked();
-	void doLastSecondCleanup();
 	void objectListDoubleClicked (QListWidgetItem* listitem);
 };
 
