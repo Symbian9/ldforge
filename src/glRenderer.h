@@ -69,7 +69,7 @@ struct LDGLOverlay
 //
 struct LDGLData
 {
-	GLdouble		rotationMatrix[16];
+	GLfloat			rotationMatrix[16];
 	double			panX[7];
 	double			panY[7];
 	double			zoom[7];

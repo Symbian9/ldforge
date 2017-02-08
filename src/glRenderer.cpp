@@ -214,9 +214,9 @@ void GLRenderer::resetAngles()
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	glRotated(30, 1, 0, 0);
-	glRotated(330, 0, 1, 0);
-	glGetDoublev(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
+	glRotatef(30, 1, 0, 0);
+	glRotatef(330, 0, 1, 0);
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
 	glPopMatrix();
 	panning(X) = panning(Y) = 0.0f;
 	needZoomToFit();
@@ -406,7 +406,7 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
-		glMultMatrixd(currentDocumentData().rotationMatrix);
+		glMultMatrixf(currentDocumentData().rotationMatrix);
 	}
 
 	glEnableClientState (GL_VERTEX_ARRAY);
@@ -612,7 +612,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 #ifndef RELEASE
 	{
 		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4",
-		    QGenericMatrix<4, 4, GLdouble>(currentDocumentData().rotationMatrix), panning(X), panning(Y), zoom());
+		    QGenericMatrix<4, 4, GLfloat>(currentDocumentData().rotationMatrix), panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect(0, 0, m_width, m_height, Qt::AlignCenter, text);
 		painter.setPen(textPen());
 		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
@@ -807,9 +807,9 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 			glPushMatrix();
 			glLoadIdentity();
 			// 0.6 is an arbitrary rotation sensitivity scalar
-			glRotated(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
-			glMultMatrixd(currentDocumentData().rotationMatrix);
-			glGetDoublev(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
+			glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
+			glMultMatrixf(currentDocumentData().rotationMatrix);
+			glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
 			glPopMatrix();
 			m_isCameraMoving = true;
 		}
