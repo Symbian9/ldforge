@@ -69,7 +69,7 @@ struct LDGLOverlay
 //
 struct LDGLData
 {
-	GLfloat			rotationMatrix[16];
+	QGenericMatrix<4, 4, GLfloat> rotationMatrix;
 	double			panX[7];
 	double			panY[7];
 	double			zoom[7];
@@ -79,7 +79,6 @@ struct LDGLData
 	bool			needZoomToFit;
 
 	LDGLData() :
-	    rotationMatrix {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		init (false),
 		needZoomToFit (true)
 	{

@@ -210,14 +210,17 @@ void GLRenderer::needZoomToFit()
 //
 void GLRenderer::resetAngles()
 {
-	// Why did I even bother trying to compute this by pen and paper? Let GL figure it out...
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glRotatef(30, 1, 0, 0);
-	glRotatef(330, 0, 1, 0);
-	glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
-	glPopMatrix();
+	if (m_initialized)
+	{
+		// Why did I even bother trying to compute this by pen and paper? Let GL figure it out...
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glRotatef(30, 1, 0, 0);
+		glRotatef(330, 0, 1, 0);
+		glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix.data());
+		glPopMatrix();
+	}
 	panning(X) = panning(Y) = 0.0f;
 	needZoomToFit();
 }
@@ -251,6 +254,8 @@ void GLRenderer::initializeGL()
 	compiler()->initialize();
 	initializeAxes();
 	m_initialized = true;
+	// Now that GL is initialized, we can reset angles.
+	resetAllAngles();
 }
 
 // =============================================================================
@@ -406,7 +411,7 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
-		glMultMatrixf(currentDocumentData().rotationMatrix);
+		glMultMatrixf(currentDocumentData().rotationMatrix.constData());
 	}
 
 	glEnableClientState (GL_VERTEX_ARRAY);
@@ -612,7 +617,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 #ifndef RELEASE
 	{
 		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4",
-		    QGenericMatrix<4, 4, GLfloat>(currentDocumentData().rotationMatrix), panning(X), panning(Y), zoom());
+		    currentDocumentData().rotationMatrix, panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect(0, 0, m_width, m_height, Qt::AlignCenter, text);
 		painter.setPen(textPen());
 		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
@@ -808,8 +813,8 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 			glLoadIdentity();
 			// 0.6 is an arbitrary rotation sensitivity scalar
 			glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
-			glMultMatrixf(currentDocumentData().rotationMatrix);
-			glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
+			glMultMatrixf(currentDocumentData().rotationMatrix.constData());
+			glGetFloatv(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix.data());
 			glPopMatrix();
 			m_isCameraMoving = true;
 		}

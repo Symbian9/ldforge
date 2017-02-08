@@ -78,11 +78,12 @@ public:
 				if (column > 0)
 					m_text += ", ";
 
-				m_text += StringFormatArg{matrix(row, column)}.text();
+				m_text += StringFormatArg {matrix(row, column)}.text();
 			}
 
 			m_text += "}";
 		}
+		m_text += "}";
 	}
 
 	inline QString text() const
