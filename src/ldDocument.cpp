@@ -30,15 +30,14 @@ LDDocument::LDDocument (DocumentManager* parent) :
 	QObject (parent),
     Model {parent},
 	HierarchyElement (parent),
-	m_history (new EditHistory (this)),
-    m_flags(IsFrozen | VerticesOutdated | NeedsVertexMerge | NeedsRecache),
+    m_history (new EditHistory (this)),
 	m_savePosition(-1),
     m_tabIndex(-1),
 	m_manager (parent) {}
 
 LDDocument::~LDDocument()
 {
-	m_flags |= IsBeingDestroyed;
+	m_isBeingDestroyed = true;
 	delete m_history;
 }
 
@@ -104,15 +103,12 @@ void LDDocument::setDefaultName (QString value)
 
 void LDDocument::setFrozen(bool value)
 {
-	if (value)
-		m_flags |= IsFrozen;
-	else
-		m_flags &= ~IsFrozen;
+	m_isFrozen = value;
 }
 
 bool LDDocument::isFrozen() const
 {
-	return !!(m_flags & IsFrozen);
+	return m_isFrozen;
 }
 
 void LDDocument::addHistoryStep()
@@ -144,7 +140,7 @@ void LDDocument::close()
 {
 	if (not isFrozen())
 	{
-		m_flags |= IsFrozen;
+		setFrozen(true);
 		m_manager->documentClosed(this);
 	}
 }
@@ -290,7 +286,7 @@ void LDDocument::reloadAllSubfiles()
 			replaceWithFromString(obj, static_cast<LDError*> (obj)->contents());
 	}
 
-	m_flags |= NeedsRecache;
+	m_needsRecache = true;
 
 	if (this == m_window->currentDocument())
 		m_window->buildObjectList();
@@ -319,26 +315,11 @@ void LDDocument::objectChanged(int position, QString before, QString after)
 	m_window->currentDocument()->redoVertices();
 }
 
-// =============================================================================
-//
-void LDDocument::addKnownVertices (LDObject* obj)
-{
-	auto it = m_objectVertices.find (obj);
-
-	if (it == m_objectVertices.end())
-		it = m_objectVertices.insert (obj, QSet<Vertex>());
-	else
-		it->clear();
-
-	obj->getVertices (*it);
-	needVertexMerge();
-}
-
 LDObject* LDDocument::withdrawAt(int position)
 {
 	LDObject* object = getObject(position);
 
-	if (not isFrozen() and not checkFlag(IsBeingDestroyed))
+	if (not isFrozen() and not m_isBeingDestroyed)
 	{
 		history()->add(new DelHistoryEntry {position, object});
 		m_objectVertices.remove(object);
@@ -372,7 +353,7 @@ QString LDDocument::getDisplayName()
 //
 void LDDocument::initializeCachedData()
 {
-	if (checkFlag(NeedsRecache))
+	if (m_needsRecache)
 	{
 		m_vertices.clear();
 		Model model {m_documents};
@@ -397,36 +378,34 @@ void LDDocument::initializeCachedData()
 			}
 		}
 
-		unsetFlag(NeedsRecache);
+		m_needsRecache = false;
 	}
 
-	if (checkFlag(VerticesOutdated))
+	if (m_verticesOutdated)
 	{
 		m_objectVertices.clear();
 		Model model {m_documents};
 		inlineContents(model, true, false);
 
-		for (LDObject* obj : model)
-			addKnownVertices (obj);
+		for (LDObject* object : model)
+		{
+			auto iterator = m_objectVertices.find (object);
 
-		mergeVertices();
-		unsetFlag(VerticesOutdated);
+			if (iterator == m_objectVertices.end())
+				iterator = m_objectVertices.insert (object, QSet<Vertex>());
+			else
+				iterator->clear();
+
+			object->getVertices (*iterator);
+		}
+
+		m_vertices.clear();
+
+		for (const QSet<Vertex>& vertices : m_objectVertices)
+			m_vertices.unite(vertices);
+
+		m_verticesOutdated = false;
 	}
-
-	if (checkFlag(NeedsVertexMerge))
-		mergeVertices();
-}
-
-// =============================================================================
-//
-void LDDocument::mergeVertices()
-{
-	m_vertices.clear();
-
-	for (const QSet<Vertex>& vertices : m_objectVertices)
-		m_vertices.unite(vertices);
-
-	unsetFlag(NeedsVertexMerge);
 }
 
 // =============================================================================
@@ -548,11 +527,5 @@ const QSet<Vertex>& LDDocument::inlineVertices()
 
 void LDDocument::redoVertices()
 {
-	setFlag(VerticesOutdated);
+	m_verticesOutdated = true;
 }
-
-void LDDocument::needVertexMerge()
-{
-	setFlag(NeedsVertexMerge);
-}
-

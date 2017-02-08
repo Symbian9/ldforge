@@ -42,17 +42,6 @@ class LDDocument : public QObject, public Model, public HierarchyElement
 	Q_OBJECT
 
 public:
-	enum Flag
-	{
-		IsFrozen = (1 << 0), // Document may not be modified
-		VerticesOutdated = (1 << 1),
-		NeedsVertexMerge = (1 << 2),
-		IsBeingDestroyed = (1 << 3),
-		NeedsRecache = (1 << 4), // The next polygon inline of this document rebuilds stored polygon data.
-	};
-
-	Q_DECLARE_FLAGS(Flags, Flag)
-
 	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
@@ -76,7 +65,6 @@ public:
 	bool isFrozen() const;
 	bool isSafeToClose();
 	QString name() const;
-	void needVertexMerge();
 	void objectRemoved(LDObject* object, int index);
 	const QList<LDPolygon>& polygonData() const;
 	void recountTriangles();
@@ -110,7 +98,10 @@ private:
 	QString m_fullPath;
 	QString m_defaultName;
 	EditHistory* m_history;
-	Flags m_flags;
+	bool m_isFrozen = true; // Document may not be modified
+	bool m_verticesOutdated = true;
+	bool m_isBeingDestroyed = true;
+	bool m_needsRecache = true; // The next polygon inline of this document rebuilds stored polygon data.
 	long m_savePosition;
 	int m_tabIndex;
 	int m_triangleCount;
@@ -119,13 +110,7 @@ private:
 	QSet<Vertex> m_vertices;
 	QSet<LDObject*> m_selection;
 	DocumentManager* m_manager;
-
-	DEFINE_FLAG_ACCESS_METHODS(m_flags)
-	void addKnownVertices (LDObject* obj);
-	void mergeVertices();
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(LDDocument::Flags)
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
