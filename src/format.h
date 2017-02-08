@@ -18,9 +18,9 @@
 
 #pragma once
 #include <QIODevice>
+#include <QGenericMatrix>
 #include "basics.h"
 #include "colors.h"
-
 
 // Converts a given value into a string that can be retrieved with text().
 // Used as the argument type to the formatting functions, hence its name.
@@ -60,6 +60,29 @@ public:
 		}
 
 		m_text += "}";
+	}
+
+	template<int Columns, int Rows, typename Type>
+	StringFormatArg(const QGenericMatrix<Columns, Rows, Type>& matrix)
+	{
+		m_text = "{";
+		for (int row = 0; row < Rows; ++row)
+		{
+			if (row > 0)
+				m_text += ", ";
+
+			m_text += "{";
+
+			for (int column = 0; column < Rows; ++column)
+			{
+				if (column > 0)
+					m_text += ", ";
+
+				m_text += StringFormatArg{matrix(row, column)}.text();
+			}
+
+			m_text += "}";
+		}
 	}
 
 	inline QString text() const

@@ -69,9 +69,7 @@ struct LDGLOverlay
 //
 struct LDGLData
 {
-	double			rotationX;
-	double			rotationY;
-	double			rotationZ;
+	GLdouble		rotationMatrix[16];
 	double			panX[7];
 	double			panY[7];
 	double			zoom[7];
@@ -81,9 +79,7 @@ struct LDGLData
 	bool			needZoomToFit;
 
 	LDGLData() :
-		rotationX (0.0),
-		rotationY (0.0),
-		rotationZ (0.0),
+	    rotationMatrix {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		init (false),
 		needZoomToFit (true)
 	{
@@ -249,7 +245,6 @@ private:
 	LDOverlay* findOverlayObject (Camera cam);
 	double& panning (Axis ax);
 	double panning (Axis ax) const;
-	double& rotation (Axis ax);
 	double& zoom();
 	void zoomToFit();
 	void zoomAllToFit();

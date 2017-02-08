@@ -210,9 +210,15 @@ void GLRenderer::needZoomToFit()
 //
 void GLRenderer::resetAngles()
 {
-	rotation (X) = 30.0f;
-	rotation (Y) = 325.f;
-	panning (X) = panning (Y) = rotation (Z) = 0.0f;
+	// Why did I even bother trying to compute this by pen and paper? Let GL figure it out...
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glRotated(30, 1, 0, 0);
+	glRotated(330, 0, 1, 0);
+	glGetDoublev(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
+	glPopMatrix();
+	panning(X) = panning(Y) = 0.0f;
 	needZoomToFit();
 }
 
@@ -400,9 +406,7 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
-		glRotatef(rotation(X), 1.0f, 0.0f, 0.0f);
-		glRotatef(rotation(Y), 0.0f, 1.0f, 0.0f);
-		glRotatef(rotation(Z), 0.0f, 0.0f, 1.0f);
+		glMultMatrixd(currentDocumentData().rotationMatrix);
 	}
 
 	glEnableClientState (GL_VERTEX_ARRAY);
@@ -607,8 +611,8 @@ void GLRenderer::paintEvent(QPaintEvent*)
 
 #ifndef RELEASE
 	{
-		QString text = format("Rotation: (%1°, %2°, %3°)\nPanning: (%4, %5), Zoom: %6",
-			rotation(X), rotation(Y), rotation(Z), panning(X), panning(Y), zoom());
+		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4",
+		    QGenericMatrix<4, 4, GLdouble>(currentDocumentData().rotationMatrix), panning(X), panning(Y), zoom());
 		QRect textSize = metrics.boundingRect(0, 0, m_width, m_height, Qt::AlignCenter, text);
 		painter.setPen(textPen());
 		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
@@ -807,12 +811,17 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 			m_panning = true;
 			m_isCameraMoving = true;
 		}
-		else if (left and camera() == FreeCamera)
+		else if (left and camera() == FreeCamera and (xMove != 0 or yMove != 0))
 		{
-			rotation(X) = rotation(X) + yMove;
-			rotation(Y) = rotation(Y) + xMove;
-			clampAngle(rotation (X));
-			clampAngle(rotation (Y));
+			// Apply current rotation input to the rotation matrix
+			// ref: https://forums.ldraw.org/thread-22006-post-24426.html#pid24426
+			glPushMatrix();
+			glLoadIdentity();
+			// 0.6 is an arbitrary rotation sensitivity scalar
+			glRotated(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
+			glMultMatrixd(currentDocumentData().rotationMatrix);
+			glGetDoublev(GL_MODELVIEW_MATRIX, currentDocumentData().rotationMatrix);
+			glPopMatrix();
 			m_isCameraMoving = true;
 		}
 	}
@@ -1621,14 +1630,6 @@ Camera GLRenderer::camera() const
 LDGLData& GLRenderer::currentDocumentData() const
 {
 	return *document()->glData();
-}
-
-double& GLRenderer::rotation (Axis ax)
-{
-	return
-		(ax == X) ? currentDocumentData().rotationX :
-		(ax == Y) ? currentDocumentData().rotationY :
-					currentDocumentData().rotationZ;
 }
 
 double& GLRenderer::panning (Axis ax)
