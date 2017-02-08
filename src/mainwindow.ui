@@ -247,9 +247,6 @@
     <addaction name="actionDrawEdgeLines"/>
     <addaction name="actionDrawConditionalLines"/>
     <addaction name="separator"/>
-    <addaction name="actionSetOverlay"/>
-    <addaction name="actionClearOverlay"/>
-    <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
    </widget>
    <widget class="QMenu" name="menuInsert">

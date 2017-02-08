@@ -414,44 +414,6 @@ protected:
 	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 };
 
-//
-// LDOverlay
-//
-// Overlay image meta, stored in the header of parts so as to preserve overlay information.
-//
-class LDOverlay : public LDObject
-{
-	LDOBJ (Overlay)
-	LDOBJ_NAME (overlay)
-	LDOBJ_VERTICES (0)
-	LDOBJ_UNCOLORED
-	LDOBJ_NON_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
-public:
-	int camera() const;
-	QString fileName() const;
-	int height() const;
-	QString objectListText() const override;
-	void setCamera (int value);
-	void setFileName (QString value);
-	void setHeight (int value);
-	void setWidth (int value);
-	void setX (int value);
-	void setY (int value);
-	int width() const;
-	int x() const;
-	int y() const;
-
-private:
-	int m_camera;
-	int m_x;
-	int m_y;
-	int m_width;
-	int m_height;
-	QString m_fileName;
-};
-
 class LDBezierCurve : public LDObject
 {
 	LDOBJ (BezierCurve)

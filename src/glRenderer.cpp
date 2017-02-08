@@ -81,7 +81,6 @@ GLRenderer::GLRenderer(Model* model, QWidget* parent) :
 	m_thinBorderPen.setWidth (1);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
-	initOverlaysFromObjects();
 	resetAllAngles();
 	m_needZoomToFit = true;
 
@@ -602,18 +601,6 @@ void GLRenderer::paintEvent(QPaintEvent*)
 
 	if (camera() != FreeCamera)
 	{
-		// Paint the overlay image if we have one
-		const LDGLOverlay& overlay = m_overlays[camera()];
-
-		if (overlay.image)
-		{
-			QPoint v0 = convert3dTo2d(m_overlays[camera()].v0);
-			QPoint v1 = convert3dTo2d(m_overlays[camera()].v1);
-			QRect targetRect = {v0.x(), v0.y(), qAbs(v1.x() - v0.x()), qAbs(v1.y() - v0.y())};
-			QRect sourceRect = {0, 0, overlay.image->width(), overlay.image->height()};
-			painter.drawImage(targetRect, *overlay.image, sourceRect);
-		}
-
 		// Paint the coordinates onto the screen.
 		QString text = format(tr("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
 		QFontMetrics metrics {font()};
@@ -1108,73 +1095,6 @@ Axis GLRenderer::getCameraAxis (bool y, Camera camid)
 
 // =============================================================================
 //
-bool GLRenderer::setupOverlay (Camera camera, QString fileName, int x, int y, int w, int h)
-{
-	QImage* image = new QImage (QImage (fileName).convertToFormat (QImage::Format_ARGB32));
-	LDGLOverlay& info = getOverlay (camera);
-
-	if (image->isNull())
-	{
-		Critical (tr ("Failed to load overlay image!"));
-		m_overlays[camera].invalid = true;
-		delete image;
-		return false;
-	}
-
-	delete info.image; // delete the old image
-
-	info.fileName = fileName;
-	info.width = w;
-	info.height = h;
-	info.offsetX = x;
-	info.offsetY = y;
-	info.image = image;
-	info.invalid = false;
-
-	if (info.width == 0)
-		info.width = (info.height * image->width()) / image->height();
-	else if (info.height == 0)
-		info.height = (info.width * image->height()) / image->width();
-
-	Axis localX = getCameraAxis (false, camera);
-	Axis localY = getCameraAxis (true, camera);
-	int signX = g_cameraInfo[camera].negatedX ? -1 : 1;
-	int signY = g_cameraInfo[camera].negatedY ? -1 : 1;
-
-	info.v0 = info.v1 = Origin;
-	info.v0.setCoordinate (localX, -(info.offsetX * info.width * signX) / image->width());
-	info.v0.setCoordinate (localY, (info.offsetY * info.height * signY) / image->height());
-	info.v1.setCoordinate (localX, info.v0[localX] + info.width);
-	info.v1.setCoordinate (localY, info.v0[localY] + info.height);
-
-	// Set alpha of all pixels to 0.5
-	for (int i = 0; i < image->width(); ++i)
-	for (int j = 0; j < image->height(); ++j)
-	{
-		uint32 pixel = image->pixel (i, j);
-		image->setPixel (i, j, 0x80000000 | (pixel & 0x00FFFFFF));
-	}
-
-	updateOverlayObjects();
-	return true;
-}
-
-// =============================================================================
-//
-void GLRenderer::clearOverlay()
-{
-	if (camera() == FreeCamera)
-		return;
-
-	LDGLOverlay& info = m_overlays[camera()];
-	delete info.image;
-	info.image = nullptr;
-
-	updateOverlayObjects();
-}
-
-// =============================================================================
-//
 void GLRenderer::setDepthValue (double depth)
 {
 	if (camera() < FreeCamera)
@@ -1213,13 +1133,6 @@ QString GLRenderer::cameraName (Camera camera) const
 QString GLRenderer::currentCameraName() const
 {
 	return cameraName (camera());
-}
-
-// =============================================================================
-//
-LDGLOverlay& GLRenderer::getOverlay (int newcam)
-{
-	return m_overlays[newcam];
 }
 
 // =============================================================================
@@ -1328,134 +1241,6 @@ void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
 {
 	if (m_currentEditMode->mouseDoubleClicked (ev))
 		ev->accept();
-}
-
-// =============================================================================
-//
-LDOverlay* GLRenderer::findOverlayObject (Camera cam)
-{
-	for (LDObject* obj : m_model->objects())
-	{
-		LDOverlay* overlay = dynamic_cast<LDOverlay*> (obj);
-
-		if (overlay and overlay->camera() == cam)
-			return overlay;
-	}
-
-	return nullptr;
-}
-
-// =============================================================================
-//
-// Read in overlays from the current file and update overlay info accordingly.
-//
-void GLRenderer::initOverlaysFromObjects()
-{
-	for (Camera camera : iterateEnum<Camera>())
-	{
-		if (camera == FreeCamera)
-			continue;
-
-		LDGLOverlay& meta = m_overlays[camera];
-		LDOverlay* overlay = findOverlayObject (camera);
-
-		if (overlay == nullptr and meta.image)
-		{
-			// The document doesn't have an overlay for this camera but we have an image for it, delete the image.
-			delete meta.image;
-			meta.image = nullptr;
-		}
-		else if (overlay
-			and (meta.image == nullptr or meta.fileName != overlay->fileName())
-			and not meta.invalid)
-		{
-			// Found a valid overlay definition for this camera, set it up for use.
-			setupOverlay (camera, overlay->fileName(), overlay->x(),
-				overlay->y(), overlay->width(), overlay->height());
-		}
-	}
-}
-
-// =============================================================================
-//
-void GLRenderer::updateOverlayObjects()
-{
-	for (Camera camera : iterateEnum<Camera>())
-	{
-		if (camera == FreeCamera)
-			continue;
-
-		LDGLOverlay& meta = m_overlays[camera];
-		LDOverlay* overlayObject = findOverlayObject (camera);
-
-		if (meta.image == nullptr and overlayObject)
-		{
-			// If this is the last overlay image, we need to remove the empty space after it as well.
-			LDObject* nextobj = overlayObject->next();
-
-			if (nextobj and nextobj->type() == OBJ_Empty)
-				m_model->remove(nextobj);
-
-			// If the overlay object was there and the overlay itself is
-			// not, remove the object.
-			m_model->remove(overlayObject);
-			overlayObject = nullptr;
-		}
-		else if (meta.image and overlayObject == nullptr)
-		{
-			// Inverse case: image is there but the overlay object is
-			// not, thus create the object.
-			//
-			// Find a suitable position to place this object. We want to place
-			// this into the header, which is everything up to the first scemantic
-			// object. If we find another overlay object, place this object after
-			// the last one found. Otherwise, place it before the first schemantic
-			// object and put an empty object after it (though don't do this if
-			// there was no schemantic elements at all)
-			int i;
-			int lastOverlayPosition = -1;
-			bool found = false;
-
-			for (i = 0; i < m_model->size(); ++i)
-			{
-				LDObject* object = m_model->getObject (i);
-
-				if (object->isScemantic())
-				{
-					found = true;
-					break;
-				}
-
-				if (object->type() == OBJ_Overlay)
-					lastOverlayPosition = i;
-			}
-
-			if (lastOverlayPosition != -1)
-			{
-				overlayObject = m_model->emplaceAt<LDOverlay>(lastOverlayPosition + 1);
-			}
-			else
-			{
-				overlayObject = m_model->emplaceAt<LDOverlay>(i);
-
-				if (found)
-					m_model->emplaceAt<LDEmpty>(i + 1);
-			}
-		}
-
-		if (meta.image and overlayObject)
-		{
-			overlayObject->setCamera (camera);
-			overlayObject->setFileName (meta.fileName);
-			overlayObject->setX (meta.offsetX);
-			overlayObject->setY (meta.offsetY);
-			overlayObject->setWidth (meta.width);
-			overlayObject->setHeight (meta.height);
-		}
-	}
-
-	if (m_window->renderer() == this)
-		m_window->refresh();
 }
 
 // =============================================================================
@@ -1586,14 +1371,4 @@ double GLRenderer::panning (Axis ax) const
 double& GLRenderer::zoom()
 {
 	return m_zoom[camera()];
-}
-
-
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-LDGLOverlay::~LDGLOverlay()
-{
-	delete image;
 }

@@ -38,32 +38,6 @@ class Ui_OverlayUI;
 class Ui_LDPathUI;
 class Ui_OpenProgressUI;
 
-class OverlayDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit OverlayDialog (QWidget* parent = nullptr, Qt::WindowFlags f = 0);
-	virtual ~OverlayDialog();
-
-	QString         fpath() const;
-	int         ofsx() const;
-	int         ofsy() const;
-	double      lwidth() const;
-	double      lheight() const;
-	int         camera() const;
-
-private:
-	Ui_OverlayUI* ui;
-	QList<Pair<QRadioButton*, int>> m_cameraArgs;
-
-private slots:
-	void slot_fpath();
-	void slot_help();
-	void slot_dimensionsChanged();
-	void fillDefaults (int newcam);
-};
-
 // =============================================================================
 class ExtProgPathPrompt : public QDialog
 {

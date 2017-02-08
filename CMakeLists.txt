@@ -148,7 +148,6 @@ set (LDFORGE_FORMS
 	ui/flip.ui
 	ui/intersector.ui
 	ui/isecalc.ui
-	ui/overlay.ui
 	ui/rectifier.ui
 	ui/replcoords.ui
 	ui/rotpoint.ui

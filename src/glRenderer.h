@@ -43,24 +43,6 @@ struct CameraInfo
 	bool negatedDepth; // is greater depth value closer to camera?
 };
 
-//
-// Meta for overlays
-//
-struct LDGLOverlay
-{
-	~LDGLOverlay();
-
-	Vertex			v0,
-					v1;
-	int				offsetX,
-					offsetY;
-	double			width,
-					height;
-	QString			fileName;
-	QImage*			image = nullptr;
-	bool			invalid = false;
-};
-
 enum Camera
 {
 	TopCamera,
@@ -96,7 +78,6 @@ public:
 	const CameraInfo& cameraInfo(Camera camera) const;
 	QString cameraName(Camera camera) const;
 	QByteArray capturePixels();
-	void clearOverlay();
 	void compileObject(LDObject* obj);
 	GLCompiler* compiler() const;
 	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
@@ -111,13 +92,11 @@ public:
 	void forgetObject(LDObject* obj);
 	Axis getCameraAxis(bool y, Camera camid = (Camera) -1);
 	double getDepthValue() const;
-	LDGLOverlay& getOverlay(int newcam);
 	void getRelativeAxes(Axis& relX, Axis& relY) const;
 	Axis getRelativeZ() const;
 	void hardRefresh();
 	void highlightCursorObject();
 	void initGLData();
-	void initOverlaysFromObjects();
 	bool isDrawOnly() const;
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
@@ -141,9 +120,7 @@ public:
 	void setDrawOnly(bool value);
 	void setEditMode(EditModeType type);
 	void setPicking(bool a);
-	bool setupOverlay(Camera camera, QString fileName, int x, int y, int w, int h);
 	QPen textPen() const;
-	void updateOverlayObjects();
 	void zoomNotch(bool inward);
 
 protected:
@@ -178,7 +155,6 @@ private:
 	double m_panY[7] = {0};
 	double m_zoom[7] = {30};
 	double m_depthValues[6];
-	LDGLOverlay m_overlays[6];
 	bool m_useDarkBackground = false;
 	bool m_drawToolTip = false;
 	bool m_takingScreenCapture = false;
@@ -205,7 +181,6 @@ private:
 
 	void calcCameraIcons();
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
-	LDOverlay* findOverlayObject (Camera cam);
 	double& panning (Axis ax);
 	double panning (Axis ax) const;
 	double& zoom();

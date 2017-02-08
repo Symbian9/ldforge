@@ -384,21 +384,7 @@ LDObject* Model::insertFromString(int position, QString line)
 				if (countof(tokens) > 2 and tokens[1] == "!LDFORGE")
 				{
 					// Handle LDForge-specific types, they're embedded into comments too
-					if (tokens[2] == "OVERLAY")
-					{
-						CheckTokenCount (tokens, 9);
-						CheckTokenNumbers (tokens, 5, 8);
-
-						LDOverlay* obj = emplaceAt<LDOverlay>(position);
-						obj->setFileName (tokens[3]);
-						obj->setCamera (tokens[4].toLong());
-						obj->setX (tokens[5].toLong());
-						obj->setY (tokens[6].toLong());
-						obj->setWidth (tokens[7].toLong());
-						obj->setHeight (tokens[8].toLong());
-						return obj;
-					}
-					else if (tokens[2] == "BEZIER_CURVE")
+					if (tokens[2] == "BEZIER_CURVE")
 					{
 						CheckTokenCount (tokens, 16);
 						CheckTokenNumbers (tokens, 3, 15);

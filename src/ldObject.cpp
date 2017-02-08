@@ -73,7 +73,6 @@ LDOBJ_DEFAULT_CTOR (LDLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
 LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
-LDOBJ_DEFAULT_CTOR (LDOverlay, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
@@ -631,16 +630,6 @@ LDObject* LDObject::fromID(int32 id)
 
 // =============================================================================
 //
-QString LDOverlay::asText() const
-{
-	return format ("0 !LDFORGE OVERLAY %1 %2 %3 %4 %5 %6",
-		fileName(), camera(), x(), y(), width(), height());
-}
-
-void LDOverlay::invert() {}
-
-// =============================================================================
-//
 // Hook the set accessors of certain properties to this changeProperty function.
 // It takes care of history management so we can capture low-level changes, this
 // makes history stuff work out of the box.
@@ -817,66 +806,6 @@ QString LDBfc::statementToString (BfcStatement statement)
 		return "";
 }
 
-int LDOverlay::camera() const
-{
-	return m_camera;
-}
-
-void LDOverlay::setCamera (int value)
-{
-	m_camera = value;
-}
-
-int LDOverlay::x() const
-{
-	return m_x;
-}
-
-void LDOverlay::setX (int value)
-{
-	m_x = value;
-}
-
-int LDOverlay::y() const
-{
-	return m_y;
-}
-
-void LDOverlay::setY (int value)
-{
-	m_y = value;
-}
-
-int LDOverlay::width() const
-{
-	return m_width;
-}
-
-void LDOverlay::setWidth (int value)
-{
-	m_width = value;
-}
-
-int LDOverlay::height() const
-{
-	return m_height;
-}
-
-void LDOverlay::setHeight (int value)
-{
-	m_height = value;
-}
-
-QString LDOverlay::fileName() const
-{
-	return m_fileName;
-}
-
-void LDOverlay::setFileName (QString value)
-{
-	m_fileName = value;
-}
-
 Vertex LDBezierCurve::pointAt (qreal t) const
 {
 	if (t >= 0.0 and t <= 1.0)
@@ -1009,11 +938,6 @@ QString LDSubfileReference::objectListText() const
 
 	result += ')';
 	return result;
-}
-
-QString LDOverlay::objectListText() const
-{
-	return format("[%1] %2 (%3, %4), %5 x %6", static_cast<int>(camera()), Basename(fileName()), x(), y(), width(), height());
 }
 
 QString LDComment::objectListText() const

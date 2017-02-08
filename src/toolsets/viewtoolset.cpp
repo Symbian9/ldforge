@@ -155,22 +155,6 @@ void ViewToolset::wireframe()
 	m_window->renderer()->refresh();
 }
 
-void ViewToolset::setOverlay()
-{
-	OverlayDialog dlg;
-
-	if (not dlg.exec())
-		return;
-
-	m_window->renderer()->setupOverlay ((Camera) dlg.camera(), dlg.fpath(), dlg.ofsx(),
-		dlg.ofsy(), dlg.lwidth(), dlg.lheight());
-}
-
-void ViewToolset::clearOverlay()
-{
-	m_window->renderer()->clearOverlay();
-}
-
 void ViewToolset::drawAngles()
 {
 	m_config->toggleDrawAngles();
