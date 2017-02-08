@@ -298,17 +298,6 @@ void LDDocument::reloadAllSubfiles()
 
 // =============================================================================
 //
-void LDDocument::addObjects (const LDObjectList& objects)
-{
-	for (LDObject* object : objects)
-	{
-		if (object)
-			addObject (object);
-	}
-}
-
-// =============================================================================
-//
 void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	Model::insertObject(pos, obj);

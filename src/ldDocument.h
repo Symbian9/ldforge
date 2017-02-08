@@ -57,14 +57,12 @@ public:
 	~LDDocument();
 
 	void addHistoryStep();
-	void addObjects (const LDObjectList& objs);
 	void addToHistory (AbstractHistoryEntry* entry);
 	void addToSelection (LDObject* obj);
 	void clearHistory();
 	void clearSelection();
 	void close();
 	QString defaultName() const;
-	void forgetObject (LDObject* obj);
 	QString fullPath();
 	QString getDisplayName();
 	const QSet<LDObject*>& getSelection() const;
