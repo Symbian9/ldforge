@@ -28,7 +28,6 @@
 #include "../miscallenous.h"
 #include "../radioGroup.h"
 #include "../glRenderer.h"
-#include "../dialogs.h"
 #include "../colors.h"
 #include "../mathfunctions.h"
 #include "../ldobjectiterator.h"

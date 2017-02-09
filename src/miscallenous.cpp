@@ -22,7 +22,6 @@
 #include "main.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
-#include "dialogs.h"
 #include "ldDocument.h"
 
 

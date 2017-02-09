@@ -31,7 +31,6 @@ set (LDFORGE_SOURCES
 	src/canvas.cpp
 	src/colors.cpp
 	src/crashCatcher.cpp
-	src/dialogs.cpp
 	src/documentation.cpp
 	src/documentloader.cpp
 	src/documentmanager.cpp
@@ -59,6 +58,7 @@ set (LDFORGE_SOURCES
 	src/version.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
+	src/dialogs/externalprogrampathdialog.cpp
 	src/dialogs/generateprimitivedialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
 	src/dialogs/newpartdialog.cpp
@@ -86,7 +86,6 @@ set (LDFORGE_HEADERS
 	src/canvas.h
 	src/colors.h
 	src/crashCatcher.h
-	src/dialogs.h
 	src/documentation.h
 	src/documentloader.h
 	src/documentmanager.h
@@ -118,6 +117,7 @@ set (LDFORGE_HEADERS
 	src/transform.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
+	src/dialogs/externalprogrampathdialog.h
 	src/dialogs/generateprimitivedialog.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
@@ -146,7 +146,6 @@ set (LDFORGE_FORMS
 	ui/coverer.ui
 	ui/edger2.ui
 	ui/editraw.ui
-	ui/extprogpath.ui
 	ui/flip.ui
 	ui/intersector.ui
 	ui/isecalc.ui
@@ -158,6 +157,7 @@ set (LDFORGE_FORMS
 	src/partdownloader.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
+	src/dialogs/externalprogrampathdialog.ui
 	src/dialogs/generateprimitivedialog.ui
 	src/dialogs/ldrawpathdialog.ui
 	src/dialogs/newpartdialog.ui

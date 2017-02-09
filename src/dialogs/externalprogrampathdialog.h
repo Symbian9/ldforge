@@ -18,7 +18,7 @@
 
 #pragma once
 #include <QDialog>
-#include "main.h"
+#include "../main.h"
 
 /*
  * Prompts the user for a path to an external program.

@@ -24,7 +24,6 @@
 # include <signal.h>
 # include <unistd.h>
 # include "crashCatcher.h"
-# include "dialogs.h"
 
 # ifdef Q_OS_LINUX
 #  include <sys/prctl.h>

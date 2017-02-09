@@ -17,14 +17,12 @@
  */
 
 #include <QFileDialog>
-#include "dialogs.h"
-#include "mainwindow.h"
-#include "dialogs/configdialog.h"
-#include "glRenderer.h"
-#include "documentation.h"
-#include "dialogs.h"
-#include "ui_overlay.h"
+#include "externalprogrampathdialog.h"
+#include "configdialog.h"
 #include "ui_extprogpath.h"
+#include "../mainwindow.h"
+#include "../glRenderer.h"
+#include "../documentation.h"
 
 /*
  * Constructs a new external program path dialog.
