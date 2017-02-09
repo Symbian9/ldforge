@@ -498,71 +498,6 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 	}
 }
 
-// =============================================================================
-//
-// This converts a 2D point on the screen to a 3D point in the model. If 'snap'
-// is true, the 3D point will snap to the current grid.
-//
-Vertex GLRenderer::convert2dTo3d (const QPoint& position2d, bool snap) const
-{
-	if (camera() == FreeCamera)
-	{
-		return {0, 0, 0};
-	}
-	else
-	{
-		Vertex position3d;
-		const CameraInfo* camera = &g_cameraInfo[this->camera()];
-		Axis axisX = camera->localX;
-		Axis axisY = camera->localY;
-		int signX = camera->negatedX ? -1 : 1;
-		int signY = camera->negatedY ? -1 : 1;
-
-		// Calculate cx and cy - these are the LDraw unit coords the cursor is at.
-		double cx = (-m_virtualWidth + ((2 * position2d.x() * m_virtualWidth) / m_width) - panning(X));
-		double cy = (m_virtualHeight - ((2 * position2d.y() * m_virtualHeight) / m_height) - panning(Y));
-
-		if (snap)
-		{
-			cx = grid()->snap(cx, Grid::Coordinate);
-			cy = grid()->snap(cy, Grid::Coordinate);
-		}
-
-		cx *= signX;
-		cy *= signY;
-		roundToDecimals(cx, 4);
-		roundToDecimals(cy, 4);
-
-		// Create the vertex from the coordinates
-		position3d.setCoordinate(axisX, cx);
-		position3d.setCoordinate(axisY, cy);
-		position3d.setCoordinate(static_cast<Axis>(3 - axisX - axisY), getDepthValue());
-		return position3d;
-	}
-}
-
-/*
- * Inverse operation for the above - convert a 3D position to a 2D screen position.
- */
-QPoint GLRenderer::convert3dTo2d(const Vertex& position3d) const
-{
-	if (camera() == FreeCamera)
-	{
-		return {0, 0};
-	}
-	else
-	{
-		const CameraInfo* camera = &g_cameraInfo[this->camera()];
-		Axis axisX = camera->localX;
-		Axis axisY = camera->localY;
-		int signX = camera->negatedX ? -1 : 1;
-		int signY = camera->negatedY ? -1 : 1;
-		int rx = (((position3d[axisX] * signX) + m_virtualWidth + panning(X)) * m_width) / (2 * m_virtualWidth);
-		int ry = (((position3d[axisY] * signY) - m_virtualHeight + panning(Y)) * m_height) / (2 * m_virtualHeight);
-		return {rx, -ry};
-	}
-}
-
 QPen GLRenderer::textPen() const
 {
 	return {m_useDarkBackground ? Qt::white : Qt::black};
@@ -894,23 +829,6 @@ void GLRenderer::setPicking(bool value)
 
 // =============================================================================
 //
-void GLRenderer::getRelativeAxes(Axis& relativeX, Axis& relativeY) const
-{
-	const CameraInfo* camera = &g_cameraInfo[this->camera()];
-	relativeX = camera->localX;
-	relativeY = camera->localY;
-}
-
-// =============================================================================
-//
-Axis GLRenderer::getRelativeZ() const
-{
-	const CameraInfo* camera = &g_cameraInfo[this->camera()];
-	return static_cast<Axis>(3 - camera->localX - camera->localY);
-}
-
-// =============================================================================
-//
 void GLRenderer::compileObject (LDObject* obj)
 {
 	compiler()->stageForCompilation (obj);
@@ -968,24 +886,6 @@ Axis GLRenderer::getCameraAxis (bool y, Camera camid)
 
 	const CameraInfo* cam = &g_cameraInfo[camid];
 	return (y) ? cam->localY : cam->localX;
-}
-
-// =============================================================================
-//
-void GLRenderer::setDepthValue (double depth)
-{
-	if (camera() < FreeCamera)
-		m_depthValues[camera()] = depth;
-}
-
-// =============================================================================
-//
-double GLRenderer::getDepthValue() const
-{
-	if (camera() < FreeCamera)
-		return m_depthValues[camera()];
-	else
-		return 0.0;
 }
 
 // =============================================================================
@@ -1184,11 +1084,6 @@ QPointF const& GLRenderer::mousePositionF() const
 	return m_mousePositionF;
 }
 
-int GLRenderer::depthNegateFactor() const
-{
-	return g_cameraInfo[camera()].negatedDepth ? -1 : 1;
-}
-
 Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
 {
 	return m_currentKeyboardModifiers;
@@ -1229,4 +1124,14 @@ bool GLRenderer::isDrawingSelectionScene() const
 Qt::MouseButtons GLRenderer::lastButtons() const
 {
 	return m_lastButtons;
+}
+
+double GLRenderer::virtualHeight() const
+{
+	return m_virtualHeight;
+}
+
+double GLRenderer::virtualWidth() const
+{
+	return m_virtualWidth;
 }

@@ -34,6 +34,8 @@ class MagicWandMode;
 
 struct CameraInfo
 {
+	CameraInfo(const CameraInfo&) = delete;
+
 	int glrotate[3];
 	Axis localX;
 	Axis localY;
@@ -80,16 +82,10 @@ public:
 	QByteArray capturePixels();
 	void compileObject(LDObject* obj);
 	GLCompiler* compiler() const;
-	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
-	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	QString currentCameraName() const;
-	int depthNegateFactor() const;
 	void drawGLScene();
 	void forgetObject(LDObject* obj);
 	Axis getCameraAxis(bool y, Camera camid = (Camera) -1);
-	double getDepthValue() const;
-	void getRelativeAxes(Axis& relX, Axis& relY) const;
-	Axis getRelativeZ() const;
 	void hardRefresh();
 	void highlightCursorObject();
 	void initGLData();
@@ -109,10 +105,11 @@ public:
 	void resetAngles();
 	void setBackground();
 	void setCamera(Camera cam);
-	void setDepthValue(double depth);
 	void setDrawOnly(bool value);
 	void setPicking(bool a);
 	QPen textPen() const;
+	double virtualHeight() const;
+	double virtualWidth() const;
 	void zoomNotch(bool inward);
 
 	static const QPen thinBorderPen;
@@ -160,7 +157,6 @@ private:
 	double m_panX[7] = {0};
 	double m_panY[7] = {0};
 	double m_zoom[7] = {30};
-	double m_depthValues[6];
 	bool m_useDarkBackground = false;
 	bool m_drawToolTip = false;
 	bool m_takingScreenCapture = false;

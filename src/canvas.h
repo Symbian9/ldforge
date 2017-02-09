@@ -26,13 +26,20 @@ public:
 	Canvas(LDDocument* document, QWidget* parent = nullptr);
 	~Canvas();
 
+	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
+	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	EditModeType currentEditModeType() const;
+	int depthNegateFactor() const;
 	LDDocument* document() const;
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos) const;
+	double getDepthValue() const;
+	void getRelativeAxes(Axis& relX, Axis& relY) const;
+	Axis getRelativeZ() const;
 	QPen linePen() const;
 	const Vertex& position3D() const;
+	void setDepthValue(double depth);
 	void setEditMode(EditModeType type);
 
 protected:
@@ -49,4 +56,5 @@ private:
 	LDDocument& m_document;
 	AbstractEditMode* m_currentEditMode = nullptr;
 	Vertex m_position3D;
+	double m_depthValues[6] = {0};
 };

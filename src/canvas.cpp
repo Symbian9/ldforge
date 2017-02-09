@@ -19,9 +19,11 @@
 #include <QMouseEvent>
 #include "canvas.h"
 #include "documentmanager.h"
+#include "grid.h"
 #include "ldDocument.h"
 #include "mainwindow.h"
 #include "messageLog.h"
+#include "miscallenous.h"
 #include "primitives.h"
 
 Canvas::Canvas(LDDocument* document, QWidget* parent) :
@@ -203,4 +205,108 @@ QPen Canvas::linePen() const
 	linepen.setWidth(2);
 	linepen.setColor(luma(backgroundColor()) < 40 ? Qt::white : Qt::black);
 	return linepen;
+}
+
+
+int Canvas::depthNegateFactor() const
+{
+	return cameraInfo(camera()).negatedDepth ? -1 : 1;
+}
+
+// =============================================================================
+//
+void Canvas::getRelativeAxes(Axis& relativeX, Axis& relativeY) const
+{
+	const CameraInfo& camera = cameraInfo(this->camera());
+	relativeX = camera.localX;
+	relativeY = camera.localY;
+}
+
+// =============================================================================
+//
+Axis Canvas::getRelativeZ() const
+{
+	const CameraInfo& camera = cameraInfo(this->camera());
+	return static_cast<Axis>(3 - camera.localX - camera.localY);
+}
+
+// =============================================================================
+//
+void Canvas::setDepthValue (double depth)
+{
+	if (camera() < FreeCamera)
+		m_depthValues[camera()] = depth;
+}
+
+// =============================================================================
+//
+double Canvas::getDepthValue() const
+{
+	if (camera() < FreeCamera)
+		return m_depthValues[camera()];
+	else
+		return 0.0;
+}
+
+/*
+ * This converts a 2D point on the screen to a 3D point in the model. If 'snap' is true, the 3D point will snap to the current grid.
+ */
+Vertex Canvas::convert2dTo3d(const QPoint& position2d, bool snap) const
+{
+	if (camera() == FreeCamera)
+	{
+		return {0, 0, 0};
+	}
+	else
+	{
+		Vertex position3d;
+		const CameraInfo& camera = cameraInfo(this->camera());
+		Axis axisX = camera.localX;
+		Axis axisY = camera.localY;
+		int signX = camera.negatedX ? -1 : 1;
+		int signY = camera.negatedY ? -1 : 1;
+
+		// Calculate cx and cy - these are the LDraw unit coords the cursor is at.
+		double cx = (-virtualWidth() + ((2 * position2d.x() * virtualWidth()) / width()) - panning(X));
+		double cy = (virtualHeight() - ((2 * position2d.y() * virtualHeight()) / height()) - panning(Y));
+
+		if (snap)
+		{
+			cx = grid()->snap(cx, Grid::Coordinate);
+			cy = grid()->snap(cy, Grid::Coordinate);
+		}
+
+		cx *= signX;
+		cy *= signY;
+		roundToDecimals(cx, 4);
+		roundToDecimals(cy, 4);
+
+		// Create the vertex from the coordinates
+		position3d.setCoordinate(axisX, cx);
+		position3d.setCoordinate(axisY, cy);
+		position3d.setCoordinate(static_cast<Axis>(3 - axisX - axisY), getDepthValue());
+		return position3d;
+	}
+}
+
+/*
+ * Inverse operation for the above - convert a 3D position to a 2D screen position.
+ */
+QPoint Canvas::convert3dTo2d(const Vertex& position3d) const
+{
+	if (camera() == FreeCamera)
+	{
+		return {0, 0};
+	}
+	else
+	{
+		const CameraInfo& camera = cameraInfo(this->camera());
+		Axis axisX = camera.localX;
+		Axis axisY = camera.localY;
+		int signX = camera.negatedX ? -1 : 1;
+		int signY = camera.negatedY ? -1 : 1;
+		int rx = (((position3d[axisX] * signX) + virtualWidth() + panning(X)) * width()) / (2 * virtualWidth());
+		int ry = (((position3d[axisY] * signY) - virtualHeight() + panning(Y)) * height()) / (2 * virtualHeight());
+		return {rx, -ry};
+	}
 }
