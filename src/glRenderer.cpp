@@ -455,11 +455,13 @@ void GLRenderer::drawGLScene()
 
 		if (m_config->drawAxes())
 		{
+			glDisableClientState (GL_NORMAL_ARRAY);
 			glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
 			glVertexPointer (3, GL_FLOAT, 0, NULL);
 			glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
 			glColorPointer (3, GL_FLOAT, 0, NULL);
 			glDrawArrays (GL_LINES, 0, 6);
+			glEnableClientState (GL_NORMAL_ARRAY);
 			CHECK_GL_ERROR();
 		}
 	}
