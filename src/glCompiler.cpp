@@ -45,8 +45,6 @@ static const GLErrorInfo g_GLErrors[] =
 
 ConfigOption (QString SelectColorBlend = "#0080FF")
 
-// static QMap<LDObject*, String> g_objectOrigins;
-
 void CheckGLErrorImpl (const char* file, int line)
 {
 	QString errmsg;
@@ -72,8 +70,14 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 	HierarchyElement (renderer),
 	m_renderer (renderer)
 {
-	needMerge();
-	memset (m_vboSizes, 0, sizeof m_vboSizes);
+	connect(renderer->model(), SIGNAL(objectAdded(LDObject*)), this, SLOT(compileObject(LDObject*)));
+	connect(renderer->model(), SIGNAL(objectModified(LDObject*)), this, SLOT(compileObject(LDObject*)));
+	connect(renderer->model(), SIGNAL(aboutToRemoveObject(LDObject*)), this, SLOT(forgetObject(LDObject*)), Qt::DirectConnection);
+	connect(renderer, SIGNAL(objectHighlightingChanged(LDObject*)), this, SLOT(compileObject(LDObject*)));
+	connect(m_window, SIGNAL(gridChanged()), this, SLOT(recompile()));
+
+	for (LDObject* object : renderer->model()->objects())
+		stageForCompilation(object);
 }
 
 
@@ -96,24 +100,23 @@ QColor GLCompiler::indexColorForID (int id) const
 {
 	// Calculate a color based from this index. This method caters for
 	// 16777216 objects. I don't think that will be exceeded anytime soon. :)
-	int r = (id / 0x10000) % 0x100,
-		g = (id / 0x100) % 0x100,
-		b = id % 0x100;
-
-	return QColor (r, g, b);
+	int r = (id / 0x10000) % 0x100;
+	int g = (id / 0x100) % 0x100;
+	int b = id % 0x100;
+	return {r, g, b};
 }
 
 
 QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const
 {
 	QColor qcol;
-	static const QColor bfcFrontColor (64, 192, 80);
-	static const QColor bfcBackColor (208, 64, 64);
+	static const QColor bfcFrontColor {64, 192, 80};
+	static const QColor bfcBackColor {208, 64, 64};
 
 	switch (complement)
 	{
 	case SurfacesVboComplement:
-		return QColor();
+		return {};
 
 	case BfcFrontColorsVboComplement:
 		qcol = bfcFrontColor;
@@ -124,7 +127,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 		break;
 
 	case PickColorsVboComplement:
-		return indexColorForID (topobj->id());
+		return indexColorForID(topobj->id());
 
 	case RandomColorsVboComplement:
 		qcol = topobj->randomColor();
@@ -140,7 +143,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 		}
 		else if (poly.color == EdgeColor)
 		{
-			qcol = luma (QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
+			qcol = luma(QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
 		}
 		else
 		{
@@ -152,7 +155,25 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 		break;
 	}
 
-	if (not qcol.isValid())
+	if (qcol.isValid())
+	{
+		double blendAlpha = 0.0;
+
+		if (topobj->isSelected())
+			blendAlpha = 1.0;
+		else if (topobj == m_renderer->objectAtCursor())
+			blendAlpha = 0.5;
+
+		if (blendAlpha != 0.0)
+		{
+			QColor selectedColor = m_config->selectColorBlend();
+			double denom = blendAlpha + 1.0;
+			qcol.setRed((qcol.red() + (selectedColor.red() * blendAlpha)) / denom);
+			qcol.setGreen((qcol.green() + (selectedColor.green() * blendAlpha)) / denom);
+			qcol.setBlue((qcol.blue() + (selectedColor.blue() * blendAlpha)) / denom);
+		}
+	}
+	else
 	{
 		// The color was unknown. Use main color to make the polygon at least
 		// not appear pitch-black.
@@ -162,30 +183,12 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 			qcol = Qt::black;
 
 		// Warn about the unknown color, but only once.
-		static QList<int> warnedColors;
-		if (not warnedColors.contains (poly.color))
+		static QSet<int> warnedColors;
+		if (not warnedColors.contains(poly.color))
 		{
-			print ("Unknown color %1!\n", poly.color);
-			warnedColors << poly.color;
+			print("Unknown color %1!\n", poly.color);
+			warnedColors.insert(poly.color);
 		}
-
-		return qcol;
-	}
-
-	double blendAlpha = 0.0;
-
-	if (topobj->isSelected())
-		blendAlpha = 1.0;
-	else if (topobj == m_renderer->objectAtCursor())
-		blendAlpha = 0.5;
-
-	if (blendAlpha != 0.0)
-	{
-		QColor selcolor (m_config->selectColorBlend());
-		double denom = blendAlpha + 1.0;
-		qcol.setRed ((qcol.red() + (selcolor.red() * blendAlpha)) / denom);
-		qcol.setGreen ((qcol.green() + (selcolor.green() * blendAlpha)) / denom);
-		qcol.setBlue ((qcol.blue() + (selcolor.blue() * blendAlpha)) / denom);
 	}
 
 	return qcol;
@@ -201,11 +204,6 @@ void GLCompiler::needMerge()
 
 void GLCompiler::stageForCompilation (LDObject* obj)
 {
-	/*
-	g_objectOrigins[obj] = format ("%1:%2 (%3)",
-		obj->document()->getDisplayName(), obj->lineNumber(), obj->typeName());
-	*/
-
 	m_staged << obj;
 }
 
@@ -216,20 +214,10 @@ void GLCompiler::unstage (LDObject* obj)
 }
 
 
-void GLCompiler::compileModel (Model* model)
-{
-	if (model)
-	{
-		for (LDObject* obj : model->objects())
-			compileObject (obj);
-	}
-}
-
-
 void GLCompiler::compileStaged()
 {
-	for (QSetIterator<LDObject*> it (m_staged); it.hasNext();)
-		compileObject (it.next());
+	for (LDObject* object : m_staged)
+		compileObject(object);
 
 	m_staged.clear();
 }
@@ -268,13 +256,19 @@ void GLCompiler::prepareVBO (int vbonum, Model* model)
 }
 
 
-void GLCompiler::dropObjectInfo (LDObject* obj)
+void GLCompiler::dropObjectInfo(LDObject* object)
 {
-	if (m_objectInfo.contains (obj))
+	if (m_objectInfo.contains(object))
 	{
-		m_objectInfo.remove (obj);
+		m_objectInfo.remove(object);
 		needMerge();
 	}
+}
+
+void GLCompiler::forgetObject(LDObject* object)
+{
+	dropObjectInfo(object);
+	m_staged.remove(object);
 }
 
 
@@ -398,4 +392,11 @@ GLuint GLCompiler::vbo (int vbonum) const
 int GLCompiler::vboSize (int vbonum) const
 {
 	return m_vboSizes[vbonum];
+}
+
+
+void GLCompiler::recompile()
+{
+	for (LDObject* object : m_renderer->model()->objects())
+		compileObject(object);
 }

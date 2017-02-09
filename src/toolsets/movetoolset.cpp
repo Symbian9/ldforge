@@ -63,11 +63,6 @@ void MoveToolset::moveSelection (bool up)
 		obj->swap(model->getObject(target));
 	}
 
-	// The objects need to be recompiled, otherwise their pick lists are left with
-	// the wrong index colors which messes up selection.
-	for (LDObject* obj : objsToCompile)
-		m_window->renderer()->compileObject(obj);
-
 	m_window->buildObjectList();
 }
 

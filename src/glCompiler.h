@@ -25,8 +25,10 @@
 
 // =============================================================================
 //
-class GLCompiler : public HierarchyElement, protected QOpenGLFunctions
+class GLCompiler : public QObject, public HierarchyElement, protected QOpenGLFunctions
 {
+	Q_OBJECT
+
 public:
 	struct ObjectVBOInfo
 	{
@@ -36,8 +38,6 @@ public:
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	void compileModel (Model* model);
-	void dropObjectInfo (LDObject* obj);
 	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const;
 	QColor indexColorForID (int id) const;
 	void initialize();
@@ -53,14 +53,18 @@ public:
 
 private:
 	void compileStaged();
-	void compileObject (LDObject* obj);
 	void compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
+	Q_SLOT void compileObject (LDObject* obj);
+	Q_SLOT void recompile();
+	void dropObjectInfo (LDObject* obj);
+	Q_SLOT void forgetObject(LDObject* object);
 
+private:
 	QMap<LDObject*, ObjectVBOInfo>	m_objectInfo;
 	QSet<LDObject*> m_staged; // Objects that need to be compiled
 	GLuint m_vbo[NumVbos];
-	bool m_vboChanged[NumVbos];
-	int m_vboSizes[NumVbos];
+	bool m_vboChanged[NumVbos] = {true};
+	int m_vboSizes[NumVbos] = {0};
 	GLRenderer* m_renderer;
 };
 

@@ -126,7 +126,6 @@ void FileToolset::insertFrom()
 			{
 				currentDocument()->insertObject (position, object);
 				currentDocument()->addToSelection(object);
-				m_window->renderer()->compileObject (object);
 				position++;
 			}
 

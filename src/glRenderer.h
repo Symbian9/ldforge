@@ -80,18 +80,17 @@ public:
 	const CameraInfo& cameraInfo(Camera camera) const;
 	QString cameraName(Camera camera) const;
 	QByteArray capturePixels();
-	void compileObject(LDObject* obj);
 	GLCompiler* compiler() const;
 	QString currentCameraName() const;
 	void drawGLScene();
 	void forgetObject(LDObject* obj);
 	Axis getCameraAxis(bool y, Camera camid = (Camera) -1);
-	void hardRefresh();
 	void highlightCursorObject();
 	void initGLData();
 	bool isDrawOnly() const;
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
+	const Model* model() const;
 	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;
@@ -112,6 +111,9 @@ public:
 	void zoomNotch(bool inward);
 
 	static const QPen thinBorderPen;
+
+signals:
+	void objectHighlightingChanged(LDObject* object);
 
 protected:
 	void initializeGL();

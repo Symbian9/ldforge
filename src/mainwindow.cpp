@@ -280,10 +280,7 @@ void MainWindow::updateGridToolBar()
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
-
-	// Recompile all Bézier curves, the changing grid affects their precision.
-	for (LDObjectIterator<LDBezierCurve> it (m_currentDocument); it.isValid(); ++it)
-		renderer()->compileObject (it);
+	emit gridChanged();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -437,11 +434,6 @@ void MainWindow::selectionChanged()
 	// The select() method calls may have selected additional items (i.e. invertnexts)
 	// Update it all now.
 	updateSelection();
-
-	// Update the GL renderer
-	for (LDObject* obj : priorSelection + selectedObjects())
-		renderer()->compileObject (obj);
-
 	renderer()->update();
 }
 
@@ -478,7 +470,6 @@ void MainWindow::quickColorClicked()
 			continue; // uncolored object
 
 		obj->setColor (color);
-		renderer()->compileObject (obj);
 	}
 
 	endAction();
@@ -505,7 +496,7 @@ int MainWindow::suggestInsertPoint()
 void MainWindow::doFullRefresh()
 {
 	buildObjectList();
-	renderer()->hardRefresh();
+	renderer()->update();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1147,9 +1138,7 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 	{
 		document->setFrozen(false);
 		print ("Opened %1", document->name());
-
-		// Cache files are not compiled by the GL renderer. Now that this file is open for editing, it needs to be compiled.
-		getRendererForDocument(document)->compiler()->compileModel(document);
+		getRendererForDocument(document);
 		updateDocumentList();
 	}
 }

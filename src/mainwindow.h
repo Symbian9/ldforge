@@ -119,6 +119,9 @@ public:
 	void updateSelection();
 	void updateTitle();
 
+signals:
+	void gridChanged();
+
 public slots:
 	void actionTriggered();
 	void circleToolSegmentsChanged();

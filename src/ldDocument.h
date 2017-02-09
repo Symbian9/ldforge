@@ -37,7 +37,7 @@ class DocumentManager;
 // The default name is a placeholder, initially suggested name for a file. The
 // primitive generator uses this to give initial names to primitives.
 //
-class LDDocument : public QObject, public Model, public HierarchyElement
+class LDDocument : public Model, public HierarchyElement
 {
 	Q_OBJECT
 

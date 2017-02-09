@@ -21,6 +21,7 @@
 #include "documentmanager.h"
 
 Model::Model(DocumentManager* manager) :
+    QObject {manager},
     _manager {manager} {}
 
 Model::~Model()
@@ -65,6 +66,7 @@ void Model::insertObject(int position, LDObject* object)
 	_objects.insert(position, object);
 	_needsTriangleRecount = true;
 	object->setDocument(this);
+	emit objectAdded(object);
 }
 
 /*
@@ -248,6 +250,7 @@ void Model::withdraw(LDObject* object)
 LDObject* Model::withdrawAt(int position)
 {
 	LDObject* object = _objects[position];
+	emit aboutToRemoveObject(object);
 	_objects.removeAt(position);
 	_needsTriangleRecount = true;
 	return object;

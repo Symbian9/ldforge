@@ -23,8 +23,10 @@
 /*
  * This class represents a LDraw model, consisting of a vector of objects. It manages LDObject ownership.
  */
-class Model
+class Model : public QObject
 {
+	Q_OBJECT
+
 public:
 	Model(DocumentManager* manager);
 	Model(const Model& other) = delete;
@@ -55,6 +57,11 @@ public:
 	LDObject* insertFromString(int position, QString line);
 	LDObject* addFromString(QString line);
 	LDObject* replaceWithFromString(LDObject* object, QString line);
+
+signals:
+	void objectAdded(LDObject* object);
+	void aboutToRemoveObject(LDObject* object);
+	void objectModified(LDObject* object);
 
 protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);

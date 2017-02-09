@@ -328,17 +328,6 @@ void GLRenderer::refresh()
 
 // =============================================================================
 //
-void GLRenderer::hardRefresh()
-{
-	if (m_initialized)
-	{
-		compiler()->compileModel (currentDocument());
-		refresh();
-	}
-}
-
-// =============================================================================
-//
 void GLRenderer::resizeGL (int width, int height)
 {
 	calcCameraIcons();
@@ -785,18 +774,8 @@ void GLRenderer::setPicking(bool value)
 
 // =============================================================================
 //
-void GLRenderer::compileObject (LDObject* obj)
-{
-	compiler()->stageForCompilation (obj);
-}
-
-// =============================================================================
-//
 void GLRenderer::forgetObject(LDObject* obj)
 {
-	compiler()->dropObjectInfo(obj);
-	compiler()->unstage(obj);
-
 	if (m_objectAtCursor == obj)
 		m_objectAtCursor = nullptr;
 }
@@ -1002,10 +981,10 @@ void GLRenderer::highlightCursorObject()
 		m_objectAtCursor = newObject;
 
 		if (oldObject)
-			compileObject (oldObject);
+			emit objectHighlightingChanged(oldObject);
 
 		if (newObject)
-			compileObject (newObject);
+			emit objectHighlightingChanged(newObject);
 	}
 
 	update();
@@ -1084,4 +1063,9 @@ double GLRenderer::virtualHeight() const
 double GLRenderer::virtualWidth() const
 {
 	return m_virtualWidth;
+}
+
+const Model* GLRenderer::model() const
+{
+	return m_model;
 }

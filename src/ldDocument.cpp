@@ -22,13 +22,11 @@
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "canvas.h"
-#include "glCompiler.h"
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"
 
 LDDocument::LDDocument (DocumentManager* parent) :
-	QObject (parent),
     Model {parent},
 	HierarchyElement (parent),
     m_history (new EditHistory (this)),
@@ -299,7 +297,6 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	Model::insertObject(pos, obj);
 	history()->add(new AddHistoryEntry {pos, obj});
-	m_window->renderer()->compileObject(obj);
 	connect(obj, SIGNAL(codeChanged(int,QString,QString)), this, SLOT(objectChanged(int,QString,QString)));
 
 #ifdef DEBUG
@@ -312,8 +309,8 @@ void LDDocument::objectChanged(int position, QString before, QString after)
 {
 	LDObject* object = static_cast<LDObject*>(sender());
 	addToHistory(new EditHistoryEntry {position, before, after});
-	m_window->renderer()->compileObject(object);
-	m_window->currentDocument()->redoVertices();
+	redoVertices();
+	emit objectModified(object);
 }
 
 LDObject* LDDocument::withdrawAt(int position)
@@ -446,7 +443,7 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 	if (not m_selection.contains(obj) and obj->model() == this)
 	{
 		m_selection.insert(obj);
-		m_window->renderer()->compileObject (obj);
+		emit objectModified(obj);
 
 		// If this object is inverted with INVERTNEXT, select the INVERTNEXT as well.
 		LDBfc* invertnext;
@@ -463,7 +460,7 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 	if (m_selection.contains(obj))
 	{
 		m_selection.remove(obj);
-		m_window->renderer()->compileObject (obj);
+		emit objectModified(obj);
 
 		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
 		LDBfc* invertnext;
@@ -478,9 +475,7 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 void LDDocument::clearSelection()
 {
 	for (LDObject* object : m_selection)
-		m_window->renderer()->compileObject(object);
-
-	m_selection.clear();
+		removeFromSelection(object);
 }
 
 // =============================================================================
