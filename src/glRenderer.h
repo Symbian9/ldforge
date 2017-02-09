@@ -169,8 +169,6 @@ private:
 	Camera m_camera;
 	Camera m_toolTipCamera;
 	GLuint m_axeslist;
-	int m_width = 0;
-	int m_height = 0;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;
 	GLuint m_axesVbo;

@@ -121,7 +121,7 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& info : m_cameraIcons)
 	{
 		// MATH
-		int x1 = (m_width - (info.camera != FreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
+		int x1 = (width() - (info.camera != FreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
 		int y1 = ((i / 3) * 16) + 1;
 
 		info.sourceRect = QRect (0, 0, 16, 16);
@@ -339,15 +339,13 @@ void GLRenderer::hardRefresh()
 
 // =============================================================================
 //
-void GLRenderer::resizeGL (int w, int h)
+void GLRenderer::resizeGL (int width, int height)
 {
-	m_width = w;
-	m_height = h;
 	calcCameraIcons();
-	glViewport (0, 0, w, h);
+	glViewport (0, 0, width, height);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective (45.0f, (double) w / (double) h, 1.0f, 10000.0f);
+	gluPerspective (45.0f, (double) width / (double) height, 1.0f, 10000.0f);
 	glMatrixMode (GL_MODELVIEW);
 }
 
@@ -362,7 +360,7 @@ void GLRenderer::drawGLScene()
 	}
 
 	m_virtualWidth = zoom();
-	m_virtualHeight = (m_height * m_virtualWidth) / m_width;
+	m_virtualHeight = (height() * m_virtualWidth) / width();
 
 	if (m_config->drawWireframe() and not m_isDrawingSelectionScene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -705,8 +703,8 @@ QSet<LDObject*> GLRenderer::pick(const QRect& range)
 	// Clamp the values to ensure they're within bounds
 	x0 = qMax (0, x0);
 	y0 = qMax (0, y0);
-	x1 = qMin (x1, m_width);
-	y1 = qMin (y1, m_height);
+	x1 = qMin (x1, width());
+	y1 = qMin (y1, height());
 	const int areawidth = (x1 - x0);
 	const int areaheight = (y1 - y0);
 	const qint32 numpixels = areawidth * areaheight;
@@ -716,7 +714,7 @@ QSet<LDObject*> GLRenderer::pick(const QRect& range)
 	pixelData.resize(4 * numpixels);
 
 	// Read pixels from the color buffer.
-	glReadPixels(x0, m_height - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
+	glReadPixels(x0, height() - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
 	QSet<int32_t> indices;
 
@@ -755,7 +753,7 @@ LDObject* GLRenderer::pick(int mouseX, int mouseY)
 	makeCurrent();
 	setPicking(true);
 	drawGLScene();
-	glReadPixels(mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+	glReadPixels(mouseX, height() - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
 	LDObject* object = LDObject::fromID(pixel[0] * 0x10000 + pixel[1] * 0x100 + pixel[2]);
 	setPicking(false);
 	repaint();
@@ -902,16 +900,16 @@ void GLRenderer::zoomToFit()
 		}
 
 		zoomNotch (inward);
-		QVector<unsigned char> capture (4 * m_width * m_height);
+		QVector<unsigned char> capture (4 * width() * height());
 		drawGLScene();
-		glReadPixels (0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, capture.data());
-		QImage image (capture.constData(), m_width, m_height, QImage::Format_ARGB32);
+		glReadPixels (0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, capture.data());
+		QImage image (capture.constData(), width(), height(), QImage::Format_ARGB32);
 		bool filled = false;
 
 		// Check the top and bottom rows
 		for (int i = 0; i < image.width(); ++i)
 		{
-			if (image.pixel (i, 0) != black or image.pixel (i, m_height - 1) != black)
+			if (image.pixel (i, 0) != black or image.pixel (i, height() - 1) != black)
 			{
 				filled = true;
 				break;
@@ -923,7 +921,7 @@ void GLRenderer::zoomToFit()
 		{
 			for (int i = 0; i < image.height(); ++i)
 			{
-				if (image.pixel (0, i) != black or image.pixel (m_width - 1, i) != black)
+				if (image.pixel (0, i) != black or image.pixel (width() - 1, i) != black)
 				{
 					filled = true;
 					break;
@@ -992,7 +990,7 @@ void GLRenderer::highlightCursorObject()
 		setPicking (false);
 
 		unsigned char pixel[4];
-		glReadPixels (m_mousePosition.x(), m_height - m_mousePosition.y(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel[0]);
+		glReadPixels (m_mousePosition.x(), height() - m_mousePosition.y(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel[0]);
 		newIndex = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
 	}
 
