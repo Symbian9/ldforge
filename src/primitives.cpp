@@ -24,6 +24,8 @@
 #include "colors.h"
 #include "ldpaths.h"
 #include "documentmanager.h"
+#include "linetypes/comment.h"
+#include "linetypes/empty.h"
 
 
 PrimitiveManager::PrimitiveManager(QObject* parent) :

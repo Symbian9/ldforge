@@ -67,14 +67,12 @@ LDObject::LDObject (Model* model) :
 LDSubfileReference::LDSubfileReference (Model* model) :
     LDMatrixObject (model) {}
 
-LDOBJ_DEFAULT_CTOR (LDEmpty, LDObject)
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
 LDOBJ_DEFAULT_CTOR (LDLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
 LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
-LDOBJ_DEFAULT_CTOR (LDComment, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
 LDObject::~LDObject()
@@ -85,13 +83,6 @@ LDObject::~LDObject()
 
 	// Remove this object from the list of LDObjects
 	g_allObjects.erase(g_allObjects.find(id()));
-}
-
-// =============================================================================
-//
-QString LDComment::asText() const
-{
-	return format ("0 %1", text());
 }
 
 // =============================================================================
@@ -174,13 +165,6 @@ QString LDError::asText() const
 
 // =============================================================================
 //
-QString LDEmpty::asText() const
-{
-	return "";
-}
-
-// =============================================================================
-//
 QString LDBfc::asText() const
 {
 	return format ("0 BFC %1", statementToString());
@@ -214,6 +198,11 @@ int LDTriangle::triangleCount() const
 int LDQuad::triangleCount() const
 {
 	return 2;
+}
+
+int LDObject::numVertices() const
+{
+	return 0;
 }
 
 // =============================================================================
@@ -351,6 +340,26 @@ LDPolygon* LDObject::getPolygon()
 	return data;
 }
 
+LDColor LDObject::defaultColor() const
+{
+	return MainColor;
+}
+
+bool LDObject::isColored() const
+{
+	return true;
+}
+
+bool LDObject::isScemantic() const
+{
+	return true;
+}
+
+bool LDObject::hasMatrix() const
+{
+	return false;
+}
+
 // =============================================================================
 //
 QList<LDPolygon> LDSubfileReference::inlinePolygons()
@@ -476,8 +485,6 @@ Model* LDObject::model() const
 //
 void LDObject::invert() {}
 void LDBfc::invert() {}
-void LDEmpty::invert() {}
-void LDComment::invert() {}
 void LDError::invert() {}
 
 // =============================================================================
@@ -630,35 +637,9 @@ LDObject* LDObject::fromID(int32 id)
 
 // =============================================================================
 //
-// Hook the set accessors of certain properties to this changeProperty function.
-// It takes care of history management so we can capture low-level changes, this
-// makes history stuff work out of the box.
-//
-template<typename T>
-static void changeProperty(LDObject* object, T* property, const T& value)
-{
-	if (*property == value)
-		return;
-
-	int position = object->lineNumber();
-
-	if (position != -1)
-	{
-		QString before = object->asText();
-		*property = value;
-		emit object->codeChanged(position, before, object->asText());
-	}
-	else
-	{
-		*property = value;
-	}
-}
-
-// =============================================================================
-//
 void LDObject::setColor (LDColor color)
 {
-	changeProperty (this, &m_color, color);
+	changeProperty(&m_color, color);
 }
 
 // =============================================================================
@@ -676,7 +657,7 @@ const Vertex& LDObject::vertex (int i) const
 //
 void LDObject::setVertex (int i, const Vertex& vert)
 {
-	changeProperty (this, &m_coords[i], vert);
+	changeProperty(&m_coords[i], vert);
 }
 
 LDMatrixObject::LDMatrixObject (Model* model) :
@@ -711,7 +692,7 @@ const Vertex& LDMatrixObject::position() const
 //
 void LDMatrixObject::setPosition (const Vertex& a)
 {
-	changeProperty (this, &m_position, a);
+	changeProperty(&m_position, a);
 }
 
 // =============================================================================
@@ -723,7 +704,7 @@ const Matrix& LDMatrixObject::transformationMatrix() const
 
 void LDMatrixObject::setTransformationMatrix (const Matrix& val)
 {
-	changeProperty (this, &m_transformationMatrix, val);
+	changeProperty(&m_transformationMatrix, val);
 }
 
 LDError::LDError (QString contents, QString reason, Model* model) :
@@ -749,20 +730,6 @@ QString LDError::fileReferenced() const
 void LDError::setFileReferenced (QString value)
 {
 	m_fileReferenced = value;
-}
-
-LDComment::LDComment (QString text, Model* model) :
-    LDObject {model},
-    m_text {text} {}
-
-QString LDComment::text() const
-{
-	return m_text;
-}
-
-void LDComment::setText (QString value)
-{
-	changeProperty (this, &m_text, value);
 }
 
 LDBfc::LDBfc (const BfcStatement type, Model* model) :
@@ -871,7 +838,7 @@ LDDocument* LDSubfileReference::fileInfo() const
 
 void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 {
-	changeProperty (this, &m_fileInfo, newReferee);
+	changeProperty(&m_fileInfo, newReferee);
 
 	if (model())
 		model()->recountTriangles();
@@ -919,11 +886,6 @@ QString LDObject::objectListText() const
 	}
 }
 
-QString LDEmpty::objectListText() const
-{
-	return "";
-}
-
 QString LDError::objectListText() const
 {
 	return "ERROR: " + asText();
@@ -938,11 +900,6 @@ QString LDSubfileReference::objectListText() const
 
 	result += ')';
 	return result;
-}
-
-QString LDComment::objectListText() const
-{
-	return text().simplified();
 }
 
 QString LDBfc::objectListText() const

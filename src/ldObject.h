@@ -99,21 +99,21 @@ class LDObject : public QObject
 public:
 	virtual QString asText() const = 0; // This object as LDraw code
     LDColor color() const;
-	virtual LDColor defaultColor() const = 0; // What color does the object default to?
+	virtual LDColor defaultColor() const; // What color does the object default to?
 	Model* model() const;
 	LDPolygon* getPolygon();
 	virtual void getVertices (QSet<Vertex>& verts) const;
-	virtual bool hasMatrix() const = 0; // Does this object have a matrix and position? (see LDMatrixObject)
+	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
 	qint32 id() const;
-	virtual void invert() = 0; // Inverts this object (winding is reversed)
-	virtual bool isColored() const = 0;
+	virtual void invert(); // Inverts this object (winding is reversed)
+	virtual bool isColored() const;
 	bool isHidden() const;
-	virtual bool isScemantic() const = 0; // Does this object have meaning in the part model?
+	virtual bool isScemantic() const; // Does this object have meaning in the part model?
 	bool isSelected() const;
 	int lineNumber() const;
 	void move (Vertex vect);
 	LDObject* next() const;
-	virtual int numVertices() const = 0;
+	virtual int numVertices() const;
 	virtual QString objectListText() const;
 	LDObject* previous() const;
 	bool previousIsInvertnext (LDBfc*& ptr);
@@ -130,13 +130,16 @@ public:
 	static LDObject* fromID(int32 id);
 
 signals:
-	void codeChanged(int position, QString before, QString after);
+	void codeChanged(QString before, QString after);
 
 protected:
 	friend class Model;
 	LDObject (Model* model = nullptr);
 	virtual ~LDObject();
 	void setDocument(Model* model);
+
+	template<typename T>
+	void changeProperty(T* property, const T& value);
 
 private:
 	bool m_isHidden;
@@ -205,48 +208,6 @@ private:
 	QString m_fileReferenced; // If this error was caused by inability to open a file, what file was that?
 	QString m_contents; // The LDraw code that was being parsed
 	QString m_reason;
-};
-
-//
-//
-// Represents an empty line in the LDraw code file.
-//
-class LDEmpty : public LDObject
-{
-	LDOBJ (Empty)
-	LDOBJ_NAME (empty)
-	LDOBJ_VERTICES (0)
-	LDOBJ_UNCOLORED
-	LDOBJ_NON_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
-public:
-	QString objectListText() const override;
-};
-
-//
-//
-// Represents a code-0 comment in the LDraw code file.
-//
-class LDComment : public LDObject
-{
-	LDOBJ (Comment)
-	LDOBJ_NAME (comment)
-	LDOBJ_VERTICES (0)
-	LDOBJ_UNCOLORED
-	LDOBJ_NON_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
-public:
-	QString objectListText() const override;
-	QString text() const;
-	void setText (QString value);
-
-protected:
-	LDComment (QString text, Model* model = nullptr);
-
-private:
-	QString m_text;
 };
 
 //
@@ -438,3 +399,17 @@ enum
 	LowResolution = 16,
 	HighResolution = 48
 };
+
+/*
+ * Changes a property in a manner that emits the appropriate signal to notify that the object changed.
+ */
+template<typename T>
+void LDObject::changeProperty(T* property, const T& value)
+{
+	if (*property != value)
+	{
+		QString before = asText();
+		*property = value;
+		emit codeChanged(before, asText());
+	}
+}

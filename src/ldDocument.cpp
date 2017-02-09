@@ -25,6 +25,7 @@
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"
+#include "linetypes/comment.h"
 
 LDDocument::LDDocument (DocumentManager* parent) :
     Model {parent},
@@ -308,7 +309,7 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 void LDDocument::objectChanged(int position, QString before, QString after)
 {
 	LDObject* object = static_cast<LDObject*>(sender());
-	addToHistory(new EditHistoryEntry {position, before, after});
+	addToHistory(new EditHistoryEntry {object->lineNumber(), before, after});
 	redoVertices();
 	emit objectModified(object);
 }

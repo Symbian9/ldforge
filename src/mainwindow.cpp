@@ -33,6 +33,7 @@
 #include "editmodes/abstractEditMode.h"
 #include "toolsets/toolset.h"
 #include "dialogs/configdialog.h"
+#include "linetypes/comment.h"
 #include "guiutilities.h"
 #include "glCompiler.h"
 #include "documentmanager.h"

@@ -23,6 +23,8 @@
 #include "../mainwindow.h"
 #include "newpartdialog.h"
 #include "ui_newpartdialog.h"
+#include "../linetypes/comment.h"
+#include "../linetypes/empty.h"
 
 NewPartDialog::NewPartDialog (QWidget *parent) :
 	QDialog (parent),

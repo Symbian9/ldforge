@@ -71,6 +71,8 @@ set (LDFORGE_SOURCES
 	src/editmodes/magicWandMode.cpp
 	src/editmodes/rectangleMode.cpp
 	src/editmodes/selectMode.cpp
+	src/linetypes/comment.cpp
+	src/linetypes/empty.cpp
 	src/toolsets/algorithmtoolset.cpp
 	src/toolsets/basictoolset.cpp
 	src/toolsets/extprogramtoolset.cpp
@@ -130,6 +132,8 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/linetypes/comment.h
+	src/linetypes/empty.h
 	src/toolsets/algorithmtoolset.h
 	src/toolsets/basictoolset.h
 	src/toolsets/extprogramtoolset.h
