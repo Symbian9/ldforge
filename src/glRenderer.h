@@ -182,6 +182,7 @@ private:
 	void zoomAllToFit();
 
 private slots:
-	void	slot_toolTipTimer();
-	void	initializeAxes();
+	void slot_toolTipTimer();
+	void initializeAxes();
+	void initializeLighting();
 };

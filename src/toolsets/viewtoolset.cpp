@@ -281,3 +281,9 @@ void ViewToolset::drawConditionalLines()
 	m_config->toggleDrawConditionalLines();
 	m_window->updateActions();
 }
+
+void ViewToolset::lighting()
+{
+	m_config->toggleLighting();
+	m_window->updateActions();
+}

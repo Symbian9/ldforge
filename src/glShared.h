@@ -54,9 +54,10 @@ enum ComplementVboType
 	BfcFrontColorsVboComplement,
 	BfcBackColorsVboComplement,
 	RandomColorsVboComplement,
+	NormalsVboComplement,
 };
 
-MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, RandomColorsVboComplement)
+MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, NormalsVboComplement)
 
 enum
 {

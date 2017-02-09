@@ -116,6 +116,7 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 	switch (complement)
 	{
 	case SurfacesVboComplement:
+	case NormalsVboComplement:
 		return {};
 
 	case BfcFrontColorsVboComplement:
@@ -344,6 +345,16 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	default: return;
 	}
 
+	// Determine the normals for the polygon.
+	Vertex normals[4];
+	for (int i = 0; i < numverts; ++i)
+	{
+		const Vertex& v1 = poly.vertices[(i - 1 + numverts) % numverts];
+		const Vertex& v2 = poly.vertices[i];
+		const Vertex& v3 = poly.vertices[(i + 1) % numverts];
+		normals[i] = Vertex::crossProduct(v3 - v2, v1 - v2).normalized();
+	}
+
 	for (ComplementVboType complement : iterateEnum<ComplementVboType>())
 	{
 		const int vbonum = vboNumber (surface, complement);
@@ -358,6 +369,12 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 				vbodata	<< poly.vertices[vert].x()
 						<< -poly.vertices[vert].y()
 						<< -poly.vertices[vert].z();
+			}
+			else if (complement == NormalsVboComplement)
+			{
+				vbodata << normals[vert].x()
+				        << -normals[vert].y()
+				        << -normals[vert].z();
 			}
 			else
 			{

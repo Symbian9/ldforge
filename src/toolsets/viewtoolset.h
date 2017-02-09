@@ -33,6 +33,7 @@ public:
 	Q_INVOKABLE void drawEdgeLines();
 	Q_INVOKABLE void drawSurfaces();
 	Q_INVOKABLE void jumpTo();
+	Q_INVOKABLE void lighting();
 	Q_INVOKABLE void randomColors();
 	Q_INVOKABLE void resetView();
 	Q_INVOKABLE void screenshot();

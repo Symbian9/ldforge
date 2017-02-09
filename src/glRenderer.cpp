@@ -62,6 +62,7 @@ ConfigOption (bool HighlightObjectBelowCursor = true)
 ConfigOption (bool DrawSurfaces = true)
 ConfigOption (bool DrawEdgeLines = true)
 ConfigOption (bool DrawConditionalLines = true)
+ConfigOption (bool Lighting = true)
 
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
@@ -236,9 +237,25 @@ void GLRenderer::initializeGL()
 	setFocusPolicy (Qt::WheelFocus);
 	compiler()->initialize();
 	initializeAxes();
+	initializeLighting();
 	m_initialized = true;
 	// Now that GL is initialized, we can reset angles.
 	resetAllAngles();
+}
+
+void GLRenderer::initializeLighting()
+{
+	GLfloat materialShininess[] = {5.0};
+	GLfloat lightPosition[] = {1.0, 1.0, 1.0, 0.0};
+	GLfloat ambientLightingLevel[] = {0.8, 0.8, 0.8, 1.0};
+	glShadeModel(GL_SMOOTH);
+	glMaterialfv(GL_FRONT, GL_SHININESS, materialShininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientLightingLevel);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_DEPTH_TEST);
 }
 
 // =============================================================================
@@ -356,6 +373,11 @@ void GLRenderer::drawGLScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
+	if (m_config->lighting())
+		glEnable(GL_LIGHTING);
+	else
+		glDisable(GL_LIGHTING);
+
 	if (camera() != FreeCamera)
 	{
 		glMatrixMode (GL_PROJECTION);
@@ -389,6 +411,7 @@ void GLRenderer::drawGLScene()
 		glMultMatrixf(m_rotationMatrix.constData());
 	}
 
+	glEnableClientState (GL_NORMAL_ARRAY);
 	glEnableClientState (GL_VERTEX_ARRAY);
 	glEnableClientState (GL_COLOR_ARRAY);
 
@@ -445,6 +468,7 @@ void GLRenderer::drawGLScene()
 	glBindBuffer (GL_ARRAY_BUFFER, 0);
 	glDisableClientState (GL_VERTEX_ARRAY);
 	glDisableClientState (GL_COLOR_ARRAY);
+	glDisableClientState (GL_NORMAL_ARRAY);
 	CHECK_GL_ERROR();
 	glDisable (GL_CULL_FACE);
 	glMatrixMode (GL_MODELVIEW);
@@ -465,10 +489,13 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 
 	int surfaceVboNumber = m_compiler->vboNumber(surface, SurfacesVboComplement);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
+	int normalVboNumber = m_compiler->vboNumber(surface, NormalsVboComplement);
 	m_compiler->prepareVBO(surfaceVboNumber, currentDocument());
 	m_compiler->prepareVBO(colorVboNumber, currentDocument());
+	m_compiler->prepareVBO(normalVboNumber, currentDocument());
 	GLuint surfaceVbo = m_compiler->vbo(surfaceVboNumber);
 	GLuint colorVbo = m_compiler->vbo(colorVboNumber);
+	GLuint normalVbo = m_compiler->vbo(normalVboNumber);
 	GLsizei count = m_compiler->vboSize(surfaceVboNumber) / 3;
 
 	if (count > 0)
@@ -478,6 +505,9 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 		CHECK_GL_ERROR();
 		glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
 		glColorPointer(4, GL_FLOAT, 0, nullptr);
+		CHECK_GL_ERROR();
+		glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+		glNormalPointer(GL_FLOAT, 0, nullptr);
 		CHECK_GL_ERROR();
 		glDrawArrays(type, 0, count);
 		CHECK_GL_ERROR();

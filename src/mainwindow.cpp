@@ -940,6 +940,7 @@ void MainWindow::updateActions()
 	ui.actionDrawSurfaces->setChecked (m_config.drawSurfaces());
 	ui.actionDrawEdgeLines->setChecked (m_config.drawEdgeLines());
 	ui.actionDrawConditionalLines->setChecked (m_config.drawConditionalLines());
+	ui.actionLighting->setChecked(m_config.lighting());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
