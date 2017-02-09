@@ -68,6 +68,8 @@ public:
 	explicit ConfigDialog (QWidget* parent = nullptr, Tab defaulttab = (Tab) 0, Qt::WindowFlags f = 0);
 	virtual ~ConfigDialog();
 
+	static const char* const externalProgramPathFilter;
+
 private:
 	class Ui_ConfigDialog& ui;
 	QList<QListWidgetItem*> quickColorItems;

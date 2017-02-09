@@ -19,47 +19,50 @@
 #include <QFileDialog>
 #include "dialogs.h"
 #include "mainwindow.h"
+#include "dialogs/configdialog.h"
 #include "glRenderer.h"
 #include "documentation.h"
 #include "dialogs.h"
 #include "ui_overlay.h"
 #include "ui_extprogpath.h"
 
-extern const char* g_extProgPathFilter;
-
-// =============================================================================
-// =============================================================================
-ExtProgPathPrompt::ExtProgPathPrompt (QString progName, QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f),
-	ui (new Ui_ExtProgPath)
+/*
+ * Constructs a new external program path dialog.
+ */
+ExternalProgramPathDialog::ExternalProgramPathDialog(QString programName, QWidget* parent, Qt::WindowFlags flags) :
+    QDialog {parent, flags},
+    ui {*new Ui_ExtProgPath}
 {
-	ui->setupUi (this);
-	QString labelText = ui->m_label->text();
-	labelText.replace ("<PROGRAM>", progName);
-	ui->m_label->setText (labelText);
-	connect (ui->m_findPath, SIGNAL (clicked (bool)), this, SLOT (findPath()));
+	ui.setupUi (this);
+	QString labelText = ui.programLabel->text();
+	labelText.replace("<PROGRAM>", programName);
+	ui.programLabel->setText(labelText);
+	connect(ui.findPathButton, SIGNAL(clicked (bool)), this, SLOT(findPath()));
 }
 
-// =============================================================================
-// =============================================================================
-ExtProgPathPrompt::~ExtProgPathPrompt()
+/*
+ * Destructs the UI pointer when the dialog is deleted.
+ */
+ExternalProgramPathDialog::~ExternalProgramPathDialog()
 {
-	delete ui;
+	delete &ui;
 }
 
-// =============================================================================
-// =============================================================================
-void ExtProgPathPrompt::findPath()
+/*
+ * Handler for the button in the dialog, shows a modal dialog for the user to locate the program.
+ */
+void ExternalProgramPathDialog::findPath()
 {
-	QString path = QFileDialog::getOpenFileName (nullptr, "", "", g_extProgPathFilter);
+	QString path = QFileDialog::getOpenFileName(nullptr, "", "", ConfigDialog::externalProgramPathFilter);
 
 	if (not path.isEmpty())
-		ui->m_path->setText (path);
+		ui.path->setText(path);
 }
 
-// =============================================================================
-// =============================================================================
-QString ExtProgPathPrompt::getPath() const
+/*
+ * Returns the path specified by the user in this dialog.
+ */
+QString ExternalProgramPathDialog::path() const
 {
-	return ui->m_path->text();
+	return ui.path->text();
 }

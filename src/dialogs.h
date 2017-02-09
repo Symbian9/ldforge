@@ -19,38 +19,21 @@
 #pragma once
 #include <QDialog>
 #include "main.h"
-#include "basics.h"
 
-class Ui_ExtProgPath;
-class QRadioButton;
-class QCheckBox;
-class QProgressBar;
-class QGroupBox;
-class QDialogButtonBox;
-class QDoubleSpinBox;
-class QPushButton;
-class QLineEdit;
-class QSpinBox;
-class RadioGroup;
-class QLabel;
-class QAbstractButton;
-class Ui_OverlayUI;
-class Ui_LDPathUI;
-class Ui_OpenProgressUI;
-
-// =============================================================================
-class ExtProgPathPrompt : public QDialog
+/*
+ * Prompts the user for a path to an external program.
+ */
+class ExternalProgramPathDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit ExtProgPathPrompt (QString progName, QWidget* parent = 0, Qt::WindowFlags f = 0);
-	virtual ~ExtProgPathPrompt();
-	QString getPath() const;
+	explicit ExternalProgramPathDialog(QString programName, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+	~ExternalProgramPathDialog();
 
-public slots:
-	void findPath();
+	Q_SLOT void findPath();
+	QString path() const;
 
 private:
-	Ui_ExtProgPath* ui;
+	class Ui_ExtProgPath& ui;
 };

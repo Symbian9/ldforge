@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>444</width>
-    <height>89</height>
+    <height>101</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="m_label">
+    <widget class="QLabel" name="programLabel">
      <property name="text">
       <string>Please input a path for &lt;PROGRAM&gt;:</string>
      </property>
@@ -24,10 +24,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="m_path"/>
+      <widget class="QLineEdit" name="path"/>
      </item>
      <item>
-      <widget class="QPushButton" name="m_findPath">
+      <widget class="QPushButton" name="findPathButton">
        <property name="text">
         <string>...</string>
        </property>

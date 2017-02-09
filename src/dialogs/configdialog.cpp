@@ -41,7 +41,7 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
 
-const char* g_extProgPathFilter =
+const char* const ConfigDialog::externalProgramPathFilter =
 #ifdef _WIN32
 	"Applications (*.exe)(*.exe);;"
 #endif
@@ -614,7 +614,7 @@ void ConfigDialog::slot_setExtProgPath()
 		ExternalProgramWidgets& widgets = m_externalProgramWidgets[program];
 		QString filepath = QFileDialog::getOpenFileName (this,
 			format ("Path to %1", toolset->externalProgramName (program)),
-			widgets.input->text(), g_extProgPathFilter);
+		    widgets.input->text(), externalProgramPathFilter);
 	
 		if (filepath.isEmpty())
 			return;

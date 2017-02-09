@@ -121,11 +121,11 @@ bool ExtProgramToolset::checkExtProgramPath (ExtProgramType program)
 	if (not path.isEmpty())
 		return true;
 
-	ExtProgPathPrompt* dialog = new ExtProgPathPrompt (externalProgramName (program));
+	ExternalProgramPathDialog* dialog = new ExternalProgramPathDialog (externalProgramName (program));
 
-	if (dialog->exec() and not dialog->getPath().isEmpty())
+	if (dialog->exec() and not dialog->path().isEmpty())
 	{
-		setPathSetting (program, dialog->getPath());
+		setPathSetting (program, dialog->path());
 		return true;
 	}
 
