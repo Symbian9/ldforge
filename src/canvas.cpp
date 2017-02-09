@@ -175,3 +175,32 @@ const Vertex& Canvas::position3D() const
 {
 	return m_position3D;
 }
+
+void Canvas::drawPoint(QPainter& painter, QPointF pos, QColor color) const
+{
+	int pointSize = 8;
+	QPen pen = thinBorderPen;
+	pen.setWidth(1);
+	painter.setPen(pen);
+	painter.setBrush(color);
+	painter.drawEllipse(pos.x() - pointSize / 2, pos.y() - pointSize / 2, pointSize, pointSize);
+}
+
+void Canvas::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d) const
+{
+	drawBlipCoordinates (painter, pos3d, convert3dTo2d (pos3d));
+}
+
+void Canvas::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos) const
+{
+	painter.setPen (textPen());
+	painter.drawText (pos.x(), pos.y() - 8, pos3d.toString (true));
+}
+
+QPen Canvas::linePen() const
+{
+	QPen linepen = thinBorderPen;
+	linepen.setWidth(2);
+	linepen.setColor(luma(backgroundColor()) < 40 ? Qt::white : Qt::black);
+	return linepen;
+}

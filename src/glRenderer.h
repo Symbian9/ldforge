@@ -73,6 +73,7 @@ public:
 	GLRenderer(Model* model, QWidget* parent = nullptr);
 	~GLRenderer();
 
+	QColor backgroundColor() const;
 	Camera camera() const;
 	const CameraInfo& cameraInfo(Camera camera) const;
 	QString cameraName(Camera camera) const;
@@ -83,9 +84,6 @@ public:
 	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	QString currentCameraName() const;
 	int depthNegateFactor() const;
-	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
-	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d);
-	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos);
 	void drawGLScene();
 	void forgetObject(LDObject* obj);
 	Axis getCameraAxis(bool y, Camera camid = (Camera) -1);
@@ -98,7 +96,6 @@ public:
 	bool isDrawOnly() const;
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
-	QPen linePen() const;
 	void makeCurrent();
 	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
@@ -118,6 +115,8 @@ public:
 	void setPicking(bool a);
 	QPen textPen() const;
 	void zoomNotch(bool inward);
+
+	static const QPen thinBorderPen;
 
 protected:
 	void contextMenuEvent(QContextMenuEvent* event);
@@ -175,7 +174,6 @@ private:
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
-	QPen m_thinBorderPen;
 	Camera m_camera;
 	Camera m_toolTipCamera;
 	GLuint m_axeslist;

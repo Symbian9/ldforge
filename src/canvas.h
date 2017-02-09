@@ -28,6 +28,10 @@ public:
 
 	EditModeType currentEditModeType() const;
 	LDDocument* document() const;
+	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
+	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d) const;
+	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos) const;
+	QPen linePen() const;
 	const Vertex& position3D() const;
 	void setEditMode(EditModeType type);
 

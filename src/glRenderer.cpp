@@ -64,6 +64,8 @@ ConfigOption (bool DrawSurfaces = true)
 ConfigOption (bool DrawEdgeLines = true)
 ConfigOption (bool DrawConditionalLines = true)
 
+const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+
 // =============================================================================
 //
 GLRenderer::GLRenderer(Model* model, QWidget* parent) :
@@ -75,8 +77,6 @@ GLRenderer::GLRenderer(Model* model, QWidget* parent) :
 	m_compiler = new GLCompiler (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
-	m_thinBorderPen = QPen (QColor (0, 0, 0, 208), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-	m_thinBorderPen.setWidth (1);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
 	resetAllAngles();
@@ -309,6 +309,11 @@ void GLRenderer::setBackground()
 		// The picking scene requires a black background.
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	}
+}
+
+QColor GLRenderer::backgroundColor() const
+{
+	return m_backgroundColor;
 }
 
 // =============================================================================
@@ -563,14 +568,6 @@ QPen GLRenderer::textPen() const
 	return {m_useDarkBackground ? Qt::white : Qt::black};
 }
 
-QPen GLRenderer::linePen() const
-{
-	QPen linepen = m_thinBorderPen;
-	linepen.setWidth(2);
-	linepen.setColor(luma(m_backgroundColor) < 40 ? Qt::white : Qt::black);
-	return linepen;
-}
-
 bool GLRenderer::freeCameraAllowed() const
 {
 	return true;
@@ -593,7 +590,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 void GLRenderer::overpaint(QPainter &painter)
 {
 	// Draw a background for the selected camera
-	painter.setPen(m_thinBorderPen);
+	painter.setPen(thinBorderPen);
 	painter.setBrush(QBrush {QColor {0, 128, 160, 128}});
 	painter.drawRect(m_cameraIcons[camera()].hitRect);
 
@@ -623,29 +620,6 @@ void GLRenderer::overpaint(QPainter &painter)
 		painter.setPen(textPen());
 		painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
 	}
-}
-
-// =============================================================================
-//
-void GLRenderer::drawPoint(QPainter& painter, QPointF pos, QColor color) const
-{
-	int pointSize = 8;
-	QPen pen = m_thinBorderPen;
-	pen.setWidth(1);
-	painter.setPen(pen);
-	painter.setBrush(color);
-	painter.drawEllipse(pos.x() - pointSize / 2, pos.y() - pointSize / 2, pointSize, pointSize);
-}
-
-void GLRenderer::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d)
-{
-	drawBlipCoordinates (painter, pos3d, convert3dTo2d (pos3d));
-}
-
-void GLRenderer::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos)
-{
-	painter.setPen (textPen());
-	painter.drawText (pos.x(), pos.y() - 8, pos3d.toString (true));
 }
 
 // =============================================================================
