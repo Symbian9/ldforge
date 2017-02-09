@@ -334,12 +334,12 @@ void AlgorithmToolset::addHistoryLine()
 	bool ishistory = false;
 	bool prevIsHistory = false;
 
-	QDialog* dlg = new QDialog;
-	Ui_AddHistoryLine* ui = new Ui_AddHistoryLine;
-	ui->setupUi (dlg);
-	ui->m_username->setText (m_config->defaultUser());
-	ui->m_date->setDate (QDate::currentDate());
-	ui->m_comment->setFocus();
+	QDialog* dlg = new QDialog {m_window};
+	Ui_AddHistoryLine ui;
+	ui.setupUi(dlg);
+	ui.m_username->setText (m_config->defaultUser());
+	ui.m_date->setDate (QDate::currentDate());
+	ui.m_comment->setFocus();
 
 	if (not dlg->exec())
 		return;
@@ -364,9 +364,9 @@ void AlgorithmToolset::addHistoryLine()
 
 	// Create the comment object based on input
 	currentDocument()->emplaceAt<LDComment>(idx++, format("!HISTORY %1 [%2] %3",
-	    ui->m_date->date().toString ("yyyy-MM-dd"),
-	    ui->m_username->text(),
-	    ui->m_comment->text()));
+	    ui.m_date->date().toString ("yyyy-MM-dd"),
+	    ui.m_username->text(),
+	    ui.m_comment->text()));
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
@@ -374,7 +374,6 @@ void AlgorithmToolset::addHistoryLine()
 		currentDocument()->emplaceAt<LDEmpty>(idx);
 
 	m_window->buildObjectList();
-	delete ui;
 }
 
 void AlgorithmToolset::splitLines()
