@@ -397,7 +397,7 @@ void ConfigDialog::slot_setColor()
 			return; // don't color separators
 	}
 
-	LDColor defaultValue = entry ? entry->color() : LDColor::nullColor();
+	LDColor defaultValue = entry ? entry->color() : LDColor::nullColor;
 	LDColor value;
 
 	if (not ColorSelector::selectColor (this, value, defaultValue))

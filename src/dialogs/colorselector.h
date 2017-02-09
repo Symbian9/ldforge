@@ -26,9 +26,9 @@ class ColorSelector : public QDialog, public HierarchyElement
 	Q_OBJECT
 
 public:
-	explicit ColorSelector (QWidget* parent, LDColor defaultvalue = LDColor::nullColor());
+	explicit ColorSelector (QWidget* parent, LDColor defaultvalue = LDColor::nullColor);
 	virtual ~ColorSelector();
-	static bool selectColor (QWidget* parent, LDColor& val, LDColor defval = LDColor::nullColor());
+	static bool selectColor (QWidget* parent, LDColor& val, LDColor defval = LDColor::nullColor);
 	LDColor selection() const;
 
 private:

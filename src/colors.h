@@ -36,7 +36,6 @@ public:
 	};
 
 	ColorData();
-	~ColorData();
 	void loadFromLdconfig();
 	bool contains(int code) const;
 	const Entry& get(int code) const;
@@ -68,7 +67,8 @@ public:
 	bool isDirect() const;
 	QString indexString() const;
 
-	static LDColor nullColor();
+	static const LDColor nullColor;
+	static void initColors();
 
 	LDColor& operator=(qint32 index) { m_index = index; return *this; }
 	LDColor& operator=(const LDColor &other) = default;
@@ -84,6 +84,7 @@ public:
 	bool operator>=(LDColor other) const { return index() >= other.index(); }
 
 private:
+	static ColorData* colorData;
 	const ColorData::Entry& data() const;
 
 	qint32 m_index;
@@ -110,7 +111,6 @@ private:
 	QStringList m_tokens;
 };
 
-void initColors();
 int luma(const QColor& col);
 
 enum

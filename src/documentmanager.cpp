@@ -27,6 +27,7 @@
 
 ConfigOption (QStringList RecentFiles)
 ConfigOption (bool TryDownloadMissingFiles = false)
+const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
 
 enum
 {
@@ -208,7 +209,7 @@ QString DocumentManager::findDocumentPath (QString relativePath, bool subdirs)
 			// Ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
 			QString partTopDir = Basename (Dirname (partpath));
 
-			for (QString subdir : g_specialSubdirectories)
+			for (QString subdir : specialSubdirectories)
 			{
 				if ((partTopDir == subdir) != (relativeTopDir == subdir))
 					goto skipthis;

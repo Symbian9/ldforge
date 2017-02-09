@@ -41,7 +41,7 @@ int main (int argc, char* argv[])
 	paths->deleteLater();
 
 	initializeCrashHandler();
-	initColors();
+	LDColor::initColors();
 	MainWindow* win = new MainWindow(configObject);
 	win->show();
 

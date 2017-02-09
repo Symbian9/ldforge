@@ -507,7 +507,7 @@ QString LDDocument::shortenName (QString a) // [static]
 	QString shortname = Basename (a);
 	QString topdirname = Basename (Dirname (a));
 
-	if (g_specialSubdirectories.contains (topdirname))
+	if (DocumentManager::specialSubdirectories.contains (topdirname))
 		shortname.prepend (topdirname + "\\");
 
 	return shortname;

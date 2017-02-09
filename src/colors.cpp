@@ -21,18 +21,19 @@
 #include "colors.h"
 #include "ldpaths.h"
 
-static ColorData* colorData = nullptr;
+ColorData* LDColor::colorData = nullptr;
+const LDColor LDColor::nullColor {-1};
 
 /*
  * initColors
  *
  * Initializes the color information module.
  */
-void initColors()
+void LDColor::initColors()
 {
 	print ("Initializing color information.\n");
 	static ColorData colors;
-	colorData = &colors;
+	LDColor::colorData = &colors;
 }
 
 /*
@@ -197,16 +198,6 @@ bool LDColor::isDirect() const
 }
 
 /*
- * LDColor :: nullColor
- *
- * Returns a color that is guaranteed to be invalid.
- */
-LDColor LDColor::nullColor()
-{
-	return LDColor {-1};
-}
-
-/*
  * qHash
  *
  * LDColors are hashed by their index.
@@ -234,9 +225,6 @@ int luma (const QColor& color)
  */
 ColorData::ColorData()
 {
-	if (colorData == nullptr)
-		colorData = this;
-
 	// Initialize main and edge colors, they're special like that.
 	m_data[MainColor].faceColor = "#AAAAAA";
 	m_data[MainColor].edgeColor = Qt::black;
@@ -247,17 +235,6 @@ ColorData::ColorData()
 
 	// Load the rest from LDConfig.ldr.
 	loadFromLdconfig();
-}
-
-/*
- * ColorData :: ~ColorData
- *
- * Cleanup the colorData pointer after the array is deleted.
- */
-ColorData::~ColorData()
-{
-	if (colorData == this)
-		colorData = nullptr;
 }
 
 /*

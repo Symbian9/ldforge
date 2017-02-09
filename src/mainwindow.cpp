@@ -450,7 +450,7 @@ void MainWindow::recentFileClicked()
 void MainWindow::quickColorClicked()
 {
 	QToolButton* button = static_cast<QToolButton*> (sender());
-	LDColor color = LDColor::nullColor();
+	LDColor color = LDColor::nullColor;
 
 	for (const ColorToolbarItem& entry : m_quickColors)
 	{
@@ -569,7 +569,7 @@ LDColor MainWindow::getUniformSelectedColor()
 			continue; // This one doesn't use color so it doesn't have a say
 
 		if (result.isValid() and obj->color() != result)
-			return LDColor::nullColor(); // No consensus in object color
+			return LDColor::nullColor; // No consensus in object color
 
 		if (not result.isValid())
 			result = obj->color();
@@ -1294,12 +1294,12 @@ ColorToolbarItem::ColorToolbarItem (LDColor color, QToolButton* toolButton) :
 
 ColorToolbarItem ColorToolbarItem::makeSeparator()
 {
-	return ColorToolbarItem (LDColor::nullColor(), nullptr);
+	return ColorToolbarItem (LDColor::nullColor, nullptr);
 }
 
 bool ColorToolbarItem::isSeparator() const
 {
-	return color() == LDColor::nullColor();
+	return color() == LDColor::nullColor;
 }
 
 LDColor ColorToolbarItem::color() const
