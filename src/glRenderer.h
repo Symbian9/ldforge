@@ -96,7 +96,6 @@ public:
 	bool isDrawOnly() const;
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
-	void makeCurrent();
 	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;

@@ -1184,12 +1184,6 @@ QPointF const& GLRenderer::mousePositionF() const
 	return m_mousePositionF;
 }
 
-void GLRenderer::makeCurrent()
-{
-	QGLWidget::makeCurrent();
-	initializeOpenGLFunctions();
-}
-
 int GLRenderer::depthNegateFactor() const
 {
 	return g_cameraInfo[camera()].negatedDepth ? -1 : 1;
