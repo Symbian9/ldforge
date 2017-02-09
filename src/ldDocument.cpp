@@ -298,7 +298,7 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	Model::insertObject(pos, obj);
 	history()->add(new AddHistoryEntry {pos, obj});
-	connect(obj, SIGNAL(codeChanged(int,QString,QString)), this, SLOT(objectChanged(int,QString,QString)));
+	connect(obj, SIGNAL(codeChanged(QString,QString)), this, SLOT(objectChanged(QString,QString)));
 
 #ifdef DEBUG
 	if (not isFrozen())
@@ -306,7 +306,7 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 #endif
 }
 
-void LDDocument::objectChanged(int position, QString before, QString after)
+void LDDocument::objectChanged(QString before, QString after)
 {
 	LDObject* object = static_cast<LDObject*>(sender());
 	addToHistory(new EditHistoryEntry {object->lineNumber(), before, after});
@@ -475,7 +475,7 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 //
 void LDDocument::clearSelection()
 {
-	for (LDObject* object : m_selection)
+	for (LDObject* object : m_selection.toList())
 		removeFromSelection(object);
 }
 

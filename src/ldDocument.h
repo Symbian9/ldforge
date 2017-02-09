@@ -88,7 +88,7 @@ public:
 	static QString shortenName (QString a); // Turns a full path into a relative path
 
 public slots:
-	void objectChanged(int position, QString before, QString after);
+	void objectChanged(QString before, QString after);
 
 protected:
 	LDObject* withdrawAt(int position);
