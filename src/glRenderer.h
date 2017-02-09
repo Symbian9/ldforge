@@ -97,9 +97,8 @@ public:
 	QPointF const& mousePositionF() const;
 	void needZoomToFit();
 	LDObject* objectAtCursor() const;
-	void pick(int mouseX, int mouseY, bool additive);
-	void pick(const QRect& range, bool additive);
-	LDObject* pickOneObject(int mouseX, int mouseY);
+	QSet<LDObject*> pick(const QRect& range);
+	LDObject* pick(int mouseX, int mouseY);
 	void refresh();
 	void resetAllAngles();
 	void resetAngles();
@@ -115,8 +114,6 @@ public:
 	static const QPen thinBorderPen;
 
 protected:
-	void contextMenuEvent(QContextMenuEvent* event);
-	void dragEnterEvent(QDragEnterEvent* event);
 	void initializeGL();
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);

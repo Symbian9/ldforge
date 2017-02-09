@@ -310,3 +310,14 @@ QPoint Canvas::convert3dTo2d(const Vertex& position3d) const
 		return {rx, -ry};
 	}
 }
+
+void Canvas::contextMenuEvent(QContextMenuEvent* event)
+{
+	m_window->spawnContextMenu(event->globalPos());
+}
+
+void Canvas::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (m_window and event->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
+		event->acceptProposedAction();
+}

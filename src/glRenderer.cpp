@@ -675,13 +675,6 @@ void GLRenderer::leaveEvent(QEvent*)
 
 // =============================================================================
 //
-void GLRenderer::contextMenuEvent(QContextMenuEvent* event)
-{
-	m_window->spawnContextMenu(event->globalPos());
-}
-
-// =============================================================================
-//
 void GLRenderer::setCamera(Camera camera)
 {
 	// The edit mode may forbid the free camera.
@@ -692,25 +685,13 @@ void GLRenderer::setCamera(Camera camera)
 	}
 }
 
-// =============================================================================
-//
-void GLRenderer::pick (int mouseX, int mouseY, bool additive)
-{
-	pick (QRect (mouseX, mouseY, mouseX + 1, mouseY + 1), additive);
-}
-
-// =============================================================================
-//
-void GLRenderer::pick(const QRect& range, bool additive)
+/*
+ * Returns the set of objects found in the specified pixel area.
+ */
+QSet<LDObject*> GLRenderer::pick(const QRect& range)
 {
 	makeCurrent();
-	QSet<LDObject*> priorSelection = selectedObjects();
 	QSet<LDObject*> newSelection;
-
-	// If we're doing an additive selection, we start off with the existing selection.
-	// Otherwise we start selecting from scratch.
-	if (additive)
-		newSelection = priorSelection;
 
 	// Paint the picking scene
 	setPicking(true);
@@ -757,48 +738,25 @@ void GLRenderer::pick(const QRect& range, bool additive)
 		LDObject* object = LDObject::fromID(index);
 
 		if (object != nullptr)
-		{
-			// If this is an additive single pick and the object is currently selected,
-			// we remove it from selection instead.
-			if (additive and newSelection.contains(object))
-				newSelection.remove(object);
-			else
-				newSelection.insert(object);
-		}
+			newSelection.insert(object);
 	}
 
-	// Select all objects that we now have selected that were not selected before.
-	for (LDObject* object : newSelection - priorSelection)
-	{
-		currentDocument()->addToSelection(object);
-		compileObject(object);
-	}
-
-	// Likewise, deselect whatever was selected that isn't anymore.
-	for (LDObject* object : priorSelection - newSelection)
-	{
-		currentDocument()->removeFromSelection(object);
-		compileObject(object);
-	}
-
-	m_window->updateSelection();
 	setPicking(false);
 	repaint();
+	return newSelection;
 }
 
-//
-// Simpler version of GLRenderer::pick which simply picks whatever object on the cursor
-//
-LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
+/*
+ * Simpler version of GLRenderer::pick which simply picks whatever object on the cursor
+ */
+LDObject* GLRenderer::pick(int mouseX, int mouseY)
 {
 	unsigned char pixel[4];
 	makeCurrent();
 	setPicking(true);
 	drawGLScene();
 	glReadPixels(mouseX, m_height - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-	LDObject* object = LDObject::fromID(pixel[0] * 0x10000 +
-	                                    pixel[1] * 0x100 +
-	                                    pixel[2] * 0x1);
+	LDObject* object = LDObject::fromID(pixel[0] * 0x10000 + pixel[1] * 0x100 + pixel[2]);
 	setPicking(false);
 	repaint();
 	return object;
@@ -1053,12 +1011,6 @@ void GLRenderer::highlightCursorObject()
 	}
 
 	update();
-}
-
-void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
-{
-	if (m_window and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
-		ev->acceptProposedAction();
 }
 
 const CameraInfo& GLRenderer::cameraInfo (Camera camera) const

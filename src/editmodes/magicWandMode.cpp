@@ -210,7 +210,7 @@ bool MagicWandMode::mouseReleased (MouseEventData const& data)
 		else if (data.keymods & Qt::ControlModifier)
 			wandtype = MagicWandMode::Subtractive;
 
-		doMagic (renderer()->pickOneObject (data.ev->x(), data.ev->y()), wandtype);
+		doMagic (renderer()->pick (data.ev->x(), data.ev->y()), wandtype);
 		return true;
 	}
 

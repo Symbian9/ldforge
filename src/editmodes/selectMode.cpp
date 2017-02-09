@@ -66,23 +66,23 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 		if (not data.mouseMoved or m_rangepick)
 		{
 			QRect area;
-			int const mx = data.ev->x();
-			int const my = data.ev->y();
+			int mx = data.ev->x();
+			int my = data.ev->y();
 
 			if (not m_rangepick)
 			{
-				area = QRect (mx, my, 1, 1);
+				area = {mx, my, 1, 1};
 			}
 			else
 			{
-				int const x = qMin (m_rangeStart.x(), mx);
-				int const y = qMin (m_rangeStart.y(), my);
-				int const width = qAbs (m_rangeStart.x() - mx);
-				int const height = qAbs (m_rangeStart.y() - my);
-				area = QRect (x, y, width, height);
+				int x = qMin(m_rangeStart.x(), mx);
+				int y = qMin(m_rangeStart.y(), my);
+				int width = qAbs(m_rangeStart.x() - mx);
+				int height = qAbs(m_rangeStart.y() - my);
+				area = {x, y, width, height};
 			}
 
-			renderer()->pick (area, m_addpick);
+			doSelection(area);
 		}
 
 		m_rangepick = false;
@@ -90,6 +90,29 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 	}
 
 	return false;
+}
+
+void SelectMode::doSelection(const QRect& area)
+{
+	QSet<LDObject*> priorSelection = selectedObjects();
+	QSet<LDObject*> newSelection = renderer()->pick(area);
+
+	// If we're doing an additive pick, use a symmetric difference to keep the existing ones, and filter out objects that were selected
+	// once over again.
+	if (m_addpick)
+		newSelection = (newSelection - priorSelection) | (priorSelection - newSelection);
+
+	newSelection.unite(renderer()->pick(area));
+
+	// Select all objects that we now have selected that were not selected before.
+	for (LDObject* object : newSelection - priorSelection)
+		currentDocument()->addToSelection(object);
+
+	// Likewise, deselect whatever was selected that isn't anymore.
+	for (LDObject* object : priorSelection - newSelection)
+		currentDocument()->removeFromSelection(object);
+
+	m_window->updateSelection();
 }
 
 bool SelectMode::mousePressed (QMouseEvent* ev)
@@ -117,7 +140,7 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	if (ev->buttons() & Qt::LeftButton)
 	{
 		currentDocument()->clearSelection();
-		LDObject* obj = renderer()->pickOneObject (ev->x(), ev->y());
+		LDObject* obj = renderer()->pick (ev->x(), ev->y());
 
 		if (obj)
 		{

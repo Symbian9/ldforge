@@ -30,6 +30,7 @@ class SelectMode : public AbstractSelectMode
 public:
 	SelectMode (Canvas* canvas);
 
+	void doSelection(const QRect& area);
 	void render (QPainter& painter) const override;
 	bool mousePressed (QMouseEvent* ev) override;
 	bool mouseReleased (MouseEventData const& data) override;
