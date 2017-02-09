@@ -492,9 +492,9 @@ void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLe
 	int surfaceVboNumber = m_compiler->vboNumber(surface, SurfacesVboComplement);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
 	int normalVboNumber = m_compiler->vboNumber(surface, NormalsVboComplement);
-	m_compiler->prepareVBO(surfaceVboNumber, currentDocument());
-	m_compiler->prepareVBO(colorVboNumber, currentDocument());
-	m_compiler->prepareVBO(normalVboNumber, currentDocument());
+	m_compiler->prepareVBO(surfaceVboNumber, m_model);
+	m_compiler->prepareVBO(colorVboNumber, m_model);
+	m_compiler->prepareVBO(normalVboNumber, m_model);
 	GLuint surfaceVbo = m_compiler->vbo(surfaceVboNumber);
 	GLuint colorVbo = m_compiler->vbo(colorVboNumber);
 	GLuint normalVbo = m_compiler->vbo(normalVboNumber);

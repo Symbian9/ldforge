@@ -42,7 +42,7 @@ public:
 	QColor indexColorForID (int id) const;
 	void initialize();
 	void needMerge();
-	void prepareVBO (int vbonum, Model* model);
+	void prepareVBO (int vbonum, const Model* model);
 	void setRenderer (GLRenderer* compiler);
 	void stageForCompilation (LDObject* obj);
 	void unstage (LDObject* obj);

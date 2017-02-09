@@ -224,7 +224,7 @@ void GLCompiler::compileStaged()
 }
 
 
-void GLCompiler::prepareVBO (int vbonum, Model* model)
+void GLCompiler::prepareVBO (int vbonum, const Model* model)
 {
 	// Compile anything that still awaits it
 	compileStaged();
