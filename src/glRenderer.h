@@ -72,7 +72,7 @@ class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public Hierarch
 	Q_OBJECT
 
 public:
-	GLRenderer(Model* model, QWidget* parent = nullptr);
+	GLRenderer(const Model* model, QWidget* parent = nullptr);
 	~GLRenderer();
 
 	QColor backgroundColor() const;
@@ -144,7 +144,7 @@ protected:
 	}
 
 private:
-	Model* const m_model;
+	const Model* const m_model;
 	GLCompiler* m_compiler;
 	LDObject* m_objectAtCursor = nullptr;
 	CameraIcon m_cameraIcons[7];

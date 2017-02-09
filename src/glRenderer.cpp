@@ -68,7 +68,7 @@ const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Q
 
 // =============================================================================
 //
-GLRenderer::GLRenderer(Model* model, QWidget* parent) :
+GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
     m_model {model}
