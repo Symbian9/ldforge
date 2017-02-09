@@ -21,7 +21,7 @@
 #include "../mainwindow.h"
 #include "../ldDocument.h"
 #include "../miscallenous.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../primitives.h"
 #include "../colors.h"
 #include "../dialogs.h"

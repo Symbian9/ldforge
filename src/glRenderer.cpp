@@ -1302,7 +1302,7 @@ void GLRenderer::dropEvent (QDropEvent* ev)
 		ref->setFileInfo (m_documents->getDocumentByName (primitiveName));
 		currentDocument()->addToSelection(ref);
 		m_window->buildObjectList();
-		m_window->renderer()->refresh();
+		refresh();
 		ev->acceptProposedAction();
 	}
 }

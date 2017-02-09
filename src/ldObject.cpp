@@ -23,7 +23,7 @@
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "editHistory.h"
-#include "glRenderer.h"
+#include "canvas.h"
 #include "colors.h"
 #include "glCompiler.h"
 

@@ -28,6 +28,7 @@ set_source_files_properties (${CMAKE_BINARY_DIR}/configuration.cpp PROPERTIES GE
 
 set (LDFORGE_SOURCES
 	src/basics.cpp
+	src/canvas.cpp
 	src/colors.cpp
 	src/crashCatcher.cpp
 	src/dialogs.cpp
@@ -82,6 +83,7 @@ set (LDFORGE_SOURCES
 
 set (LDFORGE_HEADERS
 	src/basics.h
+	src/canvas.h
 	src/colors.h
 	src/crashCatcher.h
 	src/dialogs.h

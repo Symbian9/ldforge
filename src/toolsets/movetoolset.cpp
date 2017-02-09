@@ -23,7 +23,7 @@
 #include "movetoolset.h"
 #include "ui_rotpoint.h"
 #include "../grid.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 
 MoveToolset::MoveToolset (MainWindow* parent) :
 	Toolset (parent) {}

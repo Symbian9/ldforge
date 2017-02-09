@@ -21,6 +21,7 @@
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
+#include "canvas.h"
 #include "glCompiler.h"
 #include "documentloader.h"
 #include "dialogs/openprogressdialog.h"

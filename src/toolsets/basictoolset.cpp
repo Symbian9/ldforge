@@ -22,7 +22,7 @@
 #include <QDialogButtonBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../ldDocument.h"
 #include "../ldObject.h"
 #include "../ldobjectiterator.h"

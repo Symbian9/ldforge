@@ -34,7 +34,7 @@
 #include "../main.h"
 #include "../ldDocument.h"
 #include "../miscallenous.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../guiutilities.h"
 #include "../documentmanager.h"
 #include "colorselector.h"

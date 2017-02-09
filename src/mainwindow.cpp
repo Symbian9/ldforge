@@ -23,7 +23,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include "main.h"
-#include "glRenderer.h"
+#include "canvas.h"
 #include "mainwindow.h"
 #include "ldDocument.h"
 #include "miscallenous.h"
@@ -959,9 +959,9 @@ PrimitiveManager* MainWindow::primitives()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-GLRenderer* MainWindow::renderer()
+Canvas* MainWindow::renderer()
 {
-	return static_cast<GLRenderer*>(ui.rendererStack->currentWidget());
+	return static_cast<Canvas*>(ui.rendererStack->currentWidget());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1172,7 +1172,7 @@ void MainWindow::changeDocument (LDDocument* document)
 		return;
 
 	m_currentDocument = document;
-	GLRenderer* renderer = getRendererForDocument(document);
+	Canvas* renderer = getRendererForDocument(document);
 	ui.rendererStack->setCurrentWidget(renderer);
 
 	if (document)
@@ -1188,14 +1188,14 @@ void MainWindow::changeDocument (LDDocument* document)
 /*
  * Returns the associated renderer for the given document
  */
-GLRenderer* MainWindow::getRendererForDocument(LDDocument *document)
+Canvas* MainWindow::getRendererForDocument(LDDocument *document)
 {
-	GLRenderer* renderer = m_renderers.value(document);
+	Canvas* renderer = m_renderers.value(document);
 
 	if (not renderer)
 	{
 		print("MainWindow: Couldn't find a renderer for %1, creating one now", document->getDisplayName());
-		renderer = new GLRenderer {document, this};
+		renderer = new Canvas {document, this};
 		print("Created renderer: %1", renderer);
 		m_renderers[document] = renderer;
 		ui.rendererStack->addWidget(renderer);
@@ -1214,7 +1214,7 @@ void MainWindow::documentClosed(LDDocument *document)
 	if (currentDocument() == document)
 		currentDocumentClosed();
 
-	GLRenderer* renderer = m_renderers.value(document);
+	Canvas* renderer = m_renderers.value(document);
 
 	if (renderer)
 	{

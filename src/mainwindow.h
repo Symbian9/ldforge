@@ -32,7 +32,7 @@ class MessageManager;
 class MainWindow;
 class QToolButton;
 class QDialogButtonBox;
-class GLRenderer;
+class Canvas;
 class QComboBox;
 class QProgressBar;
 class Toolset;
@@ -87,7 +87,7 @@ public:
 	QTreeWidget* getPrimitivesTree() const;
 	class QSettings* getSettings() { return m_settings; }
 	LDColor getUniformSelectedColor();
-	GLRenderer* getRendererForDocument(LDDocument* document);
+	Canvas* getRendererForDocument(LDDocument* document);
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
@@ -96,7 +96,7 @@ public:
 	LDDocument* newDocument (bool cache = false);
 	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
-	GLRenderer* renderer();
+	Canvas* renderer();
 	void refresh();
 	void refreshObjectList();
 	bool ringToolHiRes() const;
@@ -138,7 +138,7 @@ private:
 	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;
 	MessageManager* m_messageLog = nullptr;
-	QMap<LDDocument*, GLRenderer*> m_renderers;
+	QMap<LDDocument*, Canvas*> m_renderers;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;
