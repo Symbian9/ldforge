@@ -62,6 +62,12 @@ void Canvas::overpaint(QPainter& painter)
 	// Draw edit mode HUD
 	m_currentEditMode->render(painter);
 
+	// Render triangle count
+	{
+		QPoint renderPoint {4, height() - 4 - metrics.height() - metrics.descent()};
+		painter.drawText(renderPoint, format("△ %1", m_document.triangleCount()));
+	}
+
 	// Message log
 	if (m_window->messageLog())
 	{

@@ -622,13 +622,6 @@ void GLRenderer::overpaint(QPainter &painter)
 		int margin = 4;
 		painter.setPen(textPen());
 		painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
-
-		// Also render triangle count.
-		if (m_model)
-		{
-			QPoint renderPoint = {margin, height() - margin - metrics.height() - metrics.descent()};
-			painter.drawText(renderPoint, format("△ %1", m_model->triangleCount()));
-		}
 	}
 }
 
