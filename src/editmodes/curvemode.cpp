@@ -18,10 +18,10 @@
 
 #include "curvemode.h"
 #include "../ldObject.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 
-CurveMode::CurveMode (GLRenderer* renderer) :
-	Super (renderer) {}
+CurveMode::CurveMode (Canvas* canvas) :
+    Super (canvas) {}
 
 void CurveMode::render (QPainter& painter) const
 {

@@ -24,7 +24,7 @@ class CircleMode : public AbstractDrawMode
 	DEFINE_CLASS (CircleMode, AbstractDrawMode)
 
 public:
-	CircleMode (GLRenderer* renderer);
+	CircleMode (Canvas* canvas);
 
 	void endDraw() override;
 	double getCircleDrawDist (int position) const;

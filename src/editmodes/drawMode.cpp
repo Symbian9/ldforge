@@ -22,8 +22,8 @@
 #include "../ldObject.h"
 #include "../glRenderer.h"
 
-DrawMode::DrawMode (GLRenderer* renderer) :
-	Super (renderer) {}
+DrawMode::DrawMode (Canvas* canvas) :
+    Super (canvas) {}
 
 EditModeType DrawMode::type() const
 {

@@ -24,7 +24,7 @@ class LinePathMode : public AbstractDrawMode
 	DEFINE_CLASS (LinePathMode, AbstractDrawMode)
 
 public:
-	LinePathMode (GLRenderer* renderer);
+	LinePathMode (Canvas* canvas);
 
 	void render (QPainter& painter) const override;
 	EditModeType type() const override { return EditModeType::LinePath; }

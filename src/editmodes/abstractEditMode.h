@@ -21,7 +21,7 @@
 #include "../model.h"
 
 class QPainter;
-class GLRenderer;
+class Canvas;
 class QMouseEvent;
 class QKeyEvent;
 
@@ -52,11 +52,11 @@ public:
 		Qt::MouseButtons releasedButtons;
 	};
 
-	AbstractEditMode (GLRenderer* renderer);
+	AbstractEditMode(Canvas* canvas);
 
 	virtual bool			allowFreeCamera() const = 0;
 	virtual void			render (QPainter&) const {}
-	GLRenderer*				renderer() const;
+	Canvas* renderer() const;
 	virtual EditModeType	type() const = 0;
 	virtual bool			mousePressed (QMouseEvent*) { return false; }
 	virtual bool			mouseReleased (MouseEventData const&) { return false; }
@@ -64,10 +64,10 @@ public:
 	virtual bool			mouseMoved (QMouseEvent*) { return false; }
 	virtual bool			keyReleased (QKeyEvent*) { return false; }
 
-	static AbstractEditMode* createByType (GLRenderer* renderer, EditModeType type);
+	static AbstractEditMode* createByType (Canvas* renderer, EditModeType type);
 
 private:
-	GLRenderer* m_renderer;
+	Canvas* m_canvas;
 };
 
 /*
@@ -82,7 +82,7 @@ protected:
 	QBrush					m_polybrush;
 
 public:
-	AbstractDrawMode (GLRenderer* renderer);
+	AbstractDrawMode (Canvas* canvas);
 
 	void addDrawnVertex(const Vertex& pos);
 	bool allowFreeCamera() const override final;
@@ -105,7 +105,7 @@ class AbstractSelectMode : public AbstractEditMode
 	DEFINE_CLASS (AbstractSelectMode, AbstractEditMode)
 
 public:
-	AbstractSelectMode (GLRenderer* renderer);
+	AbstractSelectMode (Canvas* canvas);
 
 	virtual bool allowFreeCamera() const override
 	{

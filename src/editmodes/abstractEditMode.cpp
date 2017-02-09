@@ -28,7 +28,7 @@
 #include "curvemode.h"
 #include "../mainwindow.h"
 #include "../ldDocument.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../miscallenous.h"
 #include "../grid.h"
 
@@ -38,25 +38,25 @@ ConfigOption (bool DrawAngles = false)
 /*
  * Base class constructor of the abstract editing mode.
  */
-AbstractEditMode::AbstractEditMode(GLRenderer* renderer) :
-	QObject(renderer),
-	HierarchyElement(renderer),
-	m_renderer(renderer) {}
+AbstractEditMode::AbstractEditMode(Canvas* canvas) :
+    QObject(canvas),
+    HierarchyElement(canvas),
+    m_canvas(canvas) {}
 
 /*
  * Constructs an edit mode by type.
  */
-AbstractEditMode* AbstractEditMode::createByType(GLRenderer* renderer, EditModeType type)
+AbstractEditMode* AbstractEditMode::createByType(Canvas* canvas, EditModeType type)
 {
 	switch (type)
 	{
-	case EditModeType::Select: return new SelectMode (renderer);
-	case EditModeType::Draw: return new DrawMode (renderer);
-	case EditModeType::Rectangle: return new RectangleMode (renderer);
-	case EditModeType::Circle: return new CircleMode (renderer);
-	case EditModeType::MagicWand: return new MagicWandMode (renderer);
-	case EditModeType::LinePath: return new LinePathMode (renderer);
-	case EditModeType::Curve: return new CurveMode (renderer);
+	case EditModeType::Select: return new SelectMode (canvas);
+	case EditModeType::Draw: return new DrawMode (canvas);
+	case EditModeType::Rectangle: return new RectangleMode (canvas);
+	case EditModeType::Circle: return new CircleMode (canvas);
+	case EditModeType::MagicWand: return new MagicWandMode (canvas);
+	case EditModeType::LinePath: return new LinePathMode (canvas);
+	case EditModeType::Curve: return new CurveMode (canvas);
 	}
 
 	throw std::logic_error("bad type given to AbstractEditMode::createByType");
@@ -65,20 +65,20 @@ AbstractEditMode* AbstractEditMode::createByType(GLRenderer* renderer, EditModeT
 /*
  * Returns the edit mode's corresponding renderer pointer.
  */
-GLRenderer* AbstractEditMode::renderer() const
+Canvas* AbstractEditMode::renderer() const
 {
-	return m_renderer;
+	return m_canvas;
 }
 
 /*
  * Base class constructor of the abstract drwaing mode.
  */
-AbstractDrawMode::AbstractDrawMode(GLRenderer* renderer) :
-    AbstractEditMode {renderer},
+AbstractDrawMode::AbstractDrawMode(Canvas* canvas) :
+    AbstractEditMode {canvas},
     m_polybrush {QBrush {QColor {64, 192, 0, 128}}}
 {
-	renderer->setContextMenuPolicy(Qt::NoContextMenu); // We need the right mouse button for removing vertices
-	renderer->setCursor(Qt::CrossCursor);
+	canvas->setContextMenuPolicy(Qt::NoContextMenu); // We need the right mouse button for removing vertices
+	canvas->setCursor(Qt::CrossCursor);
 	m_window->currentDocument()->clearSelection();
 	m_window->updateSelection();
 	m_drawedVerts.clear();
@@ -87,11 +87,11 @@ AbstractDrawMode::AbstractDrawMode(GLRenderer* renderer) :
 /*
  * Base class constructor of the abstract selection mode.
  */
-AbstractSelectMode::AbstractSelectMode(GLRenderer* renderer) :
-    AbstractEditMode {renderer}
+AbstractSelectMode::AbstractSelectMode(Canvas* canvas) :
+    AbstractEditMode {canvas}
 {
-	renderer->unsetCursor();
-	renderer->setContextMenuPolicy (Qt::DefaultContextMenu);
+	canvas->unsetCursor();
+	canvas->setContextMenuPolicy (Qt::DefaultContextMenu);
 }
 
 /*

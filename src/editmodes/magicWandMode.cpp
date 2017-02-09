@@ -20,10 +20,10 @@
 #include "magicWandMode.h"
 #include "../ldDocument.h"
 #include "../mainwindow.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 
-MagicWandMode::MagicWandMode (GLRenderer* renderer) :
-	Super (renderer)
+MagicWandMode::MagicWandMode (Canvas* canvas) :
+    Super (canvas)
 {
 	// Get vertex<->object data
 	for (LDObject* obj : currentDocument()->objects())

@@ -24,7 +24,7 @@ class CurveMode : public AbstractDrawMode
 	DEFINE_CLASS (CurveMode, AbstractDrawMode)
 
 public:
-	CurveMode (GLRenderer* renderer);
+	CurveMode (Canvas* canvas);
 	void endDraw() override;
 	void render (QPainter& painter) const override;
 	EditModeType type() const override;

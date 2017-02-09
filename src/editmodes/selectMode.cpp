@@ -18,12 +18,12 @@
 
 #include <QMouseEvent>
 #include "selectMode.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../mainwindow.h"
 #include "../ldDocument.h"
 
-SelectMode::SelectMode (GLRenderer* renderer) :
-	Super (renderer),
+SelectMode::SelectMode (Canvas* canvas) :
+    Super (canvas),
 	m_rangepick (false) {}
 
 EditModeType SelectMode::type() const

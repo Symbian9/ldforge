@@ -21,7 +21,6 @@
 #include "main.h"
 #include "model.h"
 #include "glShared.h"
-#include "editmodes/abstractEditMode.h"
 
 class GLCompiler;
 class MessageManager;
@@ -83,7 +82,6 @@ public:
 	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
 	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	QString currentCameraName() const;
-	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d);
@@ -110,7 +108,6 @@ public:
 	void pick(int mouseX, int mouseY, bool additive);
 	void pick(const QRect& range, bool additive);
 	LDObject* pickOneObject(int mouseX, int mouseY);
-	Vertex const& position3D() const;
 	void refresh();
 	void resetAllAngles();
 	void resetAngles();
@@ -118,7 +115,6 @@ public:
 	void setCamera(Camera cam);
 	void setDepthValue(double depth);
 	void setDrawOnly(bool value);
-	void setEditMode(EditModeType type);
 	void setPicking(bool a);
 	QPen textPen() const;
 	void zoomNotch(bool inward);
@@ -126,18 +122,31 @@ public:
 protected:
 	void contextMenuEvent(QContextMenuEvent* event);
 	void dragEnterEvent(QDragEnterEvent* event);
-	void dropEvent(QDropEvent* event);
 	void initializeGL();
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
 	void leaveEvent(QEvent* event);
-	void mouseDoubleClickEvent(QMouseEvent* event);
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* ev);
 	void mouseReleaseEvent(QMouseEvent* ev);
-	void paintEvent(QPaintEvent* ev);
+	void paintEvent(QPaintEvent*);
 	void resizeGL(int w, int h);
 	void wheelEvent(QWheelEvent* ev);
+
+	virtual void overpaint(QPainter& painter);
+	virtual bool freeCameraAllowed() const;
+	bool isDrawingSelectionScene() const;
+	Qt::MouseButtons lastButtons() const;
+	double panning (Axis ax) const;
+	const QGenericMatrix<4, 4, GLfloat>& rotationMatrix() const;
+	double& panning (Axis ax);
+	double& zoom();
+
+	template<typename... Args>
+	QString format (QString fmtstr, Args... args)
+	{
+		return ::format (fmtstr, args...);
+	}
 
 private:
 	Model* const m_model;
@@ -147,7 +156,6 @@ private:
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
 	Qt::KeyboardModifiers m_currentKeyboardModifiers;
-	Vertex m_position3D;
 	double m_virtualWidth;
 	double m_virtualHeight;
 	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
@@ -175,23 +183,13 @@ private:
 	int m_height = 0;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;
-	AbstractEditMode* m_currentEditMode = nullptr;
 	GLuint m_axesVbo;
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
 	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
-	double& panning (Axis ax);
-	double panning (Axis ax) const;
-	double& zoom();
 	void zoomToFit();
 	void zoomAllToFit();
-
-	template<typename... Args>
-	QString format (QString fmtstr, Args... args)
-	{
-		return ::format (fmtstr, args...);
-	}
 
 private slots:
 	void	slot_toolTipTimer();

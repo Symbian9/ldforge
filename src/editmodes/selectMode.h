@@ -28,7 +28,7 @@ class SelectMode : public AbstractSelectMode
 	DEFINE_CLASS (SelectMode, AbstractSelectMode)
 
 public:
-	SelectMode (GLRenderer* renderer);
+	SelectMode (Canvas* canvas);
 
 	void render (QPainter& painter) const override;
 	bool mousePressed (QMouseEvent* ev) override;

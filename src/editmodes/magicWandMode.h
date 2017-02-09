@@ -39,7 +39,7 @@ public:
 		InternalRecursion
 	};
 
-	MagicWandMode (GLRenderer* renderer);
+	MagicWandMode (Canvas* canvas);
 	void doMagic (LDObject* obj, MagicType type);
 	virtual EditModeType type() const override;
 	virtual bool mouseReleased (MouseEventData const& data) override;

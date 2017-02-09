@@ -18,11 +18,11 @@
 
 #include <QKeyEvent>
 #include "linePathMode.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../mainwindow.h"
 
-LinePathMode::LinePathMode (GLRenderer *renderer) :
-	Super (renderer) {}
+LinePathMode::LinePathMode (Canvas* canvas) :
+    Super (canvas) {}
 
 void LinePathMode::render (QPainter& painter) const
 {

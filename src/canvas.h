@@ -18,9 +18,31 @@
 
 #pragma once
 #include "glRenderer.h"
+#include "editmodes/abstractEditMode.h"
 
 class Canvas : public GLRenderer
 {
 public:
 	Canvas(LDDocument* document, QWidget* parent = nullptr);
+	~Canvas();
+
+	EditModeType currentEditModeType() const;
+	LDDocument* document() const;
+	const Vertex& position3D() const;
+	void setEditMode(EditModeType type);
+
+protected:
+	void dropEvent(QDropEvent* event) override;
+	bool freeCameraAllowed() const override;
+	void keyReleaseEvent(QKeyEvent* event) override;
+	void mouseDoubleClickEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+	void overpaint(QPainter& painter) override;
+
+private:
+	LDDocument& m_document;
+	AbstractEditMode* m_currentEditMode = nullptr;
+	Vertex m_position3D;
 };

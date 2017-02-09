@@ -25,7 +25,7 @@ class RectangleMode : public AbstractDrawMode
 	QVector<Vertex> m_rectangleVerts;
 
 public:
-	RectangleMode (GLRenderer* renderer);
+	RectangleMode (Canvas* canvas);
 
 	void render (QPainter& painter) const override;
 	EditModeType type() const override;

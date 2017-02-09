@@ -31,7 +31,6 @@
 #include "miscallenous.h"
 #include "editHistory.h"
 #include "dialogs.h"
-#include "messageLog.h"
 #include "glCompiler.h"
 #include "primitives.h"
 #include "documentmanager.h"
@@ -73,7 +72,6 @@ GLRenderer::GLRenderer(Model* model, QWidget* parent) :
     m_model {model}
 {
 	m_camera = (Camera) m_config->camera();
-	m_currentEditMode = AbstractEditMode::createByType (this, EditModeType::Select);
 	m_compiler = new GLCompiler (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
@@ -89,9 +87,9 @@ GLRenderer::GLRenderer(Model* model, QWidget* parent) :
 	{
 		const char* cameraIconNames[EnumLimits<Camera>::Count] =
 		{
-			"camera-top", "camera-front", "camera-left",
-			"camera-bottom", "camera-back", "camera-right",
-			"camera-free"
+		    "camera-top", "camera-front", "camera-left",
+		    "camera-bottom", "camera-back", "camera-right",
+		    "camera-free"
 		};
 
 		CameraIcon* info = &m_cameraIcons[camera];
@@ -108,7 +106,6 @@ GLRenderer::~GLRenderer()
 {
 	m_compiler->setRenderer (nullptr);
 	delete m_compiler;
-	delete m_currentEditMode;
 	glDeleteBuffers (1, &m_axesVbo);
 	glDeleteBuffers (1, &m_axesColorVbo);
 }
@@ -359,6 +356,9 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
+	m_virtualWidth = zoom();
+	m_virtualHeight = (m_height * m_virtualWidth) / m_width;
+
 	if (m_config->drawWireframe() and not m_isDrawingSelectionScene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -571,101 +571,63 @@ QPen GLRenderer::linePen() const
 	return linepen;
 }
 
-// =============================================================================
-//
+bool GLRenderer::freeCameraAllowed() const
+{
+	return true;
+}
+
 void GLRenderer::paintEvent(QPaintEvent*)
 {
 	makeCurrent();
-	m_virtualWidth = zoom();
-	m_virtualHeight = (m_height * m_virtualWidth) / m_width;
 	initGLData();
 	drawGLScene();
-	QPainter painter {this};
-	QFontMetrics metrics {QFont {}};
-	painter.setRenderHint(QPainter::Antialiasing);
 
-	// If we wish to only draw the brick, stop here
-	if (isDrawOnly() or m_isDrawingSelectionScene)
+	if (isDrawingSelectionScene())
 		return;
 
-#ifndef RELEASE
+	QPainter painter {this};
+	painter.setRenderHint(QPainter::Antialiasing);
+	overpaint(painter);
+}
+
+void GLRenderer::overpaint(QPainter &painter)
+{
+	// Draw a background for the selected camera
+	painter.setPen(m_thinBorderPen);
+	painter.setBrush(QBrush {QColor {0, 128, 160, 128}});
+	painter.drawRect(m_cameraIcons[camera()].hitRect);
+
+	// Draw the camera icons
+	for (const CameraIcon& info : m_cameraIcons)
 	{
-		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4",
-		    m_rotationMatrix, panning(X), panning(Y), zoom());
-		QRect textSize = metrics.boundingRect(0, 0, m_width, m_height, Qt::AlignCenter, text);
+		// Don't draw the free camera icon when we can't use the free camera
+		if (&info == &m_cameraIcons[FreeCamera] and not freeCameraAllowed())
+			continue;
+
+		painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
+	}
+
+	// Tool tips
+	if (m_drawToolTip)
+	{
+		if (not m_cameraIcons[m_toolTipCamera].targetRect.contains (m_mousePosition))
+			m_drawToolTip = false;
+		else
+			QToolTip::showText(m_globalpos, currentCameraName());
+	}
+
+	// Draw a label for the current camera in the bottom left corner
+	{
+		QFontMetrics metrics {QFont {}};
+		int margin = 4;
 		painter.setPen(textPen());
-		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
-			textSize.height(), Qt::AlignCenter, text);
-	}
-#endif
+		painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
 
-	if (camera() != FreeCamera)
-	{
-		// Paint the coordinates onto the screen.
-		QString text = format(tr("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
-		QFontMetrics metrics {font()};
-		QRect textSize = metrics.boundingRect (0, 0, m_width, m_height, Qt::AlignCenter, text);
-		painter.setPen(textPen());
-		painter.drawText(m_width - textSize.width(), m_height - 16,
-		                 textSize.width(), textSize.height(), Qt::AlignCenter, text);
-	}
-
-	{
-		// Draw edit mode HUD
-		m_currentEditMode->render(painter);
-
-		// Draw a background for the selected camera
-		painter.setPen(m_thinBorderPen);
-		painter.setBrush(QBrush {QColor {0, 128, 160, 128}});
-		painter.drawRect(m_cameraIcons[camera()].hitRect);
-
-		// Draw the camera icons
-		for (CameraIcon& info : m_cameraIcons)
+		// Also render triangle count.
+		if (m_model)
 		{
-			// Don't draw the free camera icon when we can't use the free camera
-			if (&info == &m_cameraIcons[FreeCamera] and not m_currentEditMode->allowFreeCamera())
-				continue;
-
-			painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
-		}
-
-		// Draw a label for the current camera in the bottom left corner
-		{
-			int margin = 4;
-			painter.setPen(textPen());
-			painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
-
-			// Also render triangle count.
-			if (m_model)
-			{
-				QPoint renderPoint = {margin, height() - margin - metrics.height() - metrics.descent()};
-				painter.drawText(renderPoint, format("△ %1", m_model->triangleCount()));
-			}
-		}
-
-		// Tool tips
-		if (m_drawToolTip)
-		{
-			if (not m_cameraIcons[m_toolTipCamera].targetRect.contains (m_mousePosition))
-				m_drawToolTip = false;
-			else
-				QToolTip::showText(m_globalpos, currentCameraName());
-		}
-	}
-
-	// Message log
-	if (m_window->messageLog())
-	{
-		int y = 0;
-		int margin = 2;
-		QColor penColor = textPen().color();
-
-		for (const MessageManager::Line& line : m_window->messageLog()->getLines())
-		{
-			penColor.setAlphaF(line.alpha);
-			painter.setPen(penColor);
-			painter.drawText(QPoint {margin, y + margin + metrics.ascent()}, line.text);
-			y += metrics.height();
+			QPoint renderPoint = {margin, height() - margin - metrics.height() - metrics.descent()};
+			painter.drawText(renderPoint, format("△ %1", m_model->triangleCount()));
 		}
 	}
 }
@@ -695,41 +657,24 @@ void GLRenderer::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPo
 
 // =============================================================================
 //
-void GLRenderer::mouseReleaseEvent(QMouseEvent* ev)
+void GLRenderer::mouseReleaseEvent(QMouseEvent* event)
 {
-	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (ev->buttons() & Qt::LeftButton);
-	Qt::MouseButtons releasedbuttons = m_lastButtons & ~ev->buttons();
+	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (event->buttons() & Qt::LeftButton);
 	m_panning = false;
 
-	if (wasLeft)
+	// Check if we selected a camera icon
+	if (wasLeft and not mouseHasMoved())
 	{
-		// Check if we selected a camera icon
-		if (not mouseHasMoved())
+		for (CameraIcon& info : m_cameraIcons)
 		{
-			for (CameraIcon& info : m_cameraIcons)
+			if (info.targetRect.contains (event->pos()))
 			{
-				if (info.targetRect.contains (ev->pos()))
-				{
-					setCamera (info.camera);
-					goto end;
-				}
+				setCamera (info.camera);
+				break;
 			}
 		}
 	}
 
-	if (not isDrawOnly())
-	{
-		AbstractEditMode::MouseEventData data;
-		data.ev = ev;
-		data.mouseMoved = mouseHasMoved();
-		data.keymods = m_currentKeyboardModifiers;
-		data.releasedButtons = releasedbuttons;
-
-		if (m_currentEditMode->mouseReleased (data))
-			goto end;
-	}
-
-end:
 	update();
 	m_totalMouseMove = 0;
 }
@@ -738,11 +683,8 @@ end:
 //
 void GLRenderer::mousePressEvent(QMouseEvent* event)
 {
-	m_totalMouseMove = 0;
 	m_lastButtons = event->buttons();
-
-	if (m_currentEditMode->mousePressed(event))
-		event->accept();
+	m_totalMouseMove = 0;
 }
 
 // =============================================================================
@@ -754,32 +696,29 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 	m_totalMouseMove += qAbs(xMove) + qAbs(yMove);
 	m_isCameraMoving = false;
 
-	if (not m_currentEditMode->mouseMoved (event))
-	{
-		bool left = event->buttons() & Qt::LeftButton;
-		bool mid = event->buttons() & Qt::MidButton;
-		bool shift = event->modifiers() & Qt::ShiftModifier;
+	bool left = event->buttons() & Qt::LeftButton;
+	bool mid = event->buttons() & Qt::MidButton;
+	bool shift = event->modifiers() & Qt::ShiftModifier;
 
-		if (mid or (left and shift))
-		{
-			panning(X) += 0.03f * xMove * (zoom() / 7.5f);
-			panning(Y) -= 0.03f * yMove * (zoom() / 7.5f);
-			m_panning = true;
-			m_isCameraMoving = true;
-		}
-		else if (left and camera() == FreeCamera and (xMove != 0 or yMove != 0))
-		{
-			// Apply current rotation input to the rotation matrix
-			// ref: https://forums.ldraw.org/thread-22006-post-24426.html#pid24426
-			glPushMatrix();
-			glLoadIdentity();
-			// 0.6 is an arbitrary rotation sensitivity scalar
-			glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
-			glMultMatrixf(m_rotationMatrix.constData());
-			glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
-			glPopMatrix();
-			m_isCameraMoving = true;
-		}
+	if (mid or (left and shift))
+	{
+		panning(X) += 0.03f * xMove * (zoom() / 7.5f);
+		panning(Y) -= 0.03f * yMove * (zoom() / 7.5f);
+		m_panning = true;
+		m_isCameraMoving = true;
+	}
+	else if (left and camera() == FreeCamera and (xMove != 0 or yMove != 0))
+	{
+		// Apply current rotation input to the rotation matrix
+		// ref: https://forums.ldraw.org/thread-22006-post-24426.html#pid24426
+		glPushMatrix();
+		glLoadIdentity();
+		// 0.6 is an arbitrary rotation sensitivity scalar
+		glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
+		glMultMatrixf(m_rotationMatrix.constData());
+		glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
+		glPopMatrix();
+		m_isCameraMoving = true;
 	}
 
 	// Start the tool tip timer
@@ -790,9 +729,6 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 	m_mousePosition = event->pos();
 	m_globalpos = event->globalPos();
 	m_mousePositionF = event->localPos();
-
-	// Calculate 3d position of the cursor
-	m_position3D = (camera() != FreeCamera) ? convert2dTo3d (m_mousePosition, true) : Origin;
 
 	highlightCursorObject();
 	update();
@@ -811,7 +747,6 @@ void GLRenderer::keyPressEvent(QKeyEvent* event)
 void GLRenderer::keyReleaseEvent(QKeyEvent* event)
 {
 	m_currentKeyboardModifiers = event->modifiers();
-	m_currentEditMode->keyReleased(event);
 	update();
 }
 
@@ -848,7 +783,7 @@ void GLRenderer::contextMenuEvent(QContextMenuEvent* event)
 void GLRenderer::setCamera(Camera camera)
 {
 	// The edit mode may forbid the free camera.
-	if (m_currentEditMode->allowFreeCamera() or camera != FreeCamera)
+	if (freeCameraAllowed() or camera != FreeCamera)
 	{
 		m_camera = camera;
 		m_config->setCamera(int {camera});
@@ -965,31 +900,6 @@ LDObject* GLRenderer::pickOneObject (int mouseX, int mouseY)
 	setPicking(false);
 	repaint();
 	return object;
-}
-
-// =============================================================================
-//
-void GLRenderer::setEditMode(EditModeType a)
-{
-	if (m_currentEditMode and m_currentEditMode->type() == a)
-		return;
-
-	delete m_currentEditMode;
-	m_currentEditMode = AbstractEditMode::createByType(this, a);
-
-	// If we cannot use the free camera, use the top one instead.
-	if (camera() == FreeCamera and not m_currentEditMode->allowFreeCamera())
-		setCamera(TopCamera);
-
-	m_window->updateEditModeActions();
-	update();
-}
-
-// =============================================================================
-//
-EditModeType GLRenderer::currentEditModeType() const
-{
-	return m_currentEditMode->type();
 }
 
 // =============================================================================
@@ -1237,14 +1147,6 @@ void GLRenderer::zoomAllToFit()
 
 // =============================================================================
 //
-void GLRenderer::mouseDoubleClickEvent (QMouseEvent* ev)
-{
-	if (m_currentEditMode->mouseDoubleClicked (ev))
-		ev->accept();
-}
-
-// =============================================================================
-//
 void GLRenderer::highlightCursorObject()
 {
 	if (not m_config->highlightObjectBelowCursor() and objectAtCursor() == nullptr)
@@ -1290,26 +1192,6 @@ void GLRenderer::dragEnterEvent (QDragEnterEvent* ev)
 {
 	if (m_window and ev->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
 		ev->acceptProposedAction();
-}
-
-void GLRenderer::dropEvent (QDropEvent* ev)
-{
-	if (m_window and ev->source() == m_window->getPrimitivesTree())
-	{
-		PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (m_window->getPrimitivesTree()->currentItem());
-		QString primitiveName = item->primitive()->name;
-		LDSubfileReference* ref = currentDocument()->emplaceAt<LDSubfileReference>(m_window->suggestInsertPoint());
-		ref->setFileInfo (m_documents->getDocumentByName (primitiveName));
-		currentDocument()->addToSelection(ref);
-		m_window->buildObjectList();
-		refresh();
-		ev->acceptProposedAction();
-	}
-}
-
-Vertex const& GLRenderer::position3D() const
-{
-	return m_position3D;
 }
 
 const CameraInfo& GLRenderer::cameraInfo (Camera camera) const
@@ -1371,4 +1253,19 @@ double GLRenderer::panning (Axis ax) const
 double& GLRenderer::zoom()
 {
 	return m_zoom[camera()];
+}
+
+const QGenericMatrix<4, 4, GLfloat>& GLRenderer::rotationMatrix() const
+{
+	return m_rotationMatrix;
+}
+
+bool GLRenderer::isDrawingSelectionScene() const
+{
+	return m_isDrawingSelectionScene;
+}
+
+Qt::MouseButtons GLRenderer::lastButtons() const
+{
+	return m_lastButtons;
 }

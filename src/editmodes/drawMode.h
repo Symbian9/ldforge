@@ -25,7 +25,7 @@ class DrawMode : public AbstractDrawMode
 	bool m_rectdraw;
 
 public:
-	DrawMode (GLRenderer* renderer);
+	DrawMode (Canvas* canvas);
 
 	void render (QPainter& painter) const override;
 	int maxVertices() const override { return 4; }

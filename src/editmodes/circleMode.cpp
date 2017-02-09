@@ -23,14 +23,14 @@
 #include "../ldDocument.h"
 #include "../ringFinder.h"
 #include "../primitives.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 #include "../mainwindow.h"
 #include "../mathfunctions.h"
 #include "../miscallenous.h"
 #include "../grid.h"
 
-CircleMode::CircleMode(GLRenderer* renderer) :
-	Super {renderer} {}
+CircleMode::CircleMode(Canvas* canvas) :
+    Super {canvas} {}
 
 
 EditModeType CircleMode::type() const

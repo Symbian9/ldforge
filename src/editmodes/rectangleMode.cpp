@@ -20,10 +20,10 @@
 #include <QMouseEvent>
 #include "rectangleMode.h"
 #include "../ldObject.h"
-#include "../glRenderer.h"
+#include "../canvas.h"
 
-RectangleMode::RectangleMode (GLRenderer* renderer) :
-	Super (renderer),
+RectangleMode::RectangleMode (Canvas* canvas) :
+    Super (canvas),
 	m_rectangleVerts (QVector<Vertex>(4)) {}
 
 EditModeType RectangleMode::type() const
