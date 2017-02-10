@@ -217,6 +217,75 @@ bool valueInEnum(typename std::underlying_type<Enum>::type x)
 double getRadialPoint(int segment, int divisions, double(*func)(double));
 QVector<QLineF> makeCircle(int segments, int divisions, double radius);
 
+/*
+ * Implements a ring adapter over T. This class corrects indices given to the element-operator so that they're within bounds.
+ * The maximum amount can be specified manually.
+ *
+ * Example:
+ *
+ *   int A[] = {10,20,30,40};
+ *   ring(A)[0]  ==     A[0 % 4]    == A[0]
+ *   ring(A)[5]  ==     A[5 % 4]    == A[1]
+ *   ring(A)[-1] == ring(A)[-1 + 4] == A[3]
+ */
+template<typename T>
+class RingAdapter
+{
+private:
+	// The private section must come first because _collection is used in decltype() below.
+	T& _collection;
+	const int _count;
+
+public:
+	RingAdapter(T& collection, int count) :
+	    _collection {collection},
+	    _count {count} {}
+
+	template<typename IndexType>
+	decltype(_collection[IndexType()]) operator[](IndexType index)
+	{
+		if (_count == 0)
+		{
+			// Argh! ...let the collection deal with this case.
+			return _collection[0];
+		}
+		else
+		{
+			index %= _count;
+
+			// Fix negative modulus...
+			if (index < 0)
+				index += _count;
+
+			return _collection[index];
+		}
+	}
+
+	int size() const
+	{
+		return _count;
+	}
+};
+
+/*
+ * Convenience function for RingAdapter so that the template parameter does not have to be provided. The ring amount is assumed
+ * to be the amount of elements in the collection.
+ */
+template<typename T>
+RingAdapter<T> ring(T& collection)
+{
+	return RingAdapter<T> {collection, countof(collection)};
+}
+
+/*
+ * Version of ring() that allows manual specification of the count.
+ */
+template<typename T>
+RingAdapter<T> ring(T& collection, int count)
+{
+	return RingAdapter<T> {collection, count};
+}
+
 //
 // Get the amount of elements in something.
 //
@@ -253,4 +322,10 @@ template<typename T>
 int countof(const std::initializer_list<T>& vector)
 {
 	return vector.size();
+}
+
+template<typename T>
+int countof(const RingAdapter<T>& ring)
+{
+	return ring.size();
 }

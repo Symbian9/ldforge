@@ -334,24 +334,26 @@ void GLCompiler::compileObject (LDObject* obj)
 void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
 {
 	SurfaceVboType surface;
-	int numverts;
+	int vertexCount;
 
 	switch (poly.num)
 	{
-	case 2:	surface = LinesVbo;				numverts = 2; break;
-	case 3:	surface = TrianglesVbo;			numverts = 3; break;
-	case 4:	surface = QuadsVbo;				numverts = 4; break;
-	case 5:	surface = ConditionalLinesVbo;	numverts = 2; break;
+	case 2:	surface = LinesVbo;				vertexCount = 2; break;
+	case 3:	surface = TrianglesVbo;			vertexCount = 3; break;
+	case 4:	surface = QuadsVbo;				vertexCount = 4; break;
+	case 5:	surface = ConditionalLinesVbo;	vertexCount = 2; break;
 	default: return;
 	}
 
 	// Determine the normals for the polygon.
 	Vertex normals[4];
-	for (int i = 0; i < numverts; ++i)
+	auto vertexRing = ring(poly.vertices, vertexCount);
+
+	for (int i = 0; i < vertexCount; ++i)
 	{
-		const Vertex& v1 = poly.vertices[(i - 1 + numverts) % numverts];
-		const Vertex& v2 = poly.vertices[i];
-		const Vertex& v3 = poly.vertices[(i + 1) % numverts];
+		const Vertex& v1 = vertexRing[i - 1];
+		const Vertex& v2 = vertexRing[i];
+		const Vertex& v3 = vertexRing[i + 1];
 		normals[i] = Vertex::crossProduct(v3 - v2, v1 - v2).normalized();
 	}
 
@@ -361,7 +363,7 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
 		const QColor color = getColorForPolygon (poly, topobj, complement);
 
-		for (int vert = 0; vert < numverts; ++vert)
+		for (int vert = 0; vert < vertexCount; ++vert)
 		{
 			if (complement == SurfacesVboComplement)
 			{
