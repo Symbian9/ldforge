@@ -22,31 +22,29 @@
 #	TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 #	PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER
 #	OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-#	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#	EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO,
 #	PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 #	PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-#	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT(INCLUDING
 #	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import argparse
+from argparse import ArgumentParser
+from collections import OrderedDict
 import caseconversions
-import collections
 import outputfile
-import re
-from pprint import pprint
 
+# These types are passed by value
 passbyvalue = {'int', 'bool', 'float', 'double', 'qreal'}
 
 def deduce_type(value):
 	'''
 		Try to determine the type of value from the value itself.
 	'''
-	if value in ('true', 'false'):
+	if value in('true', 'false'):
 		return 'bool'
-
-	if value.startswith('"') and value.endswith('"'):
+	elif value.startswith('"') and value.endswith('"'):
 		return 'QString'
 
 	try:
@@ -70,156 +68,154 @@ def deduce_type(value):
 
 	raise ValueError('unable to deduce type of %r' % value)
 
-class ConfigCollector (object):
-	def __init__ (self, args):
-		self.decls = []
-		self.qttypes = set()
+class ConfigCollector:
+	def __init__(self, args):
+		self.declarations = OrderedDict()
+		self.qtTypes = set()
 		self.args = args
 
-	def collect (self, filename):
-		with open(filename, 'r') as file:
+	def collect(self, filename):
+		with open(filename) as file:
 			for line in file:
 				line = line.strip()
 				if line and not line.startswith('#'):
-					match = re.search('^option (\w+) = (.+)$', line)
+					from re import search
+					match = search('^option (\w+) = (.+)$', line)
 					if not match:
 						raise ValueError('unable to parse: %r' % line)
 					name, value = match.groups()
-					match = re.search(r'^(\w+)\s*\{(.*)\}$', value)
+					match = search(r'^(\w+)\s*\{(.*)\}$', value)
 					try:
-						type, value = match.groups()
+						typename, value = match.groups()
 						if not value:
-							value = type + ' {}'
+							value = typename + ' {}'
 					except:
-						type = deduce_type(value)
-					self.add_config_declaration((name, type, value))
+						typename = deduce_type(value)
+					self.declare(name, typename, value)
+		# Sort the declarations in alphabetical order
+		self.declarations = OrderedDict(sorted(self.declarations.items(), key = lambda t: t[1]['name']))
+		# Fill in additional information
+		for declaration in self.declarations.values():
+			declaration['readgate'] = caseconversions.convert_case(declaration['name'], style='java')
+			declaration['writegate'] = 'set' + caseconversions.convert_case(declaration['name'], style='camel')
+			declaration['togglefunction'] = 'toggle' + caseconversions.convert_case(declaration['name'], style='camel')
+			if declaration['type'] in passbyvalue:
+				declaration['typereference'] = declaration['type']
+			else:
+				declaration['typereference'] = 'const %s&' % declaration['type']
 
-		self.decls.sort (key=lambda x: x['name'].upper())
+	def declare(self, name, typename, default):
+		from re import findall
+		if name in self.declarations:
+			raise ValueError('Attempted to redeclare %r' % name)
+		self.declarations[name] = {
+			'name': name,
+			'type': typename,
+			'default': default
+		}
+		# Keep a file of any Qt types, we'll need to #include them.
+		self.qtTypes.update(findall(r'Q\w+', typename))
 
-		for decl in self.decls:
-			decl['getter'] = caseconversions.convert_case (decl['name'], style='java')
-			decl['varname'] = 'm_' + decl['getter']
-			decl['setter'] = 'set' + caseconversions.convert_case (decl['name'], style='camel')
-			decl['toggler'] = 'toggle' + caseconversions.convert_case (decl['name'], style='camel')
-			decl['typecref'] = 'const %s&' % decl['type'] if decl['type'] not in passbyvalue else decl['type']
-			decl['valuefunc'] = 'value<' + decl['type'] + '>'
-
-	def add_config_declaration (self, decl):
-		declname, decltype, decldefault = decl
-		self.decls.append (dict (name=declname, type=decltype, default=decldefault))
-
-		# Take note of any Qt types we may want to #include in our source file (we'll need to #include them).
-		self.qttypes.update (re.findall (r'Q\w+', decltype))
-
-	def write_header (self, fp):
-		fp.write ('#pragma once\n')
-		fp.write ('#include <QMap>\n')
-		for qttype in sorted (self.qttypes):
-			fp.write ('#include <%s>\n' % qttype)
-		fp.write ('\n')
+	def writeHeader(self, device):
+		device.write('#pragma once\n')
+		device.write('#include <QMap>\n')
+		for qtType in sorted(self.qtTypes):
+			device.write('#include <%s>\n' % qtType)
+		device.write('\n')
 		formatargs = {}
-		write = lambda value: fp.write (value)
-		write ('class Configuration\n')
-		write ('{\n')
-		write ('public:\n')
-		write ('\tConfiguration();\n')
-		write ('\t~Configuration();\n')
-		write ('\tbool existsEntry (const QString& name);\n')
-		write ('\tQVariant defaultValueByName (const QString& name);\n')
+		write = lambda value: device.write(value)
+		write('class Configuration\n')
+		write('{\n')
+		write('public:\n')
+		write('\tConfiguration();\n')
+		write('\t~Configuration();\n')
+		write('\tbool existsEntry(const QString& name);\n')
+		write('\tQVariant defaultValueByName(const QString& name);\n')
+		for declaration in self.declarations.values():
+			write('\t{type} {readgate}() const;\n'.format(**declaration))
+		for declaration in self.declarations.values():
+			write('\tvoid {writegate}({typereference} value);\n'.format(**declaration))
 
-		for decl in self.decls:
-			write ('\t{type} {getter}() const;\n'.format (**decl))
-		for decl in self.decls:
-			write ('\tvoid {setter}({typecref} value);\n'.format (**decl))
-
-		for decl in filter(lambda decl: decl['type'] == 'bool', self.decls):
-			write('\tvoid {toggler}();\n'.format(**decl))
-
-		write ('\n')
-		write ('private:\n')
-		write ('\tQMap<QString, QVariant> m_defaults;\n')
-		write ('\tclass QSettings* m_settings;\n')
-		write ('};\n')
-
-	def write_source (self, fp, headername):
-		fp.write ('#include <QSet>\n')
-		fp.write ('#include <QSettings>\n')
-		fp.write ('#include <QVariant>\n')
-		fp.write ('#include "%s/mainwindow.h"\n' % (self.args.sourcedir))
-		fp.write ('#include "%s"\n' % headername)
-
-		fp.write (
+		for declaration in filter(lambda declaration: declaration['type'] == 'bool', self.declarations.values()):
+			write('\tvoid {togglefunction}();\n'.format(**declaration))
+		write('\n')
+		write('private:\n')
+		write('\tQMap<QString, QVariant> m_defaults;\n')
+		write('\tclass QSettings* m_settings;\n')
+		write('};\n')
+	
+	def writeSource(self, device, headername):
+		device.write('#include <QSet>\n')
+		device.write('#include <QSettings>\n')
+		device.write('#include <QVariant>\n')
+		device.write('#include "%s/mainwindow.h"\n' % (self.args.sourcedir))
+		device.write('#include "%s"\n' % headername)
+		device.write(
 			'\n'
 			'Configuration::Configuration() :\n'
-			'\tm_settings (makeSettings (nullptr))\n'
+			'\tm_settings(makeSettings(nullptr))\n'
 			'{\n')
-
-		for decl in self.decls:
-			fp.write ('\tm_defaults["{name}"] = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
-
-		fp.write ('}\n'
+		for declaration in self.declarations.values():
+			device.write('\tm_defaults["{name}"] = QVariant::fromValue<{type}>({default});\n'.format(**declaration))
+		device.write('}\n'
 			'\n'
 			'Configuration::~Configuration()\n'
 			'{\n'
 			'\tm_settings->deleteLater();\n'
 			'}\n'
 			'\n')
-
-		maptype = 'QMap<QString, QVariant>'
-		fp.write ('QVariant Configuration::defaultValueByName (const QString& name)\n')
-		fp.write ('{\n')
-		fp.write ('\t%s::iterator it = m_defaults.find (name);\n' % maptype)
-		fp.write ('\tif (it != m_defaults.end())\n')
-		fp.write ('\t\treturn *it;\n')
-		fp.write ('\treturn QVariant();\n')
-		fp.write ('}\n')
-		fp.write ('\n')
-		fp.write ('bool Configuration::existsEntry (const QString& name)\n')
-		fp.write ('{\n')
-		fp.write ('\treturn m_defaults.find (name) != m_defaults.end();\n')
-		fp.write ('}\n')
-		fp.write ('\n')
-
-		for decl in self.decls:
-			fp.write ('{type} Configuration::{getter}() const\n'.format (**decl))
-			fp.write ('{\n')
-			fp.write ('\tstatic const QVariant defaultvalue = QVariant::fromValue<{type}> ({default});\n'.format (**decl))
-			fp.write ('\treturn m_settings->value ("{name}", defaultvalue).{valuefunc}();\n'.format (**decl))
-			fp.write ('}\n')
-			fp.write ('\n')
-
-		for decl in self.decls:
-			fp.write ('void Configuration::{setter}({typecref} value)\n'.format (**decl))
-			fp.write ('{\n')
-			fp.write ('\tif (value != {default})\n'.format (**decl))
-			fp.write ('\t\tm_settings->setValue ("{name}", QVariant::fromValue<{type}> (value));\n'.format (**decl))
-			fp.write ('\telse\n')
-			fp.write ('\t\tm_settings->remove ("{name}");\n'.format (**decl))
-			fp.write ('}\n')
-			fp.write ('\n')
-
-		for decl in filter(lambda decl: decl['type'] == 'bool', self.decls):
-			fp.write('void Configuration::{toggler}()\n'.format(**decl))
-			fp.write('{\n')
-			fp.write('\t{setter}(not {getter}());\n'.format(**decl))
-			fp.write('}\n')
-			fp.write('\n')
+		device.write('QVariant Configuration::defaultValueByName(const QString& name)\n')
+		device.write('{\n')
+		device.write('\tQMap<QString, QVariant>::iterator it = m_defaults.find(name);\n')
+		device.write('\tif(it != m_defaults.end())\n')
+		device.write('\t\treturn *it;\n')
+		device.write('\telse\n')
+		device.write('\t\treturn {};\n')
+		device.write('}\n')
+		device.write('\n')
+		device.write('bool Configuration::existsEntry(const QString& name)\n')
+		device.write('{\n')
+		device.write('\treturn m_defaults.find(name) != m_defaults.end();\n')
+		device.write('}\n')
+		device.write('\n')
+		for declaration in self.declarations.values():
+			device.write('{type} Configuration::{readgate}() const\n'.format(**declaration))
+			device.write('{\n')
+			device.write('\tstatic const QVariant defaultvalue = QVariant::fromValue<{type}>({default});\n'.format(**declaration))
+			device.write('\treturn m_settings->value("{name}", defaultvalue).value<{type}>();\n'.format(**declaration))
+			device.write('}\n')
+			device.write('\n')
+		for declaration in self.declarations.values():
+			device.write('void Configuration::{writegate}({typereference} value)\n'.format(**declaration))
+			device.write('{\n')
+			device.write('\tif(value != {default})\n'.format(**declaration))
+			device.write('\t\tm_settings->setValue("{name}", QVariant::fromValue<{type}>(value));\n'.format(**declaration))
+			device.write('\telse\n')
+			device.write('\t\tm_settings->remove("{name}");\n'.format(**declaration))
+			device.write('}\n')
+			device.write('\n')
+		for declaration in filter(lambda declaration: declaration['type'] == 'bool', self.declarations.values()):
+			device.write('void Configuration::{togglefunction}()\n'.format(**declaration))
+			device.write('{\n')
+			device.write('\t{writegate}(not {readgate}());\n'.format(**declaration))
+			device.write('}\n')
+			device.write('\n')
 
 def main():
-	parser = argparse.ArgumentParser (description='Collects a list of configuration objects')
-	parser.add_argument ('input')
-	parser.add_argument ('--header', required=True)
-	parser.add_argument ('--source', required=True)
-	parser.add_argument ('--sourcedir', required=True)
+	parser = ArgumentParser(description='Collects a list of configuration objects')
+	parser.add_argument('input')
+	parser.add_argument('--header', required=True)
+	parser.add_argument('--source', required=True)
+	parser.add_argument('--sourcedir', required=True)
 	args = parser.parse_args()
-	collector = ConfigCollector (args)
-	collector.collect (args.input)
-	header = outputfile.OutputFile (args.header)
-	source = outputfile.OutputFile (args.source)
-	collector.write_source (source, headername=args.header)
-	collector.write_header (header)
-	header.save (verbose = True)
-	source.save (verbose = True)
+	collector = ConfigCollector(args)
+	collector.collect(args.input)
+	header = outputfile.OutputFile(args.header)
+	source = outputfile.OutputFile(args.source)
+	collector.writeSource(source, headername=args.header)
+	collector.writeHeader(header)
+	header.save(verbose = True)
+	source.save(verbose = True)
 
 if __name__ == '__main__':
 	main()
