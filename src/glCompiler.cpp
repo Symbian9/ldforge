@@ -104,94 +104,106 @@ QColor GLCompiler::indexColorForID (int id) const
 	return {r, g, b};
 }
 
-
-QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement) const
+/*
+ * Returns the suitable color for the polygon.
+ * - polygon is the polygon to colorise.
+ * - polygonOwner is the LDObject from which the polygon originated.
+ * - subclass provides context for the polygon.
+ */
+QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner, VboSubclass subclass) const
 {
-	QColor qcol;
-	static const QColor bfcFrontColor {64, 192, 80};
-	static const QColor bfcBackColor {208, 64, 64};
+	QColor color;
 
-	switch (complement)
+	switch (subclass)
 	{
 	case VboSubclass::Surfaces:
 	case VboSubclass::Normals:
 	case VboSubclass::_End:
+		// Surface and normal VBOs contain vertex data, not colors. So we can't return anything meaningful.
 		return {};
 
 	case VboSubclass::BfcFrontColors:
-		qcol = bfcFrontColor;
-		break;
+		// Use the constant green color for BFC front colors
+		return {64, 192, 80};
 
 	case VboSubclass::BfcBackColors:
-		qcol = bfcBackColor;
-		break;
+		// Use the constant red color for BFC back colors
+		return {208, 64, 64};
 
 	case VboSubclass::PickColors:
-		return indexColorForID(topobj->id());
+		// For the picking scene, determine the color from the owner's ID.
+		return indexColorForID(polygonOwner->id());
 
 	case VboSubclass::RandomColors:
-		qcol = topobj->randomColor();
+		// For the random color scene, the owner object has rolled up a random color. Use that.
+		color = polygonOwner->randomColor();
 		break;
 
 	case VboSubclass::NormalColors:
-		if (poly.color == MainColor)
+		// For normal colors, use the polygon's color.
+		if (polygon.color == MainColor)
 		{
-			if (topobj->color() == MainColor)
-				qcol = guiUtilities()->mainColorRepresentation();
+			// If it's the main color, use the polygon owner's color.
+			if (polygonOwner->color() == MainColor)
+			{
+				// If that also is the main color, then we whatever the user has configured the main color to look like.
+				color = guiUtilities()->mainColorRepresentation();
+			}
 			else
-				qcol = topobj->color().faceColor();
+			{
+				color = polygonOwner->color().faceColor();
+			}
 		}
-		else if (poly.color == EdgeColor)
+		else if (polygon.color == EdgeColor)
 		{
-			qcol = luma(QColor (m_config->backgroundColor())) > 40 ? Qt::black : Qt::white;
+			// Edge color is black, unless we have a dark background, in which case lines need to be bright.
+			color = luma(m_config->backgroundColor()) > 40 ? Qt::black : Qt::white;
 		}
 		else
 		{
-			LDColor col = poly.color;
-
-			if (col.isValid())
-				qcol = col.faceColor();
+			// Not main or edge color, use the polygon's color as is.
+			color = LDColor {polygon.color}.faceColor();
 		}
 		break;
 	}
 
-	if (qcol.isValid())
+	if (color.isValid())
 	{
+		// We may wish to apply blending on the color to indicate selection or highlight.
 		double blendAlpha = 0.0;
 
-		if (topobj->isSelected())
+		if (polygonOwner->isSelected())
 			blendAlpha = 1.0;
-		else if (topobj == m_renderer->objectAtCursor())
+		else if (polygonOwner == m_renderer->objectAtCursor())
 			blendAlpha = 0.5;
 
 		if (blendAlpha != 0.0)
 		{
 			QColor selectedColor = m_config->selectColorBlend();
-			double denom = blendAlpha + 1.0;
-			qcol.setRed((qcol.red() + (selectedColor.red() * blendAlpha)) / denom);
-			qcol.setGreen((qcol.green() + (selectedColor.green() * blendAlpha)) / denom);
-			qcol.setBlue((qcol.blue() + (selectedColor.blue() * blendAlpha)) / denom);
+			double denominator = blendAlpha + 1.0;
+			color.setRed((color.red() + (selectedColor.red() * blendAlpha)) / denominator);
+			color.setGreen((color.green() + (selectedColor.green() * blendAlpha)) / denominator);
+			color.setBlue((color.blue() + (selectedColor.blue() * blendAlpha)) / denominator);
 		}
 	}
 	else
 	{
-		// The color was unknown. Use main color to make the polygon at least
-		// not appear pitch-black.
-		if (poly.num != 2 and poly.num != 5)
-			qcol = guiUtilities()->mainColorRepresentation();
+		// The color was unknown. Use main color to make the polygon at least not appear pitch-black.
+		if (polygon.num != 2 and polygon.num != 5)
+			color = guiUtilities()->mainColorRepresentation();
 		else
-			qcol = Qt::black;
+			color = Qt::black;
 
 		// Warn about the unknown color, but only once.
 		static QSet<int> warnedColors;
-		if (not warnedColors.contains(poly.color))
+		if (not warnedColors.contains(polygon.color))
 		{
-			print("Unknown color %1!\n", poly.color);
-			warnedColors.insert(poly.color);
+			print("Unknown color %1!\n", polygon.color);
+			warnedColors.insert(polygon.color);
 		}
 	}
 
-	return qcol;
+	return color;
 }
 
 
