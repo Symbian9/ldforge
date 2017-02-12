@@ -36,32 +36,34 @@ struct LDPolygon
 	}
 };
 
-enum SurfaceVboType
+enum class VboClass
 {
-	LinesVbo,
-	TrianglesVbo,
-	QuadsVbo,
-	ConditionalLinesVbo,
+	Lines,
+	Triangles,
+	Quads,
+	ConditionalLines,
+	_End
 };
 
-MAKE_ITERABLE_ENUM (SurfaceVboType, LinesVbo, ConditionalLinesVbo)
+MAKE_ITERABLE_ENUM(VboClass)
 
-enum ComplementVboType
+enum class VboSubclass
 {
-	SurfacesVboComplement,
-	NormalColorsVboComplement,
-	PickColorsVboComplement,
-	BfcFrontColorsVboComplement,
-	BfcBackColorsVboComplement,
-	RandomColorsVboComplement,
-	NormalsVboComplement,
+	Surfaces,
+	NormalColors,
+	PickColors,
+	BfcFrontColors,
+	BfcBackColors,
+	RandomColors,
+	Normals,
+	_End
 };
 
-MAKE_ITERABLE_ENUM (ComplementVboType, SurfacesVboComplement, NormalsVboComplement)
+MAKE_ITERABLE_ENUM(VboSubclass)
 
 enum
 {
-	NumVbos = EnumLimits<SurfaceVboType>::Count * EnumLimits<ComplementVboType>::Count
+	NumVbos = EnumLimits<VboClass>::Count * EnumLimits<VboSubclass>::Count
 };
 
 // KDevelop doesn't seem to understand some VBO stuff

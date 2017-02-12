@@ -27,7 +27,7 @@ LDComment::LDComment(QString text, Model* model) :
 
 LDObjectType LDComment::type() const
 {
-	return OBJ_Comment;
+	return LDObjectType::Comment;
 }
 
 QString LDComment::typeName() const

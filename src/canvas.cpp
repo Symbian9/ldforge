@@ -51,7 +51,7 @@ void Canvas::overpaint(QPainter& painter)
 	}
 #endif
 
-	if (camera() != FreeCamera)
+	if (camera() != Camera::Free)
 	{
 		// Paint the coordinates onto the screen.
 		QString text = format(tr("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
@@ -101,8 +101,8 @@ void Canvas::setEditMode(EditModeType a)
 	m_currentEditMode = AbstractEditMode::createByType(this, a);
 
 	// If we cannot use the free camera, use the top one instead.
-	if (camera() == FreeCamera and not m_currentEditMode->allowFreeCamera())
-		setCamera(TopCamera);
+	if (camera() == Camera::Free and not m_currentEditMode->allowFreeCamera())
+		setCamera(Camera::Top);
 
 	m_window->updateEditModeActions();
 	update();
@@ -234,16 +234,16 @@ Axis Canvas::getRelativeZ() const
 //
 void Canvas::setDepthValue (double depth)
 {
-	if (camera() < FreeCamera)
-		m_depthValues[camera()] = depth;
+	if (camera() < Camera::Free)
+		m_depthValues[static_cast<int>(camera())] = depth;
 }
 
 // =============================================================================
 //
 double Canvas::getDepthValue() const
 {
-	if (camera() < FreeCamera)
-		return m_depthValues[camera()];
+	if (camera() < Camera::Free)
+		return m_depthValues[static_cast<int>(camera())];
 	else
 		return 0.0;
 }
@@ -253,7 +253,7 @@ double Canvas::getDepthValue() const
  */
 Vertex Canvas::convert2dTo3d(const QPoint& position2d, bool snap) const
 {
-	if (camera() == FreeCamera)
+	if (camera() == Camera::Free)
 	{
 		return {0, 0, 0};
 	}
@@ -294,7 +294,7 @@ Vertex Canvas::convert2dTo3d(const QPoint& position2d, bool snap) const
  */
 QPoint Canvas::convert3dTo2d(const Vertex& position3d) const
 {
-	if (camera() == FreeCamera)
+	if (camera() == Camera::Free)
 	{
 		return {0, 0};
 	}

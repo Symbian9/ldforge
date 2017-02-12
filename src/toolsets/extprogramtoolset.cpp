@@ -167,14 +167,14 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 {
 	for (LDObject* obj : objects)
 	{
-		if (obj->type() == OBJ_SubfileReference)
+		if (obj->type() == LDObjectType::SubfileReference)
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			Model model {m_documents};
 			ref->inlineContents(model, true, false);
 			writeObjects(model.objects().toList(), f);
 		}
-		else if (obj->type() == OBJ_BezierCurve)
+		else if (obj->type() == LDObjectType::BezierCurve)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
 			Model model {m_documents};

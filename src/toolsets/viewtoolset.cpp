@@ -71,7 +71,7 @@ void ViewToolset::selectByType()
 	{
 		types << obj->type();
 
-		if (obj->type() == OBJ_SubfileReference)
+		if (obj->type() == LDObjectType::SubfileReference)
 			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
 	}
 
@@ -85,7 +85,7 @@ void ViewToolset::selectByType()
 			continue;
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
-		if (type == OBJ_SubfileReference
+		if (type == LDObjectType::SubfileReference
 			and not subfilenames.contains (static_cast<LDSubfileReference*> (obj)->fileInfo()->name()))
 		{
 			continue;
@@ -162,7 +162,7 @@ void ViewToolset::drawAngles()
 
 void ViewToolset::setDrawDepth()
 {
-	if (m_window->renderer()->camera() == FreeCamera)
+	if (m_window->renderer()->camera() == Camera::Free)
 		return;
 
 	bool ok;

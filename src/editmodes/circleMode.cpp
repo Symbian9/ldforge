@@ -71,13 +71,13 @@ Matrix CircleMode::getCircleDrawMatrix(double scale)
 		{ 0, 1, 0, 2, 0, 0, 0, 0, 2 },
 	};
 
-	Matrix transform = templates[renderer()->camera() % 3];
+	Matrix transform = templates[static_cast<int>(renderer()->camera()) % 3];
 
 	for (double& value : transform)
 	{
 		if (value == 2)
 			value = scale;
-		else if (value == 1 and renderer()->camera() >= 3)
+		else if (value == 1 and static_cast<int>(renderer()->camera()) >= 3)
 			value = -1;
 	}
 
@@ -164,7 +164,7 @@ void CircleMode::endDraw()
 			quad->setColor(MainColor);
 
 			// Ensure the quads always are BFC-front towards the camera
-			if (renderer()->camera() % 3 <= 0)
+			if (static_cast<int>(renderer()->camera()) % 3 <= 0)
 				quad->invert();
 		}
 	}

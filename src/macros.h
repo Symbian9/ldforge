@@ -39,16 +39,16 @@ public: \
 #define printValueOf(A) dprint ("value of '%1' = %2\n", #A, A)
 #define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
 
-#define MAKE_ITERABLE_ENUM(T, FIRST, LAST) \
+#define MAKE_ITERABLE_ENUM(T) \
 	template<> \
 	struct EnumLimits<T> \
 	{\
-		enum { First = FIRST, Last = LAST, End = LAST + 1, Count = End - FIRST };\
+	    enum { First = 0, Last = static_cast<int>(T::_End) - 1, Count = Last + 1 };\
 	}; \
-	inline T operator++ (T& a) { a = (T) ((int) a + 1); return a; } \
-	inline T operator-- (T& a) { a = (T) ((int) a - 1); return a; } \
-	inline T operator++ (T& a, int) { T result = a; a = (T) ((int) a + 1); return result; } \
-	inline T operator-- (T& a, int) { T result = a; a = (T) ((int) a - 1); return result; }
+	inline T operator++ (T& a) { a = static_cast<T>(static_cast<int>(a) + 1); return a; } \
+	inline T operator-- (T& a) { a = static_cast<T>(static_cast<int>(a) - 1); return a; } \
+	inline T operator++ (T& a, int) { T result = a; a = static_cast<T>(static_cast<int>(a) + 1); return result; } \
+	inline T operator-- (T& a, int) { T result = a; a = static_cast<T>(static_cast<int>(a) - 1); return result; }
 
 template<typename T>
 struct EnumLimits {};

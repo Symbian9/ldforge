@@ -38,7 +38,7 @@ public:
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const;
+	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement) const;
 	QColor indexColorForID (int id) const;
 	void initialize();
 	void needMerge();
@@ -49,7 +49,7 @@ public:
 	GLuint vbo (int vbonum) const;
 	int vboSize (int vbonum) const;
 
-	static int vboNumber (SurfaceVboType surface, ComplementVboType complement);
+	static int vboNumber (VboClass surface, VboSubclass complement);
 
 private:
 	void compileStaged();

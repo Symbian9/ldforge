@@ -270,10 +270,10 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 {
 	switch (obj->type())
 	{
-	case OBJ_Line:
-	case OBJ_CondLine:
-	case OBJ_Triangle:
-	case OBJ_Quad:
+	case LDObjectType::Line:
+	case LDObjectType::CondLine:
+	case LDObjectType::Triangle:
+	case LDObjectType::Quad:
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
 			Vertex v = obj->vertex (i);
@@ -282,7 +282,7 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 		}
 		break;
 
-	case OBJ_SubfileReference:
+	case LDObjectType::SubfileReference:
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			Matrix newMatrix = transform * ref->transformationMatrix();
@@ -320,10 +320,10 @@ void LDSubfileReference::inlineContents(Model& model, bool deep, bool render)
 LDPolygon* LDObject::getPolygon()
 {
 	LDObjectType ot = type();
-	int num = (ot == OBJ_Line)		? 2
-			: (ot == OBJ_Triangle)	? 3
-			: (ot == OBJ_Quad)		? 4
-			: (ot == OBJ_CondLine)	? 5
+	int num = (ot == LDObjectType::Line)		? 2
+			: (ot == LDObjectType::Triangle)	? 3
+			: (ot == LDObjectType::Quad)		? 4
+			: (ot == LDObjectType::CondLine)	? 5
 			: 0;
 
 	if (num == 0)
@@ -419,7 +419,7 @@ bool LDObject::previousIsInvertnext (LDBfc*& ptr)
 {
 	LDObject* prev = previous();
 
-	if (prev and prev->type() == OBJ_Bfc and static_cast<LDBfc*> (prev)->statement() == BfcStatement::InvertNext)
+	if (prev and prev->type() == LDObjectType::Bfc and static_cast<LDBfc*> (prev)->statement() == BfcStatement::InvertNext)
 	{
 		ptr = static_cast<LDBfc*> (prev);
 		return true;

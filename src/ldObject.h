@@ -27,11 +27,11 @@ class Model;
 
 #define LDOBJ(T)												\
 public:															\
-	static constexpr LDObjectType SubclassType = OBJ_##T;		\
+	static constexpr LDObjectType SubclassType = LDObjectType::T;	\
 																\
 	virtual LDObjectType type() const override					\
 	{															\
-		return OBJ_##T;											\
+	    return SubclassType;									\
 	}															\
 																\
 	virtual QString asText() const override;					\
@@ -66,23 +66,20 @@ class LDBfc;
 //
 enum LDObjectType
 {
-	OBJ_SubfileReference,	//	Object represents a	sub-file reference
-	OBJ_Quad,				//	Object represents a	quadrilateral
-	OBJ_Triangle,			//	Object represents a	triangle
-	OBJ_Line,				//	Object represents a	line
-	OBJ_CondLine,			//	Object represents a	conditional line
-	OBJ_Bfc,				//	Object represents a	BFC statement
-	OBJ_Overlay,			//	Object contains meta-info about an overlay image.
-	OBJ_Comment,			//	Object represents a	comment
-	OBJ_Error,				//	Object is the result of failed parsing
-	OBJ_Empty,				//	Object represents an empty line
-	OBJ_BezierCurve,		//	Object represents a Bézier curve
-
-	OBJ_NumTypes,			// Amount of object types
-	OBJ_FirstType = OBJ_SubfileReference
+	SubfileReference,	//	Object represents a	sub-file reference
+	Quad,				//	Object represents a	quadrilateral
+	Triangle,			//	Object represents a	triangle
+	Line,				//	Object represents a	line
+	CondLine,			//	Object represents a	conditional line
+	Bfc,				//	Object represents a	BFC statement
+	Comment,			//	Object represents a	comment
+	Error,				//	Object is the result of failed parsing
+	Empty,				//	Object represents an empty line
+	BezierCurve,		//	Object represents a Bézier curve
+	_End
 };
 
-MAKE_ITERABLE_ENUM (LDObjectType, OBJ_SubfileReference, OBJ_BezierCurve)
+MAKE_ITERABLE_ENUM(LDObjectType)
 
 //
 // LDObject
@@ -214,7 +211,7 @@ private:
 //
 // Represents a 0 BFC statement in the LDraw code.
 //
-enum BfcStatement
+enum class BfcStatement
 {
 	CertifyCCW,
 	CCW,
@@ -226,9 +223,10 @@ enum BfcStatement
 	ClipCCW,
 	ClipCW,
 	NoClip,
+	_End
 };
 
-MAKE_ITERABLE_ENUM(BfcStatement, CertifyCCW, NoClip)
+MAKE_ITERABLE_ENUM(BfcStatement)
 
 class LDBfc : public LDObject
 {

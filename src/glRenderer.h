@@ -44,18 +44,19 @@ struct CameraInfo
 	bool negatedDepth; // is greater depth value closer to camera?
 };
 
-enum Camera
+enum class Camera
 {
-	TopCamera,
-	FrontCamera,
-	LeftCamera,
-	BottomCamera,
-	BackCamera,
-	RightCamera,
-	FreeCamera,
+	Top,
+	Front,
+	Left,
+	Bottom,
+	Back,
+	Right,
+	Free,
+	_End
 };
 
-MAKE_ITERABLE_ENUM(Camera, TopCamera, FreeCamera)
+MAKE_ITERABLE_ENUM(Camera)
 
 struct CameraIcon
 {
@@ -177,7 +178,7 @@ private:
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
-	void drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type);
+	void drawVbos (VboClass surface, VboSubclass colors, GLenum type);
 	void zoomToFit();
 	void zoomAllToFit();
 

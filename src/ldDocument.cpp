@@ -216,7 +216,7 @@ bool LDDocument::save (QString path, int64* sizeptr)
 	// If the second object in the list holds the file name, update that now.
 	LDObject* nameObject = getObject (1);
 
-	if (nameObject and nameObject->type() == OBJ_Comment)
+	if (nameObject and nameObject->type() == LDObjectType::Comment)
 	{
 		LDComment* nameComment = static_cast<LDComment*> (nameObject);
 
@@ -269,7 +269,7 @@ void LDDocument::reloadAllSubfiles()
 	// Go through all objects in the current file and reload the subfiles
 	for (LDObject* obj : objects())
 	{
-		if (obj->type() == OBJ_SubfileReference)
+		if (obj->type() == LDObjectType::SubfileReference)
 		{
 			LDSubfileReference* reference = static_cast<LDSubfileReference*> (obj);
 			LDDocument* fileInfo = m_documents->getDocumentByName (reference->fileInfo()->name());
@@ -282,7 +282,7 @@ void LDDocument::reloadAllSubfiles()
 
 		// Reparse gibberish files. It could be that they are invalid because
 		// of loading errors. Circumstances may be different now.
-		if (obj->type() == OBJ_Error)
+		if (obj->type() == LDObjectType::Error)
 			replaceWithFromString(obj, static_cast<LDError*> (obj)->contents());
 	}
 
@@ -360,7 +360,7 @@ void LDDocument::initializeCachedData()
 
 		for (LDObject* obj : model.objects())
 		{
-			if (obj->type() == OBJ_SubfileReference)
+			if (obj->type() == LDObjectType::SubfileReference)
 			{
 				print ("Warning: unable to inline %1 into %2",
 					static_cast<LDSubfileReference*> (obj)->fileInfo()->getDisplayName(),
@@ -430,7 +430,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
-		if (deep and object->type() == OBJ_SubfileReference)
+		if (deep and object->type() == LDObjectType::SubfileReference)
 			static_cast<LDSubfileReference*>(object)->inlineContents(model, deep, renderinline);
 		else
 			model.addFromString(object->asText());

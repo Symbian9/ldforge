@@ -29,7 +29,7 @@ QString LDEmpty::typeName() const
 
 LDObjectType LDEmpty::type() const
 {
-	return OBJ_Empty;
+	return LDObjectType::Empty;
 }
 
 QString LDEmpty::objectListText() const

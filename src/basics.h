@@ -197,7 +197,7 @@ struct EnumIterShell
 
 	Iterator end()
 	{
-		return Iterator(EnumLimits<Enum>::End);
+		return Iterator(EnumLimits<Enum>::Last + 1);
 	}
 };
 
@@ -209,9 +209,10 @@ EnumIterShell<Enum> iterateEnum()
 
 // Is a value inside an enum?
 template<typename Enum>
-bool valueInEnum(typename std::underlying_type<Enum>::type x)
+bool valueInEnum(Enum enumerator)
 {
-	return x >= EnumLimits<Enum>::First and x <= EnumLimits<Enum>::Last;
+	typename std::underlying_type<Enum>::type index = static_cast<typename std::underlying_type<Enum>::type>(enumerator);
+	return index >= EnumLimits<Enum>::First and index <= EnumLimits<Enum>::Last;
 }
 
 double getRadialPoint(int segment, int divisions, double(*func)(double));

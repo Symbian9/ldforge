@@ -99,7 +99,7 @@ void AlgorithmToolset::editRaw()
 	ui.setupUi (dlg);
 	ui.code->setText (obj->asText());
 
-	if (obj->type() == OBJ_Error)
+	if (obj->type() == LDObjectType::Error)
 		ui.errorDescription->setText (static_cast<LDError*> (obj)->reason());
 	else
 	{
@@ -122,12 +122,12 @@ void AlgorithmToolset::makeBorders()
 	{
 		const LDObjectType type = object->type();
 
-		if (type != OBJ_Quad and type != OBJ_Triangle)
+		if (type != LDObjectType::Quad and type != LDObjectType::Triangle)
 			continue;
 
 		Model lines {m_documents};
 
-		if (type == OBJ_Quad)
+		if (type == LDObjectType::Quad)
 		{
 			LDQuad* quad = static_cast<LDQuad*>(object);
 			lines.emplace<LDLine>(quad->vertex (0), quad->vertex (1));
@@ -390,7 +390,7 @@ void AlgorithmToolset::splitLines()
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (not isOneOf (obj->type(), OBJ_Line, OBJ_CondLine))
+		if (not isOneOf (obj->type(), LDObjectType::Line, LDObjectType::CondLine))
 			continue;
 
 		Model segments {m_documents};
@@ -412,7 +412,7 @@ void AlgorithmToolset::splitLines()
 				a = (obj->vertex (0)[ax] + ((len * (i + 1)) / numSegments));
 			});
 
-			if (obj->type() == OBJ_Line)
+			if (obj->type() == LDObjectType::Line)
 				segments.emplace<LDLine>(v0, v1);
 			else
 				segments.emplace<LDCondLine>(v0, v1, obj->vertex (2), obj->vertex (3));

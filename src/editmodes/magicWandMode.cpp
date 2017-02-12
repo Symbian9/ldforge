@@ -46,7 +46,7 @@ void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& bounda
 	// of candidates.
 	for (LDObject* candidate : candidates)
 	{
-		if (not isOneOf (candidate->type(), OBJ_Line, OBJ_CondLine) or candidate->vertex (0) == candidate->vertex (1))
+		if (not isOneOf (candidate->type(), LDObjectType::Line, LDObjectType::CondLine) or candidate->vertex (0) == candidate->vertex (1))
 			continue;
 
 		int matches = 0;
@@ -60,7 +60,7 @@ void MagicWandMode::fillBoundaries (LDObject* obj, QVector<BoundaryType>& bounda
 			{
 				// Boundary found. If it's an edgeline, add it to the boundaries list, if a
 				// conditional line, select it.
-				if (candidate->type() == OBJ_CondLine)
+				if (candidate->type() == LDObjectType::CondLine)
 					m_selection << candidate;
 				else
 					boundaries.append (std::make_tuple (candidate->vertex (0), candidate->vertex (1)));
@@ -96,13 +96,13 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 
 	switch (obj->type())
 	{
-		case OBJ_Line:
-		case OBJ_CondLine:
+		case LDObjectType::Line:
+		case LDObjectType::CondLine:
 			matchesneeded = 1;
 			break;
 
-		case OBJ_Triangle:
-		case OBJ_Quad:
+		case LDObjectType::Triangle:
+		case LDObjectType::Quad:
 			matchesneeded = 2;
 			break;
 

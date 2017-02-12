@@ -92,8 +92,8 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 		    "camera-free"
 		};
 
-		CameraIcon* info = &m_cameraIcons[camera];
-		info->image = GetIcon (cameraIconNames[camera]);
+		CameraIcon* info = &m_cameraIcons[static_cast<int>(camera)];
+		info->image = GetIcon (cameraIconNames[static_cast<int>(camera)]);
 		info->camera = camera;
 	}
 
@@ -121,7 +121,7 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& info : m_cameraIcons)
 	{
 		// MATH
-		int x1 = (width() - (info.camera != FreeCamera ? 48 : 16)) + ((i % 3) * 16) - 1;
+		int x1 = (width() - (info.camera != Camera::Free ? 48 : 16)) + ((i % 3) * 16) - 1;
 		int y1 = ((i / 3) * 16) + 1;
 
 		info.sourceRect = QRect (0, 0, 16, 16);
@@ -378,7 +378,7 @@ void GLRenderer::drawGLScene()
 	else
 		glDisable(GL_LIGHTING);
 
-	if (camera() != FreeCamera)
+	if (camera() != Camera::Free)
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
@@ -387,15 +387,15 @@ void GLRenderer::drawGLScene()
 		glOrtho (-m_virtualWidth, m_virtualWidth, -m_virtualHeight, m_virtualHeight, -100.0f, 100.0f);
 		glTranslatef(panning (X), panning (Y), 0.0f);
 
-		if (camera() != FrontCamera and camera() != BackCamera)
+		if (camera() != Camera::Front and camera() != Camera::Back)
 		{
-			glRotatef(90.0f, g_cameraInfo[camera()].glrotate[0],
-				g_cameraInfo[camera()].glrotate[1],
-				g_cameraInfo[camera()].glrotate[2]);
+			glRotatef(90.0f, g_cameraInfo[static_cast<int>(camera())].glrotate[0],
+			    g_cameraInfo[static_cast<int>(camera())].glrotate[1],
+			    g_cameraInfo[static_cast<int>(camera())].glrotate[2]);
 		}
 
 		// Back camera needs to be handled differently
-		if (camera() == BackCamera)
+		if (camera() == Camera::Back)
 		{
 			glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
 			glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
@@ -417,10 +417,10 @@ void GLRenderer::drawGLScene()
 
 	if (m_isDrawingSelectionScene)
 	{
-		drawVbos (TrianglesVbo, PickColorsVboComplement, GL_TRIANGLES);
-		drawVbos (QuadsVbo, PickColorsVboComplement, GL_QUADS);
-		drawVbos (LinesVbo, PickColorsVboComplement, GL_LINES);
-		drawVbos (ConditionalLinesVbo, PickColorsVboComplement, GL_LINES);
+		drawVbos (VboClass::Triangles, VboSubclass::PickColors, GL_TRIANGLES);
+		drawVbos (VboClass::Quads, VboSubclass::PickColors, GL_QUADS);
+		drawVbos (VboClass::Lines, VboSubclass::PickColors, GL_LINES);
+		drawVbos (VboClass::ConditionalLines, VboSubclass::PickColors, GL_LINES);
 	}
 	else
 	{
@@ -428,29 +428,29 @@ void GLRenderer::drawGLScene()
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
-			drawVbos (TrianglesVbo, BfcFrontColorsVboComplement, GL_TRIANGLES);
-			drawVbos (QuadsVbo, BfcFrontColorsVboComplement, GL_QUADS);
+			drawVbos (VboClass::Triangles, VboSubclass::BfcFrontColors, GL_TRIANGLES);
+			drawVbos (VboClass::Quads, VboSubclass::BfcFrontColors, GL_QUADS);
 			glCullFace (GL_FRONT);
-			drawVbos (TrianglesVbo, BfcBackColorsVboComplement, GL_TRIANGLES);
-			drawVbos (QuadsVbo, BfcBackColorsVboComplement, GL_QUADS);
+			drawVbos (VboClass::Triangles, VboSubclass::BfcBackColors, GL_TRIANGLES);
+			drawVbos (VboClass::Quads, VboSubclass::BfcBackColors, GL_QUADS);
 			glDisable (GL_CULL_FACE);
 		}
 		else
 		{
-			ComplementVboType colors;
+			VboSubclass colors;
 
 			if (m_config->randomColors())
-				colors = RandomColorsVboComplement;
+				colors = VboSubclass::RandomColors;
 			else
-				colors = NormalColorsVboComplement;
+				colors = VboSubclass::NormalColors;
 
-			drawVbos (TrianglesVbo, colors, GL_TRIANGLES);
-			drawVbos (QuadsVbo, colors, GL_QUADS);
+			drawVbos (VboClass::Triangles, colors, GL_TRIANGLES);
+			drawVbos (VboClass::Quads, colors, GL_QUADS);
 		}
 
-		drawVbos (LinesVbo, NormalColorsVboComplement, GL_LINES);
+		drawVbos (VboClass::Lines, VboSubclass::NormalColors, GL_LINES);
 		glEnable (GL_LINE_STIPPLE);
-		drawVbos (ConditionalLinesVbo, NormalColorsVboComplement, GL_LINES);
+		drawVbos (VboClass::ConditionalLines, VboSubclass::NormalColors, GL_LINES);
 		glDisable (GL_LINE_STIPPLE);
 
 		if (m_config->drawAxes())
@@ -479,19 +479,19 @@ void GLRenderer::drawGLScene()
 
 // =============================================================================
 //
-void GLRenderer::drawVbos (SurfaceVboType surface, ComplementVboType colors, GLenum type)
+void GLRenderer::drawVbos (VboClass surface, VboSubclass colors, GLenum type)
 {
 	// Filter this through some configuration options
-	if ((isOneOf (surface, QuadsVbo, TrianglesVbo) and m_config->drawSurfaces() == false)
-		or (surface == LinesVbo and m_config->drawEdgeLines() == false)
-		or (surface == ConditionalLinesVbo and m_config->drawConditionalLines() == false))
+	if ((isOneOf (surface, VboClass::Quads, VboClass::Triangles) and m_config->drawSurfaces() == false)
+		or (surface == VboClass::Lines and m_config->drawEdgeLines() == false)
+		or (surface == VboClass::ConditionalLines and m_config->drawConditionalLines() == false))
 	{
 		return;
 	}
 
-	int surfaceVboNumber = m_compiler->vboNumber(surface, SurfacesVboComplement);
+	int surfaceVboNumber = m_compiler->vboNumber(surface, VboSubclass::Surfaces);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
-	int normalVboNumber = m_compiler->vboNumber(surface, NormalsVboComplement);
+	int normalVboNumber = m_compiler->vboNumber(surface, VboSubclass::Normals);
 	m_compiler->prepareVBO(surfaceVboNumber, m_model);
 	m_compiler->prepareVBO(colorVboNumber, m_model);
 	m_compiler->prepareVBO(normalVboNumber, m_model);
@@ -545,13 +545,13 @@ void GLRenderer::overpaint(QPainter &painter)
 	// Draw a background for the selected camera
 	painter.setPen(thinBorderPen);
 	painter.setBrush(QBrush {QColor {0, 128, 160, 128}});
-	painter.drawRect(m_cameraIcons[camera()].hitRect);
+	painter.drawRect(m_cameraIcons[static_cast<int>(camera())].hitRect);
 
 	// Draw the camera icons
 	for (const CameraIcon& info : m_cameraIcons)
 	{
 		// Don't draw the free camera icon when we can't use the free camera
-		if (&info == &m_cameraIcons[FreeCamera] and not freeCameraAllowed())
+		if (info.camera == Camera::Free and not freeCameraAllowed())
 			continue;
 
 		painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
@@ -560,7 +560,7 @@ void GLRenderer::overpaint(QPainter &painter)
 	// Tool tips
 	if (m_drawToolTip)
 	{
-		if (not m_cameraIcons[m_toolTipCamera].targetRect.contains (m_mousePosition))
+		if (not m_cameraIcons[static_cast<int>(m_toolTipCamera)].targetRect.contains (m_mousePosition))
 			m_drawToolTip = false;
 		else
 			QToolTip::showText(m_globalpos, currentCameraName());
@@ -627,7 +627,7 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 		m_panning = true;
 		m_isCameraMoving = true;
 	}
-	else if (left and camera() == FreeCamera and (xMove != 0 or yMove != 0))
+	else if (left and camera() == Camera::Free and (xMove != 0 or yMove != 0))
 	{
 		// Apply current rotation input to the rotation matrix
 		// ref: https://forums.ldraw.org/thread-22006-post-24426.html#pid24426
@@ -696,10 +696,10 @@ void GLRenderer::leaveEvent(QEvent*)
 void GLRenderer::setCamera(Camera camera)
 {
 	// The edit mode may forbid the free camera.
-	if (freeCameraAllowed() or camera != FreeCamera)
+	if (freeCameraAllowed() or camera != Camera::Free)
 	{
 		m_camera = camera;
-		m_config->setCamera(int {camera});
+		m_config->setCamera(static_cast<int>(camera));
 	}
 }
 
@@ -850,8 +850,8 @@ Axis GLRenderer::getCameraAxis (bool y, Camera camid)
 	if (camid == (Camera) -1)
 		camid = camera();
 
-	const CameraInfo* cam = &g_cameraInfo[camid];
-	return (y) ? cam->localY : cam->localX;
+	const CameraInfo& cameraData = cameraInfo(camid);
+	return (y) ? cameraData.localY : cameraData.localX;
 }
 
 // =============================================================================
@@ -860,13 +860,13 @@ QString GLRenderer::cameraName (Camera camera) const
 {
 	switch (camera)
 	{
-	case TopCamera: return tr ("Top Camera");
-	case FrontCamera: return tr ("Front Camera");
-	case LeftCamera: return tr ("Left Camera");
-	case BottomCamera: return tr ("Bottom Camera");
-	case BackCamera: return tr ("Back Camera");
-	case RightCamera: return tr ("Right Camera");
-	case FreeCamera: return tr ("Free Camera");
+	case Camera::Top: return tr ("Top Camera");
+	case Camera::Front: return tr ("Front Camera");
+	case Camera::Left: return tr ("Left Camera");
+	case Camera::Bottom: return tr ("Bottom Camera");
+	case Camera::Back: return tr ("Back Camera");
+	case Camera::Right: return tr ("Right Camera");
+	case Camera::Free: return tr ("Free Camera");
 	default: break;
 	}
 
@@ -1024,7 +1024,7 @@ void GLRenderer::highlightCursorObject()
 const CameraInfo& GLRenderer::cameraInfo (Camera camera) const
 {
 	if (valueInEnum<Camera>(camera))
-		return g_cameraInfo[camera];
+		return g_cameraInfo[static_cast<int>(camera)];
 	else
 		return g_cameraInfo[0];
 }
@@ -1056,19 +1056,17 @@ Camera GLRenderer::camera() const
 
 double& GLRenderer::panning (Axis ax)
 {
-	return (ax == X) ? m_panX[camera()] :
-		m_panY[camera()];
+	return (ax == X) ? m_panX[static_cast<int>(camera())] : m_panY[static_cast<int>(camera())];
 }
 
 double GLRenderer::panning (Axis ax) const
 {
-	return (ax == X) ? m_panX[camera()] :
-	    m_panY[camera()];
+	return (ax == X) ? m_panX[static_cast<int>(camera())] : m_panY[static_cast<int>(camera())];
 }
 
 double& GLRenderer::zoom()
 {
-	return m_zoom[camera()];
+	return m_zoom[static_cast<int>(camera())];
 }
 
 const QGenericMatrix<4, 4, GLfloat>& GLRenderer::rotationMatrix() const

@@ -297,7 +297,7 @@ void MainWindow::updateTitle()
 		title += m_currentDocument->getDisplayName();
 
 		if (m_currentDocument->size() > 0 and
-		    m_currentDocument->getObject(0)->type() == OBJ_Comment)
+		    m_currentDocument->getObject(0)->type() == LDObjectType::Comment)
 		{
 			// Append title
 			LDComment* comm = static_cast <LDComment*> (m_currentDocument->getObject (0));
@@ -369,7 +369,7 @@ void MainWindow::buildObjectList()
 		}
 
 		// Color gibberish orange on red so it stands out.
-		if (obj->type() == OBJ_Error)
+		if (obj->type() == LDObjectType::Error)
 		{
 			item->setBackground (QColor ("#AA0000"));
 			item->setForeground (QColor ("#FFAA00"));
@@ -616,7 +616,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (obj->type() == OBJ_SubfileReference)
+		if (obj->type() == LDObjectType::SubfileReference)
 		{
 			hasSubfiles = true;
 			break;
@@ -625,7 +625,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 
 	QMenu* contextMenu = new QMenu;
 
-	if (single and singleObj->type() != OBJ_Empty)
+	if (single and singleObj->type() != LDObjectType::Empty)
 	{
 		contextMenu->addAction (ui.actionEdit);
 		contextMenu->addSeparator();
@@ -662,7 +662,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
-	if (renderer()->camera() != FreeCamera)
+	if (renderer()->camera() != Camera::Free)
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui.actionSetDrawDepth);

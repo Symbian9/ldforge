@@ -25,7 +25,7 @@
 class LDEmpty : public LDObject
 {
 public:
-	static const LDObjectType SubclassType = OBJ_Empty;
+	static const LDObjectType SubclassType = LDObjectType::Empty;
 
 	QString asText() const override;
 	QString objectListText() const override;

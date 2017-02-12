@@ -107,7 +107,7 @@ QColor GLCompiler::indexColorForID (int id) const
 }
 
 
-QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, ComplementVboType complement) const
+QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement) const
 {
 	QColor qcol;
 	static const QColor bfcFrontColor {64, 192, 80};
@@ -115,26 +115,27 @@ QColor GLCompiler::getColorForPolygon (LDPolygon& poly, LDObject* topobj, Comple
 
 	switch (complement)
 	{
-	case SurfacesVboComplement:
-	case NormalsVboComplement:
+	case VboSubclass::Surfaces:
+	case VboSubclass::Normals:
+	case VboSubclass::_End:
 		return {};
 
-	case BfcFrontColorsVboComplement:
+	case VboSubclass::BfcFrontColors:
 		qcol = bfcFrontColor;
 		break;
 
-	case BfcBackColorsVboComplement:
+	case VboSubclass::BfcBackColors:
 		qcol = bfcBackColor;
 		break;
 
-	case PickColorsVboComplement:
+	case VboSubclass::PickColors:
 		return indexColorForID(topobj->id());
 
-	case RandomColorsVboComplement:
+	case VboSubclass::RandomColors:
 		qcol = topobj->randomColor();
 		break;
 
-	case NormalColorsVboComplement:
+	case VboSubclass::NormalColors:
 		if (poly.color == MainColor)
 		{
 			if (topobj->color() == MainColor)
@@ -286,10 +287,10 @@ void GLCompiler::compileObject (LDObject* obj)
 	{
 	// Note: We cannot split quads into triangles here, it would mess up the wireframe view.
 	// Quads must go into separate vbos.
-	case OBJ_Triangle:
-	case OBJ_Quad:
-	case OBJ_Line:
-	case OBJ_CondLine:
+	case LDObjectType::Triangle:
+	case LDObjectType::Quad:
+	case LDObjectType::Line:
+	case LDObjectType::CondLine:
 		{
 			LDPolygon* poly = obj->getPolygon();
 			poly->id = obj->id();
@@ -298,7 +299,7 @@ void GLCompiler::compileObject (LDObject* obj)
 			break;
 		}
 
-	case OBJ_SubfileReference:
+	case LDObjectType::SubfileReference:
 		{
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			auto data = ref->inlinePolygons();
@@ -311,7 +312,7 @@ void GLCompiler::compileObject (LDObject* obj)
 			break;
 		}
 
-	case OBJ_BezierCurve:
+	case LDObjectType::BezierCurve:
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
 			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
@@ -333,15 +334,15 @@ void GLCompiler::compileObject (LDObject* obj)
 
 void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
 {
-	SurfaceVboType surface;
+	VboClass surface;
 	int vertexCount;
 
 	switch (poly.num)
 	{
-	case 2:	surface = LinesVbo;				vertexCount = 2; break;
-	case 3:	surface = TrianglesVbo;			vertexCount = 3; break;
-	case 4:	surface = QuadsVbo;				vertexCount = 4; break;
-	case 5:	surface = ConditionalLinesVbo;	vertexCount = 2; break;
+	case 2:	surface = VboClass::Lines;				vertexCount = 2; break;
+	case 3:	surface = VboClass::Triangles;			vertexCount = 3; break;
+	case 4:	surface = VboClass::Quads;				vertexCount = 4; break;
+	case 5:	surface = VboClass::ConditionalLines;	vertexCount = 2; break;
 	default: return;
 	}
 
@@ -357,7 +358,7 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 		normals[i] = Vertex::crossProduct(v3 - v2, v1 - v2).normalized();
 	}
 
-	for (ComplementVboType complement : iterateEnum<ComplementVboType>())
+	for (VboSubclass complement : iterateEnum<VboSubclass>())
 	{
 		const int vbonum = vboNumber (surface, complement);
 		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
@@ -365,14 +366,14 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 
 		for (int vert = 0; vert < vertexCount; ++vert)
 		{
-			if (complement == SurfacesVboComplement)
+			if (complement == VboSubclass::Surfaces)
 			{
 				// Write coordinates. Apparently Z must be flipped too?
 				vbodata	<< poly.vertices[vert].x()
 						<< -poly.vertices[vert].y()
 						<< -poly.vertices[vert].z();
 			}
-			else if (complement == NormalsVboComplement)
+			else if (complement == VboSubclass::Normals)
 			{
 				vbodata << normals[vert].x()
 				        << -normals[vert].y()
@@ -396,9 +397,9 @@ void GLCompiler::setRenderer (GLRenderer* renderer)
 }
 
 
-int GLCompiler::vboNumber (SurfaceVboType surface, ComplementVboType complement)
+int GLCompiler::vboNumber (VboClass surface, VboSubclass complement)
 {
-	return (surface * EnumLimits<ComplementVboType>::Count) + complement;
+	return (static_cast<int>(surface) * EnumLimits<VboSubclass>::Count) + static_cast<int>(complement);
 }
 
 

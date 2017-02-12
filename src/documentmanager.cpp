@@ -133,7 +133,7 @@ void DocumentManager::openMainModel (QString path)
 
 	for (LDObject* obj : file->objects())
 	{
-		if (obj->type() != OBJ_Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty())
+		if (obj->type() != LDObjectType::Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty())
 			continue;
 
 		unknowns << static_cast<LDError*> (obj)->fileReferenced();

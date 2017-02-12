@@ -25,7 +25,7 @@
 class LDComment : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = OBJ_Comment;
+	static constexpr LDObjectType SubclassType = LDObjectType::Comment;
 
 	QString asText() const override;
 	bool isColored() const override;
