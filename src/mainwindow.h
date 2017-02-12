@@ -136,7 +136,7 @@ protected:
 	void closeEvent (QCloseEvent* ev);
 
 private:
-	struct ToolInfo { QMetaMethod method; Toolset* object; };
+	struct ToolInfo;
 
 	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;

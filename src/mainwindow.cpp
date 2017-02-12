@@ -41,6 +41,12 @@
 #include "grid.h"
 #include "mathfunctions.h"
 
+struct MainWindow::ToolInfo
+{
+	QMetaMethod method;
+	Toolset* object;
+};
+
 ConfigOption (bool ColorizeObjectsList = true)
 ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
 ConfigOption (bool ListImplicitFiles = false)
