@@ -32,9 +32,6 @@
 #include "../miscallenous.h"
 #include "../grid.h"
 
-ConfigOption (bool DrawLineLengths = true)
-ConfigOption (bool DrawAngles = false)
-
 /*
  * Base class constructor of the abstract editing mode.
  */

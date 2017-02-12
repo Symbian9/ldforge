@@ -43,8 +43,6 @@ static const GLErrorInfo g_GLErrors[] =
 	{ GL_STACK_OVERFLOW,				"The operation would have caused an overflow" },
 };
 
-ConfigOption (QString SelectColorBlend = "#0080FF")
-
 void CheckGLErrorImpl (const char* file, int line)
 {
 	QString errmsg;

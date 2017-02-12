@@ -19,21 +19,6 @@
 #include "grid.h"
 #include "configuration.h"
 
-
-ConfigOption (int Grid = 1)
-ConfigOption (qreal GridCoarseCoordinateSnap = 5.0)
-ConfigOption (qreal GridCoarseAngleSnap = 45.0)
-ConfigOption (int GridCoarseBezierCurveSegments = 8)
-ConfigOption (qreal GridMediumCoordinateSnap = 1.0)
-ConfigOption (qreal GridMediumAngleSnap = 22.5)
-ConfigOption (qreal GridMediumBezierCurveSegments = 16)
-ConfigOption (qreal GridFineCoordinateSnap = 0.1)
-ConfigOption (qreal GridFineAngleSnap = 7.5)
-ConfigOption (qreal GridFineBezierCurveSegments = 32)
-ConfigOption (int RotationPointType = 0)
-ConfigOption (Vertex CustomRotationPoint = Origin)
-
-
 Grid::Grid(QObject* parent) :
 	HierarchyElement(parent) {}
 

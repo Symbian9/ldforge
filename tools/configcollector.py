@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 #
-#	Copyright 2015 Teemu Piippo
+#	Copyright 2015 - 2017 Teemu Piippo
 #	All rights reserved.
 #
 #	Redistribution and use in source and binary forms, with or without
@@ -37,117 +37,79 @@ import outputfile
 import re
 from pprint import pprint
 
-passbyvalue = {'int', 'bool', 'float', 'double' }
-variantconversions = {
-	'QString': 'toString',
-	'bool': 'toBool',
-	'int': 'toInt',
-	'float': 'toFloat',
-	'double': 'toDouble',
-	'QChar': 'toChar',
-	'QBitArray': 'toBitArray',
-	'QDate': 'toDate',
-	'QDateTime': 'toDateTime',
-	'uint': 'toUInt',
-	'unsigned int': 'toUInt',
-	'QUrl': 'toUrl',
-	'QTime': 'toTime',
-	'QPoint': 'toPoint',
-	'QPointF': 'toPointF',
-	'QSize': 'toSize',
-	'QSizeF': 'toSizeF',
-	'qreal': 'toReal',
-	'QRect': 'toRect',
-	'QRectF': 'toRectF',
-	'QLine': 'toLine',
-	'QLineF': 'toLineF',
-	'QEasingCurve': 'toEasingCurve',
-	'qlonglong': 'toLongLong',
-	'qulonglong': 'toULongLong',
-}
+passbyvalue = {'int', 'bool', 'float', 'double', 'qreal'}
+
+def deduce_type(value):
+	'''
+		Try to determine the type of value from the value itself.
+	'''
+	if value in ('true', 'false'):
+		return 'bool'
+
+	if value.startswith('"') and value.endswith('"'):
+		return 'QString'
+
+	try:
+		int(value)
+		return 'int'
+	except:
+		pass
+
+	try:
+		float(value)
+		return 'double'
+	except:
+		pass
+
+	if endswith(value, 'f'):
+		try:
+			float(value[:-1])
+			return 'float'
+		except:
+			pass
+
+	raise ValueError('unable to deduce type of %r' % value)
 
 class ConfigCollector (object):
 	def __init__ (self, args):
-		self.pattern = re.compile (r'\s*ConfigOption\s*\((.+)\)\s*')
-		self.declpattern = re.compile (r'^([A-Za-z0-9,<>\[\]\(\)\{\}\s]+)\s+(\w+)(\s*=\s*(.+))?$')
 		self.decls = []
 		self.qttypes = set()
 		self.args = args
 
-	def collect (self, filenames):
-		for filename in filenames:
-			with open (filename, 'r') as fp:
-				lines = fp.read().splitlines()
-
-			for line in lines:
-				matches = self.pattern.findall (line)
-				for match in matches:
-					match = match.strip()
-					declarations = self.declpattern.findall (match)
-					for decl in declarations:
-						self.add_config_declaration (decl)
+	def collect (self, filename):
+		with open(filename, 'r') as file:
+			for line in file:
+				line = line.strip()
+				if line and not line.startswith('#'):
+					match = re.search('^option (\w+) = (.+)$', line)
+					if not match:
+						raise ValueError('unable to parse: %r' % line)
+					name, value = match.groups()
+					match = re.search(r'^(\w+)\s*\{(.*)\}$', value)
+					try:
+						type, value = match.groups()
+						if not value:
+							value = type + ' {}'
+					except:
+						type = deduce_type(value)
+					self.add_config_declaration((name, type, value))
 
 		self.decls.sort (key=lambda x: x['name'].upper())
 
-	def add_config_declaration (self, decl):
-		decltype, declname, junk, decldefault = decl
-		if not decldefault:
-			if decltype == 'int':
-				decldefault = '0'
-			elif decltype == 'float':
-				decldefault = '0.0f'
-			elif decltype == 'double':
-				decldefault = '0.0'
-			elif decltype == 'bool':
-				raise TypeError ('bool entries must provide a default value')
-			else:
-				decldefault = decltype + '()'
-
-		self.decls.append (dict (name=declname, type=decltype, default=decldefault))
-
-		# Take note of any Qt types we may want to #include in our source file (we'll need to #include them).
-		self.qttypes.update (re.findall (r'(Q[A-Za-z]+)', decltype))
-
-	def make_config_key_type (self, basetype):
-		result = 'ConfigTypeKey_' + basetype
-		result = re.sub (r'[^\w]+', '_', result)
-		return result
-
-	def make_enums (self):
-		self.enums = collections.OrderedDict()
-
 		for decl in self.decls:
-			enumname = self.make_config_key_type (decl['type'])
-			decl['enumerator'] = caseconversions.convert_case (decl['name'], style='upper')
-			decl['enumname'] = enumname
 			decl['getter'] = caseconversions.convert_case (decl['name'], style='java')
 			decl['varname'] = 'm_' + decl['getter']
 			decl['setter'] = 'set' + caseconversions.convert_case (decl['name'], style='camel')
 			decl['toggler'] = 'toggle' + caseconversions.convert_case (decl['name'], style='camel')
 			decl['typecref'] = 'const %s&' % decl['type'] if decl['type'] not in passbyvalue else decl['type']
+			decl['valuefunc'] = 'value<' + decl['type'] + '>'
 
-			try:
-				decl['valuefunc'] = variantconversions[decl['type']]
-			except KeyError:
-				decl['valuefunc'] = 'value<' + decl['type'] + '>'
+	def add_config_declaration (self, decl):
+		declname, decltype, decldefault = decl
+		self.decls.append (dict (name=declname, type=decltype, default=decldefault))
 
-			if enumname not in self.enums:
-				self.enums[enumname] = dict (
-					name = enumname,
-					typename = decl['type'],
-					values = [],
-					numvalues = 0,
-					highestkey = -1)
-
-			self.enums[enumname]['values'].append (decl)
-			self.enums[enumname]['numvalues'] += 1
-			self.enums[enumname]['highestkey'] += 1
-
-		self.enums = collections.OrderedDict (sorted (self.enums.items(), key=lambda x: x[0].upper()))
-
-		for name, enum in self.enums.items():
-			for i, value in enumerate (enum['values']):
-				value['index'] = i
+		# Take note of any Qt types we may want to #include in our source file (we'll need to #include them).
+		self.qttypes.update (re.findall (r'Q\w+', decltype))
 
 	def write_header (self, fp):
 		fp.write ('#pragma once\n')
@@ -177,7 +139,6 @@ class ConfigCollector (object):
 		write ('private:\n')
 		write ('\tQMap<QString, QVariant> m_defaults;\n')
 		write ('\tclass QSettings* m_settings;\n')
-
 		write ('};\n')
 
 	def write_source (self, fp, headername):
@@ -246,14 +207,13 @@ class ConfigCollector (object):
 
 def main():
 	parser = argparse.ArgumentParser (description='Collects a list of configuration objects')
-	parser.add_argument ('inputs', nargs='+')
+	parser.add_argument ('input')
 	parser.add_argument ('--header', required=True)
 	parser.add_argument ('--source', required=True)
 	parser.add_argument ('--sourcedir', required=True)
 	args = parser.parse_args()
 	collector = ConfigCollector (args)
-	collector.collect (args.inputs)
-	collector.make_enums()
+	collector.collect (args.input)
 	header = outputfile.OutputFile (args.header)
 	source = outputfile.OutputFile (args.source)
 	collector.write_source (source, headername=args.header)

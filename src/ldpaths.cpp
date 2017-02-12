@@ -21,8 +21,6 @@
 #include "mainwindow.h"
 #include "dialogs/ldrawpathdialog.h"
 
-ConfigOption (QString LDrawPath)
-
 LDPaths::LDPaths (Configuration *config, QObject* parent) :
 	QObject(parent),
 	m_config(config),

@@ -25,8 +25,6 @@
 #include "documentloader.h"
 #include "glRenderer.h"
 
-ConfigOption (QStringList RecentFiles)
-ConfigOption (bool TryDownloadMissingFiles = false)
 const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
 
 enum

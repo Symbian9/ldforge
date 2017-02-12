@@ -46,24 +46,6 @@ const CameraInfo g_cameraInfo[EnumLimits<Camera>::Count] =
 	{{  1,  0, 0 }, X, Z, false, false, false }, // free (defensive dummy data)
 };
 
-ConfigOption (QColor BackgroundColor = "#FFFFFF")
-ConfigOption (QColor MainColor = "#A0A0A0")
-ConfigOption (float MainColorAlpha = 1.0)
-ConfigOption (int LineThickness = 2)
-ConfigOption (bool BfcRedGreenView = false)
-ConfigOption (int Camera = 6)
-ConfigOption (bool BlackEdges = false)
-ConfigOption (bool DrawAxes = false)
-ConfigOption (bool DrawWireframe = false)
-ConfigOption (bool UseLogoStuds = false)
-ConfigOption (bool AntiAliasedLines = true)
-ConfigOption (bool RandomColors = false)
-ConfigOption (bool HighlightObjectBelowCursor = true)
-ConfigOption (bool DrawSurfaces = true)
-ConfigOption (bool DrawEdgeLines = true)
-ConfigOption (bool DrawConditionalLines = true)
-ConfigOption (bool Lighting = true)
-
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
 // =============================================================================

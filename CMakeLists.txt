@@ -168,6 +168,10 @@ set (LDFORGE_FORMS
 	src/dialogs/openprogressdialog.ui
 )
 
+set (LDFORGE_OTHER_FILES
+	src/configurationoptions.txt
+)
+
 set (LDFORGE_RESOURCES ldforge.qrc)
 # set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
 
@@ -203,17 +207,18 @@ add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS}
 	${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS}
 	${CMAKE_BINARY_DIR}/configuration.cpp)
 
-set_source_files_properties (${LDFORGE_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties(${LDFORGE_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties(${LDFORGE_OTHER_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 set_target_properties (ldforge PROPERTIES AUTOMOC 1)
 target_link_libraries (ldforge Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
 
 add_custom_target (config_collection ALL
-	COMMAND python
+	COMMAND python3
 		"${CMAKE_SOURCE_DIR}/tools/configcollector.py"
 		--header ${CMAKE_BINARY_DIR}/configuration.h
 		--source ${CMAKE_BINARY_DIR}/configuration.cpp
 		--sourcedir ${CMAKE_SOURCE_DIR}/src
-		${LDFORGE_SOURCES}
+		${CMAKE_SOURCE_DIR}/src/configurationoptions.txt
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(lengthcheck ALL

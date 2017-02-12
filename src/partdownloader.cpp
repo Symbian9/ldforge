@@ -27,10 +27,6 @@
 #include "glRenderer.h"
 #include "documentmanager.h"
 
-ConfigOption(QString DownloadFilePath)
-ConfigOption(bool GuessDownloadPaths = true)
-ConfigOption (bool AutoCloseDownloadDialog = true)
-
 const char* g_unofficialLibraryURL = "http://ldraw.org/library/unofficial/";
 
 PartDownloader::PartDownloader (QWidget* parent)

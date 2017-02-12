@@ -25,8 +25,6 @@
 MainWindow* g_win = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 
-ConfigOption (bool FirstStart = true)
-
 // =============================================================================
 //
 int main (int argc, char* argv[])

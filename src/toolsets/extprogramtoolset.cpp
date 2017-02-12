@@ -44,21 +44,6 @@
 #include "ui_isecalc.h"
 #include "ui_edger2.h"
 
-// =============================================================================
-//
-ConfigOption (QString IsecalcPath)
-ConfigOption (QString IntersectorPath)
-ConfigOption (QString CovererPath)
-ConfigOption (QString RectifierPath)
-ConfigOption (QString YtruderPath)
-ConfigOption (QString Edger2Path)
-ConfigOption (bool IsecalcUsesWine = false)
-ConfigOption (bool IntersectorUsesWine = false)
-ConfigOption (bool CovererUsesWine = false)
-ConfigOption (bool YtruderUsesWine = false)
-ConfigOption (bool RectifierUsesWine = false)
-ConfigOption (bool Edger2UsesWine = false)
-
 ExtProgramToolset::ExtProgramToolset (MainWindow* parent) :
 	Toolset (parent)
 {

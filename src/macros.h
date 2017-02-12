@@ -53,8 +53,6 @@ public: \
 template<typename T>
 struct EnumLimits {};
 
-#define ConfigOption(...)
-
 #define DEFINE_FLAG_ACCESS_METHODS(FLAGS) \
 	bool checkFlag(decltype(FLAGS) flag) const { return !!(FLAGS & flag); } \
 	void setFlag(decltype(FLAGS) flag) { FLAGS |= flag; } \

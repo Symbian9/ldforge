@@ -47,11 +47,6 @@ struct MainWindow::ToolInfo
 	Toolset* object;
 };
 
-ConfigOption (bool ColorizeObjectsList = true)
-ConfigOption (QString QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15")
-ConfigOption (bool ListImplicitFiles = false)
-ConfigOption (QStringList HiddenToolbars)
-
 // ---------------------------------------------------------------------------------------------------------------------
 //
 MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowFlags flags) :

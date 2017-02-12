@@ -1,0 +1,79 @@
+#
+# LDForge configuration option definitions
+#
+# Syntax:
+#    option OptionName = value
+#    option OptionName = type {value}
+#    # comment
+#
+
+# Editing options
+option Grid = 1
+option GridCoarseCoordinateSnap = 5.0
+option GridCoarseAngleSnap = 45.0
+option GridCoarseBezierCurveSegments = 8
+option GridMediumCoordinateSnap = 1.0
+option GridMediumAngleSnap = 22.5
+option GridMediumBezierCurveSegments = 16
+option GridFineCoordinateSnap = 0.1
+option GridFineAngleSnap = 7.5
+option GridFineBezierCurveSegments = 32
+option RotationPointType = 0
+option CustomRotationPoint = Vertex {}
+option ColorizeObjectsList = true
+option QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15"
+option ListImplicitFiles = false
+option HiddenToolbars = QStringList {}
+option RecentFiles = QStringList {}
+option TryDownloadMissingFiles = false
+option DefaultName = ""
+option DefaultUser = ""
+option UseCaLicense = true
+option RoundPositionPrecision = 3
+option RoundMatrixPrecision = 4
+option SplitLinesSegments = 5
+
+# External program options
+option IsecalcPath = ""
+option IntersectorPath = ""
+option CovererPath = ""
+option RectifierPath = ""
+option YtruderPath = ""
+option Edger2Path = ""
+option IsecalcUsesWine = false
+option IntersectorUsesWine = false
+option CovererUsesWine = false
+option YtruderUsesWine = false
+option RectifierUsesWine = false
+option Edger2UsesWine = false
+
+# Rendering options
+option BackgroundColor = QColor {"#FFFFFF"}
+option MainColor = QColor {"#A0A0A0"}
+option MainColorAlpha = 1.0
+option SelectColorBlend = "#0080FF"
+option LineThickness = 2
+option BfcRedGreenView = false
+option Camera = 6
+option BlackEdges = false
+option DrawAxes = false
+option DrawWireframe = false
+option UseLogoStuds = false
+option AntiAliasedLines = true
+option RandomColors = false
+option HighlightObjectBelowCursor = true
+option DrawSurfaces = true
+option DrawEdgeLines = true
+option DrawConditionalLines = true
+option Lighting = true
+option DrawLineLengths = true
+option DrawAngles = false
+
+# File management options
+option DownloadFilePath = ""
+option GuessDownloadPaths = true
+option AutoCloseDownloadDialog = true
+option LDrawPath = ""
+
+# Other options
+option FirstStart = true

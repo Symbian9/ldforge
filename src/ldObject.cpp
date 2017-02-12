@@ -27,10 +27,6 @@
 #include "colors.h"
 #include "glCompiler.h"
 
-ConfigOption (QString DefaultName = "")
-ConfigOption (QString DefaultUser = "")
-ConfigOption (bool UseCaLicense = true)
-
 // List of all LDObjects
 QMap<int32, LDObject*> g_allObjects;
 
