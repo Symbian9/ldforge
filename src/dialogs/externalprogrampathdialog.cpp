@@ -19,7 +19,7 @@
 #include <QFileDialog>
 #include "externalprogrampathdialog.h"
 #include "configdialog.h"
-#include "ui_extprogpath.h"
+#include "ui_externalprogrampathdialog.h"
 #include "../mainwindow.h"
 #include "../glRenderer.h"
 #include "../documentation.h"

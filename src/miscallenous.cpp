@@ -87,7 +87,7 @@ void applyToMatrix (const Matrix& a, ApplyToMatrixConstFunction func)
 QString formatFileSize (qint64 size)
 {
 	static const QString suffixes[] = {" bytes", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
-	int magnitude = magnitude = (size > 0) ? floor(log(size) / log(1000) + 1e-10) : 0;
+	int magnitude = (size > 0) ? floor(log10(size) / 3.0 + 1e-10) : 0;
 	magnitude = qBound(0, magnitude, countof(suffixes) - 1);
 	return QString::number(size / pow(1000, magnitude)) + suffixes[magnitude];
 }
