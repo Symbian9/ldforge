@@ -37,8 +37,9 @@
 
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
-// =============================================================================
-//
+/*
+ * Constructs a GL renderer.
+ */
 GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
@@ -80,20 +81,18 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 	calcCameraIcons();
 }
 
-// =============================================================================
-//
+/*
+ * Cleans up the axes VBOs when the renderer is destroyed.
+ */
 GLRenderer::~GLRenderer()
 {
-	m_compiler->setRenderer (nullptr);
-	delete m_compiler;
-	glDeleteBuffers (1, &m_axesVbo);
-	glDeleteBuffers (1, &m_axesColorVbo);
+	glDeleteBuffers(1, &m_axesVbo);
+	glDeleteBuffers(1, &m_axesColorVbo);
 }
 
-// =============================================================================
-// Calculates the "hitboxes" of the camera icons so that we can tell when the
-// cursor is pointing at the camera icon.
-//
+/*
+ * Calculates the camera icon locations.
+ */
 void GLRenderer::calcCameraIcons()
 {
 	int i = 0;
@@ -105,6 +104,7 @@ void GLRenderer::calcCameraIcons()
 		int row = i / columns;
 		int column = i % columns;
 
+		// Do right-justifying on the last row.
 		if (i >= firstAtLastRow)
 			column += columns - (countof(m_cameras) % columns);
 
@@ -124,18 +124,25 @@ void GLRenderer::calcCameraIcons()
 	}
 }
 
+/*
+ * Returns the camera currently in use.
+ */
 GLCamera& GLRenderer::currentCamera()
 {
 	return m_cameras[static_cast<int>(camera())];
 }
 
+/*
+ * Returns the camera currently in use.
+ */
 const GLCamera& GLRenderer::currentCamera() const
 {
 	return m_cameras[static_cast<int>(camera())];
 }
 
-// =============================================================================
-//
+/*
+ * Prepares the GL context for rendering.
+ */
 void GLRenderer::initGLData()
 {
 	glEnable (GL_BLEND);
@@ -160,21 +167,9 @@ void GLRenderer::initGLData()
 	}
 }
 
-bool GLRenderer::isDrawOnly() const
-{
-	return m_isDrawOnly;
-}
-
-void GLRenderer::setDrawOnly (bool value)
-{
-	m_isDrawOnly = value;
-}
-
-GLCompiler* GLRenderer::compiler() const
-{
-	return m_compiler;
-}
-
+/*
+ * Returns the object currently highlighted by the cursor.
+ */
 LDObject* GLRenderer::objectAtCursor() const
 {
 	return m_objectAtCursor;
@@ -232,7 +227,7 @@ void GLRenderer::initializeGL()
 	setAutoFillBackground (false);
 	setMouseTracking (true);
 	setFocusPolicy (Qt::WheelFocus);
-	compiler()->initialize();
+	m_compiler->initialize();
 	initializeAxes();
 	initializeLighting();
 	m_initialized = true;

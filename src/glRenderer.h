@@ -87,7 +87,6 @@ public:
 	void forgetObject(LDObject* obj);
 	void highlightCursorObject();
 	void initGLData();
-	bool isDrawOnly() const;
 	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
 	const Model* model() const;
@@ -103,7 +102,6 @@ public:
 	void resetAngles();
 	void setBackground();
 	void setCamera(Camera cam);
-	void setDrawOnly(bool value);
 	void setPicking(bool a);
 	QPen textPen() const;
 
@@ -152,7 +150,6 @@ private:
 	bool m_takingScreenCapture = false;
 	bool m_panning = false;
 	bool m_initialized = false;
-	bool m_isDrawOnly = false;
 	bool m_isDrawingSelectionScene = false;
 	bool m_isCameraMoving = false;
 	bool m_needZoomToFit = true;
