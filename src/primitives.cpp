@@ -28,7 +28,7 @@
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"
 #include "linetypes/empty.h"
-
+#include "linetypes/triangle.h"
 
 PrimitiveManager::PrimitiveManager(QObject* parent) :
 	QObject(parent),

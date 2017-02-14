@@ -65,7 +65,6 @@ LDSubfileReference::LDSubfileReference (Model* model) :
     LDMatrixObject (model) {}
 
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
-LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
 LDOBJ_DEFAULT_CTOR (LDQuadrilateral, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
@@ -88,18 +87,6 @@ QString LDSubfileReference::asText() const
 	val += transformationMatrix().toString();
 	val += ' ';
 	val += fileInfo()->name();
-	return val;
-}
-
-// =============================================================================
-//
-QString LDTriangle::asText() const
-{
-	QString val = format ("3 %1", color());
-
-	for (int i = 0; i < 3; ++i)
-		val += format (" %1", vertex (i));
-
 	return val;
 }
 
@@ -160,11 +147,6 @@ int LDSubfileReference::triangleCount() const
 	return fileInfo()->triangleCount();
 }
 
-int LDTriangle::triangleCount() const
-{
-	return 1;
-}
-
 int LDQuadrilateral::triangleCount() const
 {
 	return 2;
@@ -173,16 +155,6 @@ int LDQuadrilateral::triangleCount() const
 int LDObject::numVertices() const
 {
 	return 0;
-}
-
-// =============================================================================
-//
-LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-    LDObject {model}
-{
-	setVertex (0, v1);
-	setVertex (1, v2);
-	setVertex (2, v3);
 }
 
 // =============================================================================
@@ -436,19 +408,6 @@ Model* LDObject::model() const
 void LDObject::invert() {}
 void LDBfc::invert() {}
 void LDError::invert() {}
-
-// =============================================================================
-//
-void LDTriangle::invert()
-{
-	// Triangle goes 0 -> 1 -> 2, reversed: 0 -> 2 -> 1.
-	// Thus, we swap 1 and 2.
-	Vertex tmp = vertex (1);
-	setVertex (1, vertex (2));
-	setVertex (2, tmp);
-
-	return;
-}
 
 // =============================================================================
 //

@@ -22,6 +22,7 @@
 #include "../linetypes/modelobject.h"
 #include "../glrenderer.h"
 #include "../linetypes/edgeline.h"
+#include "../linetypes/triangle.h"
 
 DrawMode::DrawMode (Canvas* canvas) :
     Super (canvas) {}

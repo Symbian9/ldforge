@@ -29,7 +29,7 @@ class LDDocument;
 /*
  * Object type codes.
  */
-enum LDObjectType
+enum class LDObjectType
 {
 	SubfileReference,	//	Object represents a	sub-file reference
 	Quadrilateral,		//	Object represents a	quadrilateral
@@ -45,6 +45,11 @@ enum LDObjectType
 };
 
 MAKE_ITERABLE_ENUM(LDObjectType)
+
+inline int qHash(LDObjectType type)
+{
+	return qHash(static_cast<int>(type));
+}
 
 /*
  * Represents one line of code in an LDraw model file.
@@ -250,31 +255,6 @@ protected:
 
 private:
 	LDDocument* m_fileInfo;
-};
-
-/*
- * Represents a single code-3 triangle in the LDraw code file.
- */
-class LDTriangle : public LDObject
-{
-public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Triangle;
-
-	virtual LDObjectType type() const override
-	{
-		return SubclassType;
-	}
-
-	virtual QString asText() const override;
-	virtual void invert() override;
-	int triangleCount() const override;
-	int numVertices() const override { return 3; }
-	QString typeName() const override { return "triangle"; }
-
-protected:
-	friend class Model;
-	LDTriangle (Model* model);
-	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 };
 
 /*
