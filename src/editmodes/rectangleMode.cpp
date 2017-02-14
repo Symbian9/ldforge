@@ -19,7 +19,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include "rectangleMode.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "../canvas.h"
 
 RectangleMode::RectangleMode (Canvas* canvas) :

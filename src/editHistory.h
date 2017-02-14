@@ -18,7 +18,7 @@
 
 #pragma once
 #include "main.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 
 class AbstractHistoryEntry;
 

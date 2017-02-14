@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "generateprimitivedialog.h"
 #include "ui_generateprimitivedialog.h"
 

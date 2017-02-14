@@ -18,10 +18,10 @@
 
 #pragma once
 #include <type_traits>
-#include "main.h"
-#include "basics.h"
-#include "glShared.h"
-#include "colors.h"
+#include "../main.h"
+#include "../basics.h"
+#include "../glShared.h"
+#include "../colors.h"
 
 class Model;
 class LDDocument;

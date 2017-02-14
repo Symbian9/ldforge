@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 
 /*
  * Represents a single code-2 line in the LDraw code file.

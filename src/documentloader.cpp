@@ -18,7 +18,7 @@
 
 #include "documentloader.h"
 #include "lddocument.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 #include "mainwindow.h"
 #include "dialogs/openprogressdialog.h"
 

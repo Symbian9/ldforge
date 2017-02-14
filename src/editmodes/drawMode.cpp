@@ -19,7 +19,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include "drawMode.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "../glrenderer.h"
 #include "../linetypes/edgeline.h"
 

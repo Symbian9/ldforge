@@ -18,7 +18,7 @@
 
 #pragma once
 #include "main.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 
 /*
  * This class represents a LDraw model, consisting of a vector of objects. It manages LDObject ownership.

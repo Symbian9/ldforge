@@ -17,16 +17,16 @@
  */
 
 #include <assert.h>
-#include "documentmanager.h"
-#include "ldObject.h"
-#include "lddocument.h"
-#include "miscallenous.h"
-#include "mainwindow.h"
-#include "editHistory.h"
-#include "canvas.h"
-#include "colors.h"
-#include "glcompiler.h"
-#include "linetypes/edgeline.h"
+#include "../documentmanager.h"
+#include "../linetypes/modelobject.h"
+#include "../lddocument.h"
+#include "../miscallenous.h"
+#include "../mainwindow.h"
+#include "../editHistory.h"
+#include "../canvas.h"
+#include "../colors.h"
+#include "../glcompiler.h"
+#include "edgeline.h"
 
 // List of all LDObjects
 QMap<qint32, LDObject*> g_allObjects;

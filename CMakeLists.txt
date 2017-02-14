@@ -42,7 +42,6 @@ set (LDFORGE_SOURCES
 	src/guiutilities.cpp
 	src/hierarchyelement.cpp
 	src/lddocument.cpp
-	src/ldObject.cpp
 	src/ldpaths.cpp
 	src/main.cpp
 	src/mainwindow.cpp
@@ -76,6 +75,7 @@ set (LDFORGE_SOURCES
 	src/linetypes/conditionaledge.cpp
 	src/linetypes/edgeline.cpp
 	src/linetypes/empty.cpp
+	src/linetypes/modelobject.cpp
 	src/toolsets/algorithmtoolset.cpp
 	src/toolsets/basictoolset.cpp
 	src/toolsets/extprogramtoolset.cpp
@@ -104,7 +104,6 @@ set (LDFORGE_HEADERS
 	src/guiutilities.h
 	src/hierarchyelement.h
 	src/lddocument.h
-	src/ldObject.h
 	src/ldobjectiterator.h
 	src/ldpaths.h
 	src/macros.h
@@ -140,6 +139,7 @@ set (LDFORGE_HEADERS
 	src/linetypes/conditionaledge.h
 	src/linetypes/edgeline.h
 	src/linetypes/empty.h
+	src/linetypes/modelobject.h
 	src/toolsets/algorithmtoolset.h
 	src/toolsets/basictoolset.h
 	src/toolsets/extprogramtoolset.h

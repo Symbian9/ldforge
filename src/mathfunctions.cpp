@@ -17,7 +17,7 @@
  */
 
 #include "mathfunctions.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 #include "miscallenous.h"
 
 

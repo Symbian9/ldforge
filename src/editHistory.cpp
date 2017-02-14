@@ -17,7 +17,7 @@
  */
 
 #include "editHistory.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 #include "lddocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"

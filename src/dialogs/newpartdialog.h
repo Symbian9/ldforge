@@ -19,7 +19,7 @@
 #pragma once
 #include <QDialog>
 #include "../main.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 
 class NewPartDialog : public QDialog, HierarchyElement
 {

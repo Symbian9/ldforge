@@ -19,7 +19,7 @@
 #include <QPainter>
 #include "circleMode.h"
 #include "../miscallenous.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "../lddocument.h"
 #include "../ringFinder.h"
 #include "../primitives.h"

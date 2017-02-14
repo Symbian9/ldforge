@@ -24,7 +24,7 @@
 #include <QRadioButton>
 #include <QTreeWidget>
 #include <QMetaMethod>
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 #include "colors.h"
 #include "doublemap.h"
 

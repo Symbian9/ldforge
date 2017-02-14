@@ -17,7 +17,7 @@
  */
 
 #include "model.h"
-#include "ldObject.h"
+#include "linetypes/modelobject.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"

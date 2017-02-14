@@ -17,7 +17,7 @@
  */
 
 #include "curvemode.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "../canvas.h"
 
 CurveMode::CurveMode (Canvas* canvas) :

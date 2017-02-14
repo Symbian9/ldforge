@@ -24,7 +24,7 @@
 #include <QVBoxLayout>
 #include "../canvas.h"
 #include "../lddocument.h"
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"

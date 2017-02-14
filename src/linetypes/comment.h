@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "../ldObject.h"
+#include "../linetypes/modelobject.h"
 
 /*
  * Represents a line type 0 comment in the LDraw model.
