@@ -90,26 +90,27 @@ void AlgorithmToolset::editRaw()
 	if (countof(selectedObjects()) != 1)
 		return;
 
-	LDObject* obj = *(selectedObjects().begin());
-	QDialog* dlg = new QDialog;
+	LDObject* object = *(selectedObjects().begin());
+	QDialog dialog;
 	Ui::EditRawUI ui;
+	ui.setupUi(&dialog);
+	ui.code->setText (object->asText());
 
-	ui.setupUi (dlg);
-	ui.code->setText (obj->asText());
-
-	if (obj->type() == LDObjectType::Error)
-		ui.errorDescription->setText (static_cast<LDError*> (obj)->reason());
+	if (object->type() == LDObjectType::Error)
+	{
+		ui.errorDescription->setText(static_cast<LDError*>(object)->reason());
+	}
 	else
 	{
 		ui.errorDescription->hide();
 		ui.errorIcon->hide();
 	}
 
-	if (dlg->exec() == QDialog::Rejected)
-		return;
-
-	// Reinterpret it from the text of the input field
-	currentDocument()->replaceWithFromString(obj, ui.code->text());
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		// Reinterpret it from the text of the input field
+		currentDocument()->replaceWithFromString(object, ui.code->text());
+	}
 }
 
 void AlgorithmToolset::makeBorders()
