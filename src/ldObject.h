@@ -24,41 +24,8 @@
 #include "colors.h"
 
 class Model;
-
-#define LDOBJ(T)												\
-public:															\
-	static constexpr LDObjectType SubclassType = LDObjectType::T;	\
-																\
-	virtual LDObjectType type() const override					\
-	{															\
-	    return SubclassType;									\
-	}															\
-																\
-	virtual QString asText() const override;					\
-	virtual void invert() override;								\
-protected:														\
-	friend class Model;											\
-	LD##T (Model* model = nullptr);								\
-
-#define LDOBJ_NAME(N)          public: virtual QString typeName() const override { return #N; }
-#define LDOBJ_VERTICES(V)      public: virtual int numVertices() const override { return V; }
-#define LDOBJ_SETCOLORED(V)    public: virtual bool isColored() const override { return V; }
-#define LDOBJ_COLORED          LDOBJ_SETCOLORED (true)
-#define LDOBJ_UNCOLORED        LDOBJ_SETCOLORED (false) LDOBJ_DEFAULTCOLOR (MainColor)
-#define LDOBJ_DEFAULTCOLOR(V)  public: virtual LDColor defaultColor() const override { return (V); }
-
-#define LDOBJ_CUSTOM_SCEMANTIC public: virtual bool isScemantic() const override
-#define LDOBJ_SCEMANTIC        LDOBJ_CUSTOM_SCEMANTIC { return true; }
-#define LDOBJ_NON_SCEMANTIC    LDOBJ_CUSTOM_SCEMANTIC { return false; }
-
-#define LDOBJ_SETMATRIX(V)     public: virtual bool hasMatrix() const override { return V; }
-#define LDOBJ_HAS_MATRIX       LDOBJ_SETMATRIX (true)
-#define LDOBJ_NO_MATRIX        LDOBJ_SETMATRIX (false)
-
-class QListWidgetItem;
 class LDSubfileReference;
 class LDDocument;
-
 class LDBfc;
 
 //
@@ -184,21 +151,27 @@ private:
 //
 class LDError : public LDObject
 {
-	LDOBJ (Error)
-	LDOBJ_NAME (error)
-	LDOBJ_VERTICES (0)
-	LDOBJ_UNCOLORED
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
 public:
+	static constexpr LDObjectType SubclassType = LDObjectType::Error;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
 	QString reason() const;
 	QString contents() const;
 	QString fileReferenced() const;
 	void setFileReferenced (QString value);
 	QString objectListText() const override;
+	bool isColored() const override { return false; }
+	QString typeName() const override { return "error"; }
 
 protected:
+	friend class Model;
+	LDError (Model* model);
 	LDError (QString contents, QString reason, Model* model = nullptr);
 
 private:
@@ -230,19 +203,28 @@ MAKE_ITERABLE_ENUM(BfcStatement)
 
 class LDBfc : public LDObject
 {
-public:
-	LDOBJ (Bfc)
-	LDOBJ_NAME (bfc)
-	LDOBJ_VERTICES (0)
-	LDOBJ_UNCOLORED
-	LDOBJ_CUSTOM_SCEMANTIC { return (statement() == BfcStatement::InvertNext); }
-	LDOBJ_NO_MATRIX
+	public:
+	static constexpr LDObjectType SubclassType = LDObjectType::Bfc;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
+protected:
+	friend class Model;
+	LDBfc (Model* model);
 
 public:
+	bool isScemantic() const override { return statement() == BfcStatement::InvertNext; }
     QString objectListText() const override;
 	BfcStatement statement() const;
 	void setStatement (BfcStatement value);
 	QString statementToString() const;
+	bool isColored() const override { return false; }
+	QString typeName() const override { return "bfc"; }
 
 	static QString statementToString (BfcStatement statement);
 
@@ -260,16 +242,16 @@ private:
 //
 class LDSubfileReference : public LDMatrixObject
 {
-	LDOBJ (SubfileReference)
-	LDOBJ_NAME (subfilereference)
-	LDOBJ_VERTICES (0)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_HAS_MATRIX
-
 public:
-	// Inlines this subfile.
+	static constexpr LDObjectType SubclassType = LDObjectType::SubfileReference;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
 	LDDocument* fileInfo() const;
 	virtual void getVertices (QSet<Vertex>& verts) const override;
 	void inlineContents(Model& model, bool deep, bool render);
@@ -277,8 +259,12 @@ public:
 	QString objectListText() const override;
 	void setFileInfo (LDDocument* fileInfo);
 	int triangleCount() const override;
+	bool hasMatrix() const override { return true; }
+	QString typeName() const override { return "subfilereference"; }
 
 protected:
+	friend class Model;
+	LDSubfileReference (Model* model);
 	LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
 
 private:
@@ -292,15 +278,23 @@ private:
 //
 class LDLine : public LDObject
 {
-	LDOBJ (Line)
-	LDOBJ_NAME (line)
-	LDOBJ_VERTICES (2)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (EdgeColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
+public:
+	static constexpr LDObjectType SubclassType = LDObjectType::Line;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
+	int numVertices() const override { return 2; }
+	LDColor defaultColor() const override { return EdgeColor; }
+	QString typeName() const override { return "line"; }
 
 protected:
+	friend class Model;
+	LDLine (Model* model);
 	LDLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };
 
@@ -311,18 +305,24 @@ protected:
 //
 class LDCondLine : public LDLine
 {
-	LDOBJ (CondLine)
-	LDOBJ_NAME (condline)
-	LDOBJ_VERTICES (4)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (EdgeColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
 public:
+	static constexpr LDObjectType SubclassType = LDObjectType::CondLine;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
+	int numVertices() const override { return 4; }
+	LDColor defaultColor() const override { return EdgeColor; }
 	LDLine* becomeEdgeLine();
+	QString typeName() const override { return "condline"; }
 
 protected:
+	friend class Model;
+	LDCondLine (Model* model);
 	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
@@ -335,18 +335,23 @@ protected:
 //
 class LDTriangle : public LDObject
 {
-	LDOBJ (Triangle)
-	LDOBJ_NAME (triangle)
-	LDOBJ_VERTICES (3)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
 public:
+	static constexpr LDObjectType SubclassType = LDObjectType::Triangle;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
 	int triangleCount() const override;
+	int numVertices() const override { return 3; }
+	QString typeName() const override { return "triangle"; }
 
 protected:
+	friend class Model;
+	LDTriangle (Model* model);
 	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 };
 
@@ -358,37 +363,48 @@ protected:
 //
 class LDQuad : public LDObject
 {
-	LDOBJ (Quad)
-	LDOBJ_NAME (quad)
-	LDOBJ_VERTICES (4)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (MainColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
 public:
+	static constexpr LDObjectType SubclassType = LDObjectType::Quad;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	QString asText() const override;
+	void invert() override;
 	int triangleCount() const override;
+	int numVertices() const override { return 4; }
+	QString typeName() const override { return "quad"; }
 
 protected:
+	friend class Model;
+	LDQuad (Model* model);
 	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 };
 
 class LDBezierCurve : public LDObject
 {
-	LDOBJ (BezierCurve)
-	LDOBJ_NAME (beziercurve)
-	LDOBJ_VERTICES (4)
-	LDOBJ_COLORED
-	LDOBJ_DEFAULTCOLOR (EdgeColor)
-	LDOBJ_SCEMANTIC
-	LDOBJ_NO_MATRIX
-
 public:
+	static constexpr LDObjectType SubclassType = LDObjectType::BezierCurve;
+
+	virtual LDObjectType type() const override
+	{
+		return SubclassType;
+	}
+
+	virtual QString asText() const override;
+	virtual void invert() override;
 	Vertex pointAt (qreal t) const;
 	void rasterize(Model& model, int segments);
 	QVector<LDPolygon> rasterizePolygons (int segments);
+	int numVertices() const override { return 4; }
+	LDColor defaultColor() const override { return EdgeColor; }
+	QString typeName() const override { return "beziercurve"; }
 
 protected:
+	friend class Model;
+	LDBezierCurve (Model* model);
 	LDBezierCurve (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
