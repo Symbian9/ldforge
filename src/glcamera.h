@@ -41,10 +41,10 @@ class GLCamera : public QObject
 
 public:
 	// This is used to construct the free camera
-	enum FreeToken { FreeCamera };
+	enum { FreeCamera };
 
 	GLCamera(QString name, FixedCameraParameters&& bag);
-	GLCamera(QString name, FreeToken);
+	GLCamera(QString name, decltype(FreeCamera));
 
 	Axis axisX() const;
 	Axis axisY() const;

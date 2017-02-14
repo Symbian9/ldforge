@@ -35,7 +35,7 @@ GLCamera::GLCamera(QString name, FixedCameraParameters&& bag) :
 /*
  * Constructs a free camera.
  */
-GLCamera::GLCamera(QString name, FreeToken) :
+GLCamera::GLCamera(QString name, decltype(FreeCamera)) :
     m_name {name},
     m_isFree {true} {}
 
