@@ -28,7 +28,7 @@
 #include "glCompiler.h"
 
 // List of all LDObjects
-QMap<int32, LDObject*> g_allObjects;
+QMap<qint32, LDObject*> g_allObjects;
 
 enum { MAX_LDOBJECT_IDS = (1 << 24) };
 
@@ -48,7 +48,7 @@ LDObject::LDObject (Model* model) :
 	assert(_model != nullptr);
 
 	// Let's hope that nobody goes to create 17 million objects anytime soon...
-	static int32 nextId = 1; // 0 shalt be null
+	static qint32 nextId = 1; // 0 shalt be null
 	if (nextId < MAX_LDOBJECT_IDS)
 		m_id = nextId++;
 	else
@@ -626,7 +626,7 @@ LDLine* LDCondLine::becomeEdgeLine()
 
 // =============================================================================
 //
-LDObject* LDObject::fromID(int32 id)
+LDObject* LDObject::fromID(qint32 id)
 {
 	return g_allObjects.value(id);
 }

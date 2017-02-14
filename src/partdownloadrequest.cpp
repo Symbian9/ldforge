@@ -240,7 +240,7 @@ void PartDownloadRequest::downloadFinished()
 	prompt()->checkIfFinished();
 }
 
-void PartDownloadRequest::updateDownloadProgress (int64 recv, int64 total)
+void PartDownloadRequest::updateDownloadProgress (qint64 recv, qint64 total)
 {
 	m_numBytesRead = recv;
 	m_numBytesTotal = total;

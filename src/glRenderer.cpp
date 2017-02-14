@@ -713,22 +713,20 @@ QSet<LDObject*> GLRenderer::pick(const QRect& range)
 	// Read pixels from the color buffer.
 	glReadPixels(x0, height() - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
-	QSet<int32_t> indices;
+	QSet<qint32> indices;
 
 	// Go through each pixel read and add them to the selection.
 	// Each pixel maps to an LDObject index injectively.
 	// Note: black is background, those indices are skipped.
 	for (unsigned char *pixelCursor = pixelData.begin(); pixelCursor < pixelData.end(); pixelCursor += 4)
 	{
-		int32_t index = pixelCursor[0] * 0x10000 +
-		                pixelCursor[1] * 0x100 +
-		                pixelCursor[2] * 0x1;
+		qint32 index = pixelCursor[0] * 0x10000 + pixelCursor[1] * 0x100 + pixelCursor[2] * 0x1;
 		if (index != 0)
 			indices.insert(index);
 	}
 
 	// For each index read, resolve the LDObject behind it and add it to the selection.
-	for (int32_t index : indices)
+	for (qint32 index : indices)
 	{
 		LDObject* object = LDObject::fromID(index);
 

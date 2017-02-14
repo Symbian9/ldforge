@@ -323,7 +323,7 @@ static Vertex ParseVertex (QStringList& s, const int n)
 	return v;
 }
 
-static int32 StringToNumber (QString a, bool* ok = nullptr)
+static qint32 StringToNumber (QString a, bool* ok = nullptr)
 {
 	int base = 10;
 

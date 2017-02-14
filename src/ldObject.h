@@ -124,7 +124,7 @@ public:
 	virtual QString typeName() const = 0;
 	const Vertex& vertex (int i) const;
 
-	static LDObject* fromID(int32 id);
+	static LDObject* fromID(qint32 id);
 
 signals:
 	void codeChanged(QString before, QString after);

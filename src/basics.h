@@ -35,15 +35,6 @@ class QFile;
 class QTextStream;
 class Matrix;
 class LDDocument;
-
-using int8 = qint8;
-using int16 = qint16;
-using int32 = qint32;
-using int64 = qint64;
-using uint8 = quint8;
-using uint16 = quint16;
-using uint32 = quint32;
-using uint64 = quint64;
 using LDObjectList = QList<LDObject*>;
 
 template<typename T, typename R>

@@ -720,7 +720,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 		return false;
 
 	QString path = doc->fullPath();
-	int64 savesize;
+	qint64 savesize;
 
 	if (saveAs or path.isEmpty())
 	{

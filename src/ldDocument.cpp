@@ -205,7 +205,7 @@ bool LDDocument::isSafeToClose()
 
 // =============================================================================
 //
-bool LDDocument::save (QString path, int64* sizeptr)
+bool LDDocument::save (QString path, qint64* sizeptr)
 {
 	if (isFrozen())
 		return false;

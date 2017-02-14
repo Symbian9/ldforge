@@ -72,7 +72,7 @@ public:
 	void redoVertices();
 	void reloadAllSubfiles();
 	void removeFromSelection (LDObject* obj);
-	bool save (QString path = "", int64* sizeptr = nullptr);
+	bool save (QString path = "", qint64* sizeptr = nullptr);
 	long savePosition() const;
 	void setDefaultName (QString value);
 	void setFrozen(bool value);
