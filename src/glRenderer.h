@@ -21,6 +21,7 @@
 #include "main.h"
 #include "model.h"
 #include "glShared.h"
+#include "glcamera.h"
 
 class GLCompiler;
 class MessageManager;
@@ -56,8 +57,6 @@ enum class Camera
 	_End
 };
 
-MAKE_ITERABLE_ENUM(Camera)
-
 struct CameraIcon
 {
 	QPixmap image;
@@ -66,6 +65,8 @@ struct CameraIcon
 	QRect hitRect;
 	Camera camera;
 };
+
+MAKE_ITERABLE_ENUM(Camera)
 
 // The main renderer object, draws the brick on the screen, manages the camera and selection picking.
 class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
@@ -82,10 +83,11 @@ public:
 	QString cameraName(Camera camera) const;
 	QByteArray capturePixels();
 	GLCompiler* compiler() const;
+	GLCamera& currentCamera();
+	const GLCamera& currentCamera() const;
 	QString currentCameraName() const;
 	void drawGLScene();
 	void forgetObject(LDObject* obj);
-	Axis getCameraAxis(bool y, Camera camid = (Camera) -1);
 	void highlightCursorObject();
 	void initGLData();
 	bool isDrawOnly() const;
@@ -107,9 +109,6 @@ public:
 	void setDrawOnly(bool value);
 	void setPicking(bool a);
 	QPen textPen() const;
-	double virtualHeight() const;
-	double virtualWidth() const;
-	void zoomNotch(bool inward);
 
 	static const QPen thinBorderPen;
 
@@ -134,8 +133,7 @@ protected:
 	Qt::MouseButtons lastButtons() const;
 	double panning (Axis ax) const;
 	const QGenericMatrix<4, 4, GLfloat>& rotationMatrix() const;
-	double& panning (Axis ax);
-	double& zoom();
+	double zoom();
 
 	template<typename... Args>
 	QString format (QString fmtstr, Args... args)
@@ -151,12 +149,8 @@ private:
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
 	Qt::KeyboardModifiers m_currentKeyboardModifiers;
-	double m_virtualWidth;
-	double m_virtualHeight;
 	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
-	double m_panX[7] = {0};
-	double m_panY[7] = {0};
-	double m_zoom[7] = {30};
+	GLCamera m_cameras[7];
 	bool m_useDarkBackground = false;
 	bool m_drawToolTip = false;
 	bool m_takingScreenCapture = false;

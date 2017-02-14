@@ -45,7 +45,7 @@ void CurveMode::render (QPainter& painter) const
 			curve[3] = curve[2];
 
 		for (int i = 0; i < countof(curve); ++i)
-			curve2d[i] = renderer()->convert3dTo2d (curve[i]);
+			curve2d[i] = renderer()->currentCamera().convert3dTo2d(curve[i]);
 
 		painter.setPen (QColor (0, 112, 112));
 		if (countof(m_drawedVerts) >= 2)
@@ -71,7 +71,7 @@ void CurveMode::render (QPainter& painter) const
 	else
 	{
 		// Even if we have nothing, still draw the vertex at the cursor
-		QPoint vertex2d = renderer()->convert3dTo2d (getCursorVertex());
+		QPoint vertex2d = renderer()->currentCamera().convert3dTo2d(getCursorVertex());
 		renderer()->drawPoint (painter, vertex2d);
 		renderer()->drawBlipCoordinates (painter, getCursorVertex(), vertex2d);
 	}

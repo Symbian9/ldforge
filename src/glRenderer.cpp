@@ -37,13 +37,13 @@
 
 const CameraInfo g_cameraInfo[EnumLimits<Camera>::Count] =
 {
-	{{  1,  0, 0 }, X, Z, false, false, false }, // top
-	{{  0,  0, 0 }, X, Y, false,  true, false }, // front
-	{{  0,  1, 0 }, Z, Y,  true,  true, false }, // left
-	{{ -1,  0, 0 }, X, Z, false,  true, true }, // bottom
-	{{  0,  0, 0 }, X, Y,  true,  true, true }, // back
-	{{  0, -1, 0 }, Z, Y, false,  true, true }, // right
-	{{  1,  0, 0 }, X, Z, false, false, false }, // free (defensive dummy data)
+    {{  1,  0, 0 }, X, Z, false, false, false }, // top
+    {{  0,  0, 0 }, X, Y, false,  true, false }, // front
+    {{  0,  1, 0 }, Z, Y,  true,  true, false }, // left
+    {{ -1,  0, 0 }, X, Z, false,  true, true }, // bottom
+    {{  0,  0, 0 }, X, Y,  true,  true, true }, // back
+    {{  0, -1, 0 }, Z, Y, false,  true, true }, // right
+    {{  1,  0, 0 }, X, Z, false, false, false }, // free (defensive dummy data)
 };
 
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
@@ -53,7 +53,16 @@ const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Q
 GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
-    m_model {model}
+    m_model {model},
+    m_cameras {
+        {1,  0, 0, X, Z, false, false, false}, // top
+        {0,  0, 0, X, Y, false,  true, false}, // front
+        {0,  1, 0, Z, Y,  true,  true, false}, // left
+        {-1,  0, 0, X, Z, false,  true, true}, // bottom
+        {0,  0, 0, X, Y,  true,  true, true}, // back
+        {0, -1, 0, Z, Y, false,  true, true}, // right
+        {GLCamera::FreeCamera}, // free
+    }
 {
 	m_camera = (Camera) m_config->camera();
 	m_compiler = new GLCompiler (this);
@@ -99,24 +108,43 @@ GLRenderer::~GLRenderer()
 void GLRenderer::calcCameraIcons()
 {
 	int i = 0;
+	const int columns = 3;
+	const int firstAtLastRow = countof(m_cameras) - (countof(m_cameras) % columns);
 
-	for (CameraIcon& info : m_cameraIcons)
+	for (CameraIcon& cameraIcon : m_cameraIcons)
 	{
-		// MATH
-		int x1 = (width() - (info.camera != Camera::Free ? 48 : 16)) + ((i % 3) * 16) - 1;
-		int y1 = ((i / 3) * 16) + 1;
+		int row = i / columns;
+		int column;
 
-		info.sourceRect = QRect (0, 0, 16, 16);
-		info.targetRect = QRect (x1, y1, 16, 16);
-		info.hitRect = QRect (
-			info.targetRect.x(),
-			info.targetRect.y(),
-			info.targetRect.width() + 1,
-			info.targetRect.height() + 1
-		);
+		if (i < firstAtLastRow)
+			column = i % columns;
+		else
+			column = i + columns - (countof(m_cameras) % columns);
+
+		int x1 = width() - 48 + (column * 16) - 1;
+		int y1 = (row * 16) + 1;
+
+		cameraIcon.sourceRect = {0, 0, 16, 16};
+		cameraIcon.targetRect = {x1, y1, 16, 16};
+		cameraIcon.hitRect = {
+		    cameraIcon.targetRect.x(),
+		    cameraIcon.targetRect.y(),
+		    cameraIcon.targetRect.width() + 1,
+		    cameraIcon.targetRect.height() + 1
+		};
 
 		++i;
 	}
+}
+
+GLCamera& GLRenderer::currentCamera()
+{
+	return m_cameras[static_cast<int>(camera())];
+}
+
+const GLCamera& GLRenderer::currentCamera() const
+{
+	return m_cameras[static_cast<int>(camera())];
 }
 
 // =============================================================================
@@ -187,7 +215,7 @@ void GLRenderer::resetAngles()
 		glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
 		glPopMatrix();
 	}
-	panning(X) = panning(Y) = 0.0f;
+	currentCamera().setPanning(0, 0);
 	needZoomToFit();
 }
 
@@ -334,6 +362,10 @@ void GLRenderer::resizeGL (int width, int height)
 	glLoadIdentity();
 	gluPerspective (45.0f, (double) width / (double) height, 1.0f, 10000.0f);
 	glMatrixMode (GL_MODELVIEW);
+
+	// Unfortunately Qt does not provide a resized() signal so we have to manually feed the information.
+	for (GLCamera& camera : m_cameras)
+		camera.rendererResized(width, height);
 }
 
 // =============================================================================
@@ -345,9 +377,6 @@ void GLRenderer::drawGLScene()
 		m_needZoomToFit = false;
 		zoomAllToFit();
 	}
-
-	m_virtualWidth = zoom();
-	m_virtualHeight = (height() * m_virtualWidth) / width();
 
 	if (m_config->drawWireframe() and not m_isDrawingSelectionScene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -366,15 +395,12 @@ void GLRenderer::drawGLScene()
 		glPushMatrix();
 
 		glLoadIdentity();
-		glOrtho (-m_virtualWidth, m_virtualWidth, -m_virtualHeight, m_virtualHeight, -100.0f, 100.0f);
+		const QSizeF& virtualSize = currentCamera().virtualSize();
+		glOrtho(-virtualSize.width(), virtualSize.width(), -virtualSize.height(), virtualSize.height(), -100.0f, 100.0f);
 		glTranslatef(panning (X), panning (Y), 0.0f);
 
 		if (camera() != Camera::Front and camera() != Camera::Back)
-		{
-			glRotatef(90.0f, g_cameraInfo[static_cast<int>(camera())].glrotate[0],
-			    g_cameraInfo[static_cast<int>(camera())].glrotate[1],
-			    g_cameraInfo[static_cast<int>(camera())].glrotate[2]);
-		}
+			glRotatef(90.0f, currentCamera().glRotate(X), currentCamera().glRotate(Y), currentCamera().glRotate(Z));
 
 		// Back camera needs to be handled differently
 		if (camera() == Camera::Back)
@@ -604,8 +630,7 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 
 	if (mid or (left and shift))
 	{
-		panning(X) += 0.03f * xMove * (zoom() / 7.5f);
-		panning(Y) -= 0.03f * yMove * (zoom() / 7.5f);
+		currentCamera().pan(xMove, yMove);
 		m_panning = true;
 		m_isCameraMoving = true;
 	}
@@ -657,8 +682,7 @@ void GLRenderer::keyReleaseEvent(QKeyEvent* event)
 void GLRenderer::wheelEvent(QWheelEvent* ev)
 {
 	makeCurrent();
-	zoomNotch(ev->delta() > 0);
-	zoom() = qBound(0.01, zoom(), 10000.0);
+	currentCamera().zoomNotch(ev->delta() > 0);
 	m_isCameraMoving = true;
 	update();
 	ev->accept();
@@ -827,17 +851,6 @@ void GLRenderer::slot_toolTipTimer()
 
 // =============================================================================
 //
-Axis GLRenderer::getCameraAxis (bool y, Camera camid)
-{
-	if (camid == (Camera) -1)
-		camid = camera();
-
-	const CameraInfo& cameraData = cameraInfo(camid);
-	return (y) ? cameraData.localY : cameraData.localX;
-}
-
-// =============================================================================
-//
 QString GLRenderer::cameraName (Camera camera) const
 {
 	switch (camera)
@@ -862,16 +875,9 @@ QString GLRenderer::currentCameraName() const
 
 // =============================================================================
 //
-void GLRenderer::zoomNotch (bool inward)
-{
-	zoom() *= inward ? 0.833f : 1.2f;
-}
-
-// =============================================================================
-//
 void GLRenderer::zoomToFit()
 {
-	zoom() = 30.0f;
+	currentCamera().setZoom(30.0f);
 	bool lastfilled = false;
 	bool firstrun = true;
 	enum { black = 0xFF000000 };
@@ -887,11 +893,11 @@ void GLRenderer::zoomToFit()
 		if (zoom() > 10000.0 or zoom() < 0.0)
 		{
 			// Nothing to draw if we get here.
-			zoom() = 30.0;
+			currentCamera().setZoom(30.0);
 			break;
 		}
 
-		zoomNotch (inward);
+		currentCamera().zoomNotch(inward);
 		QVector<unsigned char> capture (4 * width() * height());
 		drawGLScene();
 		glReadPixels (0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, capture.data());
@@ -935,7 +941,7 @@ void GLRenderer::zoomToFit()
 			// last run had ideal zoom - zoom a bit back and we should reach it.
 			if (filled and not lastfilled)
 			{
-				zoomNotch (false);
+				currentCamera().zoomNotch(false);
 				break;
 			}
 
@@ -1036,19 +1042,14 @@ Camera GLRenderer::camera() const
 	return m_camera;
 }
 
-double& GLRenderer::panning (Axis ax)
-{
-	return (ax == X) ? m_panX[static_cast<int>(camera())] : m_panY[static_cast<int>(camera())];
-}
-
 double GLRenderer::panning (Axis ax) const
 {
-	return (ax == X) ? m_panX[static_cast<int>(camera())] : m_panY[static_cast<int>(camera())];
+	return (ax == X) ? currentCamera().panningX() : currentCamera().panningY();
 }
 
-double& GLRenderer::zoom()
+double GLRenderer::zoom()
 {
-	return m_zoom[static_cast<int>(camera())];
+	return currentCamera().zoom();
 }
 
 const QGenericMatrix<4, 4, GLfloat>& GLRenderer::rotationMatrix() const
@@ -1064,16 +1065,6 @@ bool GLRenderer::isDrawingSelectionScene() const
 Qt::MouseButtons GLRenderer::lastButtons() const
 {
 	return m_lastButtons;
-}
-
-double GLRenderer::virtualHeight() const
-{
-	return m_virtualHeight;
-}
-
-double GLRenderer::virtualWidth() const
-{
-	return m_virtualWidth;
 }
 
 const Model* GLRenderer::model() const

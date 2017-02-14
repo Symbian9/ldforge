@@ -74,9 +74,9 @@ void RectangleMode::updateRectVerts()
 	Vertex v0 = m_drawedVerts[0],
 		   v1 = (countof(m_drawedVerts) >= 2) ? m_drawedVerts[1] : renderer()->position3D();
 
-	const Axis localx = renderer()->getCameraAxis (false),
-			   localy = renderer()->getCameraAxis (true),
-			   localz = (Axis) (3 - localx - localy);
+	Axis localx, localy, localz;
+	renderer()->getRelativeAxes(localx, localy);
+	localz = renderer()->getRelativeZ();
 
 	for (int i = 0; i < 4; ++i)
 		m_rectangleVerts[i].setCoordinate (localz, renderer()->getDepthValue());

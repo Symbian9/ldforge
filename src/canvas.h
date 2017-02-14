@@ -26,8 +26,6 @@ public:
 	Canvas(LDDocument* document, QWidget* parent = nullptr);
 	~Canvas();
 
-	Vertex convert2dTo3d(const QPoint& pos2d, bool snap) const;
-	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	EditModeType currentEditModeType() const;
 	int depthNegateFactor() const;
 	LDDocument* document() const;
