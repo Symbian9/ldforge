@@ -18,9 +18,10 @@
 
 #include <QPainter>
 #include <QMouseEvent>
+#include "../canvas.h"
 #include "rectangleMode.h"
 #include "../linetypes/modelobject.h"
-#include "../canvas.h"
+#include "../linetypes/quadrilateral.h"
 
 RectangleMode::RectangleMode (Canvas* canvas) :
     Super (canvas),

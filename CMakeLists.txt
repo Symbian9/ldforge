@@ -76,6 +76,7 @@ set (LDFORGE_SOURCES
 	src/linetypes/edgeline.cpp
 	src/linetypes/empty.cpp
 	src/linetypes/modelobject.cpp
+	src/linetypes/quadrilateral.cpp
 	src/linetypes/triangle.cpp
 	src/toolsets/algorithmtoolset.cpp
 	src/toolsets/basictoolset.cpp
@@ -141,6 +142,7 @@ set (LDFORGE_HEADERS
 	src/linetypes/edgeline.h
 	src/linetypes/empty.h
 	src/linetypes/modelobject.h
+	src/linetypes/quadrilateral.h
 	src/linetypes/triangle.h
 	src/toolsets/algorithmtoolset.h
 	src/toolsets/basictoolset.h

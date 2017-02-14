@@ -19,7 +19,6 @@
 #include <QPainter>
 #include "circleMode.h"
 #include "../miscallenous.h"
-#include "../linetypes/modelobject.h"
 #include "../lddocument.h"
 #include "../ringFinder.h"
 #include "../primitives.h"
@@ -28,6 +27,8 @@
 #include "../mathfunctions.h"
 #include "../miscallenous.h"
 #include "../grid.h"
+#include "../linetypes/modelobject.h"
+#include "../linetypes/quadrilateral.h"
 
 CircleMode::CircleMode(Canvas* canvas) :
     Super {canvas} {}

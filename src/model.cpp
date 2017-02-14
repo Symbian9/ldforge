@@ -23,6 +23,7 @@
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"
 #include "linetypes/empty.h"
+#include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
 
 Model::Model(DocumentManager* manager) :

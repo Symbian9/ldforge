@@ -258,31 +258,6 @@ private:
 };
 
 /*
- * Represents a single code-4 quadrilateral.
- */
-class LDQuadrilateral : public LDObject
-{
-public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Quadrilateral;
-
-	virtual LDObjectType type() const override
-	{
-		return SubclassType;
-	}
-
-	QString asText() const override;
-	void invert() override;
-	int triangleCount() const override;
-	int numVertices() const override { return 4; }
-	QString typeName() const override { return "quad"; }
-
-protected:
-	friend class Model;
-	LDQuadrilateral (Model* model);
-	LDQuadrilateral (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
-};
-
-/*
  * Models a Bézier curve. It is stored as a special comment in the LDraw code file and can be inlined down into line segments.
  */
 class LDBezierCurve : public LDObject

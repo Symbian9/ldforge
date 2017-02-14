@@ -36,6 +36,7 @@
 #include "../linetypes/conditionaledge.h"
 #include "../linetypes/edgeline.h"
 #include "../linetypes/empty.h"
+#include "../linetypes/quadrilateral.h"
 #include "../linetypes/triangle.h"
 #include "ui_replcoords.h"
 #include "ui_editraw.h"
