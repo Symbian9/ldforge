@@ -79,13 +79,10 @@ public:
 
 	QColor backgroundColor() const;
 	Camera camera() const;
-	const CameraInfo& cameraInfo(Camera camera) const;
-	QString cameraName(Camera camera) const;
 	QByteArray capturePixels();
 	GLCompiler* compiler() const;
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
-	QString currentCameraName() const;
 	void drawGLScene();
 	void forgetObject(LDObject* obj);
 	void highlightCursorObject();

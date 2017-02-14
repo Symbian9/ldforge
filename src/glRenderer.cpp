@@ -35,17 +35,6 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-const CameraInfo g_cameraInfo[EnumLimits<Camera>::Count] =
-{
-    {{  1,  0, 0 }, X, Z, false, false, false }, // top
-    {{  0,  0, 0 }, X, Y, false,  true, false }, // front
-    {{  0,  1, 0 }, Z, Y,  true,  true, false }, // left
-    {{ -1,  0, 0 }, X, Z, false,  true, true }, // bottom
-    {{  0,  0, 0 }, X, Y,  true,  true, true }, // back
-    {{  0, -1, 0 }, Z, Y, false,  true, true }, // right
-    {{  1,  0, 0 }, X, Z, false, false, false }, // free (defensive dummy data)
-};
-
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
 // =============================================================================
@@ -55,13 +44,13 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     HierarchyElement {parent},
     m_model {model},
     m_cameras {
-        {1,  0, 0, X, Z, false, false, false}, // top
-        {0,  0, 0, X, Y, false,  true, false}, // front
-        {0,  1, 0, Z, Y,  true,  true, false}, // left
-        {-1,  0, 0, X, Z, false,  true, true}, // bottom
-        {0,  0, 0, X, Y,  true,  true, true}, // back
-        {0, -1, 0, Z, Y, false,  true, true}, // right
-        {GLCamera::FreeCamera}, // free
+        {"Top camera", {1,  0, 0, X, Z, false, false, false}}, // top
+        {"Front camera", {0,  0, 0, X, Y, false,  true, false}}, // front
+        {"Left camera", {0,  1, 0, Z, Y,  true,  true, false}}, // left
+        {"Bottom camera", {-1,  0, 0, X, Z, false,  true, true}}, // bottom
+        {"Back camera", {0,  0, 0, X, Y,  true,  true, true}}, // back
+        {"Right camera", {0, -1, 0, Z, Y, false,  true, true}}, // right
+        {"Free camera", GLCamera::FreeCamera}, // free
     }
 {
 	m_camera = (Camera) m_config->camera();
@@ -571,7 +560,7 @@ void GLRenderer::overpaint(QPainter &painter)
 		if (not m_cameraIcons[static_cast<int>(m_toolTipCamera)].targetRect.contains (m_mousePosition))
 			m_drawToolTip = false;
 		else
-			QToolTip::showText(m_globalpos, currentCameraName());
+			QToolTip::showText(m_globalpos, m_cameras[static_cast<int>(m_toolTipCamera)].name());
 	}
 
 	// Draw a label for the current camera in the bottom left corner
@@ -579,7 +568,7 @@ void GLRenderer::overpaint(QPainter &painter)
 		QFontMetrics metrics {QFont {}};
 		int margin = 4;
 		painter.setPen(textPen());
-		painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCameraName());
+		painter.drawText(QPoint {margin, height() - margin - metrics.descent()}, currentCamera().name());
 	}
 }
 
@@ -851,30 +840,6 @@ void GLRenderer::slot_toolTipTimer()
 
 // =============================================================================
 //
-QString GLRenderer::cameraName (Camera camera) const
-{
-	switch (camera)
-	{
-	case Camera::Top: return tr ("Top Camera");
-	case Camera::Front: return tr ("Front Camera");
-	case Camera::Left: return tr ("Left Camera");
-	case Camera::Bottom: return tr ("Bottom Camera");
-	case Camera::Back: return tr ("Back Camera");
-	case Camera::Right: return tr ("Right Camera");
-	case Camera::Free: return tr ("Free Camera");
-	default: break;
-	}
-
-	return "";
-}
-
-QString GLRenderer::currentCameraName() const
-{
-	return cameraName (camera());
-}
-
-// =============================================================================
-//
 void GLRenderer::zoomToFit()
 {
 	currentCamera().setZoom(30.0f);
@@ -1007,14 +972,6 @@ void GLRenderer::highlightCursorObject()
 	}
 
 	update();
-}
-
-const CameraInfo& GLRenderer::cameraInfo (Camera camera) const
-{
-	if (valueInEnum<Camera>(camera))
-		return g_cameraInfo[static_cast<int>(camera)];
-	else
-		return g_cameraInfo[0];
 }
 
 bool GLRenderer::mouseHasMoved() const

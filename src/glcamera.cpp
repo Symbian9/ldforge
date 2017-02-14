@@ -23,18 +23,20 @@
 /*
  * Constructs a fixed camera from parameters.
  */
-GLCamera::GLCamera(int glRotateX, int glRotateY, int glRotateZ, Axis localX, Axis localY, bool negatedX, bool negatedY, bool negatedDepth) :
-    m_glrotate {glRotateX, glRotateY, glRotateZ},
-    m_localX {localX},
-    m_localY {localY},
-    m_negatedX {negatedX},
-    m_negatedY {negatedY},
-    m_negatedDepth {negatedDepth} {}
+GLCamera::GLCamera(QString name, FixedCameraParameters&& bag) :
+    m_name {name},
+    m_glrotate {bag.glRotateX, bag.glRotateY, bag.glRotateZ},
+    m_localX {bag.localX},
+    m_localY {bag.localY},
+    m_negatedX {bag.negatedX},
+    m_negatedY {bag.negatedY},
+    m_negatedDepth {bag.negatedZ} {}
 
 /*
  * Constructs a free camera.
  */
-GLCamera::GLCamera(FreeToken) :
+GLCamera::GLCamera(QString name, FreeToken) :
+    m_name {name},
     m_isFree {true} {}
 
 /*
@@ -231,4 +233,12 @@ void GLCamera::setZoom(double zoom)
 {
 	m_zoom = zoom;
 	rendererResized(m_size.width(), m_size.height());
+}
+
+/*
+ * Returns the name of the camera
+ */
+const QString& GLCamera::name() const
+{
+	return m_name;
 }

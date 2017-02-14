@@ -19,6 +19,18 @@
 #pragma once
 #include "main.h"
 
+struct FixedCameraParameters
+{
+	int glRotateX;
+	int glRotateY;
+	int glRotateZ;
+	Axis localX;
+	Axis localY;
+	bool negatedX;
+	bool negatedY;
+	bool negatedZ;
+};
+
 /*
  * Models a 2D x/y co-ordinate system that maps to a fixed camera position.
  * Owns camera orientation information and provides 2D←→3D translation.
@@ -31,28 +43,30 @@ public:
 	// This is used to construct the free camera
 	enum FreeToken { FreeCamera };
 
-	GLCamera(int glRotateX, int glRotateY, int glRotateZ, Axis localX, Axis localY, bool negatedX, bool negatedY, bool negatedDepth);
-	GLCamera(FreeToken);
+	GLCamera(QString name, FixedCameraParameters&& bag);
+	GLCamera(QString name, FreeToken);
 
 	Axis axisX() const;
 	Axis axisY() const;
 	Axis axisZ() const;
+	Vertex convert2dTo3d(const QPoint& pos2d, Grid* grid = nullptr) const;
+	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	double depth() const;
 	int glRotate(Axis axis) const;
 	bool isAxisNegated(Axis axis) const;
-	Q_SLOT void rendererResized(int width, int height);
-	const QSizeF& virtualSize() const;
-	Vertex convert2dTo3d(const QPoint& pos2d, Grid* grid = nullptr) const;
-	QPoint convert3dTo2d(const Vertex& pos3d) const;
+	const QString& name() const;
+	void pan(int xMove, int yMove);
 	double panningX() const;
 	double panningY() const;
-	double zoom() const;
+	Q_SLOT void rendererResized(int width, int height);
 	void setPanning(double x, double y);
-	void pan(int xMove, int yMove);
-	void zoomNotch(bool inward);
 	void setZoom(double zoom);
+	const QSizeF& virtualSize() const;
+	double zoom() const;
+	void zoomNotch(bool inward);
 
 private:
+	QString m_name;
 	double m_panningX = 0;
 	double m_panningY = 0;
 	double m_depth = 0;

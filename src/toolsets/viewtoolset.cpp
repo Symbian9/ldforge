@@ -166,9 +166,9 @@ void ViewToolset::setDrawDepth()
 		return;
 
 	bool ok;
-	double depth = QInputDialog::getDouble (m_window, "Set Draw Depth",
-		format ("Depth value for %1:", m_window->renderer()->currentCameraName()),
-		m_window->renderer()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
+	double depth = QInputDialog::getDouble(m_window, "Set Draw Depth",
+	                                       format("Depth value for %1:", m_window->renderer()->currentCamera().name()),
+	                                       m_window->renderer()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
 
 	if (ok)
 		m_window->renderer()->setDepthValue (depth);
