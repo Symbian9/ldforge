@@ -21,7 +21,7 @@
 #include "ldDocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
-#include "glRenderer.h"
+#include "glrenderer.h"
 
 EditHistory::EditHistory (LDDocument* document) :
 	m_document (document),

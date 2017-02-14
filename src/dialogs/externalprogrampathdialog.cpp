@@ -21,7 +21,7 @@
 #include "configdialog.h"
 #include "ui_externalprogrampathdialog.h"
 #include "../mainwindow.h"
-#include "../glRenderer.h"
+#include "../glrenderer.h"
 #include "../documentation.h"
 
 /*

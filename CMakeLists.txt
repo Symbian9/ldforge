@@ -37,7 +37,7 @@ set (LDFORGE_SOURCES
 	src/editHistory.cpp
 	src/glcamera.cpp
 	src/glCompiler.cpp
-	src/glRenderer.cpp
+	src/glrenderer.cpp
 	src/grid.cpp
 	src/guiutilities.cpp
 	src/hierarchyelement.cpp
@@ -99,7 +99,7 @@ set (LDFORGE_HEADERS
 	src/format.h
 	src/glcamera.h
 	src/glCompiler.h
-	src/glRenderer.h
+	src/glrenderer.h
 	src/grid.h
 	src/guiutilities.h
 	src/hierarchyelement.h

@@ -27,7 +27,7 @@
 #include "../ldDocument.h"
 #include "../miscallenous.h"
 #include "../radioGroup.h"
-#include "../glRenderer.h"
+#include "../glrenderer.h"
 #include "../colors.h"
 #include "../mathfunctions.h"
 #include "../ldobjectiterator.h"

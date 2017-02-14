@@ -20,7 +20,7 @@
 #include <QMouseEvent>
 #include "drawMode.h"
 #include "../ldObject.h"
-#include "../glRenderer.h"
+#include "../glrenderer.h"
 #include "../linetypes/edgeline.h"
 
 DrawMode::DrawMode (Canvas* canvas) :

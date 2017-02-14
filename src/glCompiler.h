@@ -18,7 +18,7 @@
 
 #pragma once
 #include "main.h"
-#include "glRenderer.h"
+#include "glrenderer.h"
 #include "glShared.h"
 #include <QMap>
 #include <QSet>

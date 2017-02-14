@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "glRenderer.h"
+#include "glrenderer.h"
 #include "editmodes/abstractEditMode.h"
 
 class Canvas : public GLRenderer

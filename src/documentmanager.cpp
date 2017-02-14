@@ -23,7 +23,7 @@
 #include "mainwindow.h"
 #include "partdownloader.h"
 #include "documentloader.h"
-#include "glRenderer.h"
+#include "glrenderer.h"
 
 const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
 

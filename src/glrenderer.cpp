@@ -25,7 +25,7 @@
 #include <GL/glu.h>
 #include "main.h"
 #include "ldDocument.h"
-#include "glRenderer.h"
+#include "glrenderer.h"
 #include "colors.h"
 #include "mainwindow.h"
 #include "miscallenous.h"

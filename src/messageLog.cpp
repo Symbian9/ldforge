@@ -19,7 +19,7 @@
 #include <QTimer>
 #include <QDate>
 #include "messageLog.h"
-#include "glRenderer.h"
+#include "glrenderer.h"
 #include "mainwindow.h"
 
 enum
