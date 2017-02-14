@@ -24,6 +24,7 @@
 #include <QSet>
 #include <QVector3D>
 #include <QVector>
+#include <QFile>
 #include <functional>
 #include <math.h>
 #include "macros.h"
@@ -31,10 +32,6 @@
 #include "types/matrix.h"
 
 class LDObject;
-class QFile;
-class QTextStream;
-class Matrix;
-class LDDocument;
 using LDObjectList = QList<LDObject*>;
 
 template<typename T, typename R>
