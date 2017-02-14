@@ -103,12 +103,10 @@ void GLRenderer::calcCameraIcons()
 	for (CameraIcon& cameraIcon : m_cameraIcons)
 	{
 		int row = i / columns;
-		int column;
+		int column = i % columns;
 
-		if (i < firstAtLastRow)
-			column = i % columns;
-		else
-			column = i + columns - (countof(m_cameras) % columns);
+		if (i >= firstAtLastRow)
+			column += columns - (countof(m_cameras) % columns);
 
 		int x1 = width() - 48 + (column * 16) - 1;
 		int y1 = (row * 16) + 1;
