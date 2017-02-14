@@ -28,9 +28,9 @@ class LDSubfileReference;
 class LDDocument;
 class LDBfc;
 
-//
-// Object type codes.
-//
+/*
+ * Object type codes.
+ */
 enum LDObjectType
 {
 	SubfileReference,	//	Object represents a	sub-file reference
@@ -48,21 +48,16 @@ enum LDObjectType
 
 MAKE_ITERABLE_ENUM(LDObjectType)
 
-//
-// LDObject
-//
-// Base class object for all object types. Each LDObject represents a single line
-// in the LDraw code file. The virtual method getType returns an enumerator
-// which is a token of the object's type. The object can be casted into
-// sub-classes based on this enumerator.
-//
+/*
+ * Represents one line of code in an LDraw model file.
+ */
 class LDObject : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	virtual QString asText() const = 0; // This object as LDraw code
-    LDColor color() const;
+	LDColor color() const;
 	virtual LDColor defaultColor() const; // What color does the object default to?
 	Model* model() const;
 	LDPolygon* getPolygon();
@@ -115,15 +110,9 @@ private:
 	Vertex m_coords[4];
 };
 
-//
-// Common code for objects with matrices. This class is multiple-derived in
-// and thus not used directly other than as a common storage point for matrices
-// and vertices.
-//
-// In 0.1-alpha, there was a separate 'radial' type which had a position and
-// matrix as well. Even though right now only LDSubfile uses this, I'm keeping
-// this class distinct in case I get new extension ideas. :)
-//
+/*
+ * Base class for objects with matrices.
+ */
 class LDMatrixObject : public LDObject
 {
 	Vertex m_position;
@@ -143,12 +132,9 @@ private:
 	Matrix m_transformationMatrix;
 };
 
-//
-//
-// Represents a line in the LDraw file that could not be properly parsed. It is
-// represented by a (!) ERROR in the code view. It exists for the purpose of
-// allowing garbage lines be debugged and corrected within LDForge.
-//
+/*
+ * Represents a line in the LDraw file that could not be properly parsed.
+ */
 class LDError : public LDObject
 {
 public:
@@ -180,10 +166,9 @@ private:
 	QString m_reason;
 };
 
-//
-//
-// Represents a 0 BFC statement in the LDraw code.
-//
+/*
+ * Represents a 0 BFC statement in the LDraw code.
+ */
 enum class BfcStatement
 {
 	CertifyCCW,
@@ -235,11 +220,9 @@ private:
 	BfcStatement m_statement;
 };
 
-//
-// LDReference
-//
-// Represents a single code-1 subfile reference.
-//
+/*
+ * Represents a single code-1 subfile reference.
+ */
 class LDSubfileReference : public LDMatrixObject
 {
 public:
@@ -271,11 +254,9 @@ private:
 	LDDocument* m_fileInfo;
 };
 
-//
-// LDLine
-//
-// Represents a single code-2 line in the LDraw code file.
-//
+/*
+ * Represents a single code-2 line in the LDraw code file.
+ */
 class LDLine : public LDObject
 {
 public:
@@ -298,11 +279,9 @@ protected:
 	LDLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };
 
-//
-// LDCondLine
-//
-// Represents a single code-5 conditional line.
-//
+/*
+ * Represents a single code-5 conditional line.
+ */
 class LDCondLine : public LDLine
 {
 public:
@@ -326,13 +305,9 @@ protected:
 	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
-//
-// LDTriangle
-//
-// Represents a single code-3 triangle in the LDraw code file. Vertices v0, v1
-// and v2 contain the end-points of this triangle. dColor is the color the
-// triangle is colored with.
-//
+/*
+ * Represents a single code-3 triangle in the LDraw code file.
+ */
 class LDTriangle : public LDObject
 {
 public:
@@ -355,12 +330,9 @@ protected:
 	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 };
 
-//
-// LDQuad
-//
-// Represents a single code-4 quadrilateral. v0, v1, v2 and v3 are the end points
-// of the quad, dColor is the color used for the quad.
-//
+/*
+ * Represents a single code-4 quadrilateral.
+ */
 class LDQuad : public LDObject
 {
 public:
@@ -383,6 +355,9 @@ protected:
 	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 };
 
+/*
+ * Models a Bézier curve. It is stored as a special comment in the LDraw code file and can be inlined down into line segments.
+ */
 class LDBezierCurve : public LDObject
 {
 public:
