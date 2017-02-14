@@ -83,7 +83,7 @@ void LinePathMode::endDraw()
 	Model model {m_documents};
 
 	for (int i = 0; i < countof(m_drawedVerts) - 1; ++i)
-		model.emplace<LDLine>(m_drawedVerts[i], m_drawedVerts[i + 1]);
+		model.emplace<LDEdgeLine>(m_drawedVerts[i], m_drawedVerts[i + 1]);
 
 	finishDraw(model);
 }

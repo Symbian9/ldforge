@@ -118,25 +118,25 @@ void AlgorithmToolset::makeBorders()
 	{
 		const LDObjectType type = object->type();
 
-		if (type != LDObjectType::Quad and type != LDObjectType::Triangle)
+		if (type != LDObjectType::Quadrilateral and type != LDObjectType::Triangle)
 			continue;
 
 		Model lines {m_documents};
 
-		if (type == LDObjectType::Quad)
+		if (type == LDObjectType::Quadrilateral)
 		{
-			LDQuad* quad = static_cast<LDQuad*>(object);
-			lines.emplace<LDLine>(quad->vertex (0), quad->vertex (1));
-			lines.emplace<LDLine>(quad->vertex (1), quad->vertex (2));
-			lines.emplace<LDLine>(quad->vertex (2), quad->vertex (3));
-			lines.emplace<LDLine>(quad->vertex (3), quad->vertex (0));
+			LDQuadrilateral* quad = static_cast<LDQuadrilateral*>(object);
+			lines.emplace<LDEdgeLine>(quad->vertex (0), quad->vertex (1));
+			lines.emplace<LDEdgeLine>(quad->vertex (1), quad->vertex (2));
+			lines.emplace<LDEdgeLine>(quad->vertex (2), quad->vertex (3));
+			lines.emplace<LDEdgeLine>(quad->vertex (3), quad->vertex (0));
 		}
 		else
 		{
 			LDTriangle* triangle = static_cast<LDTriangle*>(object);
-			lines.emplace<LDLine>(triangle->vertex (0), triangle->vertex (1));
-			lines.emplace<LDLine>(triangle->vertex (1), triangle->vertex (2));
-			lines.emplace<LDLine>(triangle->vertex (2), triangle->vertex (0));
+			lines.emplace<LDEdgeLine>(triangle->vertex (0), triangle->vertex (1));
+			lines.emplace<LDEdgeLine>(triangle->vertex (1), triangle->vertex (2));
+			lines.emplace<LDEdgeLine>(triangle->vertex (2), triangle->vertex (0));
 		}
 
 		count += countof(lines.objects());
@@ -278,7 +278,7 @@ void AlgorithmToolset::demote()
 {
 	int num = 0;
 
-	for (LDCondLine* line : filterByType<LDCondLine>(selectedObjects()))
+	for (LDConditionalEdge* line : filterByType<LDConditionalEdge>(selectedObjects()))
 	{
 		line->becomeEdgeLine();
 		++num;
@@ -386,7 +386,7 @@ void AlgorithmToolset::splitLines()
 
 	for (LDObject* obj : selectedObjects())
 	{
-		if (not isOneOf (obj->type(), LDObjectType::Line, LDObjectType::CondLine))
+		if (not isOneOf (obj->type(), LDObjectType::EdgeLine, LDObjectType::ConditionalEdge))
 			continue;
 
 		Model segments {m_documents};
@@ -408,10 +408,10 @@ void AlgorithmToolset::splitLines()
 				a = (obj->vertex (0)[ax] + ((len * (i + 1)) / numSegments));
 			});
 
-			if (obj->type() == LDObjectType::Line)
-				segments.emplace<LDLine>(v0, v1);
+			if (obj->type() == LDObjectType::EdgeLine)
+				segments.emplace<LDEdgeLine>(v0, v1);
 			else
-				segments.emplace<LDCondLine>(v0, v1, obj->vertex (2), obj->vertex (3));
+				segments.emplace<LDConditionalEdge>(v0, v1, obj->vertex (2), obj->vertex (3));
 		}
 
 		currentDocument()->replace(obj, segments);

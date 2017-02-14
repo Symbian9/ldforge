@@ -440,7 +440,7 @@ LDObject* Model::insertFromString(int position, QString line)
 				CheckTokenNumbers (tokens, 1, 7);
 
 				// Line
-				LDLine* obj = emplaceAt<LDLine>(position);
+				LDEdgeLine* obj = emplaceAt<LDEdgeLine>(position);
 				obj->setColor (StringToNumber (tokens[1]));
 
 				for (int i = 0; i < 2; ++i)
@@ -474,9 +474,9 @@ LDObject* Model::insertFromString(int position, QString line)
 				LDObject* obj;
 
 				if (num == 4)
-					obj = emplaceAt<LDQuad>(position);
+					obj = emplaceAt<LDQuadrilateral>(position);
 				else
-					obj = emplaceAt<LDCondLine>(position);
+					obj = emplaceAt<LDConditionalEdge>(position);
 
 				obj->setColor (StringToNumber (tokens[1]));
 

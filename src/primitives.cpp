@@ -262,7 +262,7 @@ void PrimitiveModel::generateBody(Model& model) const
 		{
 		case Circle:
 		    {
-			    LDLine* line = model.emplace<LDLine>();
+			    LDEdgeLine* line = model.emplace<LDEdgeLine>();
 				line->setVertex(0, Vertex {x0, 0.0f, z0});
 				line->setVertex(1, Vertex {x1, 0.0f, z1});
 				line->setColor(EdgeColor);
@@ -311,7 +311,7 @@ void PrimitiveModel::generateBody(Model& model) const
 				Vertex v1 = {x1, y1, z1};
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
-				LDQuad* quad = model.emplace<LDQuad>(v0, v1, v2, v3);
+				LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
 				quad->setColor(MainColor);
 
 				if (type == Cylinder)
@@ -375,7 +375,7 @@ void PrimitiveModel::generateBody(Model& model) const
 			v0 = {v0[X] * ringNumber, 1.0, v0[Z] * ringNumber};
 		}
 
-		LDCondLine* line = model.emplace<LDCondLine>();
+		LDConditionalEdge* line = model.emplace<LDConditionalEdge>();
 		line->setColor(EdgeColor);
 		line->setVertex(0, v0);
 		line->setVertex(1, v1);

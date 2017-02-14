@@ -298,9 +298,9 @@ void GLCompiler::compileObject (LDObject* obj)
 	// Note: We cannot split quads into triangles here, it would mess up the wireframe view.
 	// Quads must go into separate vbos.
 	case LDObjectType::Triangle:
-	case LDObjectType::Quad:
-	case LDObjectType::Line:
-	case LDObjectType::CondLine:
+	case LDObjectType::Quadrilateral:
+	case LDObjectType::EdgeLine:
+	case LDObjectType::ConditionalEdge:
 		{
 			LDPolygon* poly = obj->getPolygon();
 			poly->id = obj->id();

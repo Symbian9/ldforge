@@ -71,7 +71,7 @@ void DrawMode::endDraw()
 	{
 	    case 2:
 			// 2 verts - make a line
-		    model.emplace<LDLine>(verts[0], verts[1]);
+		    model.emplace<LDEdgeLine>(verts[0], verts[1]);
 		    break;
 
 		case 3:
@@ -79,7 +79,7 @@ void DrawMode::endDraw()
 		{
 		    LDObject* obj = (countof(verts) == 3) ?
 			            static_cast<LDObject*>(model.emplace<LDTriangle>()) :
-			            static_cast<LDObject*>(model.emplace<LDQuad>());
+			            static_cast<LDObject*>(model.emplace<LDQuadrilateral>());
 
 			for (int i = 0; i < countof(verts); ++i)
 				obj->setVertex (i, verts[i]);

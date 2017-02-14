@@ -42,7 +42,7 @@ void RectangleMode::endDraw()
 	if (countof(m_drawedVerts) == 2)
 	{
 		Model model {m_documents};
-		LDQuad* quad = model.emplace<LDQuad>();
+		LDQuadrilateral* quad = model.emplace<LDQuadrilateral>();
 		updateRectVerts();
 
 		for (int i = 0; i < quad->numVertices(); ++i)

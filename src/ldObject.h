@@ -24,9 +24,7 @@
 #include "colors.h"
 
 class Model;
-class LDSubfileReference;
 class LDDocument;
-class LDBfc;
 
 /*
  * Object type codes.
@@ -34,10 +32,10 @@ class LDBfc;
 enum LDObjectType
 {
 	SubfileReference,	//	Object represents a	sub-file reference
-	Quad,				//	Object represents a	quadrilateral
+	Quadrilateral,		//	Object represents a	quadrilateral
 	Triangle,			//	Object represents a	triangle
-	Line,				//	Object represents a	line
-	CondLine,			//	Object represents a	conditional line
+	EdgeLine,			//	Object represents a	line
+	ConditionalEdge,	//	Object represents a	conditional line
 	Bfc,				//	Object represents a	BFC statement
 	Comment,			//	Object represents a	comment
 	Error,				//	Object is the result of failed parsing
@@ -75,7 +73,7 @@ public:
 	virtual int numVertices() const;
 	virtual QString objectListText() const;
 	LDObject* previous() const;
-	bool previousIsInvertnext (LDBfc*& ptr);
+	bool previousIsInvertnext(class LDBfc*& ptr);
 	QColor randomColor() const;
 	void setColor (LDColor color);
 	void setHidden (bool value);
@@ -257,10 +255,10 @@ private:
 /*
  * Represents a single code-2 line in the LDraw code file.
  */
-class LDLine : public LDObject
+class LDEdgeLine : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Line;
+	static constexpr LDObjectType SubclassType = LDObjectType::EdgeLine;
 
 	virtual LDObjectType type() const override
 	{
@@ -275,17 +273,17 @@ public:
 
 protected:
 	friend class Model;
-	LDLine (Model* model);
-	LDLine (Vertex v1, Vertex v2, Model* model = nullptr);
+	LDEdgeLine (Model* model);
+	LDEdgeLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };
 
 /*
  * Represents a single code-5 conditional line.
  */
-class LDCondLine : public LDLine
+class LDConditionalEdge : public LDEdgeLine
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::CondLine;
+	static constexpr LDObjectType SubclassType = LDObjectType::ConditionalEdge;
 
 	virtual LDObjectType type() const override
 	{
@@ -296,13 +294,13 @@ public:
 	virtual void invert() override;
 	int numVertices() const override { return 4; }
 	LDColor defaultColor() const override { return EdgeColor; }
-	LDLine* becomeEdgeLine();
+	LDEdgeLine* becomeEdgeLine();
 	QString typeName() const override { return "condline"; }
 
 protected:
 	friend class Model;
-	LDCondLine (Model* model);
-	LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
+	LDConditionalEdge (Model* model);
+	LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
 /*
@@ -333,10 +331,10 @@ protected:
 /*
  * Represents a single code-4 quadrilateral.
  */
-class LDQuad : public LDObject
+class LDQuadrilateral : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Quad;
+	static constexpr LDObjectType SubclassType = LDObjectType::Quadrilateral;
 
 	virtual LDObjectType type() const override
 	{
@@ -351,8 +349,8 @@ public:
 
 protected:
 	friend class Model;
-	LDQuad (Model* model);
-	LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
+	LDQuadrilateral (Model* model);
+	LDQuadrilateral (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model = nullptr);
 };
 
 /*

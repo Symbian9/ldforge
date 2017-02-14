@@ -137,7 +137,7 @@ void CircleMode::endDraw()
 			v3.setCoordinate (localx, v3[localx] + c1[i].x1());
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
-			LDQuad* quad = model.emplace<LDQuad>(v0, v1, v2, v3);
+			LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
 			quad->setColor(MainColor);
 
 			// Ensure the quads always are BFC-front towards the camera

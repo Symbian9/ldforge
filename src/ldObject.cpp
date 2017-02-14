@@ -64,10 +64,10 @@ LDSubfileReference::LDSubfileReference (Model* model) :
     LDMatrixObject (model) {}
 
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
-LDOBJ_DEFAULT_CTOR (LDLine, LDObject)
+LDOBJ_DEFAULT_CTOR (LDEdgeLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
-LDOBJ_DEFAULT_CTOR (LDCondLine, LDLine)
-LDOBJ_DEFAULT_CTOR (LDQuad, LDObject)
+LDOBJ_DEFAULT_CTOR (LDConditionalEdge, LDEdgeLine)
+LDOBJ_DEFAULT_CTOR (LDQuadrilateral, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
@@ -94,7 +94,7 @@ QString LDSubfileReference::asText() const
 
 // =============================================================================
 //
-QString LDLine::asText() const
+QString LDEdgeLine::asText() const
 {
 	QString val = format ("2 %1", color());
 
@@ -118,7 +118,7 @@ QString LDTriangle::asText() const
 
 // =============================================================================
 //
-QString LDQuad::asText() const
+QString LDQuadrilateral::asText() const
 {
 	QString val = format ("4 %1", color());
 
@@ -130,7 +130,7 @@ QString LDQuad::asText() const
 
 // =============================================================================
 //
-QString LDCondLine::asText() const
+QString LDConditionalEdge::asText() const
 {
 	QString val = format ("5 %1", color());
 	
@@ -191,7 +191,7 @@ int LDTriangle::triangleCount() const
 	return 1;
 }
 
-int LDQuad::triangleCount() const
+int LDQuadrilateral::triangleCount() const
 {
 	return 2;
 }
@@ -203,7 +203,7 @@ int LDObject::numVertices() const
 
 // =============================================================================
 //
-LDLine::LDLine (Vertex v1, Vertex v2, Model* model) :
+LDEdgeLine::LDEdgeLine (Vertex v1, Vertex v2, Model* model) :
     LDObject {model}
 {
 	setVertex (0, v1);
@@ -222,7 +222,7 @@ LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Mo
 
 // =============================================================================
 //
-LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model) :
+LDQuadrilateral::LDQuadrilateral (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4, Model* model) :
     LDObject {model}
 {
 	setVertex (0, v1);
@@ -233,8 +233,8 @@ LDQuad::LDQuad (const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vert
 
 // =============================================================================
 //
-LDCondLine::LDCondLine (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-    LDLine {model}
+LDConditionalEdge::LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
+	LDEdgeLine {model}
 {
 	setVertex (0, v0);
 	setVertex (1, v1);
@@ -266,10 +266,10 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 {
 	switch (obj->type())
 	{
-	case LDObjectType::Line:
-	case LDObjectType::CondLine:
+	case LDObjectType::EdgeLine:
+	case LDObjectType::ConditionalEdge:
 	case LDObjectType::Triangle:
-	case LDObjectType::Quad:
+	case LDObjectType::Quadrilateral:
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
 			Vertex v = obj->vertex (i);
@@ -316,10 +316,10 @@ void LDSubfileReference::inlineContents(Model& model, bool deep, bool render)
 LDPolygon* LDObject::getPolygon()
 {
 	LDObjectType ot = type();
-	int num = (ot == LDObjectType::Line)		? 2
+	int num = (ot == LDObjectType::EdgeLine)		? 2
 			: (ot == LDObjectType::Triangle)	? 3
-			: (ot == LDObjectType::Quad)		? 4
-			: (ot == LDObjectType::CondLine)	? 5
+			: (ot == LDObjectType::Quadrilateral)		? 4
+			: (ot == LDObjectType::ConditionalEdge)	? 5
 			: 0;
 
 	if (num == 0)
@@ -498,7 +498,7 @@ void LDTriangle::invert()
 
 // =============================================================================
 //
-void LDQuad::invert()
+void LDQuadrilateral::invert()
 {
 	// Quad:     0 -> 1 -> 2 -> 3
 	// reversed: 0 -> 3 -> 2 -> 1
@@ -580,7 +580,7 @@ void LDSubfileReference::invert()
 
 // =============================================================================
 //
-void LDLine::invert()
+void LDEdgeLine::invert()
 {
 	// For lines, we swap the vertices.
 	Vertex tmp = vertex (0);
@@ -590,7 +590,7 @@ void LDLine::invert()
 
 // =============================================================================
 //
-void LDCondLine::invert()
+void LDConditionalEdge::invert()
 {
 	// I don't think that a conditional line's control points need to be swapped, do they?
 	Vertex tmp = vertex (0);
@@ -613,9 +613,9 @@ void LDBezierCurve::invert()
 
 // =============================================================================
 //
-LDLine* LDCondLine::becomeEdgeLine()
+LDEdgeLine* LDConditionalEdge::becomeEdgeLine()
 {
-	LDLine* replacement = model()->emplaceReplacement<LDLine>(this);
+	LDEdgeLine* replacement = model()->emplaceReplacement<LDEdgeLine>(this);
 
 	for (int i = 0; i < replacement->numVertices(); ++i)
 		replacement->setVertex (i, vertex (i));
@@ -790,7 +790,7 @@ void LDBezierCurve::rasterize(Model& model, int segments)
 
 	for (LDPolygon& poly : polygons)
 	{
-		LDLine* line = model.emplace<LDLine>(poly.vertices[0], poly.vertices[1]);
+		LDEdgeLine* line = model.emplace<LDEdgeLine>(poly.vertices[0], poly.vertices[1]);
 		line->setColor (poly.color);
 	}
 }
