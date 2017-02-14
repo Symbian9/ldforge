@@ -198,51 +198,51 @@ void AlgorithmToolset::roundCoordinates()
 
 void AlgorithmToolset::replaceCoordinates()
 {
-	QDialog* dlg = new QDialog (m_window);
+	QDialog dialog {m_window};
 	Ui::ReplaceCoordsUI ui;
-	ui.setupUi (dlg);
+	ui.setupUi (&dialog);
 
-	if (not dlg->exec())
+	if (not dialog.exec())
 		return;
 
-	const double search = ui.search->value(),
-		replacement = ui.replacement->value();
-	const bool any = ui.any->isChecked(),
-		rel = ui.relative->isChecked();
+	const double needle = ui.search->value();
+	const double replacement = ui.replacement->value();
+	const bool replaceAllValues= ui.any->isChecked();
+	const bool relative = ui.relative->isChecked();
 
-	QList<Axis> sel;
-	int num = 0;
+	QList<Axis> selectedAxes;
+	int count = 0;
 
-	if (ui.x->isChecked()) sel << X;
-	if (ui.y->isChecked()) sel << Y;
-	if (ui.z->isChecked()) sel << Z;
+	if (ui.x->isChecked())
+		selectedAxes << X;
+	if (ui.y->isChecked())
+		selectedAxes << Y;
+	if (ui.z->isChecked())
+		selectedAxes << Z;
 
 	for (LDObject* obj : selectedObjects())
 	{
 		for (int i = 0; i < obj->numVertices(); ++i)
 		{
-			Vertex v = obj->vertex (i);
+			Vertex vertex = obj->vertex(i);
 
-			v.apply ([&](Axis ax, double& coord)
+			vertex.apply([&](Axis axis, double& coordinate)
 			{
-				if (not sel.contains (ax) or
-					(not any and coord != search))
+				if (selectedAxes.contains(axis) and (replaceAllValues or isZero(coordinate - needle)))
 				{
-					return;
+					if (relative)
+						coordinate += replacement;
+					else
+						coordinate = replacement;
+					count += 1;
 				}
-
-				if (not rel)
-					coord = 0;
-
-				coord += replacement;
-				num++;
 			});
 
-			obj->setVertex (i, v);
+			obj->setVertex(i, vertex);
 		}
 	}
 
-	print (tr ("Altered %1 values"), num);
+	print(tr("Altered %1 values"), count);
 }
 
 void AlgorithmToolset::flip()
