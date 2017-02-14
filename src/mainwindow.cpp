@@ -35,7 +35,7 @@
 #include "dialogs/configdialog.h"
 #include "linetypes/comment.h"
 #include "guiutilities.h"
-#include "glCompiler.h"
+#include "glcompiler.h"
 #include "documentmanager.h"
 #include "ldobjectiterator.h"
 #include "grid.h"

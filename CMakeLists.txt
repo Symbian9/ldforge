@@ -36,7 +36,7 @@ set (LDFORGE_SOURCES
 	src/documentmanager.cpp
 	src/editHistory.cpp
 	src/glcamera.cpp
-	src/glCompiler.cpp
+	src/glcompiler.cpp
 	src/glrenderer.cpp
 	src/grid.cpp
 	src/guiutilities.cpp
@@ -98,7 +98,7 @@ set (LDFORGE_HEADERS
 	src/editHistory.h
 	src/format.h
 	src/glcamera.h
-	src/glCompiler.h
+	src/glcompiler.h
 	src/glrenderer.h
 	src/grid.h
 	src/guiutilities.h

@@ -24,7 +24,7 @@
 #include "../canvas.h"
 #include "../primitives.h"
 #include "../colors.h"
-#include "../glCompiler.h"
+#include "../glcompiler.h"
 #include "../documentmanager.h"
 #include "viewtoolset.h"
 

@@ -30,7 +30,7 @@
 #include "mainwindow.h"
 #include "miscallenous.h"
 #include "editHistory.h"
-#include "glCompiler.h"
+#include "glcompiler.h"
 #include "primitives.h"
 #include "documentmanager.h"
 #include "grid.h"

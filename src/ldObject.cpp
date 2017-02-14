@@ -25,7 +25,7 @@
 #include "editHistory.h"
 #include "canvas.h"
 #include "colors.h"
-#include "glCompiler.h"
+#include "glcompiler.h"
 #include "linetypes/edgeline.h"
 
 // List of all LDObjects

@@ -19,7 +19,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/glu.h>
 #include <GL/glext.h>
-#include "glCompiler.h"
+#include "glcompiler.h"
 #include "miscallenous.h"
 #include "guiutilities.h"
 #include "documentmanager.h"
