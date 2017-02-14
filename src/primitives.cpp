@@ -25,6 +25,8 @@
 #include "ldpaths.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
+#include "linetypes/conditionaledge.h"
+#include "linetypes/edgeline.h"
 #include "linetypes/empty.h"
 
 

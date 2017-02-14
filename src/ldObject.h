@@ -253,57 +253,6 @@ private:
 };
 
 /*
- * Represents a single code-2 line in the LDraw code file.
- */
-class LDEdgeLine : public LDObject
-{
-public:
-	static constexpr LDObjectType SubclassType = LDObjectType::EdgeLine;
-
-	virtual LDObjectType type() const override
-	{
-		return SubclassType;
-	}
-
-	virtual QString asText() const override;
-	virtual void invert() override;
-	int numVertices() const override { return 2; }
-	LDColor defaultColor() const override { return EdgeColor; }
-	QString typeName() const override { return "line"; }
-
-protected:
-	friend class Model;
-	LDEdgeLine (Model* model);
-	LDEdgeLine (Vertex v1, Vertex v2, Model* model = nullptr);
-};
-
-/*
- * Represents a single code-5 conditional line.
- */
-class LDConditionalEdge : public LDEdgeLine
-{
-public:
-	static constexpr LDObjectType SubclassType = LDObjectType::ConditionalEdge;
-
-	virtual LDObjectType type() const override
-	{
-		return SubclassType;
-	}
-
-	virtual QString asText() const override;
-	virtual void invert() override;
-	int numVertices() const override { return 4; }
-	LDColor defaultColor() const override { return EdgeColor; }
-	LDEdgeLine* becomeEdgeLine();
-	QString typeName() const override { return "condline"; }
-
-protected:
-	friend class Model;
-	LDConditionalEdge (Model* model);
-	LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
-};
-
-/*
  * Represents a single code-3 triangle in the LDraw code file.
  */
 class LDTriangle : public LDObject

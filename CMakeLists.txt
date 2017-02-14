@@ -73,6 +73,8 @@ set (LDFORGE_SOURCES
 	src/editmodes/rectangleMode.cpp
 	src/editmodes/selectMode.cpp
 	src/linetypes/comment.cpp
+	src/linetypes/conditionaledge.cpp
+	src/linetypes/edgeline.cpp
 	src/linetypes/empty.cpp
 	src/toolsets/algorithmtoolset.cpp
 	src/toolsets/basictoolset.cpp
@@ -135,6 +137,8 @@ set (LDFORGE_HEADERS
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
 	src/linetypes/comment.h
+	src/linetypes/conditionaledge.h
+	src/linetypes/edgeline.h
 	src/linetypes/empty.h
 	src/toolsets/algorithmtoolset.h
 	src/toolsets/basictoolset.h

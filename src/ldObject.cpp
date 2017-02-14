@@ -26,6 +26,7 @@
 #include "canvas.h"
 #include "colors.h"
 #include "glCompiler.h"
+#include "linetypes/edgeline.h"
 
 // List of all LDObjects
 QMap<qint32, LDObject*> g_allObjects;
@@ -64,9 +65,7 @@ LDSubfileReference::LDSubfileReference (Model* model) :
     LDMatrixObject (model) {}
 
 LDOBJ_DEFAULT_CTOR (LDError, LDObject)
-LDOBJ_DEFAULT_CTOR (LDEdgeLine, LDObject)
 LDOBJ_DEFAULT_CTOR (LDTriangle, LDObject)
-LDOBJ_DEFAULT_CTOR (LDConditionalEdge, LDEdgeLine)
 LDOBJ_DEFAULT_CTOR (LDQuadrilateral, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
 LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
@@ -94,18 +93,6 @@ QString LDSubfileReference::asText() const
 
 // =============================================================================
 //
-QString LDEdgeLine::asText() const
-{
-	QString val = format ("2 %1", color());
-
-	for (int i = 0; i < 2; ++i)
-		val += format (" %1", vertex (i));
-
-	return val;
-}
-
-// =============================================================================
-//
 QString LDTriangle::asText() const
 {
 	QString val = format ("3 %1", color());
@@ -122,19 +109,6 @@ QString LDQuadrilateral::asText() const
 {
 	QString val = format ("4 %1", color());
 
-	for (int i = 0; i < 4; ++i)
-		val += format (" %1", vertex (i));
-
-	return val;
-}
-
-// =============================================================================
-//
-QString LDConditionalEdge::asText() const
-{
-	QString val = format ("5 %1", color());
-	
-	// Add the coordinates
 	for (int i = 0; i < 4; ++i)
 		val += format (" %1", vertex (i));
 
@@ -203,15 +177,6 @@ int LDObject::numVertices() const
 
 // =============================================================================
 //
-LDEdgeLine::LDEdgeLine (Vertex v1, Vertex v2, Model* model) :
-    LDObject {model}
-{
-	setVertex (0, v1);
-	setVertex (1, v2);
-}
-
-// =============================================================================
-//
 LDTriangle::LDTriangle (const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
     LDObject {model}
 {
@@ -229,17 +194,6 @@ LDQuadrilateral::LDQuadrilateral (const Vertex& v1, const Vertex& v2, const Vert
 	setVertex (1, v2);
 	setVertex (2, v3);
 	setVertex (3, v4);
-}
-
-// =============================================================================
-//
-LDConditionalEdge::LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-	LDEdgeLine {model}
-{
-	setVertex (0, v0);
-	setVertex (1, v1);
-	setVertex (2, v2);
-	setVertex (3, v3);
 }
 
 // =============================================================================
@@ -580,26 +534,6 @@ void LDSubfileReference::invert()
 
 // =============================================================================
 //
-void LDEdgeLine::invert()
-{
-	// For lines, we swap the vertices.
-	Vertex tmp = vertex (0);
-	setVertex (0, vertex (1));
-	setVertex (1, tmp);
-}
-
-// =============================================================================
-//
-void LDConditionalEdge::invert()
-{
-	// I don't think that a conditional line's control points need to be swapped, do they?
-	Vertex tmp = vertex (0);
-	setVertex (0, vertex (1));
-	setVertex (1, tmp);
-}
-
-// =============================================================================
-//
 void LDBezierCurve::invert()
 {
 	// A Bézier curve's control points probably need to be, though.
@@ -609,19 +543,6 @@ void LDBezierCurve::invert()
 	tmp = vertex (3);
 	setVertex (3, vertex (2));
 	setVertex (2, tmp);
-}
-
-// =============================================================================
-//
-LDEdgeLine* LDConditionalEdge::becomeEdgeLine()
-{
-	LDEdgeLine* replacement = model()->emplaceReplacement<LDEdgeLine>(this);
-
-	for (int i = 0; i < replacement->numVertices(); ++i)
-		replacement->setVertex (i, vertex (i));
-
-	replacement->setColor (color());
-	return replacement;
 }
 
 // =============================================================================

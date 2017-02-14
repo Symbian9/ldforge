@@ -20,6 +20,7 @@
 #include "linePathMode.h"
 #include "../canvas.h"
 #include "../mainwindow.h"
+#include "../linetypes/edgeline.h"
 
 LinePathMode::LinePathMode (Canvas* canvas) :
     Super (canvas) {}

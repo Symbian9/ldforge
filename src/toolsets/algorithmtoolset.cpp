@@ -33,6 +33,8 @@
 #include "../ldobjectiterator.h"
 #include "../documentmanager.h"
 #include "../linetypes/comment.h"
+#include "../linetypes/conditionaledge.h"
+#include "../linetypes/edgeline.h"
 #include "../linetypes/empty.h"
 #include "ui_replcoords.h"
 #include "ui_editraw.h"

@@ -19,8 +19,10 @@
 #include "model.h"
 #include "ldObject.h"
 #include "documentmanager.h"
-#include "linetypes/empty.h"
 #include "linetypes/comment.h"
+#include "linetypes/conditionaledge.h"
+#include "linetypes/edgeline.h"
+#include "linetypes/empty.h"
 
 Model::Model(DocumentManager* manager) :
     QObject {manager},

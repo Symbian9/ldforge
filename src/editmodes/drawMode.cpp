@@ -21,6 +21,7 @@
 #include "drawMode.h"
 #include "../ldObject.h"
 #include "../glRenderer.h"
+#include "../linetypes/edgeline.h"
 
 DrawMode::DrawMode (Canvas* canvas) :
     Super (canvas) {}
