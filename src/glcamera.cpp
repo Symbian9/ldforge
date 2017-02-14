@@ -242,3 +242,36 @@ const QString& GLCamera::name() const
 {
 	return m_name;
 }
+
+/*
+ * Returns the camera's transformation matrix, scaled by the given scale value.
+ */
+Matrix GLCamera::transformationMatrix(double scale) const
+{
+	// Matrix templates. 2 is substituted with the scale value, 1 is inverted to -1 if needed.
+	static const Matrix templates[3] =
+	{
+	    { 2, 0, 0, 0, 1, 0, 0, 0, 2 },
+	    { 2, 0, 0, 0, 0, 2, 0, 1, 0 },
+	    { 0, 1, 0, 2, 0, 0, 0, 0, 2 },
+	};
+
+	Matrix transform;
+
+	if (m_localX == X and m_localY == Z)
+		transform = templates[0];
+	else if (m_localX == X and m_localY == Y)
+		transform = templates[1];
+	if (m_localX == Y and m_localY == Z)
+		transform = templates[2];
+
+	for (double& value : transform)
+	{
+		if (value == 2)
+			value = scale;
+		else if (value == 1 and (glRotate(X) + glRotate(Y) + glRotate(Z)) < 0)
+			value = -1;
+	}
+
+	return transform;
+}

@@ -61,30 +61,6 @@ double CircleMode::getCircleDrawDist(int position) const
 }
 
 
-Matrix CircleMode::getCircleDrawMatrix(double scale)
-{
-	// Matrix templates. 2 is substituted with the scale value, 1 is inverted to -1 if needed.
-	static const Matrix templates[3] =
-	{
-		{ 2, 0, 0, 0, 1, 0, 0, 0, 2 },
-		{ 2, 0, 0, 0, 0, 2, 0, 1, 0 },
-		{ 0, 1, 0, 2, 0, 0, 0, 0, 2 },
-	};
-
-	Matrix transform = templates[static_cast<int>(renderer()->camera()) % 3];
-
-	for (double& value : transform)
-	{
-		if (value == 2)
-			value = scale;
-		else if (value == 1 and static_cast<int>(renderer()->camera()) >= 3)
-			value = -1;
-	}
-
-	return transform;
-}
-
-
 void CircleMode::endDraw()
 {
 	Model model {m_documents};
@@ -106,7 +82,7 @@ void CircleMode::endDraw()
 		// If the radii are the same, there's no ring space to fill. Use a circle.
 		primitiveModel.type = PrimitiveModel::Circle;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = getCircleDrawMatrix(dist0);
+		transform = renderer()->currentCamera().transformationMatrix(dist0);
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
@@ -114,7 +90,7 @@ void CircleMode::endDraw()
 		// If either radii is 0, use a disc.
 		primitiveModel.type = PrimitiveModel::Disc;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = getCircleDrawMatrix ((dist0 != 0) ? dist0 : dist1);
+		transform = renderer()->currentCamera().transformationMatrix((dist0 != 0) ? dist0 : dist1);
 		circleOrDisc = true;
 	}
 	else if (g_RingFinder.findRings(dist0, dist1))
@@ -126,7 +102,8 @@ void CircleMode::endDraw()
 		{
 			primitiveModel.ringNumber = component.num;
 			primitiveFile = primitives()->getPrimitive(primitiveModel);
-			model.emplace<LDSubfileReference>(primitiveFile, getCircleDrawMatrix(component.scale), m_drawedVerts.first());
+			model.emplace<LDSubfileReference>(primitiveFile, renderer()->currentCamera().transformationMatrix(component.scale),
+			                                  m_drawedVerts.first());
 		}
 	}
 	else

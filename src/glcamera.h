@@ -61,6 +61,7 @@ public:
 	Q_SLOT void rendererResized(int width, int height);
 	void setPanning(double x, double y);
 	void setZoom(double zoom);
+	Matrix transformationMatrix(double scale) const;
 	const QSizeF& virtualSize() const;
 	double zoom() const;
 	void zoomNotch(bool inward);

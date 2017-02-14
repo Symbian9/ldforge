@@ -46,10 +46,10 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     m_model {model},
     m_cameras {
         {"Top camera", {1,  0, 0, X, Z, false, false, false}}, // top
-        {"Front camera", {0,  0, 0, X, Y, false,  true, false}}, // front
+        {"Front camera", {0,  0, 1, X, Y, false,  true, false}}, // front
         {"Left camera", {0,  1, 0, Z, Y,  true,  true, false}}, // left
         {"Bottom camera", {-1,  0, 0, X, Z, false,  true, true}}, // bottom
-        {"Back camera", {0,  0, 0, X, Y,  true,  true, true}}, // back
+        {"Back camera", {0,  0, -1, X, Y,  true,  true, true}}, // back
         {"Right camera", {0, -1, 0, Z, Y, false,  true, true}}, // right
         {"Free camera", GLCamera::FreeCamera}, // free
     }
@@ -382,7 +382,7 @@ void GLRenderer::drawGLScene()
 		glTranslatef(panning (X), panning (Y), 0.0f);
 
 		if (camera() != Camera::Front and camera() != Camera::Back)
-			glRotatef(90.0f, currentCamera().glRotate(X), currentCamera().glRotate(Y), currentCamera().glRotate(Z));
+			glRotatef(90.0f, currentCamera().glRotate(X), currentCamera().glRotate(Y), 0);
 
 		// Back camera needs to be handled differently
 		if (camera() == Camera::Back)

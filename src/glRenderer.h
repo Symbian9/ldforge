@@ -80,7 +80,6 @@ public:
 	QColor backgroundColor() const;
 	Camera camera() const;
 	QByteArray capturePixels();
-	GLCompiler* compiler() const;
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
 	void drawGLScene();

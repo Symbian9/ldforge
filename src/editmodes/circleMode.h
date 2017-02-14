@@ -28,7 +28,6 @@ public:
 
 	void endDraw() override;
 	double getCircleDrawDist (int position) const;
-	Matrix getCircleDrawMatrix (double scale);
 	int maxVertices() const override;
 	bool preAddVertex (Vertex const&) override;
 	void render (QPainter& painter) const override;
