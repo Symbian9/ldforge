@@ -20,7 +20,7 @@
 #include <QDialog>
 #include "main.h"
 #include "basics.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 
 class LDDocument;
 class QFile;

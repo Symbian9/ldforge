@@ -17,7 +17,7 @@
  */
 
 #include <QApplication>
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "mainwindow.h"
 #include "primitives.h"
 #include "miscallenous.h"

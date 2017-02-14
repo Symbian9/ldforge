@@ -24,7 +24,7 @@
 #include <QSpinBox>
 #include "../mainwindow.h"
 #include "../main.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../miscallenous.h"
 #include "../radioGroup.h"
 #include "../glrenderer.h"

@@ -18,7 +18,7 @@
 
 #include "miscallenous.h"
 #include "ldObject.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 
 Vertex::Vertex() :
 	QVector3D() {}

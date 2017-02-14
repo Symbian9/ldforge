@@ -20,7 +20,7 @@
 #include "selectMode.h"
 #include "../canvas.h"
 #include "../mainwindow.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 
 SelectMode::SelectMode (Canvas* canvas) :
     Super (canvas),

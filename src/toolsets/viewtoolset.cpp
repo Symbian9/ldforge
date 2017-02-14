@@ -19,7 +19,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include "../mainwindow.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../miscallenous.h"
 #include "../canvas.h"
 #include "../primitives.h"

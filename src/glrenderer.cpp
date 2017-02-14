@@ -24,7 +24,7 @@
 #include <QTimer>
 #include <GL/glu.h>
 #include "main.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "glrenderer.h"
 #include "colors.h"
 #include "mainwindow.h"

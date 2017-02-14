@@ -30,7 +30,7 @@
 #include "../main.h"
 #include "../miscallenous.h"
 #include "../mainwindow.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../radioGroup.h"
 #include "../editHistory.h"
 #include "../documentmanager.h"

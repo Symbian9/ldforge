@@ -22,7 +22,7 @@
 #include "main.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 
 
 int gcd (int a, int b)

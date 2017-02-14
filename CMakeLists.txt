@@ -41,7 +41,7 @@ set (LDFORGE_SOURCES
 	src/grid.cpp
 	src/guiutilities.cpp
 	src/hierarchyelement.cpp
-	src/ldDocument.cpp
+	src/lddocument.cpp
 	src/ldObject.cpp
 	src/ldpaths.cpp
 	src/main.cpp
@@ -103,7 +103,7 @@ set (LDFORGE_HEADERS
 	src/grid.h
 	src/guiutilities.h
 	src/hierarchyelement.h
-	src/ldDocument.h
+	src/lddocument.h
 	src/ldObject.h
 	src/ldobjectiterator.h
 	src/ldpaths.h

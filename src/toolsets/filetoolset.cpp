@@ -19,7 +19,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "../canvas.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../mainwindow.h"
 #include "../partdownloader.h"
 #include "../primitives.h"

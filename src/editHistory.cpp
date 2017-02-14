@@ -18,7 +18,7 @@
 
 #include "editHistory.h"
 #include "ldObject.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "glrenderer.h"

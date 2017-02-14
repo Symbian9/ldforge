@@ -23,7 +23,7 @@
 #include "partdownloadrequest.h"
 #include "ui_partdownloader.h"
 #include "mainwindow.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "glrenderer.h"
 #include "documentmanager.h"
 

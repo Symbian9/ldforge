@@ -23,7 +23,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include "../canvas.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../ldObject.h"
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"

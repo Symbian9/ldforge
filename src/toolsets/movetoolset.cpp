@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../mathfunctions.h"
 #include "../miscallenous.h"
 #include "../mainwindow.h"

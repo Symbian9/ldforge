@@ -18,7 +18,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "canvas.h"

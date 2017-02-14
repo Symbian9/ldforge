@@ -20,7 +20,7 @@
 #include <QPainter>
 #include "colors.h"
 #include "guiutilities.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "mainwindow.h"
 
 GuiUtilities::GuiUtilities (QObject* parent) :

@@ -18,7 +18,7 @@
 
 #include <QMouseEvent>
 #include "magicWandMode.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../mainwindow.h"
 #include "../canvas.h"
 

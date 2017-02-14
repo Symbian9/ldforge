@@ -19,7 +19,7 @@
 #include <QApplication>
 #include <QFileInfo>
 #include "documentmanager.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "mainwindow.h"
 #include "partdownloader.h"
 #include "documentloader.h"

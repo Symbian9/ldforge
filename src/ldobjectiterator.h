@@ -18,7 +18,7 @@
 
 #pragma once
 #include "ldObject.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 
 template<typename T>
 class LDObjectIterator

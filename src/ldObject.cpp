@@ -19,7 +19,7 @@
 #include <assert.h>
 #include "documentmanager.h"
 #include "ldObject.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "editHistory.h"

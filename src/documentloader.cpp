@@ -17,7 +17,7 @@
  */
 
 #include "documentloader.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "ldObject.h"
 #include "mainwindow.h"
 #include "dialogs/openprogressdialog.h"
@@ -77,7 +77,7 @@ void DocumentLoader::start()
 
 	if (isOnForeground())
 	{
-		// Show a progress dialog if we're loading the main ldDocument.here so we can show progress updates and keep the
+		// Show a progress dialog if we're loading the main lddocument.here so we can show progress updates and keep the
 		// WM posted that we're still here.
 		m_progressDialog = new OpenProgressDialog(qobject_cast<QWidget*>(parent()));
 		m_progressDialog->setNumLines (countof(m_lines));

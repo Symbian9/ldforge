@@ -20,7 +20,7 @@
 #include "circleMode.h"
 #include "../miscallenous.h"
 #include "../ldObject.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../ringFinder.h"
 #include "../primitives.h"
 #include "../canvas.h"

@@ -27,7 +27,7 @@
 #include "linePathMode.h"
 #include "curvemode.h"
 #include "../mainwindow.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../canvas.h"
 #include "../miscallenous.h"
 #include "../grid.h"

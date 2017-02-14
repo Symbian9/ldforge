@@ -19,7 +19,7 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QCheckBox>
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../mainwindow.h"
 #include "newpartdialog.h"
 #include "ui_newpartdialog.h"

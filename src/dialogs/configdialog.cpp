@@ -32,7 +32,7 @@
 #include <QSettings>
 #include <QPushButton>
 #include "../main.h"
-#include "../ldDocument.h"
+#include "../lddocument.h"
 #include "../miscallenous.h"
 #include "../canvas.h"
 #include "../guiutilities.h"

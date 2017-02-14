@@ -25,7 +25,7 @@
 #include "main.h"
 #include "canvas.h"
 #include "mainwindow.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "miscallenous.h"
 #include "messageLog.h"
 #include "ui_mainwindow.h"

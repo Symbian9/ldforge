@@ -21,7 +21,7 @@
 #include "documentmanager.h"
 #include "glcamera.h"
 #include "grid.h"
-#include "ldDocument.h"
+#include "lddocument.h"
 #include "mainwindow.h"
 #include "messageLog.h"
 #include "miscallenous.h"
