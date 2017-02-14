@@ -149,7 +149,6 @@ private:
 	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
 	GLCamera m_cameras[7];
 	bool m_useDarkBackground = false;
-	bool m_drawToolTip = false;
 	bool m_takingScreenCapture = false;
 	bool m_panning = false;
 	bool m_initialized = false;
@@ -161,7 +160,6 @@ private:
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
 	Camera m_camera;
-	Camera m_toolTipCamera;
 	GLuint m_axeslist;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;
@@ -174,7 +172,7 @@ private:
 	void zoomAllToFit();
 
 private slots:
-	void slot_toolTipTimer();
+	void showCameraIconTooltip();
 	void initializeAxes();
 	void initializeLighting();
 };

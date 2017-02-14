@@ -58,7 +58,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	setAcceptDrops (true);
-	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (slot_toolTipTimer()));
+	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (showCameraIconTooltip()));
 	resetAllAngles();
 	m_needZoomToFit = true;
 
@@ -554,15 +554,6 @@ void GLRenderer::overpaint(QPainter &painter)
 		painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
 	}
 
-	// Tool tips
-	if (m_drawToolTip)
-	{
-		if (not m_cameraIcons[static_cast<int>(m_toolTipCamera)].targetRect.contains (m_mousePosition))
-			m_drawToolTip = false;
-		else
-			QToolTip::showText(m_globalpos, m_cameras[static_cast<int>(m_toolTipCamera)].name());
-	}
-
 	// Draw a label for the current camera in the bottom left corner
 	{
 		QFontMetrics metrics {QFont {}};
@@ -638,8 +629,7 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 	}
 
 	// Start the tool tip timer
-	if (not m_drawToolTip)
-		m_toolTipTimer->start (500);
+	m_toolTipTimer->start (500);
 
 	// Update 2d position
 	m_mousePosition = event->pos();
@@ -681,7 +671,6 @@ void GLRenderer::wheelEvent(QWheelEvent* ev)
 //
 void GLRenderer::leaveEvent(QEvent*)
 {
-	m_drawToolTip = false;
 	m_toolTipTimer->stop();
 	update();
 }
@@ -819,19 +808,16 @@ QByteArray GLRenderer::capturePixels()
 	return result;
 }
 
-// =============================================================================
-//
-void GLRenderer::slot_toolTipTimer()
+/*
+ * Show a tooltip if the cursor is currently hovering over a camera icon.
+ */
+void GLRenderer::showCameraIconTooltip()
 {
-	// We come here if the cursor has stayed in one place for longer than a
-	// a second. Check if we're holding it over a camera icon - if so, draw
-	// a tooltip.
 	for (CameraIcon & icon : m_cameraIcons)
 	{
 		if (icon.targetRect.contains (m_mousePosition))
 		{
-			m_toolTipCamera = icon.camera;
-			m_drawToolTip = true;
+			QToolTip::showText(m_globalpos, m_cameras[static_cast<int>(icon.camera)].name());
 			update();
 			break;
 		}
