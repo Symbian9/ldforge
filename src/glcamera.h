@@ -18,12 +18,11 @@
 
 #pragma once
 #include "main.h"
+#include "glShared.h"
 
 struct FixedCameraParameters
 {
-	int glRotateX;
-	int glRotateY;
-	int glRotateZ;
+	GLRotationMatrix rotationMatrix;
 	Axis localX;
 	Axis localY;
 	bool negatedX;
@@ -52,7 +51,6 @@ public:
 	Vertex convert2dTo3d(const QPoint& pos2d, Grid* grid = nullptr) const;
 	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	double depth() const;
-	int glRotate(Axis axis) const;
 	bool isAxisNegated(Axis axis) const;
 	const QString& name() const;
 	void pan(int xMove, int yMove);
@@ -61,7 +59,8 @@ public:
 	Q_SLOT void rendererResized(int width, int height);
 	void setPanning(double x, double y);
 	void setZoom(double zoom);
-	Matrix transformationMatrix(double scale) const;
+	const GLRotationMatrix& transformationMatrix() const;
+	GLRotationMatrix transformationMatrix(double scale) const;
 	const QSizeF& virtualSize() const;
 	double zoom() const;
 	void zoomNotch(bool inward);
@@ -74,7 +73,7 @@ private:
 	double m_zoom = 30;
 	QSize m_size;
 	QSizeF m_virtualSize;
-	int m_glrotate[3] = {0, 0, 0}; // GL model transformation to use
+	GLRotationMatrix m_rotationMatrix;
 	Axis m_localX = X; // Which axis to use for Y
 	Axis m_localY = Y; // Which axis to use for Y
 	bool m_isFree = false; // Is this the free camera?

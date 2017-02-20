@@ -18,6 +18,7 @@
 
 #pragma once
 #include <QString>
+#include "../glShared.h"
 
 /*
  * A mathematical 3 x 3 matrix
@@ -53,6 +54,7 @@ public:
 	const double& operator()(int row, int column) const;
 
 	static const Matrix identity;
+	static Matrix fromRotationMatrix(const GLRotationMatrix& rotationMatrix);
 
 private:
 	double m_values[9];

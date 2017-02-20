@@ -26,6 +26,7 @@
 #include "../mainwindow.h"
 #include "../mathfunctions.h"
 #include "../miscallenous.h"
+#include "../documentmanager.h"
 #include "../grid.h"
 #include "../linetypes/modelobject.h"
 #include "../linetypes/quadrilateral.h"
@@ -83,7 +84,7 @@ void CircleMode::endDraw()
 		// If the radii are the same, there's no ring space to fill. Use a circle.
 		primitiveModel.type = PrimitiveModel::Circle;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = renderer()->currentCamera().transformationMatrix(dist0);
+		transform = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix(dist0));
 		circleOrDisc = true;
 	}
 	else if (dist0 == 0 or dist1 == 0)
@@ -91,7 +92,7 @@ void CircleMode::endDraw()
 		// If either radii is 0, use a disc.
 		primitiveModel.type = PrimitiveModel::Disc;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = renderer()->currentCamera().transformationMatrix((dist0 != 0) ? dist0 : dist1);
+		transform = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix((dist0 != 0) ? dist0 : dist1));
 		circleOrDisc = true;
 	}
 	else if (g_RingFinder.findRings(dist0, dist1))
@@ -103,8 +104,8 @@ void CircleMode::endDraw()
 		{
 			primitiveModel.ringNumber = component.num;
 			primitiveFile = primitives()->getPrimitive(primitiveModel);
-			model.emplace<LDSubfileReference>(primitiveFile, renderer()->currentCamera().transformationMatrix(component.scale),
-			                                  m_drawedVerts.first());
+			Matrix matrix = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
+			model.emplace<LDSubfileReference>(primitiveFile, matrix, m_drawedVerts.first());
 		}
 	}
 	else
@@ -149,15 +150,6 @@ void CircleMode::endDraw()
 
 	if (circleOrDisc and primitiveFile)
 		model.emplace<LDSubfileReference>(primitiveFile, transform, m_drawedVerts.first());
-
-	if (not model.isEmpty())
-	{
-		Axis relZ = renderer()->getRelativeZ();;
-		int l = (relZ == X ? 1 : 0);
-		int m = (relZ == Y ? 1 : 0);
-		int n = (relZ == Z ? 1 : 0);
-		math()->rotateObjects(l, m, n, -m_angleOffset, model.objects());
-	}
 
 	finishDraw (model);
 }

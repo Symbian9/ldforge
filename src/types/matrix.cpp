@@ -251,3 +251,14 @@ int Matrix::ConstRowView::row()
 {
 	return _row;
 }
+
+Matrix Matrix::fromRotationMatrix(const GLRotationMatrix& rotationMatrix)
+{
+	Matrix result;
+
+	for (int i = 0; i < 3; ++i)
+	for (int j = 0; j < 3; ++j)
+		result(i, j) = rotationMatrix(i, j);
+
+	return result;
+}

@@ -37,6 +37,17 @@
 
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
+// Transformation matrices for the fixed cameras.
+const GLRotationMatrix GLRenderer::topCameraMatrix = GLRotationMatrix {};
+const GLRotationMatrix GLRenderer::frontCameraMatrix = {{1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::leftCameraMatrix = {{0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::bottomCameraMatrix = {{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::backCameraMatrix = {{-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::rightCameraMatrix = {{0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1}};
+
+// Conversion matrix from LDraw to OpenGL coordinates.
+const GLRotationMatrix GLRenderer::ldrawToGLAdapterMatrix = {{1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1}};
+
 /*
  * Constructs a GL renderer.
  */
@@ -45,12 +56,12 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     HierarchyElement {parent},
     m_model {model},
     m_cameras {
-        {"Top camera", {1,  0, 0, X, Z, false, false, false}}, // top
-        {"Front camera", {0,  0, 1, X, Y, false,  true, false}}, // front
-        {"Left camera", {0,  1, 0, Z, Y,  true,  true, false}}, // left
-        {"Bottom camera", {-1,  0, 0, X, Z, false,  true, true}}, // bottom
-        {"Back camera", {0,  0, -1, X, Y,  true,  true, true}}, // back
-        {"Right camera", {0, -1, 0, Z, Y, false,  true, true}}, // right
+        {"Top camera", {topCameraMatrix, X, Z, false, false, false}}, // top
+        {"Front camera", {frontCameraMatrix, X, Y, false,  true, false}}, // front
+        {"Left camera", {leftCameraMatrix, Z, Y,  true,  true, false}}, // left
+        {"Bottom camera", {bottomCameraMatrix, X, Z, false,  true, true}}, // bottom
+        {"Back camera", {backCameraMatrix, X, Y,  true,  true, true}}, // back
+        {"Right camera", {rightCameraMatrix, Z, Y, false,  true, true}}, // right
         {"Free camera", GLCamera::FreeCamera}, // free
     }
 {
@@ -380,16 +391,8 @@ void GLRenderer::drawGLScene()
 		const QSizeF& virtualSize = currentCamera().virtualSize();
 		glOrtho(-virtualSize.width(), virtualSize.width(), -virtualSize.height(), virtualSize.height(), -100.0f, 100.0f);
 		glTranslatef(panning (X), panning (Y), 0.0f);
-
-		if (camera() != Camera::Front and camera() != Camera::Back)
-			glRotatef(90.0f, currentCamera().glRotate(X), currentCamera().glRotate(Y), 0);
-
-		// Back camera needs to be handled differently
-		if (camera() == Camera::Back)
-		{
-			glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
-			glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-		}
+		glMultMatrixf(currentCamera().transformationMatrix());
+		glMultMatrixf(ldrawToGLAdapterMatrix);
 	}
 	else
 	{

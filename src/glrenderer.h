@@ -105,6 +105,13 @@ public:
 	QPen textPen() const;
 
 	static const QPen thinBorderPen;
+	static const GLRotationMatrix topCameraMatrix;
+	static const GLRotationMatrix frontCameraMatrix;
+	static const GLRotationMatrix leftCameraMatrix;
+	static const GLRotationMatrix bottomCameraMatrix;
+	static const GLRotationMatrix backCameraMatrix;
+	static const GLRotationMatrix rightCameraMatrix;
+	static const GLRotationMatrix ldrawToGLAdapterMatrix;
 
 signals:
 	void objectHighlightingChanged(LDObject* object);

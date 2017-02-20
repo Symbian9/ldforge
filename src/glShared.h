@@ -19,7 +19,32 @@
 #pragma once
 
 #include <QOpenGLFunctions>
+#include <QGenericMatrix>
 #include "basics.h"
+
+class GLRotationMatrix : public QGenericMatrix<4, 4, GLfloat>
+{
+public:
+	GLRotationMatrix() {}
+	GLRotationMatrix(GLfloat values[16]) :
+	    QGenericMatrix<4, 4, GLfloat> {values} {}
+	GLRotationMatrix(std::initializer_list<GLfloat>&& values)
+	{
+		auto iterator = values.begin();
+
+		for (int i = 0; i < 4; ++i)
+		for (int j = 0; j < 4; ++j)
+		{
+			(*this)(i, j) = *iterator;
+			++iterator;
+		}
+	}
+};
+
+inline void glMultMatrixf(const GLRotationMatrix& matrix)
+{
+	glMultMatrixf(matrix.constData());
+}
 
 class LDObject;
 

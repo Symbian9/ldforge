@@ -29,9 +29,9 @@
 #include <math.h>
 #include "macros.h"
 #include "transform.h"
-#include "types/matrix.h"
 
 class LDObject;
+class Matrix;
 using LDObjectList = QList<LDObject*>;
 
 template<typename T, typename R>
