@@ -71,6 +71,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 	m_toolTipTimer->setSingleShot (true);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (showCameraIconTooltip()));
+	connect(model, SIGNAL(aboutToRemoveObject(LDObject*)), this, SLOT(removeObject(LDObject*)));
 	resetAllAngles();
 	m_needZoomToFit = true;
 
@@ -783,9 +784,9 @@ void GLRenderer::setPicking(bool value)
 
 // =============================================================================
 //
-void GLRenderer::forgetObject(LDObject* obj)
+void GLRenderer::removeObject(LDObject* object)
 {
-	if (m_objectAtCursor == obj)
+	if (m_objectAtCursor == object)
 		m_objectAtCursor = nullptr;
 }
 

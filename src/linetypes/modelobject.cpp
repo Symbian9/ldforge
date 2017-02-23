@@ -70,10 +70,6 @@ LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
 LDObject::~LDObject()
 {
-	// Delete the GL lists
-	if (g_win)
-		g_win->renderer()->forgetObject(this);
-
 	// Remove this object from the list of LDObjects
 	g_allObjects.erase(g_allObjects.find(id()));
 }

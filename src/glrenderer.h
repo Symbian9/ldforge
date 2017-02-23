@@ -83,7 +83,6 @@ public:
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
 	void drawGLScene();
-	void forgetObject(LDObject* obj);
 	void highlightCursorObject();
 	void initGLData();
 	bool isPicking() const;
@@ -173,6 +172,7 @@ private:
 	void drawVbos (VboClass surface, VboSubclass colors, GLenum type);
 	void zoomToFit();
 	void zoomAllToFit();
+	Q_SLOT void removeObject(LDObject* object);
 
 private slots:
 	void showCameraIconTooltip();
