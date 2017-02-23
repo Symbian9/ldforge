@@ -768,9 +768,12 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 	return false;
 }
 
-void MainWindow::addMessage (QString msg)
+void MainWindow::addMessage(QString message)
 {
-	messageLog()->addLine (msg);
+	messageLog()->addLine(message);
+
+	// Also print it to stdout
+	fprint(stdout, "%1\n", message);
 }
 
 /*

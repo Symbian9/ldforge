@@ -118,7 +118,7 @@ void DocumentLoader::work (int i)
 		// Check for parse errors and warn about them
 		if (obj->type() == LDObjectType::Error)
 		{
-			print ("Couldn't parse line #%1: %2", progress() + 1, static_cast<LDError*> (obj)->reason());
+			emit parseErrorMessage(format(tr("Couldn't parse line #%1: %2"), progress() + 1, static_cast<LDError*> (obj)->reason()));
 			++m_warningCount;
 		}
 	}

@@ -48,7 +48,7 @@ public:
 	Axis axisX() const;
 	Axis axisY() const;
 	Axis axisZ() const;
-	Vertex convert2dTo3d(const QPoint& pos2d, Grid* grid = nullptr) const;
+	Vertex convert2dTo3d(const QPoint& pos2d, class Grid* grid = nullptr) const;
 	QPoint convert3dTo2d(const Vertex& pos3d) const;
 	double depth() const;
 	bool isAxisNegated(Axis axis) const;

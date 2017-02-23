@@ -301,7 +301,7 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 
 #ifdef DEBUG
 	if (not isFrozen())
-		dprint ("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
+		print("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
 #endif
 }
 

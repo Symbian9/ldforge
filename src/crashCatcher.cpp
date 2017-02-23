@@ -131,8 +131,6 @@ void initializeCrashHandler()
 		if (sigaction(signal, &sighandler, nullptr) == -1)
 			fprint(stderr, "Couldn't set signal handler %1: %2", signal, strerror(errno));
 	}
-
-	print("Crash catcher hooked to signals: %1\n", signalsToCatch);
 }
 
 #endif // Q_OS_UNIX

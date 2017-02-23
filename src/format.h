@@ -124,19 +124,6 @@ QString format (QString fmtstr, Args... args)
 	return fmtstr;
 }
 
-
-// From messageLog.cc - declared here so that I don't need to include messageLog.h here.
-void printToLog (const QString& msg);
-
-
-// Format and print the given args to the message log.
-template<typename... Args>
-void print (QString fmtstr, Args... args)
-{
-	formatHelper (fmtstr, args...);
-	printToLog (fmtstr);
-}
-
 template<typename... Args>
 void fprint (FILE* fp, QString fmtstr, Args... args)
 {
@@ -151,16 +138,3 @@ void fprint (QIODevice& dev, QString fmtstr, Args... args)
 	formatHelper (fmtstr, args...);
 	dev.write (fmtstr.toUtf8());
 }
-
-
-// Exactly like print() except no-op in release builds.
-template<typename... Args>
-#ifndef RELEASE
-void dprint (QString fmtstr, Args... args)
-{
-	formatHelper (fmtstr, args...);
-	printToLog (fmtstr);
-}
-#else
-void dprint (QString, Args...) {}
-#endif

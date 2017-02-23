@@ -276,6 +276,7 @@ void DocumentManager::loadFileContents(QIODevice* input, Model& model, int* numW
 		*numWarnings = 0;
 
 	DocumentLoader* loader = new DocumentLoader {&model, m_loadingMainFile};
+	connect(loader, SIGNAL(parseErrorMessage(QString)), this, SLOT(printParseErrorMessage(QString)));
 	loader->read(input);
 	loader->start();
 
@@ -289,6 +290,11 @@ void DocumentManager::loadFileContents(QIODevice* input, Model& model, int* numW
 	// If we wanted the success value, supply that now
 	if (ok)
 		*ok = not loader->hasAborted();
+}
+
+void DocumentManager::printParseErrorMessage(QString message)
+{
+	print(message);
 }
 
 LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride,

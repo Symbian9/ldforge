@@ -59,4 +59,5 @@ private slots:
 signals:
 	void progressUpdate (int progress);
 	void workDone();
+	void parseErrorMessage(QString message);
 };

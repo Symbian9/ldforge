@@ -23,6 +23,7 @@
 #include "editHistory.h"
 #include "glShared.h"
 #include "model.h"
+#include "hierarchyelement.h"
 
 struct LDGLData;
 class DocumentManager;

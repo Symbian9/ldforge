@@ -38,7 +38,7 @@ public:
 
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement) const;
+	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement);
 	QColor indexColorForID (int id) const;
 	void initialize();
 	void needMerge();
@@ -68,5 +68,5 @@ private:
 	GLRenderer* m_renderer;
 };
 
-#define CHECK_GL_ERROR() { CheckGLErrorImpl (__FILE__, __LINE__); }
-void CheckGLErrorImpl (const char* file, int line);
+#define CHECK_GL_ERROR() { CheckGLErrorImpl (this, __FILE__, __LINE__); }
+void CheckGLErrorImpl (HierarchyElement* element, const char* file, int line);

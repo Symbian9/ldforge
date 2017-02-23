@@ -28,7 +28,6 @@ const LDColor LDColor::nullColor = -1;
  */
 void LDColor::initColors()
 {
-	print("Initializing color information.\n");
 	static ColorData colors;
 	LDColor::colorData = &colors;
 }

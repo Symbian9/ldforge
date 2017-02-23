@@ -23,6 +23,7 @@
 #include <QDirIterator>
 #include "main.h"
 #include "model.h"
+#include "hierarchyelement.h"
 
 class LDDocument;
 class Ui_GeneratePrimitiveDialog;

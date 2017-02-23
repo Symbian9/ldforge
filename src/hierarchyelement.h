@@ -20,14 +20,16 @@
 #include <QObject>
 #include "main.h"
 #include "configuration.h"
+#include "messageLog.h"
+#include "mainwindow.h"
 
-class MainWindow;
 class GuiUtilities;
 class LDDocument;
 class DocumentManager;
 class PrimitiveManager;
 class Grid;
 class MathFunctions;
+class MainWindow;
 
 //
 // Objects that are to take part in the MainWindow's hierarchy multiple-inherit from this class to get a pointer back
@@ -47,6 +49,14 @@ public:
 
 	// Utility functions
 	QString preferredLicenseText() const;
+
+	// Format and print the given args to the message log.
+	template<typename... Args>
+	void print(QString formatString, Args... args)
+	{
+		formatHelper(formatString, args...);
+		m_window->addMessage(formatString);
+	}
 
 protected:
 	MainWindow* m_window;

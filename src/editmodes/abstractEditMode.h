@@ -19,6 +19,7 @@
 #pragma once
 #include "../main.h"
 #include "../model.h"
+#include "../hierarchyelement.h"
 
 class QPainter;
 class Canvas;

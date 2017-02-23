@@ -36,7 +36,6 @@ public:
 	double* begin();
 	const double* begin() const;
 	double determinant() const;
-	void dump() const;
 	double* end();
 	const double* end() const;
 	Matrix multiply(const Matrix& other) const;

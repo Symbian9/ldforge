@@ -20,6 +20,7 @@
 #include <QDialog>
 #include "../main.h"
 #include "../colors.h"
+#include "../hierarchyelement.h"
 
 class ColorSelector : public QDialog, public HierarchyElement
 {

@@ -52,20 +52,6 @@ Matrix::Matrix (const std::initializer_list<double>& values)
 }
 
 /*
- * Prints the matrix out.
- */
-void Matrix::dump() const
-{
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-			print ("%1\t", m_values[i * 3 + j]);
-
-		print ("\n");
-	}
-}
-
-/*
  * Returns a string representation of the matrix
  */
 QString Matrix::toString() const

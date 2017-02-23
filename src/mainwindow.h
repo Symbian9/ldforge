@@ -36,6 +36,8 @@ class Configuration;
 class PrimitiveManager;
 class Grid;
 class MathFunctions;
+class DocumentManager;
+class LDDocument;
 
 class ColorToolbarItem
 {
@@ -117,6 +119,13 @@ public:
 
 	static QPixmap getIcon(QString iconName);
 	static class QSettings* makeSettings(QObject* parent = nullptr);
+
+	template<typename... Args>
+	void print(QString formatString, Args... args)
+	{
+		formatHelper(formatString, args...);
+		addMessage(formatString);
+	}
 
 signals:
 	void gridChanged();

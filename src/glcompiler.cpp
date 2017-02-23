@@ -43,7 +43,7 @@ static const GLErrorInfo g_GLErrors[] =
 	{ GL_STACK_OVERFLOW,				"The operation would have caused an overflow" },
 };
 
-void CheckGLErrorImpl (const char* file, int line)
+void CheckGLErrorImpl (HierarchyElement* element, const char* file, int line)
 {
 	QString errmsg;
 	GLenum errnum = glGetError();
@@ -60,7 +60,7 @@ void CheckGLErrorImpl (const char* file, int line)
 		}
 	}
 
-	print ("OpenGL ERROR: at %1:%2: %3", Basename (QString (file)), line, errmsg);
+	element->print ("OpenGL ERROR: at %1:%2: %3", Basename (QString (file)), line, errmsg);
 }
 
 
@@ -110,7 +110,7 @@ QColor GLCompiler::indexColorForID (int id) const
  * - polygonOwner is the LDObject from which the polygon originated.
  * - subclass provides context for the polygon.
  */
-QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner, VboSubclass subclass) const
+QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner, VboSubclass subclass)
 {
 	QColor color;
 
@@ -198,7 +198,7 @@ QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner
 		static QSet<int> warnedColors;
 		if (not warnedColors.contains(polygon.color))
 		{
-			print("Unknown color %1!\n", polygon.color);
+			print(tr("Unknown color %1!\n"), polygon.color);
 			warnedColors.insert(polygon.color);
 		}
 	}

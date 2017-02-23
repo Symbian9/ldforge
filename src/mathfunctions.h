@@ -18,6 +18,7 @@
 
 #pragma once
 #include "main.h"
+#include "hierarchyelement.h"
 
 
 enum RotationPoint

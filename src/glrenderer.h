@@ -22,6 +22,7 @@
 #include "model.h"
 #include "glShared.h"
 #include "glcamera.h"
+#include "hierarchyelement.h"
 
 class GLCompiler;
 class MessageManager;

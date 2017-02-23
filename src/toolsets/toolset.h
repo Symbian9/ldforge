@@ -19,6 +19,7 @@
 #pragma once
 #include <QObject>
 #include "../main.h"
+#include "../hierarchyelement.h"
 
 class MainWindow;
 

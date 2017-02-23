@@ -55,6 +55,8 @@ signals:
 	void documentClosed(LDDocument* document);
 
 private:
+	Q_SLOT void printParseErrorMessage(QString message);
+
 	Documents m_documents;
 	bool m_loadingMainFile;
 	bool m_isLoadingLogoedStuds;

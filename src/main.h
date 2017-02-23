@@ -31,5 +31,4 @@
 #include "macros.h"
 #include "version.h"
 #include "format.h"
-#include "hierarchyelement.h"
 #include "configuration.h"

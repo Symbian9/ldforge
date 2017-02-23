@@ -117,17 +117,3 @@ const QList<MessageManager::Line>& MessageManager::getLines() const
 {
 	return m_lines;
 }
-
-// =============================================================================
-//
-void printToLog (const QString& msg)
-{
-	for (QString& a : msg.split ("\n", QString::SkipEmptyParts))
-	{
-		if (g_win)
-			g_win->addMessage (a);
-
-		// Also print it to stdout
-		fprint (stdout, "%1\n", a);
-	}
-}
