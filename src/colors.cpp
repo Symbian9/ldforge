@@ -21,39 +21,31 @@
 #include "ldpaths.h"
 
 ColorData* LDColor::colorData = nullptr;
-const LDColor LDColor::nullColor {-1};
+const LDColor LDColor::nullColor = -1;
 
 /*
- * initColors
- *
  * Initializes the color information module.
  */
 void LDColor::initColors()
 {
-	print ("Initializing color information.\n");
+	print("Initializing color information.\n");
 	static ColorData colors;
 	LDColor::colorData = &colors;
 }
 
 /*
- * LDColor :: LDColor
- *
- * Default-constructs an LDColor to 0 (black).
+ * Default-constructs an LDColor to 0(black).
  */
 LDColor::LDColor() :
-    m_index (0) {}
+    m_index {0} {}
 
 /*
- * LDColor :: LDColor
- *
  * Constructs an LDColor by index.
  */
-LDColor::LDColor (qint32 index)
-    : m_index (index) {}
+LDColor::LDColor(qint32 index) :
+    m_index {index} {}
 
 /*
- * LDColor :: isValid
- *
  * Returns whether or not the color is valid.
  */
 bool LDColor::isValid() const
@@ -65,8 +57,6 @@ bool LDColor::isValid() const
 }
 
 /*
- * LDColor :: isLDConfigColor
- *
  * Returns whether or not this color is defined in LDConfig.ldr.
  * This is false for e.g. direct colors.
  */
@@ -76,8 +66,6 @@ bool LDColor::isLDConfigColor() const
 }
 
 /*
- * LDColor :: data
- *
  * Returns the ColorData entry for this color.
  */
 const ColorData::Entry& LDColor::data() const
@@ -86,14 +74,12 @@ const ColorData::Entry& LDColor::data() const
 }
 
 /*
- * LDColor :: name
- *
  * Returns the name of this color.
  */
 QString LDColor::name() const
 {
 	if (isDirect())
-		return "0x" + QString::number (index(), 16).toUpper();
+		return "0x" + QString::number(index(), 16).toUpper();
 	else if (isLDConfigColor())
 		return data().name;
 	else if (index() == -1)
@@ -103,8 +89,6 @@ QString LDColor::name() const
 }
 
 /*
- * LDColor :: hexcode
- *
  * Returns the hexadecimal code of this color.
  */
 QString LDColor::hexcode() const
@@ -113,8 +97,6 @@ QString LDColor::hexcode() const
 }
 
 /*
- * LDColor :: faceColor
- *
  * Returns the color used for surfaces.
  */
 QColor LDColor::faceColor() const
@@ -143,8 +125,6 @@ QColor LDColor::faceColor() const
 }
 
 /*
- * LDColor :: edgeColor
- *
  * Returns the color used for edge lines.
  */
 QColor LDColor::edgeColor() const
@@ -158,8 +138,6 @@ QColor LDColor::edgeColor() const
 }
 
 /*
- * LDColor :: index
- *
  * Returns the index number of this color.
  */
 qint32 LDColor::index() const
@@ -168,8 +146,6 @@ qint32 LDColor::index() const
 }
 
 /*
- * LDColor :: indexString
- *
  * Returns a string containing the preferred representation of the index.
  */
 QString LDColor::indexString() const
@@ -186,8 +162,6 @@ QString LDColor::indexString() const
 }
 
 /*
- * LDColor :: isDirect
- *
  * Returns whether or not this color is a direct color.
  * Direct colors are picked by RGB value and are not defined in LDConfig.ldr.
  */
@@ -197,8 +171,6 @@ bool LDColor::isDirect() const
 }
 
 /*
- * qHash
- *
  * LDColors are hashed by their index.
  */
 uint qHash(LDColor color)
@@ -207,19 +179,15 @@ uint qHash(LDColor color)
 }
 
 /*
- * luma
- *
  * Calculates the luma-value for the given color.
  * c.f. https://en.wikipedia.org/wiki/Luma_(video)
  */
-int luma (const QColor& color)
+int luma(const QColor& color)
 {
-	return round((0.2126 * color.red()) + (0.7152 * color.green()) + (0.0722 * color.blue()));
+	return static_cast<int>(round(0.2126 * color.red() + 0.7152 * color.green() + 0.0722 * color.blue()));
 }
 
 /*
- * ColorData :: ColorData
- *
  * Constructs the color data array.
  */
 ColorData::ColorData()
@@ -228,8 +196,8 @@ ColorData::ColorData()
 	m_data[MainColor].faceColor = "#AAAAAA";
 	m_data[MainColor].edgeColor = Qt::black;
 	m_data[MainColor].name = "Main color";
-	m_data[EdgeColor].faceColor =
-	m_data[EdgeColor].edgeColor = "#000000";
+	m_data[EdgeColor].faceColor = Qt::black;
+	m_data[EdgeColor].edgeColor = Qt::black;
 	m_data[EdgeColor].name = "Edge color";
 
 	// Load the rest from LDConfig.ldr.
@@ -247,8 +215,6 @@ bool ColorData::contains(int code) const
 }
 
 /*
- * ColorData :: get
- *
  * Returns an entry in the color array.
  */
 const ColorData::Entry& ColorData::get(int code) const
@@ -260,8 +226,6 @@ const ColorData::Entry& ColorData::get(int code) const
 }
 
 /*
- * ColorData :: loadFromLdconfig
- *
  * Loads color information from LDConfig.ldr.
  */
 void ColorData::loadFromLdconfig()
@@ -269,7 +233,7 @@ void ColorData::loadFromLdconfig()
 	QString path = LDPaths::ldConfigPath();
 	QFile file {path};
 
-	if (not file.open (QIODevice::ReadOnly))
+	if (not file.open(QIODevice::ReadOnly))
 	{
 		QMessageBox::critical(nullptr, "Error", "Unable to open LDConfig.ldr for parsing: " + file.errorString());
 		return;
@@ -278,7 +242,7 @@ void ColorData::loadFromLdconfig()
 	// TODO: maybe LDConfig can be loaded as a Document? Or would that be overkill?
 	while (not file.atEnd())
 	{
-		QString line = QString::fromUtf8 (file.readLine());
+		QString line = QString::fromUtf8(file.readLine());
 
 		if (line.isEmpty() or line[0] != '0')
 			continue; // empty or illogical
@@ -300,7 +264,7 @@ void ColorData::loadFromLdconfig()
 		// Replace underscores in the name with spaces for readability
 		name.replace("_", " ");
 
-		if (not parser.parseTag ("CODE", codestring))
+		if (not parser.parseTag("CODE", codestring))
 			continue;
 
 		bool ok;
@@ -332,18 +296,14 @@ void ColorData::loadFromLdconfig()
 }
 
 /*
- * LDConfigParser :: LDConfigParser
- *
  * Constructs the LDConfig.ldr parser.
  */
 LDConfigParser::LDConfigParser(QString inputText)
 {
-	m_tokens = inputText.split (' ', QString::SkipEmptyParts);
+	m_tokens = inputText.split(' ', QString::SkipEmptyParts);
 }
 
 /*
- * LDConfigParser :: getToken
- *
  * Returns whether or not there is a token at the given position.
  * If there is, fills in the value parameter with it.
  */
@@ -361,8 +321,6 @@ bool LDConfigParser::getToken(QString& tokenText, int position)
 }
 
 /*
- * LDConfigParser :: findToken
- *
  * Attempts to find the provided token in the parsed LDConfig.ldr line.
  * If found, fills in the first parameter with the position of the token.
  *
@@ -383,39 +341,31 @@ bool LDConfigParser::findToken(int& tokenPosition, QString needle, int args)
 }
 
 /*
- * LDConfigParser :: compareToken
- *
  * Returns whether or not the token at the given position has the given text value.
  */
-bool LDConfigParser::compareToken (int position, QString text)
+bool LDConfigParser::compareToken(int position, QString text)
 {
 	QString token;
-
-	if (not getToken(token, position))
-		return false;
-	else
-		return (token == text);
+	return getToken(token, position) and (token == text);
 }
 
 /*
- * LDConfig :: parseTag
- *
  * Finds an attribute in the line, and fills in its value.
  * For instance, if the line contains "ALPHA 128", this function can find the "128" for "ALPHA".
  * Returns whether or not the attribute was found.
  */
-bool LDConfigParser::parseTag (QString key, QString& value)
+bool LDConfigParser::parseTag(QString key, QString& value)
 {
 	int position;
 
 	// Try find the token and get its position
-	if (not findToken (position, key, 1))
+	if (not findToken(position, key, 1))
 	{
 		return false;
 	}
 	else
 	{
 		// Get the token after it and store it in.
-		return getToken (value, position + 1);
+		return getToken(value, position + 1);
 	}
 }
