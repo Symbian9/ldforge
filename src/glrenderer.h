@@ -169,7 +169,7 @@ private:
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
-	void drawVbos (VboClass surface, VboSubclass colors, GLenum type);
+	void drawVbos (VboClass surface, VboSubclass colors);
 	void zoomToFit();
 	void zoomAllToFit();
 	Q_SLOT void removeObject(LDObject* object);

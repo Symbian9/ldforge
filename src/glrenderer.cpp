@@ -217,15 +217,15 @@ void GLRenderer::resetAngles()
 //
 void GLRenderer::resetAllAngles()
 {
-	Camera oldcam = camera();
+	Camera oldCamera = camera();
 
-	for (int i = 0; i < 7; ++i)
+	for (Camera camera : iterateEnum<Camera>())
 	{
-		setCamera ((Camera) i);
+		setCamera(camera);
 		resetAngles();
 	}
 
-	setCamera (oldcam);
+	setCamera(oldCamera);
 }
 
 // =============================================================================
@@ -411,10 +411,10 @@ void GLRenderer::drawGLScene()
 
 	if (m_isDrawingSelectionScene)
 	{
-		drawVbos (VboClass::Triangles, VboSubclass::PickColors, GL_TRIANGLES);
-		drawVbos (VboClass::Quads, VboSubclass::PickColors, GL_QUADS);
-		drawVbos (VboClass::Lines, VboSubclass::PickColors, GL_LINES);
-		drawVbos (VboClass::ConditionalLines, VboSubclass::PickColors, GL_LINES);
+		drawVbos (VboClass::Triangles, VboSubclass::PickColors);
+		drawVbos (VboClass::Quads, VboSubclass::PickColors);
+		drawVbos (VboClass::Lines, VboSubclass::PickColors);
+		drawVbos (VboClass::ConditionalLines, VboSubclass::PickColors);
 	}
 	else
 	{
@@ -422,11 +422,11 @@ void GLRenderer::drawGLScene()
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
-			drawVbos (VboClass::Triangles, VboSubclass::BfcFrontColors, GL_TRIANGLES);
-			drawVbos (VboClass::Quads, VboSubclass::BfcFrontColors, GL_QUADS);
+			drawVbos (VboClass::Triangles, VboSubclass::BfcFrontColors);
+			drawVbos (VboClass::Quads, VboSubclass::BfcFrontColors);
 			glCullFace (GL_FRONT);
-			drawVbos (VboClass::Triangles, VboSubclass::BfcBackColors, GL_TRIANGLES);
-			drawVbos (VboClass::Quads, VboSubclass::BfcBackColors, GL_QUADS);
+			drawVbos (VboClass::Triangles, VboSubclass::BfcBackColors);
+			drawVbos (VboClass::Quads, VboSubclass::BfcBackColors);
 			glDisable (GL_CULL_FACE);
 		}
 		else
@@ -438,13 +438,13 @@ void GLRenderer::drawGLScene()
 			else
 				colors = VboSubclass::NormalColors;
 
-			drawVbos (VboClass::Triangles, colors, GL_TRIANGLES);
-			drawVbos (VboClass::Quads, colors, GL_QUADS);
+			drawVbos (VboClass::Triangles, colors);
+			drawVbos (VboClass::Quads, colors);
 		}
 
-		drawVbos (VboClass::Lines, VboSubclass::NormalColors, GL_LINES);
+		drawVbos (VboClass::Lines, VboSubclass::NormalColors);
 		glEnable (GL_LINE_STIPPLE);
-		drawVbos (VboClass::ConditionalLines, VboSubclass::NormalColors, GL_LINES);
+		drawVbos (VboClass::ConditionalLines, VboSubclass::NormalColors);
 		glDisable (GL_LINE_STIPPLE);
 
 		if (m_config->drawAxes())
@@ -471,16 +471,40 @@ void GLRenderer::drawGLScene()
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 }
 
-// =============================================================================
-//
-void GLRenderer::drawVbos (VboClass surface, VboSubclass colors, GLenum type)
+/*
+ * Draws a set of VBOs onto the scene. Renders surfaces with appropriate normals and colors.
+ *
+ * Parameters:
+ * - surface determines what kind of surface to draw (triangles, quadrilaterals, edges or conditional edges)
+ * - colors determines what VBO subclass to use for colors
+ */
+void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
 {
 	// Filter this through some configuration options
-	if ((isOneOf (surface, VboClass::Quads, VboClass::Triangles) and m_config->drawSurfaces() == false)
+	if ((isOneOf(surface, VboClass::Quads, VboClass::Triangles) and m_config->drawSurfaces() == false)
 		or (surface == VboClass::Lines and m_config->drawEdgeLines() == false)
 		or (surface == VboClass::ConditionalLines and m_config->drawConditionalLines() == false))
 	{
 		return;
+	}
+
+	GLenum type;
+
+	switch (surface)
+	{
+	case VboClass::_End:
+	case VboClass::Lines:
+	case VboClass::ConditionalLines:
+		type = GL_LINES;
+		break;
+
+	case VboClass::Triangles:
+		type = GL_TRIANGLES;
+		break;
+
+	case VboClass::Quads:
+		type = GL_QUADS;
+		break;
 	}
 
 	int surfaceVboNumber = m_compiler->vboNumber(surface, VboSubclass::Surfaces);
