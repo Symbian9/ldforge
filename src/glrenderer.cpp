@@ -286,7 +286,7 @@ void GLRenderer::initializeAxes()
 	{
 		const auto& data = axisInfo[i];
 
-		for (Axis axis : axes)
+		for (Axis axis : {X, Y, Z})
 		{
 			axisdata[(i * 6) + axis] = data.extrema[axis];
 			axisdata[(i * 6) + 3 + axis] = -data.extrema[axis];

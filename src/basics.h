@@ -44,8 +44,6 @@ enum Axis
 	Z
 };
 
-static const Axis axes[] = {X, Y, Z};
-
 //
 // Derivative of QVector3D: this class is used for the vertices.
 //
@@ -110,8 +108,6 @@ private:
 	Vertex m_vertex0;
 	Vertex m_vertex1;
 };
-
-extern const Vertex Origin;
 
 static const double pi = 3.14159265358979323846;
 

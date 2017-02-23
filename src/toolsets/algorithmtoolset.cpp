@@ -560,7 +560,7 @@ void AlgorithmToolset::subfileSelection()
 			currentDocument()->remove(object);
 
 		// Add a reference to the new subfile to where the selection was
-		currentDocument()->emplaceAt<LDSubfileReference>(referencePosition, subfile, Matrix::identity, Origin);
+		currentDocument()->emplaceAt<LDSubfileReference>(referencePosition, subfile, Matrix::identity, Vertex {0, 0, 0});
 
 		// Refresh stuff
 		m_window->updateDocumentList();

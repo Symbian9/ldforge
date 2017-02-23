@@ -22,10 +22,6 @@
 #include "documentmanager.h"
 #include "mainwindow.h"
 
-const Vertex Origin (0.0f, 0.0f, 0.0f);
-
-// =============================================================================
-//
 int main (int argc, char* argv[])
 {
 	QApplication app (argc, argv);

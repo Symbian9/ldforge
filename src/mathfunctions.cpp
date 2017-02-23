@@ -28,7 +28,7 @@ MathFunctions::MathFunctions(QObject* parent) :
 void MathFunctions::rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix) const
 {
 	vertex -= rotationPoint;
-	vertex.transform (transformationMatrix, Origin);
+	vertex.transform (transformationMatrix, {0, 0, 0});
 	vertex += rotationPoint;
 }
 

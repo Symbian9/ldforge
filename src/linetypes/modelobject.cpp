@@ -44,7 +44,7 @@ LDObject::LDObject (Model* model) :
     m_isHidden {false},
     m_isSelected {false},
     _model {model},
-    m_coords {Origin}
+    m_coords {{0, 0, 0}}
 {
 	assert(_model != nullptr);
 
@@ -493,7 +493,7 @@ void LDObject::setVertex (int i, const Vertex& vert)
 
 LDMatrixObject::LDMatrixObject (Model* model) :
     LDObject (model),
-	m_position (Origin) {}
+    m_position {0, 0, 0} {}
 
 LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, Model* model) :
     LDObject (model),
