@@ -24,7 +24,6 @@
 #include "../main.h"
 #include "../lddocument.h"
 #include "../miscallenous.h"
-#include "../radioGroup.h"
 #include "../glrenderer.h"
 #include "../colors.h"
 #include "../mathfunctions.h"

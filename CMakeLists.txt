@@ -53,7 +53,6 @@ set (LDFORGE_SOURCES
 	src/partdownloader.cpp
 	src/partdownloadrequest.cpp
 	src/primitives.cpp
-	src/radioGroup.cpp
 	src/ringFinder.cpp
 	src/version.cpp
 	src/dialogs/colorselector.cpp
@@ -119,7 +118,6 @@ set (LDFORGE_HEADERS
 	src/partdownloader.h
 	src/partdownloadrequest.h
 	src/primitives.h
-	src/radioGroup.h
 	src/ringFinder.h
 	src/transform.h
 	src/dialogs/colorselector.h

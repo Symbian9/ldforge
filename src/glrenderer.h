@@ -27,7 +27,6 @@
 class GLCompiler;
 class MessageManager;
 class QDialogButtonBox;
-class RadioGroup;
 class QDoubleSpinBox;
 class QSpinBox;
 class QLineEdit;

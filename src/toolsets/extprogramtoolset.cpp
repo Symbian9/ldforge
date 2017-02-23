@@ -32,7 +32,6 @@
 #include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "../lddocument.h"
-#include "../radioGroup.h"
 #include "../editHistory.h"
 #include "../documentmanager.h"
 #include "../grid.h"
