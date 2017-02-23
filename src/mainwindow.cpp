@@ -71,11 +71,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_tabs->setTabsClosable (true);
 	ui.verticalLayout->insertWidget (0, m_tabs);
 	createBlankDocument();
-	print("Setting current widget...");
-	GLRenderer* renderer_ = getRendererForDocument(m_currentDocument);
-	print("Choosing: %1", renderer_);
-	ui.rendererStack->setCurrentWidget(renderer_);
-	print("Set: %1", renderer());
+	ui.rendererStack->setCurrentWidget(getRendererForDocument(m_currentDocument));
 
 	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (selectionChanged()));
 	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this,
@@ -113,11 +109,11 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	// Examine the toolsets and make a dictionary of tools
 	m_toolsets = Toolset::createToolsets (this);
 
-	QStringList ignore;
+	QSet<QString> ignore;
 	for (int i = 0; i < Toolset::staticMetaObject.methodCount(); ++i)
 	{
 		QMetaMethod method = Toolset::staticMetaObject.method (i);
-		ignore.append (QString::fromUtf8 (method.name()));
+		ignore.insert(QString::fromUtf8(method.name()));
 	}
 
 	for (Toolset* toolset : m_toolsets)
