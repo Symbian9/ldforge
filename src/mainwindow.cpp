@@ -670,7 +670,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 //
 void MainWindow::deleteByColor (LDColor color)
 {
-	LDObjectList unwanted;
+	QVector<LDObject*> unwanted;
 
 	for (LDObject* object : m_currentDocument->objects())
 	{

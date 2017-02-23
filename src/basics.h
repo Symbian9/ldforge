@@ -30,9 +30,7 @@
 #include "macros.h"
 #include "transform.h"
 
-class LDObject;
 class Matrix;
-using LDObjectList = QList<LDObject*>;
 
 template<typename T, typename R>
 using Pair = std::pair<T, R>;

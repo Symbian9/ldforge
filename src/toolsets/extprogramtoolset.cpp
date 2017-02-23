@@ -149,7 +149,7 @@ QString ExtProgramToolset::errorCodeString (ExtProgramType program, QProcess& pr
 
 // =============================================================================
 //
-void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
+void ExtProgramToolset::writeObjects (const QVector<LDObject*>& objects, QFile& f)
 {
 	for (LDObject* obj : objects)
 	{
@@ -158,14 +158,14 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			Model model {m_documents};
 			ref->inlineContents(model, true, false);
-			writeObjects(model.objects().toList(), f);
+			writeObjects(model.objects(), f);
 		}
 		else if (obj->type() == LDObjectType::BezierCurve)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
 			Model model {m_documents};
 			curve->rasterize(model, grid()->bezierCurveSegments());
-			writeObjects(model.objects().toList(), f);
+			writeObjects(model.objects(), f);
 		}
 		else
 			f.write ((obj->asText() + "\r\n").toUtf8());
@@ -174,7 +174,7 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 
 // =============================================================================
 //
-void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString filename)
+void ExtProgramToolset::writeObjects (const QVector<LDObject*>& objects, QString filename)
 {
 	// Write the input file
 	QFile f (filename);
@@ -198,14 +198,14 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString filen
 //
 void ExtProgramToolset::writeSelection (QString fname)
 {
-	writeObjects (selectedObjects().toList(), fname);
+	writeObjects(selectedObjects().toList().toVector(), fname);
 }
 
 // =============================================================================
 //
 void ExtProgramToolset::writeColorGroup (LDColor color, QString fname)
 {
-	LDObjectList objects;
+	QVector<LDObject*> objects;
 
 	for (LDObject* obj : currentDocument()->objects())
 	{

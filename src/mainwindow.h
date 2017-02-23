@@ -153,7 +153,7 @@ private:
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;
-	LDObjectList m_sel;
+	QVector<LDObject*> m_sel;
 	QVector<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;

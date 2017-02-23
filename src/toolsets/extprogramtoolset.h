@@ -64,8 +64,8 @@ private:
 	QString errorCodeString (ExtProgramType program, class QProcess& process);
 	void insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace);
 	void writeColorGroup (LDColor color, QString fname);
-	void writeObjects (const LDObjectList& objects, QFile& f);
-	void writeObjects (const LDObjectList& objects, QString fname);
+	void writeObjects (const QVector<LDObject*>& objects, QFile& f);
+	void writeObjects (const QVector<LDObject*>& objects, QString fname);
 	void writeSelection (QString fname);
 
 	ExtProgramInfo extProgramInfo[NumExternalPrograms];

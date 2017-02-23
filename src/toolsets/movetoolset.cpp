@@ -31,7 +31,7 @@ MoveToolset::MoveToolset (MainWindow* parent) :
 void MoveToolset::moveSelection (bool up)
 {
 	// TODO: order these!
-	LDObjectList objs = selectedObjects().toList();
+	QVector<LDObject*> objs = selectedObjects().toList().toVector();
 
 	if (objs.isEmpty())
 		return;
