@@ -94,12 +94,24 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 }
 
 /*
- * Cleans up the axes VBOs when the renderer is destroyed.
+ * Destructs the GL renderer.
  */
 GLRenderer::~GLRenderer()
 {
-	glDeleteBuffers(1, &m_axesVbo);
-	glDeleteBuffers(1, &m_axesColorVbo);
+	freeAxes();
+}
+
+/*
+ * Deletes the axes VBOs
+ */
+void GLRenderer::freeAxes()
+{
+	if (m_axesInitialized)
+	{
+		glDeleteBuffers(1, &m_axesVbo);
+		glDeleteBuffers(1, &m_axesColorVbo);
+		m_axesInitialized = false;
+	}
 }
 
 /*
@@ -266,45 +278,34 @@ void GLRenderer::initializeLighting()
 //
 void GLRenderer::initializeAxes()
 {
-	// Definitions for visual axes, drawn on the screen
-	struct
+	freeAxes();
+	float axisVertexData[3][6];
+	float axisColorData[3][6];
+
+	auto compileAxis = [&](Axis axis, QColor color, Vertex extrema)
 	{
-		QColor color;
-		Vertex extrema;
-	} axisInfo[3] =
-	{
-	    { QColor {192,  96,  96}, Vertex {10000, 0, 0} }, // X
-	    { QColor {48,  192,  48}, Vertex {0, 10000, 0} }, // Y
-		{ QColor {48,  112, 192}, Vertex {0, 0, 10000} }, // Z
+		axisVertexData[axis][0] = extrema[X];
+		axisVertexData[axis][1] = extrema[Y];
+		axisVertexData[axis][2] = extrema[Z];
+		axisVertexData[axis][3] = -extrema[X];
+		axisVertexData[axis][4] = -extrema[Y];
+		axisVertexData[axis][5] = -extrema[Z];
+		axisColorData[axis][0] = axisColorData[axis][3] = color.red();
+		axisColorData[axis][1] = axisColorData[axis][4] = color.green();
+		axisColorData[axis][2] = axisColorData[axis][5] = color.blue();
 	};
 
-	float axisdata[18];
-	float colorData[18];
-	memset (axisdata, 0, sizeof axisdata);
+	compileAxis(X, {192, 96, 96}, {10000, 0, 0});
+	compileAxis(Y, {48, 192, 48}, {0, 10000, 0});
+	compileAxis(Z, {48, 112, 192}, {0, 0, 10000});
 
-	for (int i = 0; i < 3; ++i)
-	{
-		const auto& data = axisInfo[i];
-
-		for (Axis axis : {X, Y, Z})
-		{
-			axisdata[(i * 6) + axis] = data.extrema[axis];
-			axisdata[(i * 6) + 3 + axis] = -data.extrema[axis];
-		}
-
-		int offset = i * 6;
-		colorData[offset + 0] = colorData[offset + 3] = data.color.red();
-		colorData[offset + 1] = colorData[offset + 4] = data.color.green();
-		colorData[offset + 2] = colorData[offset + 5] = data.color.blue();
-	}
-
-	glGenBuffers (1, &m_axesVbo);
-	glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
-	glBufferData (GL_ARRAY_BUFFER, sizeof axisdata, axisdata, GL_STATIC_DRAW);
-	glGenBuffers (1, &m_axesColorVbo);
-	glBindBuffer (GL_ARRAY_BUFFER, m_axesColorVbo);
-	glBufferData (GL_ARRAY_BUFFER, sizeof colorData, colorData, GL_STATIC_DRAW);
-	glBindBuffer (GL_ARRAY_BUFFER, 0);
+	glGenBuffers(1, &m_axesVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_axesVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof axisVertexData, axisVertexData, GL_STATIC_DRAW);
+	glGenBuffers(1, &m_axesColorVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_axesColorVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof axisColorData, axisColorData, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 // =============================================================================

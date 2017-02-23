@@ -157,6 +157,7 @@ private:
 	bool m_isDrawingSelectionScene = false;
 	bool m_isCameraMoving = false;
 	bool m_needZoomToFit = true;
+	bool m_axesInitialized = false;
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
@@ -169,6 +170,7 @@ private:
 
 	void calcCameraIcons();
 	void drawVbos (VboClass surface, VboSubclass colors);
+	void freeAxes();
 	void zoomToFit();
 	void zoomAllToFit();
 	Q_SLOT void removeObject(LDObject* object);
