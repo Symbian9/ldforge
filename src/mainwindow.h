@@ -29,12 +29,8 @@
 #include "doublemap.h"
 
 class MessageManager;
-class MainWindow;
 class QToolButton;
-class QDialogButtonBox;
 class Canvas;
-class QComboBox;
-class QProgressBar;
 class Toolset;
 class Configuration;
 class PrimitiveManager;
@@ -176,46 +172,4 @@ extern MainWindow* g_win;
 
 // Get an icon by name from the resources directory.
 QPixmap GetIcon (QString iconName);
-
-// Asks the user a yes/no question with the given message and the given window title.
-// Returns true if the user answered yes, false if no.
-bool Confirm (const QString& title, const QString& message); // Generic confirm prompt
-
-// An overload of confirm(), this asks the user a yes/no question with the given message.
-// Returns true if the user answered yes, false if no.
-bool Confirm (const QString& message);
-
-// Displays an error prompt with the given message
-void Critical (const QString& message);
-void errorPrompt (QWidget *parent, const QString& message);
-
-// Takes in pairs of radio buttons and respective values and finds the first selected one.
-// Returns returns the value of the first found radio button that was checked by the user.
-template<class T>
-T RadioSwitch (const T& defval, QList<Pair<QRadioButton*, T>> haystack)
-{
-	for (Pair<QRadioButton*, const T&> i : haystack)
-	{
-		if (i.first->isChecked())
-			return i.second;
-	}
-
-	return defval;
-}
-
-// Takes in pairs of radio buttons and respective values and checks the first found radio button whose respsective value
-// matches expr have the given value.
-template<class T>
-void RadioDefault (const T& expr, QList<Pair<QRadioButton*, T>> haystack)
-{
-	for (Pair<QRadioButton*, const T&> i : haystack)
-	{
-		if (i.second == expr)
-		{
-			i.first->setChecked (true);
-			return;
-		}
-	}
-}
-
-QSettings* makeSettings (QObject* parent = nullptr);
+class QSettings* makeSettings(QObject* parent = nullptr);

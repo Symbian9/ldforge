@@ -133,7 +133,7 @@ void FileToolset::insertFrom()
 		}
 		else
 		{
-			Critical(format("Couldn't open %1 (%2)", filePath, file.errorString()));
+			QMessageBox::critical(m_window, tr("Error"), format(tr("Couldn't open %1 (%2)"), filePath, file.errorString()));
 		}
 	}
 }
@@ -162,7 +162,7 @@ void FileToolset::exportTo()
 	}
 	else
 	{
-		Critical(format("Unable to open %1 for writing (%2)", filePath, file.errorString()));
+		QMessageBox::critical(m_window, tr("Error"), format(tr("Unable to open %1 for writing: %2"), filePath, file.errorString()));
 	}
 }
 

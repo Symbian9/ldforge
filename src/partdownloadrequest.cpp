@@ -17,6 +17,7 @@
  */
 
 #include <QDir>
+#include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -50,7 +51,7 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 		print ("Creating %1...\n", dirpath);
 
 		if (not dir.mkpath (dirpath))
-			Critical (format (tr ("Couldn't create the directory %1!"), dirpath));
+			QMessageBox::critical(m_window, tr("Error"), format(tr("Couldn't create the directory %1!"), dirpath));
 	}
 
 	m_networkReply = m_networkManager->get (QNetworkRequest (QUrl (url)));
@@ -179,7 +180,7 @@ void PartDownloadRequest::downloadFinished()
 	if (networkReply()->error() != QNetworkReply::NoError)
 	{
 		if (isPrimary() and not prompt()->isAborted())
-			Critical (networkReply()->errorString());
+			QMessageBox::critical(m_window, tr("Error"), networkReply()->errorString());
 
 		print ("Unable to download %1: %2\n", destination(), networkReply()->errorString());
 		m_state = State::Failed;
@@ -262,7 +263,7 @@ void PartDownloadRequest::readFromNetworkReply()
 
 		if (not m_filePointer->open (QIODevice::WriteOnly))
 		{
-			Critical (format (tr ("Couldn't open %1 for writing: %2"), filePath(), strerror (errno)));
+			QMessageBox::critical(m_window, tr("Error"), format(tr("Couldn't open %1 for writing: %2"), filePath(), strerror(errno)));
 			m_state = State::Failed;
 			networkReply()->abort();
 			updateToTable();

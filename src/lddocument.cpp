@@ -151,20 +151,19 @@ void LDDocument::close()
 //
 bool LDDocument::isSafeToClose()
 {
-	using msgbox = QMessageBox;
 	setlocale (LC_ALL, "C");
 
 	// If we have unsaved changes, warn and give the option of saving.
 	if (hasUnsavedChanges())
 	{
-		QString message = format (tr ("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
+		QString message = format(tr("There are unsaved changes to %1. Should it be saved?"), getDisplayName());
 
-		int button = msgbox::question (m_window, QObject::tr ("Unsaved Changes"), message,
-			(msgbox::Yes | msgbox::No | msgbox::Cancel), msgbox::Cancel);
+		int button = QMessageBox::question (m_window, tr("Unsaved Changes"), message,
+		    (QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel), QMessageBox::Cancel);
 
 		switch (button)
 		{
-			case msgbox::Yes:
+		    case QMessageBox::Yes:
 			{
 				// If we don't have a file path yet, we have to ask the user for one.
 				if (name().isEmpty())
@@ -183,8 +182,8 @@ bool LDDocument::isSafeToClose()
 					message = format (QObject::tr ("Failed to save %1 (%2)\nDo you still want to close?"),
 						name(), strerror (errno));
 
-					if (msgbox::critical (m_window, QObject::tr ("Save Failure"), message,
-						(msgbox::Yes | msgbox::No), msgbox::No) == msgbox::No)
+					if (QMessageBox::critical (m_window, tr("Save Failure"), message,
+					    (QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::No)
 					{
 						return false;
 					}
@@ -192,7 +191,7 @@ bool LDDocument::isSafeToClose()
 				break;
 			}
 
-			case msgbox::Cancel:
+		    case QMessageBox::Cancel:
 				return false;
 
 			default:

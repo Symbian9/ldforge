@@ -18,6 +18,7 @@
 
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include "../mainwindow.h"
 #include "../lddocument.h"
 #include "../miscallenous.h"
@@ -120,7 +121,10 @@ void ViewToolset::screenshot()
 	QString filename = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname, imageformats);
 
 	if (not filename.isEmpty() and not image.save (filename))
-		Critical (format ("Couldn't open %1 for writing to save screencap: %2", filename, strerror (errno)));
+	{
+		QString message = format(tr("Couldn't open %1 for writing to save screen capture: %2"), filename, strerror(errno));
+		QMessageBox::critical(m_window, tr("Error"), message);
+	}
 }
 
 void ViewToolset::axes()

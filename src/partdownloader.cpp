@@ -193,7 +193,9 @@ void PartDownloader::buttonClicked(QAbstractButton* button)
 		if (QFile::exists(downloadPath() + DIRSLASH + destination))
 		{
 			QString message = format(tr("%1 already exists in download directory. Overwrite?"), destination);
-			if (not Confirm(tr("Overwrite?"), message))
+			int answer = QMessageBox::question(this, tr("Overwrite"), message, (QMessageBox::Yes | QMessageBox::No), QMessageBox::No);
+
+			if (answer != QMessageBox::Yes)
 				return;
 		}
 

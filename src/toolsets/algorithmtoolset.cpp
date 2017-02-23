@@ -17,11 +17,9 @@
  */
 
 #include <limits>
-#include <QBoxLayout>
-#include <QCheckBox>
 #include <QDir>
 #include <QInputDialog>
-#include <QSpinBox>
+#include <QMessageBox>
 #include "../mainwindow.h"
 #include "../main.h"
 #include "../lddocument.h"
@@ -476,13 +474,14 @@ void AlgorithmToolset::subfileSelection()
 	{
 		QString desiredPath = subdirname + "/s";
 		QString title = tr ("Create subfile directory?");
-		QString text = format (tr ("The directory <b>%1</b> is suggested for "
-			"subfiles. This directory does not exist, create it?"), desiredPath);
+		QString text = format(tr("The directory <b>%1</b> is suggested for subfiles. "
+		                         "This directory does not exist, do you want to create it?"), desiredPath);
 
-		if (QDir (desiredPath).exists() or Confirm (title, text))
+		if (QDir(desiredPath).exists()
+		    or QMessageBox::question(m_window, title, text, (QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes)
 		{
 			subdirname = desiredPath;
-			QDir().mkpath (subdirname);
+			QDir().mkpath(subdirname);
 		}
 		else
 			return;

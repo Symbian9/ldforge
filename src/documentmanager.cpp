@@ -18,6 +18,7 @@
 
 #include <QApplication>
 #include <QFileInfo>
+#include <QMessageBox>
 #include "documentmanager.h"
 #include "lddocument.h"
 #include "mainwindow.h"
@@ -111,7 +112,7 @@ void DocumentManager::openMainModel (QString path)
 		{
 			// Tell the user loading failed.
 			setlocale (LC_ALL, "C");
-			Critical (format (tr ("Failed to open %1: %2"), path, strerror (errno)));
+			QMessageBox::critical(m_window, tr("Error"), format(tr("Failed to open %1: %2"), path, strerror (errno)));
 		}
 
 		m_loadingMainFile = false;

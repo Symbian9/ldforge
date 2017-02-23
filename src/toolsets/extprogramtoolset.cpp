@@ -20,6 +20,7 @@
 #include <QTemporaryFile>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QComboBox>
@@ -173,14 +174,15 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QFile& f)
 
 // =============================================================================
 //
-void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString fname)
+void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString filename)
 {
 	// Write the input file
-	QFile f (fname);
+	QFile f (filename);
 
 	if (not f.open (QIODevice::WriteOnly | QIODevice::Text))
 	{
-		Critical (format ("Couldn't open temporary file %1 for writing: %2\n", fname, f.errorString()));
+		QString message = format(tr("Couldn't open temporary file %1 for writing: %2\n"), filename, f.errorString());
+		QMessageBox::critical(m_window, tr("Error"), message);
 		return;
 	}
 
@@ -188,7 +190,7 @@ void ExtProgramToolset::writeObjects (const LDObjectList& objects, QString fname
 	f.close();
 
 #ifdef DEBUG
-	QFile::copy (fname, "debug_lastInput");
+	QFile::copy (filename, "debug_lastInput");
 #endif
 }
 
@@ -245,8 +247,8 @@ bool ExtProgramToolset::runExtProgram (ExtProgramType program, QString argvstr)
 
 	if (not process.waitForStarted())
 	{
-		Critical (format ("Couldn't start %1: %2\n", externalProgramName (program),
-			errorCodeString (program, process)));
+		QString message = format("Couldn't start %1: %2\n", externalProgramName(program), errorCodeString(program, process));
+		QMessageBox::critical(m_window, tr("Error running external program"), message);
 		return false;
 	}
 
@@ -256,18 +258,19 @@ bool ExtProgramToolset::runExtProgram (ExtProgramType program, QString argvstr)
 	// Wait while it runs
 	process.waitForFinished();
 
-	QString err = "";
+	QString errorMessage = "";
 
 	if (process.exitStatus() != QProcess::NormalExit)
-		err = errorCodeString (program, process);
+		errorMessage = errorCodeString (program, process);
 
 	// Check the return code
 	if (process.exitCode() != 0)
-		err = format ("Program exited abnormally (return code %1).",  process.exitCode());
+		errorMessage = format ("Program exited abnormally (return code %1).",  process.exitCode());
 
-	if (not err.isEmpty())
+	if (not errorMessage.isEmpty())
 	{
-		Critical (format ("%1 failed: %2\n", externalProgramName (program), err));
+		QString message = format(tr("%1 failed: %2\n"), externalProgramName(program), errorMessage);
+		QMessageBox::critical(m_window, tr("External program failed"), message);
 		QString filename ("externalProgramOutput.txt");
 		QFile file (filename);
 
@@ -302,7 +305,8 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 
 	if (not f.open (QIODevice::ReadOnly))
 	{
-		Critical (format ("Couldn't open temporary file %1 for reading.\n", fname));
+		QString message = format(tr("Couldn't open temporary file %1 for reading.\n"), fname);
+		QMessageBox::critical(m_window, tr("Error running external program"), message);
 		return;
 	}
 
@@ -454,22 +458,11 @@ void ExtProgramToolset::intersector()
 	LDColor inCol, cutCol;
 	const bool repeatInverse = ui.cb_repeat->isChecked();
 
-	forever
-	{
-		if (not dlg->exec())
-			return;
+	if (not dlg->exec())
+		return;
 
-		inCol = ui.cmb_incol->itemData (ui.cmb_incol->currentIndex()).toInt();
-		cutCol = ui.cmb_cutcol->itemData (ui.cmb_cutcol->currentIndex()).toInt();
-
-		if (inCol == cutCol)
-		{
-			Critical ("Cannot use the same color group for both input and cutter!");
-			continue;
-		}
-
-		break;
-	}
+	inCol = ui.cmb_incol->itemData (ui.cmb_incol->currentIndex()).toInt();
+	cutCol = ui.cmb_cutcol->itemData (ui.cmb_cutcol->currentIndex()).toInt();
 
 	// Five temporary files!
 	// indat = input group file
@@ -547,25 +540,11 @@ void ExtProgramToolset::coverer()
 	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col1);
 	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col2);
 
-	LDColor in1Col, in2Col;
+	if (not dlg->exec())
+		return;
 
-	forever
-	{
-		if (not dlg->exec())
-			return;
-
-		in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
-		in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
-
-		if (in1Col == in2Col)
-		{
-			Critical ("Cannot use the same color group for both inputs!");
-			continue;
-		}
-
-		break;
-	}
-
+	LDColor in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
+	LDColor in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 
@@ -614,23 +593,11 @@ void ExtProgramToolset::isecalc()
 
 	LDColor in1Col, in2Col;
 
-	// Run the dialog and validate input
-	forever
-	{
-		if (not dlg->exec())
-			return;
+	if (not dlg->exec())
+		return;
 
-		in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
-		in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
-
-		if (in1Col == in2Col)
-		{
-			Critical ("Cannot use the same color group for both input and cutter!");
-			continue;
-		}
-
-		break;
-	}
+	in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
+	in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
 
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;

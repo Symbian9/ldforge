@@ -21,9 +21,6 @@
 #include "../toolsets/extprogramtoolset.h"
 #include <QDialog>
 
-class QLabel;
-class QDoubleSpinBox;
-
 // =============================================================================
 class ShortcutListItem : public QListWidgetItem
 {
@@ -116,8 +113,8 @@ public:
 	explicit KeySequenceDialog (QKeySequence seq, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 	static bool staticDialog (ShortcutListItem* item, QWidget* parent = nullptr);
 
-	QLabel* lb_output;
-	QDialogButtonBox* bbx_buttons;
+	class QLabel* lb_output;
+	class QDialogButtonBox* bbx_buttons;
 	QKeySequence seq;
 
 private:

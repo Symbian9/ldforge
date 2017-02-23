@@ -780,37 +780,6 @@ QPixmap GetIcon (QString iconName)
 	return (QPixmap (format (":/icons/%1.png", iconName)));
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-bool Confirm (const QString& message)
-{
-	return Confirm (MainWindow::tr ("Confirm"), message);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-bool Confirm (const QString& title, const QString& message)
-{
-	return QMessageBox::question (g_win, title, message,
-		(QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void Critical (const QString& message)
-{
-	QMessageBox::critical (g_win, MainWindow::tr ("Error"), message,
-		(QMessageBox::Close), QMessageBox::Close);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void errorPrompt (QWidget* parent, const QString& message)
-{
-	QMessageBox::critical (parent, MainWindow::tr ("Error"), message,
-		(QMessageBox::Close), QMessageBox::Close);
-}
-
 MessageManager* MainWindow::messageLog() const
 {
 	return m_messageLog;

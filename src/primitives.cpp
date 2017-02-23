@@ -17,6 +17,7 @@
  */
 
 #include <QApplication>
+#include <QMessageBox>
 #include "lddocument.h"
 #include "mainwindow.h"
 #include "primitives.h"
@@ -181,7 +182,8 @@ void PrimitiveManager::loadCategories()
 
 	if (not categoriesFile.open (QIODevice::ReadOnly))
 	{
-		Critical(format(tr("Failed to open primitive categories: %1"), categoriesFile.errorString()));
+		QString message = format(tr("Failed to open primitive categories: %1"), categoriesFile.errorString());
+		QMessageBox::critical(m_window, tr("Cannot open categories"), message);
 		return;
 	}
 
@@ -635,7 +637,7 @@ void PrimitiveScanner::work()
 		}
 		else
 		{
-			errorPrompt(m_window, format("Couldn't write primitive list %1: %2", path, configFile.errorString()));
+			QMessageBox::critical(m_window, tr("Error"), format("Couldn't write primitive list %1: %2", path, configFile.errorString()));
 		}
 
 		emit workDone();
