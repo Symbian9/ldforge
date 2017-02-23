@@ -17,7 +17,6 @@
  */
 
 #pragma once
-#include <type_traits>
 
 #ifndef __GNUC__
 # define __attribute__(X)
@@ -36,9 +35,6 @@ public: \
 # define DIRSLASH_CHAR '/'
 #endif // WIN32
 
-#define printValueOf(A) dprint ("value of '%1' = %2\n", #A, A)
-#define for_axes(AX) for (const Axis AX : std::initializer_list<const Axis> ({X, Y, Z}))
-
 #define MAKE_ITERABLE_ENUM(T) \
 	template<> \
 	struct EnumLimits<T> \
@@ -52,8 +48,3 @@ public: \
 
 template<typename T>
 struct EnumLimits {};
-
-#define DEFINE_FLAG_ACCESS_METHODS(FLAGS) \
-	bool checkFlag(decltype(FLAGS) flag) const { return !!(FLAGS & flag); } \
-	void setFlag(decltype(FLAGS) flag) { FLAGS |= flag; } \
-	void unsetFlag(decltype(FLAGS) flag) { FLAGS &= ~flag; }
