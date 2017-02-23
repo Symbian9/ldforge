@@ -135,7 +135,7 @@ void Canvas::dropEvent(QDropEvent* event)
 		reference->setFileInfo (m_documents->getDocumentByName(primitiveName));
 		currentDocument()->addToSelection(reference);
 		m_window->buildObjectList();
-		refresh();
+		update();
 		event->acceptProposedAction();
 	}
 }

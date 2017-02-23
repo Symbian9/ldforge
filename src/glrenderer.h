@@ -95,7 +95,6 @@ public:
 	LDObject* objectAtCursor() const;
 	QSet<LDObject*> pick(const QRect& range);
 	LDObject* pick(int mouseX, int mouseY);
-	void refresh();
 	void resetAllAngles();
 	void resetAngles();
 	void setBackground();

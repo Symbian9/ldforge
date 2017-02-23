@@ -338,16 +338,6 @@ QColor GLRenderer::backgroundColor() const
 
 // =============================================================================
 //
-void GLRenderer::refresh()
-{
-	update();
-
-	if (isVisible())
-		swapBuffers();
-}
-
-// =============================================================================
-//
 void GLRenderer::resizeGL (int width, int height)
 {
 	calcCameraIcons();

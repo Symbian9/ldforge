@@ -155,13 +155,13 @@ void ViewToolset::visibilityReveal()
 void ViewToolset::wireframe()
 {
 	m_config->toggleDrawWireframe();
-	m_window->renderer()->refresh();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::drawAngles()
 {
 	m_config->toggleDrawAngles();
-	m_window->renderer()->refresh();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::setDrawDepth()
@@ -235,7 +235,7 @@ void ViewToolset::bfcView()
 		m_config->setRandomColors (false);
 
 	m_window->updateActions();
-	m_window->renderer()->refresh();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::jumpTo()
@@ -265,7 +265,7 @@ void ViewToolset::randomColors()
 		m_config->setBfcRedGreenView (false);
 
 	m_window->updateActions();
-	m_window->renderer()->refresh();
+	m_window->renderer()->update();
 }
 
 void ViewToolset::drawSurfaces()
