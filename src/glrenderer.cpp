@@ -85,7 +85,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 		};
 
 		CameraIcon* info = &m_cameraIcons[static_cast<int>(camera)];
-		info->image = GetIcon (cameraIconNames[static_cast<int>(camera)]);
+		info->image = MainWindow::getIcon (cameraIconNames[static_cast<int>(camera)]);
 		info->camera = camera;
 	}
 

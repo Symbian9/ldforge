@@ -115,6 +115,9 @@ public:
 	void updateSelection();
 	void updateTitle();
 
+	static QPixmap getIcon(QString iconName);
+	static class QSettings* makeSettings(QObject* parent = nullptr);
+
 signals:
 	void gridChanged();
 
@@ -169,7 +172,3 @@ private slots:
 // Pointer to the instance of MainWindow.
 // TODO: it's going out, slowly but surely.
 extern MainWindow* g_win;
-
-// Get an icon by name from the resources directory.
-QPixmap GetIcon (QString iconName);
-class QSettings* makeSettings(QObject* parent = nullptr);

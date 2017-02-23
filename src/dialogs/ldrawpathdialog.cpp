@@ -36,7 +36,7 @@ LDrawPathDialog::LDrawPathDialog (const QString& defaultPath, bool validDefault,
 	else
 	{
 		cancelButton()->setText ("Exit");
-		cancelButton()->setIcon (GetIcon ("exit"));
+		cancelButton()->setIcon (MainWindow::getIcon ("exit"));
 	}
 
 	okButton()->setEnabled (false);

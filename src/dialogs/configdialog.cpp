@@ -74,7 +74,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
-	m_settings (makeSettings (this))
+    m_settings (MainWindow::makeSettings (this))
 {
 	ui.setupUi (this);
 
@@ -173,7 +173,7 @@ void ConfigDialog::addShortcut (QAction* act)
 	// If the action doesn't have a valid icon, use an empty one
 	// so that the list is kept aligned.
 	if (act->icon().isNull())
-		item->setIcon (GetIcon ("empty"));
+		item->setIcon (MainWindow::getIcon ("empty"));
 
 	ui.shortcutsList->insertItem (ui.shortcutsList->count(), item);
 }
@@ -196,9 +196,9 @@ void ConfigDialog::initExtProgs()
 		QLineEdit* input = new QLineEdit;
 		QPushButton* setPathButton = new QPushButton;
 
-		icon->setPixmap (GetIcon (name.toLower()));
+		icon->setPixmap (MainWindow::getIcon (name.toLower()));
 		input->setText (m_window->externalPrograms()->getPathSetting (program));
-		setPathButton->setIcon (GetIcon ("folder"));
+		setPathButton->setIcon (MainWindow::getIcon ("folder"));
 		widgets.input = input;
 		widgets.setPathButton = setPathButton;
 		widgets.wineBox = nullptr;
@@ -345,7 +345,7 @@ void ConfigDialog::updateQuickColorList (ColorToolbarItem* sel)
 		if (entry.isSeparator())
 		{
 			item->setText ("<hr />");
-			item->setIcon (GetIcon ("empty"));
+			item->setIcon (MainWindow::getIcon ("empty"));
 		}
 		else
 		{
@@ -359,7 +359,7 @@ void ConfigDialog::updateQuickColorList (ColorToolbarItem* sel)
 			else
 			{
 				item->setText ("[[unknown color]]");
-				item->setIcon (GetIcon ("error"));
+				item->setIcon (MainWindow::getIcon ("error"));
 			}
 		}
 
@@ -500,7 +500,7 @@ void ConfigDialog::setButtonColor()
 //
 void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 {
-	button->setIcon (GetIcon ("colorselect"));
+	button->setIcon (MainWindow::getIcon ("colorselect"));
 	button->setAutoFillBackground (true);
 	button->setStyleSheet (format ("background-color: %1", value));
 	m_buttonColors[button] = QColor (value);

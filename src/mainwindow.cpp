@@ -58,7 +58,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_mathFunctions(new MathFunctions(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
-	m_settings (makeSettings (this)),
+    m_settings (makeSettings (this)),
 	m_documents (new DocumentManager (this)),
 	m_currentDocument (nullptr),
 	m_isSelectionLocked (false)
@@ -228,7 +228,7 @@ void MainWindow::updateRecentFilesMenu()
 	for (const QVariant& it : m_config.recentFiles())
 	{
 		QString file = it.toString();
-		QAction* recent = new QAction (GetIcon ("open-recent"), file, this);
+		QAction* recent = new QAction (getIcon ("open-recent"), file, this);
 		connect (recent, SIGNAL (triggered()), this, SLOT (recentFileClicked()));
 		ui.menuOpenRecent->insertAction (first, recent);
 		m_recentFiles << recent;
@@ -355,7 +355,7 @@ void MainWindow::buildObjectList()
 	for (LDObject* obj : m_currentDocument->objects())
 	{
 		QListWidgetItem* item = new QListWidgetItem {obj->objectListText()};
-		item->setIcon (GetIcon (obj->typeName()));
+		item->setIcon (getIcon (obj->typeName()));
 
 		// Use italic font if hidden
 		if (obj->isHidden())
@@ -757,7 +757,7 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 
 	// Add a save-as button
 	QPushButton* saveAsBtn = new QPushButton (tr ("Save As"));
-	saveAsBtn->setIcon (GetIcon ("file-save-as"));
+	saveAsBtn->setIcon (getIcon ("file-save-as"));
 	dlg.addButton (saveAsBtn, QMessageBox::ActionRole);
 	dlg.setDefaultButton (QMessageBox::Close);
 	dlg.exec();
@@ -773,11 +773,12 @@ void MainWindow::addMessage (QString msg)
 	messageLog()->addLine (msg);
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QPixmap GetIcon (QString iconName)
+/*
+ * Returns an icon from built-in resources.
+ */
+QPixmap MainWindow::getIcon(QString iconName)
 {
-	return (QPixmap (format (":/icons/%1.png", iconName)));
+	return {format(":/icons/%1.png", iconName)};
 }
 
 MessageManager* MainWindow::messageLog() const
@@ -833,7 +834,7 @@ void MainWindow::updateDocumentListItem (LDDocument* doc)
 	m_tabs->setTabText (doc->tabIndex(), doc->getDisplayName());
 
 	// If the document.has unsaved changes, draw a little icon next to it to mark that.
-	m_tabs->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? GetIcon ("file-save") : QIcon());
+	m_tabs->setTabIcon (doc->tabIndex(), doc->hasUnsavedChanges() ? getIcon ("file-save") : QIcon());
 	m_tabs->setTabData (doc->tabIndex(), doc->name());
 	m_updatingTabs = oldUpdatingTabs;
 }
@@ -1038,14 +1039,13 @@ void MainWindow::circleToolSegmentsChanged()
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// Accessor to the settings object
-//
-QSettings* makeSettings (QObject* parent)
+/*
+ * Returns a settings object that interfaces the ini file.
+ */
+QSettings* MainWindow::makeSettings(QObject* parent)
 {
 	QString path = qApp->applicationDirPath() + "/" UNIXNAME ".ini";
-	return new QSettings (path, QSettings::IniFormat, parent);
+	return new QSettings {path, QSettings::IniFormat, parent};
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -153,7 +153,7 @@ class ConfigCollector:
 		device.write(
 			'\n'
 			'Configuration::Configuration() :\n'
-			'\tm_settings(makeSettings(nullptr))\n'
+			'\tm_settings(MainWindow::makeSettings(nullptr))\n'
 			'{\n')
 		for declaration in self.declarations.values():
 			device.write('\tm_defaults["{name}"] = QVariant::fromValue<{type}>({default});\n'.format(**declaration))

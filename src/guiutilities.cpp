@@ -51,7 +51,7 @@ QIcon GuiUtilities::makeColorIcon (LDColor ldColor, int size)
 	painter.fillRect(QRect {0, 0, size, size}, ldColor.edgeColor());
 
 	// Paint the checkerboard background, visible with translucent icons
-	painter.drawPixmap(QRect {1, 1, size - 2, size - 2}, GetIcon("checkerboard"), QRect {0, 0, 8, 8});
+	painter.drawPixmap(QRect {1, 1, size - 2, size - 2}, MainWindow::getIcon("checkerboard"), QRect {0, 0, 8, 8});
 
 	// Paint the color above the checkerboard
 	painter.fillRect (QRect {1, 1, size - 2, size - 2}, color);
