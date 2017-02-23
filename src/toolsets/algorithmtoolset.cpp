@@ -428,50 +428,28 @@ void AlgorithmToolset::subfileSelection()
 	if (selectedObjects().isEmpty())
 		return;
 
-	QString			parentpath (currentDocument()->fullPath());
+	// Determine the title of the new subfile
+	QString subfileTitle;
+	LDComment* titleObject = dynamic_cast<LDComment*>(currentDocument()->getObject(0));
 
-	// BFC type of the new subfile - it shall inherit the BFC type of the parent document
-	BfcStatement	bfctype (BfcStatement::NoCertify);
-
-	// Dirname of the new subfile
-	QString			subdirname (Dirname (parentpath));
-
-	// Title of the new subfile
-	QString			subtitle;
-
-	// Comment containing the title of the parent document
-	LDComment*	titleobj = dynamic_cast<LDComment*> (currentDocument()->getObject (0));
-
-	// License text for the subfile
-	QString			license = preferredLicenseText();
-
-	// LDraw code body of the new subfile (i.e. code of the selection)
-	QStringList		code;
-
-	// Full path of the subfile to be
-	QString			fullsubname;
-
-	// Where to insert the subfile reference?
-	// TODO: the selection really should be sorted by position...
-	int				referencePosition = (*selectedObjects().begin())->lineNumber();
-
-	// Determine title of subfile
-	if (titleobj)
-		subtitle = "~" + titleobj->text();
+	if (titleObject)
+		subfileTitle = "~" + titleObject->text();
 	else
-		subtitle = "~subfile";
+		subfileTitle = "~subfile";
 
 	// Remove duplicate tildes
-	while (subtitle.startsWith ("~~"))
-		subtitle.remove (0, 1);
+	while (subfileTitle.startsWith("~~"))
+		subfileTitle.remove(0, 1);
 
 	// If this the parent document isn't already in s/, we need to stuff it into
 	// a subdirectory named s/. Ensure it exists!
-	QString topdirname = Basename (Dirname (currentDocument()->fullPath()));
+	QString topDirectoryName = Basename(Dirname(currentDocument()->fullPath()));
+	QString parentDocumentPath = currentDocument()->fullPath();
+	QString subfileDirectory = Dirname(parentDocumentPath);
 
-	if (topdirname != "s")
+	if (topDirectoryName != "s")
 	{
-		QString desiredPath = subdirname + "/s";
+		QString desiredPath = subfileDirectory + "/s";
 		QString title = tr ("Create subfile directory?");
 		QString text = format(tr("The directory <b>%1</b> is suggested for subfiles. "
 		                         "This directory does not exist, do you want to create it?"), desiredPath);
@@ -479,70 +457,72 @@ void AlgorithmToolset::subfileSelection()
 		if (QDir(desiredPath).exists()
 		    or QMessageBox::question(m_window, title, text, (QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes)
 		{
-			subdirname = desiredPath;
-			QDir().mkpath(subdirname);
+			subfileDirectory = desiredPath;
+			QDir().mkpath(subfileDirectory);
 		}
 		else
 			return;
 	}
 
 	// Determine the body of the name of the subfile
-	if (not parentpath.isEmpty())
+	QString fullSubfileName;
+
+	if (not parentDocumentPath.isEmpty())
 	{
 		// Chop existing '.dat' suffix
-		if (parentpath.endsWith (".dat"))
-			parentpath.chop (4);
+		if (parentDocumentPath.endsWith (".dat"))
+			parentDocumentPath.chop (4);
 
 		// Remove the s?? suffix if it's there, otherwise we'll get filenames
 		// like s01s01.dat when subfiling subfiles.
-		QRegExp subfilesuffix ("s[0-9][0-9]$");
-		if (subfilesuffix.indexIn (parentpath) != -1)
-			parentpath.chop (subfilesuffix.matchedLength());
+		QRegExp subfilesuffix {"s[0-9][0-9]$"};
+		if (subfilesuffix.indexIn(parentDocumentPath) != -1)
+			parentDocumentPath.chop(subfilesuffix.matchedLength());
 
-		int subidx = 1;
+		int subfileIndex = 1;
 		QString digits;
 
-		// Now find the appropriate filename. Increase the number of the subfile
-		// until we find a name which isn't already taken.
+		// Now find the appropriate filename. Increase the number of the subfile until we find a name which isn't already taken.
 		do
 		{
-			digits.setNum (subidx++);
+			digits.setNum(subfileIndex++);
 
-			// pad it with a zero
+			// Pad it with a zero
 			if (countof(digits) == 1)
-				digits.prepend ("0");
+				digits.prepend("0");
 
-			fullsubname = subdirname + "/" + Basename (parentpath) + "s" + digits + ".dat";
-		} while (m_documents->findDocumentByName ("s\\" + Basename (fullsubname)) or QFile (fullsubname).exists());
+			fullSubfileName = subfileDirectory + "/" + Basename(parentDocumentPath) + "s" + digits + ".dat";
+		} while (m_documents->findDocumentByName("s\\" + Basename(fullSubfileName)) != nullptr or QFile {fullSubfileName}.exists());
 	}
 
-	// Determine the BFC winding type used in the main document - it is to
-	// be carried over to the subfile.
+	// Determine the BFC winding type used in the main document. It will be carried over to the subfile.
+	BfcStatement winding = BfcStatement::NoCertify;
 	for (LDObjectIterator<LDBfc> it (currentDocument()); it.isValid(); ++it)
 	{
-		if (isOneOf (it->statement(), BfcStatement::CertifyCCW, BfcStatement::CertifyCW, BfcStatement::NoCertify))
+		if (isOneOf(it->statement(), BfcStatement::CertifyCCW, BfcStatement::CertifyCW, BfcStatement::NoCertify))
 		{
-			bfctype = it->statement();
+			winding = it->statement();
 			break;
 		}
 	}
 
 	// Create the new subfile document
 	LDDocument* subfile = m_window->newDocument();
-	subfile->setFullPath(fullsubname);
-	subfile->setName(LDDocument::shortenName(fullsubname));
+	subfile->setFullPath(fullSubfileName);
+	subfile->setName(LDDocument::shortenName(fullSubfileName));
 
 	Model header {m_documents};
-	header.emplace<LDComment>(subtitle);
+	header.emplace<LDComment>(subfileTitle);
 	header.emplace<LDComment>("Name: "); // This gets filled in when the subfile is saved
 	header.emplace<LDComment>(format("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
 	header.emplace<LDComment>("!LDRAW_ORG Unofficial_Subpart");
 
+	QString license = preferredLicenseText();
 	if (not license.isEmpty())
 		header.emplace<LDComment>(license);
 
 	header.emplace<LDEmpty>();
-	header.emplace<LDBfc>(bfctype);
+	header.emplace<LDBfc>(winding);
 	header.emplace<LDEmpty>();
 	subfile->merge(header);
 
@@ -553,6 +533,10 @@ void AlgorithmToolset::subfileSelection()
 	// Try save it
 	if (m_window->save(subfile, true))
 	{
+		// Where to insert the subfile reference?
+		// TODO: the selection really should be sorted by position...
+		int referencePosition = (*selectedObjects().begin())->lineNumber();
+
 		// Save was successful. Delete the original selection now from the
 		// main document.
 		for (LDObject* object : selectedObjects().toList())
