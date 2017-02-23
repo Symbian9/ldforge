@@ -902,15 +902,6 @@ void MainWindow::tabSelected()
 //
 void MainWindow::refreshObjectList()
 {
-#if 0
-	ui.objectList->clear();
-	LDDocument* f = getm_currentDocument;
-
-for (LDObject* obj : *f)
-		ui.objectList->addItem (obj->qObjListEntry);
-
-#endif
-
 	buildObjectList();
 }
 
