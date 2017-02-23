@@ -813,12 +813,12 @@ QImage GLRenderer::screenCapture()
 	// Read the current render to a buffer of pixels. We use RGBA format even though the image should be fully opaque at all times.
 	// This is because apparently GL_RGBA/GL_UNSIGNED_BYTE is the only setting pair that is guaranteed to actually work!
 	// ref: https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glReadPixels.xml
-	QByteArray pixelData;
+	QVector<unsigned char> pixelData;
 	pixelData.resize(4 * width() * height());
 	glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
 	// Prepare the image and return it. It appears that GL and Qt formats have red and blue swapped and the Y axis flipped.
-	QImage image {reinterpret_cast<const uchar*>(pixelData.constData()), width(), height(), QImage::Format_ARGB32};
+	QImage image {pixelData.constData(), width(), height(), QImage::Format_ARGB32};
 	return image.rgbSwapped().mirrored();
 }
 
