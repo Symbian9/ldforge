@@ -37,12 +37,12 @@
 #include "../grid.h"
 #include "../dialogs/externalprogrampathdialog.h"
 #include "extprogramtoolset.h"
-#include "ui_ytruder.h"
-#include "ui_intersector.h"
-#include "ui_rectifier.h"
-#include "ui_coverer.h"
-#include "ui_isecalc.h"
-#include "ui_edger2.h"
+#include "ui_ytruderdialog.h"
+#include "ui_intersectordialog.h"
+#include "ui_rectifierdialog.h"
+#include "ui_covererdialog.h"
+#include "ui_isecalcdialog.h"
+#include "ui_edger2dialog.h"
 
 ExtProgramToolset::ExtProgramToolset (MainWindow* parent) :
 	Toolset (parent)

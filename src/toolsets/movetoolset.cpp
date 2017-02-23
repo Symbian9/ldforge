@@ -21,7 +21,7 @@
 #include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "movetoolset.h"
-#include "ui_rotpoint.h"
+#include "ui_rotationpointdialog.h"
 #include "../grid.h"
 #include "../canvas.h"
 

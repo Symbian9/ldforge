@@ -29,7 +29,7 @@
 #include "../dialogs/generateprimitivedialog.h"
 #include "../documentmanager.h"
 #include "filetoolset.h"
-#include "ui_about.h"
+#include "ui_aboutdialog.h"
 
 FileToolset::FileToolset(MainWindow* parent)
     : Toolset(parent) {}

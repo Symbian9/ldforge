@@ -35,10 +35,10 @@
 #include "../linetypes/empty.h"
 #include "../linetypes/quadrilateral.h"
 #include "../linetypes/triangle.h"
-#include "ui_replcoords.h"
-#include "ui_editraw.h"
-#include "ui_flip.h"
-#include "ui_addhistoryline.h"
+#include "ui_replacecoordinatesdialog.h"
+#include "ui_editrawdialog.h"
+#include "ui_flipdialog.h"
+#include "ui_addhistorylinedialog.h"
 #include "algorithmtoolset.h"
 
 AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :

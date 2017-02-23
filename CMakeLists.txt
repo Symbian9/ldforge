@@ -153,27 +153,27 @@ set (LDFORGE_HEADERS
 )
 
 set (LDFORGE_FORMS
-	ui/about.ui
-	ui/addhistoryline.ui
-	ui/coverer.ui
-	ui/edger2.ui
-	ui/editraw.ui
-	ui/flip.ui
-	ui/intersector.ui
-	ui/isecalc.ui
-	ui/rectifier.ui
-	ui/replcoords.ui
-	ui/rotpoint.ui
-	ui/ytruder.ui
-	src/mainwindow.ui
-	src/partdownloader.ui
+	src/dialogs/aboutdialog.ui
+	src/dialogs/addhistorylinedialog.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
+	src/dialogs/covererdialog.ui
+	src/dialogs/edger2dialog.ui
+	src/dialogs/editrawdialog.ui
 	src/dialogs/externalprogrampathdialog.ui
+	src/dialogs/flipdialog.ui
 	src/dialogs/generateprimitivedialog.ui
+	src/dialogs/intersectordialog.ui
+	src/dialogs/isecalcdialog.ui
 	src/dialogs/ldrawpathdialog.ui
 	src/dialogs/newpartdialog.ui
 	src/dialogs/openprogressdialog.ui
+	src/dialogs/rectifierdialog.ui
+	src/dialogs/replacecoordinatesdialog.ui
+	src/dialogs/rotationpointdialog.ui
+	src/dialogs/ytruderdialog.ui
+	src/mainwindow.ui
+	src/partdownloader.ui
 )
 
 set (LDFORGE_OTHER_FILES
