@@ -78,7 +78,6 @@ public:
 	~GLRenderer();
 
 	Camera camera() const;
-	QByteArray capturePixels();
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
@@ -90,6 +89,7 @@ public:
 	LDObject* pick(int mouseX, int mouseY);
 	void resetAllAngles();
 	void resetAngles();
+	QImage screenCapture();
 	void setBackground();
 	void setCamera(Camera cam);
 	QPen textPen() const;
@@ -145,7 +145,6 @@ private:
 	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
 	GLCamera m_cameras[7];
 	bool m_useDarkBackground = false;
-	bool m_takingScreenCapture = false;
 	bool m_panning = false;
 	bool m_initialized = false;
 	bool m_isDrawingSelectionScene = false;

@@ -104,21 +104,16 @@ void ViewToolset::resetView()
 
 void ViewToolset::screenshot()
 {
-	const char* imageformats = "PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;"
-		"PPM images (*.ppm);;X11 Bitmaps (*.xbm);;X11 Pixmaps (*.xpm);;All Files (*.*)";
-	int width = m_window->renderer()->width();
-	int height = m_window->renderer()->height();
-	QByteArray capture = m_window->renderer()->capturePixels();
-	const uchar* imagedata = reinterpret_cast<const uchar*> (capture.constData());
-	// GL and Qt formats have R and B swapped. Also, GL flips Y - correct it as well.
-	QImage image = QImage (imagedata, width, height, QImage::Format_ARGB32).rgbSwapped().mirrored();
+	const char* imageFormats = "PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;"
+	    "PPM images (*.ppm);;X11 Bitmaps (*.xbm);;X11 Pixmaps (*.xpm);;All Files (*.*)";
+	QImage image = m_window->renderer()->screenCapture();
 	QString root = Basename (currentDocument()->name());
 
 	if (root.right (4) == ".dat")
 		root.chop (4);
 
 	QString defaultname = (not root.isEmpty()) ? format ("%1.png", root) : "";
-	QString filename = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname, imageformats);
+	QString filename = QFileDialog::getSaveFileName (m_window, "Save Screencap", defaultname, imageFormats);
 
 	if (not filename.isEmpty() and not image.save (filename))
 	{
