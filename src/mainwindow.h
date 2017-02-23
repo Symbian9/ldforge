@@ -177,7 +177,3 @@ private slots:
 	void quickColorClicked();
 	void objectListDoubleClicked (QListWidgetItem* listitem);
 };
-
-// Pointer to the instance of MainWindow.
-// TODO: it's going out, slowly but surely.
-extern MainWindow* g_win;

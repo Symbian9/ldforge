@@ -63,7 +63,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_currentDocument (nullptr),
 	m_isSelectionLocked (false)
 {
-	g_win = this;
 	m_messageLog = new MessageManager {this};
 	ui.setupUi (this);
 	m_updatingTabs = false;
@@ -170,7 +169,6 @@ void MainWindow::finishInitialization()
 
 MainWindow::~MainWindow()
 {
-	g_win = nullptr;
 	delete m_guiUtilities;
 	delete m_primitives;
 	delete m_grid;

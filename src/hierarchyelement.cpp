@@ -35,11 +35,10 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 
 	if (m_window == nullptr)
 	{
-		// Drat! It doesn't seem to have the MainWindow as a parent! We'll need to force it to be in one.
-		// This shouldn't have any side effects but also shouldn't happen regardless.
-		m_window = g_win;
-		print("Hierarchy element instance %1 should have a MainWindow parent, but it is %2 (%3).\n", this,
-		      parent, parent ? parent->metaObject()->className() : "nullptr");
+		// The MainWindow relation should have been found.
+		QString error = format("Hierarchy element instance %1 should have a MainWindow parent, but it is %2 (%3).\n",
+		                       this, parent, parent ? parent->metaObject()->className() : "nullptr");
+		throw std::runtime_error {error.toUtf8().constData()};
 	}
 
 	m_documents = m_window->documents();

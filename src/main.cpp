@@ -22,7 +22,6 @@
 #include "documentmanager.h"
 #include "mainwindow.h"
 
-MainWindow* g_win = nullptr;
 const Vertex Origin (0.0f, 0.0f, 0.0f);
 
 // =============================================================================
