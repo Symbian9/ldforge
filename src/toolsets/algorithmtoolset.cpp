@@ -246,11 +246,11 @@ void AlgorithmToolset::replaceCoordinates()
 
 void AlgorithmToolset::flip()
 {
-	QDialog* dlg = new QDialog;
+	QDialog dialog {m_window};
 	Ui::FlipUI ui;
-	ui.setupUi (dlg);
+	ui.setupUi(&dialog);
 
-	if (not dlg->exec())
+	if (not dialog.exec())
 		return;
 
 	QList<Axis> sel;
@@ -333,14 +333,14 @@ void AlgorithmToolset::addHistoryLine()
 	bool ishistory = false;
 	bool prevIsHistory = false;
 
-	QDialog* dlg = new QDialog {m_window};
+	QDialog dialog {m_window};
 	Ui_AddHistoryLine ui;
-	ui.setupUi(dlg);
+	ui.setupUi(&dialog);
 	ui.m_username->setText (m_config->defaultUser());
 	ui.m_date->setDate (QDate::currentDate());
 	ui.m_comment->setFocus();
 
-	if (not dlg->exec())
+	if (not dialog.exec())
 		return;
 
 	// Find a spot to place the new comment
