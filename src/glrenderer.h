@@ -77,21 +77,14 @@ public:
 	GLRenderer(const Model* model, QWidget* parent = nullptr);
 	~GLRenderer();
 
-	QColor backgroundColor() const;
 	Camera camera() const;
 	QByteArray capturePixels();
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
-	void drawGLScene();
-	void highlightCursorObject();
-	void initGLData();
-	bool isPicking() const;
 	Qt::KeyboardModifiers keyboardModifiers() const;
 	const Model* model() const;
-	bool mouseHasMoved() const;
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;
-	void needZoomToFit();
 	LDObject* objectAtCursor() const;
 	QSet<LDObject*> pick(const QRect& range);
 	LDObject* pick(int mouseX, int mouseY);
@@ -99,7 +92,6 @@ public:
 	void resetAngles();
 	void setBackground();
 	void setCamera(Camera cam);
-	void setPicking(bool a);
 	QPen textPen() const;
 
 	static const QPen thinBorderPen;
@@ -126,10 +118,12 @@ protected:
 	void resizeGL(int w, int h);
 	void wheelEvent(QWheelEvent* ev);
 
-	virtual void overpaint(QPainter& painter);
+	QColor backgroundColor() const;
 	virtual bool freeCameraAllowed() const;
 	bool isDrawingSelectionScene() const;
 	Qt::MouseButtons lastButtons() const;
+	bool mouseHasMoved() const;
+	virtual void overpaint(QPainter& painter);
 	double panning (Axis ax) const;
 	const QGenericMatrix<4, 4, GLfloat>& rotationMatrix() const;
 	double zoom();
@@ -169,14 +163,17 @@ private:
 	GLuint m_axesColorVbo;
 
 	void calcCameraIcons();
-	void drawVbos (VboClass surface, VboSubclass colors);
+	void drawGLScene();
+	void drawVbos(VboClass surface, VboSubclass colors);
 	void freeAxes();
-	void zoomToFit();
-	void zoomAllToFit();
-	Q_SLOT void removeObject(LDObject* object);
-
-private slots:
-	void showCameraIconTooltip();
+	void highlightCursorObject();
 	void initializeAxes();
 	void initializeLighting();
+	void initGLData();
+	void needZoomToFit();
+	Q_SLOT void removeObject(LDObject* object);
+	void setPicking(bool picking);
+	Q_SLOT void showCameraIconTooltip();
+	void zoomToFit();
+	void zoomAllToFit();
 };

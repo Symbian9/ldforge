@@ -776,9 +776,9 @@ LDObject* GLRenderer::pick(int mouseX, int mouseY)
 
 // =============================================================================
 //
-void GLRenderer::setPicking(bool value)
+void GLRenderer::setPicking(bool picking)
 {
-	m_isDrawingSelectionScene = value;
+	m_isDrawingSelectionScene = picking;
 	setBackground();
 
 	if (m_isDrawingSelectionScene)
