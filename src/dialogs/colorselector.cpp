@@ -29,164 +29,166 @@
 #include "colorselector.h"
 #include "ui_colorselector.h"
 
-enum { NUM_COLUMNS = 16 };
-
-ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
-	QDialog (parent),
-	HierarchyElement (parent),
-	ui (*new Ui_ColorSelUi),
-	m_selection (defaultvalue)
+/*
+ * Constructs a color selection dialog.
+ */
+ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
+    QDialog {parent},
+    HierarchyElement {parent},
+    ui {*new Ui_ColorSelUi},
+    m_selectedColor {LDColor::nullColor}
 {
-	m_firstResize = true;
-	ui.setupUi (this);
+	ui.setupUi(this);
 
-	QGridLayout* layout = new QGridLayout (this);
+	QGridLayout* gridLayout = new QGridLayout;
 
 	// Spawn color selector buttons
-	for (LDColor ldcolor; ldcolor.isLDConfigColor(); ++ldcolor)
+	for (LDColor color; color.isLDConfigColor(); ++color)
 	{
-		QPushButton* button = new QPushButton (this);
-		button->setMinimumSize (QSize (32, 32));
-		button->setMaximumSize (button->minimumSize());
+		QPushButton* button = new QPushButton {this};
+		button->setMinimumSize({32, 32});
+		button->setMaximumSize(button->minimumSize());
 
-		if (ldcolor.isValid ())
+		if (color.isValid())
 		{
-			QColor color (ldcolor.faceColor());
+			QColor faceColor = {color.faceColor()};
 
-			if (ldcolor == MainColor)
+			if (color == MainColor)
 			{
-				color = QColor (m_config->mainColor());
-				color.setAlphaF (m_config->mainColorAlpha());
+				faceColor = m_config->mainColor();
+				faceColor.setAlphaF(m_config->mainColorAlpha());
 			}
 
-			QString color2name (luma (color) < 80 ? "white" : "black");
-			button->setAutoFillBackground (true);
-			button->setStyleSheet (format ("background-color: rgba(%1, %2, %3, %4); color: %5",
-				color.red(), color.green(), color.blue(), color.alpha(), color2name));
-			button->setCheckable (true);
-			button->setText (QString::number (ldcolor.index()));
-			button->setToolTip (format ("%1: %2", ldcolor.index(), ldcolor.name()));
-			m_buttons[ldcolor] = button;
-			m_buttonsReversed[button] = ldcolor;
-			connect (button, SIGNAL (clicked(bool)), this, SLOT (colorButtonClicked()));
-
-			if (ldcolor == selection())
-				button->setChecked (true);
+			QString edgeColor = luma(faceColor) < 80 ? "white" : "black";
+			button->setAutoFillBackground(true);
+			button->setStyleSheet(format("background-color: rgba(%1, %2, %3, %4); color: %5",
+			                             faceColor.red(), faceColor.green(), faceColor.blue(), faceColor.alpha(), edgeColor));
+			button->setCheckable(true);
+			button->setText(QString::number(color.index()));
+			button->setToolTip(format("%1: %2", color.index(), color.name()));
+			m_buttons[color] = button;
+			m_buttonsReversed[button] = color;
+			connect(button, SIGNAL(clicked(bool)), this, SLOT(colorButtonClicked()));
 		}
 		else
 		{
-			button->setEnabled (false);
+			button->setEnabled(false);
 		}
 
-		layout->addWidget (button, ldcolor.index() / NUM_COLUMNS, ldcolor.index() % NUM_COLUMNS);
+		gridLayout->addWidget(button, color.index() / columnCount, color.index() % columnCount);
 	}
 
-	QWidget* widget = new QWidget();
-	widget->setLayout (layout);
-	ui.definedColors->setWidget (widget);
-	connect (ui.directColor, SIGNAL (clicked (bool)), this, SLOT (chooseDirectColor()));
-
-	ui.definedColors->setMinimumWidth (ui.definedColors->widget()->width() + 16);
+	QWidget* gridContainerWidget = new QWidget;
+	gridContainerWidget->setLayout(gridLayout);
+	ui.definedColors->setWidget(gridContainerWidget);
+	connect(ui.directColor, SIGNAL(clicked(bool)), this, SLOT(chooseDirectColor()));
+	ui.definedColors->setMinimumWidth(ui.definedColors->widget()->width() + 16);
 
 #ifdef TRANSPARENT_DIRECT_COLORS
-	connect (ui.transparentDirectColor, SIGNAL (clicked (bool)), this, SLOT (transparentCheckboxClicked()));
+	connect(ui.transparentDirectColor, SIGNAL(clicked(bool)), this, SLOT(transparentCheckboxClicked()));
 #else
 	ui.transparentDirectColor->hide();
 #endif
 
-	drawColorInfo();
+	setSelectedColor(defaultColor);
 }
 
+/*
+ * Destructs the color selection dialog.
+ */
 ColorSelector::~ColorSelector()
 {
 	delete &ui;
 }
 
+/*
+ * Handles the press of a color button.
+ */
 void ColorSelector::colorButtonClicked()
 {
 	QPushButton* button = qobject_cast<QPushButton*>(sender());
 	LDColor color = m_buttonsReversed.value(button, LDColor::nullColor);
 
 	if (color.isValid())
-	{
-		// Uncheck the button we previously had pressed.
-		if (m_selection.isValid())
-		{
-			QPushButton* button = m_buttons.value(m_selection);
-
-			if (button)
-				button->setChecked(false);
-		}
-
-		// Select the new color.
-		m_selection = color;
-		button->setChecked (true);
-		drawColorInfo();
-	}
+		setSelectedColor(color);
 }
 
-void ColorSelector::drawColorInfo()
-{
-	if (not selection().isValid())
-	{
-		ui.colorLabel->setText ("---");
-		ui.iconLabel->setPixmap (QPixmap());
-		ui.transparentDirectColor->setChecked (false);
-		return;
-	}
-
-	ui.colorLabel->setText (format ("%1 - %2", selection().indexString(),
-		(selection().isDirect() ? "<direct color>" : selection().name())));
-	ui.iconLabel->setPixmap (guiUtilities()->makeColorIcon (selection(), 16).pixmap (16, 16));
-
-#ifdef TRANSPARENT_DIRECT_COLORS
-	ui.transparentDirectColor->setEnabled (selection().isDirect());
-	ui.transparentDirectColor->setChecked (selection().isDirect() and selection().faceColor().alphaF() < 1.0);
-#else
-	ui.transparentDirectColor->setChecked (false);
-	ui.transparentDirectColor->setEnabled (false);
-#endif
-}
-
-void ColorSelector::selectDirectColor (QColor color)
-{
-	qint32 colorIndex = (ui.transparentDirectColor->isChecked() ? 0x03000000 : 0x02000000);
-	colorIndex |= (color.red() << 16) | (color.green() << 8) | (color.blue());
-	m_selection = colorIndex;
-	drawColorInfo();
-}
-
+/*
+ * Asks the user for a direct color.
+ */
 void ColorSelector::chooseDirectColor()
 {
-	QColor defcolor = selection() != -1 ? selection().faceColor() : Qt::white;
-	QColor newcolor = QColorDialog::getColor (defcolor);
+	QColor defaultColor = selectedColor() != -1 ? selectedColor().faceColor() : Qt::white;
+	QColor newColor = QColorDialog::getColor(defaultColor);
 
-	if (not newcolor.isValid())
-		return; // canceled
-
-	selectDirectColor (newcolor);
+	if (newColor.isValid())
+		setSelectedColor({newColor, ui.transparentDirectColor->isChecked()});
 }
 
+/*
+ * Handles the click of the transparent direct color option (only available of transparent direct colors are enabled).
+ */
 void ColorSelector::transparentCheckboxClicked()
 {
-	if (selection().isDirect())
-		selectDirectColor (selection().faceColor());
+	if (selectedColor().isDirect())
+		setSelectedColor({selectedColor().faceColor(), ui.transparentDirectColor->isChecked()});
 }
 
-bool ColorSelector::selectColor (QWidget* parent, LDColor& val, LDColor defaultvalue)
+/*
+ * Convenience function for invoking the color selection dialog.
+ */
+bool ColorSelector::selectColor(QWidget* parent, LDColor& color, LDColor defaultColor)
 {
-	ColorSelector dlg (parent, defaultvalue);
+	ColorSelector dialog {parent, defaultColor};
 
-	if (dlg.exec() and dlg.selection().isValid())
+	if (dialog.exec() and dialog.selectedColor().isValid())
 	{
-		val = dlg.selection();
+		color = dialog.selectedColor();
 		return true;
 	}
 
 	return false;
 }
 
-LDColor ColorSelector::selection() const
+/*
+ * Returns the currently selected color.
+ */
+LDColor ColorSelector::selectedColor() const
 {
-	return m_selection;
+	return m_selectedColor;
+}
+
+/*
+ * Changes the selected color to the one provided, and updates all relevant widgets.
+ */
+void ColorSelector::setSelectedColor(LDColor newColor)
+{
+	// Uncheck the button we previously had pressed.
+	QPushButton* button = m_buttons.value(m_selectedColor);
+
+	if (button)
+		button->setChecked(false);
+
+	// Select the new color.
+	m_selectedColor = newColor;
+	button = m_buttons.value(newColor);
+
+	if (button)
+		button->setChecked(true);
+
+	if (m_selectedColor.isValid())
+	{
+		ui.colorLabel->setText(format("%1 - %2",
+		                              newColor.indexString(),
+		                              newColor.isDirect() ? newColor.faceColor().name() : newColor.name()));
+		ui.iconLabel->setPixmap(guiUtilities()->makeColorIcon(newColor, 16).pixmap(16, 16));
+		ui.transparentDirectColor->setEnabled(newColor.isDirect());
+		ui.transparentDirectColor->setChecked(newColor.isDirect() and newColor.faceColor().alphaF() < 1.0);
+	}
+	else
+	{
+		ui.colorLabel->setText("---");
+		ui.iconLabel->setPixmap({});
+		ui.transparentDirectColor->setChecked(false);
+	}
 }

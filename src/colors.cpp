@@ -45,6 +45,12 @@ LDColor::LDColor(qint32 index) :
     m_index {index} {}
 
 /*
+ * Constructs a direct color.
+ */
+LDColor::LDColor(QColor color, bool transparent) :
+    m_index {directColorIndex(color, transparent)} {}
+
+/*
  * Returns whether or not the color is valid.
  */
 bool LDColor::isValid() const
@@ -167,6 +173,18 @@ QString LDColor::indexString() const
 bool LDColor::isDirect() const
 {
 	return index() >= 0x02000000;
+}
+
+/*
+ * Returns the LDraw color index for a direct color.
+ */
+qint32 LDColor::directColorIndex(QColor color, bool transparent)
+{
+	qint32 index = transparent ? 0x03000000 : 0x02000000;
+	index |= color.red() << 16;
+	index |= color.green() << 8;
+	index |= color.blue();
+	return index;
 }
 
 /*

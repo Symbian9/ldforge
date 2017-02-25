@@ -55,6 +55,7 @@ class LDColor
 public:
 	LDColor();
 	LDColor(qint32 index);
+	LDColor(QColor color, bool transparent = false);
 	LDColor(const LDColor& other) = default;
 
 	bool isLDConfigColor() const;
@@ -68,6 +69,7 @@ public:
 	QString indexString() const;
 
 	static const LDColor nullColor;
+	static qint32 directColorIndex(QColor color, bool transparent = false);
 	static void initColors();
 
 	LDColor& operator=(qint32 index) { m_index = index; return *this; }

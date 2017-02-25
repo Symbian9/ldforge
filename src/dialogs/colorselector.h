@@ -22,28 +22,30 @@
 #include "../colors.h"
 #include "../hierarchyelement.h"
 
+/*
+ * Implements a dialog that asks the user to choose an LDraw color from a grid of available colors. Direct colors are also supported.
+ */
 class ColorSelector : public QDialog, public HierarchyElement
 {
 	Q_OBJECT
 
 public:
-	explicit ColorSelector (QWidget* parent, LDColor defaultvalue = LDColor::nullColor);
-	virtual ~ColorSelector();
-	static bool selectColor (QWidget* parent, LDColor& val, LDColor defval = LDColor::nullColor);
-	LDColor selection() const;
+	ColorSelector(QWidget* parent, LDColor defaultvalue = LDColor::nullColor);
+	~ColorSelector();
+
+	static bool selectColor(QWidget* parent, LDColor& color, LDColor defaultColor = LDColor::nullColor);
+	LDColor selectedColor() const;
+	Q_SLOT void setSelectedColor(LDColor color);
 
 private:
+	static const int columnCount = 16;
+
+	Q_SLOT void colorButtonClicked();
+	Q_SLOT void chooseDirectColor();
+	Q_SLOT void transparentCheckboxClicked();
+
 	class Ui_ColorSelUi& ui;
 	QMap<LDColor, QPushButton*> m_buttons;
 	QMap<QPushButton*, LDColor> m_buttonsReversed;
-	bool m_firstResize;
-	LDColor m_selection;
-
-	void drawColorInfo();
-	void selectDirectColor (QColor col);
-
-private slots:
-	void colorButtonClicked();
-	void chooseDirectColor();
-	void transparentCheckboxClicked();
+	LDColor m_selectedColor;
 };
