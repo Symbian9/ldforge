@@ -23,44 +23,43 @@
 #include <QMap>
 #include <QSet>
 
-// =============================================================================
-//
+/*
+ * Compiles LDObjects into polygons for the GLRenderer to draw.
+ */
 class GLCompiler : public QObject, public HierarchyElement, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
 public:
-	struct ObjectVBOInfo
-	{
-		QVector<GLfloat>	data[NumVbos];
-		bool				isChanged;
-	};
-
 	GLCompiler (GLRenderer* renderer);
 	~GLCompiler();
-	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement);
-	QColor indexColorForID (int id) const;
+
 	void initialize();
-	void needMerge();
-	void prepareVBO (int vbonum, const Model* model);
-	void setRenderer (GLRenderer* compiler);
-	void stageForCompilation (LDObject* obj);
-	void unstage (LDObject* obj);
+	void prepareVBO (int vbonum);
 	GLuint vbo (int vbonum) const;
 	int vboSize (int vbonum) const;
 
 	static int vboNumber (VboClass surface, VboSubclass complement);
 
 private:
+	struct ObjectVboData
+	{
+		QVector<GLfloat> data[NumVbos];
+	};
+
 	void compileStaged();
-	void compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo);
+	void compilePolygon (LDPolygon& poly, LDObject* polygonOwner, ObjectVboData& objectInfo);
 	Q_SLOT void compileObject (LDObject* obj);
+	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement);
+	QColor indexColorForID (qint32 id) const;
+	void needMerge();
 	Q_SLOT void recompile();
 	void dropObjectInfo (LDObject* obj);
 	Q_SLOT void forgetObject(LDObject* object);
+	void stageForCompilation (LDObject* obj);
+	void unstage (LDObject* obj);
 
-private:
-	QMap<LDObject*, ObjectVBOInfo>	m_objectInfo;
+	QMap<LDObject*, ObjectVboData>	m_objectInfo;
 	QSet<LDObject*> m_staged; // Objects that need to be compiled
 	GLuint m_vbo[NumVbos];
 	bool m_vboChanged[NumVbos] = {true};
@@ -68,5 +67,5 @@ private:
 	GLRenderer* m_renderer;
 };
 
-#define CHECK_GL_ERROR() { CheckGLErrorImpl (this, __FILE__, __LINE__); }
-void CheckGLErrorImpl (HierarchyElement* element, const char* file, int line);
+#define CHECK_GL_ERROR() { checkGLError(this, __FILE__, __LINE__); }
+void checkGLError (HierarchyElement* element, QString file, int line);

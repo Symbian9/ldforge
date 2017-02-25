@@ -75,7 +75,7 @@ MAKE_ITERABLE_ENUM(VboClass)
 enum class VboSubclass
 {
 	Surfaces,
-	NormalColors,
+	RegularColors,
 	PickColors,
 	BfcFrontColors,
 	BfcBackColors,
@@ -90,16 +90,3 @@ enum
 {
 	NumVbos = EnumLimits<VboClass>::Count * EnumLimits<VboSubclass>::Count
 };
-
-// KDevelop doesn't seem to understand some VBO stuff
-#ifdef IN_IDE_PARSER
-using GLint = int;
-using GLsizei = int;
-using GLenum = unsigned int;
-using GLuint = unsigned int;
-void glBindBuffer (GLenum, GLuint);
-void glGenBuffers (GLuint, GLuint*);
-void glDeleteBuffers (GLuint, GLuint*);
-void glBufferData (GLuint, GLuint, void*, GLuint);
-void glBufferSubData (GLenum, GLint, GLsizei, void*);
-#endif

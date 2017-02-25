@@ -34,8 +34,8 @@ public:
 
 private:
 	class Ui_ColorSelUi& ui;
-	QMap<int, QPushButton*> m_buttons;
-	QMap<QPushButton*, int> m_buttonsReversed;
+	QMap<LDColor, QPushButton*> m_buttons;
+	QMap<QPushButton*, LDColor> m_buttonsReversed;
 	bool m_firstResize;
 	LDColor m_selection;
 

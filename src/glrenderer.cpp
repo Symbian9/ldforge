@@ -427,15 +427,15 @@ void GLRenderer::drawGLScene()
 			if (m_config->randomColors())
 				colors = VboSubclass::RandomColors;
 			else
-				colors = VboSubclass::NormalColors;
+				colors = VboSubclass::RegularColors;
 
 			drawVbos (VboClass::Triangles, colors);
 			drawVbos (VboClass::Quads, colors);
 		}
 
-		drawVbos (VboClass::Lines, VboSubclass::NormalColors);
+		drawVbos (VboClass::Lines, VboSubclass::RegularColors);
 		glEnable (GL_LINE_STIPPLE);
-		drawVbos (VboClass::ConditionalLines, VboSubclass::NormalColors);
+		drawVbos (VboClass::ConditionalLines, VboSubclass::RegularColors);
 		glDisable (GL_LINE_STIPPLE);
 
 		if (m_config->drawAxes())
@@ -501,9 +501,9 @@ void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
 	int surfaceVboNumber = m_compiler->vboNumber(surface, VboSubclass::Surfaces);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
 	int normalVboNumber = m_compiler->vboNumber(surface, VboSubclass::Normals);
-	m_compiler->prepareVBO(surfaceVboNumber, m_model);
-	m_compiler->prepareVBO(colorVboNumber, m_model);
-	m_compiler->prepareVBO(normalVboNumber, m_model);
+	m_compiler->prepareVBO(surfaceVboNumber);
+	m_compiler->prepareVBO(colorVboNumber);
+	m_compiler->prepareVBO(normalVboNumber);
 	GLuint surfaceVbo = m_compiler->vbo(surfaceVboNumber);
 	GLuint colorVbo = m_compiler->vbo(colorVboNumber);
 	GLuint normalVbo = m_compiler->vbo(normalVboNumber);

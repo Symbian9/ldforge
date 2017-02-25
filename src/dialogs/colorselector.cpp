@@ -66,8 +66,8 @@ ColorSelector::ColorSelector (QWidget* parent, LDColor defaultvalue) :
 			button->setCheckable (true);
 			button->setText (QString::number (ldcolor.index()));
 			button->setToolTip (format ("%1: %2", ldcolor.index(), ldcolor.name()));
-			m_buttons[ldcolor.index()] = button;
-			m_buttonsReversed[button] = ldcolor.index();
+			m_buttons[ldcolor] = button;
+			m_buttonsReversed[button] = ldcolor;
 			connect (button, SIGNAL (clicked(bool)), this, SLOT (colorButtonClicked()));
 
 			if (ldcolor == selection())
@@ -104,28 +104,25 @@ ColorSelector::~ColorSelector()
 
 void ColorSelector::colorButtonClicked()
 {
-	QPushButton* button = qobject_cast<QPushButton*> (sender());
-	auto it = m_buttonsReversed.find (button);
-	LDColor color;
+	QPushButton* button = qobject_cast<QPushButton*>(sender());
+	LDColor color = m_buttonsReversed.value(button, LDColor::nullColor);
 
-	if (Q_UNLIKELY (button == nullptr or it == m_buttonsReversed.end()
-		or not (color = *it).isValid()))
+	if (color.isValid())
 	{
-		print ("colorButtonClicked() called with invalid sender");
-		return;
+		// Uncheck the button we previously had pressed.
+		if (m_selection.isValid())
+		{
+			QPushButton* button = m_buttons.value(m_selection);
+
+			if (button)
+				button->setChecked(false);
+		}
+
+		// Select the new color.
+		m_selection = color;
+		button->setChecked (true);
+		drawColorInfo();
 	}
-
-	if (selection().isValid())
-	{
-		auto button = m_buttons.find (selection().index());
-
-		if (button != m_buttons.end())
-			(*button)->setChecked (false);
-	}
-
-	m_selection = color;
-	button->setChecked (true);
-	drawColorInfo();
 }
 
 void ColorSelector::drawColorInfo()

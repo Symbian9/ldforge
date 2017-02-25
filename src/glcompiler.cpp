@@ -25,45 +25,48 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-struct GLErrorInfo
+void checkGLError(HierarchyElement* element, QString file, int line)
 {
-	GLenum	value;
-	QString	text;
-};
-
-static const GLErrorInfo g_GLErrors[] =
-{
-	{ GL_NO_ERROR,						"No error" },
-	{ GL_INVALID_ENUM,					"Unacceptable enumerator passed" },
-	{ GL_INVALID_VALUE,					"Numeric argument out of range" },
-	{ GL_INVALID_OPERATION,				"The operation is not allowed to be done in this state" },
-	{ GL_INVALID_FRAMEBUFFER_OPERATION,	"Framebuffer object is not complete"},
-	{ GL_OUT_OF_MEMORY,					"Out of memory" },
-	{ GL_STACK_UNDERFLOW,				"The operation would have caused an underflow" },
-	{ GL_STACK_OVERFLOW,				"The operation would have caused an overflow" },
-};
-
-void CheckGLErrorImpl (HierarchyElement* element, const char* file, int line)
-{
-	QString errmsg;
-	GLenum errnum = glGetError();
-
-	if (errnum == GL_NO_ERROR)
-		return;
-
-	for (const GLErrorInfo& err : g_GLErrors)
+	struct ErrorInfo
 	{
-		if (err.value == errnum)
-		{
-			errmsg = err.text;
-			break;
-		}
-	}
+		GLenum	value;
+		QString	text;
+	};
 
-	element->print ("OpenGL ERROR: at %1:%2: %3", Basename (QString (file)), line, errmsg);
+	static const ErrorInfo knownErrors[] =
+	{
+	    { GL_NO_ERROR,						"No error" },
+	    { GL_INVALID_ENUM,					"Unacceptable enumerator passed" },
+	    { GL_INVALID_VALUE,					"Numeric argument out of range" },
+	    { GL_INVALID_OPERATION,				"The operation is not allowed to be done in this state" },
+	    { GL_INVALID_FRAMEBUFFER_OPERATION,	"Framebuffer object is not complete"},
+	    { GL_OUT_OF_MEMORY,					"Out of memory" },
+	    { GL_STACK_UNDERFLOW,				"The operation would have caused an underflow" },
+	    { GL_STACK_OVERFLOW,				"The operation would have caused an overflow" },
+	};
+
+	GLenum errorNumber = glGetError();
+
+	if (errorNumber != GL_NO_ERROR)
+	{
+		QString errorMessage;
+
+		for (const ErrorInfo& error : knownErrors)
+		{
+			if (error.value == errorNumber)
+			{
+				errorMessage = error.text;
+				break;
+			}
+		}
+
+		element->print("OpenGL ERROR: at %1:%2: %3", Basename(file), line, errorMessage);
+	}
 }
 
-
+/*
+ * Constructs a GL compiler.
+ */
 GLCompiler::GLCompiler (GLRenderer* renderer) :
 	HierarchyElement (renderer),
 	m_renderer (renderer)
@@ -78,23 +81,29 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 		stageForCompilation(object);
 }
 
-
+/*
+ * Initializes the VBOs after OpenGL is initialized.
+ */
 void GLCompiler::initialize()
 {
 	initializeOpenGLFunctions();
-	glGenBuffers (NumVbos, &m_vbo[0]);
+	glGenBuffers(countof(m_vbo), &m_vbo[0]);
 	CHECK_GL_ERROR();
 }
 
-
+/*
+ * Destructs the VBOs when the compiler is deleted.
+ */
 GLCompiler::~GLCompiler()
 {
-	glDeleteBuffers (NumVbos, &m_vbo[0]);
+	glDeleteBuffers(countof(m_vbo), &m_vbo[0]);
 	CHECK_GL_ERROR();
 }
 
-
-QColor GLCompiler::indexColorForID (int id) const
+/*
+ * Returns an index color for the LDObject ID given. This color represents the object in the picking scene.
+ */
+QColor GLCompiler::indexColorForID (qint32 id) const
 {
 	// Calculate a color based from this index. This method caters for
 	// 16777216 objects. I don't think that will be exceeded anytime soon. :)
@@ -139,7 +148,7 @@ QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner
 		color = polygonOwner->randomColor();
 		break;
 
-	case VboSubclass::NormalColors:
+	case VboSubclass::RegularColors:
 		// For normal colors, use the polygon's color.
 		if (polygon.color == MainColor)
 		{
@@ -206,26 +215,34 @@ QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner
 	return color;
 }
 
-
+/*
+ * Tells the compiler that a merge of VBOs is required.
+ */
 void GLCompiler::needMerge()
 {
 	for (int i = 0; i < countof (m_vboChanged); ++i)
 		m_vboChanged[i] = true;
 }
 
-
-void GLCompiler::stageForCompilation (LDObject* obj)
+/*
+ * Stages the given object for compilation.
+ */
+void GLCompiler::stageForCompilation(LDObject* obj)
 {
 	m_staged << obj;
 }
 
-
-void GLCompiler::unstage (LDObject* obj)
+/*
+ * Removes an object from the set of objects to be compiled.
+ */
+void GLCompiler::unstage(LDObject* obj)
 {
 	m_staged.remove (obj);
 }
 
-
+/*
+ * Compiles all staged objects.
+ */
 void GLCompiler::compileStaged()
 {
 	for (LDObject* object : m_staged)
@@ -234,66 +251,78 @@ void GLCompiler::compileStaged()
 	m_staged.clear();
 }
 
-
-void GLCompiler::prepareVBO (int vbonum, const Model* model)
+/*
+ * Prepares a VBO for rendering. The VBO is merged if needed.
+ */
+void GLCompiler::prepareVBO (int vbonum)
 {
 	// Compile anything that still awaits it
 	compileStaged();
 
-	if (not m_vboChanged[vbonum])
-		return;
-
-	QVector<GLfloat> vbodata;
-
-	for (auto it = m_objectInfo.begin(); it != m_objectInfo.end();)
+	if (m_vboChanged[vbonum])
 	{
-		if (it.key() == nullptr)
+		// Merge the VBO into a vector of floats.
+		QVector<GLfloat> vbodata;
+
+		for (auto it = m_objectInfo.begin(); it != m_objectInfo.end();)
 		{
-			it = m_objectInfo.erase (it);
-			continue;
+			if (it.key() == nullptr)
+			{
+				it = m_objectInfo.erase(it);
+			}
+			else
+			{
+				if (not it.key()->isHidden())
+					vbodata += it->data[vbonum];
+
+				++it;
+			}
 		}
 
-		if (it.key()->model() == model and not it.key()->isHidden())
-			vbodata += it->data[vbonum];
-
-		++it;
+		// Transfer the VBO to the graphics processor.
+		glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);
+		glBufferData (GL_ARRAY_BUFFER, countof(vbodata) * sizeof(GLfloat), vbodata.constData(), GL_STATIC_DRAW);
+		glBindBuffer (GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
+		m_vboChanged[vbonum] = false;
+		m_vboSizes[vbonum] = countof(vbodata);
 	}
-
-	glBindBuffer (GL_ARRAY_BUFFER, m_vbo[vbonum]);
-	glBufferData (GL_ARRAY_BUFFER, countof(vbodata) * sizeof(GLfloat), vbodata.constData(), GL_STATIC_DRAW);
-	glBindBuffer (GL_ARRAY_BUFFER, 0);
-	CHECK_GL_ERROR();
-	m_vboChanged[vbonum] = false;
-	m_vboSizes[vbonum] = countof(vbodata);
 }
 
-
+/*
+ * Removes the data related to the given object.
+ */
 void GLCompiler::dropObjectInfo(LDObject* object)
 {
 	if (m_objectInfo.contains(object))
 	{
+		// If we have data relating to this object, remove it. The VBOs have changed now and need to be merged.
 		m_objectInfo.remove(object);
 		needMerge();
 	}
 }
 
+/*
+ * Makes the compiler forget about the given object completely.
+ */
 void GLCompiler::forgetObject(LDObject* object)
 {
 	dropObjectInfo(object);
-	m_staged.remove(object);
+	unstage(object);
 }
 
-
-void GLCompiler::compileObject (LDObject* obj)
+/*
+ * Compiles a single object.
+ */
+void GLCompiler::compileObject(LDObject* object)
 {
-	if (obj == nullptr)
+	if (object == nullptr)
 		return;
 
-	ObjectVBOInfo info;
-	info.isChanged = true;
-	dropObjectInfo (obj);
+	ObjectVboData info;
+	dropObjectInfo(object);
 
-	switch (obj->type())
+	switch (object->type())
 	{
 	// Note: We cannot split quads into triangles here, it would mess up the wireframe view.
 	// Quads must go into separate vbos.
@@ -302,33 +331,34 @@ void GLCompiler::compileObject (LDObject* obj)
 	case LDObjectType::EdgeLine:
 	case LDObjectType::ConditionalEdge:
 		{
-			LDPolygon* poly = obj->getPolygon();
-			poly->id = obj->id();
-			compilePolygon (*poly, obj, &info);
+			LDPolygon* poly = object->getPolygon();
+			poly->id = object->id();
+			compilePolygon (*poly, object, info);
 			delete poly;
 			break;
 		}
 
+	// TODO: try use interfaces to remove these special treatments?
 	case LDObjectType::SubfileReference:
 		{
-			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			auto data = ref->inlinePolygons();
+			LDSubfileReference* subfileReference = static_cast<LDSubfileReference*>(object);
+			auto data = subfileReference->inlinePolygons();
 
 			for (LDPolygon& poly : data)
 			{
-				poly.id = obj->id();
-				compilePolygon (poly, obj, &info);
+				poly.id = object->id();
+				compilePolygon (poly, object, info);
 			}
 			break;
 		}
 
 	case LDObjectType::BezierCurve:
 		{
-			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
+			LDBezierCurve* curve = static_cast<LDBezierCurve*>(object);
 			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
 			{
-				polygon.id = obj->id();
-				compilePolygon (polygon, obj, &info);
+				polygon.id = object->id();
+				compilePolygon (polygon, object, info);
 			}
 		}
 		break;
@@ -337,12 +367,14 @@ void GLCompiler::compileObject (LDObject* obj)
 		break;
 	}
 
-	m_objectInfo[obj] = info;
+	m_objectInfo[object] = info;
 	needMerge();
 }
 
-
-void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInfo* objinfo)
+/*
+ * Inserts a single polygon into VBOs.
+ */
+void GLCompiler::compilePolygon(LDPolygon& poly, LDObject* polygonOwner, ObjectVboData& objectInfo)
 {
 	VboClass surface;
 	int vertexCount;
@@ -371,8 +403,8 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	for (VboSubclass complement : iterateEnum<VboSubclass>())
 	{
 		const int vbonum = vboNumber (surface, complement);
-		QVector<GLfloat>& vbodata = objinfo->data[vbonum];
-		const QColor color = getColorForPolygon (poly, topobj, complement);
+		QVector<GLfloat>& vbodata = objectInfo.data[vbonum];
+		const QColor color = getColorForPolygon (poly, polygonOwner, complement);
 
 		for (int vert = 0; vert < vertexCount; ++vert)
 		{
@@ -400,13 +432,6 @@ void GLCompiler::compilePolygon (LDPolygon& poly, LDObject* topobj, ObjectVBOInf
 	}
 }
 
-
-void GLCompiler::setRenderer (GLRenderer* renderer)
-{
-	m_renderer = renderer;
-}
-
-
 int GLCompiler::vboNumber (VboClass surface, VboSubclass complement)
 {
 	return (static_cast<int>(surface) * EnumLimits<VboSubclass>::Count) + static_cast<int>(complement);
@@ -424,7 +449,9 @@ int GLCompiler::vboSize (int vbonum) const
 	return m_vboSizes[vbonum];
 }
 
-
+/*
+ * Recompiles the entire model.
+ */
 void GLCompiler::recompile()
 {
 	for (LDObject* object : m_renderer->model()->objects())
