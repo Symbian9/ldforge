@@ -51,7 +51,7 @@ ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
 
 		if (color.isValid())
 		{
-			QColor faceColor = {color.faceColor()};
+			QColor faceColor = color.faceColor();
 
 			if (color == MainColor)
 			{
