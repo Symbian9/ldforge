@@ -24,27 +24,6 @@
 #include "glcamera.h"
 #include "hierarchyelement.h"
 
-class GLCompiler;
-class MessageManager;
-class QDialogButtonBox;
-class QDoubleSpinBox;
-class QSpinBox;
-class QLineEdit;
-class QTimer;
-class MagicWandMode;
-
-struct CameraInfo
-{
-	CameraInfo(const CameraInfo&) = delete;
-
-	int glrotate[3];
-	Axis localX;
-	Axis localY;
-	bool negatedX;
-	bool negatedY;
-	bool negatedDepth; // is greater depth value closer to camera?
-};
-
 enum class Camera
 {
 	Top,
@@ -136,7 +115,7 @@ protected:
 
 private:
 	const Model* const m_model;
-	GLCompiler* m_compiler;
+	class GLCompiler* m_compiler;
 	LDObject* m_objectAtCursor = nullptr;
 	CameraIcon m_cameraIcons[7];
 	QTimer* m_toolTipTimer;
