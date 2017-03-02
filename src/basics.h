@@ -25,12 +25,14 @@
 #include <QVector3D>
 #include <QVector>
 #include <QFile>
+#include <QMatrix4x4>
 #include <functional>
 #include <math.h>
 #include "macros.h"
 #include "transform.h"
 
 class Matrix;
+using GLRotationMatrix = QMatrix4x4;
 
 template<typename T, typename R>
 using Pair = std::pair<T, R>;
@@ -59,6 +61,7 @@ public:
 	void	apply (ApplyConstFunction func) const;
 	QString	toString (bool mangled = false) const;
 	void	transform (const Matrix& matr, const Vertex& pos);
+	Vertex	transformed(const GLRotationMatrix& matrix) const;
 	void	setCoordinate (Axis ax, qreal value);
 
 	Vertex&	operator+= (const Vertex& other);

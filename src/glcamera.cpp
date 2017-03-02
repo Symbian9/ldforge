@@ -17,6 +17,7 @@
  */
 
 #include "glcamera.h"
+#include "glrenderer.h"
 #include "grid.h"
 #include "miscallenous.h"
 
@@ -252,4 +253,24 @@ GLRotationMatrix GLCamera::transformationMatrix(double scale) const
 		matrix(i, j) *= scale;
 
 	return matrix;
+}
+
+static const GLRotationMatrix ldrawToIdealAdapterMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+
+/*
+ * Converts from rea co-ordinates to ideal co-ordinates.
+ * In ideal co-ordinates, X and Y axes correspond to the 2D X and Y as seen in the camera, and +Z is "outwards" from the screen.
+ */
+Vertex GLCamera::idealize(const Vertex& realCoordinates) const
+{
+	return realCoordinates.transformed(m_rotationMatrix).transformed(ldrawToIdealAdapterMatrix);
+}
+
+/*
+ * Converts from ideal co-ordinates to real co-ordinates.
+ */
+Vertex GLCamera::realize(const Vertex& idealCoordinates) const
+{
+	// The adapter matrix would be inverted here, but it is its own inverse so let's not bother.
+	return idealCoordinates.transformed(ldrawToIdealAdapterMatrix).transformed(m_rotationMatrix.inverted());
 }

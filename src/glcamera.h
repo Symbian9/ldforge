@@ -50,6 +50,8 @@ public:
 	Axis axisZ() const;
 	Vertex convert2dTo3d(const QPoint& pos2d, class Grid* grid = nullptr) const;
 	QPoint convert3dTo2d(const Vertex& pos3d) const;
+	Vertex realize(const Vertex& idealCoordinates) const;
+	Vertex idealize(const Vertex& realCoordinates) const;
 	double depth() const;
 	bool isAxisNegated(Axis axis) const;
 	const QString& name() const;

@@ -39,14 +39,14 @@ const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Q
 
 // Transformation matrices for the fixed cameras.
 const GLRotationMatrix GLRenderer::topCameraMatrix = GLRotationMatrix {};
-const GLRotationMatrix GLRenderer::frontCameraMatrix = {{1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1}};
-const GLRotationMatrix GLRenderer::leftCameraMatrix = {{0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1}};
-const GLRotationMatrix GLRenderer::bottomCameraMatrix = {{1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1}};
-const GLRotationMatrix GLRenderer::backCameraMatrix = {{-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1}};
-const GLRotationMatrix GLRenderer::rightCameraMatrix = {{0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+const GLRotationMatrix GLRenderer::leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
+const GLRotationMatrix GLRenderer::bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
+const GLRotationMatrix GLRenderer::backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+const GLRotationMatrix GLRenderer::rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
 
 // Conversion matrix from LDraw to OpenGL coordinates.
-const GLRotationMatrix GLRenderer::ldrawToGLAdapterMatrix = {{1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1}};
+const GLRotationMatrix GLRenderer::ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
 
 /*
  * Constructs a GL renderer.

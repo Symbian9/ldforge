@@ -55,7 +55,9 @@ void Canvas::overpaint(QPainter& painter)
 	if (camera() != Camera::Free)
 	{
 		// Paint the coordinates onto the screen.
-		QString text = format(tr("X: %1, Y: %2, Z: %3"), m_position3D[X], m_position3D[Y], m_position3D[Z]);
+		Vertex idealized = currentCamera().idealize(m_position3D);
+		QString text = format(tr("X: %1, Y: %2, Z: %3, %4"), m_position3D[X], m_position3D[Y], m_position3D[Z],
+		                      idealized.toString(true));
 		QFontMetrics metrics {font()};
 		QRect textSize = metrics.boundingRect (0, 0, width(), height(), Qt::AlignCenter, text);
 		painter.setPen(textPen());

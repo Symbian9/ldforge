@@ -122,6 +122,18 @@ bool Vertex::operator< (const Vertex& other) const
 	return false;
 }
 
+/*
+ * Transforms this vertex with a tranformation matrix and returns the result.
+ */
+Vertex Vertex::transformed(const GLRotationMatrix& matrix) const
+{
+	return {
+		matrix(0, 0) * x() + matrix(0, 1) * y() + matrix(0, 2) * z(),
+		matrix(1, 0) * x() + matrix(1, 1) * y() + matrix(1, 2) * z(),
+		matrix(2, 0) * x() + matrix(2, 1) * y() + matrix(2, 2) * z(),
+	};
+}
+
 // =============================================================================
 //
 BoundingBox::BoundingBox()
