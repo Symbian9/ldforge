@@ -43,6 +43,7 @@ public:
 protected:
 	void contextMenuEvent(QContextMenuEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
+	void drawFixedCameraBackdrop() override;
 	void dropEvent(QDropEvent* event) override;
 	bool freeCameraAllowed() const override;
 	void keyReleaseEvent(QKeyEvent* event) override;

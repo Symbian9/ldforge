@@ -27,6 +27,11 @@ inline void glMultMatrixf(const GLRotationMatrix& matrix)
 	glMultMatrixf(matrix.constData());
 }
 
+inline void glVertex(const Vertex& vertex)
+{
+	glVertex3f(vertex.x(), vertex.y(), vertex.z());
+}
+
 class LDObject;
 
 struct LDPolygon

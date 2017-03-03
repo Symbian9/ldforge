@@ -87,6 +87,7 @@ signals:
 
 protected:
 	void initializeGL();
+	virtual void drawFixedCameraBackdrop();
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
 	void leaveEvent(QEvent* event);

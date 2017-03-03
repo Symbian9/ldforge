@@ -255,7 +255,7 @@ GLRotationMatrix GLCamera::transformationMatrix(double scale) const
 	return matrix;
 }
 
-static const GLRotationMatrix ldrawToIdealAdapterMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+static const GLRotationMatrix ldrawToIdealAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
 
 /*
  * Converts from rea co-ordinates to ideal co-ordinates.

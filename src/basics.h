@@ -315,3 +315,15 @@ int countof(const RingAdapter<T>& ring)
 {
 	return ring.size();
 }
+
+/*
+ * Extracts the sign of x.
+ */
+template<typename T>
+T sign(T x)
+{
+	if (isZero(x))
+		return {};
+	else
+		return x / qAbs(x);
+}

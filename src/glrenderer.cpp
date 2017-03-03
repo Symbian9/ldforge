@@ -381,10 +381,11 @@ void GLRenderer::drawGLScene()
 
 		glLoadIdentity();
 		const QSizeF& virtualSize = currentCamera().virtualSize();
-		glOrtho(-virtualSize.width(), virtualSize.width(), -virtualSize.height(), virtualSize.height(), -100.0f, 100.0f);
+		glOrtho(-virtualSize.width(), virtualSize.width(), -virtualSize.height(), virtualSize.height(), -1000.0f, 1000.0f);
 		glTranslatef(panning (X), panning (Y), 0.0f);
 		glMultMatrixf(currentCamera().transformationMatrix());
 		glMultMatrixf(ldrawToGLAdapterMatrix);
+		drawFixedCameraBackdrop();
 	}
 	else
 	{
@@ -1028,3 +1029,9 @@ const Model* GLRenderer::model() const
 {
 	return m_model;
 }
+
+/*
+ * This virtual function lets derivative classes render something to the fixed camera
+ * before the main brick is rendered.
+ */
+void GLRenderer::drawFixedCameraBackdrop() {}

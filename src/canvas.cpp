@@ -90,6 +90,59 @@ void Canvas::overpaint(QPainter& painter)
 	}
 }
 
+/*
+ * Assuming we're currently viewing from a fixed camera, draw a backdrop into it. Currently this means drawing the grid.
+ */
+void Canvas::drawFixedCameraBackdrop()
+{
+	// Find the top left corner of the grid
+	Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
+	Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
+	qreal gridSize = grid()->coordinateSnap();
+	qreal x0 = sign(topLeft.x()) * (fabs(topLeft.x()) - fmod(fabs(topLeft.x()), gridSize));
+	qreal y0 = sign(topLeft.y()) * (fabs(topLeft.y()) - fmod(fabs(topLeft.y()), gridSize));
+	glEnable(GL_LINE_STIPPLE);
+	glBegin(GL_LINES);
+
+	static const auto prepareGridLine = [](qreal value) -> bool
+	{
+		if (not isZero(value))
+		{
+			if (isZero(fmod(value, 10.0)))
+				glColor4f(0, 0, 0, 0.6);
+			else
+				glColor4f(0, 0, 0, 0.25);
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+	for (qreal x = x0; x < bottomRight.x(); x += gridSize)
+	{
+		if (prepareGridLine(x))
+		{
+			glVertex(currentCamera().realize({x, -10000, 999}));
+			glVertex(currentCamera().realize({x, 10000, 999}));
+		}
+	}
+
+	for (qreal y = y0; y < bottomRight.y(); y += gridSize)
+	{
+		if (prepareGridLine(y))
+		{
+			glVertex(currentCamera().realize({-10000, y, 999}));
+			glVertex(currentCamera().realize({10000, y, 999}));
+		}
+	}
+
+	glEnd();
+	glDisable(GL_LINE_STIPPLE);
+}
+
 bool Canvas::freeCameraAllowed() const
 {
 	return m_currentEditMode->allowFreeCamera();
