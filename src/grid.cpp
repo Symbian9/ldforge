@@ -65,17 +65,10 @@ int Grid::bezierCurveSegments() const
 }
 
 
-qreal Grid::snap(qreal value, const Grid::Config type) const
+qreal Grid::snap(qreal value) const
 {
-	double snapvalue = (type == Grid::Coordinate) ? coordinateSnap() : angleSnap();
-	double multiplier = floor (qAbs<double>(value / snapvalue));
-	double out = multiplier * snapvalue;
-
-	if (qAbs (value) - (multiplier * snapvalue) > snapvalue / 2)
-		out += snapvalue;
-
-	if (value < 0)
-		out = -out;
-
-	return out;
+	// First, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
+	// and multiply back by the the grid size.
+	double size = coordinateSnap();
+	return round(value / size) * size;
 }

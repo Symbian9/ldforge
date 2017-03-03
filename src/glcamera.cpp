@@ -107,8 +107,8 @@ Vertex GLCamera::convert2dTo3d(const QPoint& position2d, Grid* grid) const
 		// If a grid was passed, snap coordinates to it.
 		if (grid)
 		{
-			cx = grid->snap(cx, Grid::Coordinate);
-			cy = grid->snap(cy, Grid::Coordinate);
+			cx = grid->snap(cx);
+			cy = grid->snap(cy);
 		}
 
 		roundToDecimals(cx, 4);

@@ -311,8 +311,8 @@ Vertex AbstractDrawMode::getCursorVertex() const
 		renderer()->getRelativeAxes(relativeX, relativeY);
 		QLineF line = {vertex0[relativeX], vertex0[relativeY], vertex1[relativeX], vertex1[relativeY]};
 		line.setAngle(roundToInterval<int>(line.angle(), 45));
-		result.setCoordinate(relativeX, grid()->snap(line.x2(), Grid::Coordinate));
-		result.setCoordinate(relativeY, grid()->snap(line.y2(), Grid::Coordinate));
+		result.setCoordinate(relativeX, grid()->snap(line.x2()));
+		result.setCoordinate(relativeY, grid()->snap(line.y2()));
 	}
 
 	return result;
