@@ -67,10 +67,23 @@ int Grid::bezierCurveSegments() const
 
 QPointF Grid::snap(QPointF point) const
 {
-	// For each co-ordinate, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
-	// and multiply back by the the grid size.
-	double size = coordinateSnap();
-	return {round(point.x() / size) * size, round(point.y() / size) * size};
+	if (false)
+	{
+		// For each co-ordinate, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
+		// and multiply back by the the grid size.
+		double size = coordinateSnap();
+		return {round(point.x() / size) * size, round(point.y() / size) * size};
+	}
+	else
+	{
+		qreal radius = hypot(point.x() - pole().x(), point.y() - -pole().y());
+		qreal azimuth = atan2(point.y() - -pole().y(), point.x() - pole().x());
+		double size = coordinateSnap();
+		double angleStep = 2 * pi / polarDivisions();
+		radius = round(radius / size) * size;
+		azimuth = round(azimuth / angleStep) * angleStep;
+		return {pole().x() + cos(azimuth) * radius, -pole().y() + sin(azimuth) * radius};
+	}
 }
 
 /*

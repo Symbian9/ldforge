@@ -95,7 +95,7 @@ void Canvas::overpaint(QPainter& painter)
  */
 void Canvas::drawFixedCameraBackdrop()
 {
-	static const enum { Cartesian, Polar } gridType = Cartesian;
+	static const enum { Cartesian, Polar } gridType = Polar;
 
 	// Find the top left corner of the grid
 	Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
