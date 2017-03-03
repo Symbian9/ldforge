@@ -56,7 +56,7 @@ double CircleMode::getCircleDrawDist(int position) const
 		renderer()->getRelativeAxes(localx, localy);
 		double dx = m_drawedVerts[0][localx] - v1[localx];
 		double dy = m_drawedVerts[0][localy] - v1[localy];
-		return grid()->snap(hypot(dx, dy));
+		return grid()->snap({hypot(dx, dy), 0}).x();
 	}
 
 	return 0.0;

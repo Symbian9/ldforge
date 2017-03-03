@@ -65,10 +65,10 @@ int Grid::bezierCurveSegments() const
 }
 
 
-qreal Grid::snap(qreal value) const
+QPointF Grid::snap(QPointF point) const
 {
-	// First, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
+	// For each co-ordinate, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
 	// and multiply back by the the grid size.
 	double size = coordinateSnap();
-	return round(value / size) * size;
+	return {round(point.x() / size) * size, round(point.y() / size) * size};
 }
