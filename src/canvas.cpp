@@ -95,47 +95,113 @@ void Canvas::overpaint(QPainter& painter)
  */
 void Canvas::drawFixedCameraBackdrop()
 {
+	static const enum { Cartesian, Polar } gridType = Cartesian;
+
 	// Find the top left corner of the grid
 	Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
 	Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
 	qreal gridSize = grid()->coordinateSnap();
-	qreal x0 = sign(topLeft.x()) * (fabs(topLeft.x()) - fmod(fabs(topLeft.x()), gridSize));
-	qreal y0 = sign(topLeft.y()) * (fabs(topLeft.y()) - fmod(fabs(topLeft.y()), gridSize));
 	glEnable(GL_LINE_STIPPLE);
 	glBegin(GL_LINES);
 
-	static const auto prepareGridLine = [](qreal value) -> bool
+	if (gridType == Cartesian)
 	{
-		if (not isZero(value))
+		qreal x0 = sign(topLeft.x()) * (fabs(topLeft.x()) - fmod(fabs(topLeft.x()), gridSize));
+		qreal y0 = sign(topLeft.y()) * (fabs(topLeft.y()) - fmod(fabs(topLeft.y()), gridSize));
+
+		static const auto prepareGridLine = [](qreal value) -> bool
 		{
-			if (isZero(fmod(value, 10.0)))
-				glColor4f(0, 0, 0, 0.6);
+			if (not isZero(value))
+			{
+				if (isZero(fmod(value, 10.0)))
+					glColor4f(0, 0, 0, 0.6);
+				else
+					glColor4f(0, 0, 0, 0.25);
+
+				return true;
+			}
 			else
-				glColor4f(0, 0, 0, 0.25);
+			{
+				return false;
+			}
+		};
 
-			return true;
-		}
-		else
+		for (qreal x = x0; x < bottomRight.x(); x += gridSize)
 		{
-			return false;
+			if (prepareGridLine(x))
+			{
+				glVertex(currentCamera().realize({x, -10000, 999}));
+				glVertex(currentCamera().realize({x, 10000, 999}));
+			}
 		}
-	};
 
-	for (qreal x = x0; x < bottomRight.x(); x += gridSize)
-	{
-		if (prepareGridLine(x))
+		for (qreal y = y0; y < bottomRight.y(); y += gridSize)
 		{
-			glVertex(currentCamera().realize({x, -10000, 999}));
-			glVertex(currentCamera().realize({x, 10000, 999}));
+			if (prepareGridLine(y))
+			{
+				glVertex(currentCamera().realize({-10000, y, 999}));
+				glVertex(currentCamera().realize({10000, y, 999}));
+			}
 		}
 	}
-
-	for (qreal y = y0; y < bottomRight.y(); y += gridSize)
+	else
 	{
-		if (prepareGridLine(y))
+		const QPointF pole = grid()->pole();
+		const qreal size = grid()->coordinateSnap();
+		Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
+		Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
+		QPointF topLeft2d {topLeft.x(), topLeft.y()};
+		QPointF bottomLeft2d {topLeft.x(), bottomRight.y()};
+		QPointF bottomRight2d {bottomRight.x(), bottomRight.y()};
+		QPointF topRight2d {bottomRight.x(), topLeft.y()};
+		qreal smallestRadius = distanceFromPointToRectangle(pole, QRectF{topLeft2d, bottomRight2d});
+		qreal largestRadius = max(QLineF {topLeft2d, pole}.length(),
+		                          QLineF {bottomLeft2d, pole}.length(),
+		                          QLineF {bottomRight2d, pole}.length(),
+		                          QLineF {topRight2d, pole}.length());
+
+		// Snap the radii to the grid.
+		smallestRadius = round(smallestRadius / size) * size;
+		largestRadius = round(largestRadius / size) * size;
+
+		// Is the pole at (0, 0)? If so, then don't render the polar axes above the real ones.
+		bool poleIsOrigin = isZero(pole.x()) and isZero(pole.y());
+		glColor4f(0, 0, 0, 0.25);
+
+		// Render the axes
+		for (int i = 0; i < grid()->polarDivisions() / 2; ++i)
 		{
-			glVertex(currentCamera().realize({-10000, y, 999}));
-			glVertex(currentCamera().realize({10000, y, 999}));
+			qreal azimuth = (2.0 * pi) * i / grid()->polarDivisions();
+
+			if (not poleIsOrigin or not isZero(fmod(azimuth, pi / 4)))
+			{
+				QPointF extremum = {cos(azimuth) * 10000, sin(azimuth) * 10000};
+				QPointF A = pole + extremum;
+				QPointF B = pole - extremum;
+				glVertex(currentCamera().realize({A.x(), A.y(), 999}));
+				glVertex(currentCamera().realize({B.x(), B.y(), 999}));
+			}
+		}
+
+		for (qreal radius = smallestRadius; radius <= largestRadius; radius += size)
+		{
+			if (not isZero(radius))
+			{
+				Vertex points[48];
+
+				for (int i = 0; i < grid()->polarDivisions(); ++i)
+				{
+					qreal azimuth = (2.0 * pi) * i / grid()->polarDivisions();
+					QPointF point = pole + QPointF {radius * cos(azimuth), radius * sin(azimuth)};
+					points[i] = currentCamera().realize({point.x(), point.y(), 999});
+				}
+
+				for (int i = 0; i < grid()->polarDivisions(); ++i)
+				{
+					glVertex(points[i]);
+					glVertex(ring(points, grid()->polarDivisions())[i + 1]);
+				}
+			}
 		}
 	}
 

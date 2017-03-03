@@ -202,6 +202,7 @@ bool valueInEnum(Enum enumerator)
 
 double getRadialPoint(int segment, int divisions, double(*func)(double));
 QVector<QLineF> makeCircle(int segments, int divisions, double radius);
+qreal distanceFromPointToRectangle(const QPointF& point, const QRectF& rectangle);
 
 /*
  * Implements a ring adapter over T. This class corrects indices given to the element-operator so that they're within bounds.
@@ -326,4 +327,58 @@ T sign(T x)
 		return {};
 	else
 		return x / qAbs(x);
+}
+
+/*
+ * Returns the maximum of a single parameter (the parameter itself).
+ */
+template <typename T>
+T max(T a)
+{
+	return a;
+}
+
+/*
+ * Returns the maximum of two parameters.
+ */
+template <typename T>
+T max(T a, T b)
+{
+	return a > b ? a : b;
+}
+
+/*
+ * Returns the maximum of n parameters.
+ */
+template <typename T, typename... Rest>
+T max(T a, Rest&&... rest)
+{
+	return max(a, max(rest...));
+}
+
+/*
+ * Returns the minimum of a single parameter (the parameter itself).
+ */
+template <typename T>
+T min(T a)
+{
+	return a;
+}
+
+/*
+ * Returns the minimum of two parameters.
+ */
+template <typename T>
+T min(T a, T b)
+{
+	return a < b ? a : b;
+}
+
+/*
+ * Returns the minimum of n parameters.
+ */
+template <typename T, typename... Rest>
+T min(T a, Rest&&... rest)
+{
+	return min(a, min(rest...));
 }

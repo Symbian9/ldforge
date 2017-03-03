@@ -72,3 +72,28 @@ QPointF Grid::snap(QPointF point) const
 	double size = coordinateSnap();
 	return {round(point.x() / size) * size, round(point.y() / size) * size};
 }
+
+/*
+ * Returns the pole of the grid, in ideal X/Y co-ordinates. Z is left up for the caller to decide.
+ */
+QPointF Grid::pole() const
+{
+	return {12, -17};
+}
+
+/*
+ * Returns the amount of divisions (slices) to be used in the polar grid.
+ */
+int Grid::polarDivisions() const
+{
+	switch (m_config->grid())
+	{
+	default:
+	case Coarse:
+	case Medium:
+		return LowResolution;
+
+	case Fine:
+		return HighResolution;
+	}
+}

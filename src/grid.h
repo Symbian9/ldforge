@@ -41,6 +41,8 @@ public:
 	qreal angleAsRadians() const;
 	int bezierCurveSegments() const;
 	qreal coordinateSnap() const;
+	QPointF pole() const;
+	int polarDivisions() const;
 	QPointF snap(QPointF point) const;
 };
 
