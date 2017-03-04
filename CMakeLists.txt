@@ -101,6 +101,7 @@ set (LDFORGE_HEADERS
 	src/glcamera.h
 	src/glcompiler.h
 	src/glrenderer.h
+	src/glShared.h
 	src/grid.h
 	src/guiutilities.h
 	src/hierarchyelement.h
@@ -211,7 +212,7 @@ endif()
 
 qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})
 qt5_wrap_ui (LDFORGE_FORMS_HEADERS ${LDFORGE_FORMS})
-add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS}
+add_executable (ldforge WIN32 ${LDFORGE_SOURCES} ${LDFORGE_HEADERS} ${LDFORGE_OTHER_FILES}
 	${LDFORGE_QRC} ${LDFORGE_FORMS_HEADERS}
 	${CMAKE_BINARY_DIR}/configuration.cpp)
 
