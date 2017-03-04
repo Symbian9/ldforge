@@ -276,6 +276,7 @@ void MainWindow::updateGridToolBar()
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
+	ui.actionPolarGrid->setChecked(m_grid->type() == Grid::Polar);
 	emit gridChanged();
 }
 

@@ -24,7 +24,7 @@ class Grid : public HierarchyElement
 public:
 	Grid(QObject* parent);
 
-	enum Type
+	enum Size
 	{
 		Coarse,
 		Medium,
@@ -37,6 +37,12 @@ public:
 		Angle
 	};
 
+	enum Type
+	{
+		Cartesian,
+		Polar
+	};
+
 	qreal angleSnap() const;
 	qreal angleAsRadians() const;
 	int bezierCurveSegments() const;
@@ -44,5 +50,6 @@ public:
 	QPointF pole() const;
 	int polarDivisions() const;
 	QPointF snap(QPointF point) const;
+	Type type() const;
 };
 

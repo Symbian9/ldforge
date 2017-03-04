@@ -38,6 +38,7 @@ public:
 	Q_INVOKABLE void moveYPos();
 	Q_INVOKABLE void moveZNeg();
 	Q_INVOKABLE void moveZPos();
+	Q_INVOKABLE void polarGrid();
 	Q_INVOKABLE void rotateXNeg();
 	Q_INVOKABLE void rotateXPos();
 	Q_INVOKABLE void rotateYNeg();

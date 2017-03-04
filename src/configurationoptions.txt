@@ -18,6 +18,7 @@ option GridMediumBezierCurveSegments = 16
 option GridFineCoordinateSnap = 0.1
 option GridFineAngleSnap = 7.5
 option GridFineBezierCurveSegments = 32
+option PolarGrid = false
 option RotationPointType = 0
 option CustomRotationPoint = Vertex {}
 option ColorizeObjectsList = true

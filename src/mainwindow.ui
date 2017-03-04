@@ -47,8 +47,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>429</height>
+           <width>467</width>
+           <height>420</height>
           </rect>
          </property>
          <attribute name="label">
@@ -75,8 +75,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>429</height>
+           <width>467</width>
+           <height>420</height>
           </rect>
          </property>
          <attribute name="label">
@@ -157,8 +157,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>429</height>
+           <width>467</width>
+           <height>420</height>
           </rect>
          </property>
          <attribute name="label">
@@ -194,7 +194,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>25</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -476,6 +476,7 @@
    <addaction name="actionGridCoarse"/>
    <addaction name="actionGridMedium"/>
    <addaction name="actionGridFine"/>
+   <addaction name="actionPolarGrid"/>
   </widget>
   <widget class="QToolBar" name="toolBarDisplay">
    <property name="windowTitle">
@@ -1713,6 +1714,14 @@
    </property>
    <property name="text">
     <string>Lighting</string>
+   </property>
+  </action>
+  <action name="actionPolarGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Polar grid</string>
    </property>
   </action>
  </widget>

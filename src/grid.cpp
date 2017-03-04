@@ -67,22 +67,27 @@ int Grid::bezierCurveSegments() const
 
 QPointF Grid::snap(QPointF point) const
 {
-	if (false)
+	switch (type())
 	{
-		// For each co-ordinate, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
-		// and multiply back by the the grid size.
-		double size = coordinateSnap();
-		return {round(point.x() / size) * size, round(point.y() / size) * size};
-	}
-	else
-	{
-		qreal radius = hypot(point.x() - pole().x(), point.y() - -pole().y());
-		qreal azimuth = atan2(point.y() - -pole().y(), point.x() - pole().x());
-		double size = coordinateSnap();
-		double angleStep = 2 * pi / polarDivisions();
-		radius = round(radius / size) * size;
-		azimuth = round(azimuth / angleStep) * angleStep;
-		return {pole().x() + cos(azimuth) * radius, -pole().y() + sin(azimuth) * radius};
+	default:
+	case Cartesian:
+		{
+			// For each co-ordinate, extract the amount of grid steps the value is away from zero, round that to remove the remainder,
+			// and multiply back by the the grid size.
+			double size = coordinateSnap();
+			return {round(point.x() / size) * size, round(point.y() / size) * size};
+		}
+
+	case Polar:
+		{
+			qreal radius = hypot(point.x() - pole().x(), point.y() - -pole().y());
+			qreal azimuth = atan2(point.y() - -pole().y(), point.x() - pole().x());
+			double size = coordinateSnap();
+			double angleStep = 2 * pi / polarDivisions();
+			radius = round(radius / size) * size;
+			azimuth = round(azimuth / angleStep) * angleStep;
+			return {pole().x() + cos(azimuth) * radius, -pole().y() + sin(azimuth) * radius};
+		}
 	}
 }
 
@@ -91,7 +96,7 @@ QPointF Grid::snap(QPointF point) const
  */
 QPointF Grid::pole() const
 {
-	return {12, -17};
+	return {0, 0};
 }
 
 /*
@@ -109,4 +114,12 @@ int Grid::polarDivisions() const
 	case Fine:
 		return HighResolution;
 	}
+}
+
+/*
+ * Returns whether to use a cartesian or polar grid.
+ */
+Grid::Type Grid::type() const
+{
+	return m_config->polarGrid() ? Polar : Cartesian;
 }

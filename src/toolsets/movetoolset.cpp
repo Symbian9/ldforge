@@ -94,6 +94,12 @@ void MoveToolset::gridFine()
 	m_window->updateGridToolBar();
 }
 
+void MoveToolset::polarGrid()
+{
+	m_config->togglePolarGrid();
+	m_window->updateGridToolBar();
+}
+
 void MoveToolset::moveObjects (Vertex vect)
 {
 	// Apply the grid values
