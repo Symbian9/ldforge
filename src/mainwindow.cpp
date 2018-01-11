@@ -356,6 +356,9 @@ void MainWindow::buildObjectList()
 		QListWidgetItem* item = new QListWidgetItem {obj->objectListText()};
 		item->setIcon (getIcon (obj->typeName()));
 
+		if (obj->isInverted())
+			item->setText("↺ " + item->text());
+
 		// Use italic font if hidden
 		if (obj->isHidden())
 		{

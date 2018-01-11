@@ -78,12 +78,13 @@ public:
 	virtual int numVertices() const;
 	virtual QString objectListText() const;
 	LDObject* previous() const;
-	bool previousIsInvertnext(class LDBfc*& ptr);
 	QColor randomColor() const;
 	void setColor (LDColor color);
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
 	void swap (LDObject* other);
+	bool isInverted() const;
+	void setInverted(bool value);
 	virtual int triangleCount() const;
 	virtual LDObjectType type() const = 0;
 	virtual QString typeName() const = 0;
@@ -104,6 +105,7 @@ protected:
 	void changeProperty(T* property, const T& value);
 
 private:
+	bool m_hasInvertNext = false;
 	bool m_isHidden;
 	bool m_isSelected;
 	Model* _model;

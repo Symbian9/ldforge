@@ -302,23 +302,6 @@ LDObject* LDObject::previous() const
 
 // =============================================================================
 //
-// Is the previous object INVERTNEXT?
-//
-bool LDObject::previousIsInvertnext (LDBfc*& ptr)
-{
-	LDObject* prev = previous();
-
-	if (prev and prev->type() == LDObjectType::Bfc and static_cast<LDBfc*> (prev)->statement() == BfcStatement::InvertNext)
-	{
-		ptr = static_cast<LDBfc*> (prev);
-		return true;
-	}
-
-	return false;
-}
-
-// =============================================================================
-//
 // Moves this object using the given vertex as a movement List
 //
 void LDObject::move (Vertex vect)
@@ -428,22 +411,7 @@ void LDSubfileReference::invert()
 	}
 
 	// Subfile is not flat. Resort to invertnext.
-	int idx = lineNumber();
-
-	if (idx > 0)
-	{
-		LDBfc* bfc = dynamic_cast<LDBfc*> (previous());
-
-		if (bfc and bfc->statement() == BfcStatement::InvertNext)
-		{
-			// This is prefixed with an invertnext, thus remove it.
-			this->model()->remove(bfc);
-			return;
-		}
-	}
-
-	// Not inverted, thus prefix it with a new invertnext.
-	this->model()->emplaceAt<LDBfc>(idx, BfcStatement::InvertNext);
+	setInverted(not this->isInverted());
 }
 
 // =============================================================================
@@ -736,4 +704,14 @@ QString LDSubfileReference::objectListText() const
 QString LDBfc::objectListText() const
 {
 	return statementToString();
+}
+
+bool LDObject::isInverted() const
+{
+	return m_hasInvertNext;
+}
+
+void LDObject::setInverted(bool value)
+{
+	changeProperty(&m_hasInvertNext, value);
 }

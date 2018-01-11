@@ -229,23 +229,22 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 
 	QByteArray data;
 
-	if (sizeptr)
-		*sizeptr = 0;
-
 	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
 	for (LDObject* obj : objects())
 	{
-		QByteArray subdata ((obj->asText() + "\r\n").toUtf8());
-		data.append (subdata);
+		if (obj->isInverted())
+			data += "0 BFC INVERTNEXT\r\n";
 
-		if (sizeptr)
-			*sizeptr += countof(subdata);
+		data += (obj->asText() + "\r\n").toUtf8();
 	}
 
 	QFile f (path);
 
 	if (not f.open (QIODevice::WriteOnly))
 		return false;
+
+	if (sizeptr)
+		*sizeptr = data.size();
 
 	f.write (data);
 	f.close();
@@ -444,12 +443,6 @@ void LDDocument::addToSelection (LDObject* obj) // [protected]
 	{
 		m_selection.insert(obj);
 		emit objectModified(obj);
-
-		// If this object is inverted with INVERTNEXT, select the INVERTNEXT as well.
-		LDBfc* invertnext;
-
-		if (obj->previousIsInvertnext(invertnext))
-			addToSelection(invertnext);
 	}
 }
 
@@ -461,12 +454,6 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 	{
 		m_selection.remove(obj);
 		emit objectModified(obj);
-
-		// If this object is inverted with INVERTNEXT, deselect the INVERTNEXT as well.
-		LDBfc* invertnext;
-
-		if (obj->previousIsInvertnext(invertnext))
-			removeFromSelection(invertnext);
 	}
 }
 

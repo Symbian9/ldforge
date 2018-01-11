@@ -105,13 +105,21 @@ void DocumentLoader::work (int i)
 	// Parse up to 200 lines per iteration
 	int max = i + 200;
 
+	bool invertNext = false;
+
 	for (; i < max and i < (int) countof(m_lines); ++i)
 	{
-		QString line = m_lines[i];
+		QString line = m_lines[i].trimmed();
 
 		// Trim the trailing newline
 		while (line.endsWith ("\n") or line.endsWith ("\r"))
-			line.chop (1);
+			line.chop(1);
+
+		if (line == "0 BFC INVERTNEXT")
+		{
+			invertNext = true;
+			continue;
+		}
 
 		LDObject* obj = _model->addFromString(line);
 
@@ -121,6 +129,11 @@ void DocumentLoader::work (int i)
 			emit parseErrorMessage(format(tr("Couldn't parse line #%1: %2"), progress() + 1, static_cast<LDError*> (obj)->reason()));
 			++m_warningCount;
 		}
+
+		if (invertNext and obj->type() == LDObjectType::SubfileReference)
+			obj->setInverted(true);
+
+		invertNext = false;
 	}
 
 	m_progress = i;
