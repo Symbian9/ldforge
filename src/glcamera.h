@@ -34,10 +34,8 @@ struct FixedCameraParameters
  * Models a 2D x/y co-ordinate system that maps to a fixed camera position.
  * Owns camera orientation information and provides 2D←→3D translation.
  */
-class GLCamera : public QObject
+class GLCamera
 {
-	Q_OBJECT
-
 public:
 	// This is used to construct the free camera
 	enum { FreeCamera };
