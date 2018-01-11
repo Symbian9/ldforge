@@ -180,14 +180,11 @@ void GLRenderer::initGLData()
 	if (m_config->antiAliasedLines())
 	{
 		glEnable (GL_LINE_SMOOTH);
-		glEnable (GL_POLYGON_SMOOTH);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-		glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	}
 	else
 	{
 		glDisable (GL_LINE_SMOOTH);
-		glDisable (GL_POLYGON_SMOOTH);
 	}
 }
 
