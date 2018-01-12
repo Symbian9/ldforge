@@ -421,6 +421,12 @@ void GLCompiler::compilePolygon(LDPolygon& poly, LDObject* polygonOwner, ObjectV
 				        << -normals[vert].y()
 				        << -normals[vert].z();
 			}
+			else if (complement == VboSubclass::InvertedNormals)
+			{
+				vbodata << -normals[vert].x();
+				vbodata << +normals[vert].y();
+				vbodata << +normals[vert].z();
+			}
 			else
 			{
 				vbodata	<< ((GLfloat) color.red()) / 255.0f

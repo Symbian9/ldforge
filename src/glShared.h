@@ -67,6 +67,7 @@ enum class VboSubclass
 	BfcBackColors,
 	RandomColors,
 	Normals,
+	InvertedNormals,
 	_End
 };
 

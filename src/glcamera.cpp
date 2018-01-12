@@ -275,3 +275,25 @@ Vertex GLCamera::realize(const Vertex& idealCoordinates) const
 	// The adapter matrix would be inverted here, but it is its own inverse so let's not bother.
 	return idealCoordinates.transformed(ldrawToIdealAdapterMatrix).transformed(m_rotationMatrix.inverted());
 }
+
+GLRotationMatrix GLCamera::realMatrix() const
+{
+	/* glOrtho(-virtualSize.width(), virtualSize.width(),
+			-virtualSize.height(), virtualSize.height(),
+			-1000.0f, 1000.0f); */
+	GLRotationMatrix ortho {
+		1 / float(m_virtualSize.width()), 0, 0, 0,
+		0, 1 / float(m_virtualSize.height()), 0, 0,
+		0, 0, -0.0001, 0,
+		0, 0, 0, 1
+	};
+
+	GLRotationMatrix panningMatrix {
+		1, 0, 0, float(m_panningX),
+		0, 1, 0, float(m_panningY),
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	return ortho * panningMatrix * m_rotationMatrix;
+}

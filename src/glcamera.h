@@ -64,6 +64,7 @@ public:
 	const QSizeF& virtualSize() const;
 	double zoom() const;
 	void zoomNotch(bool inward);
+	GLRotationMatrix realMatrix() const;
 
 private:
 	QString m_name;

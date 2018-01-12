@@ -375,12 +375,8 @@ void GLRenderer::drawGLScene()
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
-
 		glLoadIdentity();
-		const QSizeF& virtualSize = currentCamera().virtualSize();
-		glOrtho(-virtualSize.width(), virtualSize.width(), -virtualSize.height(), virtualSize.height(), -1000.0f, 1000.0f);
-		glTranslatef(panning (X), panning (Y), 0.0f);
-		glMultMatrixf(currentCamera().transformationMatrix());
+		glMultMatrixf(currentCamera().realMatrix());
 		glMultMatrixf(ldrawToGLAdapterMatrix);
 		drawFixedCameraBackdrop();
 	}
@@ -496,9 +492,16 @@ void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
 		break;
 	}
 
+	VboSubclass normals;
+
+	if (colors != VboSubclass::BfcBackColors)
+		normals = VboSubclass::Normals;
+	else
+		normals = VboSubclass::InvertedNormals;
+
 	int surfaceVboNumber = m_compiler->vboNumber(surface, VboSubclass::Surfaces);
 	int colorVboNumber = m_compiler->vboNumber(surface, colors);
-	int normalVboNumber = m_compiler->vboNumber(surface, VboSubclass::Normals);
+	int normalVboNumber = m_compiler->vboNumber(surface, normals);
 	m_compiler->prepareVBO(surfaceVboNumber);
 	m_compiler->prepareVBO(colorVboNumber);
 	m_compiler->prepareVBO(normalVboNumber);
