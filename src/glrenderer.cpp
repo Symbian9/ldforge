@@ -366,7 +366,7 @@ void GLRenderer::drawGLScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	if (m_config->lighting())
+	if (m_config->lighting() and not m_isDrawingSelectionScene)
 		glEnable(GL_LIGHTING);
 	else
 		glDisable(GL_LIGHTING);
