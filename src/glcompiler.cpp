@@ -127,6 +127,7 @@ QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner
 	{
 	case VboSubclass::Surfaces:
 	case VboSubclass::Normals:
+	case VboSubclass::InvertedNormals:
 	case VboSubclass::_End:
 		// Surface and normal VBOs contain vertex data, not colors. So we can't return anything meaningful.
 		return {};
