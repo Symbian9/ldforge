@@ -277,15 +277,25 @@ void AlgorithmToolset::flip()
 
 void AlgorithmToolset::demote()
 {
-	int num = 0;
+	int count = 0;
 
-	for (LDConditionalEdge* line : filterByType<LDConditionalEdge>(selectedObjects()))
+	for (int i = 0; i < currentDocument()->size(); ++i)
 	{
-		line->becomeEdgeLine();
-		++num;
+		LDObject* object = currentDocument()->objects()[i];
+
+		if (object->type() == LDObjectType::ConditionalEdge)
+		{
+			Vertex v1 = object->vertex(0);
+			Vertex v2 = object->vertex(1);
+			LDColor color = object->color();
+			currentDocument()->removeAt(i);
+			LDEdgeLine* edge = currentDocument()->emplaceAt<LDEdgeLine>(i, v1, v2);
+			edge->setColor(color);
+			count += 1;
+		}
 	}
 
-	print (tr ("Converted %1 conditional lines"), num);
+	print (tr ("Converted %1 conditional lines"), count);
 }
 
 bool AlgorithmToolset::isColorUsed (LDColor color)

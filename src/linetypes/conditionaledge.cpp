@@ -44,19 +44,7 @@ QString LDConditionalEdge::asText() const
 
 void LDConditionalEdge::invert()
 {
-	// I don't think that a conditional line's control points need to be swapped, do they?
 	Vertex temp = vertex(0);
 	setVertex(0, vertex(1));
 	setVertex(1, temp);
-}
-
-LDEdgeLine* LDConditionalEdge::becomeEdgeLine()
-{
-	LDEdgeLine* replacement = model()->emplaceReplacement<LDEdgeLine>(this);
-
-	for (int i = 0; i < replacement->numVertices(); ++i)
-		replacement->setVertex (i, vertex (i));
-
-	replacement->setColor (color());
-	return replacement;
 }
