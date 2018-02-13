@@ -26,7 +26,6 @@
 #include <QMetaMethod>
 #include "linetypes/modelobject.h"
 #include "colors.h"
-#include "doublemap.h"
 
 class MessageManager;
 class QToolButton;
@@ -162,7 +161,6 @@ private:
 	class QSettings* m_settings;
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
-	DoubleMap<LDObject*, QListWidgetItem*> m_objectsInList;
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;
 
 private slots:

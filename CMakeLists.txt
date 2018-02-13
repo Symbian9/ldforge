@@ -95,7 +95,6 @@ set (LDFORGE_HEADERS
 	src/documentation.h
 	src/documentloader.h
 	src/documentmanager.h
-	src/doublemap.h
 	src/editHistory.h
 	src/format.h
 	src/glcamera.h
