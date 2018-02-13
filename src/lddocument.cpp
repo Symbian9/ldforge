@@ -306,6 +306,8 @@ void LDDocument::objectChanged(QString before, QString after)
 	addToHistory(new EditHistoryEntry {object->lineNumber(), before, after});
 	redoVertices();
 	emit objectModified(object);
+	int linenumber = object->lineNumber();
+	emit dataChanged(index(linenumber), index(linenumber));
 }
 
 LDObject* LDDocument::withdrawAt(int position)
