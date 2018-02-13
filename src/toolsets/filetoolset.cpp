@@ -129,7 +129,6 @@ void FileToolset::insertFrom()
 			}
 
 			m_window->refresh();
-			m_window->scrollToSelection();
 		}
 		else
 		{

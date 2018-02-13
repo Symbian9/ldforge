@@ -60,8 +60,7 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_externalPrograms (nullptr),
     m_settings (makeSettings (this)),
 	m_documents (new DocumentManager (this)),
-	m_currentDocument (nullptr),
-	m_isSelectionLocked (false)
+	m_currentDocument (nullptr)
 {
 	m_messageLog = new MessageManager {this};
 	ui.setupUi (this);
@@ -72,9 +71,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	createBlankDocument();
 	ui.rendererStack->setCurrentWidget(getRendererForDocument(m_currentDocument));
 
-	connect (ui.objectList, SIGNAL (itemSelectionChanged()), this, SLOT (selectionChanged()));
-	connect (ui.objectList, SIGNAL (itemDoubleClicked (QListWidgetItem*)), this,
-			 SLOT (objectListDoubleClicked (QListWidgetItem*)));
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
@@ -335,110 +331,6 @@ int MainWindow::deleteSelection()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::buildObjectList()
-{
-	if (not m_currentDocument)
-		return;
-
-	// Lock the selection while we do this so that refreshing the object list
-	// doesn't trigger selection updating so that the selection doesn't get lost
-	// while this is done.
-	m_isSelectionLocked = true;
-	m_objectsInList.clear();
-
-	for (int i = 0; i < ui.objectList->count(); ++i)
-		delete ui.objectList->item (i);
-
-	ui.objectList->clear();
-
-	for (LDObject* obj : m_currentDocument->objects())
-	{
-		QListWidgetItem* item = new QListWidgetItem {obj->objectListText()};
-		item->setIcon (getIcon (obj->typeName()));
-
-		if (obj->isInverted())
-			item->setText("↺ " + item->text());
-
-		// Use italic font if hidden
-		if (obj->isHidden())
-		{
-			QFont font = item->font();
-			font.setItalic (true);
-			item->setFont (font);
-		}
-
-		// Color gibberish orange on red so it stands out.
-		if (obj->type() == LDObjectType::Error)
-		{
-			item->setBackground (QColor ("#AA0000"));
-			item->setForeground (QColor ("#FFAA00"));
-		}
-		else if (m_config.colorizeObjectsList()
-			and obj->isColored()
-			and obj->color().isValid()
-			and obj->color() != MainColor
-			and obj->color() != EdgeColor)
-		{
-			// If the object isn't in the main or edge color, draw this list entry in that color.
-			item->setForeground (obj->color().faceColor());
-		}
-
-		m_objectsInList.insert (obj, item);
-		ui.objectList->insertItem (ui.objectList->count(), item);
-	}
-
-	m_isSelectionLocked = false;
-	updateSelection();
-	scrollToSelection();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// Scrolls the object list so that it points to the first selected object.
-//
-void MainWindow::scrollToSelection()
-{
-	if (selectedObjects().isEmpty())
-		return;
-
-	// TODO: Need a way to properly figure out the first selected object!
-	LDObject* obj = *selectedObjects().begin();
-	ui.objectList->scrollToItem (m_objectsInList[obj]);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::selectionChanged()
-{
-	if (m_isSelectionLocked == true or m_currentDocument == nullptr)
-		return;
-
-	QSet<LDObject*> priorSelection = selectedObjects();
-
-	// Get the objects from the object list selection
-	m_currentDocument->clearSelection();
-	const QList<QListWidgetItem*> items = ui.objectList->selectedItems();
-
-	for (LDObject* obj : m_currentDocument->objects())
-	{
-		for (QListWidgetItem* item : items)
-		{
-			if (item == m_objectsInList[obj])
-			{
-				m_currentDocument->addToSelection(obj);
-				break;
-			}
-		}
-	}
-
-	// The select() method calls may have selected additional items (i.e. invertnexts)
-	// Update it all now.
-	updateSelection();
-	renderer()->update();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
 void MainWindow::recentFileClicked()
 {
 	QAction* qAct = static_cast<QAction*> (sender());
@@ -495,7 +387,6 @@ int MainWindow::suggestInsertPoint()
 //
 void MainWindow::doFullRefresh()
 {
-	buildObjectList();
 	renderer()->update();
 }
 
@@ -505,7 +396,6 @@ void MainWindow::doFullRefresh()
 //
 void MainWindow::refresh()
 {
-	buildObjectList();
 	renderer()->update();
 }
 
@@ -513,46 +403,7 @@ void MainWindow::refresh()
 //
 void MainWindow::updateSelection()
 {
-	m_isSelectionLocked = true;
-	QItemSelection itemselect;
-	int top = -1;
-	int bottom = -1;
-
-	for (LDObject* obj : selectedObjects())
-	{
-		QListWidgetItem** itempointer = m_objectsInList.find (obj);
-
-		if (not itempointer)
-			continue;
-
-		int row = ui.objectList->row (*itempointer);
-
-		if (top == -1)
-		{
-			top = bottom = row;
-		}
-		else
-		{
-			if (row != bottom + 1)
-			{
-				itemselect.select (ui.objectList->model()->index (top, 0),
-					ui.objectList->model()->index (bottom, 0));
-				top = -1;
-			}
-
-			bottom = row;
-		}
-	}
-
-	if (top != -1)
-	{
-		itemselect.select (ui.objectList->model()->index (top, 0),
-			ui.objectList->model()->index (bottom, 0));
-	}
-
-	// Select multiple objects at once for performance reasons
-	ui.objectList->selectionModel()->select (itemselect, QItemSelectionModel::ClearAndSelect);
-	m_isSelectionLocked = false;
+#warning stub method
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -700,14 +551,6 @@ void MainWindow::updateEditModeActions()
 	ui.actionModeMagicWand->setChecked (mode == EditModeType::MagicWand);
 	ui.actionModeLinePath->setChecked (mode == EditModeType::LinePath);
 	ui.actionModeCurve->setChecked (mode == EditModeType::Curve);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::objectListDoubleClicked (QListWidgetItem* listitem)
-{
-	LDObject* object = m_objectsInList.reverseLookup(listitem);
-	// TODO: ...
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -869,15 +712,6 @@ void MainWindow::tabSelected()
 
 	if (switchee and switchee != m_currentDocument)
 		changeDocument (switchee);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// Updates the object list. Right now this just rebuilds it.
-//
-void MainWindow::refreshObjectList()
-{
-	buildObjectList();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1132,9 +966,9 @@ void MainWindow::changeDocument (LDDocument* document)
 	{
 		// A ton of stuff needs to be updated
 		updateDocumentListItem (document);
-		buildObjectList();
 		updateTitle();
 		print ("Changed document to %1", document->getDisplayName());
+		ui.objectList->setModel(document);
 	}
 }
 

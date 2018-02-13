@@ -259,7 +259,6 @@ void Canvas::dropEvent(QDropEvent* event)
 		LDSubfileReference* reference = currentDocument()->emplaceAt<LDSubfileReference>(m_window->suggestInsertPoint());
 		reference->setFileInfo (m_documents->getDocumentByName(primitiveName));
 		currentDocument()->addToSelection(reference);
-		m_window->buildObjectList();
 		update();
 		event->acceptProposedAction();
 	}

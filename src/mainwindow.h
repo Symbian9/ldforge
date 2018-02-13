@@ -67,7 +67,6 @@ public:
 
 	void addMessage (QString msg);
 	void applyToActions (std::function<void(QAction*)> function);
-	void buildObjectList();
 	void changeDocument (LDDocument* f);
 	void closeInitialDocument();
 	Configuration* config();
@@ -96,12 +95,10 @@ public:
 	PrimitiveManager* primitives();
 	Canvas* renderer();
 	void refresh();
-	void refreshObjectList();
 	bool ringToolHiRes() const;
 	int ringToolSegments() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
-	void scrollToSelection();
 	const QSet<LDObject*>& selectedObjects();
 	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
@@ -153,7 +150,6 @@ private:
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;
-	QVector<LDObject*> m_sel;
 	QVector<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;
@@ -167,13 +163,10 @@ private:
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	DoubleMap<LDObject*, QListWidgetItem*> m_objectsInList;
-	bool m_isSelectionLocked;
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;
 
 private slots:
 	void finishInitialization();
-	void selectionChanged();
 	void recentFileClicked();
 	void quickColorClicked();
-	void objectListDoubleClicked (QListWidgetItem* listitem);
 };

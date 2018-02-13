@@ -223,7 +223,6 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 		{
 			QString newname = shortenName (path);
 			nameComment->setText (format ("Name: %1", newname));
-			m_window->buildObjectList();
 		}
 	}
 
@@ -285,9 +284,6 @@ void LDDocument::reloadAllSubfiles()
 	}
 
 	m_needsRecache = true;
-
-	if (this == m_window->currentDocument())
-		m_window->buildObjectList();
 }
 
 // =============================================================================

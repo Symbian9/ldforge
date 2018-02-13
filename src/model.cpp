@@ -27,7 +27,7 @@
 #include "linetypes/triangle.h"
 
 Model::Model(DocumentManager* manager) :
-    QObject {manager},
+	QAbstractListModel {manager},
     _manager {manager} {}
 
 Model::~Model()
@@ -523,6 +523,72 @@ LDObject* Model::replaceWithFromString(LDObject* object, QString line)
 	}
 	else
 		return nullptr;
+}
+
+int Model::rowCount(const QModelIndex&) const
+{
+	return this->objects().size();
+}
+
+QVariant Model::data(const QModelIndex& index, int role) const
+{
+	LDObject* object = this->objects()[index.row()];
+
+	switch (role)
+	{
+	case Qt::DisplayRole:
+		{
+			QString result = object->objectListText();
+
+			if (object->isInverted())
+				result.prepend("↺ ");
+
+			return result;
+		}
+
+	case Qt::DecorationRole:
+		return MainWindow::getIcon(object->typeName());
+
+	case Qt::BackgroundColorRole:
+		if (object->type() == LDObjectType::Error)
+			return QColor {"#AA0000"};
+		else
+			return {};
+
+	case Qt::ForegroundRole:
+		if (object->type() == LDObjectType::Error)
+		{
+			return QColor {"#FFAA00"};
+		}
+		else if (
+			object->isColored()
+			and object->color().isValid()
+			and object->color() != MainColor
+			and object->color() != EdgeColor
+		) {
+			// If the object isn't in the main or edge color, draw this list entry in that color.
+			return object->color().faceColor();
+		}
+		else
+		{
+			return {};
+		}
+
+	case Qt::FontRole:
+		if (object->isHidden())
+		{
+			QFont font;
+			font.setItalic(true);
+			return font;
+		}
+		else
+		{
+			return {};
+		}
+
+	default:
+		return {};
+	}
 }
 
 int countof(Model& model)

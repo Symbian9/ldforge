@@ -17,13 +17,14 @@
  */
 
 #pragma once
+#include <QAbstractListModel>
 #include "main.h"
 #include "linetypes/modelobject.h"
 
 /*
  * This class represents a LDraw model, consisting of a vector of objects. It manages LDObject ownership.
  */
-class Model : public QObject
+class Model : public QAbstractListModel
 {
 	Q_OBJECT
 
@@ -57,6 +58,9 @@ public:
 	LDObject* insertFromString(int position, QString line);
 	LDObject* addFromString(QString line);
 	LDObject* replaceWithFromString(LDObject* object, QString line);
+
+	int rowCount(const QModelIndex& parent) const override;
+	QVariant data(const QModelIndex& index, int role) const override;
 
 signals:
 	void objectAdded(LDObject* object);

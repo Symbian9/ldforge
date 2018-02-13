@@ -79,10 +79,7 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 	if (obj == nullptr)
 	{
 		if (type == Set)
-		{
 			currentDocument()->clearSelection();
-			m_window->buildObjectList();
-		}
 
 		return;
 	}
@@ -194,9 +191,6 @@ void MagicWandMode::doMagic (LDObject* obj, MagicWandMode::MagicType type)
 	case InternalRecursion:
 		break;
 	}
-
-	if (type != InternalRecursion)
-		m_window->buildObjectList();
 }
 
 bool MagicWandMode::mouseReleased (MouseEventData const& data)

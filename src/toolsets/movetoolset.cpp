@@ -62,8 +62,6 @@ void MoveToolset::moveSelection (bool up)
 		objsToCompile << model->getObject(target);
 		obj->swap(model->getObject(target));
 	}
-
-	m_window->buildObjectList();
 }
 
 void MoveToolset::moveUp()

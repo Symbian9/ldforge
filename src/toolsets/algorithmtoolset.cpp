@@ -192,7 +192,6 @@ void AlgorithmToolset::roundCoordinates()
 	}
 
 	print (tr ("Rounded %1 values"), num);
-	m_window->refreshObjectList();
 }
 
 void AlgorithmToolset::replaceCoordinates()
@@ -371,8 +370,6 @@ void AlgorithmToolset::addHistoryLine()
 	// an empty line
 	if (obj and obj->next() and obj->next()->isScemantic())
 		currentDocument()->emplaceAt<LDEmpty>(idx);
-
-	m_window->buildObjectList();
 }
 
 void AlgorithmToolset::splitLines()
@@ -419,7 +416,6 @@ void AlgorithmToolset::splitLines()
 		currentDocument()->replace(obj, segments);
 	}
 
-	m_window->buildObjectList();
 	m_window->refresh();
 }
 

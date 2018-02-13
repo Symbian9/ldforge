@@ -83,7 +83,6 @@ void BasicToolset::paste()
 
 	print(tr("%1 objects pasted"), count);
 	m_window->refresh();
-	m_window->scrollToSelection();
 }
 
 void BasicToolset::remove()
@@ -190,7 +189,6 @@ void BasicToolset::insertRaw()
 	}
 
 	m_window->refresh();
-	m_window->scrollToSelection();
 }
 
 void BasicToolset::setColor()
