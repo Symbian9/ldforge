@@ -74,6 +74,10 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
+	connect(
+		ui.objectList->selectionModel(), SIGNAL(selectionChanged()),
+		this, SLOT(selectionChanged())
+	);
 
 	if (m_primitives->activeScanner())
 		connect (m_primitives->activeScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));

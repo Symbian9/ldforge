@@ -72,6 +72,7 @@ public:
 	void setBackground();
 	void setCamera(Camera cam);
 	QPen textPen() const;
+	void setSelection(const QItemSelection& selection);
 
 	static const QPen thinBorderPen;
 	static const GLRotationMatrix topCameraMatrix;
@@ -140,6 +141,7 @@ private:
 	QColor m_backgroundColor;
 	GLuint m_axesVbo;
 	GLuint m_axesColorVbo;
+	QItemSelection m_selectedItems;
 
 	void calcCameraIcons();
 	void drawGLScene();

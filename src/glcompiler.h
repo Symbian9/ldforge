@@ -49,18 +49,19 @@ private:
 
 	void compileStaged();
 	void compilePolygon (LDPolygon& poly, LDObject* polygonOwner, ObjectVboData& objectInfo);
-	Q_SLOT void compileObject (LDObject* obj);
+	Q_SLOT void compileObject (QModelIndex index);
 	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement);
 	QColor indexColorForID (qint32 id) const;
 	void needMerge();
 	Q_SLOT void recompile();
-	void dropObjectInfo (LDObject* obj);
-	Q_SLOT void forgetObject(LDObject* object);
-	void stageForCompilation (LDObject* obj);
-	void unstage (LDObject* obj);
+	void dropObjectInfo (const QModelIndex &index);
+	Q_SLOT void forgetObject(QModelIndex index);
+	void stageForCompilation(QModelIndex index);
+	void unstage (QModelIndex index);
+	LDObject* resolveObject(const QModelIndex& index);
 
-	QMap<LDObject*, ObjectVboData>	m_objectInfo;
-	QSet<LDObject*> m_staged; // Objects that need to be compiled
+	QMap<QPersistentModelIndex, ObjectVboData> m_objectInfo;
+	QSet<QPersistentModelIndex> m_staged; // Objects that need to be compiled
 	GLuint m_vbo[NumVbos];
 	bool m_vboChanged[NumVbos] = {true};
 	int m_vboSizes[NumVbos] = {0};

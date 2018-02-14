@@ -19,6 +19,7 @@
 #pragma once
 #include <QIODevice>
 #include <QGenericMatrix>
+#include <QModelIndex>
 #include "basics.h"
 #include "colors.h"
 #include "types/matrix.h"
@@ -85,6 +86,11 @@ public:
 			m_text += "}";
 		}
 		m_text += "}";
+	}
+
+	StringFormatArg(const QModelIndex& index)
+	{
+		m_text = QString("{%1, %2}").arg(index.row(), index.column());
 	}
 
 	inline QString text() const

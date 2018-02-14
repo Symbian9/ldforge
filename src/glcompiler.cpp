@@ -77,8 +77,11 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 	connect(renderer, SIGNAL(objectHighlightingChanged(LDObject*)), this, SLOT(compileObject(LDObject*)));
 	connect(m_window, SIGNAL(gridChanged()), this, SLOT(recompile()));
 
-	for (LDObject* object : renderer->model()->objects())
-		stageForCompilation(object);
+	for (QModelIndex index : renderer->model()->indices())
+	{
+		print("%1", index);
+		stageForCompilation(index);
+	}
 }
 
 /*
@@ -228,17 +231,22 @@ void GLCompiler::needMerge()
 /*
  * Stages the given object for compilation.
  */
-void GLCompiler::stageForCompilation(LDObject* obj)
+void GLCompiler::stageForCompilation(QModelIndex index)
 {
-	m_staged << obj;
+	m_staged.insert(index);
 }
 
 /*
  * Removes an object from the set of objects to be compiled.
  */
-void GLCompiler::unstage(LDObject* obj)
+void GLCompiler::unstage(QModelIndex index)
 {
-	m_staged.remove (obj);
+	m_staged.remove(index);
+}
+
+LDObject* GLCompiler::resolveObject(const QModelIndex& index)
+{
+	return m_renderer->model()->data(index, Model::ObjectRole).value<LDObject*>();
 }
 
 /*
@@ -246,8 +254,8 @@ void GLCompiler::unstage(LDObject* obj)
  */
 void GLCompiler::compileStaged()
 {
-	for (LDObject* object : m_staged)
-		compileObject(object);
+	for (const QModelIndex& index : m_staged)
+		compileObject(index);
 
 	m_staged.clear();
 }
@@ -265,18 +273,21 @@ void GLCompiler::prepareVBO (int vbonum)
 		// Merge the VBO into a vector of floats.
 		QVector<GLfloat> vbodata;
 
-		for (auto it = m_objectInfo.begin(); it != m_objectInfo.end();)
-		{
-			if (it.key() == nullptr)
+		for (
+			auto iterator = m_objectInfo.begin();
+			iterator != m_objectInfo.end();
+		) {
+			if (not iterator.key().isValid())
 			{
-				it = m_objectInfo.erase(it);
+				iterator = m_objectInfo.erase(iterator);
 			}
 			else
 			{
-				if (not it.key()->isHidden())
-					vbodata += it->data[vbonum];
+				LDObject* object = resolveObject(iterator.key());
+				if (not object->isHidden())
+					vbodata += iterator->data[vbonum];
 
-				++it;
+				++iterator;
 			}
 		}
 
@@ -293,12 +304,13 @@ void GLCompiler::prepareVBO (int vbonum)
 /*
  * Removes the data related to the given object.
  */
-void GLCompiler::dropObjectInfo(LDObject* object)
+void GLCompiler::dropObjectInfo(const QModelIndex& index)
 {
-	if (m_objectInfo.contains(object))
+	if (m_objectInfo.contains(index))
 	{
-		// If we have data relating to this object, remove it. The VBOs have changed now and need to be merged.
-		m_objectInfo.remove(object);
+		// If we have data relating to this object, remove it.
+		// The VBOs have changed now and need to be merged.
+		m_objectInfo.remove(index);
 		needMerge();
 	}
 }
@@ -306,27 +318,29 @@ void GLCompiler::dropObjectInfo(LDObject* object)
 /*
  * Makes the compiler forget about the given object completely.
  */
-void GLCompiler::forgetObject(LDObject* object)
+void GLCompiler::forgetObject(QModelIndex index)
 {
-	dropObjectInfo(object);
-	unstage(object);
+	dropObjectInfo(index);
+	unstage(index);
 }
 
 /*
  * Compiles a single object.
  */
-void GLCompiler::compileObject(LDObject* object)
+void GLCompiler::compileObject(QModelIndex index)
 {
+	LDObject* object = resolveObject(index);
+
 	if (object == nullptr)
 		return;
 
 	ObjectVboData info;
-	dropObjectInfo(object);
+	dropObjectInfo(index);
 
 	switch (object->type())
 	{
-	// Note: We cannot split quads into triangles here, it would mess up the wireframe view.
-	// Quads must go into separate vbos.
+	// Note: We cannot split quads into triangles here, it would mess up the
+	// wireframe view. Quads must go into separate vbos.
 	case LDObjectType::Triangle:
 	case LDObjectType::Quadrilateral:
 	case LDObjectType::EdgeLine:
@@ -368,7 +382,7 @@ void GLCompiler::compileObject(LDObject* object)
 		break;
 	}
 
-	m_objectInfo[object] = info;
+	m_objectInfo[index] = info;
 	needMerge();
 }
 
@@ -461,6 +475,6 @@ int GLCompiler::vboSize (int vbonum) const
  */
 void GLCompiler::recompile()
 {
-	for (LDObject* object : m_renderer->model()->objects())
-		compileObject(object);
+	for (QModelIndex index : m_renderer->model()->indices())
+		compileObject(index);
 }

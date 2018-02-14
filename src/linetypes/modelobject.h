@@ -115,6 +115,8 @@ private:
 	Vertex m_coords[4];
 };
 
+Q_DECLARE_METATYPE(LDObject*)
+
 /*
  * Base class for objects with matrices.
  */

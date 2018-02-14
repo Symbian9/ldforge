@@ -1035,3 +1035,8 @@ const Model* GLRenderer::model() const
  * before the main brick is rendered.
  */
 void GLRenderer::drawFixedCameraBackdrop() {}
+
+void GLRenderer::setSelection(const QItemSelection& selection)
+{
+	this->m_selectedItems = selection;
+}

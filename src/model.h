@@ -21,6 +21,54 @@
 #include "main.h"
 #include "linetypes/modelobject.h"
 
+class IndexGenerator
+{
+	class Iterator
+	{
+	public:
+		Iterator(const QAbstractListModel* model, int row) :
+			model {model},
+			row {row} {}
+
+		Iterator& operator++()
+		{
+			this->row += 1;
+			return *this;
+		}
+
+		QModelIndex operator*() const
+		{
+			return this->model->index(this->row);
+		}
+
+		bool operator!=(const Iterator& other)
+		{
+			return this->row != other.row or this->model != other.model;
+		}
+
+	private:
+		const QAbstractListModel* model;
+		int row;
+	};
+
+public:
+	IndexGenerator(const QAbstractListModel* model) :
+		model {model} {}
+
+	Iterator begin() const
+	{
+		return {this->model, 0};
+	}
+
+	Iterator end() const
+	{
+		return {this->model, this->model->rowCount()};
+	}
+
+private:
+	const QAbstractListModel* model;
+};
+
 /*
  * This class represents a LDraw model, consisting of a vector of objects. It manages LDObject ownership.
  */
@@ -29,6 +77,11 @@ class Model : public QAbstractListModel
 	Q_OBJECT
 
 public:
+	enum
+	{
+		ObjectRole = Qt::UserRole
+	};
+
 	Model(class DocumentManager* manager);
 	Model(const Model& other) = delete;
 	~Model();
@@ -58,9 +111,11 @@ public:
 	LDObject* insertFromString(int position, QString line);
 	LDObject* addFromString(QString line);
 	LDObject* replaceWithFromString(LDObject* object, QString line);
+	IndexGenerator indices() const;
 
 	int rowCount(const QModelIndex& parent) const override;
 	QVariant data(const QModelIndex& index, int role) const override;
+	bool removeRows(int row, int count, const QModelIndex& ) override;
 
 signals:
 	void objectAdded(LDObject* object);

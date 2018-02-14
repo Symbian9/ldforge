@@ -525,6 +525,11 @@ LDObject* Model::replaceWithFromString(LDObject* object, QString line)
 		return nullptr;
 }
 
+IndexGenerator Model::indices() const
+{
+	return {this};
+}
+
 int Model::rowCount(const QModelIndex&) const
 {
 	return this->objects().size();
@@ -532,6 +537,9 @@ int Model::rowCount(const QModelIndex&) const
 
 QVariant Model::data(const QModelIndex& index, int role) const
 {
+	if (index.row() < 0 or index.row() >= size())
+		return {};
+
 	LDObject* object = this->objects()[index.row()];
 
 	switch (role)
@@ -566,7 +574,8 @@ QVariant Model::data(const QModelIndex& index, int role) const
 			and object->color() != MainColor
 			and object->color() != EdgeColor
 		) {
-			// If the object isn't in the main or edge color, draw this list entry in that color.
+			// If the object isn't in the main or edge color, draw this list
+			// entry in that color.
 			return object->color().faceColor();
 		}
 		else
@@ -586,8 +595,29 @@ QVariant Model::data(const QModelIndex& index, int role) const
 			return {};
 		}
 
+	case ObjectRole:
+		return {qMetaTypeId<LDObject*>(), object};
+
 	default:
 		return {};
+	}
+}
+
+bool Model::removeRows(int row, int count, const QModelIndex& parent)
+{
+	if (row >= 0 and row < size() and count <= size() - row)
+	{
+		beginRemoveRows(parent, row, row + count - 1);
+
+		for (signed int i = row + count - 1; i >= row; i -= 1)
+			this->removeAt(i);
+
+		endRemoveRows();
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
