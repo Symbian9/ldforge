@@ -259,10 +259,11 @@ void GLRenderer::initializeLighting()
 {
 	GLfloat materialShininess[] = {5.0};
 	GLfloat lightPosition[] = {1.0, 1.0, 1.0, 0.0};
-	GLfloat ambientLightingLevel[] = {0.8, 0.8, 0.8, 1.0};
+	GLfloat ambientLightingLevel[] = {0.5, 0.5, 0.5, 1.0};
 	glShadeModel(GL_SMOOTH);
 	glMaterialfv(GL_FRONT, GL_SHININESS, materialShininess);
-	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientLightingLevel);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLightingLevel);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, ambientLightingLevel);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
