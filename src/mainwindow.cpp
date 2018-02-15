@@ -74,10 +74,6 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
-	connect(
-		ui.objectList->selectionModel(), SIGNAL(selectionChanged()),
-		this, SLOT(selectionChanged())
-	);
 
 	if (m_primitives->activeScanner())
 		connect (m_primitives->activeScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
@@ -973,6 +969,17 @@ void MainWindow::changeDocument (LDDocument* document)
 		updateTitle();
 		print ("Changed document to %1", document->getDisplayName());
 		ui.objectList->setModel(document);
+		QItemSelectionModel* selection = m_selections.value(document);
+
+		if (selection == nullptr)
+		{
+			m_selections[document] = ui.objectList->selectionModel();
+			renderer->setSelectionModel(m_selections[document]);
+		}
+		else
+		{
+			ui.objectList->setSelectionModel(selection);
+		}
 	}
 }
 
@@ -985,9 +992,7 @@ Canvas* MainWindow::getRendererForDocument(LDDocument *document)
 
 	if (not renderer)
 	{
-		print("MainWindow: Couldn't find a renderer for %1, creating one now", document->getDisplayName());
 		renderer = new Canvas {document, this};
-		print("Created renderer: %1", renderer);
 		m_renderers[document] = renderer;
 		ui.rendererStack->addWidget(renderer);
 		connect(m_messageLog, SIGNAL(changed()), renderer, SLOT(update()));

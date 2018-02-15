@@ -146,6 +146,7 @@ private:
 	class GuiUtilities* m_guiUtilities;
 	MessageManager* m_messageLog = nullptr;
 	QMap<LDDocument*, Canvas*> m_renderers;
+	QMap<LDDocument*, QItemSelectionModel*> m_selections;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	MathFunctions* m_mathFunctions;

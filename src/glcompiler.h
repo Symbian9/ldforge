@@ -38,8 +38,12 @@ public:
 	void prepareVBO (int vbonum);
 	GLuint vbo (int vbonum) const;
 	int vboSize (int vbonum) const;
+	void setSelectionModel(QItemSelectionModel* selectionModel);
 
 	static int vboNumber (VboClass surface, VboSubclass complement);
+
+public slots:
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 private:
 	struct ObjectVboData
@@ -48,9 +52,17 @@ private:
 	};
 
 	void compileStaged();
-	void compilePolygon (LDPolygon& poly, LDObject* polygonOwner, ObjectVboData& objectInfo);
-	Q_SLOT void compileObject (QModelIndex index);
-	QColor getColorForPolygon (LDPolygon& poly, LDObject* topobj, VboSubclass complement);
+	void compilePolygon(
+		LDPolygon& poly,
+		const QModelIndex& polygonOwnerIndex,
+		ObjectVboData& objectInfo
+	);
+	Q_SLOT void compileObject (const QModelIndex &index);
+	QColor getColorForPolygon(
+		LDPolygon& poly,
+		const QModelIndex& polygonOwnerIndex,
+		VboSubclass complement
+	);
 	QColor indexColorForID (qint32 id) const;
 	void needMerge();
 	Q_SLOT void recompile();
@@ -65,11 +77,13 @@ private:
 	bool m_vboChanged[NumVbos] = {true};
 	int m_vboSizes[NumVbos] = {0};
 	GLRenderer* m_renderer;
+	QItemSelectionModel* selectionModel = nullptr;
 
 private slots:
 	void handleRowInsertion(const QModelIndex&, int first, int last);
 	void handleRowRemoval(const QModelIndex&, int first, int last);
 	void handleDataChange(const QModelIndex& topLeft, const QModelIndex &bottomRight);
+	void clearSelectionModel();
 };
 
 #define CHECK_GL_ERROR() { checkGLError(this, __FILE__, __LINE__); }

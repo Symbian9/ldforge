@@ -137,9 +137,13 @@ QColor GLCompiler::indexColorForID (qint32 id) const
  * - polygonOwner is the LDObject from which the polygon originated.
  * - subclass provides context for the polygon.
  */
-QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner, VboSubclass subclass)
-{
+QColor GLCompiler::getColorForPolygon(
+	LDPolygon& polygon,
+	const QModelIndex& polygonOwnerIndex,
+	VboSubclass subclass
+) {
 	QColor color;
+	LDObject* polygonOwner = m_renderer->model()->lookup(polygonOwnerIndex);
 
 	switch (subclass)
 	{
@@ -200,7 +204,7 @@ QColor GLCompiler::getColorForPolygon(LDPolygon& polygon, LDObject* polygonOwner
 		// We may wish to apply blending on the color to indicate selection or highlight.
 		double blendAlpha = 0.0;
 
-		if (polygonOwner->isSelected())
+		if (this->selectionModel and this->selectionModel->isSelected(polygonOwnerIndex))
 			blendAlpha = 1.0;
 		else if (polygonOwner == m_renderer->objectAtCursor())
 			blendAlpha = 0.5;
@@ -337,7 +341,7 @@ void GLCompiler::forgetObject(QModelIndex index)
 /*
  * Compiles a single object.
  */
-void GLCompiler::compileObject(QModelIndex index)
+void GLCompiler::compileObject(const QModelIndex& index)
 {
 	LDObject* object = m_renderer->model()->lookup(index);
 
@@ -358,7 +362,7 @@ void GLCompiler::compileObject(QModelIndex index)
 		{
 			LDPolygon* poly = object->getPolygon();
 			poly->id = object->id();
-			compilePolygon (*poly, object, info);
+			compilePolygon (*poly, index, info);
 			delete poly;
 			break;
 		}
@@ -372,7 +376,7 @@ void GLCompiler::compileObject(QModelIndex index)
 			for (LDPolygon& poly : data)
 			{
 				poly.id = object->id();
-				compilePolygon (poly, object, info);
+				compilePolygon (poly, index, info);
 			}
 			break;
 		}
@@ -383,7 +387,7 @@ void GLCompiler::compileObject(QModelIndex index)
 			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
 			{
 				polygon.id = object->id();
-				compilePolygon (polygon, object, info);
+				compilePolygon (polygon, index, info);
 			}
 		}
 		break;
@@ -399,8 +403,11 @@ void GLCompiler::compileObject(QModelIndex index)
 /*
  * Inserts a single polygon into VBOs.
  */
-void GLCompiler::compilePolygon(LDPolygon& poly, LDObject* polygonOwner, ObjectVboData& objectInfo)
-{
+void GLCompiler::compilePolygon(
+	LDPolygon& poly,
+	const QModelIndex& polygonOwnerIndex,
+	ObjectVboData& objectInfo
+) {
 	VboClass surface;
 	int vertexCount;
 
@@ -429,7 +436,7 @@ void GLCompiler::compilePolygon(LDPolygon& poly, LDObject* polygonOwner, ObjectV
 	{
 		const int vbonum = vboNumber (surface, complement);
 		QVector<GLfloat>& vbodata = objectInfo.data[vbonum];
-		const QColor color = getColorForPolygon (poly, polygonOwner, complement);
+		const QColor color = getColorForPolygon (poly, polygonOwnerIndex, complement);
 
 		for (int vert = 0; vert < vertexCount; ++vert)
 		{
@@ -505,4 +512,44 @@ void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex&
 {
 	for (int row = topLeft.row(); row <= bottomRight.row(); row += 1)
 		compileObject(m_renderer->model()->index(row));
+}
+
+void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+	for (const QModelIndex& index : selected.indexes())
+		m_staged.insert(index);
+
+	for (const QModelIndex& index : deselected.indexes())
+		m_staged.insert(index);
+
+	m_renderer->update();
+}
+
+void GLCompiler::setSelectionModel(QItemSelectionModel* selectionModel)
+{
+	if (this->selectionModel)
+		disconnect(this->selectionModel, 0, 0, 0);
+
+	this->selectionModel = selectionModel;
+
+	if (this->selectionModel)
+	{
+		connect(
+			this->selectionModel,
+			SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+			this,
+			SLOT(selectionChanged(const QItemSelection&, const QItemSelection&))
+		);
+		connect(
+			this->selectionModel,
+			SIGNAL(destroyed(QObject*)),
+			this,
+			SLOT(clearSelectionModel())
+		);
+	}
+}
+
+void GLCompiler::clearSelectionModel()
+{
+	this->setSelectionModel(nullptr);
 }

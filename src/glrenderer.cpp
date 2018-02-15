@@ -1036,7 +1036,7 @@ const Model* GLRenderer::model() const
  */
 void GLRenderer::drawFixedCameraBackdrop() {}
 
-void GLRenderer::setSelection(const QItemSelection& selection)
+void GLRenderer::setSelectionModel(QItemSelectionModel* selectionModel)
 {
-	this->m_selectedItems = selection;
+	this->m_compiler->setSelectionModel(selectionModel);
 }
