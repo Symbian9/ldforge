@@ -83,6 +83,7 @@ private slots:
 	void handleRowInsertion(const QModelIndex&, int first, int last);
 	void handleRowRemoval(const QModelIndex&, int first, int last);
 	void handleDataChange(const QModelIndex& topLeft, const QModelIndex &bottomRight);
+	void handleObjectHighlightingChanged(const QModelIndex& oldIndex, const QModelIndex& newIndex);
 	void clearSelectionModel();
 };
 

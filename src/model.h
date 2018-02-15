@@ -113,6 +113,7 @@ public:
 	LDObject* replaceWithFromString(LDObject* object, QString line);
 	IndexGenerator indices() const;
 	LDObject* lookup(const QModelIndex& index) const;
+	QModelIndex indexFromId(qint32 id) const;
 
 	int rowCount(const QModelIndex& parent) const override;
 	QVariant data(const QModelIndex& index, int role) const override;

@@ -62,7 +62,7 @@ public:
 	void inlineContents(Model& model, bool deep, bool renderinline);
 	QList<LDPolygon> inlinePolygons();
 	const QSet<Vertex>& inlineVertices();
-	void insertObject (int pos, LDObject* obj) __attribute__((deprecated));
+	void insertObject (int pos, LDObject* obj);
 	bool isFrozen() const;
 	bool isSafeToClose();
 	QString name() const;

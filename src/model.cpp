@@ -638,6 +638,17 @@ LDObject* Model::lookup(const QModelIndex &index) const
 		return nullptr;
 }
 
+QModelIndex Model::indexFromId(qint32 id) const
+{
+	for (int row = 0; row < this->size(); ++row)
+	{
+		if (this->objects()[row]->id() == id)
+			return index(row);
+	}
+
+	return {};
+}
+
 int countof(Model& model)
 {
 	return model.size();

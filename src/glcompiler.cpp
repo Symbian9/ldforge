@@ -89,7 +89,12 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 		this,
 		SLOT(handleDataChange(QModelIndex, QModelIndex))
 	);
-	// connect(renderer, SIGNAL(objectHighlightingChanged(LDObject*)), this, SLOT(compileObject(LDObject*)));
+	connect(
+		renderer,
+		SIGNAL(objectHighlightingChanged(QModelIndex, QModelIndex)),
+		this,
+		SLOT(handleObjectHighlightingChanged(QModelIndex, QModelIndex))
+	);
 	connect(m_window, SIGNAL(gridChanged()), this, SLOT(recompile()));
 
 	for (QModelIndex index : renderer->model()->indices())
@@ -206,7 +211,7 @@ QColor GLCompiler::getColorForPolygon(
 
 		if (this->selectionModel and this->selectionModel->isSelected(polygonOwnerIndex))
 			blendAlpha = 1.0;
-		else if (polygonOwner == m_renderer->objectAtCursor())
+		else if (polygonOwnerIndex == m_renderer->objectAtCursor())
 			blendAlpha = 0.5;
 
 		if (blendAlpha != 0.0)
@@ -499,7 +504,7 @@ void GLCompiler::recompile()
 void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
 {
 	for (int row = first; row <= last; row += 1)
-		compileObject(m_renderer->model()->index(row));
+		m_staged.insert(m_renderer->model()->index(row));
 }
 
 void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
@@ -511,7 +516,15 @@ void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
 void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
 	for (int row = topLeft.row(); row <= bottomRight.row(); row += 1)
-		compileObject(m_renderer->model()->index(row));
+		m_staged.insert(m_renderer->model()->index(row));
+}
+
+void GLCompiler::handleObjectHighlightingChanged(
+	const QModelIndex& oldIndex,
+	const QModelIndex& newIndex
+) {
+	m_staged.insert(oldIndex);
+	m_staged.insert(newIndex);
 }
 
 void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)

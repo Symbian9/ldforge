@@ -63,7 +63,7 @@ public:
 	const Model* model() const;
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;
-	LDObject* objectAtCursor() const;
+	QPersistentModelIndex objectAtCursor() const;
 	QSet<LDObject*> pick(const QRect& range);
 	LDObject* pick(int mouseX, int mouseY);
 	void resetAllAngles();
@@ -84,7 +84,7 @@ public:
 	static const GLRotationMatrix ldrawToGLAdapterMatrix;
 
 signals:
-	void objectHighlightingChanged(LDObject* object);
+	void objectHighlightingChanged(const QModelIndex& oldIndex, const QModelIndex& newIndex);
 
 protected:
 	void initializeGL();
@@ -118,7 +118,7 @@ protected:
 private:
 	const Model* const m_model;
 	class GLCompiler* m_compiler;
-	LDObject* m_objectAtCursor = nullptr;
+	QPersistentModelIndex m_objectAtCursor;
 	CameraIcon m_cameraIcons[7];
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
@@ -151,7 +151,6 @@ private:
 	void initializeLighting();
 	void initGLData();
 	void needZoomToFit();
-	Q_SLOT void removeObject(LDObject* object);
 	void setPicking(bool picking);
 	Q_SLOT void showCameraIconTooltip();
 	void zoomToFit();

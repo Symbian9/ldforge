@@ -71,7 +71,6 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 	m_toolTipTimer->setSingleShot (true);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (showCameraIconTooltip()));
-	connect(model, SIGNAL(aboutToRemoveObject(LDObject*)), this, SLOT(removeObject(LDObject*)));
 	resetAllAngles();
 	m_needZoomToFit = true;
 
@@ -191,7 +190,7 @@ void GLRenderer::initGLData()
 /*
  * Returns the object currently highlighted by the cursor.
  */
-LDObject* GLRenderer::objectAtCursor() const
+QPersistentModelIndex GLRenderer::objectAtCursor() const
 {
 	return m_objectAtCursor;
 }
@@ -798,14 +797,6 @@ void GLRenderer::setPicking(bool picking)
 	}
 }
 
-// =============================================================================
-//
-void GLRenderer::removeObject(LDObject* object)
-{
-	if (m_objectAtCursor == object)
-		m_objectAtCursor = nullptr;
-}
-
 /*
  * Returns an image containing the current render of the scene.
  */
@@ -936,18 +927,13 @@ void GLRenderer::zoomAllToFit()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not m_config->highlightObjectBelowCursor() and objectAtCursor() == nullptr)
+	if (not m_config->highlightObjectBelowCursor() and not objectAtCursor().isValid())
 		return;
 
-	LDObject* newObject = nullptr;
-	LDObject* oldObject = objectAtCursor();
-	qint32 newIndex;
+	QModelIndex newIndex;
+	QModelIndex oldIndex = m_objectAtCursor;
 
-	if (m_isCameraMoving or not m_config->highlightObjectBelowCursor())
-	{
-		newIndex = 0;
-	}
-	else
+	if (not m_isCameraMoving and m_config->highlightObjectBelowCursor())
 	{
 		setPicking (true);
 		drawGLScene();
@@ -955,21 +941,16 @@ void GLRenderer::highlightCursorObject()
 
 		unsigned char pixel[4];
 		glReadPixels (m_mousePosition.x(), height() - m_mousePosition.y(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel[0]);
-		newIndex = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
+		qint32 id = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
+
+		if (id != 0)
+			newIndex = model()->indexFromId(id);
 	}
 
-	if (newIndex != (oldObject ? oldObject->id() : 0))
+	if (newIndex != oldIndex)
 	{
-		if (newIndex != 0)
-			newObject = LDObject::fromID (newIndex);
-
-		m_objectAtCursor = newObject;
-
-		if (oldObject)
-			emit objectHighlightingChanged(oldObject);
-
-		if (newObject)
-			emit objectHighlightingChanged(newObject);
+		m_objectAtCursor = newIndex;
+		emit objectHighlightingChanged(oldIndex, newIndex);
 	}
 
 	update();
