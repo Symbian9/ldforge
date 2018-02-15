@@ -98,7 +98,8 @@ public:
 	int ringToolSegments() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
-	const QSet<LDObject*>& selectedObjects();
+	QModelIndexList selectedIndexes() const;
+	QSet<LDObject*> selectedObjects() const;
 	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();

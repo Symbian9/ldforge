@@ -1041,11 +1041,21 @@ void MainWindow::closeInitialDocument()
 */
 }
 
+QModelIndexList MainWindow::selectedIndexes() const
+{
+	return this->ui.objectList->selectionModel()->selectedIndexes();
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
-const QSet<LDObject*>& MainWindow::selectedObjects()
+QSet<LDObject*> MainWindow::selectedObjects() const
 {
-	return m_currentDocument->getSelection();
+	QSet<LDObject*> result;
+
+	for (const QModelIndex& index : this->selectedIndexes())
+		result.insert(m_currentDocument->lookup(index));
+
+	return result;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
