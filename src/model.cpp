@@ -69,10 +69,12 @@ void Model::insertObject(int position, LDObject* object)
 		object->model()->withdraw(object);
 
 	// TODO: check that the object isn't in the vector once there's a cheap way to do so!
+	beginInsertRows({}, position, position);
 	_objects.insert(position, object);
 	_needsTriangleRecount = true;
 	object->setDocument(this);
 	emit objectAdded(object);
+	endInsertRows();
 }
 
 /*
@@ -255,10 +257,12 @@ void Model::withdraw(LDObject* object)
  */
 LDObject* Model::withdrawAt(int position)
 {
+	beginRemoveRows({}, position, position);
 	LDObject* object = _objects[position];
 	emit aboutToRemoveObject(object);
 	_objects.removeAt(position);
 	_needsTriangleRecount = true;
+	endRemoveRows();
 	return object;
 }
 
@@ -595,14 +599,15 @@ QVariant Model::data(const QModelIndex& index, int role) const
 			return {};
 		}
 
-	case ObjectRole:
-		return {qMetaTypeId<LDObject*>(), object};
+	case ObjectIdRole:
+		return object->id();
 
 	default:
 		return {};
 	}
 }
 
+/*
 bool Model::removeRows(int row, int count, const QModelIndex& parent)
 {
 	if (row >= 0 and row < size() and count <= size() - row)
@@ -619,6 +624,18 @@ bool Model::removeRows(int row, int count, const QModelIndex& parent)
 	{
 		return false;
 	}
+}
+*/
+
+/*
+ * Looks up an object by the given index.
+ */
+LDObject* Model::lookup(const QModelIndex &index) const
+{
+	if (index.row() >= 0 and index.row() < size())
+		return this->objects()[index.row()];
+	else
+		return nullptr;
 }
 
 int countof(Model& model)

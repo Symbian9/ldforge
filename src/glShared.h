@@ -47,6 +47,8 @@ struct LDPolygon
 	}
 };
 
+Q_DECLARE_METATYPE(LDPolygon)
+
 enum class VboClass
 {
 	Lines,

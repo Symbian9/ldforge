@@ -79,7 +79,7 @@ class Model : public QAbstractListModel
 public:
 	enum
 	{
-		ObjectRole = Qt::UserRole
+		ObjectIdRole = Qt::UserRole,
 	};
 
 	Model(class DocumentManager* manager);
@@ -112,10 +112,11 @@ public:
 	LDObject* addFromString(QString line);
 	LDObject* replaceWithFromString(LDObject* object, QString line);
 	IndexGenerator indices() const;
+	LDObject* lookup(const QModelIndex& index) const;
 
 	int rowCount(const QModelIndex& parent) const override;
 	QVariant data(const QModelIndex& index, int role) const override;
-	bool removeRows(int row, int count, const QModelIndex& ) override;
+	// bool removeRows(int row, int count, const QModelIndex& ) override;
 
 signals:
 	void objectAdded(LDObject* object);

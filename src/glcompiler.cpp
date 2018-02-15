@@ -71,10 +71,25 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 	HierarchyElement (renderer),
 	m_renderer (renderer)
 {
-	connect(renderer->model(), SIGNAL(objectAdded(LDObject*)), this, SLOT(compileObject(LDObject*)));
-	connect(renderer->model(), SIGNAL(objectModified(LDObject*)), this, SLOT(compileObject(LDObject*)));
-	connect(renderer->model(), SIGNAL(aboutToRemoveObject(LDObject*)), this, SLOT(forgetObject(LDObject*)), Qt::DirectConnection);
-	connect(renderer, SIGNAL(objectHighlightingChanged(LDObject*)), this, SLOT(compileObject(LDObject*)));
+	connect(
+		renderer->model(),
+		SIGNAL(rowsInserted(QModelIndex, int, int)),
+		this,
+		SLOT(handleRowInsertion(QModelIndex, int, int))
+	);
+	connect(
+		renderer->model(),
+		SIGNAL(rowsRemoved(QModelIndex, int, int)),
+		this,
+		SLOT(handleRowRemoval(QModelIndex, int, int))
+	);
+	connect(
+		renderer->model(),
+		SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+		this,
+		SLOT(handleDataChange(QModelIndex, QModelIndex))
+	);
+	// connect(renderer, SIGNAL(objectHighlightingChanged(LDObject*)), this, SLOT(compileObject(LDObject*)));
 	connect(m_window, SIGNAL(gridChanged()), this, SLOT(recompile()));
 
 	for (QModelIndex index : renderer->model()->indices())
@@ -231,7 +246,7 @@ void GLCompiler::needMerge()
 /*
  * Stages the given object for compilation.
  */
-void GLCompiler::stageForCompilation(QModelIndex index)
+void GLCompiler::stageForCompilation(const QModelIndex& index)
 {
 	m_staged.insert(index);
 }
@@ -239,14 +254,9 @@ void GLCompiler::stageForCompilation(QModelIndex index)
 /*
  * Removes an object from the set of objects to be compiled.
  */
-void GLCompiler::unstage(QModelIndex index)
+void GLCompiler::unstage(const QModelIndex& index)
 {
 	m_staged.remove(index);
-}
-
-LDObject* GLCompiler::resolveObject(const QModelIndex& index)
-{
-	return m_renderer->model()->data(index, Model::ObjectRole).value<LDObject*>();
 }
 
 /*
@@ -283,7 +293,7 @@ void GLCompiler::prepareVBO (int vbonum)
 			}
 			else
 			{
-				LDObject* object = resolveObject(iterator.key());
+				LDObject* object = m_renderer->model()->lookup(iterator.key());
 				if (not object->isHidden())
 					vbodata += iterator->data[vbonum];
 
@@ -329,7 +339,7 @@ void GLCompiler::forgetObject(QModelIndex index)
  */
 void GLCompiler::compileObject(QModelIndex index)
 {
-	LDObject* object = resolveObject(index);
+	LDObject* object = m_renderer->model()->lookup(index);
 
 	if (object == nullptr)
 		return;
@@ -477,4 +487,22 @@ void GLCompiler::recompile()
 {
 	for (QModelIndex index : m_renderer->model()->indices())
 		compileObject(index);
+}
+
+void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
+{
+	for (int row = first; row <= last; row += 1)
+		compileObject(m_renderer->model()->index(row));
+}
+
+void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
+{
+	for (int row = first; row <= last; row += 1)
+		forgetObject(m_renderer->model()->index(row));
+}
+
+void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	for (int row = topLeft.row(); row <= bottomRight.row(); row += 1)
+		compileObject(m_renderer->model()->index(row));
 }

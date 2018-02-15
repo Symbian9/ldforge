@@ -56,9 +56,8 @@ private:
 	Q_SLOT void recompile();
 	void dropObjectInfo (const QModelIndex &index);
 	Q_SLOT void forgetObject(QModelIndex index);
-	void stageForCompilation(QModelIndex index);
-	void unstage (QModelIndex index);
-	LDObject* resolveObject(const QModelIndex& index);
+	void stageForCompilation(const QModelIndex &index);
+	void unstage (const QModelIndex &index);
 
 	QMap<QPersistentModelIndex, ObjectVboData> m_objectInfo;
 	QSet<QPersistentModelIndex> m_staged; // Objects that need to be compiled
@@ -66,6 +65,11 @@ private:
 	bool m_vboChanged[NumVbos] = {true};
 	int m_vboSizes[NumVbos] = {0};
 	GLRenderer* m_renderer;
+
+private slots:
+	void handleRowInsertion(const QModelIndex&, int first, int last);
+	void handleRowRemoval(const QModelIndex&, int first, int last);
+	void handleDataChange(const QModelIndex& topLeft, const QModelIndex &bottomRight);
 };
 
 #define CHECK_GL_ERROR() { checkGLError(this, __FILE__, __LINE__); }
