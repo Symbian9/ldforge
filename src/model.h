@@ -95,6 +95,7 @@ public:
 	template<typename T, typename... Args> T* emplaceReplacement(LDObject* object, Args&& ...args);
 	template<typename T, typename... Args> T* emplaceReplacementAt(int position, Args&& ...args);
 	void removeAt(int position);
+	void removeAt(const QModelIndex& index);
 	void remove(LDObject* object);
 	void replace(LDObject *object, Model& model);
 	void clear();

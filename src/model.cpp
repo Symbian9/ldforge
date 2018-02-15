@@ -144,6 +144,11 @@ void Model::removeAt(int position)
 	delete object;
 }
 
+void Model::removeAt(const QModelIndex& index)
+{
+	removeAt(index.row());
+}
+
 /*
  * Replaces the given object with the contents of a model.
  */

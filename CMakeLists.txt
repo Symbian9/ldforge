@@ -135,6 +135,7 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/generics/reverse.h
 	src/linetypes/comment.h
 	src/linetypes/conditionaledge.h
 	src/linetypes/edgeline.h

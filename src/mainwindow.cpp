@@ -22,6 +22,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QSettings>
+#include "generics/reverse.h"
 #include "main.h"
 #include "canvas.h"
 #include "mainwindow.h"
@@ -316,17 +317,19 @@ void MainWindow::updateTitle()
 //
 int MainWindow::deleteSelection()
 {
-	if (selectedObjects().isEmpty())
-		return 0;
+	int count = 0;
+	QModelIndexList thingsToRemove = ui.objectList->selectionModel()->selectedIndexes();
 
-	QSet<LDObject*> selectionCopy = selectedObjects();
+	for (QModelIndex index : reverse(thingsToRemove))
+	{
+		if (m_currentDocument->hasIndex(index.row(), index.column()))
+		{
+			m_currentDocument->removeAt(index);
+			count += 1;
+		}
+	}
 
-	// Delete the objects that were being selected
-	for (LDObject* object : selectionCopy)
-		m_currentDocument->remove(object);
-
-	refresh();
-	return countof(selectionCopy);
+	return count;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
