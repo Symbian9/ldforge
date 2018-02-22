@@ -94,25 +94,15 @@ bool SelectMode::mouseReleased (MouseEventData const& data)
 
 void SelectMode::doSelection(const QRect& area)
 {
-	QSet<LDObject*> priorSelection = selectedObjects();
-	QSet<LDObject*> newSelection = renderer()->pick(area);
+	QItemSelectionModel* model = renderer()->selectionModel();
+	QItemSelectionModel::SelectionFlags mode;
 
-	// If we're doing an additive pick, use a symmetric difference to keep the existing ones, and filter out objects that were selected
-	// once over again.
 	if (m_addpick)
-		newSelection = (newSelection - priorSelection) | (priorSelection - newSelection);
+		mode = QItemSelectionModel::Toggle;
+	else
+		mode = QItemSelectionModel::ClearAndSelect;
 
-	newSelection.unite(renderer()->pick(area));
-
-	// Select all objects that we now have selected that were not selected before.
-	for (LDObject* object : newSelection - priorSelection)
-		currentDocument()->addToSelection(object);
-
-	// Likewise, deselect whatever was selected that isn't anymore.
-	for (LDObject* object : priorSelection - newSelection)
-		currentDocument()->removeFromSelection(object);
-
-	m_window->updateSelection();
+	model->select(renderer()->pick(area), mode);
 }
 
 bool SelectMode::mousePressed (QMouseEvent* ev)
@@ -140,9 +130,9 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 	if (ev->buttons() & Qt::LeftButton)
 	{
 		currentDocument()->clearSelection();
-		LDObject* obj = renderer()->pick (ev->x(), ev->y());
+		QModelIndex index = renderer()->pick(ev->x(), ev->y());
 
-		if (obj)
+		if (index.isValid())
 		{
 			// TODO:
 			m_window->endAction();

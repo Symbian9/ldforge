@@ -111,7 +111,6 @@ public:
 	void updateEditModeActions();
 	void updateGridToolBar();
 	void updateRecentFilesMenu();
-	void updateSelection();
 	void updateTitle();
 
 	static QPixmap getIcon(QString iconName);

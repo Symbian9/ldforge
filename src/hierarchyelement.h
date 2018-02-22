@@ -40,8 +40,8 @@ class HierarchyElement
 public:
 	HierarchyElement (QObject* parent);
 
-	const QSet<LDObject*>& selectedObjects();
-	LDDocument* currentDocument();
+	QSet<LDObject *> selectedObjects();
+	LDDocument* currentDocument() const;
 	GuiUtilities* guiUtilities() const;
 	PrimitiveManager* primitives();
 	Grid* grid() const;

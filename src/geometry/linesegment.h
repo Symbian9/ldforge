@@ -17,30 +17,20 @@
  */
 
 #pragma once
-#include "edgeline.h"
+#include "../basics.h"
 
 /*
- * Represents a single code-5 conditional line.
+ * Models a 3D line segment.
  */
-class LDConditionalEdge : public LDEdgeLine
+struct LineSegment
 {
-public:
-	static constexpr LDObjectType SubclassType = LDObjectType::ConditionalEdge;
+	Vertex v_1;
+	Vertex v_2;
 
-	virtual LDObjectType type() const override
-	{
-		return SubclassType;
-	}
-
-	virtual QString asText() const override;
-	virtual void invert() override;
-	int numVertices() const override { return 4; }
-	int numPolygonVertices() const override { return 2; }
-	LDColor defaultColor() const override { return EdgeColor; }
-	QString typeName() const override { return "condline"; }
-
-protected:
-	friend class Model;
-	LDConditionalEdge (Model* model);
-	LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
+	QPair<Vertex, Vertex> toPair() const;
 };
+
+LineSegment normalized(const LineSegment& segment);
+unsigned int qHash(const LineSegment& segment);
+bool operator==(const LineSegment& one, const LineSegment& other);
+bool operator<(const LineSegment& one, const LineSegment& other);

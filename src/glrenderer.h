@@ -64,14 +64,15 @@ public:
 	QPoint const& mousePosition() const;
 	QPointF const& mousePositionF() const;
 	QPersistentModelIndex objectAtCursor() const;
-	QSet<LDObject*> pick(const QRect& range);
-	LDObject* pick(int mouseX, int mouseY);
+	QItemSelection pick(const QRect& range);
+	QModelIndex pick(int mouseX, int mouseY);
 	void resetAllAngles();
 	void resetAngles();
 	QImage screenCapture();
 	void setBackground();
 	void setCamera(Camera cam);
 	QPen textPen() const;
+	QItemSelectionModel* selectionModel() const;
 	void setSelectionModel(QItemSelectionModel* selectionModel);
 
 	static const QPen thinBorderPen;

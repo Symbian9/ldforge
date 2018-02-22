@@ -76,8 +76,7 @@ AbstractDrawMode::AbstractDrawMode(Canvas* canvas) :
 {
 	canvas->setContextMenuPolicy(Qt::NoContextMenu); // We need the right mouse button for removing vertices
 	canvas->setCursor(Qt::CrossCursor);
-	m_window->currentDocument()->clearSelection();
-	m_window->updateSelection();
+	canvas->selectionModel()->clear();
 	m_drawedVerts.clear();
 }
 

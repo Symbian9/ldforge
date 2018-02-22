@@ -76,6 +76,7 @@ public:
 	void move (Vertex vect);
 	LDObject* next() const;
 	virtual int numVertices() const;
+	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;
 	LDObject* previous() const;
 	QColor randomColor() const;

@@ -135,6 +135,11 @@ int LDObject::numVertices() const
 	return 0;
 }
 
+int LDObject::numPolygonVertices() const
+{
+	return this->numVertices();
+}
+
 // =============================================================================
 //
 LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :

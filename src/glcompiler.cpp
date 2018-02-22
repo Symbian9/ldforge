@@ -209,7 +209,7 @@ QColor GLCompiler::getColorForPolygon(
 		// We may wish to apply blending on the color to indicate selection or highlight.
 		double blendAlpha = 0.0;
 
-		if (this->selectionModel and this->selectionModel->isSelected(polygonOwnerIndex))
+		if (this->_selectionModel and this->_selectionModel->isSelected(polygonOwnerIndex))
 			blendAlpha = 1.0;
 		else if (polygonOwnerIndex == m_renderer->objectAtCursor())
 			blendAlpha = 0.5;
@@ -538,23 +538,28 @@ void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSel
 	m_renderer->update();
 }
 
+QItemSelectionModel* GLCompiler::selectionModel() const
+{
+	return _selectionModel;
+}
+
 void GLCompiler::setSelectionModel(QItemSelectionModel* selectionModel)
 {
-	if (this->selectionModel)
-		disconnect(this->selectionModel, 0, 0, 0);
+	if (this->_selectionModel)
+		disconnect(this->_selectionModel, 0, 0, 0);
 
-	this->selectionModel = selectionModel;
+	this->_selectionModel = selectionModel;
 
-	if (this->selectionModel)
+	if (this->_selectionModel)
 	{
 		connect(
-			this->selectionModel,
+			this->_selectionModel,
 			SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
 			this,
 			SLOT(selectionChanged(const QItemSelection&, const QItemSelection&))
 		);
 		connect(
-			this->selectionModel,
+			this->_selectionModel,
 			SIGNAL(destroyed(QObject*)),
 			this,
 			SLOT(clearSelectionModel())

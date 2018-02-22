@@ -52,13 +52,13 @@ GuiUtilities* HierarchyElement::guiUtilities() const
 }
 
 
-LDDocument* HierarchyElement::currentDocument()
+LDDocument* HierarchyElement::currentDocument() const
 {
 	return m_window->currentDocument();
 }
 
 
-const QSet<LDObject*>& HierarchyElement::selectedObjects()
+QSet<LDObject*> HierarchyElement::selectedObjects()
 {
 	return m_window->selectedObjects();
 }

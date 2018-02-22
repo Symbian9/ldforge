@@ -19,31 +19,32 @@
 #pragma once
 #include "abstractEditMode.h"
 #include "../basics.h"
+#include "../geometry/linesegment.h"
 #include <QMap>
 #include <QVector>
 
 class MagicWandMode : public AbstractSelectMode
 {
-	QMap<Vertex, QSet<LDObject*>> m_vertices;
-	QVector<LDObject*> m_selection;
+	QMap<Vertex, QSet<QPersistentModelIndex>> m_vertices;
+	QMap<LineSegment, QSet<QPersistentModelIndex>> segments;
+	QItemSelection m_selection;
 
 	DEFINE_CLASS (MagicWandMode, AbstractSelectMode)
 
 public:
-	using BoundaryType = std::tuple<Vertex, Vertex>;
-	enum MagicType
-	{
-		Set,
-		Additive,
-		Subtractive,
-		InternalRecursion
-	};
+	MagicWandMode(Canvas* canvas);
 
-	MagicWandMode (Canvas* canvas);
-	void doMagic (LDObject* obj, MagicType type);
+	QItemSelection doMagic(const QModelIndex& index) const;
 	virtual EditModeType type() const override;
-	virtual bool mouseReleased (MouseEventData const& data) override;
+	virtual bool mouseReleased(MouseEventData const& data) override;
 
 private:
-	void fillBoundaries (LDObject* obj, QVector<BoundaryType>& boundaries, QSet<LDObject *> &candidates);
+	void edgeFill(
+		QModelIndex index,
+		QItemSelection& selection,
+		QSet<QModelIndex>& processed) const;
+	void surfaceFill(
+		QModelIndex index,
+		QItemSelection& selection,
+		QSet<QModelIndex>& processed) const;
 };

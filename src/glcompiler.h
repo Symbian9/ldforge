@@ -38,7 +38,8 @@ public:
 	void prepareVBO (int vbonum);
 	GLuint vbo (int vbonum) const;
 	int vboSize (int vbonum) const;
-	void setSelectionModel(QItemSelectionModel* selectionModel);
+	QItemSelectionModel* selectionModel() const;
+	void setSelectionModel(QItemSelectionModel* _selectionModel);
 
 	static int vboNumber (VboClass surface, VboSubclass complement);
 
@@ -77,7 +78,7 @@ private:
 	bool m_vboChanged[NumVbos] = {true};
 	int m_vboSizes[NumVbos] = {0};
 	GLRenderer* m_renderer;
-	QItemSelectionModel* selectionModel = nullptr;
+	QItemSelectionModel* _selectionModel = nullptr;
 
 private slots:
 	void handleRowInsertion(const QModelIndex&, int first, int last);

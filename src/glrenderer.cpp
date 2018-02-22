@@ -703,10 +703,10 @@ void GLRenderer::setCamera(Camera camera)
 /*
  * Returns the set of objects found in the specified pixel area.
  */
-QSet<LDObject*> GLRenderer::pick(const QRect& range)
+QItemSelection GLRenderer::pick(const QRect& range)
 {
 	makeCurrent();
-	QSet<LDObject*> newSelection;
+	QItemSelection result;
 
 	// Paint the picking scene
 	setPicking(true);
@@ -733,46 +733,46 @@ QSet<LDObject*> GLRenderer::pick(const QRect& range)
 	// Read pixels from the color buffer.
 	glReadPixels(x0, height() - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
-	QSet<qint32> indices;
+	QSet<qint32> ids;
 
 	// Go through each pixel read and add them to the selection.
 	// Each pixel maps to an LDObject index injectively.
 	// Note: black is background, those indices are skipped.
 	for (unsigned char *pixelCursor = pixelData.begin(); pixelCursor < pixelData.end(); pixelCursor += 4)
 	{
-		qint32 index = pixelCursor[0] * 0x10000 + pixelCursor[1] * 0x100 + pixelCursor[2] * 0x1;
-		if (index != 0)
-			indices.insert(index);
+		qint32 id = pixelCursor[0] * 0x10000 + pixelCursor[1] * 0x100 + pixelCursor[2] * 0x1;
+		if (id != 0)
+			ids.insert(id);
 	}
 
 	// For each index read, resolve the LDObject behind it and add it to the selection.
-	for (qint32 index : indices)
+	for (qint32 id : ids)
 	{
-		LDObject* object = LDObject::fromID(index);
+		QModelIndex index = m_model->indexFromId(id);
 
-		if (object != nullptr)
-			newSelection.insert(object);
+		if (index.isValid())
+			result.select(index, index);
 	}
 
 	setPicking(false);
 	repaint();
-	return newSelection;
+	return result;
 }
 
 /*
  * Simpler version of GLRenderer::pick which simply picks whatever object on the cursor
  */
-LDObject* GLRenderer::pick(int mouseX, int mouseY)
+QModelIndex GLRenderer::pick(int mouseX, int mouseY)
 {
-	unsigned char pixel[4];
 	makeCurrent();
 	setPicking(true);
 	drawGLScene();
+	unsigned char pixel[4];
 	glReadPixels(mouseX, height() - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-	LDObject* object = LDObject::fromID(pixel[0] * 0x10000 + pixel[1] * 0x100 + pixel[2]);
+	QModelIndex result = m_model->indexFromId(pixel[0] * 0x10000 + pixel[1] * 0x100 + pixel[2]);
 	setPicking(false);
 	repaint();
-	return object;
+	return result;
 }
 
 // =============================================================================
@@ -1017,6 +1017,11 @@ const Model* GLRenderer::model() const
  * before the main brick is rendered.
  */
 void GLRenderer::drawFixedCameraBackdrop() {}
+
+QItemSelectionModel* GLRenderer::selectionModel() const
+{
+	return m_compiler->selectionModel();
+}
 
 void GLRenderer::setSelectionModel(QItemSelectionModel* selectionModel)
 {

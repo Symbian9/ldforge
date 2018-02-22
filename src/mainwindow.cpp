@@ -404,13 +404,6 @@ void MainWindow::refresh()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::updateSelection()
-{
-#warning stub method
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
 // Returns the uniform selected color (i.e. 4 if everything selected is red), -1 if there is no such consensus.
 //
 LDColor MainWindow::getUniformSelectedColor()

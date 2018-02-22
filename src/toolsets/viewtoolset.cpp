@@ -247,7 +247,6 @@ void ViewToolset::jumpTo()
 		{
 			currentDocument()->clearSelection();
 			currentDocument()->addToSelection(object);
-			m_window->updateSelection();
 		}
 	}
 }
