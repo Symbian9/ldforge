@@ -61,8 +61,11 @@ ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
 
 			QString edgeColor = luma(faceColor) < 80 ? "white" : "black";
 			button->setAutoFillBackground(true);
-			button->setStyleSheet(format("background-color: rgba(%1, %2, %3, %4); color: %5",
-			                             faceColor.red(), faceColor.green(), faceColor.blue(), faceColor.alpha(), edgeColor));
+			button->setStyleSheet(format(
+				"background-color: #%1; color: %2;",
+				faceColor.name(QColor::HexArgb),
+				edgeColor
+			));
 			button->setCheckable(true);
 			button->setText(QString::number(color.index()));
 			button->setToolTip(format("%1: %2", color.index(), color.name()));
@@ -181,7 +184,7 @@ void ColorSelector::setSelectedColor(LDColor newColor)
 		ui.colorLabel->setText(format("%1 - %2",
 		                              newColor.indexString(),
 		                              newColor.isDirect() ? newColor.faceColor().name() : newColor.name()));
-		ui.iconLabel->setPixmap(guiUtilities()->makeColorIcon(newColor, 16).pixmap(16, 16));
+		ui.iconLabel->setPixmap(makeColorIcon(newColor, 16).pixmap(16, 16));
 		ui.transparentDirectColor->setEnabled(newColor.isDirect());
 		ui.transparentDirectColor->setChecked(newColor.isDirect() and newColor.faceColor().alphaF() < 1.0);
 	}

@@ -32,30 +32,36 @@ GuiUtilities::GuiUtilities (QObject* parent) :
  *
  * Creates an icon to represent an LDraw color.
  */
-QIcon GuiUtilities::makeColorIcon (LDColor ldColor, int size)
+QIcon makeColorIcon(LDColor color, int size)
 {
 	QImage image {size, size, QImage::Format_ARGB32};
 	QPainter painter {&image};
-	QColor color;
+	QColor truecolor;
 
-	if (ldColor == MainColor)
+	if (color == MainColor)
 	{
 		// Use the user preferences for the main color.
-		color = m_config->mainColor();
-		color.setAlphaF(m_config->mainColorAlpha());
+		truecolor = config->mainColor();
+		truecolor.setAlphaF(config->mainColorAlpha());
 	}
 	else
-		color = ldColor.faceColor();
+	{
+		truecolor = color.faceColor();
+	}
 
 	// Paint the icon border
-	painter.fillRect(QRect {0, 0, size, size}, ldColor.edgeColor());
+	painter.fillRect(QRect {0, 0, size, size}, color.edgeColor());
 
 	// Paint the checkerboard background, visible with translucent icons
-	painter.drawPixmap(QRect {1, 1, size - 2, size - 2}, MainWindow::getIcon("checkerboard"), QRect {0, 0, 8, 8});
+	painter.drawPixmap(
+		QRect {1, 1, size - 2, size - 2},
+		MainWindow::getIcon("checkerboard"),
+		QRect {0, 0, 8, 8}
+	);
 
 	// Paint the color above the checkerboard
-	painter.fillRect (QRect {1, 1, size - 2, size - 2}, color);
-	return QIcon {QPixmap::fromImage(image)};
+	painter.fillRect(QRect {1, 1, size - 2, size - 2}, truecolor);
+	return {QPixmap::fromImage(image)};
 }
 
 /*

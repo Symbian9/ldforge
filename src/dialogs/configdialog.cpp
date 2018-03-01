@@ -354,7 +354,7 @@ void ConfigDialog::updateQuickColorList (ColorToolbarItem* sel)
 			if (color.isValid())
 			{
 				item->setText (color.name());
-				item->setIcon (guiUtilities()->makeColorIcon (color, 16));
+				item->setIcon (makeColorIcon (color, 16));
 			}
 			else
 			{

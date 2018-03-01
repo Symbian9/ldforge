@@ -23,6 +23,8 @@
 #include "mainwindow.h"
 #include "generics/reverse.h"
 
+Configuration* config = nullptr;
+
 int main (int argc, char* argv[])
 {
 	QApplication app (argc, argv);
@@ -30,6 +32,7 @@ int main (int argc, char* argv[])
 	app.setApplicationName (APPNAME);
 
 	static Configuration configObject;
+	config = &configObject;
 	LDPaths* paths = new LDPaths(&configObject);
 	paths->checkPaths();
 	paths->deleteLater();

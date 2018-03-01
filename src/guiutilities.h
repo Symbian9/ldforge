@@ -32,8 +32,9 @@ class GuiUtilities : public QObject, public HierarchyElement
 public:
 	explicit GuiUtilities (QObject* parent);
 
-	QIcon makeColorIcon (LDColor ldcolor, int size);
 	void fillUsedColorsToComboBox (class QComboBox* box);
 	QColor mainColorRepresentation();
 	QVector<ColorToolbarItem> loadQuickColorList();
 };
+
+QIcon makeColorIcon(LDColor color, int size);

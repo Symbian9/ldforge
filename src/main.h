@@ -32,3 +32,5 @@
 #include "version.h"
 #include "format.h"
 #include "configuration.h"
+
+extern Configuration* config;

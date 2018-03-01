@@ -249,7 +249,7 @@ void MainWindow::updateColorToolbar()
 		else
 		{
 			QToolButton* colorButton = new QToolButton;
-			colorButton->setIcon (m_guiUtilities->makeColorIcon (entry.color(), 16));
+			colorButton->setIcon (makeColorIcon (entry.color(), 16));
 			colorButton->setIconSize (QSize (16, 16));
 			colorButton->setToolTip (entry.color().name());
 
