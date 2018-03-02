@@ -457,21 +457,6 @@ void LDDocument::removeFromSelection (LDObject* obj) // [protected]
 
 // =============================================================================
 //
-void LDDocument::clearSelection()
-{
-	for (LDObject* object : m_selection.toList())
-		removeFromSelection(object);
-}
-
-// =============================================================================
-//
-const QSet<LDObject*>& LDDocument::getSelection() const
-{
-	return m_selection;
-}
-
-// =============================================================================
-//
 bool LDDocument::swapObjects (LDObject* one, LDObject* other)
 {
 	if (Model::swapObjects(one, other))

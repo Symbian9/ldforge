@@ -129,7 +129,6 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 
 	if (ev->buttons() & Qt::LeftButton)
 	{
-		currentDocument()->clearSelection();
 		QModelIndex index = renderer()->pick(ev->x(), ev->y());
 
 		if (index.isValid())

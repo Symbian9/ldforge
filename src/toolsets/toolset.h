@@ -30,4 +30,7 @@ public:
 	Toolset (MainWindow* parent);
 
 	static QVector<Toolset*> createToolsets (MainWindow* parent);
+
+protected:
+	MainWindow* mainWindow() const;
 };

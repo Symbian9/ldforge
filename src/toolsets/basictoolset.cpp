@@ -71,7 +71,7 @@ void BasicToolset::paste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
 	int idx = m_window->suggestInsertPoint();
-	currentDocument()->clearSelection();
+	mainWindow()->clearSelection();
 	int count = 0;
 
 	for (QString line : clipboardText.split("\n"))
@@ -179,7 +179,7 @@ void BasicToolset::insertRaw()
 	if (dlg->exec() == QDialog::Rejected)
 		return;
 
-	currentDocument()->clearSelection();
+	mainWindow()->clearSelection();
 
 	for (QString line : QString (inputbox->toPlainText()).split ("\n"))
 	{

@@ -322,7 +322,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 		m_window->deleteByColor (color);
 
 	// Insert the new objects
-	currentDocument()->clearSelection();
+	mainWindow()->clearSelection();
 
 	for (LDObject* object : model.objects())
 	{

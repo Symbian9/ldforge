@@ -51,7 +51,7 @@ void ViewToolset::selectByColor()
 			colors << obj->color();
 	}
 
-	currentDocument()->clearSelection();
+	mainWindow()->clearSelection();
 
 	for (LDObject* obj : currentDocument()->objects())
 	{
@@ -76,7 +76,7 @@ void ViewToolset::selectByType()
 			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
 	}
 
-	currentDocument()->clearSelection();
+	mainWindow()->clearSelection();
 
 	for (LDObject* obj : currentDocument()->objects())
 	{
@@ -236,17 +236,30 @@ void ViewToolset::bfcView()
 void ViewToolset::jumpTo()
 {
 	bool ok;
-	int defaultValue = (countof(selectedObjects()) == 1) ? (*selectedObjects().begin())->lineNumber() : 0;
-	int index = QInputDialog::getInt (nullptr, "Go to line", "Go to line:", defaultValue, 1, currentDocument()->size(), 1, &ok);
+	int defaultValue = 0;
+
+	if (countof(selectedObjects()) == 1)
+		defaultValue = (*selectedObjects().begin())->lineNumber();
+
+	int row = QInputDialog::getInt(
+		nullptr, /* parent */
+		tr("Go to line"), /* title */
+		tr("Go to line:"), /* caption */
+		defaultValue, /* default value */
+		1, /* minimum value */
+		currentDocument()->size(), /* maximum value */
+		1, /* step value */
+		&ok /* success pointer */
+	);
 
 	if (ok)
 	{
-		LDObject *object = currentDocument()->getObject(index - 1);
+		QModelIndex object = currentDocument()->index(row - 1);
 
-		if (object)
+		if (object.isValid() and object.row() < currentDocument()->size())
 		{
-			currentDocument()->clearSelection();
-			currentDocument()->addToSelection(object);
+			mainWindow()->clearSelection();
+			currentDocument()->addToSelection(currentDocument()->lookup(object));
 		}
 	}
 }

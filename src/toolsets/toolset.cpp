@@ -40,3 +40,8 @@ QVector<Toolset*> Toolset::createToolsets (MainWindow* parent)
 	tools << new ViewToolset (parent);
 	return tools;
 }
+
+MainWindow* Toolset::mainWindow() const
+{
+	return qobject_cast<MainWindow*>(this->parent());
+}

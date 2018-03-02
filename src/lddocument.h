@@ -50,12 +50,10 @@ public:
 	void addToHistory (AbstractHistoryEntry* entry);
 	void addToSelection (LDObject* obj);
 	void clearHistory();
-	void clearSelection();
 	void close();
 	QString defaultName() const;
 	QString fullPath();
 	QString getDisplayName();
-	const QSet<LDObject*>& getSelection() const;
 	bool hasUnsavedChanges() const;
 	EditHistory* history() const;
 	void initializeCachedData();

@@ -119,7 +119,7 @@ void FileToolset::insertFrom()
 			Model model {m_documents};
 			m_documents->loadFileContents(&file, model, nullptr, nullptr);
 
-			currentDocument()->clearSelection();
+			mainWindow()->clearSelection();
 
 			for (LDObject* object : model.objects())
 			{

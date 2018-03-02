@@ -1099,6 +1099,11 @@ MathFunctions* MainWindow::mathFunctions() const
 	return m_mathFunctions;
 }
 
+void MainWindow::clearSelection()
+{
+	m_selections[m_currentDocument]->clear();
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 ColorToolbarItem::ColorToolbarItem (LDColor color, QToolButton* toolButton) :
