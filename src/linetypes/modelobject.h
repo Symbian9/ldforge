@@ -237,7 +237,7 @@ public:
 	virtual QString asText() const override;
 	LDDocument* fileInfo() const;
 	virtual void getVertices (QSet<Vertex>& verts) const override;
-	void inlineContents(Model& model, bool deep, bool render);
+	void inlineContents(class DocumentManager* context, Model& model, bool deep, bool render);
 	QList<LDPolygon> inlinePolygons();
 	QString objectListText() const override;
 	void setFileInfo (LDDocument* fileInfo);

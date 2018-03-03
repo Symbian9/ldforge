@@ -426,7 +426,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 		// Got another sub-file reference, inline it if we're deep-inlining. If not,
 		// just add it into the objects normally. Yay, recursion!
 		if (deep and object->type() == LDObjectType::SubfileReference)
-			static_cast<LDSubfileReference*>(object)->inlineContents(model, deep, renderinline);
+			static_cast<LDSubfileReference*>(object)->inlineContents(documentManager(), model, deep, renderinline);
 		else
 			model.addFromString(object->asText());
 	}

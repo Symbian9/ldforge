@@ -104,7 +104,7 @@ void BasicToolset::doInline (bool deep)
 		if (referenceIndex.isValid())
 		{
 			Model inlined {m_documents};
-			reference->inlineContents(inlined, deep, false);
+			reference->inlineContents(m_documents, inlined, deep, false);
 
 			// Merge in the inlined objects
 			for (LDObject* inlinedObject : inlined.objects())

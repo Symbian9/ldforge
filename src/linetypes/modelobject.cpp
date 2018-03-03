@@ -187,9 +187,9 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 
 // =============================================================================
 // -----------------------------------------------------------------------------
-void LDSubfileReference::inlineContents(Model& model, bool deep, bool render)
+void LDSubfileReference::inlineContents(DocumentManager* context, Model& model, bool deep, bool render)
 {
-	Model inlined {this->model()->documentManager()};
+	Model inlined {context};
 	fileInfo()->inlineContents(inlined, deep, render);
 
 	// Transform the objects
