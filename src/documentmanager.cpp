@@ -132,10 +132,14 @@ void DocumentManager::openMainModel (QString path)
 
 	for (LDObject* obj : file->objects())
 	{
-		if (obj->type() != LDObjectType::Error or static_cast<LDError*> (obj)->fileReferenced().isEmpty())
-			continue;
+		if (obj->type() == LDObjectType::SubfileReference)
+		{
+			LDSubfileReference* reference = static_cast<LDSubfileReference*>(obj);
+			LDDocument* document = reference->fileInfo(this);
 
-		unknowns << static_cast<LDError*> (obj)->fileReferenced();
+			if (document == nullptr)
+				unknowns << reference->referenceName();
+		}
 	}
 
 	if (m_config->tryDownloadMissingFiles() and not unknowns.isEmpty())
