@@ -179,15 +179,18 @@ T* Model::emplaceAt(int position, Args&& ...args)
 template<typename T, typename... Args>
 T* Model::emplaceReplacement(LDObject* object, Args&& ...args)
 {
-	if (object->model() == this)
+	QModelIndex position = this->indexOf(object);
+
+	if (position.isValid())
 	{
-		QModelIndex position = indexOf(object);
 		T* replacement = constructObject<T>(args...);
 		setObjectAt(position.row(), replacement);
 		return replacement;
 	}
 	else
+	{
 		return nullptr;
+	}
 }
 
 /*
