@@ -406,16 +406,6 @@ QString LDError::contents() const
 	return m_contents;
 }
 
-QString LDError::fileReferenced() const
-{
-	return m_fileReferenced;
-}
-
-void LDError::setFileReferenced (QString value)
-{
-	m_fileReferenced = value;
-}
-
 LDBfc::LDBfc (const BfcStatement type, Model* model) :
     LDObject {model},
     m_statement {type} {}

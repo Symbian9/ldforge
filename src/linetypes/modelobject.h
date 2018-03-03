@@ -152,8 +152,6 @@ public:
 	virtual QString asText() const override;
 	QString reason() const;
 	QString contents() const;
-	QString fileReferenced() const;
-	void setFileReferenced (QString value);
 	QString objectListText() const override;
 	bool isColored() const override { return false; }
 	QString typeName() const override { return "error"; }
@@ -164,7 +162,6 @@ protected:
 	LDError (QString contents, QString reason, Model* model = nullptr);
 
 private:
-	QString m_fileReferenced; // If this error was caused by inability to open a file, what file was that?
 	QString m_contents; // The LDraw code that was being parsed
 	QString m_reason;
 };
