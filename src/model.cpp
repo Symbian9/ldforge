@@ -130,7 +130,8 @@ LDObject* Model::getObject(int position) const
  */
 void Model::remove(LDObject* object)
 {
-	int position = object->lineNumber();
+	int position = indexOf(object).row();
+
 	if (_objects[position] == object)
 		removeAt(position);
 }
@@ -152,16 +153,16 @@ void Model::removeAt(const QModelIndex& index)
 /*
  * Replaces the given object with the contents of a model.
  */
-void Model::replace(LDObject *object, Model &model)
+void Model::replace(LDObject* object, Model& model)
 {
-	if (object->model() == this)
+	QModelIndex index = this->indexOf(object);
+
+	if (index.isValid())
 	{
-		int position = object->lineNumber();
-
 		for (int i = countof(model.objects()) - 1; i >= 1; i -= 1)
-			insertObject(position + i, model.objects()[i]);
+			insertObject(index.row() + i, model.objects()[i]);
 
-		setObjectAt(position, model.objects()[0]);
+		setObjectAt(index.row(), model.objects()[0]);
 	}
 }
 
@@ -248,13 +249,10 @@ void Model::clear()
  */
 void Model::withdraw(LDObject* object)
 {
-	if (object->model() == this)
-	{
-		int position = object->lineNumber();
+	QModelIndex index = this->indexOf(object);
 
-		if (_objects[position] == object)
-			withdrawAt(position);
-	}
+	if (index.isValid())
+		withdrawAt(index.row());
 }
 
 /*
@@ -277,6 +275,20 @@ LDObject* Model::withdrawAt(int position)
 bool Model::isEmpty() const
 {
 	return _objects.isEmpty();
+}
+
+/*
+ * Returns an index that corresponds to the given object
+ */
+QModelIndex Model::indexOf(LDObject* object) const
+{
+	for (int i = 0; i < this->size(); ++i)
+	{
+		if (this->getObject(i) == object)
+			return index(i);
+	}
+
+	return {};
 }
 
 /*
@@ -524,11 +536,12 @@ LDObject* Model::addFromString(QString line)
  */
 LDObject* Model::replaceWithFromString(LDObject* object, QString line)
 {
-	if (object and object->model() == this)
+	QModelIndex index = this->indexOf(object);
+
+	if (index.isValid())
 	{
-		int position = object->lineNumber();
-		removeAt(position);
-		return insertFromString(position, line);
+		removeAt(index.row());
+		return insertFromString(index.row(), line);
 	}
 	else
 		return nullptr;

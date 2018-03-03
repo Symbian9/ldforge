@@ -107,6 +107,7 @@ public:
 	int triangleCount() const;
 	QVector<LDObject*>::iterator begin();
 	QVector<LDObject*>::iterator end();
+	QModelIndex indexOf(LDObject* object) const;
 	bool isEmpty() const;
 	class DocumentManager* documentManager() const;
 	LDObject* insertFromString(int position, QString line);
@@ -180,9 +181,9 @@ T* Model::emplaceReplacement(LDObject* object, Args&& ...args)
 {
 	if (object->model() == this)
 	{
-		int position = object->lineNumber();
+		QModelIndex position = indexOf(object);
 		T* replacement = constructObject<T>(args...);
-		setObjectAt(position, replacement);
+		setObjectAt(position.row(), replacement);
 		return replacement;
 	}
 	else

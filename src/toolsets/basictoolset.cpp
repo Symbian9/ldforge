@@ -98,7 +98,7 @@ void BasicToolset::doInline (bool deep)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		QPersistentModelIndex referenceIndex = currentDocument()->index(reference->lineNumber());
+		QPersistentModelIndex referenceIndex = currentDocument()->indexOf(reference);
 		int row = referenceIndex.row();
 
 		if (referenceIndex.isValid())

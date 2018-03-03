@@ -303,11 +303,11 @@ void LDDocument::insertObject (int pos, LDObject* obj)
 void LDDocument::objectChanged(QString before, QString after)
 {
 	LDObject* object = static_cast<LDObject*>(sender());
-	addToHistory(new EditHistoryEntry {object->lineNumber(), before, after});
+	QModelIndex index = this->indexOf(object);
+	addToHistory(new EditHistoryEntry {index.row(), before, after});
 	redoVertices();
 	emit objectModified(object);
-	int linenumber = object->lineNumber();
-	emit dataChanged(index(linenumber), index(linenumber));
+	emit dataChanged(index, index);
 }
 
 LDObject* LDDocument::withdrawAt(int position)

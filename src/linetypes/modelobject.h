@@ -72,13 +72,11 @@ public:
 	bool isHidden() const;
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
 	bool isSelected() const;
-	int lineNumber() const;
 	void move (Vertex vect);
-	LDObject* next() const;
+	LDObject* next();
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;
-	LDObject* previous() const;
 	QColor randomColor() const;
 	void setColor (LDColor color);
 	void setHidden (bool value);

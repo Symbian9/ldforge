@@ -248,8 +248,8 @@ void ViewToolset::jumpTo()
 	bool ok;
 	int defaultValue = 0;
 
-	if (countof(selectedObjects()) == 1)
-		defaultValue = (*selectedObjects().begin())->lineNumber();
+	if (countof(m_window->selectedIndexes()) == 1)
+		defaultValue = (*m_window->selectedIndexes().begin()).row();
 
 	int row = QInputDialog::getInt(
 		nullptr, /* parent */

@@ -271,38 +271,11 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons()
 
 // =============================================================================
 //
-// Index (i.e. line number) of this object
-//
-int LDObject::lineNumber() const
-{
-	if (model())
-	{
-		for (int i = 0; i < model()->size(); ++i)
-		{
-			if (model()->getObject(i) == this)
-				return i;
-		}
-	}
-
-	return -1;
-}
-
-// =============================================================================
-//
 // Object after this in the current file
 //
-LDObject* LDObject::next() const
+LDObject* LDObject::next()
 {
-	return model()->getObject(lineNumber() + 1);
-}
-
-// =============================================================================
-//
-// Object prior to this in the current file
-//
-LDObject* LDObject::previous() const
-{
-	return model()->getObject(lineNumber() - 1);
+	return model()->getObject(model()->indexOf(this).row() + 1);
 }
 
 // =============================================================================

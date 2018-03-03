@@ -379,8 +379,8 @@ int MainWindow::suggestInsertPoint()
 {
 	// If we have a selection, put the item after it.
 	// TODO: fix this properly!
-	if (not selectedObjects().isEmpty())
-		return (*(selectedObjects().end() - 1))->lineNumber() + 1;
+	if (not selectedIndexes().isEmpty())
+		return (*(selectedIndexes().end() - 1)).row() + 1;
 
 	// Otherwise place the object at the end.
 	return m_currentDocument->size();

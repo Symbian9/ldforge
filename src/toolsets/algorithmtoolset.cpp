@@ -50,8 +50,10 @@ void AlgorithmToolset::splitQuads()
 {
 	int count = 0;
 
-	for (LDObject* object : selectedObjects().toList())
+	for (LDObject* object : selectedObjects())
 	{
+		QModelIndex index = currentDocument()->indexOf(object);
+
 		if (object->numVertices() != 4)
 			continue;
 
@@ -61,19 +63,14 @@ void AlgorithmToolset::splitQuads()
 		Vertex v3 = object->vertex(3);
 		LDColor color = object->color();
 
-		// Find the index of this quad
-		int index = object->lineNumber();
-		if (index == -1)
-			continue;
-
 		// Create the two triangles based on this quadrilateral:
 		// 0───3       0───3    3
 		// │   │  --→  │  ╱    ╱│
 		// │   │  --→  │ ╱    ╱ │
 		// │   │  --→  │╱    ╱  │
 		// 1───2       1    1───2
-		LDTriangle* triangle1 = currentDocument()->emplaceReplacementAt<LDTriangle>(index, v0, v1, v3);
-		LDTriangle* triangle2 = currentDocument()->emplaceAt<LDTriangle>(index + 1, v1, v2, v3);
+		LDTriangle* triangle1 = currentDocument()->emplaceReplacementAt<LDTriangle>(index.row(), v0, v1, v3);
+		LDTriangle* triangle2 = currentDocument()->emplaceAt<LDTriangle>(index.row() + 1, v1, v2, v3);
 
 		// The triangles also inherit the quad's color
 		triangle1->setColor(color);
@@ -142,7 +139,7 @@ void AlgorithmToolset::makeBorders()
 		}
 
 		count += countof(lines.objects());
-		currentDocument()->merge(lines, object->lineNumber() + 1);
+		currentDocument()->merge(lines, currentDocument()->indexOf(object).row() + 1);
 	}
 
 	print(tr("Added %1 border lines"), count);
@@ -368,7 +365,7 @@ void AlgorithmToolset::addHistoryLine()
 		prevIsHistory = ishistory;
 	}
 
-	int idx = obj ? obj->lineNumber() : 0;
+	int idx = obj ? currentDocument()->indexOf(obj).row() : 0;
 
 	// Create the comment object based on input
 	currentDocument()->emplaceAt<LDComment>(idx++, format("!HISTORY %1 [%2] %3",
@@ -541,7 +538,7 @@ void AlgorithmToolset::subfileSelection()
 	{
 		// Where to insert the subfile reference?
 		// TODO: the selection really should be sorted by position...
-		int referencePosition = (*selectedObjects().begin())->lineNumber();
+		int referencePosition = m_window->selectedIndexes().begin()->row();
 
 		// Save was successful. Delete the original selection now from the
 		// main document.

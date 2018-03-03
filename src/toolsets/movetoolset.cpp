@@ -47,7 +47,7 @@ void MoveToolset::moveSelection (bool up)
 	{
 		LDObject* obj = objs[i];
 
-		int idx = obj->lineNumber();
+		int idx = model->indexOf(obj).row();
 		int target = idx + (up ? -1 : 1);
 
 		if ((up and idx == 0) or (not up and idx == countof(model->objects()) - 1))
