@@ -39,4 +39,5 @@ public:
 
 private:
 	bool isColorUsed (class LDColor color);
+	LDObject* next(LDObject* object);
 };

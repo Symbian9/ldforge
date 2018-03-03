@@ -73,7 +73,6 @@ public:
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
 	bool isSelected() const;
 	void move (Vertex vect);
-	LDObject* next();
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;

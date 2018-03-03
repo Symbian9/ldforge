@@ -271,15 +271,6 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons()
 
 // =============================================================================
 //
-// Object after this in the current file
-//
-LDObject* LDObject::next()
-{
-	return model()->getObject(model()->indexOf(this).row() + 1);
-}
-
-// =============================================================================
-//
 // Moves this object using the given vertex as a movement List
 //
 void LDObject::move (Vertex vect)

@@ -306,6 +306,16 @@ bool AlgorithmToolset::isColorUsed (LDColor color)
 	return false;
 }
 
+LDObject* AlgorithmToolset::next(LDObject* object)
+{
+	QModelIndex index = currentDocument()->indexOf(object);
+
+	if (index.isValid())
+		return currentDocument()->getObject(index.row() + 1);
+	else
+		return nullptr;
+}
+
 void AlgorithmToolset::autocolor()
 {
 	LDColor color;
@@ -351,8 +361,8 @@ void AlgorithmToolset::addHistoryLine()
 
 	// Find a spot to place the new comment
 	for (obj = currentDocument()->getObject (0);
-		obj and obj->next() and not obj->next()->isScemantic();
-		obj = obj->next())
+		obj and next(obj) and not next(obj)->isScemantic();
+		obj = next(obj))
 	{
 		LDComment* comment = dynamic_cast<LDComment*> (obj);
 
@@ -375,7 +385,7 @@ void AlgorithmToolset::addHistoryLine()
 
 	// If we're adding a history line right before a scemantic object, pad it
 	// an empty line
-	if (obj and obj->next() and obj->next()->isScemantic())
+	if (obj and next(obj) and next(obj)->isScemantic())
 		currentDocument()->emplaceAt<LDEmpty>(idx);
 }
 
