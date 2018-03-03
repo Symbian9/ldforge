@@ -28,7 +28,6 @@ public:
 	static constexpr LDObjectType SubclassType = LDObjectType::Quadrilateral;
 
 	QString asText() const override;
-	void invert() override;
 	int numVertices() const override;
 	int triangleCount() const override;
 	LDObjectType type() const override;

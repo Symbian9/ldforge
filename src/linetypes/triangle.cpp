@@ -43,12 +43,3 @@ QString LDTriangle::asText() const
 
 	return result;
 }
-
-void LDTriangle::invert()
-{
-	// Triangle goes 0 -> 1 -> 2, reversed: 0 -> 2 -> 1.
-	// Thus, we swap 1 and 2.
-	Vertex temp = vertex(1);
-	setVertex(1, vertex(2));
-	setVertex(2, temp);
-}

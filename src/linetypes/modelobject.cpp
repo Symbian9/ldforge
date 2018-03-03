@@ -314,80 +314,6 @@ Model* LDObject::model() const
 
 // =============================================================================
 //
-void LDObject::invert() {}
-void LDBfc::invert() {}
-void LDError::invert() {}
-
-// =============================================================================
-//
-void LDSubfileReference::invert()
-{
-	if (model() == nullptr)
-		return;
-
-	// Check whether subfile is flat
-	int axisSet = (1 << X) | (1 << Y) | (1 << Z);
-	Model model {this->model()->documentManager()};
-	fileInfo()->inlineContents(model, true, false);
-
-	for (LDObject* obj : model.objects())
-	{
-		for (int i = 0; i < obj->numVertices(); ++i)
-		{
-			Vertex const& vrt = obj->vertex (i);
-
-			if (axisSet & (1 << X) and vrt.x() != 0.0)
-				axisSet &= ~(1 << X);
-
-			if (axisSet & (1 << Y) and vrt.y() != 0.0)
-				axisSet &= ~(1 << Y);
-
-			if (axisSet & (1 << Z) and vrt.z() != 0.0)
-				axisSet &= ~(1 << Z);
-		}
-
-		if (axisSet == 0)
-			break;
-	}
-
-	if (axisSet != 0)
-	{
-		// Subfile has all vertices zero on one specific plane, so it is flat.
-		// Let's flip it.
-		Matrix matrixModifier = Matrix::identity;
-
-		if (axisSet & (1 << X))
-			matrixModifier(0, 0) = -1;
-
-		if (axisSet & (1 << Y))
-			matrixModifier(1, 1) = -1;
-
-		if (axisSet & (1 << Z))
-			matrixModifier(2, 2) = -1;
-
-		setTransformationMatrix (transformationMatrix() * matrixModifier);
-		return;
-	}
-
-	// Subfile is not flat. Resort to invertnext.
-	setInverted(not this->isInverted());
-}
-
-// =============================================================================
-//
-void LDBezierCurve::invert()
-{
-	// A Bézier curve's control points probably need to be, though.
-	Vertex tmp = vertex (1);
-	setVertex (1, vertex (0));
-	setVertex (0, tmp);
-	tmp = vertex (3);
-	setVertex (3, vertex (2));
-	setVertex (2, tmp);
-}
-
-// =============================================================================
-//
 LDObject* LDObject::fromID(qint32 id)
 {
 	return g_allObjects.value(id);
@@ -597,9 +523,6 @@ LDDocument* LDSubfileReference::fileInfo() const
 void LDSubfileReference::setFileInfo (LDDocument* newReferee)
 {
 	changeProperty(&m_fileInfo, newReferee);
-
-	if (model())
-		model()->recountTriangles();
 
 	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
 	// GL polygons for the document if they don't exist already.

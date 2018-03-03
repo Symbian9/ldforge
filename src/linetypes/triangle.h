@@ -33,7 +33,6 @@ public:
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 	int triangleCount() const override;
 	int numVertices() const override { return 3; }
 	QString typeName() const override { return "triangle"; }

@@ -33,7 +33,6 @@ public:
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 	int numVertices() const override { return 4; }
 	int numPolygonVertices() const override { return 2; }
 	LDColor defaultColor() const override { return EdgeColor; }

@@ -41,10 +41,3 @@ QString LDConditionalEdge::asText() const
 
 	return result;
 }
-
-void LDConditionalEdge::invert()
-{
-	Vertex temp = vertex(0);
-	setVertex(0, vertex(1));
-	setVertex(1, temp);
-}

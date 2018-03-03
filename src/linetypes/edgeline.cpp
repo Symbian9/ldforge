@@ -46,13 +46,3 @@ QString LDEdgeLine::asText() const
 
 	return result;
 }
-
-/*
- * Inverting an edge line swaps the vertices.
- */
-void LDEdgeLine::invert()
-{
-	Vertex temp = vertex(0);
-	setVertex(0, vertex(1));
-	setVertex(1, temp);
-}

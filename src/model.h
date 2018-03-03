@@ -103,7 +103,7 @@ public:
 	int size() const;
 	const QVector<LDObject*>& objects() const;
 	LDObject* getObject(int position) const;
-	void recountTriangles();
+	Q_SLOT void recountTriangles();
 	int triangleCount() const;
 	QVector<LDObject*>::iterator begin();
 	QVector<LDObject*>::iterator end();

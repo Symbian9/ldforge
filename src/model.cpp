@@ -65,6 +65,8 @@ const QVector<LDObject*>& Model::objects() const
  */
 void Model::insertObject(int position, LDObject* object)
 {
+	connect(object, SIGNAL(codeChanged(QString,QString)), this, SLOT(recountTriangles()));
+
 	if (object->model() and object->model() != this)
 		object->model()->withdraw(object);
 

@@ -316,11 +316,12 @@ void PrimitiveModel::generateBody(Model& model) const
 				Vertex v1 = {x1, y1, z1};
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
-				LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
-				quad->setColor(MainColor);
 
 				if (type == Cylinder)
-					quad->invert();
+					qSwap(v1, v3);
+
+				LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
+				quad->setColor(MainColor);
 
 				if (type == Cylinder or type == Cone)
 					conditionalLineSegments.append(i);

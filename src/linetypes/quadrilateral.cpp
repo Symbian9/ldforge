@@ -55,16 +55,6 @@ int LDQuadrilateral::triangleCount() const
 	return 2;
 }
 
-void LDQuadrilateral::invert()
-{
-	// Quad:     0 -> 1 -> 2 -> 3
-	// reversed: 0 -> 3 -> 2 -> 1
-	// Thus, we swap 1 and 3.
-	Vertex temp = vertex(1);
-	setVertex(1, vertex(3));
-	setVertex(3, temp);
-}
-
 LDObjectType LDQuadrilateral::type() const
 {
 	return SubclassType;

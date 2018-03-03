@@ -67,7 +67,6 @@ public:
 	virtual void getVertices (QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
 	qint32 id() const;
-	virtual void invert(); // Inverts this object (winding is reversed)
 	virtual bool isColored() const;
 	bool isHidden() const;
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
@@ -150,7 +149,6 @@ public:
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 	QString reason() const;
 	QString contents() const;
 	QString fileReferenced() const;
@@ -201,7 +199,6 @@ class LDBfc : public LDObject
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 protected:
 	friend class Model;
 	LDBfc (Model* model);
@@ -238,7 +235,6 @@ public:
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 	LDDocument* fileInfo() const;
 	virtual void getVertices (QSet<Vertex>& verts) const override;
 	void inlineContents(Model& model, bool deep, bool render);
@@ -272,7 +268,6 @@ public:
 	}
 
 	virtual QString asText() const override;
-	virtual void invert() override;
 	Vertex pointAt (qreal t) const;
 	void rasterize(Model& model, int segments);
 	QVector<LDPolygon> rasterizePolygons (int segments);
