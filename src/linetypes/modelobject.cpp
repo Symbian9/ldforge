@@ -519,7 +519,7 @@ QString LDSubfileReference::referenceName() const
 	return m_referenceName;
 }
 
-void LDObject::getVertices(DocumentManager* context, QSet<Vertex>& verts) const
+void LDObject::getVertices(DocumentManager*, QSet<Vertex>& verts) const
 {
 	for (int i = 0; i < numVertices(); ++i)
 		verts.insert(vertex(i));
