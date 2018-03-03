@@ -217,17 +217,12 @@ void PartDownloadRequest::downloadFinished()
 
 	// Iterate through this file and check for errors. If there's any that stems
 	// from unknown file references, try resolve that by downloading the reference.
-	// This is why downloading a part may end up downloading multiple files, as
-	// it resolves dependencies.
 	for (LDObject* obj : document->objects())
 	{
-		LDError* err = dynamic_cast<LDError*> (obj);
+		LDSubfileReference* reference = dynamic_cast<LDSubfileReference*>(obj);
 
-		if (err == nullptr or err->fileReferenced().isEmpty())
-			continue;
-
-		QString dest = err->fileReferenced();
-		prompt()->downloadFromPartsTracker (dest);
+		if (reference and reference->fileInfo(m_documents) == nullptr)
+			prompt()->downloadFromPartsTracker(reference->referenceName());
 	}
 
 	prompt()->addFile (document);
