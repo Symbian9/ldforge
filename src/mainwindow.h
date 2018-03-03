@@ -73,6 +73,7 @@ public:
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
+	QItemSelectionModel* currentSelectionModel();
 	QKeySequence defaultShortcut (QAction* act);
 	void deleteByColor (LDColor color);
 	int deleteSelection();
@@ -95,10 +96,12 @@ public:
 	PrimitiveManager* primitives();
 	Canvas* renderer();
 	void refresh();
+	void replaceSelection(const QItemSelection& selection);
 	bool ringToolHiRes() const;
 	int ringToolSegments() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
+	void select(const QModelIndex& objectIndex);
 	QModelIndexList selectedIndexes() const;
 	QSet<LDObject*> selectedObjects() const;
 	void setQuickColors (const QVector<ColorToolbarItem> &colors);

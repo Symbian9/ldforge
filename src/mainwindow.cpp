@@ -1104,6 +1104,22 @@ void MainWindow::clearSelection()
 	m_selections[m_currentDocument]->clear();
 }
 
+void MainWindow::select(const QModelIndex &objectIndex)
+{
+	if (objectIndex.isValid() and objectIndex.model() == m_currentDocument)
+		m_selections[m_currentDocument]->select(objectIndex, QItemSelectionModel::Select);
+}
+
+QItemSelectionModel* MainWindow::currentSelectionModel()
+{
+	return m_selections[m_currentDocument];
+}
+
+void MainWindow::replaceSelection(const QItemSelection& selection)
+{
+	m_selections[m_currentDocument]->select(selection, QItemSelectionModel::ClearAndSelect);
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 ColorToolbarItem::ColorToolbarItem (LDColor color, QToolButton* toolButton) :

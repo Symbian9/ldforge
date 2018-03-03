@@ -320,7 +320,6 @@ LDObject* LDDocument::withdrawAt(int position)
 		m_objectVertices.remove(object);
 	}
 
-	m_selection.remove(object);
 	return Model::withdrawAt(position);
 }
 
@@ -432,29 +431,6 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 			model.addFromString(object->asText());
 	}
 }
-
-// =============================================================================
-//
-void LDDocument::addToSelection (LDObject* obj) // [protected]
-{
-	if (not m_selection.contains(obj) and obj->model() == this)
-	{
-		m_selection.insert(obj);
-		emit objectModified(obj);
-	}
-}
-
-// =============================================================================
-//
-void LDDocument::removeFromSelection (LDObject* obj) // [protected]
-{
-	if (m_selection.contains(obj))
-	{
-		m_selection.remove(obj);
-		emit objectModified(obj);
-	}
-}
-
 // =============================================================================
 //
 bool LDDocument::swapObjects (LDObject* one, LDObject* other)

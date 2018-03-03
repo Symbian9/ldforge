@@ -256,9 +256,10 @@ void Canvas::dropEvent(QDropEvent* event)
 	{
 		PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (m_window->getPrimitivesTree()->currentItem());
 		QString primitiveName = item->primitive()->name;
-		LDSubfileReference* reference = currentDocument()->emplaceAt<LDSubfileReference>(m_window->suggestInsertPoint());
-		reference->setFileInfo (m_documents->getDocumentByName(primitiveName));
-		currentDocument()->addToSelection(reference);
+		int position = m_window->suggestInsertPoint();
+		LDSubfileReference* reference = currentDocument()->emplaceAt<LDSubfileReference>(position);
+		reference->setFileInfo(m_documents->getDocumentByName(primitiveName));
+		m_window->select(currentDocument()->index(position));
 		update();
 		event->acceptProposedAction();
 	}

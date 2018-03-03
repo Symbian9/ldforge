@@ -48,7 +48,6 @@ public:
 
 	void addHistoryStep();
 	void addToHistory (AbstractHistoryEntry* entry);
-	void addToSelection (LDObject* obj);
 	void clearHistory();
 	void close();
 	QString defaultName() const;
@@ -70,7 +69,6 @@ public:
 	void redo();
 	void redoVertices();
 	void reloadAllSubfiles();
-	void removeFromSelection (LDObject* obj);
 	bool save (QString path = "", qint64* sizeptr = nullptr);
 	long savePosition() const;
 	void setDefaultName (QString value);
@@ -107,7 +105,6 @@ private:
 	QList<LDPolygon> m_polygonData;
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
-	QSet<LDObject*> m_selection;
 	DocumentManager* m_manager;
 };
 

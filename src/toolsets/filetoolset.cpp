@@ -124,8 +124,8 @@ void FileToolset::insertFrom()
 			for (LDObject* object : model.objects())
 			{
 				currentDocument()->insertObject (position, object);
-				currentDocument()->addToSelection(object);
-				position++;
+				mainWindow()->select(currentDocument()->index(position));
+				position += 1;
 			}
 
 			m_window->refresh();

@@ -70,15 +70,16 @@ void BasicToolset::copy()
 void BasicToolset::paste()
 {
 	const QString clipboardText = qApp->clipboard()->text();
-	int idx = m_window->suggestInsertPoint();
+	int row = m_window->suggestInsertPoint();
 	mainWindow()->clearSelection();
 	int count = 0;
 
 	for (QString line : clipboardText.split("\n"))
 	{
-		LDObject* pasted = currentDocument()->insertFromString(idx++, line);
-		currentDocument()->addToSelection(pasted);
-		++count;
+		currentDocument()->insertFromString(row, line);
+		mainWindow()->select(currentDocument()->index(row));
+		row += 1;
+		count += 1;
 	}
 
 	print(tr("%1 objects pasted"), count);
@@ -97,9 +98,10 @@ void BasicToolset::doInline (bool deep)
 	{
 		// Get the index of the subfile so we know where to insert the
 		// inlined contents.
-		int idx = reference->lineNumber();
+		QPersistentModelIndex referenceIndex = currentDocument()->index(reference->lineNumber());
+		int row = referenceIndex.row();
 
-		if (idx != -1)
+		if (referenceIndex.isValid())
 		{
 			Model inlined {m_documents};
 			reference->inlineContents(inlined, deep, false);
@@ -107,12 +109,13 @@ void BasicToolset::doInline (bool deep)
 			// Merge in the inlined objects
 			for (LDObject* inlinedObject : inlined.objects())
 			{
-				currentDocument()->insertObject (idx++, inlinedObject);
-				currentDocument()->addToSelection(inlinedObject);
+				currentDocument()->insertObject(row, inlinedObject);
+				mainWindow()->select(currentDocument()->index(row));
+				row += 1;
 			}
 
 			// Delete the subfile now as it's been inlined.
-			currentDocument()->remove(reference);
+			currentDocument()->removeRow(referenceIndex.row());
 		}
 	}
 
@@ -162,7 +165,7 @@ void BasicToolset::uncolor()
 
 void BasicToolset::insertRaw()
 {
-	int position = m_window->suggestInsertPoint();
+	int row = m_window->suggestInsertPoint();
 
 	QDialog* const dlg = new QDialog;
 	QVBoxLayout* const layout = new QVBoxLayout;
@@ -183,9 +186,9 @@ void BasicToolset::insertRaw()
 
 	for (QString line : QString (inputbox->toPlainText()).split ("\n"))
 	{
-		LDObject* object = currentDocument()->insertFromString(position, line);
-		currentDocument()->addToSelection(object);
-		position += 1;
+		currentDocument()->insertFromString(row, line);
+		mainWindow()->select(currentDocument()->index(row));
+		row += 1;
 	}
 
 	m_window->refresh();

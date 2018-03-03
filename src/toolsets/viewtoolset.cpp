@@ -34,8 +34,13 @@ ViewToolset::ViewToolset (MainWindow *parent) :
 
 void ViewToolset::selectAll()
 {
-	for (LDObject* obj : currentDocument()->objects())
-		currentDocument()->addToSelection(obj);
+	if (currentDocument()->size() >= 1)
+	{
+		QModelIndex top = currentDocument()->index(0);
+		QModelIndex bottom = currentDocument()->index(currentDocument()->size() - 1);
+		QItemSelection selection {top, bottom};
+		mainWindow()->replaceSelection(selection);
+	}
 }
 
 void ViewToolset::selectByColor()
@@ -51,13 +56,15 @@ void ViewToolset::selectByColor()
 			colors << obj->color();
 	}
 
-	mainWindow()->clearSelection();
+	QItemSelection selection;
 
-	for (LDObject* obj : currentDocument()->objects())
+	for (QModelIndex index : currentDocument()->indices())
 	{
-		if (colors.contains (obj->color()))
-			currentDocument()->addToSelection(obj);
+		if (colors.contains(currentDocument()->lookup(index)->color()))
+			selection.select(index, index);
 	}
+
+	mainWindow()->replaceSelection(selection);
 }
 
 void ViewToolset::selectByType()
@@ -76,10 +83,11 @@ void ViewToolset::selectByType()
 			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
 	}
 
-	mainWindow()->clearSelection();
+	QItemSelection selection;
 
-	for (LDObject* obj : currentDocument()->objects())
+	for (QModelIndex index : currentDocument()->indices())
 	{
+		LDObject* obj = currentDocument()->lookup(index);
 		LDObjectType type = obj->type();
 
 		if (not types.contains (type))
@@ -92,8 +100,10 @@ void ViewToolset::selectByType()
 			continue;
 		}
 
-		currentDocument()->addToSelection(obj);
+		selection.select(index, index);
 	}
+
+	mainWindow()->replaceSelection(selection);
 }
 
 void ViewToolset::resetView()
@@ -259,7 +269,7 @@ void ViewToolset::jumpTo()
 		if (object.isValid() and object.row() < currentDocument()->size())
 		{
 			mainWindow()->clearSelection();
-			currentDocument()->addToSelection(currentDocument()->lookup(object));
+			mainWindow()->select(object);
 		}
 	}
 }
