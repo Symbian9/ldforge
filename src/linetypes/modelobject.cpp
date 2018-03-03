@@ -110,16 +110,6 @@ QString LDBfc::asText() const
 	return format ("0 BFC %1", statementToString());
 }
 
-// =============================================================================
-//
-// Swap this object with another.
-//
-void LDObject::swap (LDObject* other)
-{
-	if (model() == other->model())
-		model()->swapObjects (this, other);
-}
-
 int LDObject::triangleCount() const
 {
 	return 0;

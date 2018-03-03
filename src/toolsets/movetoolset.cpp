@@ -40,7 +40,6 @@ void MoveToolset::moveSelection (bool up)
 	int start = up ? 0 : (countof(objs) - 1);
 	int end = up ? countof(objs) : -1;
 	int increment = up ? 1 : -1;
-	QSet<LDObject*> objsToCompile;
 	Model* model = (*objs.begin())->model();
 
 	for (int i = start; i != end; i += increment)
@@ -58,9 +57,7 @@ void MoveToolset::moveSelection (bool up)
 			return;
 		}
 
-		objsToCompile << obj;
-		objsToCompile << model->getObject(target);
-		obj->swap(model->getObject(target));
+		model->swapObjects(obj, model->getObject(target));
 	}
 }
 

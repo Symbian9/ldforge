@@ -223,7 +223,7 @@ SwapHistoryEntry::SwapHistoryEntry (int a, int b) :
 
 void SwapHistoryEntry::undo() const
 {
-	LDObject::fromID (m_a)->swap (LDObject::fromID (m_b));
+	parent()->document()->swapObjects(LDObject::fromID (m_a), LDObject::fromID (m_b));
 }
 
 void SwapHistoryEntry::redo() const

@@ -80,7 +80,6 @@ public:
 	void setColor (LDColor color);
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
-	void swap (LDObject* other);
 	bool isInverted() const;
 	void setInverted(bool value);
 	virtual int triangleCount() const;
