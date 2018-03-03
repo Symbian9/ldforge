@@ -237,7 +237,7 @@ void BasicToolset::invert()
 			int axisSet = (1 << X) | (1 << Y) | (1 << Z);
 			Model model {currentDocument()->documentManager()};
 			LDSubfileReference* reference = static_cast<LDSubfileReference*>(obj);
-			reference->fileInfo()->inlineContents(model, true, false);
+			reference->fileInfo(m_documents)->inlineContents(model, true, false);
 
 			for (LDObject* subobj : model.objects())
 			{

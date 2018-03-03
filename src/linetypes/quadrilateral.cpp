@@ -50,7 +50,7 @@ QString LDQuadrilateral::asText() const
 	return result;
 }
 
-int LDQuadrilateral::triangleCount() const
+int LDQuadrilateral::triangleCount(DocumentManager*) const
 {
 	return 2;
 }

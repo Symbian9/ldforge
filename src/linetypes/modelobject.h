@@ -25,6 +25,7 @@
 
 class Model;
 class LDDocument;
+class DocumentManager;
 
 /*
  * Object type codes.
@@ -64,7 +65,7 @@ public:
 	virtual LDColor defaultColor() const; // What color does the object default to?
 	Model* model() const;
 	LDPolygon* getPolygon();
-	virtual void getVertices (QSet<Vertex>& verts) const;
+	virtual void getVertices (DocumentManager *context, QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
 	qint32 id() const;
 	virtual bool isColored() const;
@@ -81,7 +82,7 @@ public:
 	void setVertex (int i, const Vertex& vert);
 	bool isInverted() const;
 	void setInverted(bool value);
-	virtual int triangleCount() const;
+	virtual int triangleCount(DocumentManager* context) const;
 	virtual LDObjectType type() const = 0;
 	virtual QString typeName() const = 0;
 	const Vertex& vertex (int i) const;
@@ -235,23 +236,23 @@ public:
 	}
 
 	virtual QString asText() const override;
-	LDDocument* fileInfo() const;
-	virtual void getVertices (QSet<Vertex>& verts) const override;
-	void inlineContents(class DocumentManager* context, Model& model, bool deep, bool render);
-	QList<LDPolygon> inlinePolygons();
+	LDDocument* fileInfo(DocumentManager *context) const;
+	virtual void getVertices(DocumentManager *context, QSet<Vertex>& verts) const override;
+	void inlineContents(DocumentManager* context, Model& model, bool deep, bool render);
+	QList<LDPolygon> inlinePolygons(DocumentManager* context);
 	QString objectListText() const override;
-	void setFileInfo (LDDocument* fileInfo);
-	int triangleCount() const override;
+	QString referenceName() const;
+	int triangleCount(DocumentManager *context) const override;
 	bool hasMatrix() const override { return true; }
 	QString typeName() const override { return "subfilereference"; }
 
 protected:
 	friend class Model;
-	LDSubfileReference (Model* model);
-	LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
+	LDSubfileReference(Model* model);
+	LDSubfileReference(QString referenceName, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
 
 private:
-	LDDocument* m_fileInfo;
+	QString m_referenceName;
 };
 
 /*

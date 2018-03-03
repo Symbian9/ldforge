@@ -81,7 +81,7 @@ QString LDSubfileReference::asText() const
 	QString val = format ("1 %1 %2 ", color(), position());
 	val += transformationMatrix().toString();
 	val += ' ';
-	val += fileInfo()->name();
+	val += m_referenceName;
 	return val;
 }
 
@@ -110,14 +110,14 @@ QString LDBfc::asText() const
 	return format ("0 BFC %1", statementToString());
 }
 
-int LDObject::triangleCount() const
+int LDObject::triangleCount(DocumentManager*) const
 {
 	return 0;
 }
 
-int LDSubfileReference::triangleCount() const
+int LDSubfileReference::triangleCount(DocumentManager* context) const
 {
-	return fileInfo()->triangleCount();
+	return fileInfo(context)->triangleCount();
 }
 
 int LDObject::numVertices() const
@@ -190,7 +190,7 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 void LDSubfileReference::inlineContents(DocumentManager* context, Model& model, bool deep, bool render)
 {
 	Model inlined {context};
-	fileInfo()->inlineContents(inlined, deep, render);
+	fileInfo(context)->inlineContents(inlined, deep, render);
 
 	// Transform the objects
 	for (LDObject* object : inlined)
@@ -246,9 +246,9 @@ bool LDObject::hasMatrix() const
 
 // =============================================================================
 //
-QList<LDPolygon> LDSubfileReference::inlinePolygons()
+QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context)
 {
-	QList<LDPolygon> data = fileInfo()->inlinePolygons();
+	QList<LDPolygon> data = fileInfo(context)->inlinePolygons();
 
 	for (LDPolygon& entry : data)
 	{
@@ -508,41 +508,36 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 	return result;
 }
 
-LDSubfileReference::LDSubfileReference(LDDocument* reference, const Matrix& transformationMatrix,
-                                       const Vertex& position, Model* model) :
-    LDMatrixObject {transformationMatrix, position, model},
-    m_fileInfo {reference} {}
+LDSubfileReference::LDSubfileReference(
+	QString referenceName,
+	const Matrix& transformationMatrix,
+	const Vertex& position,
+	Model* model
+) :
+	LDMatrixObject {transformationMatrix, position, model},
+	m_referenceName {referenceName} {}
 
 // =============================================================================
 //
-LDDocument* LDSubfileReference::fileInfo() const
+LDDocument* LDSubfileReference::fileInfo(DocumentManager* context) const
 {
-	return m_fileInfo;
+	return context->getDocumentByName(m_referenceName);
 }
 
-void LDSubfileReference::setFileInfo (LDDocument* newReferee)
+QString LDSubfileReference::referenceName() const
 {
-	changeProperty(&m_fileInfo, newReferee);
-
-	// If it's an immediate subfile reference (i.e. this subfile is in an opened document), we need to pre-compile the
-	// GL polygons for the document if they don't exist already.
-	if (newReferee and
-		newReferee->isFrozen() == false and
-		newReferee->polygonData().isEmpty())
-	{
-		newReferee->initializeCachedData();
-	}
+	return m_referenceName;
 }
 
-void LDObject::getVertices (QSet<Vertex>& verts) const
+void LDObject::getVertices(DocumentManager* context, QSet<Vertex>& verts) const
 {
 	for (int i = 0; i < numVertices(); ++i)
 		verts.insert(vertex(i));
 }
 
-void LDSubfileReference::getVertices (QSet<Vertex>& verts) const
+void LDSubfileReference::getVertices (DocumentManager* context, QSet<Vertex>& verts) const
 {
-	verts.unite(fileInfo()->inlineVertices());
+	verts.unite(fileInfo(context)->inlineVertices());
 }
 
 QString LDObject::objectListText() const
@@ -574,7 +569,7 @@ QString LDError::objectListText() const
 
 QString LDSubfileReference::objectListText() const
 {
-	QString result = format ("%1 %2, (", fileInfo()->getDisplayName(), position().toString(true));
+	QString result = format ("%1 %2, (", referenceName(), position().toString(true));
 
 	for (int i = 0; i < 9; ++i)
 		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");

@@ -68,7 +68,6 @@ public:
 	void recountTriangles();
 	void redo();
 	void redoVertices();
-	void reloadAllSubfiles();
 	bool save (QString path = "", qint64* sizeptr = nullptr);
 	long savePosition() const;
 	void setDefaultName (QString value);

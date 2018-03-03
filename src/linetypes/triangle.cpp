@@ -29,7 +29,7 @@ LDTriangle::LDTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, Mod
 	setVertex(2, v3);
 }
 
-int LDTriangle::triangleCount() const
+int LDTriangle::triangleCount(DocumentManager*) const
 {
 	return 1;
 }

@@ -80,7 +80,7 @@ void ViewToolset::selectByType()
 		types << obj->type();
 
 		if (obj->type() == LDObjectType::SubfileReference)
-			subfilenames << static_cast<LDSubfileReference*> (obj)->fileInfo()->name();
+			subfilenames << static_cast<LDSubfileReference*>(obj)->fileInfo(m_documents)->name();
 	}
 
 	QItemSelection selection;
@@ -95,7 +95,7 @@ void ViewToolset::selectByType()
 
 		// For subfiles, type check is not enough, we check the name of the document as well.
 		if (type == LDObjectType::SubfileReference
-			and not subfilenames.contains (static_cast<LDSubfileReference*> (obj)->fileInfo()->name()))
+			and not subfilenames.contains(static_cast<LDSubfileReference*>(obj)->fileInfo(m_documents)->name()))
 		{
 			continue;
 		}

@@ -298,7 +298,6 @@ void ConfigDialog::applySettings()
 	}
 
 	m_window->syncSettings();
-	currentDocument()->reloadAllSubfiles();
 	m_documents->loadLogoedStuds();
 	m_window->renderer()->setBackground();
 	m_window->doFullRefresh();

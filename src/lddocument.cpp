@@ -259,35 +259,6 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 
 // =============================================================================
 //
-void LDDocument::reloadAllSubfiles()
-{
-	print ("Reloading subfiles of %1", getDisplayName());
-
-	// Go through all objects in the current file and reload the subfiles
-	for (LDObject* obj : objects())
-	{
-		if (obj->type() == LDObjectType::SubfileReference)
-		{
-			LDSubfileReference* reference = static_cast<LDSubfileReference*> (obj);
-			LDDocument* fileInfo = m_documents->getDocumentByName (reference->fileInfo()->name());
-
-			if (fileInfo)
-				reference->setFileInfo (fileInfo);
-			else
-				emplaceReplacement<LDError>(reference, reference->asText(), format("Could not open %1", reference->fileInfo()->name()));
-		}
-
-		// Reparse gibberish files. It could be that they are invalid because
-		// of loading errors. Circumstances may be different now.
-		if (obj->type() == LDObjectType::Error)
-			replaceWithFromString(obj, static_cast<LDError*> (obj)->contents());
-	}
-
-	m_needsRecache = true;
-}
-
-// =============================================================================
-//
 void LDDocument::insertObject (int pos, LDObject* obj)
 {
 	Model::insertObject(pos, obj);
@@ -358,7 +329,7 @@ void LDDocument::initializeCachedData()
 			if (obj->type() == LDObjectType::SubfileReference)
 			{
 				print ("Warning: unable to inline %1 into %2",
-					static_cast<LDSubfileReference*> (obj)->fileInfo()->getDisplayName(),
+					static_cast<LDSubfileReference*> (obj)->referenceName(),
 					getDisplayName());
 				continue;
 			}
@@ -390,7 +361,7 @@ void LDDocument::initializeCachedData()
 			else
 				iterator->clear();
 
-			object->getVertices (*iterator);
+			object->getVertices(documentManager(), *iterator);
 		}
 
 		m_vertices.clear();

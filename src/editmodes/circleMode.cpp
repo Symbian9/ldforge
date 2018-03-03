@@ -105,7 +105,7 @@ void CircleMode::endDraw()
 			primitiveModel.ringNumber = component.num;
 			primitiveFile = primitives()->getPrimitive(primitiveModel);
 			Matrix matrix = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
-			model.emplace<LDSubfileReference>(primitiveFile, matrix, m_drawedVerts.first());
+			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix, m_drawedVerts.first());
 		}
 	}
 	else
@@ -149,7 +149,7 @@ void CircleMode::endDraw()
 	}
 
 	if (circleOrDisc and primitiveFile)
-		model.emplace<LDSubfileReference>(primitiveFile, transform, m_drawedVerts.first());
+		model.emplace<LDSubfileReference>(primitiveFile->name(), transform, m_drawedVerts.first());
 
 	finishDraw (model);
 }

@@ -149,7 +149,6 @@ void DocumentManager::openMainModel (QString path)
 
 		dl.exec();
 		dl.checkIfFinished();
-		file->reloadAllSubfiles();
 	}
 }
 

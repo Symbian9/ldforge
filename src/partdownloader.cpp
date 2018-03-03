@@ -255,9 +255,6 @@ void PartDownloader::checkIfFinished()
 	if (primaryFile())
 		emit primaryFileDownloaded();
 
-	for (LDDocument* file : _files)
-		file->reloadAllSubfiles();
-
 	if (m_config->autoCloseDownloadDialog() and not failed)
 	{
 		// Close automatically if desired.

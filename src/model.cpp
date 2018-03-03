@@ -186,7 +186,7 @@ int Model::triangleCount() const
 		_triangleCount = 0;
 
 		for (LDObject* object : objects())
-			_triangleCount += object->triangleCount();
+			_triangleCount += object->triangleCount(documentManager());
 
 		_needsTriangleRecount = false;
 	}
@@ -439,16 +439,6 @@ LDObject* Model::insertFromString(int position, QString line)
 			    // Subfile
 			    CheckTokenCount (tokens, 15);
 				CheckTokenNumbers (tokens, 1, 13);
-				LDDocument* document = _manager->getDocumentByName(tokens[14]);
-
-				// If we cannot open the file, mark it an error. Note we cannot use LDParseError
-				// here because the error object needs the document reference.
-				if (not document)
-				{
-					LDError* obj = emplaceAt<LDError>(position, line, format ("Could not open %1", tokens[14]));
-					obj->setFileReferenced (tokens[14]);
-					return obj;
-				}
 
 				Vertex referncePosition = ParseVertex (tokens, 2);  // 2 - 4
 				Matrix transform;
@@ -456,7 +446,7 @@ LDObject* Model::insertFromString(int position, QString line)
 				for (int i = 0; i < 9; ++i)
 					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
 
-				LDSubfileReference* obj = emplaceAt<LDSubfileReference>(position, document, transform, referncePosition);
+				LDSubfileReference* obj = emplaceAt<LDSubfileReference>(position, tokens[14], transform, referncePosition);
 				obj->setColor (StringToNumber (tokens[1]));
 				return obj;
 		    }

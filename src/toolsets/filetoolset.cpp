@@ -175,9 +175,10 @@ void FileToolset::openSubfiles()
 	for (LDObject* object : selectedObjects())
 	{
 		LDSubfileReference* reference = dynamic_cast<LDSubfileReference*>(object);
+		LDDocument* referenceDocument = reference ? reference->fileInfo(m_documents) : nullptr;
 
-		if (reference and reference->fileInfo()->isFrozen())
-			m_window->openDocumentForEditing(reference->fileInfo());
+		if (referenceDocument and referenceDocument->isFrozen())
+			m_window->openDocumentForEditing(referenceDocument);
 	}
 }
 
