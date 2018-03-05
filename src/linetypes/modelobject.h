@@ -17,10 +17,7 @@
  */
 
 #pragma once
-#include <type_traits>
 #include "../main.h"
-#include "../basics.h"
-#include "../glShared.h"
 #include "../colors.h"
 #include "../serializer.h"
 
