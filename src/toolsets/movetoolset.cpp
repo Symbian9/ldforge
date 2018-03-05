@@ -45,10 +45,10 @@ void MoveToolset::moveSelection (bool up)
 	{
 		LDObject* obj = objs[i];
 
-		int idx = currentDocument()->indexOf(obj).row();
-		int target = idx + (up ? -1 : 1);
+		QModelIndex index = currentDocument()->indexOf(obj);
+		int target = index.row() + (up ? -1 : 1);
 
-		if ((up and idx == 0) or (not up and idx == countof(currentDocument()->objects()) - 1))
+		if ((up and index.row() == 0) or (not up and index.row() == countof(currentDocument()->objects()) - 1))
 		{
 			// One of the objects hit the extrema. If this happens, this should be the first
 			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
@@ -56,7 +56,7 @@ void MoveToolset::moveSelection (bool up)
 			return;
 		}
 
-		currentDocument()->swapObjects(obj, currentDocument()->getObject(target));
+		currentDocument()->swapObjects(index, currentDocument()->index(target));
 	}
 }
 

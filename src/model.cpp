@@ -82,16 +82,14 @@ void Model::insertFromArchive(int row, Serializer::Archive& archive)
 /*
  * Swaps one object with another, assuming they both are in this model.
  */
-bool Model::swapObjects(LDObject* one, LDObject* other)
+bool Model::swapObjects(const QModelIndex& index_1, const QModelIndex& index_2)
 {
-	QModelIndex a = indexOf(one);
-	QModelIndex b = indexOf(other);
-
-	if (a.isValid() and b.isValid() and a != b)
+	if (index_1.isValid() and index_2.isValid() and index_1 != index_2)
 	{
-		_objects[b.row()] = one;
-		_objects[a.row()] = other;
-		emit objectsSwapped(a, b);
+		qSwap(_objects[index_1.row()], _objects[index_2.row()]);
+		emit objectsSwapped(index_1, index_2);
+		emit dataChanged(index_1, index_1);
+		emit dataChanged(index_2, index_2);
 		return true;
 	}
 	else

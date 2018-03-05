@@ -74,7 +74,6 @@ public:
 	void setName (QString value);
 	void setSavePosition (long value);
 	void setTabIndex (int value);
-	bool swapObjects (LDObject* one, LDObject* other);
 	int tabIndex() const;
 	void undo();
 	void vertexChanged (const Vertex& a, const Vertex& b);

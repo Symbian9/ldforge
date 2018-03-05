@@ -89,7 +89,7 @@ public:
 
 	void insertCopy(int position, LDObject* object);
 	void insertFromArchive(int row, Serializer::Archive& archive);
-	bool swapObjects(LDObject* one, LDObject* other);
+	bool swapObjects(const QModelIndex& index_1, const QModelIndex& index_2);
 	bool setObjectAt(int idx, Serializer::Archive& archive);
 	template<typename T, typename... Args> T* emplace(Args&& ...args);
 	template<typename T, typename... Args> T* emplaceAt(int position, Args&& ...args);

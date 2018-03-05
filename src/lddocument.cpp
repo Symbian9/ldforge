@@ -41,6 +41,15 @@ LDDocument::LDDocument (DocumentManager* parent) :
 		this,
 		SLOT(handleNewObject(QModelIndex))
 	);
+
+	connect(
+		this,
+		&Model::objectsSwapped,
+		[&](const QModelIndex& index_1, const QModelIndex& index_2)
+		{
+			history()->add<SwapHistoryEntry>(index_1, index_2);
+		}
+	);
 }
 
 LDDocument::~LDDocument()
@@ -415,20 +424,6 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 			static_cast<LDSubfileReference*>(object)->inlineContents(documentManager(), model, deep, renderinline);
 		else
 			model.addFromString(object->asText());
-	}
-}
-// =============================================================================
-//
-bool LDDocument::swapObjects (LDObject* one, LDObject* other)
-{
-	if (Model::swapObjects(one, other))
-	{
-		history()->add<SwapHistoryEntry>(one->id(), other->id());
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 

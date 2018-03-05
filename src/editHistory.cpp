@@ -188,15 +188,16 @@ void EditHistoryEntry::redo()
 	parent()->document()->setObjectAt(row, newState);
 }
 
-SwapHistoryEntry::SwapHistoryEntry (int a, int b, EditHistory* parent) :
+SwapHistoryEntry::SwapHistoryEntry (const QModelIndex& index_1, const QModelIndex& index_2, EditHistory* parent) :
 	AbstractHistoryEntry {parent},
-	m_a (a),
-	m_b (b) {}
+	row_1 (index_1.row()),
+	row_2 (index_2.row()) {}
 
 
 void SwapHistoryEntry::undo()
 {
-	parent()->document()->swapObjects(LDObject::fromID (m_a), LDObject::fromID (m_b));
+	Model* model = parent()->document();
+	model->swapObjects(model->index(row_1), model->index(row_2));
 }
 
 void SwapHistoryEntry::redo()

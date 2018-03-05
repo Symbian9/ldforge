@@ -119,11 +119,11 @@ private:
 class SwapHistoryEntry : public AbstractHistoryEntry
 {
 public:
-	SwapHistoryEntry (int a, int b, EditHistory* parent);
+	SwapHistoryEntry (const QModelIndex& index_1, const QModelIndex& index_2, EditHistory* parent);
 	void undo() override;
 	void redo() override;
 
 private:
-	int m_a;
-	int m_b;
+	int row_1;
+	int row_2;
 };
