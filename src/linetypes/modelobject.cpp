@@ -131,13 +131,6 @@ LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v
 
 // =============================================================================
 //
-void LDObject::setDocument (Model* model)
-{
-	_model = model;
-}
-
-// =============================================================================
-//
 static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColor parentcolor)
 {
 	switch (obj->type())
@@ -288,11 +281,6 @@ LDColor LDObject::color() const
 QColor LDObject::randomColor() const
 {
 	return m_randomColor;
-}
-
-Model* LDObject::model() const
-{
-	return _model;
 }
 
 // =============================================================================

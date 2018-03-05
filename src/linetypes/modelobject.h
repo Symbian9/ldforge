@@ -68,7 +68,6 @@ public:
 	virtual QString asText() const = 0; // This object as LDraw code
 	LDColor color() const;
 	virtual LDColor defaultColor() const; // What color does the object default to?
-	Model* model() const;
 	LDPolygon* getPolygon();
 	virtual void getVertices (DocumentManager *context, QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
@@ -99,15 +98,12 @@ signals:
 	void codeChanged(const LDObjectState& before, const LDObjectState& after);
 
 protected:
-	void setDocument(Model* model);
-
 	template<typename T>
 	void changeProperty(T* property, const T& value);
 
 private:
 	bool m_hasInvertNext = false;
 	bool m_isHidden;
-	Model* _model;
 	qint32 m_id;
 	LDColor m_color;
 	QColor m_randomColor;

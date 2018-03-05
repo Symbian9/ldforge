@@ -40,16 +40,15 @@ void MoveToolset::moveSelection (bool up)
 	int start = up ? 0 : (countof(objs) - 1);
 	int end = up ? countof(objs) : -1;
 	int increment = up ? 1 : -1;
-	Model* model = (*objs.begin())->model();
 
 	for (int i = start; i != end; i += increment)
 	{
 		LDObject* obj = objs[i];
 
-		int idx = model->indexOf(obj).row();
+		int idx = currentDocument()->indexOf(obj).row();
 		int target = idx + (up ? -1 : 1);
 
-		if ((up and idx == 0) or (not up and idx == countof(model->objects()) - 1))
+		if ((up and idx == 0) or (not up and idx == countof(currentDocument()->objects()) - 1))
 		{
 			// One of the objects hit the extrema. If this happens, this should be the first
 			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
@@ -57,7 +56,7 @@ void MoveToolset::moveSelection (bool up)
 			return;
 		}
 
-		model->swapObjects(obj, model->getObject(target));
+		currentDocument()->swapObjects(obj, currentDocument()->getObject(target));
 	}
 }
 
