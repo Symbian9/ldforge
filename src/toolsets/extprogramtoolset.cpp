@@ -327,7 +327,7 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 	for (LDObject* object : model.objects())
 	{
 		if (object->isScemantic())
-			currentDocument()->addObject(object);
+			currentDocument()->insertCopy(currentDocument()->size(), object);
 	}
 
 	m_window->doFullRefresh();

@@ -59,6 +59,8 @@ private:
 	double m_values[9];
 };
 
+Q_DECLARE_METATYPE(Matrix)
+
 /*
  * A structure that provides a view into a row in a matrix.
  * This is returned by operator[] so that the matrix can be accessed by A[i][j]

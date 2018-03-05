@@ -33,7 +33,15 @@ LDDocument::LDDocument (DocumentManager* parent) :
     m_history (new EditHistory (this)),
 	m_savePosition(-1),
     m_tabIndex(-1),
-	m_manager (parent) {}
+	m_manager (parent)
+{
+	connect(
+		this,
+		SIGNAL(objectAdded(QModelIndex)),
+		this,
+		SLOT(handleNewObject(QModelIndex))
+	);
+}
 
 LDDocument::~LDDocument()
 {
@@ -129,11 +137,6 @@ void LDDocument::redo()
 void LDDocument::clearHistory()
 {
 	history()->clear();
-}
-
-void LDDocument::addToHistory (AbstractHistoryEntry* entry)
-{
-	history()->add (entry);
 }
 
 void LDDocument::close()
@@ -257,41 +260,53 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 	return true;
 }
 
-// =============================================================================
-//
-void LDDocument::insertObject (int pos, LDObject* obj)
+void LDDocument::handleNewObject(const QModelIndex& index)
 {
-	Model::insertObject(pos, obj);
-	history()->add(new AddHistoryEntry {pos, obj});
-	connect(obj, SIGNAL(codeChanged(QString,QString)), this, SLOT(objectChanged(QString,QString)));
+	LDObject* object = lookup(index);
+	history()->add<AddHistoryEntry>(index);
+	connect(
+		object,
+		SIGNAL(codeChanged(LDObjectState, LDObjectState)),
+		this,
+		SLOT(objectChanged(LDObjectState, LDObjectState))
+	);
+	connect(
+		this,
+		SIGNAL(aboutToRemoveObject(QModelIndex)),
+		this,
+		SLOT(handleImminentObjectRemoval(QModelIndex)),
+		Qt::DirectConnection
+	);
 
 #ifdef DEBUG
 	if (not isFrozen())
-		print("Inserted object #%1 (%2) at %3\n", obj->id(), obj->typeName(), pos);
+		print("Inserted object #%1 (%2) at %3\n", object->id(), object->typeName(), index.row());
 #endif
 }
 
-void LDDocument::objectChanged(QString before, QString after)
+void LDDocument::objectChanged(const LDObjectState& before, const LDObjectState& after)
 {
-	LDObject* object = static_cast<LDObject*>(sender());
-	QModelIndex index = this->indexOf(object);
-	addToHistory(new EditHistoryEntry {index.row(), before, after});
-	redoVertices();
-	emit objectModified(object);
-	emit dataChanged(index, index);
+	LDObject* object = qobject_cast<LDObject*>(sender());
+
+	if (object)
+	{
+		QModelIndex index = this->indexOf(object);
+		history()->add<EditHistoryEntry>(index, before, after);
+		redoVertices();
+		emit objectModified(object);
+		emit dataChanged(index, index);
+	}
 }
 
-LDObject* LDDocument::withdrawAt(int position)
+void LDDocument::handleImminentObjectRemoval(const QModelIndex& index)
 {
-	LDObject* object = getObject(position);
+	LDObject* object = lookup(index);
 
 	if (not isFrozen() and not m_isBeingDestroyed)
 	{
-		history()->add(new DelHistoryEntry {position, object});
+		history()->add<DelHistoryEntry>(index);
 		m_objectVertices.remove(object);
 	}
-
-	return Model::withdrawAt(position);
 }
 
 // =============================================================================
@@ -408,7 +423,7 @@ bool LDDocument::swapObjects (LDObject* one, LDObject* other)
 {
 	if (Model::swapObjects(one, other))
 	{
-		addToHistory(new SwapHistoryEntry {one->id(), other->id()});
+		history()->add<SwapHistoryEntry>(one->id(), other->id());
 		return true;
 	}
 	else

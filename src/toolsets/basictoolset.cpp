@@ -109,7 +109,7 @@ void BasicToolset::doInline (bool deep)
 			// Merge in the inlined objects
 			for (LDObject* inlinedObject : inlined.objects())
 			{
-				currentDocument()->insertObject(row, inlinedObject);
+				currentDocument()->insertCopy(row, inlinedObject);
 				mainWindow()->select(currentDocument()->index(row));
 				row += 1;
 			}

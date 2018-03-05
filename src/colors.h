@@ -92,6 +92,7 @@ private:
 	qint32 m_index;
 };
 
+Q_DECLARE_METATYPE(LDColor)
 uint qHash(LDColor color);
 
 /*

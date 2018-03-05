@@ -19,11 +19,7 @@
 #include "../model.h"
 #include "conditionaledge.h"
 
-LDConditionalEdge::LDConditionalEdge(Model* model) :
-	LDEdgeLine {model} {}
-
-LDConditionalEdge::LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-	LDEdgeLine {model}
+LDConditionalEdge::LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
 	setVertex (0, v0);
 	setVertex (1, v1);

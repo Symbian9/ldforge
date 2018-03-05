@@ -19,16 +19,9 @@
 #include "edgeline.h"
 
 /*
- * Default-constructs this edge line.
- */
-LDEdgeLine::LDEdgeLine(Model* model) :
-	LDObject {model} {}
-
-/*
  * Constructs this edge line from two vertices.
  */
-LDEdgeLine::LDEdgeLine (Vertex v1, Vertex v2, Model* model) :
-	LDObject {model}
+LDEdgeLine::LDEdgeLine (Vertex v1, Vertex v2)
 {
 	setVertex(0, v1);
 	setVertex(1, v2);

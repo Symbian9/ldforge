@@ -22,6 +22,7 @@
 #include "../basics.h"
 #include "../glShared.h"
 #include "../colors.h"
+#include "../serializer.h"
 
 class Model;
 class LDDocument;
@@ -45,6 +46,7 @@ enum class LDObjectType
 	_End
 };
 
+Q_DECLARE_METATYPE(LDObjectType)
 MAKE_ITERABLE_ENUM(LDObjectType)
 
 inline int qHash(LDObjectType type)
@@ -60,6 +62,9 @@ class LDObject : public QObject
 	Q_OBJECT
 
 public:
+	LDObject();
+	virtual ~LDObject();
+
 	virtual QString asText() const = 0; // This object as LDraw code
 	LDColor color() const;
 	virtual LDColor defaultColor() const; // What color does the object default to?
@@ -71,7 +76,6 @@ public:
 	virtual bool isColored() const;
 	bool isHidden() const;
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
-	bool isSelected() const;
 	void move (Vertex vect);
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
@@ -86,16 +90,15 @@ public:
 	virtual LDObjectType type() const = 0;
 	virtual QString typeName() const = 0;
 	const Vertex& vertex (int i) const;
+	virtual void serialize(class Serializer& serializer);
 
 	static LDObject* fromID(qint32 id);
+	static LDObject* newFromType(LDObjectType type);
 
 signals:
-	void codeChanged(QString before, QString after);
+	void codeChanged(const LDObjectState& before, const LDObjectState& after);
 
 protected:
-	friend class Model;
-	LDObject (Model* model = nullptr);
-	virtual ~LDObject();
 	void setDocument(Model* model);
 
 	template<typename T>
@@ -104,7 +107,6 @@ protected:
 private:
 	bool m_hasInvertNext = false;
 	bool m_isHidden;
-	bool m_isSelected;
 	Model* _model;
 	qint32 m_id;
 	LDColor m_color;
@@ -119,20 +121,19 @@ Q_DECLARE_METATYPE(LDObject*)
  */
 class LDMatrixObject : public LDObject
 {
-	Vertex m_position;
-
 public:
+	LDMatrixObject() = default;
+	LDMatrixObject(const Matrix& transformationMatrix, const Vertex& pos);
+
 	const Vertex& position() const;
 	void setCoordinate (const Axis ax, double value);
 	void setPosition (const Vertex& a);
 	void setTransformationMatrix (const Matrix& value);
 	const Matrix& transformationMatrix() const;
-
-protected:
-	LDMatrixObject (Model* model = nullptr);
-	LDMatrixObject (const Matrix& transformationMatrix, const Vertex& pos, Model* model = nullptr);
+	void serialize(class Serializer& serializer) override;
 
 private:
+	Vertex m_position;
 	Matrix m_transformationMatrix;
 };
 
@@ -142,11 +143,12 @@ private:
 class LDError : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Error;
+	LDError() = default;
+	LDError(QString contents, QString reason);
 
 	virtual LDObjectType type() const override
 	{
-		return SubclassType;
+		return LDObjectType::Error;
 	}
 
 	virtual QString asText() const override;
@@ -155,11 +157,7 @@ public:
 	QString objectListText() const override;
 	bool isColored() const override { return false; }
 	QString typeName() const override { return "error"; }
-
-protected:
-	friend class Model;
-	LDError (Model* model);
-	LDError (QString contents, QString reason, Model* model = nullptr);
+	void serialize(class Serializer& serializer) override;
 
 private:
 	QString m_contents; // The LDraw code that was being parsed
@@ -184,24 +182,23 @@ enum class BfcStatement
 	_End
 };
 
+Q_DECLARE_METATYPE(BfcStatement)
 MAKE_ITERABLE_ENUM(BfcStatement)
 
 class LDBfc : public LDObject
 {
-	public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Bfc;
+public:
+	static const LDObjectType SubclassType = LDObjectType::Bfc;
+
+	LDBfc(BfcStatement type = BfcStatement::CertifyCCW);
 
 	virtual LDObjectType type() const override
 	{
-		return SubclassType;
+		return LDObjectType::Bfc;
 	}
 
 	virtual QString asText() const override;
-protected:
-	friend class Model;
-	LDBfc (Model* model);
 
-public:
 	bool isScemantic() const override { return statement() == BfcStatement::InvertNext; }
     QString objectListText() const override;
 	BfcStatement statement() const;
@@ -209,11 +206,9 @@ public:
 	QString statementToString() const;
 	bool isColored() const override { return false; }
 	QString typeName() const override { return "bfc"; }
+	void serialize(class Serializer& serializer) override;
 
 	static QString statementToString (BfcStatement statement);
-
-protected:
-	LDBfc (const BfcStatement type, Model* model = nullptr);
 
 private:
 	BfcStatement m_statement;
@@ -225,7 +220,10 @@ private:
 class LDSubfileReference : public LDMatrixObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::SubfileReference;
+	static const LDObjectType SubclassType = LDObjectType::SubfileReference;
+
+	LDSubfileReference() = default;
+	LDSubfileReference(QString referenceName, const Matrix& transformationMatrix, const Vertex& position);
 
 	virtual LDObjectType type() const override
 	{
@@ -242,11 +240,7 @@ public:
 	int triangleCount(DocumentManager *context) const override;
 	bool hasMatrix() const override { return true; }
 	QString typeName() const override { return "subfilereference"; }
-
-protected:
-	friend class Model;
-	LDSubfileReference(Model* model);
-	LDSubfileReference(QString referenceName, const Matrix& transformationMatrix, const Vertex& position, Model* model = nullptr);
+	void serialize(class Serializer& serializer) override;
 
 private:
 	QString m_referenceName;
@@ -258,7 +252,10 @@ private:
 class LDBezierCurve : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::BezierCurve;
+	static const LDObjectType SubclassType = LDObjectType::BezierCurve;
+
+	LDBezierCurve() = default;
+	LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
 	virtual LDObjectType type() const override
 	{
@@ -272,11 +269,6 @@ public:
 	int numVertices() const override { return 4; }
 	LDColor defaultColor() const override { return EdgeColor; }
 	QString typeName() const override { return "beziercurve"; }
-
-protected:
-	friend class Model;
-	LDBezierCurve (Model* model);
-	LDBezierCurve (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };
 
 enum
@@ -293,8 +285,8 @@ void LDObject::changeProperty(T* property, const T& value)
 {
 	if (*property != value)
 	{
-		QString before = asText();
+		Serializer::Archive before = Serializer::store(this);
 		*property = value;
-		emit codeChanged(before, asText());
+		emit codeChanged(before, Serializer::store(this));
 	}
 }

@@ -18,6 +18,7 @@
 
 #pragma once
 #include "main.h"
+#include "serializer.h"
 #include "linetypes/modelobject.h"
 
 class AbstractHistoryEntry;
@@ -30,8 +31,15 @@ public:
 	using Changeset = QList<AbstractHistoryEntry*>;
 
 	EditHistory (LDDocument* document);
+	~EditHistory();
 
-	void add (AbstractHistoryEntry* entry);
+	template<typename T, typename... Args>
+	void add(Args&&... args)
+	{
+		if (not isIgnoring())
+			m_currentChangeset << new T {args..., this};
+	}
+
 	void addStep();
 	const Changeset& changesetAt (int pos) const;
 	void clear();
@@ -59,57 +67,61 @@ private:
 class AbstractHistoryEntry
 {
 public:
-	AbstractHistoryEntry();
+	AbstractHistoryEntry(EditHistory* parent);
 	virtual ~AbstractHistoryEntry();
 
 	EditHistory* parent() const;
-	virtual void redo() const = 0;
-	void setParent (EditHistory* parent);
-	virtual void undo() const = 0;
+	virtual void redo() = 0;
+	virtual void undo() = 0;
 
 private:
-	EditHistory* m_parent;
+	EditHistory* const m_parent;
 };
 
 class AddHistoryEntry : public AbstractHistoryEntry
 {
 public:
-	AddHistoryEntry (int idx, LDObject* obj);
-	void undo() const override;
-	void redo() const override;
+	AddHistoryEntry (const QModelIndex& index, EditHistory* parent);
+	void undo() override;
+	void redo() override;
 	
 private:
-	int m_index;
-	QString m_code;
+	int m_row;
+	Serializer::Archive m_code;
 };
 
 class DelHistoryEntry : public AddHistoryEntry
 {
 public:
-	DelHistoryEntry (int idx, LDObject* obj);
-	void undo() const override;
-	void redo() const override;
+	using AddHistoryEntry::AddHistoryEntry;
+	void undo() override;
+	void redo() override;
 };
 
 class EditHistoryEntry : public AbstractHistoryEntry
 {
 public:
-	EditHistoryEntry (int idx, QString oldCode, QString newCode);
-	void undo() const override;
-	void redo() const override;
+	EditHistoryEntry(
+		const QModelIndex& index,
+		const Serializer::Archive& oldCode,
+		const Serializer::Archive& newCode,
+		EditHistory* parent
+	);
+	void undo() override;
+	void redo() override;
 	
 private:
-	int m_index;
-	QString m_oldCode;
-	QString m_newCode;
+	int row;
+	Serializer::Archive oldState;
+	Serializer::Archive newState;
 };
 
 class SwapHistoryEntry : public AbstractHistoryEntry
 {
 public:
-	SwapHistoryEntry (int a, int b);
-	void undo() const override;
-	void redo() const override;
+	SwapHistoryEntry (int a, int b, EditHistory* parent);
+	void undo() override;
+	void redo() override;
 
 private:
 	int m_a;

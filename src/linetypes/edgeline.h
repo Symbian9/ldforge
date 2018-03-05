@@ -25,20 +25,18 @@
 class LDEdgeLine : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::EdgeLine;
+	static const LDObjectType SubclassType = LDObjectType::EdgeLine;
+
+	LDEdgeLine() = default;
+	LDEdgeLine(Vertex v1, Vertex v2);
 
 	virtual LDObjectType type() const override
 	{
-		return SubclassType;
+		return LDObjectType::EdgeLine;
 	}
 
 	virtual QString asText() const override;
 	int numVertices() const override { return 2; }
 	LDColor defaultColor() const override { return EdgeColor; }
 	QString typeName() const override { return "line"; }
-
-protected:
-	friend class Model;
-	LDEdgeLine (Model* model);
-	LDEdgeLine (Vertex v1, Vertex v2, Model* model = nullptr);
 };

@@ -18,11 +18,7 @@
 
 #include "triangle.h"
 
-LDTriangle::LDTriangle(Model *model) :
-	LDObject {model} {}
-
-LDTriangle::LDTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-	LDObject {model}
+LDTriangle::LDTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
 	setVertex(0, v1);
 	setVertex(1, v2);

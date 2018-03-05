@@ -27,18 +27,16 @@ class LDTriangle : public LDObject
 public:
 	static constexpr LDObjectType SubclassType = LDObjectType::Triangle;
 
+	LDTriangle() = default;
+	LDTriangle(Vertex const& v1, Vertex const& v2, Vertex const& v3);
+
 	virtual LDObjectType type() const override
 	{
-		return SubclassType;
+		return LDObjectType::Triangle;
 	}
 
 	virtual QString asText() const override;
 	int triangleCount(DocumentManager*) const override;
 	int numVertices() const override { return 3; }
 	QString typeName() const override { return "triangle"; }
-
-protected:
-	friend class Model;
-	LDTriangle (Model* model);
-	LDTriangle (Vertex const& v1, Vertex const& v2, Vertex const& v3, Model* model = nullptr);
 };

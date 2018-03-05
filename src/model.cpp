@@ -25,6 +25,7 @@
 #include "linetypes/empty.h"
 #include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
+#include "editHistory.h"
 
 Model::Model(DocumentManager* manager) :
 	QAbstractListModel {manager},
@@ -36,12 +37,14 @@ Model::~Model()
 		delete _objects[i];
 }
 
-/*
- * Takes an existing object and migrates it to the end of this model. The object is removed from its old model in the process.
- */
-void Model::addObject(LDObject *object)
+void Model::installObject(int row, LDObject* object)
 {
-	insertObject(size(), object);
+	connect(object, SIGNAL(codeChanged(LDObjectState, LDObjectState)), this, SLOT(recountTriangles()));
+	beginInsertRows({}, row, row);
+	_objects.insert(row, object);
+	recountTriangles();
+	emit objectAdded(index(row));
+	endInsertRows();
 }
 
 /*
@@ -61,22 +64,19 @@ const QVector<LDObject*>& Model::objects() const
 }
 
 /*
- * Takes an existing object and migrates it to this model, at the specified position.
+ * Takes an existing object and copies it to this model, at the specified position.
  */
-void Model::insertObject(int position, LDObject* object)
+void Model::insertCopy(int position, LDObject* object)
 {
-	connect(object, SIGNAL(codeChanged(QString,QString)), this, SLOT(recountTriangles()));
+	installObject(position, Serializer::clone(object));
+}
 
-	if (object->model() and object->model() != this)
-		object->model()->withdraw(object);
+void Model::insertFromArchive(int row, Serializer::Archive& archive)
+{
+	LDObject* object = Serializer::restore(archive);
 
-	// TODO: check that the object isn't in the vector once there's a cheap way to do so!
-	beginInsertRows({}, position, position);
-	_objects.insert(position, object);
-	_needsTriangleRecount = true;
-	object->setDocument(this);
-	emit objectAdded(object);
-	endInsertRows();
+	if (object)
+		installObject(row, object);
 }
 
 /*
@@ -84,13 +84,14 @@ void Model::insertObject(int position, LDObject* object)
  */
 bool Model::swapObjects(LDObject* one, LDObject* other)
 {
-	int a = _objects.indexOf(one);
-	int b = _objects.indexOf(other);
+	QModelIndex a = indexOf(one);
+	QModelIndex b = indexOf(other);
 
-	if (a != b and a != -1 and b != -1)
+	if (a.isValid() and b.isValid() and a != b)
 	{
-		_objects[b] = one;
-		_objects[a] = other;
+		_objects[b.row()] = one;
+		_objects[a.row()] = other;
+		emit objectsSwapped(a, b);
 		return true;
 	}
 	else
@@ -102,17 +103,19 @@ bool Model::swapObjects(LDObject* one, LDObject* other)
 /*
  * Assigns a new object to the specified position in the model. The object that already is in the position is deleted in the process.
  */
-bool Model::setObjectAt(int idx, LDObject* obj)
+bool Model::setObjectAt(int row, Serializer::Archive& archive)
 {
-	if (idx < 0 or idx >= countof(_objects))
+	LDObject* object = Serializer::restore(archive);
+
+	if (object and row >= 0 and row < countof(_objects))
 	{
-		return false;
+		removeAt(row);
+		insertCopy(row, object);
+		return true;
 	}
 	else
 	{
-		removeAt(idx);
-		insertObject(idx, obj);
-		return true;
+		return false;
 	}
 }
 
@@ -143,7 +146,12 @@ void Model::remove(LDObject* object)
  */
 void Model::removeAt(int position)
 {
-	LDObject* object = withdrawAt(position);
+	beginRemoveRows({}, position, position);
+	LDObject* object = _objects[position];
+	emit aboutToRemoveObject(this->index(position));
+	_objects.removeAt(position);
+	_needsTriangleRecount = true;
+	endRemoveRows();
 	delete object;
 }
 
@@ -161,10 +169,10 @@ void Model::replace(LDObject* object, Model& model)
 
 	if (index.isValid())
 	{
-		for (int i = countof(model.objects()) - 1; i >= 1; i -= 1)
-			insertObject(index.row() + i, model.objects()[i]);
+		removeAt(index.row());
 
-		setObjectAt(index.row(), model.objects()[0]);
+		for (signed int i = countof(model.objects()) - 1; i >= 0; i -= 1)
+			insertCopy(index.row() + i, model.objects()[i]);
 	}
 }
 
@@ -208,7 +216,7 @@ void Model::merge(Model& other, int position)
 	// Inform the contents of their new owner
 	for (LDObject* object : objectsCopy)
 	{
-		insertObject(position, object);
+		insertCopy(position, object);
 		position += 1;
 	}
 
@@ -241,34 +249,6 @@ void Model::clear()
 
 	_triangleCount = 0;
 	_needsTriangleRecount = false;
-}
-
-/*
- * Drops the object from the model. The object becomes a free object as a result (thus violating the invariant that every object
- * has a model!). The caller must immediately add the withdrawn object to another model.
- *
- * This private method is only used to implement public API.
- */
-void Model::withdraw(LDObject* object)
-{
-	QModelIndex index = this->indexOf(object);
-
-	if (index.isValid())
-		withdrawAt(index.row());
-}
-
-/*
- * Drops an object from the model at the provided position. The caller must immediately put the result value object into a new model.
- */
-LDObject* Model::withdrawAt(int position)
-{
-	beginRemoveRows({}, position, position);
-	LDObject* object = _objects[position];
-	emit aboutToRemoveObject(object);
-	_objects.removeAt(position);
-	_needsTriangleRecount = true;
-	endRemoveRows();
-	return object;
 }
 
 /*

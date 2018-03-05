@@ -31,8 +31,4 @@ public:
 	QString objectListText() const override;
 	LDObjectType type() const override;
 	QString typeName() const override;
-
-protected:
-	friend class Model;
-	LDEmpty(Model* model);
 };

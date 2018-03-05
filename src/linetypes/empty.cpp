@@ -19,9 +19,6 @@
 
 #include "empty.h"
 
-LDEmpty::LDEmpty(Model* model) :
-    LDObject{model} {}
-
 QString LDEmpty::typeName() const
 {
 	return "empty";

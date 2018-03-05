@@ -123,7 +123,7 @@ void FileToolset::insertFrom()
 
 			for (LDObject* object : model.objects())
 			{
-				currentDocument()->insertObject (position, object);
+				currentDocument()->insertCopy (position, object);
 				mainWindow()->select(currentDocument()->index(position));
 				position += 1;
 			}

@@ -28,6 +28,11 @@ EditHistory::EditHistory (LDDocument* document) :
 	m_isIgnoring (false),
 	m_position (-1) {}
 
+EditHistory::~EditHistory()
+{
+	clear();
+}
+
 void EditHistory::undo()
 {
 	if (m_changesets.isEmpty() or position() == -1)
@@ -58,7 +63,7 @@ void EditHistory::redo()
 	const Changeset& set = changesetAt (position() + 1);
 
 	// Redo things in original order
-	for (const AbstractHistoryEntry* change : set)
+	for (AbstractHistoryEntry* change : set)
 		change->redo();
 
 	++m_position;
@@ -96,18 +101,6 @@ void EditHistory::addStep()
 	emit stepAdded();
 }
 
-void EditHistory::add (AbstractHistoryEntry* entry)
-{
-	if (isIgnoring())
-	{
-		delete entry;
-		return;
-	}
-
-	entry->setParent (this);
-	m_currentChangeset << entry;
-}
-
 int EditHistory::size() const
 {
 	return countof(m_changesets);
@@ -138,11 +131,9 @@ LDDocument* EditHistory::document() const
 	return m_document;
 }
 
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
+AbstractHistoryEntry::AbstractHistoryEntry(EditHistory* parent) :
+	m_parent {parent} {}
 
-AbstractHistoryEntry::AbstractHistoryEntry() {}
 AbstractHistoryEntry::~AbstractHistoryEntry() {}
 
 EditHistory* AbstractHistoryEntry::parent() const
@@ -150,83 +141,65 @@ EditHistory* AbstractHistoryEntry::parent() const
 	return m_parent;
 }
 
-void AbstractHistoryEntry::setParent (EditHistory* parent)
+AddHistoryEntry::AddHistoryEntry(const QModelIndex& index, EditHistory* parent) :
+	AbstractHistoryEntry {parent},
+	m_row {index.row()},
+	m_code {Serializer::store(parent->document()->lookup(index))} {}
+
+void AddHistoryEntry::undo()
 {
-	m_parent = parent;
-}
-
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-AddHistoryEntry::AddHistoryEntry (int idx, LDObject* obj) :
-	m_index (idx),
-	m_code (obj->asText()) {}
-
-void AddHistoryEntry::undo() const
-{
-	LDObject* object = parent()->document()->getObject(m_index);
+	LDObject* object = parent()->document()->getObject(m_row);
 	parent()->document()->remove(object);
 }
 
-void AddHistoryEntry::redo() const
+void AddHistoryEntry::redo()
 {
-	parent()->document()->insertFromString(m_index, m_code);
+	parent()->document()->insertFromArchive(m_row, m_code);
 }
 
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-DelHistoryEntry::DelHistoryEntry (int idx, LDObject* obj) :
-	AddHistoryEntry (idx, obj) {}
-
-void DelHistoryEntry::undo() const
+void DelHistoryEntry::undo()
 {
 	AddHistoryEntry::redo();
 }
 
-void DelHistoryEntry::redo() const
+void DelHistoryEntry::redo()
 {
 	AddHistoryEntry::undo();
 }
 
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
+EditHistoryEntry::EditHistoryEntry(
+	const QModelIndex& index,
+	const Serializer::Archive& oldState,
+	const Serializer::Archive& newState,
+	EditHistory* parent
+) :
+	AbstractHistoryEntry {parent},
+	row {index.row()},
+	oldState {oldState},
+	newState {newState} {}
 
-EditHistoryEntry::EditHistoryEntry (int idx, QString oldCode, QString newCode) :
-	m_index (idx),
-	m_oldCode (oldCode),
-	m_newCode (newCode) {}
-
-void EditHistoryEntry::undo() const
+void EditHistoryEntry::undo()
 {
-	LDObject* object = parent()->document()->getObject (m_index);
-	parent()->document()->replaceWithFromString(object, m_oldCode);
+	parent()->document()->setObjectAt(row, oldState);
 }
 
-void EditHistoryEntry::redo() const
+void EditHistoryEntry::redo()
 {
-	LDObject* object = parent()->document()->getObject (m_index);
-	parent()->document()->replaceWithFromString(object, m_newCode);
+	parent()->document()->setObjectAt(row, newState);
 }
 
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-SwapHistoryEntry::SwapHistoryEntry (int a, int b) :
+SwapHistoryEntry::SwapHistoryEntry (int a, int b, EditHistory* parent) :
+	AbstractHistoryEntry {parent},
 	m_a (a),
 	m_b (b) {}
 
 
-void SwapHistoryEntry::undo() const
+void SwapHistoryEntry::undo()
 {
 	parent()->document()->swapObjects(LDObject::fromID (m_a), LDObject::fromID (m_b));
 }
 
-void SwapHistoryEntry::redo() const
+void SwapHistoryEntry::redo()
 {
 	undo();
 }

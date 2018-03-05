@@ -47,7 +47,6 @@ public:
 	~LDDocument();
 
 	void addHistoryStep();
-	void addToHistory (AbstractHistoryEntry* entry);
 	void clearHistory();
 	void close();
 	QString defaultName() const;
@@ -59,7 +58,6 @@ public:
 	void inlineContents(Model& model, bool deep, bool renderinline);
 	QList<LDPolygon> inlinePolygons();
 	const QSet<Vertex>& inlineVertices();
-	void insertObject (int pos, LDObject* obj);
 	bool isFrozen() const;
 	bool isSafeToClose();
 	QString name() const;
@@ -83,9 +81,6 @@ public:
 
 	static QString shortenName (QString a); // Turns a full path into a relative path
 
-public slots:
-	void objectChanged(QString before, QString after);
-
 protected:
 	LDObject* withdrawAt(int position);
 
@@ -105,6 +100,17 @@ private:
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
 	DocumentManager* m_manager;
+
+	template<typename T, typename... Args>
+	void addToHistory(Args&&... args)
+	{
+		m_history->add<T>(args...);
+	}
+
+private slots:
+	void objectChanged(const LDObjectState &before, const LDObjectState &after);
+	void handleNewObject(const QModelIndex& index);
+	void handleImminentObjectRemoval(const QModelIndex& index);
 };
 
 // Parses a string line containing an LDraw object and returns the object parsed.

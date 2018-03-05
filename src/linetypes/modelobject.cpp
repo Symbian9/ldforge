@@ -27,27 +27,23 @@
 #include "../colors.h"
 #include "../glcompiler.h"
 #include "edgeline.h"
+#include "triangle.h"
+#include "quadrilateral.h"
+#include "conditionaledge.h"
+#include "comment.h"
+#include "empty.h"
 
 // List of all LDObjects
 QMap<qint32, LDObject*> g_allObjects;
 
 enum { MAX_LDOBJECT_IDS = (1 << 24) };
 
-#define LDOBJ_DEFAULT_CTOR(T,BASE) \
-	T :: T (Model* model) : \
-	    BASE {model} {}
-
 // =============================================================================
 // LDObject constructors
 //
-LDObject::LDObject (Model* model) :
-    m_isHidden {false},
-    m_isSelected {false},
-    _model {model},
-    m_coords {{0, 0, 0}}
+LDObject::LDObject() :
+	m_isHidden {false}
 {
-	assert(_model != nullptr);
-
 	// Let's hope that nobody goes to create 17 million objects anytime soon...
 	static qint32 nextId = 1; // 0 shalt be null
 	if (nextId < MAX_LDOBJECT_IDS)
@@ -60,13 +56,6 @@ LDObject::LDObject (Model* model) :
 
 	m_randomColor = QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128);
 }
-
-LDSubfileReference::LDSubfileReference (Model* model) :
-    LDMatrixObject (model) {}
-
-LDOBJ_DEFAULT_CTOR (LDError, LDObject)
-LDOBJ_DEFAULT_CTOR (LDBfc, LDObject)
-LDOBJ_DEFAULT_CTOR (LDBezierCurve, LDObject)
 
 LDObject::~LDObject()
 {
@@ -132,13 +121,12 @@ int LDObject::numPolygonVertices() const
 
 // =============================================================================
 //
-LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model) :
-    LDObject {model}
+LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
-	setVertex (0, v0);
-	setVertex (1, v1);
-	setVertex (2, v2);
-	setVertex (3, v3);
+	setVertex(0, v0);
+	setVertex(1, v1);
+	setVertex(2, v2);
+	setVertex(3, v3);
 }
 
 // =============================================================================
@@ -287,11 +275,6 @@ void LDObject::setHidden (bool value)
 	m_isHidden = value;
 }
 
-bool LDObject::isSelected() const
-{
-	return m_isSelected;
-}
-
 qint32 LDObject::id() const
 {
 	return m_id;
@@ -319,6 +302,47 @@ LDObject* LDObject::fromID(qint32 id)
 	return g_allObjects.value(id);
 }
 
+LDObject* LDObject::newFromType(LDObjectType type)
+{
+	switch (type)
+	{
+	case LDObjectType::SubfileReference:
+		return new LDSubfileReference {};
+
+	case LDObjectType::Quadrilateral:
+		return new LDQuadrilateral {};
+
+	case LDObjectType::Triangle:
+		return new LDTriangle {};
+
+	case LDObjectType::EdgeLine:
+		return new LDEdgeLine {};
+
+	case LDObjectType::ConditionalEdge:
+		return new LDConditionalEdge {};
+
+	case LDObjectType::Bfc:
+		return new LDBfc {};
+
+	case LDObjectType::Comment:
+		return new LDComment {};
+
+	case LDObjectType::Error:
+		return new LDError {};
+
+	case LDObjectType::Empty:
+		return new LDEmpty {};
+
+	case LDObjectType::BezierCurve:
+		return new LDBezierCurve {};
+
+	case LDObjectType::_End:
+		break;
+	}
+
+	return nullptr;
+}
+
 // =============================================================================
 //
 void LDObject::setColor (LDColor color)
@@ -344,12 +368,7 @@ void LDObject::setVertex (int i, const Vertex& vert)
 	changeProperty(&m_coords[i], vert);
 }
 
-LDMatrixObject::LDMatrixObject (Model* model) :
-    LDObject (model),
-    m_position {0, 0, 0} {}
-
-LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos, Model* model) :
-    LDObject (model),
+LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos) :
 	m_position (pos),
 	m_transformationMatrix (transform) {}
 
@@ -391,8 +410,7 @@ void LDMatrixObject::setTransformationMatrix (const Matrix& val)
 	changeProperty(&m_transformationMatrix, val);
 }
 
-LDError::LDError (QString contents, QString reason, Model* model) :
-    LDObject (model),
+LDError::LDError (QString contents, QString reason) :
 	m_contents (contents),
 	m_reason (reason) {}
 
@@ -406,8 +424,7 @@ QString LDError::contents() const
 	return m_contents;
 }
 
-LDBfc::LDBfc (const BfcStatement type, Model* model) :
-    LDObject {model},
+LDBfc::LDBfc (const BfcStatement type) :
     m_statement {type} {}
 
 BfcStatement LDBfc::statement() const
@@ -501,10 +518,9 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 LDSubfileReference::LDSubfileReference(
 	QString referenceName,
 	const Matrix& transformationMatrix,
-	const Vertex& position,
-	Model* model
+	const Vertex& position
 ) :
-	LDMatrixObject {transformationMatrix, position, model},
+	LDMatrixObject {transformationMatrix, position},
 	m_referenceName {referenceName} {}
 
 // =============================================================================
@@ -581,4 +597,43 @@ bool LDObject::isInverted() const
 void LDObject::setInverted(bool value)
 {
 	changeProperty(&m_hasInvertNext, value);
+}
+
+void LDObject::serialize(Serializer& serializer)
+{
+	serializer << m_hasInvertNext;
+	serializer << m_isHidden;
+	serializer << m_id;
+	serializer << m_color;
+	serializer << m_randomColor;
+	serializer << m_coords[0];
+	serializer << m_coords[1];
+	serializer << m_coords[2];
+	serializer << m_coords[3];
+}
+
+void LDMatrixObject::serialize(Serializer& serializer)
+{
+	LDObject::serialize(serializer);
+	serializer << m_position;
+	serializer << m_transformationMatrix;
+}
+
+void LDBfc::serialize(Serializer& serializer)
+{
+	LDObject::serialize(serializer);
+	serializer << m_statement;
+}
+
+void LDError::serialize(Serializer& serializer)
+{
+	LDObject::serialize(serializer);
+	serializer << m_contents;
+	serializer << m_reason;
+}
+
+void LDSubfileReference::serialize(Serializer& serializer)
+{
+	LDMatrixObject::serialize(serializer);
+	serializer << m_referenceName;
 }

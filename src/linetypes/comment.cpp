@@ -17,12 +17,9 @@
  */
 
 #include "comment.h"
+#include "../editHistory.h"
 
-LDComment::LDComment(Model* model) :
-    LDObject {model} {}
-
-LDComment::LDComment(QString text, Model* model) :
-    LDObject {model},
+LDComment::LDComment(QString text) :
     m_text {text} {}
 
 LDObjectType LDComment::type() const
@@ -63,4 +60,10 @@ QString LDComment::objectListText() const
 QString LDComment::asText() const
 {
 	return format ("0 %1", text());
+}
+
+void LDComment::serialize(Serializer& serializer)
+{
+	LDObject::serialize(serializer);
+	serializer << m_text;
 }

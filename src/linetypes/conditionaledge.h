@@ -25,11 +25,14 @@
 class LDConditionalEdge : public LDEdgeLine
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::ConditionalEdge;
+	static const LDObjectType SubclassType = LDObjectType::ConditionalEdge;
+
+	LDConditionalEdge() = default;
+	LDConditionalEdge(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 
 	virtual LDObjectType type() const override
 	{
-		return SubclassType;
+		return LDObjectType::ConditionalEdge;
 	}
 
 	virtual QString asText() const override;
@@ -37,9 +40,4 @@ public:
 	int numPolygonVertices() const override { return 2; }
 	LDColor defaultColor() const override { return EdgeColor; }
 	QString typeName() const override { return "condline"; }
-
-protected:
-	friend class Model;
-	LDConditionalEdge (Model* model);
-	LDConditionalEdge (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3, Model* model = nullptr);
 };

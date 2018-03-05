@@ -69,8 +69,10 @@ void AlgorithmToolset::splitQuads()
 		// │   │  --→  │ ╱    ╱ │
 		// │   │  --→  │╱    ╱  │
 		// 1───2       1    1───2
-		LDTriangle* triangle1 = currentDocument()->emplaceReplacementAt<LDTriangle>(index.row(), v0, v1, v3);
-		LDTriangle* triangle2 = currentDocument()->emplaceAt<LDTriangle>(index.row() + 1, v1, v2, v3);
+		int row = index.row();
+		currentDocument()->removeAt(index);
+		LDTriangle* triangle1 = currentDocument()->emplaceAt<LDTriangle>(row, v0, v1, v3);
+		LDTriangle* triangle2 = currentDocument()->emplaceAt<LDTriangle>(row + 1, v1, v2, v3);
 
 		// The triangles also inherit the quad's color
 		triangle1->setColor(color);

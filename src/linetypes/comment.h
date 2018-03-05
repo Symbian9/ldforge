@@ -25,7 +25,9 @@
 class LDComment : public LDObject
 {
 public:
-	static constexpr LDObjectType SubclassType = LDObjectType::Comment;
+	static const LDObjectType SubclassType = LDObjectType::Comment;
+
+	LDComment(QString text = "");
 
 	QString asText() const override;
 	bool isColored() const override;
@@ -35,11 +37,7 @@ public:
 	LDObjectType type() const override;
 	QString typeName() const override;
 	void setText(QString value);
-
-protected:
-	LDComment(QString text, Model* model);
-	LDComment(Model* model);
-	friend class Model;
+	void serialize(class Serializer& serializer) override;
 
 private:
 	QString m_text;

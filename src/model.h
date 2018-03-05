@@ -19,6 +19,7 @@
 #pragma once
 #include <QAbstractListModel>
 #include "main.h"
+#include "serializer.h"
 #include "linetypes/modelobject.h"
 
 class IndexGenerator
@@ -86,14 +87,12 @@ public:
 	Model(const Model& other) = delete;
 	~Model();
 
-	void addObject(LDObject* object);
-	virtual void insertObject(int position, LDObject* object);
-	virtual bool swapObjects(LDObject* one, LDObject* other);
-	virtual bool setObjectAt(int idx, LDObject* obj);
+	void insertCopy(int position, LDObject* object);
+	void insertFromArchive(int row, Serializer::Archive& archive);
+	bool swapObjects(LDObject* one, LDObject* other);
+	bool setObjectAt(int idx, Serializer::Archive& archive);
 	template<typename T, typename... Args> T* emplace(Args&& ...args);
 	template<typename T, typename... Args> T* emplaceAt(int position, Args&& ...args);
-	template<typename T, typename... Args> T* emplaceReplacement(LDObject* object, Args&& ...args);
-	template<typename T, typename... Args> T* emplaceReplacementAt(int position, Args&& ...args);
 	void removeAt(int position);
 	void removeAt(const QModelIndex& index);
 	void remove(LDObject* object);
@@ -119,22 +118,23 @@ public:
 
 	int rowCount(const QModelIndex& parent) const override;
 	QVariant data(const QModelIndex& index, int role) const override;
-	// bool removeRows(int row, int count, const QModelIndex& ) override;
 
 signals:
-	void objectAdded(LDObject* object);
-	void aboutToRemoveObject(LDObject* object);
+	void objectAdded(const QModelIndex& object);
+	void aboutToRemoveObject(const QModelIndex& index);
 	void objectModified(LDObject* object);
+	void objectsSwapped(const QModelIndex& index_1, const QModelIndex& index_2);
 
 protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);
-	void withdraw(LDObject* object);
-	virtual LDObject* withdrawAt(int position);
 
 	QVector<LDObject*> _objects;
 	class DocumentManager* _manager;
 	mutable int _triangleCount = 0;
 	mutable bool _needsTriangleRecount;
+
+private:
+	void installObject(int row, LDObject* object);
 };
 
 int countof(Model& model);
@@ -146,7 +146,7 @@ int countof(Model& model);
  *
  * For instance, the LDLine contains a constructor as such:
  *
- *     LDLine(Vertex v1, Vertex v2, Model* model);
+ *     LDLine(Vertex v1, Vertex v2);
  *
  * This constructor can be invoked as such:
  *
@@ -155,9 +155,7 @@ int countof(Model& model);
 template<typename T, typename... Args>
 T* Model::emplace(Args&& ...args)
 {
-	T* object = constructObject<T>(args...);
-	addObject(object);
-	return object;
+	return emplaceAt<T>(size(), args...);
 }
 
 /*
@@ -168,41 +166,8 @@ template<typename T, typename... Args>
 T* Model::emplaceAt(int position, Args&& ...args)
 {
 	T* object = constructObject<T>(args...);
-	insertObject(position, object);
+	installObject(position, object);
 	return object;
-}
-
-/*
- * Like emplace<>() but instead of inserting the constructed object, the new object replaces the object given in the first parameter.
- * If the old object cannot be replaced, the new object will not be constructed at all.
- */
-template<typename T, typename... Args>
-T* Model::emplaceReplacement(LDObject* object, Args&& ...args)
-{
-	QModelIndex position = this->indexOf(object);
-
-	if (position.isValid())
-	{
-		T* replacement = constructObject<T>(args...);
-		setObjectAt(position.row(), replacement);
-		return replacement;
-	}
-	else
-	{
-		return nullptr;
-	}
-}
-
-/*
- * Like emplaceAt<>() but instead of inserting the constructed object, it replaces the document at the given spot instead.
- * The replaced object is deleted in the process.
- */
-template<typename T, typename... Args>
-T* Model::emplaceReplacementAt(int position, Args&& ...args)
-{
-	T* replacement = constructObject<T>(args...);
-	setObjectAt(position, replacement);
-	return replacement;
 }
 
 /*
@@ -212,7 +177,7 @@ template<typename T, typename... Args>
 T* Model::constructObject(Args&& ...args)
 {
 	static_assert (std::is_base_of<LDObject, T>::value, "Can only use this function with LDObject-derivatives");
-	T* object = new T {args..., this};
+	T* object = new T {args...};
 
 	// Set default color. Relying on virtual functions, this cannot be done in the c-tor.
 	// TODO: store -1 as the default color
