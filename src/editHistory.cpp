@@ -188,19 +188,31 @@ void EditHistoryEntry::redo()
 	parent()->document()->setObjectAt(row, newState);
 }
 
-SwapHistoryEntry::SwapHistoryEntry (const QModelIndex& index_1, const QModelIndex& index_2, EditHistory* parent) :
+MoveHistoryEntry::MoveHistoryEntry(int top, int bottom, int destination, EditHistory* parent) :
 	AbstractHistoryEntry {parent},
-	row_1 (index_1.row()),
-	row_2 (index_2.row()) {}
+	top {top},
+	bottom {bottom},
+	destination {destination} {}
 
-
-void SwapHistoryEntry::undo()
+void MoveHistoryEntry::undo()
 {
-	Model* model = parent()->document();
-	model->swapObjects(model->index(row_1), model->index(row_2));
+	bool downwards = (destination < top);
+	parent()->document()->moveRows(
+		{},
+		downwards ? (destination) : (destination - (bottom - top) - 1),
+		bottom - top + 1,
+		{},
+		downwards ? (bottom + 1) : top
+	);
 }
 
-void SwapHistoryEntry::redo()
+void MoveHistoryEntry::redo()
 {
-	undo();
+	parent()->document()->moveRows(
+		{},
+		top,
+		bottom - top + 1,
+		{},
+		destination
+	);
 }

@@ -19,6 +19,7 @@
 #include "model.h"
 #include "linetypes/modelobject.h"
 #include "documentmanager.h"
+#include "generics/migrate.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"
@@ -79,17 +80,21 @@ void Model::insertFromArchive(int row, Serializer::Archive& archive)
 		installObject(row, object);
 }
 
-/*
- * Swaps one object with another, assuming they both are in this model.
- */
-bool Model::swapObjects(const QModelIndex& index_1, const QModelIndex& index_2)
-{
-	if (index_1.isValid() and index_2.isValid() and index_1 != index_2)
-	{
-		qSwap(_objects[index_1.row()], _objects[index_2.row()]);
-		emit objectsSwapped(index_1, index_2);
-		emit dataChanged(index_1, index_1);
-		emit dataChanged(index_2, index_2);
+bool Model::moveRows(
+	const QModelIndex&,
+	int sourceRow,
+	int count,
+	const QModelIndex&,
+	int destinationRow
+) {
+	int sourceRowLast = sourceRow + count - 1;
+
+	if (range(0, 1, size() - count).contains(sourceRow)
+		and range(0, 1, size()).contains(destinationRow)
+	) {
+		beginMoveRows({}, sourceRow, sourceRowLast, {}, destinationRow);
+		migrate(_objects, sourceRow, sourceRowLast, destinationRow);
+		endMoveRows();
 		return true;
 	}
 	else

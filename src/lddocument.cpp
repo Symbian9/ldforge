@@ -44,10 +44,10 @@ LDDocument::LDDocument (DocumentManager* parent) :
 
 	connect(
 		this,
-		&Model::objectsSwapped,
-		[&](const QModelIndex& index_1, const QModelIndex& index_2)
+		&Model::rowsMoved,
+		[&](const QModelIndex&, int start, int end, const QModelIndex&, int row)
 		{
-			history()->add<SwapHistoryEntry>(index_1, index_2);
+			history()->add<MoveHistoryEntry>(start, end, row);
 		}
 	);
 }

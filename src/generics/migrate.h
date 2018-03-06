@@ -16,22 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// =============================================================================
-// This file is included one way or another in every source file of LDForge.
-// Stuff defined and included here is universally included.
-
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <QSet>
-#include <QString>
-#include <QTextFormat>
-#include "macros.h"
-#include "version.h"
-#include "format.h"
-#include "configuration.h"
-#include "generics/range.h"
+#include <algorithm>
+#include "range.h"
 
-extern Configuration* config;
+template<typename T>
+void migrate(T& vector, int first, int last, int destination)
+{
+	if (destination < first)
+	{
+		int n = first - destination;
+		for (int i : range(first, first + 1, last))
+		{
+			for (int step : range(i - 1, i - 2, i - n))
+				std::swap(vector[step + 1], vector[step]);
+		}
+	}
+	else if (destination > last)
+	{
+		int n = destination - last - 1;
+
+		for (int i : range(last, last - 1, first))
+		{
+			for (int step : range(i + 1, i + 2, i + n))
+				std::swap(vector[step - 1], vector[step]);
+		}
+	}
+}

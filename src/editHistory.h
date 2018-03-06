@@ -116,14 +116,15 @@ private:
 	Serializer::Archive newState;
 };
 
-class SwapHistoryEntry : public AbstractHistoryEntry
+class MoveHistoryEntry : public AbstractHistoryEntry
 {
 public:
-	SwapHistoryEntry (const QModelIndex& index_1, const QModelIndex& index_2, EditHistory* parent);
+	MoveHistoryEntry(int top, int bottom, int destination, EditHistory* parent);
 	void undo() override;
 	void redo() override;
 
 private:
-	int row_1;
-	int row_2;
+	int top;
+	int bottom;
+	int destination;
 };

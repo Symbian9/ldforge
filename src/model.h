@@ -89,7 +89,6 @@ public:
 
 	void insertCopy(int position, LDObject* object);
 	void insertFromArchive(int row, Serializer::Archive& archive);
-	bool swapObjects(const QModelIndex& index_1, const QModelIndex& index_2);
 	bool setObjectAt(int idx, Serializer::Archive& archive);
 	template<typename T, typename... Args> T* emplace(Args&& ...args);
 	template<typename T, typename... Args> T* emplaceAt(int position, Args&& ...args);
@@ -116,6 +115,14 @@ public:
 	LDObject* lookup(const QModelIndex& index) const;
 	QModelIndex indexFromId(qint32 id) const;
 
+	bool moveRows(
+		const QModelIndex& sourceParent,
+		int sourceRow,
+		int count,
+		const QModelIndex& destinationParent,
+		int destinationChild
+	) override;
+
 	int rowCount(const QModelIndex& parent) const override;
 	QVariant data(const QModelIndex& index, int role) const override;
 
@@ -123,7 +130,6 @@ signals:
 	void objectAdded(const QModelIndex& object);
 	void aboutToRemoveObject(const QModelIndex& index);
 	void objectModified(LDObject* object);
-	void objectsSwapped(const QModelIndex& index_1, const QModelIndex& index_2);
 
 protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);

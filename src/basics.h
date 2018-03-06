@@ -329,6 +329,15 @@ T sign(T x)
 		return x / qAbs(x);
 }
 
+template<>
+inline int sign(int x)
+{
+	if (x == 0)
+		return 0;
+	else
+		return x / qAbs(x);
+}
+
 /*
  * Returns the maximum of a single parameter (the parameter itself).
  */

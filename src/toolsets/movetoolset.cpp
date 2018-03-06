@@ -30,33 +30,15 @@ MoveToolset::MoveToolset (MainWindow* parent) :
 
 void MoveToolset::moveSelection (bool up)
 {
-	// TODO: order these!
-	QVector<LDObject*> objs = selectedObjects().toList().toVector();
-
-	if (objs.isEmpty())
-		return;
-
-	// If we move down, we need to iterate the array in reverse order.
-	int start = up ? 0 : (countof(objs) - 1);
-	int end = up ? countof(objs) : -1;
-	int increment = up ? 1 : -1;
-
-	for (int i = start; i != end; i += increment)
+	for (const QItemSelectionRange& selectionRange : m_window->currentSelectionModel()->selection())
 	{
-		LDObject* obj = objs[i];
-
-		QModelIndex index = currentDocument()->indexOf(obj);
-		int target = index.row() + (up ? -1 : 1);
-
-		if ((up and index.row() == 0) or (not up and index.row() == countof(currentDocument()->objects()) - 1))
-		{
-			// One of the objects hit the extrema. If this happens, this should be the first
-			// object to be iterated on. Thus, nothing has changed yet and it's safe to just
-			// abort the entire operation.
-			return;
-		}
-
-		currentDocument()->swapObjects(index, currentDocument()->index(target));
+		currentDocument()->moveRows(
+			{},
+			selectionRange.top(),
+			selectionRange.height(),
+			{},
+			up ? (selectionRange.top() - 1) : (selectionRange.bottom() + 2)
+		);
 	}
 }
 

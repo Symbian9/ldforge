@@ -138,6 +138,8 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/generics/migrate.h
+	src/generics/range.h
 	src/generics/reverse.h
 	src/geometry/linesegment.h
 	src/linetypes/comment.h
