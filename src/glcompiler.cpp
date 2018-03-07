@@ -511,6 +511,8 @@ void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
 {
 	for (int row = first; row <= last; row += 1)
 		forgetObject(m_renderer->model()->index(row));
+
+	needMerge();
 }
 
 void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
