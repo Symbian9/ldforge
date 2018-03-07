@@ -42,16 +42,6 @@ void Canvas::overpaint(QPainter& painter)
 	GLRenderer::overpaint(painter);
 	QFontMetrics metrics {QFont {}};
 
-#ifndef RELEASE
-	{
-		QString text = format("Rotation: %1\nPanning: (%2, %3), Zoom: %4", rotationMatrix(), panning(X), panning(Y), zoom());
-		QRect textSize = metrics.boundingRect(0, 0, width(), height(), Qt::AlignCenter, text);
-		painter.setPen(textPen());
-		painter.drawText((width() - textSize.width()) / 2, height() - textSize.height(), textSize.width(),
-		    textSize.height(), Qt::AlignCenter, text);
-	}
-#endif
-
 	if (camera() != Camera::Free)
 	{
 		// Paint the coordinates onto the screen.
