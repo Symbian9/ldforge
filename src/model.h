@@ -78,11 +78,6 @@ class Model : public QAbstractListModel
 	Q_OBJECT
 
 public:
-	enum
-	{
-		ObjectIdRole = Qt::UserRole,
-	};
-
 	Model(class DocumentManager* manager);
 	Model(const Model& other) = delete;
 	~Model();

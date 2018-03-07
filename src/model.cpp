@@ -592,9 +592,6 @@ QVariant Model::data(const QModelIndex& index, int role) const
 			return {};
 		}
 
-	case ObjectIdRole:
-		return object->id();
-
 	default:
 		return {};
 	}
