@@ -90,7 +90,7 @@ private:
 	EditHistory* m_history;
 	bool m_isFrozen = true; // Document may not be modified
 	bool m_verticesOutdated = true;
-	bool m_isBeingDestroyed = true;
+	bool m_isBeingDestroyed = false;
 	bool m_needsRecache = true; // The next polygon inline of this document rebuilds stored polygon data.
 	long m_savePosition;
 	int m_tabIndex;
