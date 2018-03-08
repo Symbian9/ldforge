@@ -60,7 +60,6 @@ class LDObject : public QObject
 
 public:
 	LDObject();
-	virtual ~LDObject();
 
 	virtual QString asText() const = 0; // This object as LDraw code
 	LDColor color() const;
@@ -68,7 +67,6 @@ public:
 	LDPolygon* getPolygon();
 	virtual void getVertices (DocumentManager *context, QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
-	qint32 id() const;
 	virtual bool isColored() const;
 	bool isHidden() const;
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
@@ -88,7 +86,6 @@ public:
 	const Vertex& vertex (int i) const;
 	virtual void serialize(class Serializer& serializer);
 
-	static LDObject* fromID(qint32 id);
 	static LDObject* newFromType(LDObjectType type);
 
 signals:
@@ -101,7 +98,6 @@ protected:
 private:
 	bool m_hasInvertNext = false;
 	bool m_isHidden;
-	qint32 m_id;
 	LDColor m_color;
 	QColor m_randomColor;
 	Vertex m_coords[4];

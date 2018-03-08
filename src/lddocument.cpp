@@ -286,11 +286,6 @@ void LDDocument::handleNewObject(const QModelIndex& index)
 		SLOT(handleImminentObjectRemoval(QModelIndex)),
 		Qt::DirectConnection
 	);
-
-#ifdef DEBUG
-	if (not isFrozen())
-		print("Inserted object #%1 (%2) at %3\n", object->id(), object->typeName(), index.row());
-#endif
 }
 
 void LDDocument::objectChanged(const LDObjectState& before, const LDObjectState& after)

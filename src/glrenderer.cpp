@@ -701,6 +701,15 @@ void GLRenderer::setCamera(Camera camera)
 }
 
 /*
+ * Resolves a pixel pointer to an RGB color.
+ * pixel[0..2] must be valid.
+ */
+static QRgb colorFromPixel(uint8_t* pixel)
+{
+	return pixel[0] << 16 | pixel[1] << 8 | pixel[2] | 0xff000000;
+}
+
+/*
  * Returns the set of objects found in the specified pixel area.
  */
 QItemSelection GLRenderer::pick(const QRect& range)
@@ -733,22 +742,23 @@ QItemSelection GLRenderer::pick(const QRect& range)
 	// Read pixels from the color buffer.
 	glReadPixels(x0, height() - y1, areawidth, areaheight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData.data());
 
-	QSet<qint32> ids;
+	QSet<QRgb> pixelColors;
 
 	// Go through each pixel read and add them to the selection.
-	// Each pixel maps to an LDObject index injectively.
+	// Each pixel maps to an LDObject injectively.
 	// Note: black is background, those indices are skipped.
-	for (unsigned char *pixelCursor = pixelData.begin(); pixelCursor < pixelData.end(); pixelCursor += 4)
+	for (int i : ::range(0, 4, pixelData.size() - 4))
 	{
-		qint32 id = pixelCursor[0] * 0x10000 + pixelCursor[1] * 0x100 + pixelCursor[2] * 0x1;
-		if (id != 0)
-			ids.insert(id);
+		QRgb color = colorFromPixel(&pixelData[i]);
+
+		if (color != BlackRgb)
+			pixelColors.insert(color);
 	}
 
 	// For each index read, resolve the LDObject behind it and add it to the selection.
-	for (qint32 id : ids)
+	for (QRgb color : pixelColors)
 	{
-		QModelIndex index = m_model->indexFromId(id);
+		QModelIndex index = m_model->objectByPickingColor(color);
 
 		if (index.isValid())
 			result.select(index, index);
@@ -769,7 +779,7 @@ QModelIndex GLRenderer::pick(int mouseX, int mouseY)
 	drawGLScene();
 	unsigned char pixel[4];
 	glReadPixels(mouseX, height() - mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-	QModelIndex result = m_model->indexFromId(pixel[0] * 0x10000 + pixel[1] * 0x100 + pixel[2]);
+	QModelIndex result = m_model->objectByPickingColor(colorFromPixel(pixel));
 	setPicking(false);
 	repaint();
 	return result;
@@ -838,7 +848,6 @@ void GLRenderer::zoomToFit()
 	currentCamera().setZoom(30.0f);
 	bool lastfilled = false;
 	bool firstrun = true;
-	enum { black = 0xFF000000 };
 	bool inward = true;
 	int runaway = 50;
 
@@ -865,7 +874,7 @@ void GLRenderer::zoomToFit()
 		// Check the top and bottom rows
 		for (int i = 0; i < image.width(); ++i)
 		{
-			if (image.pixel (i, 0) != black or image.pixel (i, height() - 1) != black)
+			if (image.pixel (i, 0) != BlackRgb or image.pixel (i, height() - 1) != BlackRgb)
 			{
 				filled = true;
 				break;
@@ -877,7 +886,7 @@ void GLRenderer::zoomToFit()
 		{
 			for (int i = 0; i < image.height(); ++i)
 			{
-				if (image.pixel (0, i) != black or image.pixel (width() - 1, i) != black)
+				if (image.pixel (0, i) != BlackRgb or image.pixel (width() - 1, i) != BlackRgb)
 				{
 					filled = true;
 					break;
@@ -939,13 +948,17 @@ void GLRenderer::highlightCursorObject()
 		setPicking (true);
 		drawGLScene();
 		setPicking (false);
-
 		unsigned char pixel[4];
-		glReadPixels (m_mousePosition.x(), height() - m_mousePosition.y(), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixel[0]);
-		qint32 id = pixel[0] * 0x10000 | pixel[1] * 0x100 | pixel[2];
-
-		if (id != 0)
-			newIndex = model()->indexFromId(id);
+		glReadPixels(
+			m_mousePosition.x(),
+			height() - m_mousePosition.y(),
+			1,
+			1,
+			GL_RGBA,
+			GL_UNSIGNED_BYTE,
+			&pixel[0]
+		);
+		newIndex = model()->objectByPickingColor(colorFromPixel(pixel));
 	}
 
 	if (newIndex != oldIndex)

@@ -108,7 +108,8 @@ public:
 	LDObject* replaceWithFromString(LDObject* object, QString line);
 	IndexGenerator indices() const;
 	LDObject* lookup(const QModelIndex& index) const;
-	QModelIndex indexFromId(qint32 id) const;
+	QColor pickingColorForObject(const QModelIndex& objectIndex) const;
+	QModelIndex objectByPickingColor(const QColor& color) const;
 
 	bool moveRows(
 		const QModelIndex& sourceParent,
@@ -130,6 +131,8 @@ protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);
 
 	QVector<LDObject*> _objects;
+	QMap<LDObject*, QRgb> pickingColors;
+	QRgb pickingColorCursor = 0x000001;
 	class DocumentManager* _manager;
 	mutable int _triangleCount = 0;
 	mutable bool _needsTriangleRecount;

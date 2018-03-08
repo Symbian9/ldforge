@@ -43,6 +43,13 @@ void Model::installObject(int row, LDObject* object)
 	connect(object, SIGNAL(codeChanged(LDObjectState, LDObjectState)), this, SLOT(recountTriangles()));
 	beginInsertRows({}, row, row);
 	_objects.insert(row, object);
+
+	if (this->pickingColorCursor <= 0xffffff)
+	{
+		this->pickingColors[object] = this->pickingColorCursor;
+		this->pickingColorCursor += 1;
+	}
+
 	recountTriangles();
 	emit objectAdded(index(row));
 	endInsertRows();
@@ -628,15 +635,27 @@ LDObject* Model::lookup(const QModelIndex &index) const
 		return nullptr;
 }
 
-QModelIndex Model::indexFromId(qint32 id) const
+QColor Model::pickingColorForObject(const QModelIndex& objectIndex) const
 {
-	for (int row = 0; row < this->size(); ++row)
-	{
-		if (this->objects()[row]->id() == id)
-			return index(row);
-	}
+	return QColor::fromRgba(this->pickingColors.value(this->lookup(objectIndex)) | 0xff000000);
+}
 
-	return {};
+QModelIndex Model::objectByPickingColor(const QColor& color) const
+{
+	if (color != qRgb(0, 0, 0))
+	{
+		for (int row = 0; row < this->size(); row += 1)
+		{
+			if (this->pickingColorForObject(this->index(row)) == color)
+				return this->index(row);
+		}
+
+		return {};
+	}
+	else
+	{
+		return {};
+	}
 }
 
 int countof(Model& model)

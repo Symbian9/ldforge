@@ -38,7 +38,6 @@ struct LDPolygon
 {
 	char		num;
 	Vertex		vertices[4];
-	int			id;
 	int			color;
 
 	inline int numVertices() const

@@ -168,8 +168,8 @@ QColor GLCompiler::getColorForPolygon(
 		return {208, 64, 64};
 
 	case VboSubclass::PickColors:
-		// For the picking scene, determine the color from the owner's ID.
-		return indexColorForID(polygonOwner->id());
+		// For the picking scene, use unique picking colors provided by the model.
+		return m_renderer->model()->pickingColorForObject(polygonOwnerIndex);
 
 	case VboSubclass::RandomColors:
 		// For the random color scene, the owner object has rolled up a random color. Use that.
@@ -366,7 +366,6 @@ void GLCompiler::compileObject(const QModelIndex& index)
 	case LDObjectType::ConditionalEdge:
 		{
 			LDPolygon* poly = object->getPolygon();
-			poly->id = object->id();
 			compilePolygon (*poly, index, info);
 			delete poly;
 			break;
@@ -379,10 +378,7 @@ void GLCompiler::compileObject(const QModelIndex& index)
 			auto data = subfileReference->inlinePolygons(m_documents);
 
 			for (LDPolygon& poly : data)
-			{
-				poly.id = object->id();
 				compilePolygon (poly, index, info);
-			}
 			break;
 		}
 
@@ -390,10 +386,7 @@ void GLCompiler::compileObject(const QModelIndex& index)
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*>(object);
 			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
-			{
-				polygon.id = object->id();
 				compilePolygon (polygon, index, info);
-			}
 		}
 		break;
 

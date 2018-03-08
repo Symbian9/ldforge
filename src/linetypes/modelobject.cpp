@@ -44,23 +44,7 @@ enum { MAX_LDOBJECT_IDS = (1 << 24) };
 LDObject::LDObject() :
 	m_isHidden {false}
 {
-	// Let's hope that nobody goes to create 17 million objects anytime soon...
-	static qint32 nextId = 1; // 0 shalt be null
-	if (nextId < MAX_LDOBJECT_IDS)
-		m_id = nextId++;
-	else
-		m_id = 0;
-
-	if (m_id != 0)
-		g_allObjects[m_id] = this;
-
 	m_randomColor = QColor::fromHsv (rand() % 360, rand() % 256, rand() % 96 + 128);
-}
-
-LDObject::~LDObject()
-{
-	// Remove this object from the list of LDObjects
-	g_allObjects.erase(g_allObjects.find(id()));
 }
 
 // =============================================================================
@@ -195,7 +179,6 @@ LDPolygon* LDObject::getPolygon()
 		return nullptr;
 
 	LDPolygon* data = new LDPolygon;
-	data->id = id();
 	data->num = num;
 	data->color = color().index();
 
@@ -268,11 +251,6 @@ void LDObject::setHidden (bool value)
 	m_isHidden = value;
 }
 
-qint32 LDObject::id() const
-{
-	return m_id;
-}
-
 LDColor LDObject::color() const
 {
 	return m_color;
@@ -281,13 +259,6 @@ LDColor LDObject::color() const
 QColor LDObject::randomColor() const
 {
 	return m_randomColor;
-}
-
-// =============================================================================
-//
-LDObject* LDObject::fromID(qint32 id)
-{
-	return g_allObjects.value(id);
 }
 
 LDObject* LDObject::newFromType(LDObjectType type)
@@ -490,7 +461,6 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 	parms.append (pointAt (1.0));
 	LDPolygon poly;
 	poly.color = color().index();
-	poly.id = id();
 	poly.num = 2;
 
 	for (int i = 0; i < segments; ++i)
@@ -591,7 +561,6 @@ void LDObject::serialize(Serializer& serializer)
 {
 	serializer << m_hasInvertNext;
 	serializer << m_isHidden;
-	serializer << m_id;
 	serializer << m_color;
 	serializer << m_randomColor;
 	serializer << m_coords[0];

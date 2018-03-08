@@ -53,6 +53,8 @@ class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public Hierarch
 	Q_OBJECT
 
 public:
+	enum { BlackRgb = 0xff000000 };
+
 	GLRenderer(const Model* model, QWidget* parent = nullptr);
 	~GLRenderer();
 
