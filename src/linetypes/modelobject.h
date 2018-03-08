@@ -89,7 +89,7 @@ public:
 	static LDObject* newFromType(LDObjectType type);
 
 signals:
-	void codeChanged(const LDObjectState& before, const LDObjectState& after);
+	void modified(const LDObjectState& before, const LDObjectState& after);
 
 protected:
 	template<typename T>
@@ -276,6 +276,6 @@ void LDObject::changeProperty(T* property, const T& value)
 	{
 		Serializer::Archive before = Serializer::store(this);
 		*property = value;
-		emit codeChanged(before, Serializer::store(this));
+		emit modified(before, Serializer::store(this));
 	}
 }

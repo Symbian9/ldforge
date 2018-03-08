@@ -275,7 +275,7 @@ void LDDocument::handleNewObject(const QModelIndex& index)
 	history()->add<AddHistoryEntry>(index);
 	connect(
 		object,
-		SIGNAL(codeChanged(LDObjectState, LDObjectState)),
+		SIGNAL(modified(LDObjectState, LDObjectState)),
 		this,
 		SLOT(objectChanged(LDObjectState, LDObjectState))
 	);

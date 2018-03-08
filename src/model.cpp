@@ -40,7 +40,7 @@ Model::~Model()
 
 void Model::installObject(int row, LDObject* object)
 {
-	connect(object, SIGNAL(codeChanged(LDObjectState, LDObjectState)), this, SLOT(recountTriangles()));
+	connect(object, SIGNAL(modified(LDObjectState, LDObjectState)), this, SLOT(recountTriangles()));
 	beginInsertRows({}, row, row);
 	_objects.insert(row, object);
 
