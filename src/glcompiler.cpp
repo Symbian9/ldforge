@@ -500,12 +500,16 @@ void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
 		m_staged.insert(m_renderer->model()->index(row));
 }
 
-void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
+void GLCompiler::handleRowRemoval(const QModelIndex&, int, int)
 {
-	for (int row = first; row <= last; row += 1)
+	// It looks like removing rows causes some key invalidation. Until I can figure that out,
+	// we're going scorched earth.
+	m_objectInfo.clear();
+	recompile();
+	/*
+	for (int row = last; row >= first; row -= 1)
 		forgetObject(m_renderer->model()->index(row));
-
-	needMerge();
+	*/
 }
 
 void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
