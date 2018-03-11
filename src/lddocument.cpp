@@ -50,6 +50,13 @@ LDDocument::LDDocument (DocumentManager* parent) :
 			history()->add<MoveHistoryEntry>(start, end, row);
 		}
 	);
+	connect(
+		this,
+		SIGNAL(aboutToRemoveObject(QModelIndex)),
+		this,
+		SLOT(handleImminentObjectRemoval(QModelIndex)),
+		Qt::DirectConnection
+	);
 }
 
 LDDocument::~LDDocument()
@@ -278,13 +285,6 @@ void LDDocument::handleNewObject(const QModelIndex& index)
 		SIGNAL(modified(LDObjectState, LDObjectState)),
 		this,
 		SLOT(objectChanged(LDObjectState, LDObjectState))
-	);
-	connect(
-		this,
-		SIGNAL(aboutToRemoveObject(QModelIndex)),
-		this,
-		SLOT(handleImminentObjectRemoval(QModelIndex)),
-		Qt::DirectConnection
 	);
 }
 
