@@ -50,7 +50,7 @@ void Model::installObject(int row, LDObject* object)
 		this->pickingColorCursor += 1;
 	}
 
-	recountTriangles();
+	_triangleCount += object->triangleCount(documentManager());
 	emit objectAdded(index(row));
 	endInsertRows();
 }
