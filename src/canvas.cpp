@@ -242,6 +242,7 @@ void Canvas::mouseDoubleClickEvent(QMouseEvent* event)
 
 void Canvas::dropEvent(QDropEvent* event)
 {
+	/*
 	if (m_window and event->source() == m_window->getPrimitivesTree())
 	{
 		PrimitiveTreeItem* item = static_cast<PrimitiveTreeItem*> (m_window->getPrimitivesTree()->currentItem());
@@ -256,6 +257,7 @@ void Canvas::dropEvent(QDropEvent* event)
 		update();
 		event->acceptProposedAction();
 	}
+	*/
 }
 
 void Canvas::keyReleaseEvent(QKeyEvent* event)
@@ -372,6 +374,8 @@ void Canvas::contextMenuEvent(QContextMenuEvent* event)
 
 void Canvas::dragEnterEvent(QDragEnterEvent* event)
 {
+	/*
 	if (m_window and event->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
 		event->acceptProposedAction();
+	*/
 }

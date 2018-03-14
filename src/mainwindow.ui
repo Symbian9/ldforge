@@ -166,18 +166,16 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QTreeWidget" name="primitives">
+           <widget class="QTreeView" name="primitives">
             <property name="dragDropMode">
              <enum>QAbstractItemView::DragOnly</enum>
             </property>
             <attribute name="headerVisible">
              <bool>false</bool>
             </attribute>
-            <column>
-             <property name="text">
-              <string notr="true">1</string>
-             </property>
-            </column>
+            <attribute name="headerDefaultSectionSize">
+             <number>0</number>
+            </attribute>
            </widget>
           </item>
          </layout>

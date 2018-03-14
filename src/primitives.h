@@ -86,7 +86,7 @@ private:
 	QString m_name;
 };
 
-class PrimitiveManager : public QObject, HierarchyElement
+class PrimitiveManager : public QAbstractItemModel, HierarchyElement
 {
 	Q_OBJECT
 
@@ -98,8 +98,14 @@ public:
 	LDDocument* getPrimitive(const PrimitiveModel &spec);
 	QString getPrimitivesCfgPath() const;
 	void loadPrimitives();
-	void populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault = {});
 	void startScan();
+
+	int	columnCount(const QModelIndex &parent = {}) const override;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
+	QModelIndex parent(const QModelIndex &index) const override;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
 	QList<PrimitiveCategory*> m_categories;

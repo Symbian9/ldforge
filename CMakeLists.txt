@@ -185,6 +185,7 @@ set (LDFORGE_FORMS
 
 set (LDFORGE_OTHER_FILES
 	src/configurationoptions.txt
+	data/primitive-categories.cfg
 )
 
 set (LDFORGE_RESOURCES ldforge.qrc)

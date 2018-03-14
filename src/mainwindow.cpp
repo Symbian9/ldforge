@@ -69,17 +69,13 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
 	ui.verticalLayout->insertWidget (0, m_tabs);
+	ui.primitives->setModel(m_primitives);
 	createBlankDocument();
 	ui.rendererStack->setCurrentWidget(getRendererForDocument(m_currentDocument));
 
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
-
-	if (m_primitives->activeScanner())
-		connect (m_primitives->activeScanner(), SIGNAL (workDone()), this, SLOT (updatePrimitives()));
-	else
-		updatePrimitives();
 
 	m_quickColors = m_guiUtilities->loadQuickColorList();
 	updateActions();
@@ -760,13 +756,6 @@ void MainWindow::setQuickColors (const QVector<ColorToolbarItem>& colors)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::updatePrimitives()
-{
-	m_primitives->populateTreeWidget(ui.primitives);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
 void MainWindow::closeTab (int tabindex)
 {
 	LDDocument* doc = m_documents->findDocumentByName (m_tabs->tabData (tabindex).toString());
@@ -818,13 +807,6 @@ void MainWindow::applyToActions (std::function<void(QAction*)> function)
 		if (not act->objectName().isEmpty())
 			function (act);
 	}
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QTreeWidget* MainWindow::getPrimitivesTree() const
-{
-	return ui.primitives;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

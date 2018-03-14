@@ -33,10 +33,10 @@
 #include "linetypes/triangle.h"
 
 PrimitiveManager::PrimitiveManager(QObject* parent) :
-	QObject(parent),
-	HierarchyElement(parent),
-	m_activeScanner(nullptr),
-	m_unmatched(nullptr) {}
+	QAbstractItemModel {parent},
+	HierarchyElement {parent},
+	m_activeScanner {nullptr},
+	m_unmatched {nullptr} {}
 
 
 PrimitiveScanner* PrimitiveManager::activeScanner()
@@ -95,10 +95,12 @@ void PrimitiveManager::startScan()
 			if (m_activeScanner)
 			{
 				m_primitives = m_activeScanner->scannedPrimitives();
+				emit layoutAboutToBeChanged();
 				populateCategories();
 				print(tr("%1 primitives scanned"), countof(m_primitives));
 				delete m_activeScanner;
 				m_activeScanner = nullptr;
+				emit layoutChanged();
 			}
 		});
 	}
@@ -514,36 +516,149 @@ LDDocument* PrimitiveManager::getPrimitive(const PrimitiveModel& model)
 }
 
 /*
- * PrimitiveManager :: populateTreeWidget
- *
- * Fills in a tree widget with all known primitives.
+ * Returns the amount of columns in the primitives tree (1)
  */
-void PrimitiveManager::populateTreeWidget(QTreeWidget* tree, const QString& selectByDefault)
+int	PrimitiveManager::columnCount(const QModelIndex&) const
 {
-	tree->clear();
+	return 1;
+}
 
-	for (PrimitiveCategory* category : m_categories)
+/*
+ * For an index that points to a primitive, returns the category that contains it
+ */
+static PrimitiveCategory* categoryForPrimitiveIndex(const QModelIndex& primitiveIndex)
+{
+	return static_cast<PrimitiveCategory*>(primitiveIndex.internalPointer());
+}
+
+/*
+ * Returns data from the tree model.
+ */
+QVariant PrimitiveManager::data(const QModelIndex& index, int role) const
+{
+	if (index.isValid())
 	{
-		PrimitiveTreeItem* parentItem = new PrimitiveTreeItem {tree, nullptr};
-		parentItem->setText(0, category->name());
-		//QList<QTreeWidgetItem*> subfileItems;
-
-		for (Primitive& primitive : category->primitives)
+		if (categoryForPrimitiveIndex(index) != nullptr)
 		{
-			PrimitiveTreeItem* item = new PrimitiveTreeItem {parentItem, &primitive};
-			item->setText(0, format("%1 - %2", primitive.name, primitive.title));
-			//subfileItems.append(item);
+			// Index points to a primitive, return primitive information.
+			Primitive& primitive = categoryForPrimitiveIndex(index)->primitives[index.row()];
 
-			// If this primitive is the one the current object points to,
-			// select it by default
-			if (selectByDefault == primitive.name)
-				tree->setCurrentItem(item);
+			switch(role)
+			{
+			case Qt::DisplayRole:
+				return format("%1 - %2", primitive.name, primitive.title);
+			case Qt::DecorationRole:
+				return MainWindow::getIcon("subfilereference");
+			default:
+				return {};
+			}
 		}
+		else
+		{
+			// Index points to a category, return category information.
+			PrimitiveCategory* category = this->m_categories[index.row()];
 
-		tree->addTopLevelItem(parentItem);
+			switch (role)
+			{
+			case Qt::DisplayRole:
+				return category->name();
+			case Qt::DecorationRole:
+				return MainWindow::getIcon("folder");
+			default:
+				return {};
+			}
+		}
+	}
+	else
+	{
+		// Index is invalid.
+		return {};
 	}
 }
 
+/*
+ * For a row and parent index, returns a child index.
+ */
+QModelIndex PrimitiveManager::index(int row, int, const QModelIndex& parent) const
+{
+	if (parent.isValid())
+	{
+		if (categoryForPrimitiveIndex(parent))
+		{
+			// Parent is a primitive index. Primitives cannot have children so return an
+			// invalid index.
+			return {};
+		}
+		else
+		{
+			// Parent is a category, return an index to a primitive
+			PrimitiveCategory* category = m_categories[parent.row()];
+
+			// Create an index inside the category
+			if (row >= 0 and row < category->primitives.size())
+				return this->createIndex(row, 0, category);
+			else
+				return {};
+		}
+	}
+	else
+	{
+		// Create a top-level index pointing to a category
+		if (row >= 0 and row < this->m_categories.size())
+			return this->createIndex(row, 0, nullptr);
+		else
+			return {};
+	}
+}
+
+/*
+ * For a primitive index, find the category index that contains it.
+ */
+QModelIndex PrimitiveManager::parent(const QModelIndex &index) const
+{
+	int row = this->m_categories.indexOf(categoryForPrimitiveIndex(index));
+
+	if (row != -1)
+		return this->createIndex(row, 0, nullptr);
+	else
+		return {};
+}
+
+/*
+ * Returns the amount of rows contained inside the given index.
+ */
+int PrimitiveManager::rowCount(const QModelIndex& parent) const
+{
+	if (parent.isValid())
+	{
+		if (categoryForPrimitiveIndex(parent))
+		{
+			// Primitives don't have child nodes, so return 0.
+			return 0;
+		}
+		else
+		{
+			// For categories, return the amount of primitives contained.
+			return this->m_categories[parent.row()]->primitives.size();
+		}
+	}
+	else
+	{
+		// For top-level, return the amount of categories.
+		return this->m_categories.size();
+	}
+}
+
+/*
+ * Returns a static "Primitives" text for the header.
+ */
+QVariant PrimitiveManager::headerData(int section, Qt::Orientation, int role) const
+{
+	if (section == 0 and role == Qt::DisplayRole)
+		return tr("Primitives");
+	else
+		return {};
+}
 
 //
 // ---------------------------------------------------------------------------------------------------------------------
@@ -626,6 +741,14 @@ void PrimitiveScanner::work()
 	if (not m_iterator.hasNext())
 	{
 		// If there are no more primitives to iterate, we're done. Now save this information into a cache file.
+		std::sort(
+			m_scannedPrimitives.begin(),
+			m_scannedPrimitives.end(),
+			[](const Primitive& one, const Primitive& other) -> bool
+			{
+				return one.title < other.title;
+			}
+		);
 		QString path = m_manager->getPrimitivesCfgPath();
 		QFile configFile = {path};
 

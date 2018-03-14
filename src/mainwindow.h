@@ -82,7 +82,6 @@ public:
 	void endAction();
 	class ExtProgramToolset* externalPrograms();
 	QVariant getConfigValue (QString name);
-	QTreeWidget* getPrimitivesTree() const;
 	class QSettings* getSettings() { return m_settings; }
 	LDColor getUniformSelectedColor();
 	Canvas* getRendererForDocument(LDDocument* document);
@@ -137,7 +136,6 @@ public slots:
 	void historyTraversed();
 	void ringToolHiResClicked (bool clicked);
 	void tabSelected();
-	void updatePrimitives();
 	void documentClosed(LDDocument* document);
 
 protected:
