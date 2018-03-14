@@ -94,13 +94,13 @@ void PrimitiveManager::startScan()
 		{
 			if (m_activeScanner)
 			{
-				m_primitives = m_activeScanner->scannedPrimitives();
 				emit layoutAboutToBeChanged();
+				m_primitives = m_activeScanner->scannedPrimitives();
 				populateCategories();
+				emit layoutChanged();
 				print(tr("%1 primitives scanned"), countof(m_primitives));
 				delete m_activeScanner;
 				m_activeScanner = nullptr;
-				emit layoutChanged();
 			}
 		});
 	}
