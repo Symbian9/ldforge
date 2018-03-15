@@ -43,6 +43,49 @@ class LDDocument : public Model, public HierarchyElement
 	Q_OBJECT
 
 public:
+	struct Header
+	{
+		enum FileType
+		{
+			Part,
+			Subpart,
+			Shortcut,
+			Primitive,
+			Primitive_8,
+			Primitive_48,
+			Configuration,
+		} type;
+		enum Qualifier
+		{
+			Alias = 1 << 0,
+			Physical_Color = 1 << 1,
+			Flexible_Section = 1 << 2,
+		};
+		QFlags<Qualifier> qualfiers;
+		QString description;
+		QString filename;
+		struct
+		{
+			QString realName;
+			QString userName;
+		} author;
+		QString category;
+		QString cmdline;
+		QStringList help;
+		QStringList keywords;
+		enum
+		{
+			NoWinding,
+			CounterClockwise,
+			Clockwise,
+		} winding = NoWinding;
+		enum
+		{
+			CaLicense,
+			NonCaLicense
+		} license = CaLicense;
+	};
+
 	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
@@ -111,6 +154,8 @@ private slots:
 	void handleNewObject(const QModelIndex& index);
 	void handleImminentObjectRemoval(const QModelIndex& index);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDDocument::Header::Qualifier>)
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
