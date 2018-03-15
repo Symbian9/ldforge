@@ -63,6 +63,9 @@ void PrimitiveManager::loadPrimitives()
 	}
 	else
 	{
+		emit layoutAboutToBeChanged();
+		m_primitives.clear();
+
 		while (not primitivesFile.atEnd())
 		{
 			QString line = primitivesFile.readLine().simplified();
@@ -78,6 +81,7 @@ void PrimitiveManager::loadPrimitives()
 		}
 
 		populateCategories();
+		emit layoutChanged();
 		print(tr("%1 primitives loaded.") + "\n", countof(m_primitives));
 	}
 }
