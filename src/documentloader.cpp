@@ -22,13 +22,16 @@
 #include "mainwindow.h"
 #include "dialogs/openprogressdialog.h"
 
-DocumentLoader::DocumentLoader (Model* model, bool onForeground, QObject *parent) :
-	QObject (parent),
-    _model(model),
-	m_warningCount (0),
-	m_isDone (false),
-	m_hasAborted (false),
-	m_isOnForeground (onForeground) {}
+DocumentLoader::DocumentLoader(
+	Model* model,
+	LDHeader& header,
+	bool onForeground,
+	QObject *parent,
+) :
+	QObject {parent},
+	_model {model},
+	_header {header},
+	m_isOnForeground {onForeground} {}
 
 bool DocumentLoader::hasAborted()
 {
@@ -65,7 +68,7 @@ void DocumentLoader::read (QIODevice* fp)
 	if (fp and fp->isOpen())
 	{
 		while (not fp->atEnd())
-			m_lines << QString::fromUtf8 (fp->readLine());
+			m_lines << QString::fromUtf8(fp->readLine()).simplified();
 	}
 }
 
@@ -87,7 +90,43 @@ void DocumentLoader::start()
 		connect (m_progressDialog, SIGNAL (rejected()), this, SLOT (abort()));
 	}
 	else
+	{
 		m_progressDialog = nullptr;
+	}
+
+	// Parse the header
+	while (m_progress < m_lines.size())
+	{
+		const QString& line = m_lines[m_progress];
+
+		if (not line.isEmpty())
+		{
+			if (line.startsWith("0"))
+			{
+				if (m_progress == 0)
+				{
+					_header.description = line.mid(1).simplified();
+				}
+				else if (line.startsWith("0 !LDRAW_ORG"))
+				{
+					QStringList tokens = line.mid(strlen("0 !LDRAW_ORG"));
+				}
+				else if (line.startsWith("0 BFC"))
+				{
+					...;
+				}
+				else
+				{
+					_model->addFromString(line);
+				}
+				m_progress += 1;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
 
 	// Begin working
 	work (0);
@@ -109,11 +148,7 @@ void DocumentLoader::work (int i)
 
 	for (; i < max and i < (int) countof(m_lines); ++i)
 	{
-		QString line = m_lines[i].trimmed();
-
-		// Trim the trailing newline
-		while (line.endsWith ("\n") or line.endsWith ("\r"))
-			line.chop(1);
+		const QString& line = m_lines[i];
 
 		if (line == "0 BFC INVERTNEXT")
 		{

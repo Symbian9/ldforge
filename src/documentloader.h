@@ -20,6 +20,8 @@
 #include "main.h"
 #include "model.h"
 
+struct LDHeader;
+
 //
 // DocumentLoader
 //
@@ -31,7 +33,12 @@ class DocumentLoader : public QObject
 	Q_OBJECT
 
 public:
-	DocumentLoader (Model* model, bool onForeground = false, QObject* parent = 0);
+	DocumentLoader(
+		Model* model,
+		LDHeader& header,
+		bool onForeground = false,
+		QObject* parent = nullptr,
+	);
 
 	Q_SLOT void abort();
 	bool hasAborted();
@@ -46,12 +53,13 @@ public:
 private:
 	class OpenProgressDialog* m_progressDialog;
 	Model* _model;
+	LDHeader& _header;
 	QStringList m_lines;
 	int m_progress;
-	int m_warningCount;
-	bool m_isDone;
-	bool m_hasAborted;
-	bool m_isOnForeground;
+	int m_warningCount = 0;
+	bool m_isDone = false;
+	bool m_hasAborted = false;
+	const bool m_isOnForeground = false;
 
 private slots:
 	void work (int i);

@@ -28,6 +28,49 @@
 struct LDGLData;
 class DocumentManager;
 
+struct LDHeader
+{
+	enum FileType
+	{
+		Part,
+		Subpart,
+		Shortcut,
+		Primitive,
+		Primitive_8,
+		Primitive_48,
+		Configuration,
+	} type = Part;
+	enum Qualifier
+	{
+		Alias = 1 << 0,
+		Physical_Color = 1 << 1,
+		Flexible_Section = 1 << 2,
+	};
+	QFlags<Qualifier> qualfiers;
+	QString description;
+	QString filename;
+	struct
+	{
+		QString realName;
+		QString userName;
+	} author;
+	QString category;
+	QString cmdline;
+	QStringList help;
+	QStringList keywords;
+	enum
+	{
+		NoWinding,
+		CounterClockwise,
+		Clockwise,
+	} winding = NoWinding;
+	enum
+	{
+		CaLicense,
+		NonCaLicense
+	} license = CaLicense;
+};
+
 //
 // This class stores a document either as a editable file for the user or for
 // subfile caching.
@@ -43,49 +86,6 @@ class LDDocument : public Model, public HierarchyElement
 	Q_OBJECT
 
 public:
-	struct Header
-	{
-		enum FileType
-		{
-			Part,
-			Subpart,
-			Shortcut,
-			Primitive,
-			Primitive_8,
-			Primitive_48,
-			Configuration,
-		} type;
-		enum Qualifier
-		{
-			Alias = 1 << 0,
-			Physical_Color = 1 << 1,
-			Flexible_Section = 1 << 2,
-		};
-		QFlags<Qualifier> qualfiers;
-		QString description;
-		QString filename;
-		struct
-		{
-			QString realName;
-			QString userName;
-		} author;
-		QString category;
-		QString cmdline;
-		QStringList help;
-		QStringList keywords;
-		enum
-		{
-			NoWinding,
-			CounterClockwise,
-			Clockwise,
-		} winding = NoWinding;
-		enum
-		{
-			CaLicense,
-			NonCaLicense
-		} license = CaLicense;
-	};
-
 	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
@@ -127,6 +127,7 @@ protected:
 	LDObject* withdrawAt(int position);
 
 private:
+	LDHeader m_header;
 	QString m_name;
 	QString m_fullPath;
 	QString m_defaultName;
@@ -155,7 +156,7 @@ private slots:
 	void handleImminentObjectRemoval(const QModelIndex& index);
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDDocument::Header::Qualifier>)
+Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);
