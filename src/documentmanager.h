@@ -41,10 +41,8 @@ public:
 	QString findDocumentPath (QString relpath, bool subdirs);
 	LDDocument* getDocumentByName (QString filename);
 	bool isSafeToCloseAll();
-	void loadFileContents(QIODevice* fp, Model& model, int* numWarnings, bool* ok);
 	void loadLogoedStuds();
-	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr,
-							  bool* aborted = nullptr);
+	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr);
 	QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer);
 	void openMainModel (QString path);
 	bool preInline (LDDocument* doc, Model& model, bool deep, bool renderinline);

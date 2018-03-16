@@ -32,7 +32,6 @@ set (LDFORGE_SOURCES
 	src/colors.cpp
 	src/crashCatcher.cpp
 	src/documentation.cpp
-	src/documentloader.cpp
 	src/documentmanager.cpp
 	src/editHistory.cpp
 	src/glcamera.cpp
@@ -52,6 +51,7 @@ set (LDFORGE_SOURCES
 	src/model.cpp
 	src/partdownloader.cpp
 	src/partdownloadrequest.cpp
+	src/parser.cpp
 	src/primitives.cpp
 	src/serializer.cpp
 	src/ringFinder.cpp
@@ -95,7 +95,6 @@ set (LDFORGE_HEADERS
 	src/colors.h
 	src/crashCatcher.h
 	src/documentation.h
-	src/documentloader.h
 	src/documentmanager.h
 	src/editHistory.h
 	src/format.h
@@ -119,6 +118,7 @@ set (LDFORGE_HEADERS
 	src/model.h
 	src/partdownloader.h
 	src/partdownloadrequest.h
+	src/parser.h
 	src/primitives.h
 	src/ringFinder.h
 	src/serializer.h

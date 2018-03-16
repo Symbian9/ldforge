@@ -22,7 +22,6 @@
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "canvas.h"
-#include "documentloader.h"
 #include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
@@ -68,6 +67,11 @@ LDDocument::~LDDocument()
 QString LDDocument::name() const
 {
 	return m_name;
+}
+
+void LDDocument::setHeader(LDHeader&& header)
+{
+	this->m_header = header;
 }
 
 void LDDocument::setName (QString value)
@@ -400,8 +404,9 @@ QList<LDPolygon> LDDocument::inlinePolygons()
 	return polygonData();
 }
 
-// =============================================================================
-// -----------------------------------------------------------------------------
+/*
+ * Inlines this document into the given model
+ */
 void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 {
 	if (m_manager->preInline(this, model, deep, renderinline))
@@ -409,16 +414,16 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 
 	for (LDObject* object : objects())
 	{
-		// Skip those without scemantic meaning
+		// Skip those without effect on the model meaning
 		if (not object->isScemantic())
 			continue;
 
-		// Got another sub-file reference, inline it if we're deep-inlining. If not,
-		// just add it into the objects normally. Yay, recursion!
+		// Got another sub-file reference, recurse and inline it too if we're deep-inlining.
+		// If not, just add it into the objects normally.
 		if (deep and object->type() == LDObjectType::SubfileReference)
 			static_cast<LDSubfileReference*>(object)->inlineContents(documentManager(), model, deep, renderinline);
 		else
-			model.addFromString(object->asText());
+			model.insertCopy(model.size(), object);
 	}
 }
 
@@ -446,4 +451,20 @@ const QSet<Vertex>& LDDocument::inlineVertices()
 void LDDocument::redoVertices()
 {
 	m_verticesOutdated = true;
+}
+
+/*
+ * Special operator definition that implements the XOR operator for the winding.
+ * However, if either winding is NoWinding, then this function returns NoWinding.
+ */
+decltype(LDHeader::winding) operator^(
+	decltype(LDHeader::winding) one,
+	decltype(LDHeader::winding) other
+) {
+	if (one == LDHeader::NoWinding or other == LDHeader::NoWinding)
+		return LDHeader::NoWinding;
+	else if (one != other)
+		return LDHeader::Clockwise;
+	else
+		return LDHeader::CounterClockwise;
 }

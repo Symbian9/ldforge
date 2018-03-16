@@ -103,9 +103,6 @@ public:
 	QModelIndex indexOf(LDObject* object) const;
 	bool isEmpty() const;
 	class DocumentManager* documentManager() const;
-	LDObject* insertFromString(int position, QString line);
-	LDObject* addFromString(QString line);
-	LDObject* replaceWithFromString(LDObject* object, QString line);
 	IndexGenerator indices() const;
 	LDObject* lookup(const QModelIndex& index) const;
 	QColor pickingColorForObject(const QModelIndex& objectIndex) const;

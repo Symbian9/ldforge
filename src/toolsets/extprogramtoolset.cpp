@@ -35,6 +35,7 @@
 #include "../editHistory.h"
 #include "../documentmanager.h"
 #include "../grid.h"
+#include "../parser.h"
 #include "../dialogs/externalprogrampathdialog.h"
 #include "extprogramtoolset.h"
 #include "ui_ytruderdialog.h"
@@ -309,10 +310,9 @@ void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor
 		return;
 	}
 
-	// TODO: I don't like how I need to go to the document manager to load objects from a file...
-	// We're not loading this as a document so it shouldn't be necessary.
 	Model model {m_documents};
-	m_documents->loadFileContents(&f, model, nullptr, nullptr);
+	Parser parser {f};
+	parser.parseBody(model);
 
 	// If we replace the objects, delete the selection now.
 	if (replace)

@@ -23,7 +23,7 @@
 #include "lddocument.h"
 #include "mainwindow.h"
 #include "partdownloader.h"
-#include "documentloader.h"
+#include "parser.h"
 #include "glrenderer.h"
 
 const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
@@ -103,18 +103,13 @@ void DocumentManager::openMainModel (QString path)
 		file->clear();
 	}
 
-	bool aborted;
-	file = openDocument (path, false, false, file, &aborted);
+	file = openDocument (path, false, false, file);
 
 	if (file == nullptr)
 	{
-		if (not aborted)
-		{
-			// Tell the user loading failed.
-			setlocale (LC_ALL, "C");
-			QMessageBox::critical(m_window, tr("Error"), format(tr("Failed to open %1: %2"), path, strerror (errno)));
-		}
-
+		// Tell the user loading failed.
+		setlocale (LC_ALL, "C");
+		QMessageBox::critical(m_window, tr("Error"), format(tr("Failed to open %1: %2"), path, strerror (errno)));
 		m_loadingMainFile = false;
 		return;
 	}
@@ -273,35 +268,12 @@ QFile* DocumentManager::openLDrawFile (QString relpath, bool subdirs, QString* p
 	return nullptr;
 }
 
-void DocumentManager::loadFileContents(QIODevice* input, Model& model, int* numWarnings, bool* ok)
-{
-	if (numWarnings)
-		*numWarnings = 0;
-
-	DocumentLoader* loader = new DocumentLoader {&model, m_loadingMainFile};
-	connect(loader, SIGNAL(parseErrorMessage(QString)), this, SLOT(printParseErrorMessage(QString)));
-	loader->read(input);
-	loader->start();
-
-	// After start() returns, if the loader isn't done yet, it's delaying
-	// its next iteration through the event loop. We need to catch this here
-	// by telling the event loop to tick, which will tick the file loader again.
-	// We keep doing this until the file loader is ready.
-	while (not loader->isDone())
-		qApp->processEvents();
-
-	// If we wanted the success value, supply that now
-	if (ok)
-		*ok = not loader->hasAborted();
-}
-
 void DocumentManager::printParseErrorMessage(QString message)
 {
 	print(message);
 }
 
-LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride,
-										   bool* aborted)
+LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride)
 {
 	// Convert the file name to lowercase when searching because some parts contain subfile
 	// subfile references with uppercase file names. I'll assume here that the library will always
@@ -336,24 +308,22 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 	load->history()->setIgnoring (true);
 
 	int numWarnings;
-	bool ok;
-	Model model {this};
-	loadFileContents(fp, model, &numWarnings, &ok);
-	load->merge(model);
+	Parser parser {*fp};
+	load->setHeader(parser.parseHeader());
+	parser.parseBody(*load);
 	fp->close();
 	fp->deleteLater();
 
-	if (aborted)
-		*aborted = ok == false;
-
-	if (not ok)
-	{
-		load->close();
-		return nullptr;
-	}
-
 	if (m_loadingMainFile)
 	{
+		int numWarnings = 0;
+
+		for (LDObject* object : load->objects())
+		{
+			if (object->type() == LDObjectType::Error)
+				numWarnings += 1;
+		}
+
 		m_window->changeDocument (load);
 		print (tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
 	}

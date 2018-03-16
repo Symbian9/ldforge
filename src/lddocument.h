@@ -30,6 +30,13 @@ class DocumentManager;
 
 struct LDHeader
 {
+	struct HistoryEntry
+	{
+		QDate date;
+		QString author;
+		QString description;
+		enum { UserName, RealName } authorType = UserName;
+	};
 	enum FileType
 	{
 		Part,
@@ -48,7 +55,7 @@ struct LDHeader
 	};
 	QFlags<Qualifier> qualfiers;
 	QString description;
-	QString filename;
+	QString name;
 	struct
 	{
 		QString realName;
@@ -58,6 +65,7 @@ struct LDHeader
 	QString cmdline;
 	QStringList help;
 	QStringList keywords;
+	QVector<HistoryEntry> history;
 	enum
 	{
 		NoWinding,
@@ -70,6 +78,13 @@ struct LDHeader
 		NonCaLicense
 	} license = CaLicense;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
+
+decltype(LDHeader::winding) operator^(
+	decltype(LDHeader::winding) one,
+	decltype(LDHeader::winding) other
+);
 
 //
 // This class stores a document either as a editable file for the user or for
@@ -114,6 +129,7 @@ public:
 	void setDefaultName (QString value);
 	void setFrozen(bool value);
 	void setFullPath (QString value);
+	void setHeader(LDHeader&& header);
 	void setName (QString value);
 	void setSavePosition (long value);
 	void setTabIndex (int value);
@@ -155,8 +171,6 @@ private slots:
 	void handleNewObject(const QModelIndex& index);
 	void handleImminentObjectRemoval(const QModelIndex& index);
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
 
 // Parses a string line containing an LDraw object and returns the object parsed.
 LDObject* ParseLine (QString line);

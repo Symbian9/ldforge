@@ -29,6 +29,7 @@
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"
 #include "../grid.h"
+#include "../parser.h"
 #include "basictoolset.h"
 
 BasicToolset::BasicToolset (MainWindow *parent) :
@@ -76,7 +77,7 @@ void BasicToolset::paste()
 
 	for (QString line : clipboardText.split("\n"))
 	{
-		currentDocument()->insertFromString(row, line);
+		Parser::parseFromString(*currentDocument(), row, line);
 		mainWindow()->select(currentDocument()->index(row));
 		row += 1;
 		count += 1;
@@ -186,7 +187,7 @@ void BasicToolset::insertRaw()
 
 	for (QString line : QString (inputbox->toPlainText()).split ("\n"))
 	{
-		currentDocument()->insertFromString(row, line);
+		Parser::parseFromString(*currentDocument(), row, line);
 		mainWindow()->select(currentDocument()->index(row));
 		row += 1;
 	}

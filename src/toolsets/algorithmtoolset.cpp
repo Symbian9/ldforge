@@ -35,6 +35,7 @@
 #include "../linetypes/empty.h"
 #include "../linetypes/quadrilateral.h"
 #include "../linetypes/triangle.h"
+#include "../parser.h"
 #include "ui_replacecoordinatesdialog.h"
 #include "ui_editrawdialog.h"
 #include "ui_flipdialog.h"
@@ -85,10 +86,11 @@ void AlgorithmToolset::splitQuads()
 
 void AlgorithmToolset::editRaw()
 {
-	if (countof(selectedObjects()) != 1)
+	if (countof(m_window->selectedIndexes()) != 1)
 		return;
 
-	LDObject* object = *(selectedObjects().begin());
+	QModelIndex index = *(m_window->selectedIndexes().begin());
+	LDObject* object = currentDocument()->lookup(index);
 	QDialog dialog;
 	Ui::EditRawUI ui;
 	ui.setupUi(&dialog);
@@ -107,7 +109,9 @@ void AlgorithmToolset::editRaw()
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		// Reinterpret it from the text of the input field
-		currentDocument()->replaceWithFromString(object, ui.code->text());
+		int row = index.row();
+		currentDocument()->removeAt(row);
+		Parser::parseFromString(*currentDocument(), row, ui.code->text());
 	}
 }
 
@@ -543,7 +547,7 @@ void AlgorithmToolset::subfileSelection()
 
 	// Copy the body over to the new document
 	for (LDObject* object : selectedObjects())
-		subfile->addFromString(object->asText());
+		Parser::parseFromString(*subfile, Parser::EndOfModel, object->asText());
 
 	// Try save it
 	if (m_window->save(subfile, true))

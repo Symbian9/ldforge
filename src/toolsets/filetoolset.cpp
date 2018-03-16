@@ -22,6 +22,7 @@
 #include "../lddocument.h"
 #include "../mainwindow.h"
 #include "../partdownloader.h"
+#include "../parser.h"
 #include "../primitives.h"
 #include "../dialogs/configdialog.h"
 #include "../dialogs/ldrawpathdialog.h"
@@ -117,7 +118,8 @@ void FileToolset::insertFrom()
 		if (file.open(QIODevice::ReadOnly))
 		{
 			Model model {m_documents};
-			m_documents->loadFileContents(&file, model, nullptr, nullptr);
+			Parser parser {file};
+			parser.parseBody(model);
 
 			mainWindow()->clearSelection();
 
