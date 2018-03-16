@@ -25,15 +25,28 @@
 #include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
 
+/*
+ * Constructs an LDraw parser
+ */
 Parser::Parser(QIODevice& device, QObject* parent) :
 	QObject {parent},
 	device {device} {}
 
+/*
+ * Reads a single line from the device.
+ */
 QString Parser::readLine()
 {
 	return QString::fromUtf8(this->device.readLine()).simplified();
 }
 
+/*
+ * Parses a single line of the header.
+ * Possible parse results:
+ *   · ParseSuccess: the header line was parsed successfully.
+ *   · ParseFailure: the header line was parsed incorrectly and needs to be handled otherwise.
+ *   · StopParsing: the line does not belong in the header and header parsing needs to stop.
+ */
 Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QString& line)
 {
 	if (line.isEmpty())
@@ -182,6 +195,10 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 	}
 }
 
+/*
+ * Parses the header from the device given at construction and returns
+ * the resulting header structure.
+ */
 LDHeader Parser::parseHeader()
 {
 	LDHeader header = {};
@@ -202,10 +219,12 @@ LDHeader Parser::parseHeader()
 
 				if (result == ParseFailure)
 				{
+					// Failed to parse this header line, add it as a comment into the body later.
 					this->bag.append(line);
 				}
 				else if (result == StopParsing)
 				{
+					// Header parsing stops, add this line to the body.
 					this->bag.append(line);
 					break;
 				}
@@ -220,6 +239,9 @@ LDHeader Parser::parseHeader()
 	return header;
 }
 
+/*
+ * Parses the model body into the given model.
+ */
 void Parser::parseBody(Model& model)
 {
 	bool invertNext = false;
@@ -300,7 +322,14 @@ static Vertex parseVertex(QStringList& tokens, const int n)
 	return {tokens[n].toDouble(), tokens[n + 1].toDouble(), tokens[n + 2].toDouble()};
 }
 
-// TODO: rewrite this using regular expressions
+/*
+ * Parses the given model body line and inserts the result into the given model.
+ * The resulting object is also returned.
+ *
+ * If an error happens, an error object is created. Result is guaranteed to be a valid pointer.
+ *
+ * TODO: rewrite this using regular expressions
+ */
 LDObject* Parser::parseFromString(Model& model, int position, QString line)
 {
 	if (position == EndOfModel)
