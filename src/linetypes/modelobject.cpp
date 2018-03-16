@@ -90,7 +90,11 @@ int LDObject::triangleCount(DocumentManager*) const
 
 int LDSubfileReference::triangleCount(DocumentManager* context) const
 {
-	return fileInfo(context)->triangleCount();
+	LDDocument* file = fileInfo(context);
+	if (file)
+		return file->triangleCount();
+	else
+		return 0;
 }
 
 int LDObject::numVertices() const
@@ -212,15 +216,24 @@ bool LDObject::hasMatrix() const
 //
 QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context)
 {
-	QList<LDPolygon> data = fileInfo(context)->inlinePolygons();
+	LDDocument* file = fileInfo(context);
 
-	for (LDPolygon& entry : data)
+	if (file)
 	{
-		for (int i = 0; i < entry.numVertices(); ++i)
-			entry.vertices[i].transform (transformationMatrix(), position());
-	}
+		QList<LDPolygon> data = fileInfo(context)->inlinePolygons();
 
-	return data;
+		for (LDPolygon& entry : data)
+		{
+			for (int i = 0; i < entry.numVertices(); ++i)
+				entry.vertices[i].transform (transformationMatrix(), position());
+		}
+
+		return data;
+	}
+	else
+	{
+		return {};
+	}
 }
 
 // =============================================================================
