@@ -28,6 +28,13 @@
 struct LDGLData;
 class DocumentManager;
 
+enum Winding
+{
+	NoWinding,
+	CounterClockwise,
+	Clockwise,
+};
+
 struct LDHeader
 {
 	struct HistoryEntry
@@ -35,10 +42,10 @@ struct LDHeader
 		QDate date;
 		QString author;
 		QString description;
-		enum { UserName, RealName } authorType = UserName;
 	};
 	enum FileType
 	{
+		NoHeader,
 		Part,
 		Subpart,
 		Shortcut,
@@ -46,7 +53,7 @@ struct LDHeader
 		Primitive_8,
 		Primitive_48,
 		Configuration,
-	} type = Part;
+	} type = NoHeader;
 	enum Qualifier
 	{
 		Alias = 1 << 0,
@@ -56,35 +63,23 @@ struct LDHeader
 	QFlags<Qualifier> qualfiers;
 	QString description;
 	QString name;
-	struct
-	{
-		QString realName;
-		QString userName;
-	} author;
+	QString author;
 	QString category;
 	QString cmdline;
-	QStringList help;
-	QStringList keywords;
+	QString help;
+	QString keywords;
 	QVector<HistoryEntry> history;
+	Winding winding = NoWinding;
 	enum
 	{
-		NoWinding,
-		CounterClockwise,
-		Clockwise,
-	} winding = NoWinding;
-	enum
-	{
+		Unspecified,
 		CaLicense,
 		NonCaLicense
-	} license = CaLicense;
+	} license = Unspecified;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
-
-decltype(LDHeader::winding) operator^(
-	decltype(LDHeader::winding) one,
-	decltype(LDHeader::winding) other
-);
+Winding operator^(Winding one, Winding other);
 
 //
 // This class stores a document either as a editable file for the user or for
@@ -101,6 +96,8 @@ class LDDocument : public Model, public HierarchyElement
 	Q_OBJECT
 
 public:
+	LDHeader header;
+
 	LDDocument (DocumentManager* parent);
 	~LDDocument();
 
@@ -129,7 +126,6 @@ public:
 	void setDefaultName (QString value);
 	void setFrozen(bool value);
 	void setFullPath (QString value);
-	void setHeader(LDHeader&& header);
 	void setName (QString value);
 	void setSavePosition (long value);
 	void setTabIndex (int value);
@@ -143,7 +139,6 @@ protected:
 	LDObject* withdrawAt(int position);
 
 private:
-	LDHeader m_header;
 	QString m_name;
 	QString m_fullPath;
 	QString m_defaultName;

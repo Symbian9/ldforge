@@ -114,7 +114,6 @@ public:
 	void updateEditModeActions();
 	void updateGridToolBar();
 	void updateRecentFilesMenu();
-	void updateTitle();
 
 	static QPixmap getIcon(QString iconName);
 	static class QSettings* makeSettings(QObject* parent = nullptr);
@@ -137,6 +136,7 @@ public slots:
 	void ringToolHiResClicked (bool clicked);
 	void tabSelected();
 	void documentClosed(LDDocument* document);
+	void updateTitle();
 
 protected:
 	void closeEvent (QCloseEvent* ev);

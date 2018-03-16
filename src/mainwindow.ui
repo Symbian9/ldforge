@@ -42,13 +42,23 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
+        <widget class="QWidget" name="page">
+         <attribute name="label">
+          <string>Header</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="HeaderEdit" name="header" native="true"/>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="pageDocument">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
            <width>465</width>
-           <height>399</height>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -76,7 +86,7 @@
            <x>0</x>
            <y>0</y>
            <width>465</width>
-           <height>399</height>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -158,7 +168,7 @@
            <x>0</x>
            <y>0</y>
            <width>465</width>
-           <height>399</height>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -1723,6 +1733,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HeaderEdit</class>
+   <extends>QWidget</extends>
+   <header>widgets/headeredit.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>

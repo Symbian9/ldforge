@@ -391,3 +391,15 @@ T min(T a, Rest&&... rest)
 {
 	return min(a, min(rest...));
 }
+
+/*
+ * Assigns the value of a single flag in a flagset
+ */
+template<int Flag, typename T>
+void assignFlag(QFlags<T>& flagset, bool value)
+{
+	if (value)
+		flagset |= static_cast<T>(Flag);
+	else
+		flagset &= ~static_cast<T>(Flag);
+}

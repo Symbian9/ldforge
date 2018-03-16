@@ -37,7 +37,7 @@ Parser::Parser(QIODevice& device, QObject* parent) :
  */
 QString Parser::readLine()
 {
-	return QString::fromUtf8(this->device.readLine()).simplified();
+	return QString::fromUtf8(this->device.readLine()).trimmed();
 }
 
 /*
@@ -97,17 +97,17 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 	}
 	else if (line == "0 BFC CERTIFY CCW")
 	{
-		header.winding = LDHeader::CounterClockwise;
+		header.winding = CounterClockwise;
 		return ParseSuccess;
 	}
 	else if (line == "0 BFC CERTIFY CW")
 	{
-		header.winding = LDHeader::Clockwise;
+		header.winding = Clockwise;
 		return ParseSuccess;
 	}
 	else if (line == "0 BFC NOCERTIFY")
 	{
-		header.winding = LDHeader::NoWinding;
+		header.winding = NoWinding;
 		return ParseSuccess;
 	}
 	else if (line.startsWith("0 !HISTORY "))
@@ -118,18 +118,17 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 		};
 		if (historyRegexp.exactMatch(line))
 		{
-			QString dateString = historyRegexp.capturedTexts().value(0);
-			QString authorWithPrefix = historyRegexp.capturedTexts().value(1);
-			QString description = historyRegexp.capturedTexts().value(2);
+			QString dateString = historyRegexp.capturedTexts().value(1);
+			QString authorWithPrefix = historyRegexp.capturedTexts().value(2);
+			QString description = historyRegexp.capturedTexts().value(3);
 			LDHeader::HistoryEntry historyEntry;
 			historyEntry.date = QDate::fromString(dateString, Qt::ISODate);
-			historyEntry.author = authorWithPrefix.mid(1);
 			historyEntry.description = description;
 
 			if (authorWithPrefix[0] == '{')
-				historyEntry.authorType = LDHeader::HistoryEntry::RealName;
+				historyEntry.author = authorWithPrefix + "}";
 			else
-				historyEntry.authorType = LDHeader::HistoryEntry::UserName;
+				historyEntry.author = authorWithPrefix.mid(1);
 
 			header.history.append(historyEntry);
 			return ParseSuccess;
@@ -141,18 +140,8 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 	}
 	else if (line.startsWith("0 Author: "))
 	{
-		static const QRegExp authorRegexp {R"(0 Author: ([^[]+)(?: \[([^]]+)\])?)"};
-		if (authorRegexp.exactMatch(line))
-		{
-			QStringList tokens = authorRegexp.capturedTexts();
-			header.author.realName = tokens.value(0);
-			header.author.userName = tokens.value(1);
-			return ParseSuccess;
-		}
-		else
-		{
-			return ParseFailure;
-		}
+		header.author = line.mid(strlen("0 Author: "));
+		return ParseSuccess;
 	}
 	else if (line.startsWith("0 Name: "))
 	{
@@ -161,12 +150,16 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 	}
 	else if (line.startsWith("0 !HELP "))
 	{
-		header.help.append(line.mid(strlen("0 !HELP ")));
+		if (not header.help.isEmpty())
+			header.help += "\n";
+		header.help += line.mid(strlen("0 !HELP "));
 		return ParseSuccess;
 	}
 	else if (line.startsWith("0 !KEYWORDS "))
 	{
-		header.keywords.append(line.mid(strlen("0 !KEYWORDS ")));
+		if (not header.keywords.isEmpty())
+			header.keywords += "\n";
+		header.keywords += line.mid(strlen("0 !KEYWORDS "));
 		return ParseSuccess;
 	}
 	else if (line.startsWith("0 !CATEGORY "))
@@ -209,7 +202,7 @@ LDHeader Parser::parseHeader()
 		QString descriptionLine = this->readLine();
 		if (descriptionLine.startsWith("0 "))
 		{
-			header.description = descriptionLine.mid(strlen("0 ")).simplified();
+			header.description = descriptionLine.mid(strlen("0 ")).trimmed();
 
 			// Parse the rest of the header
 			while (not this->device.atEnd())
@@ -356,7 +349,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 			{
 				// Comment
 				QString commentText = line.mid(line.indexOf("0") + 2);
-				QString commentTextSimplified = commentText.simplified();
+				QString commentTextSimplified = commentText.trimmed();
 
 				// Handle BFC statements
 				if (countof(tokens) > 2 and tokens[1] == "BFC")

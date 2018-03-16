@@ -86,6 +86,12 @@ MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowF
 		connect (act, SIGNAL (triggered()), this, SLOT (actionTriggered()));
 		m_defaultShortcuts[act] = act->shortcut();
 	});
+	connect(
+		ui.header,
+		&HeaderEdit::descriptionChanged,
+		this,
+		&MainWindow::updateTitle
+	);
 
 	updateGridToolBar();
 	updateEditModeActions();
@@ -277,7 +283,7 @@ void MainWindow::updateGridToolBar()
 //
 void MainWindow::updateTitle()
 {
-	QString title = format (APPNAME " " VERSION_STRING);
+	QString title = APPNAME " " VERSION_STRING;
 
 	// Append our current file if we have one
 	if (m_currentDocument)
@@ -285,13 +291,8 @@ void MainWindow::updateTitle()
 		title += ": ";
 		title += m_currentDocument->getDisplayName();
 
-		if (m_currentDocument->size() > 0 and
-		    m_currentDocument->getObject(0)->type() == LDObjectType::Comment)
-		{
-			// Append title
-			LDComment* comm = static_cast <LDComment*> (m_currentDocument->getObject (0));
-			title += format (": %1", comm->text());
-		}
+		if (not m_currentDocument->header.description.isEmpty())
+			title += format (": %1", m_currentDocument->header.description);
 
 		if (m_currentDocument->hasUnsavedChanges())
 			title += '*';
@@ -947,6 +948,7 @@ void MainWindow::changeDocument (LDDocument* document)
 		updateTitle();
 		print ("Changed document to %1", document->getDisplayName());
 		ui.objectList->setModel(document);
+		ui.header->setHeader(&document->header);
 		QItemSelectionModel* selection = m_selections.value(document);
 
 		if (selection == nullptr)

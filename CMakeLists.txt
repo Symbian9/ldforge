@@ -39,6 +39,7 @@ set (LDFORGE_SOURCES
 	src/glrenderer.cpp
 	src/grid.cpp
 	src/guiutilities.cpp
+	src/headerhistorymodel.cpp
 	src/hierarchyelement.cpp
 	src/lddocument.cpp
 	src/ldpaths.cpp
@@ -87,6 +88,7 @@ set (LDFORGE_SOURCES
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
 	src/types/matrix.cpp
+	src/widgets/headeredit.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -104,6 +106,7 @@ set (LDFORGE_HEADERS
 	src/glShared.h
 	src/grid.h
 	src/guiutilities.h
+	src/headerhistorymodel.h
 	src/hierarchyelement.h
 	src/lddocument.h
 	src/ldobjectiterator.h
@@ -157,6 +160,7 @@ set (LDFORGE_HEADERS
 	src/toolsets/toolset.h
 	src/toolsets/viewtoolset.h
 	src/types/matrix.h
+	src/widgets/headeredit.h
 )
 
 set (LDFORGE_FORMS
@@ -181,6 +185,7 @@ set (LDFORGE_FORMS
 	src/dialogs/ytruderdialog.ui
 	src/mainwindow.ui
 	src/partdownloader.ui
+	src/widgets/headeredit.ui
 )
 
 set (LDFORGE_OTHER_FILES
@@ -189,11 +194,9 @@ set (LDFORGE_OTHER_FILES
 )
 
 set (LDFORGE_RESOURCES ldforge.qrc)
-# set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lGLU")
-
-if (NOT MSVC)
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -W -Wall")
-endif()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (TRANSPARENT_DIRECT_COLORS)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTRANSPARENT_DIRECT_COLORS")
@@ -210,6 +213,7 @@ endif()
 include_directories ("${PROJECT_BINARY_DIR}")
 include_directories ("${PROJECT_BINARY_DIR}/src")
 include_directories ("${PROJECT_BINARY_DIR}/src/misc")
+include_directories ("${PROJECT_SOURCE_DIR}/src")
 
 if (NOT MSVC)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")

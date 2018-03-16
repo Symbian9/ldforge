@@ -69,11 +69,6 @@ QString LDDocument::name() const
 	return m_name;
 }
 
-void LDDocument::setHeader(LDHeader&& header)
-{
-	this->m_header = header;
-}
-
 void LDDocument::setName (QString value)
 {
 	m_name = value;
@@ -454,17 +449,13 @@ void LDDocument::redoVertices()
 }
 
 /*
- * Special operator definition that implements the XOR operator for the winding.
+ * Special operator definition that implements the XOR operator for windings.
  * However, if either winding is NoWinding, then this function returns NoWinding.
  */
-decltype(LDHeader::winding) operator^(
-	decltype(LDHeader::winding) one,
-	decltype(LDHeader::winding) other
-) {
-	if (one == LDHeader::NoWinding or other == LDHeader::NoWinding)
-		return LDHeader::NoWinding;
-	else if (one != other)
-		return LDHeader::Clockwise;
+Winding operator^(Winding one, Winding other)
+{
+	if (one == NoWinding or other == NoWinding)
+		return NoWinding;
 	else
-		return LDHeader::CounterClockwise;
+		return static_cast<Winding>(static_cast<int>(one) ^ static_cast<int>(other));
 }
