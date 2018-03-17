@@ -72,10 +72,10 @@ struct LDHeader
 	Winding winding = NoWinding;
 	enum
 	{
-		Unspecified,
+		UnspecifiedLicense,
 		CaLicense,
 		NonCaLicense
-	} license = Unspecified;
+	} license = UnspecifiedLicense;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)

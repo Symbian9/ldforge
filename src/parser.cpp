@@ -40,6 +40,16 @@ QString Parser::readLine()
 	return QString::fromUtf8(this->device.readLine()).trimmed();
 }
 
+const QMap<QString, decltype(LDHeader::type)> Parser::typeStrings {
+	{"Part", LDHeader::Part},
+	{"Subpart", LDHeader::Subpart},
+	{"Shortcut", LDHeader::Shortcut},
+	{"Primitive", LDHeader::Primitive},
+	{"8_Primitive", LDHeader::Primitive_8},
+	{"48_Primitive", LDHeader::Primitive_48},
+	{"Configuration", LDHeader::Configuration},
+};
+
 /*
  * Parses a single line of the header.
  * Possible parse results:
@@ -65,22 +75,13 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 
 		if (not tokens.isEmpty())
 		{
-			static const QMap<QString, decltype(LDHeader::type)> typeStrings {
-				{"Part", LDHeader::Part},
-				{"Subpart", LDHeader::Subpart},
-				{"Shortcut", LDHeader::Shortcut},
-				{"Primitive", LDHeader::Primitive},
-				{"8_Primitive", LDHeader::Primitive_8},
-				{"48_Primitive", LDHeader::Primitive_48},
-				{"Configuration", LDHeader::Configuration},
-			};
 			QString partTypeString = tokens[0];
 			// Anything that enters LDForge becomes unofficial in any case if saved.
 			// Therefore we don't need to give the Unofficial type any special
 			// consideration.
 			if (partTypeString.startsWith("Unofficial_"))
 				partTypeString = partTypeString.mid(strlen("Unofficial_"));
-			header.type = typeStrings.value(partTypeString, LDHeader::Part);
+			header.type = Parser::typeStrings.value(partTypeString, LDHeader::Part);
 			header.qualfiers = 0;
 			if (tokens.contains("Alias"))
 				header.qualfiers |= LDHeader::Alias;

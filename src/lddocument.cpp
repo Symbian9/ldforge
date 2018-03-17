@@ -25,6 +25,7 @@
 #include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
+#include "parser.h"
 
 LDDocument::LDDocument (DocumentManager* parent) :
     Model {parent},
@@ -220,6 +221,120 @@ bool LDDocument::isSafeToClose()
 	return true;
 }
 
+static QString headerToString(const LDHeader& header)
+{
+	QString result;
+
+	if (header.type != LDHeader::NoHeader)
+	{
+		QString partTypeString;
+
+		for (
+			auto iterator = Parser::typeStrings.begin();
+			iterator != Parser::typeStrings.end();
+			++iterator
+		) {
+			if (iterator.value() == header.type)
+			{
+				partTypeString += "Unofficial_" + iterator.key();
+				break;
+			}
+		}
+
+		if (header.qualfiers & LDHeader::Physical_Color)
+			partTypeString += " Physical_Colour";
+
+		if (header.qualfiers & LDHeader::Flexible_Section)
+			partTypeString += " Flexible_Section";
+
+		if (header.qualfiers & LDHeader::Alias)
+			partTypeString += " Alias";
+
+		result += "0 " + header.description + "\r\n";
+		result += "0 Name: " + header.name + "\r\n";
+		result += "0 Author: " + header.author + "\r\n";
+		result += "0 !LDRAW_ORG " + partTypeString + "\r\n";
+
+		switch (header.license)
+		{
+		case LDHeader::CaLicense:
+			result += "0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt\r\n";
+			break;
+		case LDHeader::NonCaLicense:
+			result += "0 !LICENSE Not redistributable : see NonCAreadme.txt\r\n";
+			break;
+		case LDHeader::UnspecifiedLicense:
+			break;
+		}
+
+		if (not header.help.isEmpty())
+		{
+			result += "\r\n";
+			for (QString line : header.help.split("\n"))
+				result += "0 !HELP " + line + "\r\n";
+		}
+
+		result += "\r\n";
+
+		switch (header.winding)
+		{
+		case CounterClockwise:
+			result += "0 BFC CERTIFY CCW\r\n";
+			break;
+
+		case Clockwise:
+			result += "0 BFC CERTIFY CW\r\n";
+			break;
+
+		case NoWinding:
+			result += "0 BFC NOCERTIFY\r\n";
+			break;
+		}
+
+		if (not header.category.isEmpty() or not header.keywords.isEmpty())
+		{
+			result += "\r\n";
+
+			if (not header.category.isEmpty())
+				result += "0 !CATEGORY " + header.category + "\r\n";
+
+			if (not header.keywords.isEmpty())
+			{
+				for (QString line : header.keywords.split("\n"))
+					result += "0 !KEYWORDS " + line + "\r\n";
+			}
+		}
+
+		if (not header.cmdline.isEmpty())
+		{
+			result += "\r\n";
+			result += "0 !CMDLINE " + header.cmdline + "\r\n";
+		}
+
+		if (not header.history.isEmpty())
+		{
+			result += "\r\n";
+
+			for (const LDHeader::HistoryEntry& historyEntry : header.history)
+			{
+				QString author = historyEntry.author;
+
+				if (not author.startsWith("{"))
+					author = "[" + author + "]";
+
+				result += "0 !HISTORY ";
+				result += historyEntry.date.toString(Qt::ISODate) + " ";
+				result += author + " ";
+				result += historyEntry.description + "\r\n";
+			}
+		}
+
+		result += "\r\n";
+	}
+
+	return result.toUtf8();
+}
+
 // =============================================================================
 //
 bool LDDocument::save (QString path, qint64* sizeptr)
@@ -230,21 +345,13 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 	if (path.isEmpty())
 		path = fullPath();
 
-	// If the second object in the list holds the file name, update that now.
-	LDObject* nameObject = getObject (1);
-
-	if (nameObject and nameObject->type() == LDObjectType::Comment)
-	{
-		LDComment* nameComment = static_cast<LDComment*> (nameObject);
-
-		if (nameComment->text().left (6) == "Name: ")
-		{
-			QString newname = shortenName (path);
-			nameComment->setText (format ("Name: %1", newname));
-		}
-	}
-
 	QByteArray data;
+
+	if (this->header.type != LDHeader::NoHeader)
+	{
+		header.name = LDDocument::shortenName(path);
+		data += headerToString(this->header).toUtf8();
+	}
 
 	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
 	for (LDObject* obj : objects())

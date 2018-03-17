@@ -18,6 +18,7 @@
 
 #pragma once
 #include "main.h"
+#include "lddocument.h"
 
 class LDHeader;
 class Model;
@@ -35,6 +36,8 @@ public:
 	void parseBody(Model& model);
 
 	static LDObject* parseFromString(Model& model, int position, QString line);
+
+	static const QMap<QString, decltype(LDHeader::type)> typeStrings;
 
 /*
 signals:
