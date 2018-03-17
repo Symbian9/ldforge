@@ -28,6 +28,7 @@ public:
 	Q_INVOKABLE void autocolor();
 	Q_INVOKABLE void demote();
 	Q_INVOKABLE void editRaw();
+	Q_INVOKABLE void fixRoundingErrors();
 	Q_INVOKABLE void flip();
 	Q_INVOKABLE void makeBorders();
 	Q_INVOKABLE void replaceCoordinates();

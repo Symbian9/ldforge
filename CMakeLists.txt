@@ -182,6 +182,7 @@ set (LDFORGE_FORMS
 	src/dialogs/replacecoordinatesdialog.ui
 	src/dialogs/rotationpointdialog.ui
 	src/dialogs/ytruderdialog.ui
+	src/toolsets/fixroundingerrors.ui
 	src/mainwindow.ui
 	src/partdownloader.ui
 	src/widgets/headeredit.ui

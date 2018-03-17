@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QPushButton>
 #include "../mainwindow.h"
 #include "../main.h"
 #include "../lddocument.h"
@@ -39,6 +40,7 @@
 #include "ui_replacecoordinatesdialog.h"
 #include "ui_editrawdialog.h"
 #include "ui_flipdialog.h"
+#include "ui_fixroundingerrors.h"
 #include "algorithmtoolset.h"
 
 AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
@@ -194,6 +196,93 @@ void AlgorithmToolset::roundCoordinates()
 	}
 
 	print (tr ("Rounded %1 values"), num);
+}
+
+void AlgorithmToolset::fixRoundingErrors()
+{
+	QDialog dialog {m_window};
+	Ui::FixRoundingErrors ui;
+	ui.setupUi(&dialog);
+	auto updateDialogButtonBox = [&]()
+	{
+		QPushButton* button = ui.buttonBox->button(QDialogButtonBox::Ok);
+
+		if (button)
+		{
+			button->setEnabled(
+				ui.checkboxX->isChecked()
+				or ui.checkboxY->isChecked()
+				or ui.checkboxZ->isChecked()
+			);
+		}
+	};
+	updateDialogButtonBox();
+	connect(ui.checkboxX, &QCheckBox::clicked, updateDialogButtonBox);
+	connect(ui.checkboxY, &QCheckBox::clicked, updateDialogButtonBox);
+	connect(ui.checkboxZ, &QCheckBox::clicked, updateDialogButtonBox);
+	const int result = dialog.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		const Vertex referencePoint = {
+			ui.valueX->value(),
+			ui.valueY->value(),
+			ui.valueZ->value()
+		};
+
+		// Find out which axes to consider
+		QSet<Axis> axes;
+		if (ui.checkboxX->isChecked())
+			axes << X;
+		if (ui.checkboxY->isChecked())
+			axes << Y;
+		if (ui.checkboxZ->isChecked())
+			axes << Z;
+
+		// Make a reference distance from the threshold value.
+		// If we're only comparing one dimension, this is the square of the threshold.
+		// If we're comparing multiple dimensions, the distance is multiplied to adjust.
+		double thresholdDistanceSquared = countof(axes) * std::pow(ui.threshold->value(), 2);
+		// Add some tiny leeway to fix rounding errors in the rounding error fixer.
+		thresholdDistanceSquared += 1e-10;
+
+		auto fixVertex = [&](Vertex& vertex)
+		{
+			double distanceSquared = 0.0;
+
+			for (Axis axis : axes)
+				distanceSquared += std::pow(vertex[axis] - referencePoint[axis], 2);
+
+			if (distanceSquared < thresholdDistanceSquared)
+			{
+				// It's close enough, so clamp it
+				for (Axis axis : axes)
+					vertex.setCoordinate(axis, referencePoint[axis]);
+			}
+		};
+
+		for (const QModelIndex& index : m_window->selectedIndexes())
+		{
+			LDObject* object = currentDocument()->lookup(index);
+
+			if (object)
+			{
+				for (int i : range(0, 1, object->numVertices() - 1))
+				{
+					Vertex point = object->vertex(i);
+					fixVertex(point);
+					object->setVertex(i, point);
+				}
+				if (object->type() == LDObjectType::SubfileReference)
+				{
+					LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
+					Vertex point = reference->position();
+					fixVertex(point);
+					reference->setPosition(point);
+				}
+			}
+		}
+	}
 }
 
 void AlgorithmToolset::replaceCoordinates()

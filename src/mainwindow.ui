@@ -327,6 +327,7 @@
     <addaction name="actionMakeBorders"/>
     <addaction name="actionRoundCoordinates"/>
     <addaction name="actionReplaceCoordinates"/>
+    <addaction name="actionFixRoundingErrors"/>
     <addaction name="actionFlip"/>
     <addaction name="actionDemote"/>
     <addaction name="actionOpenSubfiles"/>
@@ -1732,6 +1733,11 @@
    </property>
    <property name="text">
     <string>Polar grid</string>
+   </property>
+  </action>
+  <action name="actionFixRoundingErrors">
+   <property name="text">
+    <string>Fix rounding errors</string>
    </property>
   </action>
  </widget>
