@@ -39,7 +39,6 @@
 #include "ui_replacecoordinatesdialog.h"
 #include "ui_editrawdialog.h"
 #include "ui_flipdialog.h"
-#include "ui_addhistorylinedialog.h"
 #include "algorithmtoolset.h"
 
 AlgorithmToolset::AlgorithmToolset (MainWindow* parent) :
@@ -347,52 +346,6 @@ void AlgorithmToolset::autocolor()
 	}
 
 	print (tr ("Auto-colored: new color is [%1] %2"), color.index(), color.name());
-}
-
-void AlgorithmToolset::addHistoryLine()
-{
-	LDObject* obj;
-	bool ishistory = false;
-	bool prevIsHistory = false;
-
-	QDialog dialog {m_window};
-	Ui_AddHistoryLine ui;
-	ui.setupUi(&dialog);
-	ui.m_username->setText (m_config->defaultUser());
-	ui.m_date->setDate (QDate::currentDate());
-	ui.m_comment->setFocus();
-
-	if (not dialog.exec())
-		return;
-
-	// Find a spot to place the new comment
-	for (obj = currentDocument()->getObject (0);
-		obj and next(obj) and not next(obj)->isScemantic();
-		obj = next(obj))
-	{
-		LDComment* comment = dynamic_cast<LDComment*> (obj);
-
-		if (comment and comment->text().startsWith ("!HISTORY "))
-			ishistory = true;
-
-		if (prevIsHistory and not ishistory)
-			break; // Last line was history, this isn't, thus insert the new history line here.
-
-		prevIsHistory = ishistory;
-	}
-
-	int idx = obj ? currentDocument()->indexOf(obj).row() : 0;
-
-	// Create the comment object based on input
-	currentDocument()->emplaceAt<LDComment>(idx++, format("!HISTORY %1 [%2] %3",
-	    ui.m_date->date().toString ("yyyy-MM-dd"),
-	    ui.m_username->text(),
-	    ui.m_comment->text()));
-
-	// If we're adding a history line right before a scemantic object, pad it
-	// an empty line
-	if (obj and next(obj) and next(obj)->isScemantic())
-		currentDocument()->emplaceAt<LDEmpty>(idx);
 }
 
 void AlgorithmToolset::splitLines()

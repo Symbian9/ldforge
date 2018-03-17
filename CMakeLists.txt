@@ -165,7 +165,6 @@ set (LDFORGE_HEADERS
 
 set (LDFORGE_FORMS
 	src/dialogs/aboutdialog.ui
-	src/dialogs/addhistorylinedialog.ui
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
 	src/dialogs/covererdialog.ui

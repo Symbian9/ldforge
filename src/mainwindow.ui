@@ -43,6 +43,14 @@
          <number>0</number>
         </property>
         <widget class="QWidget" name="page">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>465</width>
+           <height>362</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Header</string>
          </attribute>
@@ -313,7 +321,6 @@
     <addaction name="actionInlineDeep"/>
     <addaction name="actionMakePrimitive"/>
     <addaction name="separator"/>
-    <addaction name="actionAddHistoryLine"/>
     <addaction name="separator"/>
     <addaction name="actionSplitQuads"/>
     <addaction name="actionEditRaw"/>
@@ -1521,11 +1528,6 @@
   <action name="actionDownloadFrom">
    <property name="text">
     <string>&amp;Download From...</string>
-   </property>
-  </action>
-  <action name="actionAddHistoryLine">
-   <property name="text">
-    <string>Add History Line</string>
    </property>
   </action>
   <action name="actionJumpTo">

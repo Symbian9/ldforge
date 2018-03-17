@@ -25,7 +25,6 @@ class AlgorithmToolset : public Toolset
 public:
 	explicit AlgorithmToolset (MainWindow* parent);
 
-	Q_INVOKABLE void addHistoryLine();
 	Q_INVOKABLE void autocolor();
 	Q_INVOKABLE void demote();
 	Q_INVOKABLE void editRaw();
