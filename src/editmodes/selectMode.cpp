@@ -21,6 +21,7 @@
 #include "../canvas.h"
 #include "../mainwindow.h"
 #include "../lddocument.h"
+#include "../widgets/vertexobjecteditor.h"
 
 SelectMode::SelectMode (Canvas* canvas) :
     Super (canvas),
@@ -134,6 +135,9 @@ bool SelectMode::mouseDoubleClicked (QMouseEvent* ev)
 		if (index.isValid())
 		{
 			// TODO:
+			LDObject* object = currentDocument()->lookup(index);
+			VertexObjectEditor editor {object};
+			editor.exec();
 			m_window->endAction();
 			return true;
 		}

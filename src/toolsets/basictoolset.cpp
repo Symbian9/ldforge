@@ -25,11 +25,16 @@
 #include "../canvas.h"
 #include "../lddocument.h"
 #include "../linetypes/modelobject.h"
+#include "../linetypes/triangle.h"
+#include "../linetypes/quadrilateral.h"
+#include "../linetypes/edgeline.h"
+#include "../linetypes/conditionaledge.h"
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"
 #include "../grid.h"
 #include "../parser.h"
+#include "../widgets/vertexobjecteditor.h"
 #include "basictoolset.h"
 
 BasicToolset::BasicToolset (MainWindow *parent) :
@@ -286,6 +291,14 @@ void BasicToolset::invert()
 	}
 }
 
+template<typename T>
+void createBasicObject(MainWindow* window)
+{
+	LDObject* object = window->currentDocument()->emplaceAt<T>(window->suggestInsertPoint());
+	VertexObjectEditor editor {object};
+	editor.exec();
+}
+
 void BasicToolset::newSubfile()
 {
 	// TODO:
@@ -293,22 +306,22 @@ void BasicToolset::newSubfile()
 
 void BasicToolset::newLine()
 {
-	// TODO:
+	createBasicObject<LDEdgeLine>(this->m_window);
 }
 
 void BasicToolset::newTriangle()
 {
-	// TODO:
+	createBasicObject<LDTriangle>(this->m_window);
 }
 
 void BasicToolset::newQuadrilateral()
 {
-	// TODO:
+	createBasicObject<LDQuadrilateral>(this->m_window);
 }
 
 void BasicToolset::newConditionalLine()
 {
-	// TODO:
+	createBasicObject<LDConditionalEdge>(this->m_window);
 }
 
 void BasicToolset::newComment()
@@ -326,7 +339,11 @@ void BasicToolset::edit()
 	if (countof(selectedObjects()) == 1)
 	{
 		LDObject* obj = *selectedObjects().begin();
-		// TODO:
+		if (obj->numVertices() > 0)
+		{
+			VertexObjectEditor editor {obj};
+			editor.exec();
+		}
 	}
 }
 

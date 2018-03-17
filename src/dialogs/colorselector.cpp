@@ -33,8 +33,7 @@
  * Constructs a color selection dialog.
  */
 ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
-    QDialog {parent},
-    HierarchyElement {parent},
+	QDialog {parent},
     ui {*new Ui_ColorSelUi},
     m_selectedColor {LDColor::nullColor}
 {
@@ -55,14 +54,14 @@ ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
 
 			if (color == MainColor)
 			{
-				faceColor = m_config->mainColor();
-				faceColor.setAlphaF(m_config->mainColorAlpha());
+				faceColor = ::config->mainColor();
+				faceColor.setAlphaF(::config->mainColorAlpha());
 			}
 
 			QString edgeColor = luma(faceColor) < 80 ? "white" : "black";
 			button->setAutoFillBackground(true);
 			button->setStyleSheet(format(
-				"background-color: #%1; color: %2;",
+				"background-color: %1; color: %2; border:none;",
 				faceColor.name(QColor::HexArgb),
 				edgeColor
 			));

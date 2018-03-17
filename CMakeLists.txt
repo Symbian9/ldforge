@@ -89,6 +89,7 @@ set (LDFORGE_SOURCES
 	src/toolsets/viewtoolset.cpp
 	src/types/matrix.cpp
 	src/widgets/headeredit.cpp
+	src/widgets/vertexobjecteditor.cpp
 )
 
 set (LDFORGE_HEADERS
@@ -161,6 +162,7 @@ set (LDFORGE_HEADERS
 	src/toolsets/viewtoolset.h
 	src/types/matrix.h
 	src/widgets/headeredit.h
+	src/widgets/vertexobjecteditor.h
 )
 
 set (LDFORGE_FORMS
@@ -185,6 +187,7 @@ set (LDFORGE_FORMS
 	src/toolsets/fixroundingerrors.ui
 	src/mainwindow.ui
 	src/partdownloader.ui
+	src/widgets/vertexobjecteditor.ui
 	src/widgets/headeredit.ui
 )
 

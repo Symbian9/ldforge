@@ -20,12 +20,11 @@
 #include <QDialog>
 #include "../main.h"
 #include "../colors.h"
-#include "../hierarchyelement.h"
 
 /*
  * Implements a dialog that asks the user to choose an LDraw color from a grid of available colors. Direct colors are also supported.
  */
-class ColorSelector : public QDialog, public HierarchyElement
+class ColorSelector : public QDialog
 {
 	Q_OBJECT
 
