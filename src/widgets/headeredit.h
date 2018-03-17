@@ -22,4 +22,6 @@ private:
 	class Ui_HeaderEdit& ui;
 	class HeaderHistoryModel* headerHistoryModel = nullptr;
 	LDHeader* m_header = nullptr;
+
+	void moveRows(int direction);
 };

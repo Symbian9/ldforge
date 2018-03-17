@@ -117,7 +117,48 @@ HeaderEdit::HeaderEdit(QWidget* parent) :
 			}
 		}
 	);
+	connect(
+		ui.historyNew,
+		&QPushButton::clicked,
+		[&]()
+		{
+			if (this->hasValidHeader())
+			{
+				const QModelIndex index = this->ui.history->selectionModel()->currentIndex();
+				int row;
+
+				if (index.isValid())
+					row = index.row() + 1;
+				else
+					row = this->headerHistoryModel->rowCount();
+
+				this->headerHistoryModel->insertRows(row, 1, {});
+			}
+		}
+	);
+	connect(
+		ui.historyDelete,
+		&QPushButton::clicked,
+		[&]()
+		{
+			const QModelIndex index = this->ui.history->selectionModel()->currentIndex();
+
+			if (this->hasValidHeader() and index.isValid())
+				this->headerHistoryModel->removeRows(index.row(), 1, {});
+		}
+	);
+	connect(ui.historyMoveUp, &QPushButton::clicked, [&](){ this->moveRows(-1); });
+	connect(ui.historyMoveDown, &QPushButton::clicked, [&](){ this->moveRows(+2); });
 	this->setEnabled(this->hasValidHeader());
+}
+
+void HeaderEdit::moveRows(int direction)
+{
+	if (this->hasValidHeader())
+	{
+		const QModelIndex index = this->ui.history->selectionModel()->currentIndex();
+		this->headerHistoryModel->moveRows({}, index.row(), 1, {}, index.row() + direction);
+	}
 }
 
 HeaderEdit::~HeaderEdit()
