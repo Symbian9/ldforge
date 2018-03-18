@@ -3,6 +3,7 @@
 #include "../linetypes/modelobject.h"
 #include "../primitives.h"
 #include "../guiutilities.h"
+#include "../dialogs/colorselector.h"
 
 SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QWidget* parent) :
 	QDialog {parent},
@@ -15,7 +16,17 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 	this->ui.positionX->setValue(reference->position().x());
 	this->ui.positionY->setValue(reference->position().y());
 	this->ui.positionZ->setValue(reference->position().z());
-	::setupColorButton(parent, this->ui.colorButton, &this->color);
+
+	connect(
+		this->ui.colorButton,
+		&QPushButton::clicked,
+		[&]()
+		{
+			if (ColorSelector::selectColor(this, this->color, this->color))
+				::setColorButton(this->ui.colorButton, this->color);
+		}
+	);
+
 	for (int i : {0, 1, 2})
 	for (int j : {0, 1, 2})
 	{

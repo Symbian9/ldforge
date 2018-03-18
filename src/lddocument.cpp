@@ -511,21 +511,35 @@ QList<LDPolygon> LDDocument::inlinePolygons()
  */
 void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 {
-	if (m_manager->preInline(this, model, deep, renderinline))
-		return; // Manager dealt with this inline
-
-	for (LDObject* object : objects())
+	// Protect against circular references by not inling if called by recursion again.
+	if (not m_isInlining)
 	{
-		// Skip those without effect on the model meaning
-		if (not object->isScemantic())
-			continue;
+		m_isInlining = true;
 
-		// Got another sub-file reference, recurse and inline it too if we're deep-inlining.
-		// If not, just add it into the objects normally.
-		if (deep and object->type() == LDObjectType::SubfileReference)
-			static_cast<LDSubfileReference*>(object)->inlineContents(documentManager(), model, deep, renderinline);
-		else
-			model.insertCopy(model.size(), object);
+		// First ask the manager to deal with this inline (this takes logoed studs into account)
+		if (not m_manager->preInline(this, model, deep, renderinline))
+		{
+			for (LDObject* object : objects())
+			{
+				// Skip those without effect on the model meaning
+				if (object->isScemantic())
+				{
+					// Got another sub-file reference, recurse and inline it too if we're deep-inlining.
+					// If not, just add it into the objects normally.
+					if (deep and object->type() == LDObjectType::SubfileReference)
+					{
+						LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
+						reference->inlineContents(documentManager(), model, deep, renderinline);
+					}
+					else
+					{
+						model.insertCopy(model.size(), object);
+					}
+				}
+			}
+		}
+
+		m_isInlining = false;
 	}
 }
 

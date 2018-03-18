@@ -147,6 +147,7 @@ private:
 	bool m_verticesOutdated = true;
 	bool m_isBeingDestroyed = false;
 	bool m_needsRecache = true; // The next polygon inline of this document rebuilds stored polygon data.
+	bool m_isInlining = false;
 	long m_savePosition;
 	int m_tabIndex;
 	int m_triangleCount;

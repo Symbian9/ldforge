@@ -59,17 +59,24 @@ void DocumentManager::clear()
 
 LDDocument* DocumentManager::getDocumentByName (QString filename)
 {
-	LDDocument* doc = findDocumentByName (filename);
-
-	if (doc == nullptr)
+	if (not filename.isEmpty())
 	{
-		bool tmp = m_loadingMainFile;
-		m_loadingMainFile = false;
-		doc = openDocument (filename, true, true);
-		m_loadingMainFile = tmp;
-	}
+		LDDocument* doc = findDocumentByName (filename);
 
-	return doc;
+		if (doc == nullptr)
+		{
+			bool tmp = m_loadingMainFile;
+			m_loadingMainFile = false;
+			doc = openDocument (filename, true, true);
+			m_loadingMainFile = tmp;
+		}
+
+		return doc;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void DocumentManager::openMainModel (QString path)
@@ -153,10 +160,13 @@ void DocumentManager::openMainModel (QString path)
 
 LDDocument* DocumentManager::findDocumentByName (QString name)
 {
-	for (LDDocument* document : m_documents)
+	if (not name.isEmpty())
 	{
-		if (isOneOf (name, document->name(), document->defaultName()))
-			return document;
+		for (LDDocument* document : m_documents)
+		{
+			if (isOneOf (name, document->name(), document->defaultName()))
+				return document;
+		}
 	}
 
 	return nullptr;

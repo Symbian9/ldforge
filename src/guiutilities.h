@@ -39,4 +39,4 @@ public:
 
 QIcon makeColorIcon(LDColor color, int size);
 void setColorButton(class QPushButton* button, LDColor color);
-void setupColorButton(QWidget* parent, QPushButton* button, LDColor* color);
+void editObject(MainWindow* parent, LDObject* object);

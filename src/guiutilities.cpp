@@ -24,6 +24,9 @@
 #include "lddocument.h"
 #include "dialogs/colorselector.h"
 #include "mainwindow.h"
+#include "linetypes/modelobject.h"
+#include "dialogs/subfilereferenceeditor.h"
+#include "widgets/vertexobjecteditor.h"
 
 GuiUtilities::GuiUtilities (QObject* parent) :
 	QObject (parent),
@@ -167,16 +170,18 @@ void setColorButton(QPushButton* button, LDColor color)
 	}
 }
 
-void setupColorButton(QWidget* parent, QPushButton* button, LDColor* color)
+void editObject(MainWindow* parent, LDObject* object)
 {
-	QObject::connect(
-		button,
-		&QPushButton::clicked,
-		[&]()
-		{
-			if (ColorSelector::selectColor(parent, *color, *color))
-				::setColorButton(button, *color);
-		}
-	);
-	setColorButton(button, *color);
+	if (object->type() == LDObjectType::SubfileReference)
+	{
+		LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
+		SubfileReferenceEditor editor {reference, parent};
+		editor.setPrimitivesTree(parent->primitives());
+		editor.exec();
+	}
+	else
+	{
+		VertexObjectEditor editor {object, parent};
+		editor.exec();
+	}
 }

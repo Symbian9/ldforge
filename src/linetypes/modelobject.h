@@ -123,7 +123,7 @@ public:
 
 private:
 	Vertex m_position;
-	Matrix m_transformationMatrix;
+	Matrix m_transformationMatrix = Matrix::identity;
 };
 
 /*
