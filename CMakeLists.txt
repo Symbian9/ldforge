@@ -62,6 +62,7 @@ set (LDFORGE_SOURCES
 	src/dialogs/externalprogrampathdialog.cpp
 	src/dialogs/generateprimitivedialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
+	src/dialogs/subfilereferenceeditor.cpp
 	src/dialogs/newpartdialog.cpp
 	src/dialogs/openprogressdialog.cpp
 	src/editmodes/abstractEditMode.cpp
@@ -133,6 +134,7 @@ set (LDFORGE_HEADERS
 	src/dialogs/generateprimitivedialog.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
+	src/dialogs/subfilereferenceeditor.h
 	src/dialogs/openprogressdialog.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
@@ -183,6 +185,7 @@ set (LDFORGE_FORMS
 	src/dialogs/rectifierdialog.ui
 	src/dialogs/replacecoordinatesdialog.ui
 	src/dialogs/rotationpointdialog.ui
+	src/dialogs/subfilereferenceeditor.ui
 	src/dialogs/ytruderdialog.ui
 	src/toolsets/fixroundingerrors.ui
 	src/mainwindow.ui

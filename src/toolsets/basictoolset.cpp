@@ -32,6 +32,7 @@
 #include "../ldobjectiterator.h"
 #include "../mainwindow.h"
 #include "../dialogs/colorselector.h"
+#include "../dialogs/subfilereferenceeditor.h"
 #include "../grid.h"
 #include "../parser.h"
 #include "../widgets/vertexobjecteditor.h"
@@ -292,36 +293,44 @@ void BasicToolset::invert()
 }
 
 template<typename T>
-void createBasicObject(MainWindow* window)
+static T* createObject(MainWindow* window)
 {
-	LDObject* object = window->currentDocument()->emplaceAt<T>(window->suggestInsertPoint());
+	return window->currentDocument()->emplaceAt<T>(window->suggestInsertPoint());
+}
+
+template<typename T>
+static void createVertexObject(MainWindow* window)
+{
+	LDObject* object = createObject<T>(window);
 	VertexObjectEditor editor {object};
 	editor.exec();
 }
 
 void BasicToolset::newSubfile()
 {
-	// TODO:
+	LDSubfileReference* reference = createObject<LDSubfileReference>(this->m_window);
+	SubfileReferenceEditor editor {reference, this->m_window};
+	editor.exec();
 }
 
 void BasicToolset::newLine()
 {
-	createBasicObject<LDEdgeLine>(this->m_window);
+	createVertexObject<LDEdgeLine>(this->m_window);
 }
 
 void BasicToolset::newTriangle()
 {
-	createBasicObject<LDTriangle>(this->m_window);
+	createVertexObject<LDTriangle>(this->m_window);
 }
 
 void BasicToolset::newQuadrilateral()
 {
-	createBasicObject<LDQuadrilateral>(this->m_window);
+	createVertexObject<LDQuadrilateral>(this->m_window);
 }
 
 void BasicToolset::newConditionalLine()
 {
-	createBasicObject<LDConditionalEdge>(this->m_window);
+	createVertexObject<LDConditionalEdge>(this->m_window);
 }
 
 void BasicToolset::newComment()

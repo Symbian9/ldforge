@@ -236,6 +236,11 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context)
 	}
 }
 
+void LDSubfileReference::setReferenceName(const QString& newReferenceName)
+{
+	changeProperty(&this->m_referenceName, newReferenceName);
+}
+
 // =============================================================================
 //
 // Moves this object using the given vertex as a movement List

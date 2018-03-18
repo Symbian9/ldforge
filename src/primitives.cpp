@@ -551,8 +551,16 @@ QVariant PrimitiveManager::data(const QModelIndex& index, int role) const
 			{
 			case Qt::DisplayRole:
 				return format("%1 - %2", primitive.name, primitive.title);
+
 			case Qt::DecorationRole:
 				return MainWindow::getIcon("subfilereference");
+
+			case PrimitiveNameRole:
+				return primitive.name;
+
+			case PrimitiveDescriptionRole:
+				return primitive.title;
+
 			default:
 				return {};
 			}
@@ -566,8 +574,10 @@ QVariant PrimitiveManager::data(const QModelIndex& index, int role) const
 			{
 			case Qt::DisplayRole:
 				return category->name();
+
 			case Qt::DecorationRole:
 				return MainWindow::getIcon("folder");
+
 			default:
 				return {};
 			}

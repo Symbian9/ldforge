@@ -14,7 +14,6 @@ public:
 
 private:
 	class QDoubleSpinBox* spinboxAt(int i, Axis axis);
-	void setColorButton(LDColor color);
 
 	class Ui_VertexObjectEditor& ui;
 	class QGridLayout* vertexGrid;

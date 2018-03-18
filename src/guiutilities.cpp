@@ -18,9 +18,11 @@
 
 #include <QComboBox>
 #include <QPainter>
+#include <QPushButton>
 #include "colors.h"
 #include "guiutilities.h"
 #include "lddocument.h"
+#include "dialogs/colorselector.h"
 #include "mainwindow.h"
 
 GuiUtilities::GuiUtilities (QObject* parent) :
@@ -145,4 +147,36 @@ QVector<ColorToolbarItem> GuiUtilities::loadQuickColorList()
 	}
 
 	return colors;
+}
+
+
+void setColorButton(QPushButton* button, LDColor color)
+{
+	if (color.isValid())
+	{
+		button->setFlat(true);
+		button->setText(color.name());
+		button->setStyleSheet(format("background-color: %1", color.hexcode()));
+		button->setStyleSheet(format("color: %1", color.edgeColor().name()));
+	}
+	else
+	{
+		button->setFlat(false);
+		button->setText("");
+		button->setStyleSheet("");
+	}
+}
+
+void setupColorButton(QWidget* parent, QPushButton* button, LDColor* color)
+{
+	QObject::connect(
+		button,
+		&QPushButton::clicked,
+		[&]()
+		{
+			if (ColorSelector::selectColor(parent, *color, *color))
+				::setColorButton(button, *color);
+		}
+	);
+	setColorButton(button, *color);
 }

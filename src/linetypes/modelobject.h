@@ -230,6 +230,7 @@ public:
 	bool hasMatrix() const override { return true; }
 	QString typeName() const override { return "subfilereference"; }
 	void serialize(class Serializer& serializer) override;
+	void setReferenceName(const QString& newReferenceName);
 
 private:
 	QString m_referenceName;

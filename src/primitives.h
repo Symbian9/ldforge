@@ -91,6 +91,12 @@ class PrimitiveManager : public QAbstractItemModel, HierarchyElement
 	Q_OBJECT
 
 public:
+	enum
+	{
+		PrimitiveNameRole = Qt::UserRole + 10,
+		PrimitiveDescriptionRole,
+	};
+
 	PrimitiveManager(QObject* parent);
 
 	PrimitiveScanner* activeScanner();

@@ -3,6 +3,7 @@
 #include "vertexobjecteditor.h"
 #include "ui_vertexobjecteditor.h"
 #include "../dialogs/colorselector.h"
+#include "../guiutilities.h"
 
 VertexObjectEditor::VertexObjectEditor(LDObject* object, QWidget *parent) :
 	QDialog {parent},
@@ -12,15 +13,8 @@ VertexObjectEditor::VertexObjectEditor(LDObject* object, QWidget *parent) :
 {
 	this->ui.setupUi(this);
 	this->ui.verticesContainer->setLayout(this->vertexGrid);
-	connect(
-		this->ui.color,
-		&QPushButton::clicked,
-		[&]()
-		{
-			ColorSelector::selectColor(this, this->currentColor, this->currentColor);
-			this->setColorButton(this->currentColor);
-		}
-	);
+	this->currentColor = this->object->color();
+	::setupColorButton(parent, this->ui.color, &this->currentColor);
 
 	for (int i : range(0, 1, object->numVertices() - 1))
 	{
@@ -44,29 +38,11 @@ VertexObjectEditor::VertexObjectEditor(LDObject* object, QWidget *parent) :
 				spinbox->setValue(this->object->vertex(i)[axis]);
 		}
 	}
-
-	this->currentColor = this->object->color();
-	this->setColorButton(this->object->color());
 }
 
 VertexObjectEditor::~VertexObjectEditor()
 {
 	delete &this->ui;
-}
-
-void VertexObjectEditor::setColorButton(LDColor color)
-{
-	if (color.isValid())
-	{
-		this->ui.color->setText(color.name());
-		this->ui.color->setStyleSheet(format("background-color: %1", color.hexcode()));
-		this->ui.color->setStyleSheet(format("color: %1", color.edgeColor().name()));
-	}
-	else
-	{
-		this->ui.color->setText("");
-		this->ui.color->setStyleSheet("");
-	}
 }
 
 QDoubleSpinBox* VertexObjectEditor::spinboxAt(int i, Axis axis)
