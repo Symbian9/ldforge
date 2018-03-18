@@ -24,6 +24,7 @@
 #include <QVBoxLayout>
 #include "../canvas.h"
 #include "../lddocument.h"
+#include "../linetypes/comment.h"
 #include "../linetypes/modelobject.h"
 #include "../linetypes/triangle.h"
 #include "../linetypes/quadrilateral.h"
@@ -327,7 +328,7 @@ void BasicToolset::newConditionalLine()
 
 void BasicToolset::newComment()
 {
-	// TODO:
+	createObject<LDComment>(this->m_window);
 }
 
 void BasicToolset::newBFC()

@@ -19,12 +19,14 @@
 #include <QComboBox>
 #include <QPainter>
 #include <QPushButton>
+#include <QInputDialog>
 #include "colors.h"
 #include "guiutilities.h"
 #include "lddocument.h"
 #include "dialogs/colorselector.h"
 #include "mainwindow.h"
 #include "linetypes/modelobject.h"
+#include "linetypes/comment.h"
 #include "dialogs/subfilereferenceeditor.h"
 #include "widgets/vertexobjecteditor.h"
 
@@ -178,6 +180,17 @@ void editObject(MainWindow* parent, LDObject* object)
 		SubfileReferenceEditor editor {reference, parent};
 		editor.setPrimitivesTree(parent->primitives());
 		editor.exec();
+	}
+	else if (object->type() == LDObjectType::Comment)
+	{
+		LDComment* comment = static_cast<LDComment*>(object);
+		comment->setText(QInputDialog::getText(
+			parent,
+			QObject::tr("Edit comment"),
+			QObject::tr("Comment text:"),
+			QLineEdit::Normal,
+			comment->text()
+		));
 	}
 	else
 	{
