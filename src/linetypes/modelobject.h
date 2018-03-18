@@ -98,7 +98,7 @@ protected:
 private:
 	bool m_hasInvertNext = false;
 	bool m_isHidden;
-	LDColor m_color;
+	LDColor m_color = LDColor::nullColor;
 	QColor m_randomColor;
 	Vertex m_coords[4];
 };

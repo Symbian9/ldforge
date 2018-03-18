@@ -271,7 +271,10 @@ void LDObject::setHidden (bool value)
 
 LDColor LDObject::color() const
 {
-	return m_color;
+	if (this->m_color.isValid())
+		return this->m_color;
+	else
+		return this->defaultColor();
 }
 
 QColor LDObject::randomColor() const
@@ -324,6 +327,9 @@ LDObject* LDObject::newFromType(LDObjectType type)
 //
 void LDObject::setColor (LDColor color)
 {
+	if (color == this->defaultColor())
+		color = LDColor::nullColor;
+
 	changeProperty(&m_color, color);
 }
 

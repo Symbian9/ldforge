@@ -13,10 +13,10 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 	this->ui.setupUi(this);
 	this->ui.referenceName->setText(reference->referenceName());
 	this->color = reference->color();
+	::setColorButton(this->ui.colorButton, this->color);
 	this->ui.positionX->setValue(reference->position().x());
 	this->ui.positionY->setValue(reference->position().y());
 	this->ui.positionZ->setValue(reference->position().z());
-
 	connect(
 		this->ui.colorButton,
 		&QPushButton::clicked,
@@ -26,7 +26,6 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 				::setColorButton(this->ui.colorButton, this->color);
 		}
 	);
-
 	for (int i : {0, 1, 2})
 	for (int j : {0, 1, 2})
 	{
