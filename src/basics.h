@@ -44,6 +44,16 @@ enum Axis
 	Z
 };
 
+enum Winding
+{
+	NoWinding,
+	CounterClockwise,
+	Clockwise,
+};
+
+Winding operator^(Winding one, Winding other);
+Winding& operator^=(Winding& one, Winding other);
+
 //
 // Derivative of QVector3D: this class is used for the vertices.
 //

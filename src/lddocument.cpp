@@ -529,7 +529,13 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 					if (deep and object->type() == LDObjectType::SubfileReference)
 					{
 						LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
-						reference->inlineContents(documentManager(), model, deep, renderinline);
+						reference->inlineContents(
+							documentManager(),
+							this->header.winding,
+							model,
+							deep,
+							renderinline
+						);
 					}
 					else
 					{
@@ -567,16 +573,4 @@ const QSet<Vertex>& LDDocument::inlineVertices()
 void LDDocument::redoVertices()
 {
 	m_verticesOutdated = true;
-}
-
-/*
- * Special operator definition that implements the XOR operator for windings.
- * However, if either winding is NoWinding, then this function returns NoWinding.
- */
-Winding operator^(Winding one, Winding other)
-{
-	if (one == NoWinding or other == NoWinding)
-		return NoWinding;
-	else
-		return static_cast<Winding>(static_cast<int>(one) ^ static_cast<int>(other));
 }

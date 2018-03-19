@@ -40,6 +40,11 @@ struct LDPolygon
 	Vertex		vertices[4];
 	int			color;
 
+	inline int numPolygonVertices() const
+	{
+		return (num == 5) ? 2 : num;
+	}
+
 	inline int numVertices() const
 	{
 		return (num == 5) ? 4 : num;

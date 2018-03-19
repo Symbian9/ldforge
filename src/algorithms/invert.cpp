@@ -128,3 +128,18 @@ void invert(LDObject* obj, DocumentManager* context)
 		}
 	}
 }
+
+void invertPolygon(LDPolygon& polygon)
+{
+	switch (polygon.numPolygonVertices())
+	{
+	case 2:
+	case 3:
+		std::swap(polygon.vertices[0], polygon.vertices[1]);
+		break;
+
+	case 4:
+		std::swap(polygon.vertices[1], polygon.vertices[3]);
+		break;
+	}
+}

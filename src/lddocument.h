@@ -28,13 +28,6 @@
 struct LDGLData;
 class DocumentManager;
 
-enum Winding
-{
-	NoWinding,
-	CounterClockwise,
-	Clockwise,
-};
-
 struct LDHeader
 {
 	struct HistoryEntry
@@ -79,7 +72,6 @@ struct LDHeader
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
-Winding operator^(Winding one, Winding other);
 
 //
 // This class stores a document either as a editable file for the user or for

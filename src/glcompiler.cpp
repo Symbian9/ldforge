@@ -375,7 +375,8 @@ void GLCompiler::compileObject(const QModelIndex& index)
 	case LDObjectType::SubfileReference:
 		{
 			LDSubfileReference* subfileReference = static_cast<LDSubfileReference*>(object);
-			auto data = subfileReference->inlinePolygons(m_documents);
+			// TODO: move winding to Model and use it here
+			auto data = subfileReference->inlinePolygons(m_documents, CounterClockwise);
 
 			for (LDPolygon& poly : data)
 				compilePolygon (poly, index, info);

@@ -22,3 +22,4 @@
 bool isflat(class Model* model, Axis* axis);
 Matrix flipmatrix(Axis axis);
 void invert(LDObject* obj, class DocumentManager* context);
+void invertPolygon(LDPolygon& polygon);

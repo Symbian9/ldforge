@@ -26,6 +26,7 @@
 #include "../canvas.h"
 #include "../colors.h"
 #include "../glcompiler.h"
+#include "../algorithms/invert.h"
 #include "edgeline.h"
 #include "triangle.h"
 #include "quadrilateral.h"
@@ -154,16 +155,35 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 		obj->setColor (parentcolor);
 }
 
+bool shouldInvert(LDSubfileReference* reference, Winding winding, DocumentManager* context)
+{
+	bool result = false;
+	result ^= (reference->isInverted());
+	result ^= (reference->transformationMatrix().determinant() < 0);
+	result ^= (reference->fileInfo(context)->header.winding != winding);
+	return result;
+}
+
 // =============================================================================
 // -----------------------------------------------------------------------------
-void LDSubfileReference::inlineContents(DocumentManager* context, Model& model, bool deep, bool render)
-{
+void LDSubfileReference::inlineContents(
+	DocumentManager* context,
+	Winding parentWinding,
+	Model& model,
+	bool deep,
+	bool render
+) {
 	Model inlined {context};
 	fileInfo(context)->inlineContents(inlined, deep, render);
 
 	// Transform the objects
 	for (LDObject* object : inlined)
+	{
+		if (::shouldInvert(this, parentWinding, context))
+			::invert(object, context);
+
 		TransformObject(object, transformationMatrix(), position(), color());
+	}
 
 	model.merge(inlined);
 }
@@ -214,7 +234,7 @@ bool LDObject::hasMatrix() const
 
 // =============================================================================
 //
-QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context)
+QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context, Winding parentWinding)
 {
 	LDDocument* file = fileInfo(context);
 
@@ -226,6 +246,9 @@ QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context)
 		{
 			for (int i = 0; i < entry.numVertices(); ++i)
 				entry.vertices[i].transform (transformationMatrix(), position());
+
+			if (::shouldInvert(this, parentWinding, context))
+				::invertPolygon(entry);
 		}
 
 		return data;

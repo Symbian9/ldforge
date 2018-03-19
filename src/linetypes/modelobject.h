@@ -222,8 +222,14 @@ public:
 	virtual QString asText() const override;
 	LDDocument* fileInfo(DocumentManager *context) const;
 	virtual void getVertices(DocumentManager *context, QSet<Vertex>& verts) const override;
-	void inlineContents(DocumentManager* context, Model& model, bool deep, bool render);
-	QList<LDPolygon> inlinePolygons(DocumentManager* context);
+	void inlineContents(
+		DocumentManager* context,
+		Winding parentWinding,
+		Model& model,
+		bool deep,
+		bool render
+	);
+	QList<LDPolygon> inlinePolygons(DocumentManager* context, Winding parentWinding);
 	QString objectListText() const override;
 	QString referenceName() const;
 	int triangleCount(DocumentManager *context) const override;
