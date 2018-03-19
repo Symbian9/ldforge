@@ -23,10 +23,13 @@
  * Returns whether or not the document is flat.
  * If it is flat, the result is stored in *axis.
  */
-bool isflat(Model* model, Axis* axis)
+bool isflat(Model* model, Axis* flatDimension)
 {
-	QVector<Axis> axisSet = {X, Y, Z};
+	// The dimensions that this model is potentially flat in.
+	QVector<Axis> dimensions = {X, Y, Z};
 
+	// Iterate through everything in the subfile. If there is any vertex with a coordinate not at
+	// zero, the subfile is not flat in that dimension.
 	for (LDObject* subfileObject : model->objects())
 	{
 		for (int i = 0; i < subfileObject->numVertices(); ++i)
@@ -34,38 +37,42 @@ bool isflat(Model* model, Axis* axis)
 			Vertex const& v_i = subfileObject->vertex(i);
 
 			if (not qFuzzyCompare(v_i.x(), 0.f))
-				axisSet.removeOne(X);
+				dimensions.removeOne(X);
 
 			if (not qFuzzyCompare(v_i.y(), 0.f))
-				axisSet.removeOne(Y);
+				dimensions.removeOne(Y);
 
 			if (not qFuzzyCompare(v_i.z(), 0.f))
-				axisSet.removeOne(Z);
+				dimensions.removeOne(Z);
 		}
 
-		if (axisSet.isEmpty())
+		// If there are no more dimensions left, we can exit the loop.
+		if (dimensions.isEmpty())
 			break;
 	}
 
-	if (axisSet.size() == 1)
+	if (dimensions.size() == 1)
 	{
-		*axis = axisSet[0];
+		// The model is flat in one dimension, return that.
+		// If the model is flat in two or three dimensions, it's not really a valid model.
+		*flatDimension = dimensions[0];
 		return true;
 	}
 	else
 	{
+		// The model is not flat.
 		return false;
 	}
 }
 
 /*
- * Returns a matrix that causes a flip on the given axis.
+ * Returns a matrix that causes a flip on the given dimension.
  */
-Matrix flipmatrix(Axis axis)
+Matrix flipmatrix(Axis dimension)
 {
 	Matrix result = Matrix::identity;
 
-	switch (axis)
+	switch (dimension)
 	{
 	case X:
 		result(0, 0) = -1;
@@ -90,6 +97,7 @@ void invert(LDObject* obj, DocumentManager* context)
 {
 	if (obj->numPolygonVertices() > 0)
 	{
+		// Object is vertex based, so change the order of the vertices.
 		QVector<Vertex> vertices;
 		vertices.resize(obj->numPolygonVertices());
 
@@ -105,12 +113,12 @@ void invert(LDObject* obj, DocumentManager* context)
 		Model model {context};
 		LDSubfileReference* reference = static_cast<LDSubfileReference*>(obj);
 		reference->fileInfo(context)->inlineContents(model, true, false);
-		Axis flatAxis;
+		Axis flatDimension;
 
-		if (isflat(&model, &flatAxis))
+		if (::isflat(&model, &flatDimension))
 		{
 			reference->setTransformationMatrix(
-				reference->transformationMatrix() * flipmatrix(flatAxis)
+				reference->transformationMatrix() * ::flipmatrix(flatDimension)
 			);
 		}
 		else
