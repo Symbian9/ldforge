@@ -57,6 +57,7 @@ set (LDFORGE_SOURCES
 	src/serializer.cpp
 	src/ringFinder.cpp
 	src/version.cpp
+	src/algorithms/invert.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
 	src/dialogs/externalprogrampathdialog.cpp
@@ -128,6 +129,7 @@ set (LDFORGE_HEADERS
 	src/ringFinder.h
 	src/serializer.h
 	src/transform.h
+	src/algorithms/invert.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
 	src/dialogs/externalprogrampathdialog.h

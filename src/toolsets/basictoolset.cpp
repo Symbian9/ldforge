@@ -37,6 +37,7 @@
 #include "../grid.h"
 #include "../parser.h"
 #include "../widgets/vertexobjecteditor.h"
+#include "../algorithms/invert.h"
 #include "basictoolset.h"
 #include "guiutilities.h"
 
@@ -228,70 +229,8 @@ void BasicToolset::setColor()
 
 void BasicToolset::invert()
 {
-	for (LDObject* obj : selectedObjects())
-	{
-		if (obj->numPolygonVertices() > 0)
-		{
-			QVector<Vertex> vertices;
-
-			for (int i = 0; i < obj->numPolygonVertices(); i += 1)
-				vertices.append(obj->vertex(i));
-
-			for (int i = 0; i < vertices.size(); i += 1)
-				obj->setVertex(i, vertices[vertices.size() - 1 - i]);
-		}
-		else if (obj->type() == LDObjectType::SubfileReference)
-		{
-			// Check whether subfile is flat
-			int axisSet = (1 << X) | (1 << Y) | (1 << Z);
-			Model model {currentDocument()->documentManager()};
-			LDSubfileReference* reference = static_cast<LDSubfileReference*>(obj);
-			reference->fileInfo(m_documents)->inlineContents(model, true, false);
-
-			for (LDObject* subobj : model.objects())
-			{
-				for (int i = 0; i < subobj->numVertices(); ++i)
-				{
-					Vertex const& vrt = subobj->vertex (i);
-
-					if (axisSet & (1 << X) and vrt.x() != 0.0)
-						axisSet &= ~(1 << X);
-
-					if (axisSet & (1 << Y) and vrt.y() != 0.0)
-						axisSet &= ~(1 << Y);
-
-					if (axisSet & (1 << Z) and vrt.z() != 0.0)
-						axisSet &= ~(1 << Z);
-				}
-
-				if (axisSet == 0)
-					break;
-			}
-
-			if (axisSet != 0)
-			{
-				// Subfile has all vertices zero on one specific plane, so it is flat.
-				// Let's flip it.
-				Matrix matrixModifier = Matrix::identity;
-
-				if (axisSet & (1 << X))
-					matrixModifier(0, 0) = -1;
-
-				if (axisSet & (1 << Y))
-					matrixModifier(1, 1) = -1;
-
-				if (axisSet & (1 << Z))
-					matrixModifier(2, 2) = -1;
-
-				reference->setTransformationMatrix(reference->transformationMatrix() * matrixModifier);
-			}
-			else
-			{
-				// Subfile is not flat. Resort to invertnext.
-				reference->setInverted(not reference->isInverted());
-			}
-		}
-	}
+	for (LDObject* object : selectedObjects())
+		::invert(object, m_documents);
 }
 
 template<typename T>
