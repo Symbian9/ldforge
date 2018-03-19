@@ -91,12 +91,13 @@ void invert(LDObject* obj, DocumentManager* context)
 	if (obj->numPolygonVertices() > 0)
 	{
 		QVector<Vertex> vertices;
-
-		for (int i = 0; i < obj->numPolygonVertices(); i += 1)
-			vertices.append(obj->vertex(i));
+		vertices.resize(obj->numPolygonVertices());
 
 		for (int i = 0; i < vertices.size(); i += 1)
-			obj->setVertex(i, vertices[vertices.size() - 1 - i]);
+			vertices[vertices.size() - 1 - i] = obj->vertex(i);
+
+		for (int i = 0; i < vertices.size(); i += 1)
+			obj->setVertex(i, vertices[i]);
 	}
 	else if (obj->type() == LDObjectType::SubfileReference)
 	{
