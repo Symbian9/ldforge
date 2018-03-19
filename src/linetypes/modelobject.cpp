@@ -160,7 +160,7 @@ bool shouldInvert(LDSubfileReference* reference, Winding winding, DocumentManage
 	bool result = false;
 	result ^= (reference->isInverted());
 	result ^= (reference->transformationMatrix().determinant() < 0);
-	result ^= (reference->fileInfo(context)->header.winding != winding);
+	result ^= (reference->fileInfo(context)->winding() != winding);
 	return result;
 }
 

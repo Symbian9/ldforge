@@ -414,6 +414,17 @@ QModelIndex Model::objectByPickingColor(const QColor& color) const
 	}
 }
 
+Winding Model::winding() const
+{
+	return this->_winding;
+}
+
+void Model::setWinding(Winding winding)
+{
+	this->_winding = winding;
+	emit windingChanged(this->_winding);
+}
+
 int countof(Model& model)
 {
 	return model.size();

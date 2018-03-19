@@ -62,7 +62,6 @@ struct LDHeader
 	QString help;
 	QString keywords;
 	QVector<HistoryEntry> history;
-	Winding winding = NoWinding;
 	enum
 	{
 		UnspecifiedLicense,

@@ -915,8 +915,9 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 	{
 		document->setFrozen(false);
 		print ("Opened %1", document->name());
-		getRendererForDocument(document);
+		Canvas* canvas = getRendererForDocument(document);
 		updateDocumentList();
+		connect(document, &LDDocument::windingChanged, canvas, &Canvas::fullUpdate);
 	}
 }
 
@@ -948,7 +949,7 @@ void MainWindow::changeDocument (LDDocument* document)
 		updateTitle();
 		print ("Changed document to %1", document->getDisplayName());
 		ui.objectList->setModel(document);
-		ui.header->setHeader(&document->header);
+		ui.header->setDocument(document);
 		QItemSelectionModel* selection = m_selections.value(document);
 
 		if (selection == nullptr)

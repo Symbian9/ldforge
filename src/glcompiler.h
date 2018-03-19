@@ -40,6 +40,7 @@ public:
 	int vboSize (int vbonum) const;
 	QItemSelectionModel* selectionModel() const;
 	void setSelectionModel(QItemSelectionModel* _selectionModel);
+	void fullUpdate();
 
 	static int vboNumber (VboClass surface, VboSubclass complement);
 

@@ -74,10 +74,7 @@ HeaderEdit::HeaderEdit(QWidget* parent) :
 		[&](int index)
 		{
 			if (this->hasValidHeader())
-			{
-				this->m_header->winding = static_cast<Winding>(index);
-				emit windingChanged(this->m_header->winding);
-			}
+				this->m_model->setWinding(static_cast<Winding>(index));
 		}
 	);
 	connect(
@@ -185,8 +182,10 @@ HeaderEdit::~HeaderEdit()
 	delete &this->ui;
 }
 
-void HeaderEdit::setHeader(LDHeader* header)
+void HeaderEdit::setDocument(LDDocument* document)
 {
+	LDHeader* header = &document->header;
+	this->m_model = document;
 	this->m_header = header;
 	this->ui.description->setText(header->description);
 	this->ui.author->setText(header->author);
@@ -196,16 +195,11 @@ void HeaderEdit::setHeader(LDHeader* header)
 	this->ui.physicalColor->setChecked(header->qualfiers & LDHeader::Physical_Color);
 	this->ui.flexibleSection->setChecked(header->qualfiers & LDHeader::Flexible_Section);
 	this->ui.cmdline->setText(header->cmdline);
-	this->ui.winding->setCurrentIndex(header->winding);
+	this->ui.winding->setCurrentIndex(document->winding());
 	this->ui.keywords->document()->setPlainText(header->keywords);
 	this->ui.help->document()->setPlainText(header->help);
 	this->headerHistoryModel->setHeader(header);
 	this->setEnabled(this->hasValidHeader());
-}
-
-LDHeader* HeaderEdit::header() const
-{
-	return this->m_header;
 }
 
 bool HeaderEdit::hasValidHeader() const

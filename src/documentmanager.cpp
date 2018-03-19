@@ -319,7 +319,9 @@ LDDocument* DocumentManager::openDocument (QString path, bool search, bool impli
 
 	int numWarnings;
 	Parser parser {*fp};
-	load->header = parser.parseHeader();
+	Winding winding = NoWinding;
+	load->header = parser.parseHeader(winding);
+	load->setWinding(winding);
 	parser.parseBody(*load);
 	fp->close();
 	fp->deleteLater();

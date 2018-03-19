@@ -57,8 +57,11 @@ const QMap<QString, decltype(LDHeader::type)> Parser::typeStrings {
  *   · ParseFailure: the header line was parsed incorrectly and needs to be handled otherwise.
  *   · StopParsing: the line does not belong in the header and header parsing needs to stop.
  */
-Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QString& line)
-{
+Parser::HeaderParseResult Parser::parseHeaderLine(
+	LDHeader& header,
+	Winding& winding,
+	const QString& line
+) {
 	if (line.isEmpty())
 	{
 		return ParseSuccess;
@@ -98,17 +101,17 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
 	}
 	else if (line == "0 BFC CERTIFY CCW")
 	{
-		header.winding = CounterClockwise;
+		winding = CounterClockwise;
 		return ParseSuccess;
 	}
 	else if (line == "0 BFC CERTIFY CW")
 	{
-		header.winding = Clockwise;
+		winding = Clockwise;
 		return ParseSuccess;
 	}
 	else if (line == "0 BFC NOCERTIFY")
 	{
-		header.winding = NoWinding;
+		winding = NoWinding;
 		return ParseSuccess;
 	}
 	else if (line.startsWith("0 !HISTORY "))
@@ -193,7 +196,7 @@ Parser::HeaderParseResult Parser::parseHeaderLine(LDHeader& header, const QStrin
  * Parses the header from the device given at construction and returns
  * the resulting header structure.
  */
-LDHeader Parser::parseHeader()
+LDHeader Parser::parseHeader(Winding& winding)
 {
 	LDHeader header = {};
 
@@ -209,7 +212,7 @@ LDHeader Parser::parseHeader()
 			while (not this->device.atEnd())
 			{
 				const QString& line = this->readLine();
-				auto result = parseHeaderLine(header, line);
+				auto result = parseHeaderLine(header, winding, line);
 
 				if (result == ParseFailure)
 				{

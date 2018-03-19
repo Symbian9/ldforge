@@ -61,6 +61,7 @@ public:
 	Camera camera() const;
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
+	Q_SLOT void fullUpdate();
 	Qt::KeyboardModifiers keyboardModifiers() const;
 	const Model* model() const;
 	QPoint const& mousePosition() const;

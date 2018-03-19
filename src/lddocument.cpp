@@ -221,7 +221,7 @@ bool LDDocument::isSafeToClose()
 	return true;
 }
 
-static QString headerToString(const LDHeader& header)
+static QString headerToString(const Model& model, const LDHeader& header)
 {
 	QString result;
 
@@ -276,7 +276,7 @@ static QString headerToString(const LDHeader& header)
 
 		result += "\r\n";
 
-		switch (header.winding)
+		switch (model.winding())
 		{
 		case CounterClockwise:
 			result += "0 BFC CERTIFY CCW\r\n";
@@ -350,7 +350,7 @@ bool LDDocument::save (QString path, qint64* sizeptr)
 	if (this->header.type != LDHeader::NoHeader)
 	{
 		header.name = LDDocument::shortenName(path);
-		data += headerToString(this->header).toUtf8();
+		data += headerToString(*this, this->header).toUtf8();
 	}
 
 	// File is open, now save the model to it. Note that LDraw requires files to have DOS line endings.
@@ -531,7 +531,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 						LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
 						reference->inlineContents(
 							documentManager(),
-							this->header.winding,
+							this->winding(),
 							model,
 							deep,
 							renderinline

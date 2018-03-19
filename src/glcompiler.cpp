@@ -24,6 +24,7 @@
 #include "guiutilities.h"
 #include "documentmanager.h"
 #include "grid.h"
+#include "algorithms/invert.h"
 
 void checkGLError(HierarchyElement* element, QString file, int line)
 {
@@ -375,8 +376,10 @@ void GLCompiler::compileObject(const QModelIndex& index)
 	case LDObjectType::SubfileReference:
 		{
 			LDSubfileReference* subfileReference = static_cast<LDSubfileReference*>(object);
-			// TODO: move winding to Model and use it here
-			auto data = subfileReference->inlinePolygons(m_documents, CounterClockwise);
+			auto data = subfileReference->inlinePolygons(
+				m_documents,
+				m_renderer->model()->winding()
+			);
 
 			for (LDPolygon& poly : data)
 				compilePolygon (poly, index, info);
@@ -407,6 +410,9 @@ void GLCompiler::compilePolygon(
 	const QModelIndex& polygonOwnerIndex,
 	ObjectVboData& objectInfo
 ) {
+	if (m_renderer->model()->winding() == Clockwise)
+		::invertPolygon(poly);
+
 	VboClass surface;
 	int vertexCount;
 
@@ -484,6 +490,12 @@ GLuint GLCompiler::vbo (int vbonum) const
 int GLCompiler::vboSize (int vbonum) const
 {
 	return m_vboSizes[vbonum];
+}
+
+void GLCompiler::fullUpdate()
+{
+	m_objectInfo.clear();
+	recompile();
 }
 
 /*

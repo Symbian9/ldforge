@@ -116,7 +116,7 @@ void BasicToolset::doInline (bool deep)
 			Model inlined {m_documents};
 			reference->inlineContents(
 				m_documents,
-				currentDocument()->header.winding,
+				currentDocument()->winding(),
 				inlined,
 				deep,
 				false

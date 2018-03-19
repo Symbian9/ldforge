@@ -28,18 +28,17 @@ public:
 	HeaderEdit(QWidget* parent = nullptr);
 	~HeaderEdit();
 
-	void setHeader(LDHeader* header);
-	LDHeader* header() const;
+	void setDocument(LDDocument* document);
 	bool hasValidHeader() const;
 
 signals:
 	void descriptionChanged(const QString& newDescription);
-	void windingChanged(Winding newWinding);
 
 private:
 	class Ui_HeaderEdit& ui;
 	class HeaderHistoryModel* headerHistoryModel = nullptr;
 	LDHeader* m_header = nullptr;
+	Model* m_model = nullptr;
 
 	void moveRows(int direction);
 };

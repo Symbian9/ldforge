@@ -32,7 +32,7 @@ public:
 
 	Parser(QIODevice& device, QObject* parent = nullptr);
 
-	LDHeader parseHeader();
+	LDHeader parseHeader(Winding& winding);
 	void parseBody(Model& model);
 
 	static LDObject* parseFromString(Model& model, int position, QString line);
@@ -48,7 +48,7 @@ private:
 	enum HeaderParseResult {ParseSuccess, ParseFailure, StopParsing};
 
 	QString readLine();
-	HeaderParseResult parseHeaderLine(LDHeader& header, const QString& line);
+	HeaderParseResult parseHeaderLine(LDHeader& header, Winding& winding, const QString& line);
 
 	QIODevice& device;
 	QStringList bag;

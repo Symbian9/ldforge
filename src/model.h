@@ -107,6 +107,8 @@ public:
 	LDObject* lookup(const QModelIndex& index) const;
 	QColor pickingColorForObject(const QModelIndex& objectIndex) const;
 	QModelIndex objectByPickingColor(const QColor& color) const;
+	Winding winding() const;
+	void setWinding(Winding winding);
 
 	bool moveRows(
 		const QModelIndex& sourceParent,
@@ -123,6 +125,7 @@ signals:
 	void objectAdded(const QModelIndex& object);
 	void aboutToRemoveObject(const QModelIndex& index);
 	void objectModified(LDObject* object);
+	void windingChanged(Winding newWinding);
 
 protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);
@@ -133,6 +136,7 @@ protected:
 	class DocumentManager* _manager;
 	mutable int _triangleCount = 0;
 	mutable bool _needsTriangleRecount;
+	Winding _winding = NoWinding;
 
 private:
 	void installObject(int row, LDObject* object);

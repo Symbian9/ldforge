@@ -1040,3 +1040,9 @@ void GLRenderer::setSelectionModel(QItemSelectionModel* selectionModel)
 {
 	this->m_compiler->setSelectionModel(selectionModel);
 }
+
+void GLRenderer::fullUpdate()
+{
+	this->m_compiler->fullUpdate();
+	update();
+}
