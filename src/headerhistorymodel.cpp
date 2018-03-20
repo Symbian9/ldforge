@@ -10,6 +10,8 @@ int HeaderHistoryModel::rowCount(const QModelIndex&) const
 {
 	if (this->header)
 		return this->header->history.size();
+	else
+		return 0;
 }
 
 int HeaderHistoryModel::columnCount(const QModelIndex&) const
