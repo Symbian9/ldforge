@@ -96,8 +96,8 @@ void Canvas::drawFixedCameraBackdrop()
 	{
 	case Grid::Cartesian:
 		{
-			qreal x0 = sign(topLeft.x()) * (fabs(topLeft.x()) - fmod(fabs(topLeft.x()), gridSize));
-			qreal y0 = sign(topLeft.y()) * (fabs(topLeft.y()) - fmod(fabs(topLeft.y()), gridSize));
+			qreal x0 = sign(topLeft.x) * (fabs(topLeft.x) - fmod(fabs(topLeft.x), gridSize));
+			qreal y0 = sign(topLeft.y) * (fabs(topLeft.y) - fmod(fabs(topLeft.y), gridSize));
 
 			static const auto prepareGridLine = [](qreal value) -> bool
 			{
@@ -116,7 +116,7 @@ void Canvas::drawFixedCameraBackdrop()
 				}
 			};
 
-			for (qreal x = x0; x < bottomRight.x(); x += gridSize)
+			for (qreal x = x0; x < bottomRight.x; x += gridSize)
 			{
 				if (prepareGridLine(x))
 				{
@@ -125,7 +125,7 @@ void Canvas::drawFixedCameraBackdrop()
 				}
 			}
 
-			for (qreal y = y0; y < bottomRight.y(); y += gridSize)
+			for (qreal y = y0; y < bottomRight.y; y += gridSize)
 			{
 				if (prepareGridLine(y))
 				{
@@ -142,10 +142,10 @@ void Canvas::drawFixedCameraBackdrop()
 			const qreal size = grid()->coordinateSnap();
 			Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
 			Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
-			QPointF topLeft2d {topLeft.x(), topLeft.y()};
-			QPointF bottomLeft2d {topLeft.x(), bottomRight.y()};
-			QPointF bottomRight2d {bottomRight.x(), bottomRight.y()};
-			QPointF topRight2d {bottomRight.x(), topLeft.y()};
+			QPointF topLeft2d {topLeft.x, topLeft.y};
+			QPointF bottomLeft2d {topLeft.x, bottomRight.y};
+			QPointF bottomRight2d {bottomRight.x, bottomRight.y};
+			QPointF topRight2d {bottomRight.x, topLeft.y};
 			qreal smallestRadius = distanceFromPointToRectangle(pole, QRectF{topLeft2d, bottomRight2d});
 			qreal largestRadius = max(QLineF {topLeft2d, pole}.length(),
 			                          QLineF {bottomLeft2d, pole}.length(),

@@ -29,7 +29,7 @@ inline void glMultMatrixf(const GLRotationMatrix& matrix)
 
 inline void glVertex(const Vertex& vertex)
 {
-	glVertex3f(vertex.x(), vertex.y(), vertex.z());
+	glVertex3f(vertex.x, vertex.y, vertex.z);
 }
 
 class LDObject;

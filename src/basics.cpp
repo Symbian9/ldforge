@@ -20,106 +20,158 @@
 #include "linetypes/modelobject.h"
 #include "lddocument.h"
 
-Vertex::Vertex() :
-	QVector3D() {}
-
-Vertex::Vertex (const QVector3D& a) :
-	QVector3D (a) {}
-
-Vertex::Vertex (qreal xpos, qreal ypos, qreal zpos) :
-	QVector3D(xpos, ypos, zpos) {}
-
-
-void Vertex::transform (const Matrix& matrix, const Vertex& pos)
+void Vertex::transform(const Matrix& matrix, const Vertex& pos)
 {
-	double x2 = (matrix(0, 0) * x()) + (matrix(0, 1) * y()) + (matrix(0, 2) * z()) + pos.x();
-	double y2 = (matrix(1, 0) * x()) + (matrix(1, 1) * y()) + (matrix(1, 2) * z()) + pos.y();
-	double z2 = (matrix(2, 0) * x()) + (matrix(2, 1) * y()) + (matrix(2, 2) * z()) + pos.z();
-	setX (x2);
-	setY (y2);
-	setZ (z2);
+	double x2 = (matrix(0, 0) * x) + (matrix(0, 1) * y) + (matrix(0, 2) * z) + pos.x;
+	double y2 = (matrix(1, 0) * x) + (matrix(1, 1) * y) + (matrix(1, 2) * z) + pos.y;
+	double z2 = (matrix(2, 0) * x) + (matrix(2, 1) * y) + (matrix(2, 2) * z) + pos.z;
+	this->x = x2;
+	this->y = y2;
+	this->z = z2;
 }
 
-void Vertex::apply (ApplyFunction func)
+void Vertex::apply(ApplyFunction func)
 {
-	double newX = x(), newY = y(), newZ = z();
-	func (X, newX);
-	func (Y, newY);
-	func (Z, newZ);
-	*this = Vertex (newX, newY, newZ);
+	func(X, this->x);
+	func(Y, this->y);
+	func(Z, this->z);
 }
 
-void Vertex::apply (ApplyConstFunction func) const
+void Vertex::apply(ApplyConstFunction func) const
 {
-	func (X, x());
-	func (Y, y());
-	func (Z, z());
+	func(X, this->x);
+	func(Y, this->y);
+	func(Z, this->z);
 }
 
-double Vertex::operator[] (Axis ax) const
+double& Vertex::operator[](Axis axis)
 {
-	switch (ax)
+	switch (axis)
 	{
-		case X: return x();
-		case Y: return y();
-		case Z: return z();
-	}
+	case X:
+		return this->x;
 
-	return 0.0;
+	case Y:
+		return this->y;
+
+	case Z:
+		return this->z;
+
+	default:
+		return ::sink<double>();
+	}
 }
 
-void Vertex::setCoordinate (Axis ax, qreal value)
+double Vertex::operator[] (Axis axis) const
 {
-	switch (ax)
+	switch (axis)
 	{
-		case X: setX (value); break;
-		case Y: setY (value); break;
-		case Z: setZ (value); break;
+	case X:
+		return this->x;
+
+	case Y:
+		return this->y;
+
+	case Z:
+		return this->z;
+
+	default:
+		return 0.0;
 	}
+}
+
+void Vertex::setCoordinate (Axis axis, qreal value)
+{
+	(*this)[axis] = value;
 }
 
 QString Vertex::toString (bool mangled) const
 {
 	if (mangled)
-		return format ("(%1, %2, %3)", x(), y(), z());
-
-	return format ("%1 %2 %3", x(), y(), z());
+		return ::format("(%1, %2, %3)", this->x, this->y, this->z);
+	else
+		return ::format("%1 %2 %3", this->x, this->y, this->z);
 }
 
 Vertex Vertex::operator* (qreal scalar) const
 {
-	return Vertex (x() * scalar, y() * scalar, z() * scalar);
+	return {this->x * scalar, this->y * scalar, this->z * scalar};
 }
 
-Vertex& Vertex::operator+= (const Vertex& other)
+Vertex& Vertex::operator+=(const QVector3D& other)
 {
-	setX (x() + other.x());
-	setY (y() + other.y());
-	setZ (z() + other.z());
+	this->x += other.x();
+	this->y += other.y();
+	this->z += other.z();
 	return *this;
 }
 
-Vertex Vertex::operator+ (const Vertex& other) const
+Vertex Vertex::operator+(const QVector3D& other) const
 {
 	Vertex result (*this);
 	result += other;
 	return result;
 }
 
+QVector3D Vertex::toVector() const
+{
+	return {
+		static_cast<float>(this->x),
+		static_cast<float>(this->y),
+		static_cast<float>(this->z)
+	};
+}
+
+Vertex Vertex::operator- (const QVector3D& vector) const
+{
+	Vertex result = *this;
+	result -= vector;
+	return result;
+}
+
+Vertex& Vertex::operator-= (const QVector3D& vector)
+{
+	this->x -= vector.x();
+	this->y -= vector.y();
+	this->z -= vector.z();
+	return *this;
+}
+
+QVector3D Vertex::operator- (const Vertex& other) const
+{
+	return {
+		static_cast<float>(this->x - other.x),
+		static_cast<float>(this->y - other.y),
+		static_cast<float>(this->z - other.z)
+	};
+}
+
 Vertex& Vertex::operator*= (qreal scalar)
 {
-	setX (x() * scalar);
-	setY (y() * scalar);
-	setZ (z() * scalar);
+	x *= scalar;
+	y *= scalar;
+	z *= scalar;
 	return *this;
+}
+
+bool Vertex::operator==(const Vertex& other) const
+{
+	return this->x == other.x and this->y == other.y and this->z == other.z;
+}
+
+bool Vertex::operator!=(const Vertex& other) const
+{
+	return not (*this == other);
 }
 
 bool Vertex::operator< (const Vertex& other) const
 {
-	if (x() != other.x()) return x() < other.x();
-	if (y() != other.y()) return y() < other.y();
-	if (z() != other.z()) return z() < other.z();
-	return false;
+	if (not qFuzzyCompare(this->x, other.x))
+		return this->x < other.x;
+	else if (not qFuzzyCompare(this->y, other.y))
+		return this->y < other.y;
+	else
+		return this->z < other.z;
 }
 
 /*
@@ -128,9 +180,15 @@ bool Vertex::operator< (const Vertex& other) const
 Vertex Vertex::transformed(const GLRotationMatrix& matrix) const
 {
 	return {
-		matrix(0, 0) * x() + matrix(0, 1) * y() + matrix(0, 2) * z(),
-		matrix(1, 0) * x() + matrix(1, 1) * y() + matrix(1, 2) * z(),
-		matrix(2, 0) * x() + matrix(2, 1) * y() + matrix(2, 2) * z(),
+		matrix(0, 0) * this->x
+			+ matrix(0, 1) * this->y
+			+ matrix(0, 2) * this->z,
+		matrix(1, 0) * this->x
+			+ matrix(1, 1) * this->y
+			+ matrix(1, 2) * this->z,
+		matrix(2, 0) * this->x
+			+ matrix(2, 1) * this->y
+			+ matrix(2, 2) * this->z,
 	};
 }
 
@@ -153,12 +211,12 @@ BoundingBox& BoundingBox::operator<< (const Vertex& v)
 //
 void BoundingBox::calcVertex (const Vertex& vertex)
 {
-	m_vertex0.setX (qMin (vertex.x(), m_vertex0.x()));
-	m_vertex0.setY (qMin (vertex.y(), m_vertex0.y()));
-	m_vertex0.setZ (qMin (vertex.z(), m_vertex0.z()));
-	m_vertex1.setX (qMax (vertex.x(), m_vertex1.x()));
-	m_vertex1.setY (qMax (vertex.y(), m_vertex1.y()));
-	m_vertex1.setZ (qMax (vertex.z(), m_vertex1.z()));
+	m_vertex0.x = qMin(vertex.x, m_vertex0.x);
+	m_vertex0.y = qMin(vertex.y, m_vertex0.y);
+	m_vertex0.z = qMin(vertex.z, m_vertex0.z);
+	m_vertex1.x = qMax(vertex.x, m_vertex1.x);
+	m_vertex1.y = qMax(vertex.y, m_vertex1.y);
+	m_vertex1.z = qMax(vertex.z, m_vertex1.z);
 	m_isEmpty = false;
 }
 
@@ -168,8 +226,8 @@ void BoundingBox::calcVertex (const Vertex& vertex)
 //
 void BoundingBox::reset()
 {
-	m_vertex0 = Vertex (10000.0, 10000.0, 10000.0);
-	m_vertex1 = Vertex (-10000.0, -10000.0, -10000.0);
+	m_vertex0 = {10000.0, 10000.0, 10000.0};
+	m_vertex1 = {-10000.0, -10000.0, -10000.0};
 	m_isEmpty = true;
 }
 
@@ -179,23 +237,11 @@ void BoundingBox::reset()
 //
 double BoundingBox::longestMeasurement() const
 {
-	double xscale = (m_vertex0.x() - m_vertex1.x());
-	double yscale = (m_vertex0.y() - m_vertex1.y());
-	double zscale = (m_vertex0.z() - m_vertex1.z());
-	double size = zscale;
-
-	if (xscale > yscale)
-	{
-		if (xscale > zscale)
-			size = xscale;
-	}
-	else if (yscale > zscale)
-		size = yscale;
-
-	if (qAbs (size) >= 2.0)
-		return qAbs (size / 2);
-
-	return 1.0;
+	double xscale = m_vertex0.x - m_vertex1.x;
+	double yscale = m_vertex0.y - m_vertex1.y;
+	double zscale = m_vertex0.z - m_vertex1.z;
+	double size = qMax(xscale, qMax(yscale, zscale));
+	return qMax(qAbs(size / 2.0), 1.0);
 }
 
 // =============================================================================
@@ -204,10 +250,11 @@ double BoundingBox::longestMeasurement() const
 //
 Vertex BoundingBox::center() const
 {
-	return Vertex (
-		(m_vertex0.x() + m_vertex1.x()) / 2,
-		(m_vertex0.y() + m_vertex1.y()) / 2,
-		(m_vertex0.z() + m_vertex1.z()) / 2);
+	return {
+		(m_vertex0.x + m_vertex1.x) / 2,
+		(m_vertex0.y + m_vertex1.y) / 2,
+		(m_vertex0.z + m_vertex1.z) / 2
+	};
 }
 
 bool BoundingBox::isEmpty() const
@@ -240,7 +287,7 @@ inline int rotl20(T x)
 
 uint qHash(const Vertex& key)
 {
-	return qHash(key.x()) ^ rotl10(qHash(key.y())) ^ rotl20(qHash(key.z()));
+	return qHash(key.x) ^ rotl10(qHash(key.y)) ^ rotl20(qHash(key.z));
 }
 
 /*

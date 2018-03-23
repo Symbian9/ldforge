@@ -95,32 +95,33 @@ enum Winding
 Winding operator^(Winding one, Winding other);
 Winding& operator^=(Winding& one, Winding other);
 
-//
-// Derivative of QVector3D: this class is used for the vertices.
-//
-class Vertex : public QVector3D
+struct Vertex
 {
-public:
+	qreal x, y, z;
+
 	using ApplyFunction = std::function<void (Axis, double&)>;
 	using ApplyConstFunction = std::function<void (Axis, double)>;
-
-	Vertex();
-	Vertex (const QVector3D& a);
-	Vertex (qreal xpos, qreal ypos, qreal zpos);
 
 	void	apply (ApplyFunction func);
 	void	apply (ApplyConstFunction func) const;
 	QString	toString (bool mangled = false) const;
+	QVector3D toVector() const;
 	void	transform (const Matrix& matr, const Vertex& pos);
 	Vertex	transformed(const GLRotationMatrix& matrix) const;
 	void	setCoordinate (Axis ax, qreal value);
 
-	Vertex&	operator+= (const Vertex& other);
-	Vertex	operator+ (const Vertex& other) const;
+	Vertex&	operator+= (const QVector3D& other);
+	Vertex	operator+ (const QVector3D& other) const;
+	QVector3D operator- (const Vertex& other) const;
+	Vertex operator- (const QVector3D& vector) const;
+	Vertex& operator-= (const QVector3D& vector);
 	Vertex&	operator*= (qreal scalar);
 	Vertex	operator* (qreal scalar) const;
 	bool	operator< (const Vertex& other) const;
+	double&	operator[] (Axis ax);
 	double	operator[] (Axis ax) const;
+	bool operator==(const Vertex& other) const;
+	bool operator!=(const Vertex& other) const;
 };
 
 inline Vertex operator* (qreal scalar, const Vertex& vertex)

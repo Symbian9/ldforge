@@ -426,7 +426,7 @@ void GLCompiler::compilePolygon(
 	}
 
 	// Determine the normals for the polygon.
-	Vertex normals[4];
+	QVector3D normals[4];
 	auto vertexRing = ring(poly.vertices, vertexCount);
 
 	for (int i = 0; i < vertexCount; ++i)
@@ -434,7 +434,7 @@ void GLCompiler::compilePolygon(
 		const Vertex& v1 = vertexRing[i - 1];
 		const Vertex& v2 = vertexRing[i];
 		const Vertex& v3 = vertexRing[i + 1];
-		normals[i] = Vertex::crossProduct(v3 - v2, v1 - v2).normalized();
+		normals[i] = QVector3D::crossProduct(v3 - v2, v1 - v2).normalized();
 	}
 
 	for (VboSubclass complement : iterateEnum<VboSubclass>())
@@ -448,9 +448,9 @@ void GLCompiler::compilePolygon(
 			if (complement == VboSubclass::Surfaces)
 			{
 				// Write coordinates. Apparently Z must be flipped too?
-				vbodata	<< poly.vertices[vert].x()
-						<< -poly.vertices[vert].y()
-						<< -poly.vertices[vert].z();
+				vbodata	<< poly.vertices[vert].x
+						<< -poly.vertices[vert].y
+						<< -poly.vertices[vert].z;
 			}
 			else if (complement == VboSubclass::Normals)
 			{

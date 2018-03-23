@@ -47,7 +47,7 @@ public:
 	Q_INVOKABLE void rotateZPos();
 
 private:
-	void moveSelection (bool up);
-	void moveObjects (Vertex vect);
+	void moveSelection(bool up);
+	void moveObjects(QVector3D vect);
 	double getRotateActionAngle();
 };

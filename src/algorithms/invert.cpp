@@ -36,13 +36,13 @@ bool isflat(Model* model, Axis* flatDimension)
 		{
 			Vertex const& v_i = subfileObject->vertex(i);
 
-			if (not qFuzzyCompare(v_i.x(), 0.f))
+			if (not qFuzzyCompare(v_i.x, 0.0))
 				dimensions.removeOne(X);
 
-			if (not qFuzzyCompare(v_i.y(), 0.f))
+			if (not qFuzzyCompare(v_i.y, 0.0))
 				dimensions.removeOne(Y);
 
-			if (not qFuzzyCompare(v_i.z(), 0.f))
+			if (not qFuzzyCompare(v_i.z, 0.0))
 				dimensions.removeOne(Z);
 		}
 

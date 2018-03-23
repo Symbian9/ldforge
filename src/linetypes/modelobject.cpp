@@ -259,19 +259,19 @@ void LDSubfileReference::setReferenceName(const QString& newReferenceName)
 
 // =============================================================================
 //
-// Moves this object using the given vertex as a movement List
+// Moves this object using the given vector
 //
-void LDObject::move (Vertex vect)
+void LDObject::move (const QVector3D vector)
 {
 	if (hasMatrix())
 	{
 		LDMatrixObject* mo = static_cast<LDMatrixObject*> (this);
-		mo->setPosition (mo->position() + vect);
+		mo->setPosition (mo->position() + vector);
 	}
 	else
 	{
 		for (int i = 0; i < numVertices(); ++i)
-			setVertex (i, vertex (i) + vect);
+			setVertex (i, vertex (i) + vector);
 	}
 }
 
@@ -368,18 +368,11 @@ LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos) :
 	m_position (pos),
 	m_transformationMatrix (transform) {}
 
-void LDMatrixObject::setCoordinate (const Axis ax, double value)
+void LDMatrixObject::setCoordinate (const Axis axis, double value)
 {
-	Vertex v = position();
-
-	switch (ax)
-	{
-		case X: v.setX (value); break;
-		case Y: v.setY (value); break;
-		case Z: v.setZ (value); break;
-	}
-
-	setPosition (v);
+	Vertex position = this->position();
+	position.setCoordinate(axis, value);
+	this->setPosition(position);
 }
 
 const Vertex& LDMatrixObject::position() const
@@ -424,11 +417,10 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 {
 	if (t >= 0.0 and t <= 1.0)
 	{
-		Vertex result;
-		result += pow (1.0 - t, 3) * vertex (0);
-		result += (3 * pow (1.0 - t, 2) * t) * vertex (2);
-		result += (3 * (1.0 - t) * pow (t, 2)) * vertex (3);
-		result += pow (t, 3) * vertex (1);
+		Vertex result = pow(1.0 - t, 3) * vertex(0);
+		result += (3 * pow(1.0 - t, 2) * t) * vertex(2).toVector();
+		result += (3 * (1.0 - t) * pow(t, 2)) * vertex(3).toVector();
+		result += pow(t, 3) * vertex(1).toVector();
 		return result;
 	}
 	else

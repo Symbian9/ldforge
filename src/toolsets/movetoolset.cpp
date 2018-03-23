@@ -76,43 +76,43 @@ void MoveToolset::polarGrid()
 	m_window->updateGridToolBar();
 }
 
-void MoveToolset::moveObjects (Vertex vect)
+void MoveToolset::moveObjects(QVector3D vector)
 {
 	// Apply the grid values
-	vect *= grid()->coordinateSnap();
+	vector *= grid()->coordinateSnap();
 
 	for (LDObject* obj : selectedObjects())
-		obj->move (vect);
+		obj->move (vector);
 }
 
 void MoveToolset::moveXNeg()
 {
-	moveObjects ({-1, 0, 0});
+	moveObjects({-1, 0, 0});
 }
 
 void MoveToolset::moveYNeg()
 {
-	moveObjects ({0, -1, 0});
+	moveObjects({0, -1, 0});
 }
 
 void MoveToolset::moveZNeg()
 {
-	moveObjects ({0, 0, -1});
+	moveObjects({0, 0, -1});
 }
 
 void MoveToolset::moveXPos()
 {
-	moveObjects ({1, 0, 0});
+	moveObjects({1, 0, 0});
 }
 
 void MoveToolset::moveYPos()
 {
-	moveObjects ({0, 1, 0});
+	moveObjects({0, 1, 0});
 }
 
 void MoveToolset::moveZPos()
 {
-	moveObjects ({0, 0, 1});
+	moveObjects({0, 0, 1});
 }
 
 double MoveToolset::getRotateActionAngle()
@@ -172,9 +172,9 @@ void MoveToolset::configureRotationPoint()
 	}
 
 	Vertex custompoint = m_config->customRotationPoint();
-	ui.customX->setValue(custompoint.x());
-	ui.customY->setValue(custompoint.y());
-	ui.customZ->setValue(custompoint.z());
+	ui.customX->setValue(custompoint.x);
+	ui.customY->setValue(custompoint.y);
+	ui.customZ->setValue(custompoint.z);
 
 	if (dialog->exec() == QDialog::Accepted)
 	{
@@ -187,10 +187,10 @@ void MoveToolset::configureRotationPoint()
 		else
 			pointType = CustomPoint;
 
-		custompoint.setX (ui.customX->value());
-		custompoint.setY (ui.customY->value());
-		custompoint.setZ (ui.customZ->value());
-		m_config->setRotationPointType((int) pointType);
-		m_config->setCustomRotationPoint (custompoint);
+		custompoint.x = ui.customX->value();
+		custompoint.y = ui.customY->value();
+		custompoint.z = ui.customZ->value();
+		m_config->setRotationPointType(pointType);
+		m_config->setCustomRotationPoint(custompoint);
 	}
 }

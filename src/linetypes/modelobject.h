@@ -69,7 +69,7 @@ public:
 	virtual bool isColored() const;
 	bool isHidden() const;
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
-	void move (Vertex vect);
+	void move (const QVector3D vector);
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;
