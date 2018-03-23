@@ -15,6 +15,10 @@ find_package (Qt5Core REQUIRED)
 find_package (Qt5OpenGL REQUIRED)
 find_package (Qt5Network REQUIRED)
 
+if (Qt5Widgets_VERSION VERSION_LESS 5.5.0)
+	message(FATAL_ERROR "Qt5 version 5.5 required")
+endif()
+
 set (CMAKE_AUTOMOC ON)
 
 find_package (OpenGL REQUIRED)
