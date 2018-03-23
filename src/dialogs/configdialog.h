@@ -74,6 +74,8 @@ private:
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
 	class QSettings* m_settings;
 	QVector<ColorToolbarItem> quickColors;
+	class LibrariesModel* librariesModel;
+	Libraries libraries;
 
 	void applySettings();
 	void addShortcut (QAction* act);

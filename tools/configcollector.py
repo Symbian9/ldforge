@@ -59,7 +59,7 @@ def deduce_type(value):
 	except:
 		pass
 
-	if endswith(value, 'f'):
+	if value.endswith('f'):
 		try:
 			float(value[:-1])
 			return 'float'
@@ -76,22 +76,32 @@ class ConfigCollector:
 
 	def collect(self, filename):
 		with open(filename) as file:
-			for line in file:
-				line = line.strip()
-				if line and not line.startswith('#'):
-					from re import search
-					match = search('^option (\w+) = (.+)$', line)
-					if not match:
-						raise ValueError('unable to parse: %r' % line)
-					name, value = match.groups()
-					match = search(r'^(\w+)\s*\{(.*)\}$', value)
-					try:
-						typename, value = match.groups()
-						if not value:
-							value = typename + ' {}'
-					except:
-						typename = deduce_type(value)
-					self.declare(name, typename, value)
+			for linenumber, line in enumerate(file, 1):
+				try:
+					line = line.strip()
+					if line and not line.startswith('#'):
+						from re import search
+						match = search('^option (\w+) = (.+)$', line)
+						if not match:
+							raise ValueError('unable to parse: %r' % line)
+						name, value = match.groups()
+						match = search(r'^([a-zA-Z0-9_<>]+)\s*\{(.*)\}$', value)
+						try:
+							typename, value = match.groups()
+							if not value:
+								value = typename + ' {}'
+						except:
+							typename = deduce_type(value)
+						self.declare(name, typename, value)
+				except ValueError as error:
+					from sys import stderr, exit
+					print(str.format(
+						'{file}:{line}: {error}',
+						file = filename,
+						line = linenumber,
+						error = str(error),
+					), file = stderr)
+					exit(1)
 		# Sort the declarations in alphabetical order
 		self.declarations = OrderedDict(sorted(self.declarations.items(), key = lambda t: t[1]['name']))
 		# Fill in additional information

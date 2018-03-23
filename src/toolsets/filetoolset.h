@@ -44,6 +44,5 @@ public:
 	Q_INVOKABLE void saveAll();
 	Q_INVOKABLE void saveAs();
 	Q_INVOKABLE void scanPrimitives();
-	Q_INVOKABLE void setLDrawPath();
 	Q_INVOKABLE void settings();
 };

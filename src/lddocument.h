@@ -130,7 +130,6 @@ protected:
 	LDObject* withdrawAt(int position);
 
 private:
-	QString m_name;
 	QString m_fullPath;
 	QString m_defaultName;
 	EditHistory* m_history;

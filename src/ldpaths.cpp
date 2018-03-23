@@ -26,7 +26,7 @@ LDPaths::LDPaths (Configuration *config, QObject* parent) :
 	m_config(config),
 	m_dialog(nullptr) {}
 
-
+/*
 void LDPaths::checkPaths()
 {
 	QString pathconfig = m_config->lDrawPath();
@@ -42,7 +42,7 @@ void LDPaths::checkPaths()
 			m_config->setLDrawPath(m_dialog->path());
 	}
 }
-
+*/
 
 bool LDPaths::isValid (const QDir& dir) const
 {

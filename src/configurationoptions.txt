@@ -71,10 +71,10 @@ option DrawLineLengths = true
 option DrawAngles = false
 
 # File management options
+option Libraries = QVector<Library> {}
 option DownloadFilePath = ""
 option GuessDownloadPaths = true
 option AutoCloseDownloadDialog = true
-option LDrawPath = ""
 
 # Other options
 option FirstStart = true

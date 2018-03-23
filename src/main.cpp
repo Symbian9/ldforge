@@ -30,12 +30,18 @@ int main (int argc, char* argv[])
 	QApplication app (argc, argv);
 	app.setOrganizationName (APPNAME);
 	app.setApplicationName (APPNAME);
+	qRegisterMetaType<Library>("Library");
+	qRegisterMetaType<Libraries>("Libraries");
+	qRegisterMetaTypeStreamOperators<Library>("Library");
+	qRegisterMetaTypeStreamOperators<Libraries>("Libraries");
 
 	static Configuration configObject;
 	config = &configObject;
+	/*
 	LDPaths* paths = new LDPaths(&configObject);
 	paths->checkPaths();
 	paths->deleteLater();
+	*/
 
 	initializeCrashHandler();
 	LDColor::initColors();

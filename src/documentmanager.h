@@ -37,13 +37,17 @@ public:
 	const Documents& allDocuments() const { return m_documents; }
 	void clear();
 	LDDocument* createNew();
+	QString findDocument(QString name) const;
 	LDDocument* findDocumentByName (QString name);
-	QString findDocumentPath (QString relpath, bool subdirs);
 	LDDocument* getDocumentByName (QString filename);
 	bool isSafeToCloseAll();
 	void loadLogoedStuds();
-	LDDocument* openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride = nullptr);
-	QFile* openLDrawFile (QString relpath, bool subdirs, QString* pathpointer);
+	LDDocument* openDocument(
+		QString path,
+		bool search,
+		bool implicit,
+		LDDocument* fileToOverride = nullptr
+	);
 	void openMainModel (QString path);
 	bool preInline (LDDocument* doc, Model& model, bool deep, bool renderinline);
 

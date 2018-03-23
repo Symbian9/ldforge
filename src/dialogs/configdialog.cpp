@@ -33,6 +33,7 @@
 #include <QPushButton>
 #include "../main.h"
 #include "../lddocument.h"
+#include "../librariesmodel.h"
 #include "../miscallenous.h"
 #include "../canvas.h"
 #include "../guiutilities.h"
@@ -74,9 +75,12 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
-    m_settings (MainWindow::makeSettings (this))
+	m_settings (MainWindow::makeSettings (this)),
+	libraries {::config->libraries()},
+	librariesModel {new LibrariesModel {this->libraries, this}}
 {
 	ui.setupUi (this);
+	ui.librariesView->setModel(this->librariesModel);
 
 	// Set defaults
 	applyToWidgetOptions([&](QWidget* widget, QString confname)
@@ -146,10 +150,52 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 		this, SLOT (buttonClicked (QAbstractButton*)));
 	connect (ui.m_pages, SIGNAL (currentChanged (int)), this, SLOT (selectPage (int)));
 	connect (ui.m_pagelist, SIGNAL (currentRowChanged (int)), this, SLOT (selectPage (int)));
+	connect(
+		this->ui.addLibrary,
+		&QPushButton::clicked,
+		[&]()
+		{
+			this->librariesModel->insertRow(this->librariesModel->rowCount());
+		}
+	);
+	connect(
+		this->ui.removeLibrary,
+		&QPushButton::clicked,
+		[&]()
+		{
+			QModelIndex index = this->ui.librariesView->currentIndex();
+
+			if (index.isValid())
+				this->librariesModel->removeRow(index.row());
+		}
+	);
+	connect(
+		this->ui.moveLibraryUp,
+		&QPushButton::clicked,
+		[&]()
+		{
+			QModelIndex index = this->ui.librariesView->currentIndex();
+
+			if (index.isValid())
+				this->librariesModel->moveRows({}, index.row(), 1, {}, index.row() - 1);
+		}
+	);
+	connect(
+		this->ui.moveLibraryDown,
+		&QPushButton::clicked,
+		[&]()
+		{
+			QModelIndex index = this->ui.librariesView->currentIndex();
+
+			if (index.isValid())
+				this->librariesModel->moveRows({}, index.row(), 1, {}, index.row() + 2);
+		}
+	);
 }
 
 ConfigDialog::~ConfigDialog()
 {
+	delete this->librariesModel;
 	delete &ui;
 }
 
@@ -277,6 +323,7 @@ void ConfigDialog::applySettings()
 	// Rebuild the quick color toolbar
 	m_window->setQuickColors (quickColors);
 	m_config->setQuickColorToolbar (quickColorString());
+	::config->setLibraries(this->libraries);
 
 	// Ext program settings
 	for (int i = 0; i < NumExternalPrograms; ++i)

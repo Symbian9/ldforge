@@ -43,6 +43,7 @@ set (LDFORGE_SOURCES
 	src/hierarchyelement.cpp
 	src/lddocument.cpp
 	src/ldpaths.cpp
+	src/librariesmodel.cpp
 	src/main.cpp
 	src/mainwindow.cpp
 	src/mathfunctions.cpp
@@ -114,6 +115,7 @@ set (LDFORGE_HEADERS
 	src/lddocument.h
 	src/ldobjectiterator.h
 	src/ldpaths.h
+	src/librariesmodel.h
 	src/macros.h
 	src/main.h
 	src/mainwindow.h

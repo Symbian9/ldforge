@@ -67,12 +67,12 @@ LDDocument::~LDDocument()
 
 QString LDDocument::name() const
 {
-	return m_name;
+	return this->header.name;
 }
 
 void LDDocument::setName (QString value)
 {
-	m_name = value;
+	this->header.name = value;
 }
 
 EditHistory* LDDocument::history() const

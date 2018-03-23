@@ -28,7 +28,7 @@ class LDPaths : public QObject
 
 public:
 	LDPaths(Configuration* config, QObject* parent = nullptr);
-	void checkPaths();
+	// void checkPaths();
 	bool isValid (const class QDir& path) const;
 
 	static QDir& baseDir();

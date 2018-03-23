@@ -17,6 +17,7 @@
  */
 
 #include <QApplication>
+#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include "documentmanager.h"
@@ -197,85 +198,22 @@ QString Basename (QString path)
 	return path;
 }
 
-QString DocumentManager::findDocumentPath (QString relativePath, bool subdirs)
+QString DocumentManager::findDocument(QString name) const
 {
-	// LDraw models use backslashes as path separators. Replace those into forward slashes for Qt.
-	relativePath.replace ("\\", "/");
+	name = name.replace("\\", "/");
 
-	// Try find it relative to other currently open documents. We want a file in the immediate vicinity of a current
-	// part model to override stock LDraw stuff.
-	QString relativeTopDir = Basename (Dirname (relativePath));
-
-	for (LDDocument* document : m_documents)
+	for (const Library& library : ::config->libraries())
 	{
-		QString partpath = format ("%1/%2", Dirname (document->fullPath()), relativePath);
-		QFileInfo fileinfo (partpath);
-
-		if (fileinfo.exists())
+		for (const QString& subdirectory : {"parts", "p"})
 		{
-			// Ensure we don't mix subfiles and 48-primitives with non-subfiles and non-48
-			QString partTopDir = Basename (Dirname (partpath));
+			QDir dir {library.path + "/" + subdirectory};
 
-			for (QString subdir : specialSubdirectories)
-			{
-				if ((partTopDir == subdir) != (relativeTopDir == subdir))
-					goto skipthis;
-			}
-
-			return partpath;
-		}
-skipthis:
-		continue;
-	}
-
-	if (QFileInfo::exists (relativePath))
-		return relativePath;
-
-	// Try with just the LDraw path first
-	QString fullPath = format ("%1" DIRSLASH "%2", m_config->lDrawPath(), relativePath);
-
-	if (QFileInfo::exists (fullPath))
-		return fullPath;
-
-	if (subdirs)
-	{
-		// Look in sub-directories: parts and p. Also look in the download path, since that's where we download parts
-		// from the PT to.
-		QStringList dirs = { m_config->lDrawPath(), m_config->downloadFilePath() };
-		for (const QString& topdir : dirs)
-		{
-			for (const QString& subdir : QStringList ({ "parts", "p" }))
-			{
-				fullPath = format ("%1" DIRSLASH "%2" DIRSLASH "%3", topdir, subdir, relativePath);
-
-				if (QFile::exists (fullPath))
-					return fullPath;
-			}
+			if (dir.exists(name))
+				return QDir::cleanPath(dir.filePath(name));
 		}
 	}
 
-	// Did not find the file.
-	return "";
-}
-
-QFile* DocumentManager::openLDrawFile (QString relpath, bool subdirs, QString* pathpointer)
-{
-	print ("Opening %1...\n", relpath);
-	QString path = findDocumentPath (relpath, subdirs);
-
-	if (pathpointer)
-		*pathpointer = path;
-
-	if (path.isEmpty())
-		return nullptr;
-
-	QFile* fp = new QFile (path);
-
-	if (fp->open (QIODevice::ReadOnly))
-		return fp;
-
-	fp->deleteLater();
-	return nullptr;
+	return {};
 }
 
 void DocumentManager::printParseErrorMessage(QString message)
@@ -283,65 +221,63 @@ void DocumentManager::printParseErrorMessage(QString message)
 	print(message);
 }
 
-LDDocument* DocumentManager::openDocument (QString path, bool search, bool implicit, LDDocument* fileToOverride)
-{
-	// Convert the file name to lowercase when searching because some parts contain subfile
-	// subfile references with uppercase file names. I'll assume here that the library will always
-	// use lowercase file names for the part files.
-	QFile* fp;
-	QString fullpath;
-
-	if (search)
+LDDocument* DocumentManager::openDocument(
+	QString path,
+	bool search,
+	bool implicit,
+	LDDocument* fileToOverride
+) {
+	if (search and not QFileInfo {path}.exists())
 	{
-		fp = openLDrawFile (path.toLower(), true, &fullpath);
+		// Convert the file name to lowercase when searching because some parts contain subfile
+		// subfile references with uppercase file names. I'll assume here that the library will
+		// always use lowercase file names for the part files.
+		path = this->findDocument(path.toLower());
+	}
+
+	QFile file {path};
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		LDDocument* load = fileToOverride;
+
+		if (fileToOverride == nullptr)
+			load = m_window->newDocument(implicit);
+
+		load->setFullPath(path);
+		load->setName(LDDocument::shortenName(path));
+
+		// Loading the file shouldn't count as actual edits to the document.
+		load->history()->setIgnoring (true);
+
+		Parser parser {file};
+		Winding winding = NoWinding;
+		load->header = parser.parseHeader(winding);
+		load->setWinding(winding);
+		parser.parseBody(*load);
+		file.close();
+
+		if (m_loadingMainFile)
+		{
+			int numWarnings = 0;
+
+			for (LDObject* object : load->objects())
+			{
+				if (object->type() == LDObjectType::Error)
+					numWarnings += 1;
+			}
+
+			m_window->changeDocument(load);
+			print(tr("File %1 opened successfully (%2 errors)."), load->name(), numWarnings);
+		}
+
+		load->history()->setIgnoring (false);
+		return load;
 	}
 	else
 	{
-		fp = new QFile (path);
-		fullpath = path;
-
-		if (not fp->open (QIODevice::ReadOnly))
-		{
-			delete fp;
-			return nullptr;
-		}
-	}
-
-	if (not fp)
 		return nullptr;
-
-	LDDocument* load = (fileToOverride ? fileToOverride : m_window->newDocument (implicit));
-	load->setFullPath (fullpath);
-	load->setName (LDDocument::shortenName (load->fullPath()));
-
-	// Loading the file shouldn't count as actual edits to the document.
-	load->history()->setIgnoring (true);
-
-	int numWarnings;
-	Parser parser {*fp};
-	Winding winding = NoWinding;
-	load->header = parser.parseHeader(winding);
-	load->setWinding(winding);
-	parser.parseBody(*load);
-	fp->close();
-	fp->deleteLater();
-
-	if (m_loadingMainFile)
-	{
-		int numWarnings = 0;
-
-		for (LDObject* object : load->objects())
-		{
-			if (object->type() == LDObjectType::Error)
-				numWarnings += 1;
-		}
-
-		m_window->changeDocument (load);
-		print (tr ("File %1 parsed successfully (%2 errors)."), path, numWarnings);
 	}
-
-	load->history()->setIgnoring (false);
-	return load;
 }
 
 void DocumentManager::addRecentFile (QString path)

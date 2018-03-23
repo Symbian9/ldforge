@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QDir>
 #include <QMessageBox>
 #include "colors.h"
 #include "ldpaths.h"
@@ -29,6 +30,7 @@ const LDColor LDColor::nullColor = -1;
 void LDColor::initColors()
 {
 	static ColorData colors;
+	colors.loadFromLdconfig();
 	LDColor::colorData = &colors;
 }
 
@@ -216,9 +218,6 @@ ColorData::ColorData()
 	m_data[EdgeColor].faceColor = Qt::black;
 	m_data[EdgeColor].edgeColor = Qt::black;
 	m_data[EdgeColor].name = "Edge color";
-
-	// Load the rest from LDConfig.ldr.
-	loadFromLdconfig();
 }
 
 /*
@@ -247,19 +246,41 @@ const ColorData::Entry& ColorData::get(int code) const
  */
 void ColorData::loadFromLdconfig()
 {
-	QString path = LDPaths::ldConfigPath();
-	QFile file {path};
+	*this = {};
 
-	if (not file.open(QIODevice::ReadOnly))
+	for (const Library& library : ::config->libraries())
 	{
-		QMessageBox::critical(nullptr, "Error", "Unable to open LDConfig.ldr for parsing: " + file.errorString());
-		return;
+		QDir dir {library.path};
+
+		if (dir.exists("LDConfig.ldr"))
+		{
+			QFile file {dir.filePath("LDConfig.ldr")};
+
+			if (file.open(QIODevice::ReadOnly))
+			{
+				this->loadFromFile(file);
+			}
+			else
+			{
+				QMessageBox::critical(
+					nullptr,
+					QObject::tr("Error"),
+					format(
+						QObject::tr("Unable to open LDConfig.ldr for parsing: %1"),
+						file.errorString()
+					)
+				);
+			}
+		}
 	}
+}
 
+void ColorData::loadFromFile(QIODevice& device)
+{
 	// TODO: maybe LDConfig can be loaded as a Document? Or would that be overkill?
-	while (not file.atEnd())
+	while (not device.atEnd())
 	{
-		QString line = QString::fromUtf8(file.readLine());
+		QString line = QString::fromUtf8(device.readLine());
 
 		if (line.isEmpty() or line[0] != '0')
 			continue; // empty or illogical

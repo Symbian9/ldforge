@@ -37,6 +37,7 @@ public:
 
 	ColorData();
 	void loadFromLdconfig();
+	void loadFromFile(QIODevice& device);
 	bool contains(int code) const;
 	const Entry& get(int code) const;
 

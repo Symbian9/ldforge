@@ -93,14 +93,6 @@ void FileToolset::settings()
 	(new ConfigDialog {m_window})->exec();
 }
 
-void FileToolset::setLDrawPath()
-{
-	LDrawPathDialog* dialog = new LDrawPathDialog {m_config->lDrawPath(), true};
-
-	if (dialog->exec())
-		m_config->setLDrawPath (dialog->path());
-}
-
 void FileToolset::exit()
 {
 	::exit(EXIT_SUCCESS);
@@ -155,10 +147,8 @@ void FileToolset::exportTo()
 	{
 		for (LDObject* obj : selectedObjects())
 		{
-			QString contents = obj->asText();
-			QByteArray data = contents.toUtf8();
-			file.write(data, countof(data));
-			file.write("\r\n", 2);
+			file.write(obj->asText().toUtf8());
+			file.write("\r\n");
 		}
 	}
 	else

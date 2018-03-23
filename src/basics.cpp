@@ -378,3 +378,13 @@ Winding& operator^=(Winding& one, Winding other)
 	one = one ^ other;
 	return one;
 }
+
+QDataStream& operator<<(QDataStream& out, const Library& library)
+{
+	return out << library.path << library.role;
+}
+
+QDataStream& operator>>(QDataStream &in, Library& library)
+{
+	return in >> library.path >> enum_cast<>(library.role);
+}

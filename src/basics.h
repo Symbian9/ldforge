@@ -27,6 +27,7 @@
 #include <QFile>
 #include <QMatrix4x4>
 #include <functional>
+#include <type_traits>
 #include <math.h>
 #include "macros.h"
 #include "transform.h"
@@ -265,6 +266,15 @@ public:
 };
 
 /*
+ * Casts a reference to an enum into a reference to its underlying integer type.
+ */
+template<typename T>
+typename std::underlying_type<T>::type& enum_cast(T& enu)
+{
+	return *reinterpret_cast<typename std::underlying_type<T>::type*>(&enu);
+}
+
+/*
  * Convenience function for RingAdapter so that the template parameter does not have to be provided. The ring amount is assumed
  * to be the amount of elements in the collection.
  */
@@ -282,6 +292,28 @@ RingAdapter<T> ring(T& collection, int count)
 {
 	return RingAdapter<T> {collection, count};
 }
+
+struct Library
+{
+	QString path;
+	enum
+	{
+		ReadOnlyStorage, // for official files, etc
+		UnofficialFiles, // put downloaded files here
+		WorkingDirectory, // for editable documents
+	} role = ReadOnlyStorage;
+
+	bool operator==(const Library& other) const
+	{
+		return (this->path == other.path) and (this->role == other.role);
+	}
+};
+
+Q_DECLARE_METATYPE(Library)
+using Libraries = QVector<Library>;
+
+QDataStream& operator<<(QDataStream& out, const Library& library);
+QDataStream& operator>>(QDataStream& in, Library& library);
 
 //
 // Get the amount of elements in something.
