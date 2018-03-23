@@ -33,6 +33,8 @@ int main (int argc, char* argv[])
 	qRegisterMetaType<Libraries>("Libraries");
 	qRegisterMetaTypeStreamOperators<Library>("Library");
 	qRegisterMetaTypeStreamOperators<Libraries>("Libraries");
+	qRegisterMetaType<Vertex>("Vertex");
+	qRegisterMetaTypeStreamOperators<Vertex>("Vertex");
 
 	static Configuration configObject;
 	config = &configObject;

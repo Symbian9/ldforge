@@ -192,6 +192,16 @@ Vertex Vertex::transformed(const GLRotationMatrix& matrix) const
 	};
 }
 
+QDataStream& operator<<(QDataStream& out, const Vertex& vertex)
+{
+	return out << vertex.x << vertex.y << vertex.z;
+}
+
+QDataStream& operator>>(QDataStream& in, Vertex& vertex)
+{
+	return in >> vertex.x >> vertex.y >> vertex.z;
+}
+
 // =============================================================================
 //
 BoundingBox::BoundingBox()
