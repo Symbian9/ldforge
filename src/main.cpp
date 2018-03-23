@@ -18,7 +18,6 @@
 
 #include <QApplication>
 #include "crashCatcher.h"
-#include "ldpaths.h"
 #include "documentmanager.h"
 #include "mainwindow.h"
 #include "generics/reverse.h"
@@ -37,11 +36,6 @@ int main (int argc, char* argv[])
 
 	static Configuration configObject;
 	config = &configObject;
-	/*
-	LDPaths* paths = new LDPaths(&configObject);
-	paths->checkPaths();
-	paths->deleteLater();
-	*/
 
 	initializeCrashHandler();
 	LDColor::initColors();

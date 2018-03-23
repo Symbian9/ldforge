@@ -19,7 +19,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include "colors.h"
-#include "ldpaths.h"
+#include "main.h"
 
 ColorData* LDColor::colorData = nullptr;
 const LDColor LDColor::nullColor = -1;

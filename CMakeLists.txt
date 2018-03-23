@@ -14,6 +14,7 @@ find_package (Qt5Widgets REQUIRED)
 find_package (Qt5Core REQUIRED)
 find_package (Qt5OpenGL REQUIRED)
 find_package (Qt5Network REQUIRED)
+
 set (CMAKE_AUTOMOC ON)
 
 find_package (OpenGL REQUIRED)
@@ -42,7 +43,6 @@ set (LDFORGE_SOURCES
 	src/headerhistorymodel.cpp
 	src/hierarchyelement.cpp
 	src/lddocument.cpp
-	src/ldpaths.cpp
 	src/librariesmodel.cpp
 	src/main.cpp
 	src/mainwindow.cpp
@@ -114,7 +114,6 @@ set (LDFORGE_HEADERS
 	src/hierarchyelement.h
 	src/lddocument.h
 	src/ldobjectiterator.h
-	src/ldpaths.h
 	src/librariesmodel.h
 	src/macros.h
 	src/main.h

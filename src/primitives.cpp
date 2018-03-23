@@ -23,7 +23,6 @@
 #include "primitives.h"
 #include "miscallenous.h"
 #include "colors.h"
-#include "ldpaths.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"
