@@ -73,6 +73,7 @@ template <typename... Args> Q_CONSTEXPR Q_DECL_UNUSED QNonConstOverload<Args...>
 #endif
 
 class Matrix;
+struct Vertex;
 using GLRotationMatrix = QMatrix4x4;
 
 template<typename T, typename R>
@@ -95,75 +96,10 @@ enum Winding
 Winding operator^(Winding one, Winding other);
 Winding& operator^=(Winding& one, Winding other);
 
-struct Vertex
-{
-	qreal x, y, z;
-
-	using ApplyFunction = std::function<void (Axis, double&)>;
-	using ApplyConstFunction = std::function<void (Axis, double)>;
-
-	void	apply (ApplyFunction func);
-	void	apply (ApplyConstFunction func) const;
-	QString	toString (bool mangled = false) const;
-	QVector3D toVector() const;
-	void	transform (const Matrix& matr, const Vertex& pos);
-	Vertex	transformed(const GLRotationMatrix& matrix) const;
-	void	setCoordinate (Axis ax, qreal value);
-
-	Vertex&	operator+= (const QVector3D& other);
-	Vertex	operator+ (const QVector3D& other) const;
-	QVector3D operator- (const Vertex& other) const;
-	Vertex operator- (const QVector3D& vector) const;
-	Vertex& operator-= (const QVector3D& vector);
-	Vertex&	operator*= (qreal scalar);
-	Vertex	operator* (qreal scalar) const;
-	bool	operator< (const Vertex& other) const;
-	double&	operator[] (Axis ax);
-	double	operator[] (Axis ax) const;
-	bool operator==(const Vertex& other) const;
-	bool operator!=(const Vertex& other) const;
-};
-
-inline Vertex operator* (qreal scalar, const Vertex& vertex)
-{
-	return vertex * scalar;
-}
-
-Q_DECLARE_METATYPE (Vertex)
-uint qHash(const Vertex& key);
-QDataStream& operator<<(QDataStream& out, const Vertex& vertex);
-QDataStream& operator>>(QDataStream& in, Vertex& vertex);
-
-
 static inline qreal abs(const QVector3D &vector)
 {
 	return vector.length();
 }
-
-//
-// Defines a bounding box that encompasses a given set of objects.
-// vertex0 is the minimum vertex, vertex1 is the maximum vertex.
-//
-class BoundingBox
-{
-public:
-	BoundingBox();
-
-	void calcVertex (const Vertex& vertex);
-	Vertex center() const;
-	bool isEmpty() const;
-	double longestMeasurement() const;
-	void reset(); 
-	const Vertex& vertex0() const;
-	const Vertex& vertex1() const;
-
-	BoundingBox& operator<< (const Vertex& v);
-
-private:
-	bool m_isEmpty;
-	Vertex m_vertex0;
-	Vertex m_vertex1;
-};
 
 static const double pi = 3.14159265358979323846;
 

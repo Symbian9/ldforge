@@ -16,23 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// =============================================================================
-// This file is included one way or another in every source file of LDForge.
-// Stuff defined and included here is universally included.
-
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <QSet>
-#include <QString>
-#include <QTextFormat>
-#include "macros.h"
-#include "version.h"
-#include "format.h"
-#include "configuration.h"
-#include "generics/range.h"
-#include "types/vertex.h"
+#include "vertex.h"
 
-extern Configuration* config;
+//
+// Defines a bounding box that encompasses a given set of objects.
+// vertex0 is the minimum vertex, vertex1 is the maximum vertex.
+//
+class BoundingBox
+{
+public:
+	BoundingBox();
+
+	void calcVertex(const Vertex& vertex);
+	Vertex center() const;
+	bool isEmpty() const;
+	double longestMeasurement() const;
+	void reset();
+	const Vertex& vertex0() const;
+	const Vertex& vertex1() const;
+
+	BoundingBox& operator<<(const Vertex& v);
+
+private:
+	bool m_isEmpty;
+	Vertex m_vertex0;
+	Vertex m_vertex1;
+};

@@ -21,6 +21,7 @@
 #include <QOpenGLFunctions>
 #include <QGenericMatrix>
 #include "basics.h"
+#include "types/vertex.h"
 
 inline void glMultMatrixf(const GLRotationMatrix& matrix)
 {

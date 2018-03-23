@@ -18,6 +18,7 @@
 
 #pragma once
 #include "../basics.h"
+#include "../types/vertex.h"
 
 /*
  * Models a 3D line segment.

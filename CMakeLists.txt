@@ -94,7 +94,9 @@ set (LDFORGE_SOURCES
 	src/toolsets/movetoolset.cpp
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
+	src/types/boundingbox.cpp
 	src/types/matrix.cpp
+	src/types/vertex.cpp
 	src/widgets/headeredit.cpp
 	src/widgets/vertexobjecteditor.cpp
 )
@@ -169,7 +171,9 @@ set (LDFORGE_HEADERS
 	src/toolsets/movetoolset.h
 	src/toolsets/toolset.h
 	src/toolsets/viewtoolset.h
+	src/types/boundingbox.h
 	src/types/matrix.h
+	src/types/vertex.h
 	src/widgets/headeredit.h
 	src/widgets/vertexobjecteditor.h
 )
