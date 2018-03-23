@@ -704,11 +704,26 @@ QString PrimitiveCategory::name() const
 PrimitiveScanner::PrimitiveScanner(PrimitiveManager* parent) :
 	QObject(parent),
 	HierarchyElement(parent),
-	m_manager(parent),
-	m_iterator(LDPaths::primitivesDir(), QDirIterator::Subdirectories)
+	m_manager(parent)
 {
-	m_basePathLength = countof(LDPaths::primitivesDir().absolutePath());
+	for (const Library& library : ::config->libraries())
+	{
+		QDir dir {library.path};
+		if (dir.exists("p") and QFileInfo {dir.filePath("p")}.isDir())
+		{
+			directories.push(dir.filePath("p"));
+
+			if (dir.exists("p/48") and QFileInfo {dir.filePath("p/48")}.isDir())
+				directories.push(dir.filePath("p/48"));
+		}
+	}
+
 	print("Scanning primitives...");
+}
+
+PrimitiveScanner::~PrimitiveScanner()
+{
+	delete this->currentIterator;
 }
 
 /*
@@ -729,62 +744,79 @@ const QVector<Primitive> &PrimitiveScanner::scannedPrimitives() const
  */
 void PrimitiveScanner::work()
 {
-	for (int i = 0; m_iterator.hasNext() and i < 100; ++i)
+	while (this->currentIterator == nullptr or not this->currentIterator->hasNext())
 	{
-		QString filename = m_iterator.next();
+		delete this->currentIterator;
+		this->currentIterator = nullptr;
+
+		if (this->directories.isEmpty())
+		{
+			// If there are no more primitives to iterate, we're done. Now save this information into a cache file.
+			std::sort(
+				m_scannedPrimitives.begin(),
+				m_scannedPrimitives.end(),
+				[](const Primitive& one, const Primitive& other) -> bool
+				{
+					return one.title < other.title;
+				}
+			);
+			QString path = m_manager->getPrimitivesCfgPath();
+			QFile configFile = {path};
+
+			if (configFile.open(QIODevice::WriteOnly | QIODevice::Text))
+			{
+				for (Primitive& primitive : m_scannedPrimitives)
+					fprint(configFile, "%1 %2\r\n", primitive.name, primitive.title);
+
+				configFile.close();
+			}
+			else
+			{
+				QMessageBox::critical(
+					m_window,
+					tr("Error"),
+					format(
+						tr("Couldn't write primitive list %1: %2"),
+						path,
+						configFile.errorString()
+					)
+				);
+			}
+
+			emit workDone();
+			return;
+		}
+		else
+		{
+			this->currentIterator = new QDirIterator {this->directories.pop()};
+			this->m_basePathLength = this->currentIterator->path().length();
+		}
+	}
+
+	for (int i = 0; this->currentIterator->hasNext() and i < 100; ++i)
+	{
+		QString filename = this->currentIterator->next();
 		QFile file = {filename};
 
 		if (file.open (QIODevice::ReadOnly))
 		{
 			Primitive primitive;
-			primitive.name = filename.mid(m_basePathLength + 1); // make full path relative
-			primitive.name.replace('/', '\\'); // use DOS backslashes, they're expected
+			primitive.name = LDDocument::shortenName(filename);
 			primitive.category = nullptr;
 			primitive.title = QString::fromUtf8(file.readLine().simplified());
 
 			if (primitive.title[0] == '0')
 			{
 				primitive.title.remove(0, 1);  // remove 0
-				primitive.title = primitive.title.simplified();
+				primitive.title = primitive.title.trimmed();
 			}
 
 			m_scannedPrimitives << primitive;
 		}
 	}
 
-	if (not m_iterator.hasNext())
-	{
-		// If there are no more primitives to iterate, we're done. Now save this information into a cache file.
-		std::sort(
-			m_scannedPrimitives.begin(),
-			m_scannedPrimitives.end(),
-			[](const Primitive& one, const Primitive& other) -> bool
-			{
-				return one.title < other.title;
-			}
-		);
-		QString path = m_manager->getPrimitivesCfgPath();
-		QFile configFile = {path};
-
-		if (configFile.open(QIODevice::WriteOnly | QIODevice::Text))
-		{
-			for (Primitive& primitive : m_scannedPrimitives)
-				fprint(configFile, "%1 %2\r\n", primitive.name, primitive.title);
-
-			configFile.close();
-		}
-		else
-		{
-			QMessageBox::critical(m_window, tr("Error"), format("Couldn't write primitive list %1: %2", path, configFile.errorString()));
-		}
-
-		emit workDone();
-	}
-	else
-	{
-		// Otherwise, defer to event loop, pick up the work later.
-		QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
-	}
+	// Defer to event loop, pick up the work later.
+	QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
 }
 
 

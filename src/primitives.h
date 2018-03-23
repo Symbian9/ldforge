@@ -21,6 +21,7 @@
 #include <QDialog>
 #include <QTreeWidgetItem>
 #include <QDirIterator>
+#include <QStack>
 #include "main.h"
 #include "model.h"
 #include "hierarchyelement.h"
@@ -135,6 +136,7 @@ class PrimitiveScanner : public QObject, HierarchyElement
 
 public:
 	PrimitiveScanner(PrimitiveManager* parent);
+	~PrimitiveScanner();
 	const QVector<Primitive>& scannedPrimitives() const;
 
 public slots:
@@ -146,7 +148,8 @@ signals:
 private:
 	PrimitiveManager* m_manager;
 	QVector<Primitive> m_scannedPrimitives;
-	QDirIterator m_iterator;
+	QStack<QDir> directories;
+	QDirIterator* currentIterator = nullptr;
 	int m_basePathLength;
 };
 
