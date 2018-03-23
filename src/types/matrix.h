@@ -18,10 +18,10 @@
 
 #pragma once
 #include <QString>
-#include "../glShared.h"
+#include <QMetaType>
 
 /*
- * A mathematical 3 x 3 matrix
+ * A mathematical 3 × 3 matrix
  */
 class Matrix
 {

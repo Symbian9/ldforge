@@ -28,6 +28,7 @@
 #include <QSet>
 #include <QString>
 #include <QTextFormat>
+#include <QVariant>
 #include "macros.h"
 #include "version.h"
 #include "format.h"

@@ -19,6 +19,7 @@
 #pragma once
 #include "main.h"
 
+class LDObject;
 using LDObjectState = QVector<QVariant>;
 
 class Serializer

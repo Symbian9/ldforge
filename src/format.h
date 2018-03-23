@@ -23,6 +23,7 @@
 #include "basics.h"
 #include "colors.h"
 #include "types/matrix.h"
+#include "types/vertex.h"
 
 // Converts a given value into a string that can be retrieved with text().
 // Used as the argument type to the formatting functions, hence its name.

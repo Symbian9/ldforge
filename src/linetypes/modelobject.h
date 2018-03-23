@@ -24,6 +24,7 @@
 class Model;
 class LDDocument;
 class DocumentManager;
+struct LDPolygon;
 
 /*
  * Object type codes.
