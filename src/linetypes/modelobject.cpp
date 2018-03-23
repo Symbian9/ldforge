@@ -77,13 +77,6 @@ QString LDError::asText() const
 	return contents();
 }
 
-// =============================================================================
-//
-QString LDBfc::asText() const
-{
-	return format ("0 BFC %1", statementToString());
-}
-
 int LDObject::triangleCount(DocumentManager*) const
 {
 	return 0;
@@ -324,9 +317,6 @@ LDObject* LDObject::newFromType(LDObjectType type)
 	case LDObjectType::ConditionalEdge:
 		return new LDConditionalEdge {};
 
-	case LDObjectType::Bfc:
-		return new LDBfc {};
-
 	case LDObjectType::Comment:
 		return new LDComment {};
 
@@ -428,46 +418,6 @@ QString LDError::reason() const
 QString LDError::contents() const
 {
 	return m_contents;
-}
-
-LDBfc::LDBfc (const BfcStatement type) :
-    m_statement {type} {}
-
-BfcStatement LDBfc::statement() const
-{
-	return m_statement;
-}
-
-void LDBfc::setStatement (BfcStatement value)
-{
-	m_statement = value;
-}
-
-QString LDBfc::statementToString() const
-{
-	return LDBfc::statementToString (statement());
-}
-
-QString LDBfc::statementToString (BfcStatement statement)
-{
-	static const char* statementStrings[] =
-	{
-		"CERTIFY CCW",
-		"CCW",
-		"CERTIFY CW",
-		"CW",
-		"NOCERTIFY",
-		"INVERTNEXT",
-		"CLIP",
-		"CLIP CCW",
-		"CLIP CW",
-		"NOCLIP",
-	};
-
-	if ((int) statement >= 0 and (int) statement < countof (statementStrings))
-		return QString::fromLatin1 (statementStrings[(int) statement]);
-	else
-		return "";
 }
 
 Vertex LDBezierCurve::pointAt (qreal t) const
@@ -589,11 +539,6 @@ QString LDSubfileReference::objectListText() const
 	return result;
 }
 
-QString LDBfc::objectListText() const
-{
-	return statementToString();
-}
-
 bool LDObject::isInverted() const
 {
 	return m_hasInvertNext;
@@ -621,12 +566,6 @@ void LDMatrixObject::serialize(Serializer& serializer)
 	LDObject::serialize(serializer);
 	serializer << m_position;
 	serializer << m_transformationMatrix;
-}
-
-void LDBfc::serialize(Serializer& serializer)
-{
-	LDObject::serialize(serializer);
-	serializer << m_statement;
 }
 
 void LDError::serialize(Serializer& serializer)

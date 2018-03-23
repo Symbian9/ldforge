@@ -276,11 +276,6 @@ void BasicToolset::newComment()
 	createObject<LDComment>(this->m_window);
 }
 
-void BasicToolset::newBFC()
-{
-	// TODO:
-}
-
 void BasicToolset::edit()
 {
 	if (countof(selectedObjects()) == 1)

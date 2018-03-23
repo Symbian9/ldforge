@@ -556,36 +556,18 @@ void AlgorithmToolset::subfileSelection()
 		} while (m_documents->findDocumentByName("s\\" + Basename(fullSubfileName)) != nullptr or QFile {fullSubfileName}.exists());
 	}
 
-	// Determine the BFC winding type used in the main document. It will be carried over to the subfile.
-	BfcStatement winding = BfcStatement::NoCertify;
-	for (LDObjectIterator<LDBfc> it (currentDocument()); it.isValid(); ++it)
-	{
-		if (isOneOf(it->statement(), BfcStatement::CertifyCCW, BfcStatement::CertifyCW, BfcStatement::NoCertify))
-		{
-			winding = it->statement();
-			break;
-		}
-	}
-
 	// Create the new subfile document
 	LDDocument* subfile = m_window->newDocument();
 	subfile->setFullPath(fullSubfileName);
-	subfile->setName(LDDocument::shortenName(fullSubfileName));
+	subfile->header.description = subfileTitle;
+	subfile->header.type = LDHeader::Subpart;
+	subfile->header.name = LDDocument::shortenName(fullSubfileName);
+	subfile->header.author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
 
-	Model header {m_documents};
-	header.emplace<LDComment>(subfileTitle);
-	header.emplace<LDComment>("Name: "); // This gets filled in when the subfile is saved
-	header.emplace<LDComment>(format("Author: %1 [%2]", m_config->defaultName(), m_config->defaultUser()));
-	header.emplace<LDComment>("!LDRAW_ORG Unofficial_Subpart");
+	if (::config->useCaLicense())
+		subfile->header.license = LDHeader::CaLicense;
 
-	QString license = preferredLicenseText();
-	if (not license.isEmpty())
-		header.emplace<LDComment>(license);
-
-	header.emplace<LDEmpty>();
-	header.emplace<LDBfc>(winding);
-	header.emplace<LDEmpty>();
-	subfile->merge(header);
+	subfile->setWinding(currentDocument()->winding());
 
 	// Copy the body over to the new document
 	for (LDObject* object : selectedObjects())

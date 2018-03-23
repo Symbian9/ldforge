@@ -486,14 +486,21 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 
 	document->setFrozen(false);
 	document->history()->setIgnoring(false);
-	document->emplace<LDComment>(description);
-	document->emplace<LDComment>(format("Name: %1", fileName));
-	document->emplace<LDComment>(format("Author: %1", author));
-	document->emplace<LDComment>(format("!LDRAW_ORG Unofficial_%1Primitive", hires ?  "48_" : ""));
-	document->emplace<LDComment>(license);
-	document->emplace<LDEmpty>();
-	document->emplace<LDBfc>(BfcStatement::CertifyCCW);
-	document->emplace<LDEmpty>();
+	document->header.name = fileName;
+	document->header.description = description;
+	document->header.author = author;
+
+	if (hires)
+		document->header.type = LDHeader::Primitive_48;
+	else
+		document->header.type = LDHeader::Primitive_8;
+
+	if (::config->useCaLicense())
+		document->header.license = LDHeader::CaLicense;
+	else
+		document->header.license =LDHeader::UnspecifiedLicense;
+
+	document->setWinding(CounterClockwise);
 	spec.generateBody(*document);
 	document->addHistoryStep();
 	return document;

@@ -20,66 +20,64 @@
 #include <QRadioButton>
 #include <QCheckBox>
 #include "../lddocument.h"
-#include "../mainwindow.h"
 #include "newpartdialog.h"
 #include "ui_newpartdialog.h"
-#include "../linetypes/comment.h"
-#include "../linetypes/empty.h"
 
 NewPartDialog::NewPartDialog (QWidget *parent) :
 	QDialog (parent),
-	HierarchyElement (parent),
 	ui (*new Ui_NewPart)
 {
-	ui.setupUi (this);
+	this->ui.setupUi (this);
 
-	QString authortext = m_config->defaultName();
+	QString authortext = ::config->defaultName();
 
-	if (not m_config->defaultUser().isEmpty())
-		authortext.append (format (" [%1]", m_config->defaultUser()));
+	if (not ::config->defaultUser().isEmpty())
+		authortext.append(format(" [%1]", ::config->defaultUser()));
 
-	ui.author->setText (authortext);
-	ui.useCaLicense->setChecked (m_config->useCaLicense());
+	this->ui.author->setText (authortext);
+	this->ui.useCaLicense->setChecked (::config->useCaLicense());
 }
 
-BfcStatement NewPartDialog::getWinding() const
+NewPartDialog::~NewPartDialog()
 {
-	if (ui.windingCcw->isChecked())
-		return BfcStatement::CertifyCCW;
+	delete &this->ui;
+}
 
-	if (ui.windingCw->isChecked())
-		return BfcStatement::CertifyCW;
-
-	return BfcStatement::NoCertify;
+Winding NewPartDialog::winding() const
+{
+	if (this->ui.windingCcw->isChecked())
+		return CounterClockwise;
+	else if (this->ui.windingCw->isChecked())
+		return Clockwise;
+	else
+		return NoWinding;
 }
 
 bool NewPartDialog::useCaLicense() const
 {
-	return ui.useCaLicense->isChecked();
+	return this->ui.useCaLicense->isChecked();
 }
 
 QString NewPartDialog::author() const
 {
-	return ui.author->text();
+	return this->ui.author->text();
 }
 
-QString NewPartDialog::title() const
+QString NewPartDialog::description() const
 {
-	return ui.title->text();
+	return this->ui.title->text();
 }
 
-void NewPartDialog::fillHeader (LDDocument* newdoc) const
+void NewPartDialog::fillHeader (LDDocument* document) const
 {
-	newdoc->emplace<LDComment>(title());
-	newdoc->emplace<LDComment>("Name: <untitled>.dat");
-	newdoc->emplace<LDComment>("Author: " + author());
-	newdoc->emplace<LDComment>("!LDRAW_ORG Unofficial_Part");
-	QString license = preferredLicenseText();
+	document->header.description = this->description();
+	document->header.type = LDHeader::Part;
+	document->header.author = this->author();
 
-	if (not license.isEmpty())
-		newdoc->emplace<LDComment>(license);
+	if (this->useCaLicense())
+		document->header.license = LDHeader::CaLicense;
+	else
+		document->header.license = LDHeader::UnspecifiedLicense;
 
-	newdoc->emplace<LDEmpty>();
-	newdoc->emplace<LDBfc>(getWinding());
-	newdoc->emplace<LDEmpty>();
+	document->setWinding(this->winding());
 }

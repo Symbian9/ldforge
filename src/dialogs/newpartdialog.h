@@ -21,17 +21,19 @@
 #include "../main.h"
 #include "../linetypes/modelobject.h"
 
-class NewPartDialog : public QDialog, HierarchyElement
+class NewPartDialog : public QDialog
 {
 	Q_OBJECT
+
 public:
 	NewPartDialog (QWidget *parent);
+	~NewPartDialog();
 
 	QString author() const;
-	void fillHeader (LDDocument* newdoc) const;
-	BfcStatement getWinding() const;
+	void fillHeader(LDDocument* document) const;
+	Winding winding() const;
 	bool useCaLicense() const;
-	QString title() const;
+	QString description() const;
 
 private:
 	class Ui_NewPart& ui;

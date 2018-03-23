@@ -48,7 +48,7 @@
            <x>0</x>
            <y>0</y>
            <width>465</width>
-           <height>362</height>
+           <height>387</height>
           </rect>
          </property>
          <attribute name="label">
@@ -65,8 +65,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>362</height>
+           <width>98</width>
+           <height>93</height>
           </rect>
          </property>
          <attribute name="label">
@@ -93,8 +93,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>362</height>
+           <width>277</width>
+           <height>121</height>
           </rect>
          </property>
          <attribute name="label">
@@ -175,8 +175,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>465</width>
-           <height>362</height>
+           <width>98</width>
+           <height>93</height>
           </rect>
          </property>
          <attribute name="label">
@@ -210,7 +210,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -277,7 +277,6 @@
     <addaction name="actionNewQuadrilateral"/>
     <addaction name="actionNewConditionalLine"/>
     <addaction name="actionNewComment"/>
-    <addaction name="actionNewBFC"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -446,7 +445,6 @@
    <addaction name="actionNewQuadrilateral"/>
    <addaction name="actionNewConditionalLine"/>
    <addaction name="actionNewComment"/>
-   <addaction name="actionNewBFC"/>
   </widget>
   <widget class="QToolBar" name="toolBarBasicTools">
    <property name="windowTitle">
@@ -843,15 +841,6 @@
    </property>
    <property name="text">
     <string>New C&amp;omment</string>
-   </property>
-  </action>
-  <action name="actionNewBFC">
-   <property name="icon">
-    <iconset resource="../ldforge.qrc">
-     <normaloff>:/icons/add-bfc.png</normaloff>:/icons/add-bfc.png</iconset>
-   </property>
-   <property name="text">
-    <string>New &amp;BFC Statement</string>
    </property>
   </action>
   <action name="actionUndo">
@@ -1750,7 +1739,6 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

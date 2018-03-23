@@ -353,23 +353,6 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 			{
 				// Comment
 				QString commentText = line.mid(line.indexOf("0") + 2);
-				QString commentTextSimplified = commentText.trimmed();
-
-				// Handle BFC statements
-				if (countof(tokens) > 2 and tokens[1] == "BFC")
-				{
-					for (BfcStatement statement : iterateEnum<BfcStatement>())
-					{
-						if (commentTextSimplified == format("BFC %1", LDBfc::statementToString(statement)))
-							return model.emplaceAt<LDBfc>(position, statement);
-					}
-
-					// handle MLCAD nonsense
-					if (commentTextSimplified == "BFC CERTIFY CLIP")
-						return model.emplaceAt<LDBfc>(position, BfcStatement::Clip);
-					else if (commentTextSimplified == "BFC CERTIFY NOCLIP")
-						return model.emplaceAt<LDBfc>(position, BfcStatement::NoClip);
-				}
 
 				if (countof(tokens) > 2 and tokens[1] == "!LDFORGE")
 				{

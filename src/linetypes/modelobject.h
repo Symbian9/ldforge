@@ -35,7 +35,6 @@ enum class LDObjectType
 	Triangle,			//	Object represents a	triangle
 	EdgeLine,			//	Object represents a	line
 	ConditionalEdge,	//	Object represents a	conditional line
-	Bfc,				//	Object represents a	BFC statement
 	Comment,			//	Object represents a	comment
 	Error,				//	Object is the result of failed parsing
 	Empty,				//	Object represents an empty line
@@ -151,56 +150,6 @@ public:
 private:
 	QString m_contents; // The LDraw code that was being parsed
 	QString m_reason;
-};
-
-/*
- * Represents a 0 BFC statement in the LDraw code.
- */
-enum class BfcStatement
-{
-	CertifyCCW,
-	CCW,
-	CertifyCW,
-	CW,
-	NoCertify,
-	InvertNext,
-	Clip,
-	ClipCCW,
-	ClipCW,
-	NoClip,
-	_End
-};
-
-Q_DECLARE_METATYPE(BfcStatement)
-MAKE_ITERABLE_ENUM(BfcStatement)
-
-class LDBfc : public LDObject
-{
-public:
-	static const LDObjectType SubclassType = LDObjectType::Bfc;
-
-	LDBfc(BfcStatement type = BfcStatement::CertifyCCW);
-
-	virtual LDObjectType type() const override
-	{
-		return LDObjectType::Bfc;
-	}
-
-	virtual QString asText() const override;
-
-	bool isScemantic() const override { return statement() == BfcStatement::InvertNext; }
-    QString objectListText() const override;
-	BfcStatement statement() const;
-	void setStatement (BfcStatement value);
-	QString statementToString() const;
-	bool isColored() const override { return false; }
-	QString typeName() const override { return "bfc"; }
-	void serialize(class Serializer& serializer) override;
-
-	static QString statementToString (BfcStatement statement);
-
-private:
-	BfcStatement m_statement;
 };
 
 /*
