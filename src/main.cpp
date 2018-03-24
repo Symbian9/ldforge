@@ -36,17 +36,16 @@ int main (int argc, char* argv[])
 	qRegisterMetaType<Vertex>("Vertex");
 	qRegisterMetaTypeStreamOperators<Vertex>("Vertex");
 
-	static Configuration configObject;
-	config = &configObject;
+	config = &::singleton<Configuration>();
 
 	initializeCrashHandler();
 	LDColor::initColors();
-	MainWindow* win = new MainWindow(configObject);
-	win->show();
+	MainWindow* mainWindow = new MainWindow;
+	mainWindow->show();
 
 	// Process the command line
 	for (int arg = 1; arg < argc; ++arg)
-		win->documents()->openMainModel (QString::fromLocal8Bit (argv[arg]));
+		mainWindow->documents()->openMainModel(QString::fromLocal8Bit(argv[arg]));
 
 	return app.exec();
 }

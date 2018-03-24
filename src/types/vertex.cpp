@@ -57,7 +57,7 @@ double& Vertex::operator[](Axis axis)
 		return this->z;
 
 	default:
-		return ::sink<double>();
+		return ::singleton<double>();
 	}
 }
 

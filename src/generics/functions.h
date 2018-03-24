@@ -202,7 +202,7 @@ void assignFlag(QFlags<T>& flagset, bool value)
  * pointer.
  */
 template<typename T>
-inline T& sink()
+inline T& singleton()
 {
 	static T result;
 	return result;

@@ -61,7 +61,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(Configuration& config, QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
+	explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
 	~MainWindow();
 
 	void addMessage (QString msg);

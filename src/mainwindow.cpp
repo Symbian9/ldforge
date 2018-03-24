@@ -50,9 +50,9 @@ struct MainWindow::ToolInfo
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-MainWindow::MainWindow(class Configuration& config, QWidget* parent, Qt::WindowFlags flags) :
+MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
-	m_config(config),
+	m_config(*::config),
 	m_guiUtilities (new GuiUtilities (this)),
 	m_primitives(new PrimitiveManager(this)),
 	m_grid(new Grid(this)),
