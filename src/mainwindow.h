@@ -131,7 +131,7 @@ public slots:
 	void updateTitle();
 
 protected:
-	void closeEvent (QCloseEvent* ev);
+	void closeEvent (QCloseEvent* event);
 
 private:
 	struct ToolInfo;

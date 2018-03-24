@@ -61,6 +61,8 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 {
 	m_messageLog = new MessageManager {this};
 	ui.setupUi (this);
+	this->restoreGeometry(config::mainWindowGeometry());
+	this->restoreState(config::mainWindowState());
 	m_updatingTabs = false;
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
@@ -135,14 +137,6 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 			else
 				m_toolmap[action] = info;
 		}
-	}
-
-	for (QVariant const& toolbarname : config::hiddenToolbars())
-	{
-		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
-
-		if (toolbar)
-			toolbar->hide();
 	}
 
 	// If this is the first start, get the user to configuration. Especially point
@@ -418,28 +412,21 @@ LDColor MainWindow::getUniformSelectedColor()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::closeEvent (QCloseEvent* ev)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
 	// Check whether it's safe to close all files.
-	if (not m_documents->isSafeToCloseAll())
+	if (m_documents->isSafeToCloseAll())
 	{
-		ev->ignore();
-		return;
+		// Store the state of the main window before closing.
+		config::setMainWindowGeometry(this->saveGeometry());
+		config::setMainWindowState(this->saveState());
+		settingsObject().sync();
+		event->accept();
 	}
-
-	// Save the toolbar set
-	QStringList hiddenToolbars;
-
-	for (QToolBar* toolbar : findChildren<QToolBar*>())
+	else
 	{
-		if (toolbar->isHidden())
-			hiddenToolbars << toolbar->objectName();
+		event->ignore();
 	}
-
-	// Save the configuration before leaving.
-	config::setHiddenToolbars (hiddenToolbars);
-	settingsObject().sync();
-	ev->accept();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -24,7 +24,6 @@ option CustomRotationPoint = Vertex {}
 option ColorizeObjectsList = true
 option QuickColorToolbar = "4:25:14:27:2:3:11:1:22:|:0:72:71:15"
 option ListImplicitFiles = false
-option HiddenToolbars = QStringList {}
 option RecentFiles = QStringList {}
 option TryDownloadMissingFiles = false
 option DefaultName = ""
@@ -69,6 +68,8 @@ option DrawConditionalLines = true
 option Lighting = true
 option DrawLineLengths = true
 option DrawAngles = false
+option MainWindowState = QByteArray {}
+option MainWindowGeometry = QByteArray {}
 
 # File management options
 option Libraries = QVector<Library> {}
