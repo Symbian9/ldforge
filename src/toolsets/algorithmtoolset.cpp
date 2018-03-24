@@ -484,12 +484,11 @@ void AlgorithmToolset::subfileSelection()
 
 	// Determine the title of the new subfile
 	QString subfileTitle;
-	LDComment* titleObject = dynamic_cast<LDComment*>(currentDocument()->getObject(0));
 
-	if (titleObject)
-		subfileTitle = "~" + titleObject->text();
+	if (currentDocument()->header.type != LDHeader::NoHeader)
+		subfileTitle = "~" + currentDocument()->header.description;
 	else
-		subfileTitle = "~subfile";
+		subfileTitle = "~Untitled subfile";
 
 	// Remove duplicate tildes
 	while (subfileTitle.startsWith("~~"))
@@ -497,64 +496,93 @@ void AlgorithmToolset::subfileSelection()
 
 	// If this the parent document isn't already in s/, we need to stuff it into
 	// a subdirectory named s/. Ensure it exists!
-	QString topDirectoryName = Basename(Dirname(currentDocument()->fullPath()));
+	QFileInfo path = currentDocument()->fullPath();
 	QString parentDocumentPath = currentDocument()->fullPath();
-	QString subfileDirectory = Dirname(parentDocumentPath);
+	QDir subfileDirectory = path.absoluteDir();
 
-	if (topDirectoryName != "s")
+	if (path.dir().dirName() != "s")
 	{
-		QString desiredPath = subfileDirectory + "/s";
-		QString title = tr ("Create subfile directory?");
-		QString text = format(tr("The directory <b>%1</b> is suggested for subfiles. "
-		                         "This directory does not exist, do you want to create it?"), desiredPath);
+		QDir desiredPath = subfileDirectory.filePath("s");
 
-		if (QDir(desiredPath).exists()
-		    or QMessageBox::question(m_window, title, text, (QMessageBox::Yes | QMessageBox::No), QMessageBox::No) == QMessageBox::Yes)
+		if (desiredPath.exists())
 		{
 			subfileDirectory = desiredPath;
-			QDir().mkpath(subfileDirectory);
+		} else if (QMessageBox::question(
+				m_window,
+				tr("Create subfile directory?"),
+				format(tr("The directory <b>%1</b> is suggested for subfiles. "
+					"This directory does not exist, do you want to create it?"),
+					desiredPath.absolutePath()
+				),
+				(QMessageBox::Yes | QMessageBox::No),
+				QMessageBox::No
+			) == QMessageBox::Yes
+		) {
+			if (subfileDirectory.mkdir("s"))
+			{
+				subfileDirectory = desiredPath;
+			}
+			else
+			{
+				QMessageBox::critical(
+					m_window,
+					tr("Error"),
+					format(tr("Unable to create directory %1: %2!"),
+						subfileDirectory.absolutePath(),
+						strerror(errno)
+					)
+				);
+				return;
+			}
 		}
 		else
+		{
 			return;
+		}
 	}
 
 	// Determine the body of the name of the subfile
-	QString fullSubfileName;
+	QString fullSubfilePath;
 
 	if (not parentDocumentPath.isEmpty())
 	{
-		// Chop existing '.dat' suffix
-		if (parentDocumentPath.endsWith (".dat"))
-			parentDocumentPath.chop (4);
+		QString subfileRoot = QFileInfo(parentDocumentPath).baseName();
 
 		// Remove the s?? suffix if it's there, otherwise we'll get filenames
 		// like s01s01.dat when subfiling subfiles.
 		QRegExp subfilesuffix {"s[0-9][0-9]$"};
-		if (subfilesuffix.indexIn(parentDocumentPath) != -1)
-			parentDocumentPath.chop(subfilesuffix.matchedLength());
+		if (subfilesuffix.indexIn(subfileRoot) != -1)
+			subfileRoot.chop(subfilesuffix.matchedLength());
 
 		int subfileIndex = 1;
 		QString digits;
+		QString subfileName;
 
-		// Now find the appropriate filename. Increase the number of the subfile until we find a name which isn't already taken.
+		// Now find the appropriate filename. Increase the number of the subfile until we find a
+		// name which isn't already taken.
 		do
 		{
-			digits.setNum(subfileIndex++);
+			digits.setNum(subfileIndex);
 
 			// Pad it with a zero
 			if (countof(digits) == 1)
 				digits.prepend("0");
 
-			fullSubfileName = subfileDirectory + "/" + Basename(parentDocumentPath) + "s" + digits + ".dat";
-		} while (m_documents->findDocumentByName("s\\" + Basename(fullSubfileName)) != nullptr or QFile {fullSubfileName}.exists());
+			subfileName = subfileRoot + "s" + digits + ".dat";
+			fullSubfilePath = subfileDirectory.filePath(subfileName);
+			subfileIndex += 1;
+		} while (
+			m_documents->findDocumentByName("s\\" + subfileName) != nullptr
+			or QFileInfo {fullSubfilePath}.exists()
+		);
 	}
 
 	// Create the new subfile document
 	LDDocument* subfile = m_window->newDocument();
-	subfile->setFullPath(fullSubfileName);
+	subfile->setFullPath(fullSubfilePath);
 	subfile->header.description = subfileTitle;
 	subfile->header.type = LDHeader::Subpart;
-	subfile->header.name = LDDocument::shortenName(fullSubfileName);
+	subfile->header.name = LDDocument::shortenName(fullSubfilePath);
 	subfile->header.author = format("%1 [%2]", config::defaultName(), config::defaultUser());
 
 	if (config::useCaLicense())
