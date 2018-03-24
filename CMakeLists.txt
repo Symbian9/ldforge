@@ -148,6 +148,7 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/generics/enums.h
 	src/generics/functions.h
 	src/generics/migrate.h
 	src/generics/range.h
