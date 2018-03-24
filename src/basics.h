@@ -20,13 +20,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <QFile>
+#include <QLineF>
 #include <QMatrix4x4>
 #include <QMetaType>
 #include <QObject>
+#include <QPointF>
 #include <QSet>
 #include <QString>
 #include <QStringList>
-#include <QTextFormat>
 #include <QVariant>
 #include <QVector>
 #include <QVector3D>
