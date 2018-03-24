@@ -156,39 +156,34 @@ void AlgorithmToolset::roundCoordinates()
 	setlocale (LC_ALL, "C");
 	int num = 0;
 
-	for (LDObject* obj : selectedObjects())
+	for (LDObject* object : selectedObjects())
 	{
-		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
+		LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (object);
 
 		if (mo)
 		{
-			Vertex v = mo->position();
-			Matrix t = mo->transformationMatrix();
+			Vertex position = mo->position();
+			Matrix matrix = mo->transformationMatrix();
 
-			v.apply ([&](Axis, double& a)
-			{
-				roundToDecimals (a, config::roundPositionPrecision());
-			});
+			for (Axis axis : {X, Y, Z})
+				position[axis] = roundToDecimals(position[axis], config::roundPositionPrecision());
 
-			applyToMatrix (t, [&](int, double& a)
-			{
-				roundToDecimals (a, config::roundMatrixPrecision());
-			});
+			for (int i : {0, 1, 2})
+			for (int j : {0, 1, 2})
+				matrix(i, j) = roundToDecimals(matrix(i, j), config::roundMatrixPrecision());
 
-			mo->setPosition (v);
-			mo->setTransformationMatrix (t);
+			mo->setPosition(position);
+			mo->setTransformationMatrix(matrix);
 			num += 12;
 		}
 		else
 		{
-			for (int i = 0; i < obj->numVertices(); ++i)
+			for (int i = 0; i < object->numVertices(); ++i)
 			{
-				Vertex v = obj->vertex (i);
-				v.apply ([&](Axis, double& a)
-				{
-					roundToDecimals (a, config::roundPositionPrecision());
-				});
-				obj->setVertex (i, v);
+				Vertex vertex = object->vertex (i);
+				for (Axis axis : {X, Y, Z})
+					vertex[axis] = roundToDecimals(vertex[axis], config::roundPositionPrecision());
+				object->setVertex(i, vertex);
 				num += 3;
 			}
 		}

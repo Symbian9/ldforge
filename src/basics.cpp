@@ -56,30 +56,17 @@ QString joinStrings(const QList<StringFormatArg>& values, QString delimeter)
 }
 
 
-void roundToDecimals(double& value, int decimals)
+double roundToDecimals(double value, int decimals)
 {
 	if (decimals == 0)
 	{
-		value = round(value);
+		return round(value);
 	}
 	else if (decimals > 0)
 	{
 		qreal coefficient = pow(10, decimals);
-		value = round(value * coefficient) / coefficient;
+		return round(value * coefficient) / coefficient;
 	}
-}
-
-
-void applyToMatrix(Matrix& a, ApplyToMatrixFunction func)
-{
-	for (int i = 0; i < 9; ++i)
-		func(i, a.value(i));
-}
-
-void applyToMatrix(const Matrix& a, ApplyToMatrixConstFunction func)
-{
-	for (int i = 0; i < 9; ++i)
-		func(i, a.value(i));
 }
 
 QString formatFileSize(qint64 size)

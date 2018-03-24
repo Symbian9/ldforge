@@ -111,8 +111,8 @@ Vertex GLCamera::convert2dTo3d(const QPoint& position2d, Grid* grid) const
 			cy = snapped.y();
 		}
 
-		roundToDecimals(cx, 4);
-		roundToDecimals(cy, 4);
+		cx = roundToDecimals(cx, 4);
+		cy = roundToDecimals(cy, 4);
 
 		// Create the vertex from the coordinates
 		position3d.setCoordinate(axisX(), cx * signX);

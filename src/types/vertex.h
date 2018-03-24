@@ -32,7 +32,7 @@ struct Vertex
 	void apply(ApplyConstFunction func) const;
 	QString toString(bool mangled = false) const;
 	QVector3D toVector() const;
-	void transform(const Matrix& matr, const Vertex& pos);
+	void transform(const class Matrix& matrix, const Vertex& pos);
 	Vertex transformed(const GLRotationMatrix& matrix) const;
 	void setCoordinate(Axis ax, qreal value);
 

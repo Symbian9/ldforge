@@ -94,14 +94,9 @@ static inline qreal abs(const QVector3D &vector)
 	return vector.length();
 }
 
-using ApplyToMatrixFunction = std::function<void(int, double&)>;
-using ApplyToMatrixConstFunction = std::function<void(int, double)>;
-
-void applyToMatrix(class Matrix& a, ApplyToMatrixFunction func);
-void applyToMatrix(const class Matrix& a, ApplyToMatrixConstFunction func);
 QString formatFileSize(qint64 size);
 int gcd(int a, int b);
 QString joinStrings(const QList<class StringFormatArg>& values, QString delimeter = " ");
-void roundToDecimals(double& value, int decimals);
+double roundToDecimals(double value, int decimals);
 class QSettings& settingsObject();
 void simplify(int& numerator, int& denominator);
