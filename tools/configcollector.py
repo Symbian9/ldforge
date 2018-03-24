@@ -44,7 +44,7 @@ def deduce_type(value):
 	'''
 	if value in('true', 'false'):
 		return 'bool'
-	elif value.startswith(('"', 'R"') and value.endswith('"'):
+	elif value.startswith(('"', 'R"')) and value.endswith('"'):
 		return 'QString'
 
 	try:
