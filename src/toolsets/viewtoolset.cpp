@@ -116,7 +116,7 @@ void ViewToolset::screenshot()
 	const char* imageFormats = "PNG images (*.png);;JPG images (*.jpg);;BMP images (*.bmp);;"
 	    "PPM images (*.ppm);;X11 Bitmaps (*.xbm);;X11 Pixmaps (*.xpm);;All Files (*.*)";
 	QImage image = m_window->renderer()->screenCapture();
-	QString root = Basename (currentDocument()->name());
+	QString root = QFileInfo {currentDocument()->name()}.fileName();
 
 	if (root.right (4) == ".dat")
 		root.chop (4);

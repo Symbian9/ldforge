@@ -41,15 +41,6 @@ public: \
 	using Self = SELF; \
 	using Super = SUPER;
 
-// TODO: get rid of this
-#ifdef WIN32
-# define DIRSLASH "\\"
-# define DIRSLASH_CHAR '\\'
-#else // WIN32
-# define DIRSLASH "/"
-# define DIRSLASH_CHAR '/'
-#endif // WIN32
-
 class LDObject;
 using GLRotationMatrix = QMatrix4x4;
 

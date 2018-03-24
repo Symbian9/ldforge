@@ -191,11 +191,11 @@ void PartDownloader::buttonClicked(QAbstractButton* button)
 		_isAborted = false;
 
 		if (sourceType() == CustomURL)
-			destination = Basename(url());
+			destination = QUrl {url()}.fileName();
 
 		modifyDestination(destination);
 
-		if (QFile::exists(downloadPath() + DIRSLASH + destination))
+		if (QDir {downloadPath()}.exists(destination))
 		{
 			QString message = format(tr("%1 already exists in download directory. Overwrite?"), destination);
 			int answer = QMessageBox::question(this, tr("Overwrite"), message, (QMessageBox::Yes | QMessageBox::No), QMessageBox::No);
@@ -313,12 +313,7 @@ void PartDownloader::setPrimaryFile (LDDocument* document)
 
 QString PartDownloader::downloadPath()
 {
-	QString path = config::downloadFilePath();
-
-	if (DIRSLASH[0] != '/')
-		path.replace(DIRSLASH, "/");
-
-	return path;
+	return config::downloadFilePath();
 }
 
 QTableWidget* PartDownloader::progressTable() const

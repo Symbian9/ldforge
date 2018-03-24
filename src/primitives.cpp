@@ -47,7 +47,7 @@ PrimitiveScanner* PrimitiveManager::activeScanner()
 
 QString PrimitiveManager::getPrimitivesCfgPath() const
 {
-	return qApp->applicationDirPath() + DIRSLASH "prims.cfg";
+	return QDir {qApp->applicationDirPath()}.filePath("prims.cfg");
 }
 
 

@@ -61,7 +61,7 @@ void checkGLError(HierarchyElement* element, QString file, int line)
 			}
 		}
 
-		element->print("OpenGL ERROR: at %1:%2: %3", Basename(file), line, errorMessage);
+		element->print("OpenGL ERROR: at %1:%2: %3", file, line, errorMessage);
 	}
 }
 

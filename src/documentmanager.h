@@ -63,6 +63,3 @@ private:
 	LDDocument* m_logoedStud;
 	LDDocument* m_logoedStud2;
 };
-
-QString Basename (QString path);
-QString Dirname (QString path);

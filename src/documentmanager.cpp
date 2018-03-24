@@ -170,31 +170,6 @@ LDDocument* DocumentManager::findDocumentByName (QString name)
 	return nullptr;
 }
 
-QString Dirname (QString path)
-{
-	int lastpos = path.lastIndexOf (DIRSLASH);
-
-	if (lastpos > 0)
-		return path.left (lastpos);
-
-#ifndef _WIN32
-	if (path[0] == DIRSLASH_CHAR)
-		return DIRSLASH;
-#endif // _WIN32
-
-	return "";
-}
-
-QString Basename (QString path)
-{
-	int lastpos = path.lastIndexOf (DIRSLASH);
-
-	if (lastpos != -1)
-		return path.mid (lastpos + 1);
-
-	return path;
-}
-
 QString DocumentManager::findDocument(QString name) const
 {
 	name = name.replace("\\", "/");
