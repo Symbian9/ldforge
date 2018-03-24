@@ -158,12 +158,12 @@ class ConfigCollector:
 		device.write(
 			'const QMap<QString, QVariant>& config::defaults()\n'
 			'{\n'
-			'\tstatic const QMap<QString, QVariant> defaults {'
+			'\tstatic const QMap<QString, QVariant> defaults {\n'
 		)
 		for declaration in self.declarations.values():
-			device.write('\t{{"{name}", QVariant::fromValue<{type}>({default})}},\n'.format(**declaration))
-		device.write('};\n'
-			'return defaults;\n'
+			device.write('\t\t{{"{name}", QVariant::fromValue<{type}>({default})}},\n'.format(**declaration))
+		device.write('\t};\n'
+			'\treturn defaults;\n'
 			'}\n'
 			'\n')
 		device.write('bool config::exists(const QString& name)\n')
@@ -186,7 +186,7 @@ class ConfigCollector:
 		for declaration in self.declarations.values():
 			device.write('void config::{writegate}({typereference} value)\n'.format(**declaration))
 			device.write('{\n')
-			device.write('\tif(value != {default})\n'.format(**declaration))
+			device.write('\tif (value != {default})\n'.format(**declaration))
 			device.write('\t\t::settingsObject().setValue("{name}", QVariant::fromValue<{type}>(value));\n'.format(**declaration))
 			device.write('\telse\n')
 			device.write('\t\t::settingsObject().remove("{name}");\n'.format(**declaration))
