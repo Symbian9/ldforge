@@ -25,24 +25,30 @@ GeneratePrimitiveDialog::GeneratePrimitiveDialog (QWidget* parent, Qt::WindowFla
 	ui(*new Ui_GeneratePrimitiveDialog)
 {
 	ui.setupUi (this);
-	connect (ui.highResolution, &QCheckBox::toggled, this, &GeneratePrimitiveDialog::highResolutionToggled);
+	this->previousDivisions = ui.divisions->currentText().toInt();
+	connect(
+		ui.divisions,
+		&QComboBox::currentTextChanged,
+		[&]()
+		{
+			int divisions = ui.divisions->currentText().toInt();
+
+			// Scale the segments value to fit.
+			int newSegments = static_cast<int>(round(
+				ui.segments->value() * double(divisions) / this->previousDivisions
+			));
+
+			ui.segments->setMaximum(divisions);
+			ui.segments->setValue(newSegments);
+			this->previousDivisions = divisions;
+		}
+	);
 }
 
 
 GeneratePrimitiveDialog::~GeneratePrimitiveDialog()
 {
 	delete &ui;
-}
-
-
-void GeneratePrimitiveDialog::highResolutionToggled (bool on)
-{
-	ui.segments->setMaximum (on ? HighResolution : LowResolution);
-
-	// If the current value is 16 and we switch to hi-res, default the
-	// spinbox to 48. (should we scale this?)
-	if (on and ui.segments->value() == LowResolution)
-		ui.segments->setValue(HighResolution);
 }
 
 
@@ -56,7 +62,7 @@ PrimitiveModel GeneratePrimitiveDialog::primitiveModel() const
 		ui.typeDiscNegative->isChecked() ? PrimitiveModel::DiscNegative :
 		ui.typeRing->isChecked()         ? PrimitiveModel::Ring :
 		                                   PrimitiveModel::Cone;
-	result.divisions = ui.highResolution->isChecked() ? HighResolution : LowResolution;
+	result.divisions = ui.divisions->currentText().toInt();
 	result.segments = ui.segments->value();
 	result.ringNumber = ui.ringNumber->value();
 	return result;

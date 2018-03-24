@@ -108,8 +108,10 @@ int Grid::polarDivisions() const
 	{
 	default:
 	case Coarse:
-	case Medium:
 		return LowResolution;
+
+	case Medium:
+		return MediumResolution;
 
 	case Fine:
 		return HighResolution;

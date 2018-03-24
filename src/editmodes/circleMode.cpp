@@ -66,7 +66,7 @@ void CircleMode::endDraw()
 	Model model {m_documents};
 	PrimitiveModel primitiveModel;
 	primitiveModel.segments = m_window->ringToolSegments();
-	primitiveModel.divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	primitiveModel.divisions = m_window->ringToolDivisions();
 	primitiveModel.ringNumber = 0;
 	double dist0 (getCircleDrawDist (0));
 	double dist1 (getCircleDrawDist (1));
@@ -160,7 +160,7 @@ double CircleMode::orientation() const
 {
 	if (not m_drawedVerts.isEmpty())
 	{
-		int divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+		int divisions = m_window->ringToolDivisions();
 		QPointF originSpot = renderer()->currentCamera().convert3dTo2d(m_drawedVerts.first());
 		// Line from the origin of the circle to current mouse position
 		QLineF hand1 = {originSpot, renderer()->mousePositionF()};
@@ -196,7 +196,7 @@ void CircleMode::render (QPainter& painter) const
 	QVector<QPointF> innerverts2d, outerverts2d;
 	double innerdistance = getCircleDrawDist(0);
 	double outerdistance = countof(m_drawedVerts) >= 2 ? getCircleDrawDist (1) : -1;
-	int divisions = m_window->ringToolHiRes() ? HighResolution : LowResolution;
+	int divisions = m_window->ringToolDivisions();
 	int segments = m_window->ringToolSegments();
 	double angleUnit = 2 * pi / divisions;
 	Axis relX, relY;

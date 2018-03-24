@@ -219,7 +219,8 @@ public:
 
 enum
 {
-	LowResolution = 16,
+	LowResolution = 8,
+	MediumResolution = 16,
 	HighResolution = 48
 };
 

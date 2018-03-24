@@ -98,8 +98,8 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	updateTitle();
 	loadShortcuts();
 	setMinimumSize (300, 200);
-	connect (ui.ringToolHiRes, SIGNAL (clicked (bool)), this, SLOT (ringToolHiResClicked (bool)));
-	connect (ui.ringToolSegments, SIGNAL (valueChanged (int)), this, SLOT (circleToolSegmentsChanged()));
+	connect(ui.ringToolDivisions, SIGNAL(currentTextChanged(QString)), this, SLOT(ringToolDivisionsChanged()));
+	connect(ui.ringToolSegments, SIGNAL(valueChanged(int)), this, SLOT(circleToolSegmentsChanged()));
 	circleToolSegmentsChanged(); // invoke it manually for initial label text
 
 	// Examine the toolsets and make a dictionary of tools
@@ -798,11 +798,9 @@ QKeySequence MainWindow::defaultShortcut (QAction* act)
 	return m_defaultShortcuts[act];
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-bool MainWindow::ringToolHiRes() const
+int MainWindow::ringToolDivisions() const
 {
-	return ui.ringToolHiRes->isChecked();
+	return ui.ringToolDivisions->currentText().toInt();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -814,26 +812,25 @@ int MainWindow::ringToolSegments() const
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::ringToolHiResClicked (bool checked)
+void MainWindow::ringToolDivisionsChanged()
 {
-	if (checked)
-	{
-		ui.ringToolSegments->setMaximum (HighResolution);
-		ui.ringToolSegments->setValue (ui.ringToolSegments->value() * 3);
-	}
-	else
-	{
-		ui.ringToolSegments->setValue (ui.ringToolSegments->value() / 3);
-		ui.ringToolSegments->setMaximum (LowResolution);
-	}
+	// Scale the segments value to fit.
+	int divisions = this->ringToolDivisions();
+	int newSegments = static_cast<int>(round(
+		this->ringToolSegments() * double(divisions) / this->previousDivisions
+	));
+	this->ui.ringToolSegments->setMaximum(divisions);
+	this->ui.ringToolSegments->setValue(newSegments);
+	this->previousDivisions = divisions;
+	this->renderer()->update();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::circleToolSegmentsChanged()
 {
-	int numerator (ui.ringToolSegments->value());
-	int denominator (ui.ringToolHiRes->isChecked() ? HighResolution : LowResolution);
+	int numerator = this->ringToolSegments();
+	int denominator = this->ringToolDivisions();
 	simplify (numerator, denominator);
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
 }

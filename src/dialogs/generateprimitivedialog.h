@@ -31,9 +31,7 @@ public:
 	virtual ~GeneratePrimitiveDialog();
 	PrimitiveModel primitiveModel() const;
 
-public slots:
-	void highResolutionToggled (bool on);
-
 private:
 	Ui_GeneratePrimitiveDialog& ui;
+	int previousDivisions = 0;
 };

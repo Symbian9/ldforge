@@ -434,7 +434,7 @@ QString PrimitiveModel::makeFileName() const
 	}
 
 	// Compose some general information: prefix, fraction, root, ring number
-	QString prefix = (divisions == LowResolution) ? "" : format ("%1/", divisions);
+	QString prefix = (divisions == MediumResolution) ? "" : format ("%1\\", divisions);
 	QString frac = format ("%1-%2", numerator, denominator);
 	static const char* roots[] = {"edge", "cyli", "disc", "ndis", "ring", "con"};
 	QString root = roots[type];

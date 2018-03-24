@@ -40,7 +40,7 @@
       <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page">
          <property name="geometry">
@@ -48,7 +48,7 @@
            <x>0</x>
            <y>0</y>
            <width>465</width>
-           <height>387</height>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -65,8 +65,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>93</height>
+           <width>465</width>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -93,8 +93,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>277</width>
-           <height>121</height>
+           <width>465</width>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -109,10 +109,10 @@
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
               <layout class="QFormLayout" name="formLayout">
-               <item row="0" column="1">
-                <widget class="QCheckBox" name="ringToolHiRes">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>High resolution</string>
+                  <string>Divisions:</string>
                  </property>
                 </widget>
                </item>
@@ -150,6 +150,28 @@
                  </item>
                 </layout>
                </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="ringToolDivisions">
+                 <property name="currentIndex">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>8</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>16</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>48</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -175,8 +197,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>93</height>
+           <width>465</width>
+           <height>362</height>
           </rect>
          </property>
          <attribute name="label">
@@ -210,7 +232,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1726,7 +1748,7 @@
   </action>
   <action name="actionFixRoundingErrors">
    <property name="text">
-    <string>Fix rounding errors</string>
+    <string>Fi&amp;x rounding errors</string>
    </property>
   </action>
  </widget>
@@ -1739,6 +1761,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

@@ -90,7 +90,7 @@ public:
 	Canvas* renderer();
 	void refresh();
 	void replaceSelection(const QItemSelection& selection);
-	bool ringToolHiRes() const;
+	int ringToolDivisions() const;
 	int ringToolSegments() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
@@ -125,7 +125,7 @@ public slots:
 	void circleToolSegmentsChanged();
 	void closeTab (int tabindex);
 	void historyTraversed();
-	void ringToolHiResClicked (bool clicked);
+	void ringToolDivisionsChanged();
 	void tabSelected();
 	void documentClosed(LDDocument* document);
 	void updateTitle();
@@ -154,6 +154,7 @@ private:
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;
+	int previousDivisions = MediumResolution;
 
 private slots:
 	void finishInitialization();
