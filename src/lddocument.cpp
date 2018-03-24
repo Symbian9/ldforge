@@ -571,3 +571,11 @@ void LDDocument::redoVertices()
 {
 	m_verticesOutdated = true;
 }
+
+decltype(LDHeader::license) LDHeader::defaultLicense()
+{
+	if (config::useCaLicense())
+		return LDHeader::CaLicense;
+	else
+		return LDHeader::UnspecifiedLicense;
+}

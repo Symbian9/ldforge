@@ -471,33 +471,35 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	else
 		description = format("%1 %2", PrimitiveModel::typeName(spec.type), fraction);
 
-	// Prepend "Hi-Res" if 48/ primitive.
+	// Prepend "Hi-Res" or "Lo-Res" as appropriate.
 	if (spec.divisions == HighResolution)
 		description.insert (0, "Hi-Res ");
+	else if (spec.divisions == LowResolution)
+		description.insert (0, "Lo-Res ");
 
 	LDDocument* document = m_window->newDocument();
 	document->setDefaultName(fileName);
 
-	QString author = APPNAME;
-	QString license = "";
-	bool hires = (spec.divisions == HighResolution);
-
 	if (not config::defaultName().isEmpty())
 	{
-		license = preferredLicenseText();
-		author = format("%1 [%2]", config::defaultName(), config::defaultUser());
+		document->header.license = LDHeader::defaultLicense();
+		document->header.author = format("%1 [%2]", config::defaultName(), config::defaultUser());
+	}
+	else
+	{
+		document->header.author = APPNAME;
 	}
 
 	document->setFrozen(false);
-	document->history()->setIgnoring(false);
 	document->header.name = fileName;
 	document->header.description = description;
-	document->header.author = author;
 
-	if (hires)
+	if (spec.divisions == HighResolution)
 		document->header.type = LDHeader::Primitive_48;
-	else
+	else if (spec.divisions == LowResolution)
 		document->header.type = LDHeader::Primitive_8;
+	else
+		document->header.type = LDHeader::Primitive;
 
 	if (config::useCaLicense())
 		document->header.license = LDHeader::CaLicense;
@@ -506,7 +508,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 
 	document->setWinding(CounterClockwise);
 	spec.generateBody(*document);
-	document->addHistoryStep();
+	document->history()->setIgnoring(false);
 	return document;
 }
 

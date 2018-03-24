@@ -187,17 +187,21 @@ void HeaderEdit::setDocument(LDDocument* document)
 	LDHeader* header = &document->header;
 	this->m_model = document;
 	this->m_header = header;
-	this->ui.description->setText(header->description);
-	this->ui.author->setText(header->author);
-	this->ui.category->setCurrentIndex(::categories.indexOf(header->category));
-	this->ui.license->setCurrentIndex(static_cast<int>(header->license));
-	this->ui.alias->setChecked(header->qualfiers & LDHeader::Alias);
-	this->ui.physicalColor->setChecked(header->qualfiers & LDHeader::Physical_Color);
-	this->ui.flexibleSection->setChecked(header->qualfiers & LDHeader::Flexible_Section);
-	this->ui.cmdline->setText(header->cmdline);
-	this->ui.winding->setCurrentIndex(document->winding());
-	this->ui.keywords->document()->setPlainText(header->keywords);
-	this->ui.help->document()->setPlainText(header->help);
+	if (document->header.type != LDHeader::NoHeader)
+	{
+		this->ui.description->setText(header->description);
+		this->ui.author->setText(header->author);
+		this->ui.category->setCurrentIndex(::categories.indexOf(header->category));
+		this->ui.license->setCurrentIndex(static_cast<int>(header->license));
+		this->ui.alias->setChecked(header->qualfiers & LDHeader::Alias);
+		this->ui.physicalColor->setChecked(header->qualfiers & LDHeader::Physical_Color);
+		this->ui.flexibleSection->setChecked(header->qualfiers & LDHeader::Flexible_Section);
+		this->ui.cmdline->setText(header->cmdline);
+		this->ui.winding->setCurrentIndex(document->winding());
+		this->ui.keywords->document()->setPlainText(header->keywords);
+		this->ui.help->document()->setPlainText(header->help);
+		this->ui.type->setCurrentIndex(static_cast<int>(document->header.type) - 1);
+	}
 	this->headerHistoryModel->setHeader(header);
 	this->setEnabled(this->hasValidHeader());
 }

@@ -65,6 +65,7 @@ struct LDHeader
 		CaLicense,
 		NonCaLicense
 	} license = UnspecifiedLicense;
+	static decltype(license) defaultLicense();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QFlags<LDHeader::Qualifier>)
