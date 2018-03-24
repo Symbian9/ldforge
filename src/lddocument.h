@@ -18,15 +18,12 @@
 
 #pragma once
 #include <QObject>
-#include "main.h"
-#include "linetypes/modelobject.h"
-#include "editHistory.h"
-#include "glShared.h"
 #include "model.h"
 #include "hierarchyelement.h"
 
 struct LDGLData;
 class DocumentManager;
+class EditHistory;
 
 struct LDHeader
 {
@@ -145,12 +142,6 @@ private:
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
 	DocumentManager* m_manager;
-
-	template<typename T, typename... Args>
-	void addToHistory(Args&&... args)
-	{
-		m_history->add<T>(args...);
-	}
 
 private slots:
 	void objectChanged(const LDObjectState &before, const LDObjectState &after);

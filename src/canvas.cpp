@@ -18,13 +18,8 @@
 
 #include <QMouseEvent>
 #include "canvas.h"
-#include "documentmanager.h"
-#include "glcamera.h"
 #include "grid.h"
 #include "lddocument.h"
-#include "mainwindow.h"
-#include "messageLog.h"
-#include "miscallenous.h"
 #include "primitives.h"
 
 Canvas::Canvas(LDDocument* document, QWidget* parent) :

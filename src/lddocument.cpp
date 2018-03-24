@@ -19,12 +19,10 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include "lddocument.h"
-#include "miscallenous.h"
-#include "mainwindow.h"
-#include "canvas.h"
 #include "documentmanager.h"
-#include "linetypes/comment.h"
 #include "parser.h"
+#include "editHistory.h"
+#include "glShared.h"
 
 LDDocument::LDDocument (DocumentManager* parent) :
     Model {parent},

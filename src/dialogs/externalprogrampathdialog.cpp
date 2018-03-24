@@ -22,7 +22,6 @@
 #include "ui_externalprogrampathdialog.h"
 #include "../mainwindow.h"
 #include "../glrenderer.h"
-#include "../documentation.h"
 
 /*
  * Constructs a new external program path dialog.

@@ -17,11 +17,7 @@
  */
 
 #include "editHistory.h"
-#include "linetypes/modelobject.h"
 #include "lddocument.h"
-#include "miscallenous.h"
-#include "mainwindow.h"
-#include "glrenderer.h"
 
 EditHistory::EditHistory (LDDocument* document) :
 	m_document (document),

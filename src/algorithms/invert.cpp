@@ -18,6 +18,7 @@
 
 #include "../linetypes/modelobject.h"
 #include "../lddocument.h"
+#include "../glShared.h"
 
 /*
  * Returns whether or not the document is flat.

@@ -36,7 +36,6 @@ set (LDFORGE_SOURCES
 	src/canvas.cpp
 	src/colors.cpp
 	src/crashCatcher.cpp
-	src/documentation.cpp
 	src/documentmanager.cpp
 	src/editHistory.cpp
 	src/glcamera.cpp
@@ -105,7 +104,6 @@ set (LDFORGE_HEADERS
 	src/canvas.h
 	src/colors.h
 	src/crashCatcher.h
-	src/documentation.h
 	src/documentmanager.h
 	src/editHistory.h
 	src/format.h
@@ -135,6 +133,7 @@ set (LDFORGE_HEADERS
 	src/ringFinder.h
 	src/serializer.h
 	src/transform.h
+	src/version.h
 	src/algorithms/invert.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h

@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "miscallenous.h"
-#include "linetypes/modelobject.h"
-#include "lddocument.h"
+#include <QLineF>
+#include "basics.h"
+#include "types/vertex.h"
 
 // http://stackoverflow.com/a/18204188/3629665
 template<typename T>

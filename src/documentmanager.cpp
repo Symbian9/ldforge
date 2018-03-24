@@ -16,16 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include "documentmanager.h"
 #include "lddocument.h"
-#include "mainwindow.h"
 #include "partdownloader.h"
 #include "parser.h"
-#include "glrenderer.h"
+#include "editHistory.h"
 
 const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
 

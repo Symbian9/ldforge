@@ -24,6 +24,7 @@
 #include "miscallenous.h"
 #include "colors.h"
 #include "documentmanager.h"
+#include "editHistory.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"

@@ -41,6 +41,7 @@
 #include "ldobjectiterator.h"
 #include "grid.h"
 #include "mathfunctions.h"
+#include "editHistory.h"
 
 struct MainWindow::ToolInfo
 {
