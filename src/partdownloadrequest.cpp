@@ -17,6 +17,7 @@
  */
 
 #include <QDir>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -36,22 +37,29 @@ PartDownloadRequest::PartDownloadRequest (QString url, QString dest, bool primar
 	m_prompt (parent),
 	m_url (url),
 	m_destination (dest),
-	m_filePath (parent->downloadPath() + DIRSLASH + dest),
+	m_filePath (parent->downloadPath() + "/" + dest),
 	m_networkManager (new QNetworkAccessManager),
 	m_isFirstUpdate (true),
 	m_isPrimary (primary),
 	m_filePointer (nullptr)
 {
 	// Make sure that we have a valid destination.
-	QString dirpath = Dirname (filePath());
-	QDir dir (dirpath);
+	QFileInfo destination {m_filePath};
+	QDir downloadDir {parent->downloadPath()};
+	QString relativePath = QFileInfo {dest}.path();
 
-	if (not dir.exists())
+	if (not downloadDir.exists(relativePath))
 	{
-		print ("Creating %1...\n", dirpath);
+		print("Creating %1...\n", relativePath);
 
-		if (not dir.mkpath (dirpath))
-			QMessageBox::critical(m_window, tr("Error"), format(tr("Couldn't create the directory %1!"), dirpath));
+		if (not downloadDir.mkpath(relativePath))
+		{
+			QMessageBox::critical(
+				m_window,
+				tr("Error"),
+				format(tr("Couldn't create the directory %1!"), relativePath)
+			);
+		}
 	}
 
 	m_networkReply = m_networkManager->get (QNetworkRequest (QUrl (url)));
@@ -179,11 +187,13 @@ void PartDownloadRequest::downloadFinished()
 {
 	if (networkReply()->error() != QNetworkReply::NoError)
 	{
+		// The state must be set before popping a modal dialog or we may deal with
+		// signals with an invalid state.
+		m_state = State::Failed;
+		print("Unable to download %1: %2\n", destination(), networkReply()->errorString());
+
 		if (isPrimary() and not prompt()->isAborted())
 			QMessageBox::critical(m_window, tr("Error"), networkReply()->errorString());
-
-		print ("Unable to download %1: %2\n", destination(), networkReply()->errorString());
-		m_state = State::Failed;
 	}
 	else if (m_state != State::Failed)
 	{

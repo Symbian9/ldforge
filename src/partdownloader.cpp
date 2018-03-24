@@ -116,6 +116,11 @@ void PartDownloader::modifyDestination(QString& destination) const
 		destination.remove(0, 3);
 		destination.prepend("p/48/");
 	}
+	else if (isOneOf(destination.left(2), "8\\", "8/"))
+	{
+		destination.remove(0, 2);
+		destination.prepend("p/8/");
+	}
 
 	/* Try determine where to put this part. We have four directories:
 	 * parts/, parts/s/, p/, and p/48/. If we haven't already specified
