@@ -39,7 +39,6 @@
 #include "documentmanager.h"
 #include "ldobjectiterator.h"
 #include "grid.h"
-#include "mathfunctions.h"
 #include "editHistory.h"
 
 struct MainWindow::ToolInfo
@@ -55,7 +54,6 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	m_guiUtilities (new GuiUtilities (this)),
 	m_primitives(new PrimitiveManager(this)),
 	m_grid(new Grid(this)),
-	m_mathFunctions(new MathFunctions(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
 	m_documents (new DocumentManager (this)),
@@ -169,7 +167,6 @@ MainWindow::~MainWindow()
 	delete m_guiUtilities;
 	delete m_primitives;
 	delete m_grid;
-	delete m_mathFunctions;
 	delete &ui;
 
 	for (Toolset* toolset : m_toolsets)
@@ -1045,11 +1042,6 @@ GuiUtilities* MainWindow::guiUtilities()
 Grid* MainWindow::grid()
 {
 	return m_grid;
-}
-
-MathFunctions* MainWindow::mathFunctions() const
-{
-	return m_mathFunctions;
 }
 
 void MainWindow::clearSelection()

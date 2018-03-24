@@ -26,7 +26,6 @@
 #include "../lddocument.h"
 #include "../glrenderer.h"
 #include "../colors.h"
-#include "../mathfunctions.h"
 #include "../ldobjectiterator.h"
 #include "../documentmanager.h"
 #include "../linetypes/comment.h"

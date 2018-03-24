@@ -17,12 +17,12 @@
  */
 
 #include "../lddocument.h"
-#include "../mathfunctions.h"
 #include "../mainwindow.h"
 #include "movetoolset.h"
 #include "ui_rotationpointdialog.h"
 #include "../grid.h"
 #include "../canvas.h"
+#include "../algorithms/geometry.h"
 
 MoveToolset::MoveToolset (MainWindow* parent) :
 	Toolset (parent) {}
@@ -121,32 +121,32 @@ double MoveToolset::getRotateActionAngle()
 
 void MoveToolset::rotateXPos()
 {
-	math()->rotateObjects (1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateYPos()
 {
-	math()->rotateObjects (0, 1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(0, 1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateZPos()
 {
-	math()->rotateObjects (0, 0, 1, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(0, 0, 1, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateXNeg()
 {
-	math()->rotateObjects (-1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(-1, 0, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateYNeg()
 {
-	math()->rotateObjects (0, -1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(0, -1, 0, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::rotateZNeg()
 {
-	math()->rotateObjects (0, 0, -1, getRotateActionAngle(), selectedObjects().toList().toVector());
+	rotateObjects(0, 0, -1, getRotateActionAngle(), selectedObjects().toList().toVector());
 }
 
 void MoveToolset::configureRotationPoint()
@@ -155,7 +155,7 @@ void MoveToolset::configureRotationPoint()
 	Ui_RotPointUI ui;
 	ui.setupUi(dialog);
 
-	switch (RotationPoint(config::rotationPointType()))
+	switch (static_cast<RotationPoint>(config::rotationPointType()))
 	{
 	case ObjectOrigin:
 		ui.objectPoint->setChecked (true);

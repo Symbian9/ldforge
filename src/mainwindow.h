@@ -33,7 +33,6 @@ class Canvas;
 class Toolset;
 class PrimitiveManager;
 class Grid;
-class MathFunctions;
 class DocumentManager;
 class LDDocument;
 
@@ -84,7 +83,6 @@ public:
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
-	MathFunctions* mathFunctions() const;
 	MessageManager* messageLog() const;
 	LDDocument* newDocument (bool cache = false);
 	void openDocumentForEditing(LDDocument* document);
@@ -144,7 +142,6 @@ private:
 	QMap<LDDocument*, QItemSelectionModel*> m_selections;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
-	MathFunctions* m_mathFunctions;
 	QVector<ColorToolbarItem>	m_quickColors;
 	QList<QToolButton*>	m_colorButtons;
 	QList<QAction*> m_recentFiles;

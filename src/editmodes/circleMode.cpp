@@ -23,7 +23,6 @@
 #include "../primitives.h"
 #include "../canvas.h"
 #include "../mainwindow.h"
-#include "../mathfunctions.h"
 #include "../documentmanager.h"
 #include "../grid.h"
 #include "../linetypes/modelobject.h"

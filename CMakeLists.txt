@@ -49,7 +49,6 @@ set (LDFORGE_SOURCES
 	src/librariesmodel.cpp
 	src/main.cpp
 	src/mainwindow.cpp
-	src/mathfunctions.cpp
 	src/matrixinput.cpp
 	src/messageLog.cpp
 	src/model.cpp
@@ -120,7 +119,6 @@ set (LDFORGE_HEADERS
 	src/librariesmodel.h
 	src/main.h
 	src/mainwindow.h
-	src/mathfunctions.h
 	src/matrixinput.h
 	src/messageLog.h
 	src/model.h

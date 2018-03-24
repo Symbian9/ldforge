@@ -50,6 +50,7 @@ public: \
 # define DIRSLASH_CHAR '/'
 #endif // WIN32
 
+class LDObject;
 using GLRotationMatrix = QMatrix4x4;
 
 enum Axis

@@ -28,7 +28,6 @@ class LDDocument;
 class DocumentManager;
 class PrimitiveManager;
 class Grid;
-class MathFunctions;
 class MainWindow;
 
 //
@@ -45,7 +44,6 @@ public:
 	GuiUtilities* guiUtilities() const;
 	PrimitiveManager* primitives();
 	Grid* grid() const;
-	MathFunctions* math() const;
 
 	// Utility functions
 	QString preferredLicenseText() const;

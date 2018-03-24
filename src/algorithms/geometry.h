@@ -15,11 +15,22 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #pragma once
 #include "../main.h"
+
+enum RotationPoint
+{
+	ObjectOrigin,
+	WorldOrigin,
+	CustomPoint,
+};
 
 double ldrawsin(double angle);
 double ldrawcos(double angle);
 QPointF pointOnLDrawCircumference(int segment, int divisions);
 QVector<QLineF> makeCircle(int segments, int divisions, double radius);
 qreal distanceFromPointToRectangle(const QPointF& point, const QRectF& rectangle);
+void rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& objects);
+Vertex getRotationPoint(const QVector<LDObject*>& objs);
+void rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix);
