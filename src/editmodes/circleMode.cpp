@@ -206,8 +206,8 @@ void CircleMode::render (QPainter& painter) const
 	// Calculate the preview positions of vertices
 	for (int i = 0; i < segments + 1; ++i)
 	{
-		const double sinangle (sin (angleoffset + i * angleUnit));
-		const double cosangle (cos (angleoffset + i * angleUnit));
+		const double sinangle = ldrawsin(angleoffset + i * angleUnit);
+		const double cosangle = ldrawcos(angleoffset + i * angleUnit);
 		Vertex vertex;
 		vertex.setCoordinate (relX, m_drawedVerts[0][relX] + (cosangle * innerdistance));
 		vertex.setCoordinate (relY, m_drawedVerts[0][relY] + (sinangle * innerdistance));
@@ -223,12 +223,13 @@ void CircleMode::render (QPainter& painter) const
 		}
 	}
 
-	QVector<QLineF> lines {segments};
+	QVector<QLineF> lines;
 
 	if (outerdistance != -1 and outerdistance != innerdistance)
 	{
 		painter.setBrush(m_polybrush);
 		painter.setPen(Qt::NoPen);
+		lines.reserve(segments * 2);
 
 		// Compile polygons
 		for (int i = 0; i < segments; ++i)
@@ -252,6 +253,8 @@ void CircleMode::render (QPainter& painter) const
 	}
 	else
 	{
+		lines.reserve(segments);
+
 		for (int i = 0; i < segments; ++i)
 			lines.append({innerverts2d[i], innerverts2d[i + 1]});
 	}
