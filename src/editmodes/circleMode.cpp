@@ -18,18 +18,17 @@
 
 #include <QPainter>
 #include "circleMode.h"
-#include "../miscallenous.h"
 #include "../lddocument.h"
 #include "../ringFinder.h"
 #include "../primitives.h"
 #include "../canvas.h"
 #include "../mainwindow.h"
 #include "../mathfunctions.h"
-#include "../miscallenous.h"
 #include "../documentmanager.h"
 #include "../grid.h"
 #include "../linetypes/modelobject.h"
 #include "../linetypes/quadrilateral.h"
+#include "../algorithms/geometry.h"
 
 CircleMode::CircleMode(Canvas* canvas) :
     Super {canvas} {}

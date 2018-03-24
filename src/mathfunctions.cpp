@@ -18,7 +18,6 @@
 
 #include "mathfunctions.h"
 #include "linetypes/modelobject.h"
-#include "miscallenous.h"
 #include "types/boundingbox.h"
 
 MathFunctions::MathFunctions(QObject* parent) :

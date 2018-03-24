@@ -20,11 +20,11 @@
 #include <GL/glu.h>
 #include <GL/glext.h>
 #include "glcompiler.h"
-#include "miscallenous.h"
 #include "guiutilities.h"
 #include "documentmanager.h"
 #include "grid.h"
 #include "algorithms/invert.h"
+#include "generics/ring.h"
 
 void checkGLError(HierarchyElement* element, QString file, int line)
 {

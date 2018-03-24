@@ -29,7 +29,6 @@
 #include "../mainwindow.h"
 #include "../lddocument.h"
 #include "../canvas.h"
-#include "../miscallenous.h"
 #include "../grid.h"
 
 /*

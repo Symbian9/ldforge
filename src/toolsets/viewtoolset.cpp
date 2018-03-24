@@ -21,7 +21,6 @@
 #include <QMessageBox>
 #include "../mainwindow.h"
 #include "../lddocument.h"
-#include "../miscallenous.h"
 #include "../canvas.h"
 #include "../primitives.h"
 #include "../colors.h"

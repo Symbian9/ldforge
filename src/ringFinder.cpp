@@ -17,7 +17,6 @@
  */
 
 #include "ringFinder.h"
-#include "miscallenous.h"
 
 RingFinder g_RingFinder;
 

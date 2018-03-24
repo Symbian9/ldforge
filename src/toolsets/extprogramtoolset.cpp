@@ -29,7 +29,6 @@
 #include <QFileInfo>
 #include "../guiutilities.h"
 #include "../main.h"
-#include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "../lddocument.h"
 #include "../editHistory.h"

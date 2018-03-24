@@ -27,7 +27,6 @@
 #include "canvas.h"
 #include "mainwindow.h"
 #include "lddocument.h"
-#include "miscallenous.h"
 #include "messageLog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"

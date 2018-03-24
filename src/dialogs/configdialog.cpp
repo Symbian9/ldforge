@@ -34,7 +34,6 @@
 #include "../main.h"
 #include "../lddocument.h"
 #include "../librariesmodel.h"
-#include "../miscallenous.h"
 #include "../canvas.h"
 #include "../guiutilities.h"
 #include "../documentmanager.h"

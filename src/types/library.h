@@ -16,25 +16,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// =============================================================================
-// This file is included one way or another in every source file of LDForge.
-// Stuff defined and included here is universally included.
-
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <QSet>
-#include <QString>
-#include <QTextFormat>
-#include <QVariant>
-#include "basics.h"
-#include "version.h"
-#include "format.h"
-#include "types/library.h"
-#include "configuration.h"
-#include "generics/range.h"
-#include "types/vertex.h"
+#include <QDataStream>
+#include "generics/enums.h"
 
-extern Configuration* config;
+struct Library
+{
+	QString path;
+	enum
+	{
+		ReadOnlyStorage, // for official files, etc
+		UnofficialFiles, // put downloaded files here
+		WorkingDirectory, // for editable documents
+	} role = ReadOnlyStorage;
+
+	bool operator==(const Library& other) const
+	{
+		return (this->path == other.path) and (this->role == other.role);
+	}
+};
+
+Q_DECLARE_METATYPE(Library)
+using Libraries = QVector<Library>;
+
+inline QDataStream& operator<<(QDataStream& out, const Library& library)
+{
+	return out << library.path << library.role;
+}
+
+inline QDataStream& operator>>(QDataStream &in, Library& library)
+{
+	return in >> library.path >> enum_cast(library.role);
+}

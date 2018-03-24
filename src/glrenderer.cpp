@@ -28,7 +28,6 @@
 #include "glrenderer.h"
 #include "colors.h"
 #include "mainwindow.h"
-#include "miscallenous.h"
 #include "editHistory.h"
 #include "glcompiler.h"
 #include "primitives.h"

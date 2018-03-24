@@ -16,11 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
 #include "../documentmanager.h"
 #include "../linetypes/modelobject.h"
 #include "../lddocument.h"
-#include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "../editHistory.h"
 #include "../canvas.h"

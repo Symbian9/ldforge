@@ -21,10 +21,10 @@
 #include "lddocument.h"
 #include "mainwindow.h"
 #include "primitives.h"
-#include "miscallenous.h"
 #include "colors.h"
 #include "documentmanager.h"
 #include "editHistory.h"
+#include "algorithms/geometry.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"
@@ -372,19 +372,22 @@ void PrimitiveModel::generateBody(Model& model) const
 
 	for (int i : conditionalLineSegments)
 	{
-		Vertex v0 = {getRadialPoint(i, divisions, cos), 0.0f, getRadialPoint(i, divisions, sin)};
+		QPointF p0 = ::pointOnCircumference(i, divisions);
+		QPointF p2 = ::pointOnCircumference(i + 1, divisions);
+		QPointF p3 = ::pointOnCircumference(i - 1, divisions);
+		Vertex v0 = {p0.x(), 0.0, p0.y()};
 		Vertex v1;
-		Vertex v2 = {getRadialPoint(i + 1, divisions, cos), 0.0f, getRadialPoint(i + 1, divisions, sin)};
-		Vertex v3 = {getRadialPoint(i - 1, divisions, cos), 0.0f, getRadialPoint(i - 1, divisions, sin)};
+		Vertex v2 = {p2.x(), 0.0, p2.y()};
+		Vertex v3 = {p3.x(), 0.0, p3.y()};
 
 		if (type == Cylinder)
 		{
-			v1 = {v0[X], 1.0f, v0[Z]};
+			v1 = {v0.x, 1.0f, v0.z};
 		}
 		else if (type == Cone)
 		{
-			v1 = {v0[X] * (ringNumber + 1), 0.0, v0[Z] * (ringNumber + 1)};
-			v0 = {v0[X] * ringNumber, 1.0, v0[Z] * ringNumber};
+			v1 = {v0.x * (ringNumber + 1), 0.0, v0.z * (ringNumber + 1)};
+			v0 = {v0.x * ringNumber, 1.0, v0.z * ringNumber};
 		}
 
 		LDConditionalEdge* line = model.emplace<LDConditionalEdge>();

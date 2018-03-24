@@ -24,7 +24,6 @@
 #include "../mainwindow.h"
 #include "../main.h"
 #include "../lddocument.h"
-#include "../miscallenous.h"
 #include "../glrenderer.h"
 #include "../colors.h"
 #include "../mathfunctions.h"

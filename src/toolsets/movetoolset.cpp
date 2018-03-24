@@ -18,7 +18,6 @@
 
 #include "../lddocument.h"
 #include "../mathfunctions.h"
-#include "../miscallenous.h"
 #include "../mainwindow.h"
 #include "movetoolset.h"
 #include "ui_rotationpointdialog.h"

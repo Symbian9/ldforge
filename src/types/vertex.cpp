@@ -200,3 +200,8 @@ QDataStream& operator>>(QDataStream& in, Vertex& vertex)
 {
 	return in >> vertex.x >> vertex.y >> vertex.z;
 }
+
+unsigned int qHash(const Vertex& key)
+{
+	return qHash(key.x) ^ rotl10(qHash(key.y)) ^ rotl20(qHash(key.z));
+}

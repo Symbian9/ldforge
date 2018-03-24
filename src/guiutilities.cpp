@@ -101,7 +101,7 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 		LDColor color = iterator.key();
 		int frequency = iterator.value();
 		QIcon icon = makeColorIcon(color, 16);
-		box->addItem(icon, format("[%1] %2 (%3 object%4)", color.index(), color.name(), frequency, plural(frequency)));
+		box->addItem(icon, format("[%1] %2 (%3 object(s))", color.index(), color.name(), frequency));
 		box->setItemData(row, color.index());
 		++row;
 	}

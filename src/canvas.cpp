@@ -21,6 +21,8 @@
 #include "grid.h"
 #include "lddocument.h"
 #include "primitives.h"
+#include "algorithms/geometry.h"
+#include "generics/ring.h"
 
 Canvas::Canvas(LDDocument* document, QWidget* parent) :
     GLRenderer {document, parent},

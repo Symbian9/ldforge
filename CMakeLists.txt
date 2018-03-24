@@ -52,7 +52,6 @@ set (LDFORGE_SOURCES
 	src/mathfunctions.cpp
 	src/matrixinput.cpp
 	src/messageLog.cpp
-	src/miscallenous.cpp
 	src/model.cpp
 	src/partdownloader.cpp
 	src/partdownloadrequest.cpp
@@ -61,6 +60,7 @@ set (LDFORGE_SOURCES
 	src/serializer.cpp
 	src/ringFinder.cpp
 	src/version.cpp
+	src/algorithms/geometry.cpp
 	src/algorithms/invert.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
@@ -118,13 +118,11 @@ set (LDFORGE_HEADERS
 	src/lddocument.h
 	src/ldobjectiterator.h
 	src/librariesmodel.h
-	src/macros.h
 	src/main.h
 	src/mainwindow.h
 	src/mathfunctions.h
 	src/matrixinput.h
 	src/messageLog.h
-	src/miscallenous.h
 	src/model.h
 	src/partdownloader.h
 	src/partdownloadrequest.h
@@ -132,8 +130,8 @@ set (LDFORGE_HEADERS
 	src/primitives.h
 	src/ringFinder.h
 	src/serializer.h
-	src/transform.h
 	src/version.h
+	src/algorithms/geometry.h
 	src/algorithms/invert.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
@@ -150,9 +148,12 @@ set (LDFORGE_HEADERS
 	src/editmodes/magicWandMode.h
 	src/editmodes/rectangleMode.h
 	src/editmodes/selectMode.h
+	src/generics/functions.h
 	src/generics/migrate.h
 	src/generics/range.h
 	src/generics/reverse.h
+	src/generics/ring.h
+	src/generics/transform.h
 	src/geometry/linesegment.h
 	src/linetypes/comment.h
 	src/linetypes/conditionaledge.h
@@ -169,6 +170,7 @@ set (LDFORGE_HEADERS
 	src/toolsets/toolset.h
 	src/toolsets/viewtoolset.h
 	src/types/boundingbox.h
+	src/types/library.h
 	src/types/matrix.h
 	src/types/vertex.h
 	src/widgets/headeredit.h
@@ -225,7 +227,6 @@ endif()
 
 include_directories ("${PROJECT_BINARY_DIR}")
 include_directories ("${PROJECT_BINARY_DIR}/src")
-include_directories ("${PROJECT_BINARY_DIR}/src/misc")
 include_directories ("${PROJECT_SOURCE_DIR}/src")
 
 if (NOT MSVC)

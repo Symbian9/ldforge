@@ -25,7 +25,6 @@
 #include "../guiutilities.h"
 #include "../main.h"
 #include "../mainwindow.h"
-#include "../miscallenous.h"
 #include "colorselector.h"
 #include "ui_colorselector.h"
 

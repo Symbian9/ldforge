@@ -19,7 +19,6 @@
 #include "glcamera.h"
 #include "glrenderer.h"
 #include "grid.h"
-#include "miscallenous.h"
 
 /*
  * Constructs a fixed camera from parameters.

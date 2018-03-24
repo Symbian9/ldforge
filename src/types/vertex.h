@@ -56,6 +56,6 @@ inline Vertex operator*(qreal scalar, const Vertex& vertex)
 }
 
 Q_DECLARE_METATYPE(Vertex)
-uint qHash(const Vertex& key);
+unsigned int qHash(const Vertex& key);
 QDataStream& operator<<(QDataStream& out, const Vertex& vertex);
 QDataStream& operator>>(QDataStream& in, Vertex& vertex);
