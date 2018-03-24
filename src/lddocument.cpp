@@ -22,7 +22,6 @@
 #include "miscallenous.h"
 #include "mainwindow.h"
 #include "canvas.h"
-#include "dialogs/openprogressdialog.h"
 #include "documentmanager.h"
 #include "linetypes/comment.h"
 #include "parser.h"
