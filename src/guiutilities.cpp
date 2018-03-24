@@ -48,8 +48,8 @@ QIcon makeColorIcon(LDColor color, int size)
 	if (color == MainColor)
 	{
 		// Use the user preferences for the main color.
-		truecolor = config->mainColor();
-		truecolor.setAlphaF(config->mainColorAlpha());
+		truecolor = config::mainColor();
+		truecolor.setAlphaF(config::mainColorAlpha());
 	}
 	else
 	{
@@ -114,11 +114,11 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
  */
 QColor GuiUtilities::mainColorRepresentation()
 {
-	QColor result = {m_config->mainColor()};
+	QColor result = {config::mainColor()};
 
 	if (result.isValid())
 	{
-		result.setAlpha(m_config->mainColorAlpha() * 255.f);
+		result.setAlpha(config::mainColorAlpha() * 255.f);
 		return result;
 	}
 	else
@@ -136,7 +136,7 @@ QVector<ColorToolbarItem> GuiUtilities::loadQuickColorList()
 {
 	QVector<ColorToolbarItem> colors;
 
-	for (QString colorName : m_config->quickColorToolbar().split(":"))
+	for (QString colorName : config::quickColorToolbar().split(":"))
 	{
 		if (colorName == "|")
 		{

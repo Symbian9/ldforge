@@ -19,6 +19,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QSettings>
 #include "documentmanager.h"
 #include "lddocument.h"
 #include "partdownloader.h"
@@ -143,7 +144,7 @@ void DocumentManager::openMainModel (QString path)
 		}
 	}
 
-	if (m_config->tryDownloadMissingFiles() and not unknowns.isEmpty())
+	if (config::tryDownloadMissingFiles() and not unknowns.isEmpty())
 	{
 		PartDownloader dl (m_window);
 		dl.setSourceType (PartDownloader::PartsTracker);
@@ -200,7 +201,7 @@ QString DocumentManager::findDocument(QString name) const
 {
 	name = name.replace("\\", "/");
 
-	for (const Library& library : ::config->libraries())
+	for (const Library& library : config::libraries())
 	{
 		for (const QString& subdirectory : {"parts", "p"})
 		{
@@ -280,7 +281,7 @@ LDDocument* DocumentManager::openDocument(
 
 void DocumentManager::addRecentFile (QString path)
 {
-	QStringList recentFiles = m_config->recentFiles();
+	QStringList recentFiles = config::recentFiles();
 	int idx = recentFiles.indexOf (path);
 
 	// If this file already is in the list, pop it out.
@@ -298,8 +299,8 @@ void DocumentManager::addRecentFile (QString path)
 
 	// Add the file
 	recentFiles << path;
-	m_config->setRecentFiles (recentFiles);
-	m_window->syncSettings();
+	config::setRecentFiles (recentFiles);
+	settingsObject().sync();
 	m_window->updateRecentFilesMenu();
 }
 
@@ -333,7 +334,7 @@ bool DocumentManager::preInline (LDDocument* doc, Model& model, bool deep, bool 
 	// Possibly substitute with logoed studs:
 	// stud.dat -> stud-logo.dat
 	// stud2.dat -> stud-logo2.dat
-	if (m_config->useLogoStuds() and renderinline)
+	if (config::useLogoStuds() and renderinline)
 	{
 		// Ensure logoed studs are loaded first
 		loadLogoedStuds();

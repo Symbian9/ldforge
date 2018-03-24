@@ -28,5 +28,3 @@
 #include "configuration.h"
 #include "generics/range.h"
 #include "types/vertex.h"
-
-extern Configuration* config;

@@ -22,8 +22,6 @@
 #include "mainwindow.h"
 #include "generics/reverse.h"
 
-Configuration* config = nullptr;
-
 int main (int argc, char* argv[])
 {
 	QApplication app (argc, argv);
@@ -35,9 +33,6 @@ int main (int argc, char* argv[])
 	qRegisterMetaTypeStreamOperators<Libraries>("Libraries");
 	qRegisterMetaType<Vertex>("Vertex");
 	qRegisterMetaTypeStreamOperators<Vertex>("Vertex");
-
-	config = &::singleton<Configuration>();
-
 	initializeCrashHandler();
 	LDColor::initColors();
 	MainWindow* mainWindow = new MainWindow;

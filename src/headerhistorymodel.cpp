@@ -149,7 +149,7 @@ bool HeaderHistoryModel::insertRows(int startRow, int count, const QModelIndex&)
 		{
 			this->header->history.insert(row, {});
 			this->header->history[row].date = QDate::currentDate();
-			this->header->history[row].author = ::config->defaultUser();
+			this->header->history[row].author = config::defaultUser();
 		}
 
 		this->endInsertRows();

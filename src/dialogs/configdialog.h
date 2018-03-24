@@ -72,7 +72,6 @@ private:
 	QList<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
-	class QSettings* m_settings;
 	QVector<ColorToolbarItem> quickColors;
 	class LibrariesModel* librariesModel;
 	Libraries libraries;

@@ -53,25 +53,25 @@ void MoveToolset::moveDown()
 
 void MoveToolset::gridCoarse()
 {
-	m_config->setGrid (Grid::Coarse);
+	config::setGrid (Grid::Coarse);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridMedium()
 {
-	m_config->setGrid (Grid::Medium);
+	config::setGrid (Grid::Medium);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::gridFine()
 {
-	m_config->setGrid (Grid::Fine);
+	config::setGrid (Grid::Fine);
 	m_window->updateGridToolBar();
 }
 
 void MoveToolset::polarGrid()
 {
-	m_config->togglePolarGrid();
+	config::togglePolarGrid();
 	m_window->updateGridToolBar();
 }
 
@@ -155,7 +155,7 @@ void MoveToolset::configureRotationPoint()
 	Ui_RotPointUI ui;
 	ui.setupUi(dialog);
 
-	switch (RotationPoint(m_config->rotationPointType()))
+	switch (RotationPoint(config::rotationPointType()))
 	{
 	case ObjectOrigin:
 		ui.objectPoint->setChecked (true);
@@ -170,7 +170,7 @@ void MoveToolset::configureRotationPoint()
 		break;
 	}
 
-	Vertex custompoint = m_config->customRotationPoint();
+	Vertex custompoint = config::customRotationPoint();
 	ui.customX->setValue(custompoint.x);
 	ui.customY->setValue(custompoint.y);
 	ui.customZ->setValue(custompoint.z);
@@ -189,7 +189,7 @@ void MoveToolset::configureRotationPoint()
 		custompoint.x = ui.customX->value();
 		custompoint.y = ui.customY->value();
 		custompoint.z = ui.customZ->value();
-		m_config->setRotationPointType(pointType);
-		m_config->setCustomRotationPoint(custompoint);
+		config::setRotationPointType(pointType);
+		config::setCustomRotationPoint(custompoint);
 	}
 }

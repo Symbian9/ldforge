@@ -61,7 +61,7 @@ void PartDownloader::checkValidPath()
 		if (path.isEmpty())
 			reject();
 		else
-			m_config->setDownloadFilePath(path);
+			config::setDownloadFilePath(path);
 	}
 }
 
@@ -90,7 +90,7 @@ void PartDownloader::modifyDestination(QString& destination) const
 	destination = destination.simplified();
 
 	// If the user doesn't want us to guess, stop right here.
-	if (not m_config->guessDownloadPaths())
+	if (not config::guessDownloadPaths())
 		return;
 
 	// Ensure .dat extension
@@ -255,7 +255,7 @@ void PartDownloader::checkIfFinished()
 	if (primaryFile())
 		emit primaryFileDownloaded();
 
-	if (m_config->autoCloseDownloadDialog() and not failed)
+	if (config::autoCloseDownloadDialog() and not failed)
 	{
 		// Close automatically if desired.
 		accept();
@@ -308,7 +308,7 @@ void PartDownloader::setPrimaryFile (LDDocument* document)
 
 QString PartDownloader::downloadPath()
 {
-	QString path = m_config->downloadFilePath();
+	QString path = config::downloadFilePath();
 
 	if (DIRSLASH[0] != '/')
 		path.replace(DIRSLASH, "/");

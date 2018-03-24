@@ -195,7 +195,7 @@ QColor GLCompiler::getColorForPolygon(
 		else if (polygon.color == EdgeColor)
 		{
 			// Edge color is black, unless we have a dark background, in which case lines need to be bright.
-			color = luma(m_config->backgroundColor()) > 40 ? Qt::black : Qt::white;
+			color = luma(config::backgroundColor()) > 40 ? Qt::black : Qt::white;
 		}
 		else
 		{
@@ -217,7 +217,7 @@ QColor GLCompiler::getColorForPolygon(
 
 		if (blendAlpha != 0.0)
 		{
-			QColor selectedColor = m_config->selectColorBlend();
+			QColor selectedColor = config::selectColorBlend();
 			double denominator = blendAlpha + 1.0;
 			color.setRed((color.red() + (selectedColor.red() * blendAlpha)) / denominator);
 			color.setGreen((color.green() + (selectedColor.green() * blendAlpha)) / denominator);

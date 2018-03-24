@@ -134,25 +134,20 @@ class ConfigCollector:
 		device.write('\n')
 		formatargs = {}
 		write = lambda value: device.write(value)
-		write('class Configuration\n')
+		write('namespace config\n')
 		write('{\n')
-		write('public:\n')
-		write('\tConfiguration();\n')
-		write('\t~Configuration();\n')
-		write('\tbool existsEntry(const QString& name);\n')
-		write('\tQVariant defaultValueByName(const QString& name);\n')
+		write('\tbool exists(const QString& name);\n')
+		write('\tQVariant value(const QString& name);\n')
+		write('\tQVariant setValue(const QString& name);\n')
+		write('\tconst QMap<QString, QVariant>& defaults();\n')
 		for declaration in self.declarations.values():
-			write('\t{type} {readgate}() const;\n'.format(**declaration))
+			write('\t{type} {readgate}();\n'.format(**declaration))
 		for declaration in self.declarations.values():
 			write('\tvoid {writegate}({typereference} value);\n'.format(**declaration))
 
 		for declaration in filter(lambda declaration: declaration['type'] == 'bool', self.declarations.values()):
 			write('\tvoid {togglefunction}();\n'.format(**declaration))
-		write('\n')
-		write('private:\n')
-		write('\tQMap<QString, QVariant> m_defaults;\n')
-		write('\tclass QSettings* m_settings;\n')
-		write('};\n')
+		write('}\n')
 	
 	def writeSource(self, device, headername):
 		device.write('#include <QSet>\n')
@@ -161,51 +156,44 @@ class ConfigCollector:
 		device.write('#include "%s/mainwindow.h"\n' % (self.args.sourcedir))
 		device.write('#include "%s"\n' % headername)
 		device.write(
-			'\n'
-			'Configuration::Configuration() :\n'
-			'\tm_settings(MainWindow::makeSettings(nullptr))\n'
-			'{\n')
-		for declaration in self.declarations.values():
-			device.write('\tm_defaults["{name}"] = QVariant::fromValue<{type}>({default});\n'.format(**declaration))
-		device.write('}\n'
-			'\n'
-			'Configuration::~Configuration()\n'
+			'const QMap<QString, QVariant>& config::defaults()\n'
 			'{\n'
-			'\tm_settings->deleteLater();\n'
+			'\tstatic const QMap<QString, QVariant> defaults {'
+		)
+		for declaration in self.declarations.values():
+			device.write('\t{{"{name}", QVariant::fromValue<{type}>({default})}},\n'.format(**declaration))
+		device.write('};\n'
+			'return defaults;\n'
 			'}\n'
 			'\n')
-		device.write('QVariant Configuration::defaultValueByName(const QString& name)\n')
+		device.write('bool config::exists(const QString& name)\n')
 		device.write('{\n')
-		device.write('\tQMap<QString, QVariant>::iterator it = m_defaults.find(name);\n')
-		device.write('\tif(it != m_defaults.end())\n')
-		device.write('\t\treturn *it;\n')
-		device.write('\telse\n')
-		device.write('\t\treturn {};\n')
+		device.write('\treturn defaults().contains(name);\n')
 		device.write('}\n')
 		device.write('\n')
-		device.write('bool Configuration::existsEntry(const QString& name)\n')
-		device.write('{\n')
-		device.write('\treturn m_defaults.find(name) != m_defaults.end();\n')
-		device.write('}\n')
+		device.write('QVariant config::value(const QString& name)\n'
+			'{\n'
+			'\treturn settingsObject().value(name, config::defaults().value(name));\n'
+			'}\n')
 		device.write('\n')
 		for declaration in self.declarations.values():
-			device.write('{type} Configuration::{readgate}() const\n'.format(**declaration))
+			device.write('{type} config::{readgate}()\n'.format(**declaration))
 			device.write('{\n')
 			device.write('\tstatic const QVariant defaultvalue = QVariant::fromValue<{type}>({default});\n'.format(**declaration))
-			device.write('\treturn m_settings->value("{name}", defaultvalue).value<{type}>();\n'.format(**declaration))
+			device.write('\treturn ::settingsObject().value("{name}", defaultvalue).value<{type}>();\n'.format(**declaration))
 			device.write('}\n')
 			device.write('\n')
 		for declaration in self.declarations.values():
-			device.write('void Configuration::{writegate}({typereference} value)\n'.format(**declaration))
+			device.write('void config::{writegate}({typereference} value)\n'.format(**declaration))
 			device.write('{\n')
 			device.write('\tif(value != {default})\n'.format(**declaration))
-			device.write('\t\tm_settings->setValue("{name}", QVariant::fromValue<{type}>(value));\n'.format(**declaration))
+			device.write('\t\t::settingsObject().setValue("{name}", QVariant::fromValue<{type}>(value));\n'.format(**declaration))
 			device.write('\telse\n')
-			device.write('\t\tm_settings->remove("{name}");\n'.format(**declaration))
+			device.write('\t\t::settingsObject().remove("{name}");\n'.format(**declaration))
 			device.write('}\n')
 			device.write('\n')
 		for declaration in filter(lambda declaration: declaration['type'] == 'bool', self.declarations.values()):
-			device.write('void Configuration::{togglefunction}()\n'.format(**declaration))
+			device.write('void config::{togglefunction}()\n'.format(**declaration))
 			device.write('{\n')
 			device.write('\t{writegate}(not {readgate}());\n'.format(**declaration))
 			device.write('}\n')

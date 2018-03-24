@@ -29,13 +29,13 @@ NewPartDialog::NewPartDialog (QWidget *parent) :
 {
 	this->ui.setupUi (this);
 
-	QString authortext = ::config->defaultName();
+	QString authortext = config::defaultName();
 
-	if (not ::config->defaultUser().isEmpty())
-		authortext.append(format(" [%1]", ::config->defaultUser()));
+	if (not config::defaultUser().isEmpty())
+		authortext.append(format(" [%1]", config::defaultUser()));
 
 	this->ui.author->setText (authortext);
-	this->ui.useCaLicense->setChecked (::config->useCaLicense());
+	this->ui.useCaLicense->setChecked (config::useCaLicense());
 }
 
 NewPartDialog::~NewPartDialog()

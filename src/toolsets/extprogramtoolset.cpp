@@ -76,22 +76,22 @@ bool ExtProgramToolset::programUsesWine (ExtProgramType program)
 
 bool ExtProgramToolset::getWineSetting (ExtProgramType program)
 {
-	return m_window->getConfigValue (externalProgramName (program) + "UsesWine").toBool();
+	return config::value(externalProgramName (program) + "UsesWine").toBool();
 }
 
 QString ExtProgramToolset::getPathSetting (ExtProgramType program)
 {
-	return m_window->getConfigValue (externalProgramName (program) + "Path").toString();
+	return config::value(externalProgramName (program) + "Path").toString();
 }
 
 void ExtProgramToolset::setPathSetting (ExtProgramType program, QString value)
 {
-	m_window->getSettings()->setValue (externalProgramName (program) + "Path", QVariant::fromValue (value));
+	settingsObject().setValue(externalProgramName (program) + "Path", QVariant::fromValue(value));
 }
 
 void ExtProgramToolset::setWineSetting (ExtProgramType program, bool value)
 {
-	m_window->getSettings()->setValue (externalProgramName (program) + "UsesWine", QVariant::fromValue (value));
+	settingsObject().setValue(externalProgramName (program) + "UsesWine", QVariant::fromValue(value));
 }
 
 QString ExtProgramToolset::externalProgramName (ExtProgramType program)

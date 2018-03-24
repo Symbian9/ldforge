@@ -53,8 +53,8 @@ ColorSelector::ColorSelector(QWidget* parent, LDColor defaultColor) :
 
 			if (color == MainColor)
 			{
-				faceColor = ::config->mainColor();
-				faceColor.setAlphaF(::config->mainColorAlpha());
+				faceColor = config::mainColor();
+				faceColor.setAlphaF(config::mainColorAlpha());
 			}
 
 			QString edgeColor = luma(faceColor) < 80 ? "white" : "black";

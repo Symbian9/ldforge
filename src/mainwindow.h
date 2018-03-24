@@ -31,7 +31,6 @@ class MessageManager;
 class QToolButton;
 class Canvas;
 class Toolset;
-class Configuration;
 class PrimitiveManager;
 class Grid;
 class MathFunctions;
@@ -69,7 +68,6 @@ public:
 	void changeDocument (LDDocument* f);
 	void clearSelection();
 	void closeInitialDocument();
-	Configuration* config();
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
@@ -81,8 +79,6 @@ public:
 	void doFullRefresh();
 	void endAction();
 	class ExtProgramToolset* externalPrograms();
-	QVariant getConfigValue (QString name);
-	class QSettings* getSettings() { return m_settings; }
 	LDColor getUniformSelectedColor();
 	Canvas* getRendererForDocument(LDDocument* document);
 	Grid* grid();
@@ -106,7 +102,6 @@ public:
 	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();
-	void syncSettings();
 	Q_SLOT void updateActions();
 	void updateColorToolbar();
 	void updateDocumentList();
@@ -116,7 +111,6 @@ public:
 	void updateRecentFilesMenu();
 
 	static QPixmap getIcon(QString iconName);
-	static class QSettings* makeSettings(QObject* parent = nullptr);
 
 	template<typename... Args>
 	void print(QString formatString, Args... args)
@@ -144,7 +138,6 @@ protected:
 private:
 	struct ToolInfo;
 
-	Configuration& m_config;
 	class GuiUtilities* m_guiUtilities;
 	MessageManager* m_messageLog = nullptr;
 	QMap<LDDocument*, Canvas*> m_renderers;
@@ -161,7 +154,6 @@ private:
 	QVector<Toolset*> m_toolsets;
 	QMap<QAction*, ToolInfo> m_toolmap;
 	class ExtProgramToolset* m_externalPrograms;
-	class QSettings* m_settings;
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;

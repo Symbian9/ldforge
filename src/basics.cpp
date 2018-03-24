@@ -16,10 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QApplication>
+#include <QSettings>
 #include <QLineF>
 #include "basics.h"
 #include "types/vertex.h"
 #include "format.h"
+#include "version.h"
 
 int gcd(int a, int b)
 {
@@ -85,4 +88,16 @@ QString formatFileSize(qint64 size)
 	int magnitude = (size > 0) ? floor(log10(size) / 3.0 + 1e-10) : 0;
 	magnitude = qBound(0, magnitude, countof(suffixes) - 1);
 	return QString::number(size / pow(1000, magnitude)) + suffixes[magnitude];
+}
+
+/*
+ * Returns a settings object that interfaces the ini file.
+ */
+QSettings& settingsObject()
+{
+	static QSettings settings {
+		qApp->applicationDirPath() + "/" UNIXNAME ".ini",
+		QSettings::IniFormat
+	};
+	return settings;
 }

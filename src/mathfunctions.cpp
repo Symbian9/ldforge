@@ -84,7 +84,7 @@ void MathFunctions::rotateObjects(int l, int m, int n, double angle, const QVect
 
 Vertex MathFunctions::getRotationPoint(const QVector<LDObject*>& objs) const
 {
-	switch (RotationPoint (m_config->rotationPointType()))
+	switch (RotationPoint (config::rotationPointType()))
 	{
 	case ObjectOrigin:
 		{
@@ -111,7 +111,7 @@ Vertex MathFunctions::getRotationPoint(const QVector<LDObject*>& objs) const
 		return Vertex();
 
 	case CustomPoint:
-		return m_config->customRotationPoint();
+		return config::customRotationPoint();
 	}
 
 	return Vertex();

@@ -133,7 +133,7 @@ void ViewToolset::screenshot()
 
 void ViewToolset::axes()
 {
-	m_config->toggleDrawAxes();
+	config::toggleDrawAxes();
 	m_window->updateActions();
 	m_window->renderer()->update();
 }
@@ -158,13 +158,13 @@ void ViewToolset::visibilityReveal()
 
 void ViewToolset::wireframe()
 {
-	m_config->toggleDrawWireframe();
+	config::toggleDrawWireframe();
 	m_window->renderer()->update();
 }
 
 void ViewToolset::drawAngles()
 {
-	m_config->toggleDrawAngles();
+	config::toggleDrawAngles();
 	m_window->renderer()->update();
 }
 
@@ -233,10 +233,10 @@ void ViewToolset::testpic()
 
 void ViewToolset::bfcView()
 {
-	m_config->toggleBfcRedGreenView();
+	config::toggleBfcRedGreenView();
 
-	if (m_config->bfcRedGreenView())
-		m_config->setRandomColors (false);
+	if (config::bfcRedGreenView())
+		config::setRandomColors (false);
 
 	m_window->updateActions();
 	m_window->renderer()->update();
@@ -275,10 +275,10 @@ void ViewToolset::jumpTo()
 
 void ViewToolset::randomColors()
 {
-	m_config->toggleRandomColors();
+	config::toggleRandomColors();
 
-	if (m_config->randomColors())
-		m_config->setBfcRedGreenView (false);
+	if (config::randomColors())
+		config::setBfcRedGreenView (false);
 
 	m_window->updateActions();
 	m_window->renderer()->update();
@@ -286,24 +286,24 @@ void ViewToolset::randomColors()
 
 void ViewToolset::drawSurfaces()
 {
-	m_config->toggleDrawSurfaces();
+	config::toggleDrawSurfaces();
 	m_window->updateActions();
 }
 
 void ViewToolset::drawEdgeLines()
 {
-	m_config->toggleDrawEdgeLines();
+	config::toggleDrawEdgeLines();
 	m_window->updateActions();
 }
 
 void ViewToolset::drawConditionalLines()
 {
-	m_config->toggleDrawConditionalLines();
+	config::toggleDrawConditionalLines();
 	m_window->updateActions();
 }
 
 void ViewToolset::lighting()
 {
-	m_config->toggleLighting();
+	config::toggleLighting();
 	m_window->updateActions();
 }

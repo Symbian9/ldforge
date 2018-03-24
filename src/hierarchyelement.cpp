@@ -42,7 +42,6 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	}
 
 	m_documents = m_window->documents();
-	m_config = m_window->config();
 }
 
 
@@ -85,5 +84,5 @@ MathFunctions* HierarchyElement::math() const
 QString HierarchyElement::preferredLicenseText() const
 {
 	QString caLicenseText = "!LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt";
-	return m_config->useCaLicense() ? caLicenseText : "";
+	return config::useCaLicense() ? caLicenseText : "";
 }

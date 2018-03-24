@@ -167,12 +167,12 @@ void AlgorithmToolset::roundCoordinates()
 
 			v.apply ([&](Axis, double& a)
 			{
-				roundToDecimals (a, m_config->roundPositionPrecision());
+				roundToDecimals (a, config::roundPositionPrecision());
 			});
 
 			applyToMatrix (t, [&](int, double& a)
 			{
-				roundToDecimals (a, m_config->roundMatrixPrecision());
+				roundToDecimals (a, config::roundMatrixPrecision());
 			});
 
 			mo->setPosition (v);
@@ -186,7 +186,7 @@ void AlgorithmToolset::roundCoordinates()
 				Vertex v = obj->vertex (i);
 				v.apply ([&](Axis, double& a)
 				{
-					roundToDecimals (a, m_config->roundPositionPrecision());
+					roundToDecimals (a, config::roundPositionPrecision());
 				});
 				obj->setVertex (i, v);
 				num += 3;
@@ -440,12 +440,12 @@ void AlgorithmToolset::splitLines()
 {
 	bool ok;
 	int numSegments = QInputDialog::getInt (m_window, APPNAME, "Amount of segments:",
-		m_config->splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
+		config::splitLinesSegments(), 0, std::numeric_limits<int>::max(), 1, &ok);
 
 	if (not ok)
 		return;
 
-	m_config->setSplitLinesSegments (numSegments);
+	config::setSplitLinesSegments (numSegments);
 
 	for (LDObject* obj : selectedObjects())
 	{
@@ -561,9 +561,9 @@ void AlgorithmToolset::subfileSelection()
 	subfile->header.description = subfileTitle;
 	subfile->header.type = LDHeader::Subpart;
 	subfile->header.name = LDDocument::shortenName(fullSubfileName);
-	subfile->header.author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
+	subfile->header.author = format("%1 [%2]", config::defaultName(), config::defaultUser());
 
-	if (::config->useCaLicense())
+	if (config::useCaLicense())
 		subfile->header.license = LDHeader::CaLicense;
 
 	subfile->setWinding(currentDocument()->winding());

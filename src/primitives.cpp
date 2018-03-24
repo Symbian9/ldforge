@@ -482,10 +482,10 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	QString license = "";
 	bool hires = (spec.divisions == HighResolution);
 
-	if (not m_config->defaultName().isEmpty())
+	if (not config::defaultName().isEmpty())
 	{
 		license = preferredLicenseText();
-		author = format("%1 [%2]", m_config->defaultName(), m_config->defaultUser());
+		author = format("%1 [%2]", config::defaultName(), config::defaultUser());
 	}
 
 	document->setFrozen(false);
@@ -499,7 +499,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	else
 		document->header.type = LDHeader::Primitive_8;
 
-	if (::config->useCaLicense())
+	if (config::useCaLicense())
 		document->header.license = LDHeader::CaLicense;
 	else
 		document->header.license =LDHeader::UnspecifiedLicense;
@@ -716,7 +716,7 @@ PrimitiveScanner::PrimitiveScanner(PrimitiveManager* parent) :
 	HierarchyElement(parent),
 	m_manager(parent)
 {
-	for (const Library& library : ::config->libraries())
+	for (const Library& library : config::libraries())
 	{
 		QDir dir {library.path};
 		if (dir.exists("p") and QFileInfo {dir.filePath("p")}.isDir())

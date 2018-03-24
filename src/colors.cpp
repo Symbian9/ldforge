@@ -248,7 +248,7 @@ void ColorData::loadFromLdconfig()
 {
 	*this = {};
 
-	for (const Library& library : ::config->libraries())
+	for (const Library& library : config::libraries())
 	{
 		QDir dir {library.path};
 

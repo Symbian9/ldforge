@@ -61,5 +61,4 @@ public:
 protected:
 	MainWindow* m_window;
 	DocumentManager* m_documents;
-	Configuration* m_config;
 };

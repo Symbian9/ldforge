@@ -64,7 +64,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
         {"Free camera", GLCamera::FreeCamera}, // free
     }
 {
-	m_camera = (Camera) m_config->camera();
+	m_camera = (Camera) config::camera();
 	m_compiler = new GLCompiler (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
@@ -175,7 +175,7 @@ void GLRenderer::initGLData()
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_MULTISAMPLE);
 
-	if (m_config->antiAliasedLines())
+	if (config::antiAliasedLines())
 	{
 		glEnable (GL_LINE_SMOOTH);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -241,7 +241,7 @@ void GLRenderer::initializeGL()
 {
 	initializeOpenGLFunctions();
 	setBackground();
-	glLineWidth (m_config->lineThickness());
+	glLineWidth (config::lineThickness());
 	glLineStipple (1, 0x6666);
 	setAutoFillBackground (false);
 	setMouseTracking (true);
@@ -311,7 +311,7 @@ void GLRenderer::setBackground()
 	if (not m_isDrawingSelectionScene)
 	{
 		// Otherwise use the background that the user wants.
-		QColor color = m_config->backgroundColor();
+		QColor color = config::backgroundColor();
 
 		if (color.isValid())
 		{
@@ -359,13 +359,13 @@ void GLRenderer::drawGLScene()
 		zoomAllToFit();
 	}
 
-	if (m_config->drawWireframe() and not m_isDrawingSelectionScene)
+	if (config::drawWireframe() and not m_isDrawingSelectionScene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	if (m_config->lighting() and not m_isDrawingSelectionScene)
+	if (config::lighting() and not m_isDrawingSelectionScene)
 		glEnable(GL_LIGHTING);
 	else
 		glDisable(GL_LIGHTING);
@@ -402,7 +402,7 @@ void GLRenderer::drawGLScene()
 	}
 	else
 	{
-		if (m_config->bfcRedGreenView())
+		if (config::bfcRedGreenView())
 		{
 			glEnable (GL_CULL_FACE);
 			glCullFace (GL_BACK);
@@ -417,7 +417,7 @@ void GLRenderer::drawGLScene()
 		{
 			VboSubclass colors;
 
-			if (m_config->randomColors())
+			if (config::randomColors())
 				colors = VboSubclass::RandomColors;
 			else
 				colors = VboSubclass::RegularColors;
@@ -431,7 +431,7 @@ void GLRenderer::drawGLScene()
 		drawVbos (VboClass::ConditionalLines, VboSubclass::RegularColors);
 		glDisable (GL_LINE_STIPPLE);
 
-		if (m_config->drawAxes())
+		if (config::drawAxes())
 		{
 			glDisableClientState (GL_NORMAL_ARRAY);
 			glBindBuffer (GL_ARRAY_BUFFER, m_axesVbo);
@@ -465,9 +465,9 @@ void GLRenderer::drawGLScene()
 void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
 {
 	// Filter this through some configuration options
-	if ((isOneOf(surface, VboClass::Quads, VboClass::Triangles) and m_config->drawSurfaces() == false)
-		or (surface == VboClass::Lines and m_config->drawEdgeLines() == false)
-		or (surface == VboClass::ConditionalLines and m_config->drawConditionalLines() == false))
+	if ((isOneOf(surface, VboClass::Quads, VboClass::Triangles) and config::drawSurfaces() == false)
+		or (surface == VboClass::Lines and config::drawEdgeLines() == false)
+		or (surface == VboClass::ConditionalLines and config::drawConditionalLines() == false))
 	{
 		return;
 	}
@@ -695,7 +695,7 @@ void GLRenderer::setCamera(Camera camera)
 	if (freeCameraAllowed() or camera != Camera::Free)
 	{
 		m_camera = camera;
-		m_config->setCamera(static_cast<int>(camera));
+		config::setCamera(static_cast<int>(camera));
 	}
 }
 
@@ -796,14 +796,14 @@ void GLRenderer::setPicking(bool picking)
 		glDisable(GL_DITHER);
 
 		// Use particularly thick lines while picking ease up selecting lines.
-		glLineWidth(qMax<double>(m_config->lineThickness(), 6.5));
+		glLineWidth(qMax<double>(config::lineThickness(), 6.5));
 	}
 	else
 	{
 		glEnable(GL_DITHER);
 
 		// Restore line thickness
-		glLineWidth(m_config->lineThickness());
+		glLineWidth(config::lineThickness());
 	}
 }
 
@@ -936,13 +936,13 @@ void GLRenderer::zoomAllToFit()
 //
 void GLRenderer::highlightCursorObject()
 {
-	if (not m_config->highlightObjectBelowCursor() and not objectAtCursor().isValid())
+	if (not config::highlightObjectBelowCursor() and not objectAtCursor().isValid())
 		return;
 
 	QModelIndex newIndex;
 	QModelIndex oldIndex = m_objectAtCursor;
 
-	if (not m_isCameraMoving and m_config->highlightObjectBelowCursor())
+	if (not m_isCameraMoving and config::highlightObjectBelowCursor())
 	{
 		setPicking (true);
 		drawGLScene();

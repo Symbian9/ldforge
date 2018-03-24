@@ -52,14 +52,12 @@ struct MainWindow::ToolInfo
 //
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	QMainWindow (parent, flags),
-	m_config(*::config),
 	m_guiUtilities (new GuiUtilities (this)),
 	m_primitives(new PrimitiveManager(this)),
 	m_grid(new Grid(this)),
 	m_mathFunctions(new MathFunctions(this)),
 	ui (*new Ui_MainWindow),
 	m_externalPrograms (nullptr),
-    m_settings (makeSettings (this)),
 	m_documents (new DocumentManager (this)),
 	m_currentDocument (nullptr)
 {
@@ -141,7 +139,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 		}
 	}
 
-	for (QVariant const& toolbarname : m_config.hiddenToolbars())
+	for (QVariant const& toolbarname : config::hiddenToolbars())
 	{
 		QToolBar* toolbar = findChild<QToolBar*> (toolbarname.toString());
 
@@ -151,11 +149,11 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 
 	// If this is the first start, get the user to configuration. Especially point
 	// them to the profile tab, it's the most important form to fill in.
-	if (m_config.firstStart())
+	if (config::firstStart())
 	{
 		ConfigDialog* dialog = new ConfigDialog (this, ConfigDialog::ProfileTab);
 		dialog->show();
-		m_config.setFirstStart (false);
+		config::setFirstStart (false);
 	}
 
 	QMetaObject::invokeMethod (this, "finishInitialization", Qt::QueuedConnection);
@@ -173,7 +171,6 @@ MainWindow::~MainWindow()
 	delete m_grid;
 	delete m_mathFunctions;
 	delete &ui;
-	delete m_settings;
 
 	for (Toolset* toolset : m_toolsets)
 		delete toolset;
@@ -222,7 +219,7 @@ void MainWindow::updateRecentFilesMenu()
 
 	QAction* first = nullptr;
 
-	for (const QVariant& it : m_config.recentFiles())
+	for (const QVariant& it : config::recentFiles())
 	{
 		QString file = it.toString();
 		QAction* recent = new QAction (getIcon ("open-recent"), file, this);
@@ -271,7 +268,7 @@ void MainWindow::updateColorToolbar()
 void MainWindow::updateGridToolBar()
 {
 	// Ensure that the current grid - and only the current grid - is selected.
-	int grid = m_config.grid();
+	int grid = config::grid();
 	ui.actionGridCoarse->setChecked (grid == Grid::Coarse);
 	ui.actionGridMedium->setChecked (grid == Grid::Medium);
 	ui.actionGridFine->setChecked (grid == Grid::Fine);
@@ -443,8 +440,8 @@ void MainWindow::closeEvent (QCloseEvent* ev)
 	}
 
 	// Save the configuration before leaving.
-	m_config.setHiddenToolbars (hiddenToolbars);
-	syncSettings();
+	config::setHiddenToolbars (hiddenToolbars);
+	settingsObject().sync();
 	ev->accept();
 }
 
@@ -722,15 +719,15 @@ void MainWindow::updateActions()
 		ui.actionRedo->setEnabled (pos < (long) his->size() - 1);
 	}
 
-	ui.actionWireframe->setChecked (m_config.drawWireframe());
-	ui.actionAxes->setChecked (m_config.drawAxes());
-	ui.actionBfcView->setChecked (m_config.bfcRedGreenView());
-	ui.actionRandomColors->setChecked (m_config.randomColors());
-	ui.actionDrawAngles->setChecked (m_config.drawAngles());
-	ui.actionDrawSurfaces->setChecked (m_config.drawSurfaces());
-	ui.actionDrawEdgeLines->setChecked (m_config.drawEdgeLines());
-	ui.actionDrawConditionalLines->setChecked (m_config.drawConditionalLines());
-	ui.actionLighting->setChecked(m_config.lighting());
+	ui.actionWireframe->setChecked (config::drawWireframe());
+	ui.actionAxes->setChecked (config::drawAxes());
+	ui.actionBfcView->setChecked (config::bfcRedGreenView());
+	ui.actionRandomColors->setChecked (config::randomColors());
+	ui.actionDrawAngles->setChecked (config::drawAngles());
+	ui.actionDrawSurfaces->setChecked (config::drawSurfaces());
+	ui.actionDrawEdgeLines->setChecked (config::drawEdgeLines());
+	ui.actionDrawConditionalLines->setChecked (config::drawConditionalLines());
+	ui.actionLighting->setChecked(config::lighting());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -779,7 +776,7 @@ void MainWindow::loadShortcuts()
 {
 	for (QAction* act : findChildren<QAction*>())
 	{
-		QKeySequence seq = m_settings->value ("shortcut_" + act->objectName(), act->shortcut()).value<QKeySequence>();
+		QKeySequence seq = settingsObject().value("shortcut_" + act->objectName(), act->shortcut()).value<QKeySequence>();
 		act->setShortcut (seq);
 	}
 }
@@ -793,9 +790,9 @@ void MainWindow::saveShortcuts()
 		QString const key = "shortcut_" + act->objectName();
 
 		if (m_defaultShortcuts[act] != act->shortcut())
-			m_settings->setValue (key, act->shortcut());
+			settingsObject().setValue(key, act->shortcut());
 		else
-			m_settings->remove (key);
+			settingsObject().remove(key);
 	});
 }
 
@@ -855,30 +852,6 @@ void MainWindow::circleToolSegmentsChanged()
 	int denominator (ui.ringToolHiRes->isChecked() ? HighResolution : LowResolution);
 	simplify (numerator, denominator);
 	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
-}
-
-/*
- * Returns a settings object that interfaces the ini file.
- */
-QSettings* MainWindow::makeSettings(QObject* parent)
-{
-	QString path = qApp->applicationDirPath() + "/" UNIXNAME ".ini";
-	return new QSettings {path, QSettings::IniFormat, parent};
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::syncSettings()
-{
-	m_settings->sync();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-QVariant MainWindow::getConfigValue (QString name)
-{
-	QVariant value = m_settings->value (name, m_config.defaultValueByName (name));
-	return value;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1067,11 +1040,6 @@ ExtProgramToolset* MainWindow::externalPrograms()
 GuiUtilities* MainWindow::guiUtilities()
 {
 	return m_guiUtilities;
-}
-
-Configuration* MainWindow::config()
-{
-	return &m_config;
 }
 
 Grid* MainWindow::grid()

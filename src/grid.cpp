@@ -25,24 +25,24 @@ Grid::Grid(QObject* parent) :
 
 qreal Grid::coordinateSnap() const
 {
-	switch (m_config->grid())
+	switch (config::grid())
 	{
 	default:
-	case Grid::Coarse: return m_config->gridCoarseCoordinateSnap();
-	case Grid::Medium: return m_config->gridMediumCoordinateSnap();
-	case Grid::Fine: return m_config->gridFineCoordinateSnap();
+	case Grid::Coarse: return config::gridCoarseCoordinateSnap();
+	case Grid::Medium: return config::gridMediumCoordinateSnap();
+	case Grid::Fine: return config::gridFineCoordinateSnap();
 	}
 }
 
 
 qreal Grid::angleSnap() const
 {
-	switch (m_config->grid())
+	switch (config::grid())
 	{
 	default:
-	case Grid::Coarse: return m_config->gridCoarseAngleSnap();
-	case Grid::Medium: return m_config->gridMediumAngleSnap();
-	case Grid::Fine: return m_config->gridFineAngleSnap();
+	case Grid::Coarse: return config::gridCoarseAngleSnap();
+	case Grid::Medium: return config::gridMediumAngleSnap();
+	case Grid::Fine: return config::gridFineAngleSnap();
 	}
 }
 
@@ -55,12 +55,12 @@ qreal Grid::angleAsRadians() const
 
 int Grid::bezierCurveSegments() const
 {
-	switch (m_config->grid())
+	switch (config::grid())
 	{
 	default:
-	case Grid::Coarse: return m_config->gridCoarseBezierCurveSegments();
-	case Grid::Medium: return m_config->gridMediumBezierCurveSegments();
-	case Grid::Fine: return m_config->gridFineBezierCurveSegments();
+	case Grid::Coarse: return config::gridCoarseBezierCurveSegments();
+	case Grid::Medium: return config::gridMediumBezierCurveSegments();
+	case Grid::Fine: return config::gridFineBezierCurveSegments();
 	}
 }
 
@@ -104,7 +104,7 @@ QPointF Grid::pole() const
  */
 int Grid::polarDivisions() const
 {
-	switch (m_config->grid())
+	switch (config::grid())
 	{
 	default:
 	case Coarse:
@@ -121,5 +121,5 @@ int Grid::polarDivisions() const
  */
 Grid::Type Grid::type() const
 {
-	return m_config->polarGrid() ? Polar : Cartesian;
+	return config::polarGrid() ? Polar : Cartesian;
 }

@@ -74,8 +74,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
-	m_settings (MainWindow::makeSettings (this)),
-	libraries {::config->libraries()},
+	libraries {config::libraries()},
 	librariesModel {new LibrariesModel {this->libraries, this}}
 {
 	ui.setupUi (this);
@@ -84,7 +83,7 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	// Set defaults
 	applyToWidgetOptions([&](QWidget* widget, QString confname)
 	{
-		QVariant value = m_settings->value (confname, m_config->defaultValueByName (confname));
+		QVariant value = ::settingsObject().value(confname, config::defaults().value(confname));
 		QLineEdit* lineedit;
 		QSpinBox* spinbox;
 		QDoubleSpinBox* doublespinbox;
@@ -276,7 +275,7 @@ void ConfigDialog::applyToWidgetOptions (std::function<void (QWidget*, QString)>
 
 		QString optionname (widget->objectName().mid (strlen ("config")));
 
-		if (m_config->existsEntry (optionname))
+		if (config::exists(optionname))
 			func (widget, optionname);
 		else
 			print ("Couldn't find configuration entry named %1", optionname);
@@ -316,13 +315,13 @@ void ConfigDialog::applySettings()
 			return;
 		}
 
-		m_settings->setValue (confname, value);
+		settingsObject().setValue(confname, value);
 	});
 
 	// Rebuild the quick color toolbar
 	m_window->setQuickColors (quickColors);
-	m_config->setQuickColorToolbar (quickColorString());
-	::config->setLibraries(this->libraries);
+	config::setQuickColorToolbar (quickColorString());
+	config::setLibraries(this->libraries);
 
 	// Ext program settings
 	for (int i = 0; i < NumExternalPrograms; ++i)
@@ -343,7 +342,7 @@ void ConfigDialog::applySettings()
 		item->action()->setShortcut (item->sequence());
 	}
 
-	m_window->syncSettings();
+	settingsObject().sync();
 	m_documents->loadLogoedStuds();
 	m_window->renderer()->setBackground();
 	m_window->doFullRefresh();
