@@ -36,7 +36,6 @@ int gcd(int a, int b)
 	return a;
 }
 
-
 void simplify(int& numerator, int& denominator)
 {
 	int factor = gcd(numerator, denominator);

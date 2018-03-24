@@ -372,9 +372,9 @@ void PrimitiveModel::generateBody(Model& model) const
 
 	for (int i : conditionalLineSegments)
 	{
-		QPointF p0 = ::pointOnCircumference(i, divisions);
-		QPointF p2 = ::pointOnCircumference(i + 1, divisions);
-		QPointF p3 = ::pointOnCircumference(i - 1, divisions);
+		QPointF p0 = ::pointOnLDrawCircumference(i, divisions);
+		QPointF p2 = ::pointOnLDrawCircumference(i + 1, divisions);
+		QPointF p3 = ::pointOnLDrawCircumference(i - 1, divisions);
 		Vertex v0 = {p0.x(), 0.0, p0.y()};
 		Vertex v1;
 		Vertex v2 = {p2.x(), 0.0, p2.y()};

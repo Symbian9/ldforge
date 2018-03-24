@@ -1,15 +1,26 @@
 #include "geometry.h"
 
 /*
- * getRadialPoint
- *
- * Gets an ordinate of a point in circle.
- * If func == sin, then this gets the Y co-ordinate, if func == cos, then X co-ordinate.
+ * LDraw uses 4 points of precision for sin and cos values. Primitives must be generated
+ * accordingly.
  */
-QPointF pointOnCircumference(int segment, int divisions)
+double ldrawsin(double angle)
+{
+	return roundToDecimals(sin(angle), 4);
+}
+
+double ldrawcos(double angle)
+{
+	return roundToDecimals(cos(angle), 4);
+}
+
+/*
+ * Returns a point on a circumference. LDraw precision is used.
+ */
+QPointF pointOnLDrawCircumference(int segment, int divisions)
 {
 	double angle = (segment * 2 * pi) / divisions;
-	return {cos(angle), sin(angle)};
+	return {ldrawcos(angle), ldrawsin(angle)};
 }
 
 /*
@@ -29,8 +40,8 @@ QVector<QLineF> makeCircle(int segments, int divisions, double radius)
 
 	for (int i = 0; i < segments; i += 1)
 	{
-		QPointF p0 = radius * ::pointOnCircumference(i, divisions);
-		QPointF p1 = radius * ::pointOnCircumference(i + 1, divisions);
+		QPointF p0 = radius * ::pointOnLDrawCircumference(i, divisions);
+		QPointF p1 = radius * ::pointOnLDrawCircumference(i + 1, divisions);
 		lines.append({p0, p1});
 	}
 
