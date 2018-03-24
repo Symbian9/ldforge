@@ -828,24 +828,3 @@ void PrimitiveScanner::work()
 	// Defer to event loop, pick up the work later.
 	QMetaObject::invokeMethod (this, "work", Qt::QueuedConnection);
 }
-
-
-//
-// ---------------------------------------------------------------------------------------------------------------------
-//
-
-
-PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info) :
-	QTreeWidgetItem (parent),
-	m_primitive (info) {}
-
-
-PrimitiveTreeItem::PrimitiveTreeItem (QTreeWidget* parent, Primitive* info) :
-	QTreeWidgetItem (parent),
-	m_primitive (info) {}
-
-
-Primitive* PrimitiveTreeItem::primitive() const
-{
-	return m_primitive;
-}

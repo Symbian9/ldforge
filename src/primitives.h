@@ -152,14 +152,3 @@ private:
 	QDirIterator* currentIterator = nullptr;
 	int m_basePathLength;
 };
-
-class PrimitiveTreeItem : public QTreeWidgetItem
-{
-public:
-	PrimitiveTreeItem (QTreeWidgetItem* parent, Primitive* info);
-	PrimitiveTreeItem (QTreeWidget* parent, Primitive* info);
-	Primitive* primitive() const;
-
-private:
-	Primitive* m_primitive;
-};
