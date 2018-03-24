@@ -112,7 +112,7 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 	if ((data.releasedButtons & Qt::MidButton) and (countof(m_drawedVerts) < 4) and (not data.mouseMoved))
 	{
 		// Find the closest vertex to our cursor
-		double minimumDistance = 1024.0;
+		double minimumDistance = ::squared(32.0);
 		const Vertex* closest = nullptr;
 		Vertex cursorPosition = renderer()->currentCamera().convert2dTo3d(data.ev->pos());
 		QPoint cursorPosition2D = data.ev->pos();
