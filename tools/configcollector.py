@@ -44,7 +44,7 @@ def deduce_type(value):
 	'''
 	if value in('true', 'false'):
 		return 'bool'
-	elif value.startswith('"') and value.endswith('"'):
+	elif value.startswith(('"', 'R"') and value.endswith('"'):
 		return 'QString'
 
 	try:
@@ -208,8 +208,9 @@ def main():
 	args = parser.parse_args()
 	collector = ConfigCollector(args)
 	collector.collect(args.input)
-	header = outputfile.OutputFile(args.header)
-	source = outputfile.OutputFile(args.source)
+	from outputfile import OutputFile
+	header = OutputFile(args.header)
+	source = OutputFile(args.source)
 	collector.writeSource(source, headername=args.header)
 	collector.writeHeader(header)
 	header.save(verbose = True)
