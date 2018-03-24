@@ -4,11 +4,14 @@
 #include "../basics.h"
 
 using std::abs;
+using std::atan2;
 using std::ceil;
 using std::cos;
 using std::floor;
 using std::hypot;
+using std::pow;
 using std::sin;
+using std::sort;
 using std::sqrt;
 
 /*
@@ -24,6 +27,18 @@ template<typename T>
 bool isInteger(T a)
 {
 	return (::abs(a - ::floor(a)) < 0.00001) or (::abs(a - ::ceil(a)) < 0.00001);
+}
+
+template<typename T>
+T squared(T value)
+{
+	return ::pow(value, 2);
+}
+
+template<>
+inline int squared<int>(int value)
+{
+	return value * value;
 }
 
 //

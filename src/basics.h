@@ -17,6 +17,8 @@
  */
 
 #pragma once
+#include <cstdio>
+#include <cstdlib>
 #include <QFile>
 #include <QMatrix4x4>
 #include <QMetaType>
@@ -24,6 +26,8 @@
 #include <QSet>
 #include <QString>
 #include <QStringList>
+#include <QTextFormat>
+#include <QVariant>
 #include <QVector>
 #include <QVector3D>
 #include "generics/functions.h"

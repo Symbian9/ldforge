@@ -120,7 +120,7 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 		QList<Vertex> vertices = currentDocument()->inlineVertices().toList();
 
 		// Sort the vertices in order of distance to camera
-		std::sort(vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
+		sort(vertices.begin(), vertices.end(), [&](const Vertex& a, const Vertex& b) -> bool
 		{
 			if (renderer()->currentCamera().isAxisNegated(Z))
 				return a[depthAxis] > b[depthAxis];
@@ -132,16 +132,16 @@ bool AbstractDrawMode::mouseReleased(MouseEventData const& data)
 		{
 			// If the vertex in 2d space is very close to the cursor then we use it regardless of depth.
 			QPoint vect2d = renderer()->currentCamera().convert3dTo2d(vertex) - cursorPosition2D;
-			double distance2DSquared = std::pow(vect2d.x(), 2) + std::pow(vect2d.y(), 2);
+			double distance2DSquared = ::squared(vect2d.x()) + ::squared(vect2d.y());
 
-			if (distance2DSquared < 16.0 * 16.0)
+			if (distance2DSquared < ::squared(16.0))
 			{
 				closest = &vertex;
 				break;
 			}
 
 			// Check if too far away from the cursor.
-			if (distance2DSquared > 64.0 * 64.0)
+			if (distance2DSquared > ::squared(64.0))
 				continue;
 
 			// Not very close to the cursor. Compare using true distance,

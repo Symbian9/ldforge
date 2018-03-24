@@ -241,7 +241,7 @@ void AlgorithmToolset::fixRoundingErrors()
 		// Make a reference distance from the threshold value.
 		// If we're only comparing one dimension, this is the square of the threshold.
 		// If we're comparing multiple dimensions, the distance is multiplied to adjust.
-		double thresholdDistanceSquared = countof(axes) * std::pow(ui.threshold->value(), 2);
+		double thresholdDistanceSquared = countof(axes) * pow(ui.threshold->value(), 2);
 		// Add some tiny leeway to fix rounding errors in the rounding error fixer.
 		thresholdDistanceSquared += 1e-10;
 
@@ -250,7 +250,7 @@ void AlgorithmToolset::fixRoundingErrors()
 			double distanceSquared = 0.0;
 
 			for (Axis axis : axes)
-				distanceSquared += std::pow(vertex[axis] - referencePoint[axis], 2);
+				distanceSquared += pow(vertex[axis] - referencePoint[axis], 2);
 
 			if (distanceSquared < thresholdDistanceSquared)
 			{

@@ -21,14 +21,6 @@
 // Stuff defined and included here is universally included.
 
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdarg.h>
-#include <QSet>
-#include <QString>
-#include <QTextFormat>
-#include <QVariant>
 #include "basics.h"
 #include "version.h"
 #include "format.h"

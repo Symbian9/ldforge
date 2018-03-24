@@ -172,7 +172,7 @@ void PrimitiveManager::populateCategories()
 	}
 
 	// Sort the categories. Note that we only do this here because we needed the original order for pattern matching.
-	qSort (m_categories.begin(), m_categories.end(),
+	::sort(m_categories.begin(), m_categories.end(),
 		[](PrimitiveCategory* const& one, PrimitiveCategory* const& other) -> bool
 		{
 			return one->name() < other->name();
