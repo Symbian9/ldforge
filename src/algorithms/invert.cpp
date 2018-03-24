@@ -130,6 +130,9 @@ void invert(LDObject* obj, DocumentManager* context)
 	}
 }
 
+/*
+ * Inverts the winding of a polygon.
+ */
 void invertPolygon(LDPolygon& polygon)
 {
 	switch (polygon.numPolygonVertices())
