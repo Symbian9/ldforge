@@ -121,7 +121,7 @@ public:
 	void undo();
 	void vertexChanged (const Vertex& a, const Vertex& b);
 
-	static QString shortenName (QString a); // Turns a full path into a relative path
+	static QString shortenName(const class QFileInfo& path); // Turns a full path into a relative path
 
 protected:
 	LDObject* withdrawAt(int position);

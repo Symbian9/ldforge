@@ -26,8 +26,6 @@
 #include "parser.h"
 #include "editHistory.h"
 
-const QStringList DocumentManager::specialSubdirectories {"s", "48", "8"};
-
 enum
 {
 	MaxRecentFiles = 10

@@ -548,15 +548,15 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 
 // =============================================================================
 //
-QString LDDocument::shortenName (QString a) // [static]
+QString LDDocument::shortenName(const QFileInfo& path) // [static]
 {
-	QString shortname = Basename (a);
-	QString topdirname = Basename (Dirname (a));
+	QString shortname = path.fileName();
+	QString topdirname = QFileInfo {path.absoluteFilePath()}.dir().dirName();
 
-	if (DocumentManager::specialSubdirectories.contains (topdirname))
-		shortname.prepend (topdirname + "\\");
-
-	return shortname;
+	if (isOneOf(topdirname, "s", "48", "8"))
+		return topdirname + "\\" + shortname;
+	else
+		return shortname;
 }
 
 // =============================================================================
