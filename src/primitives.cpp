@@ -323,7 +323,7 @@ void PrimitiveModel::generateBody(Model& model) const
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
 
-				if (type == Cylinder)
+				if (type == Cylinder || type == Ring)
 					qSwap(v1, v3);
 
 				LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
@@ -373,8 +373,8 @@ void PrimitiveModel::generateBody(Model& model) const
 	for (int i : conditionalLineSegments)
 	{
 		QPointF p0 = ::pointOnLDrawCircumference(i, divisions);
-		QPointF p2 = ::pointOnLDrawCircumference(i + 1, divisions);
-		QPointF p3 = ::pointOnLDrawCircumference(i - 1, divisions);
+		QPointF p2 = ::pointOnLDrawCircumference(i - 1, divisions);
+		QPointF p3 = ::pointOnLDrawCircumference(i + 1, divisions);
 		Vertex v0 = {p0.x(), 0.0, p0.y()};
 		Vertex v1;
 		Vertex v2 = {p2.x(), 0.0, p2.y()};
@@ -388,6 +388,9 @@ void PrimitiveModel::generateBody(Model& model) const
 		{
 			v1 = {v0.x * (ringNumber + 1), 0.0, v0.z * (ringNumber + 1)};
 			v0 = {v0.x * ringNumber, 1.0, v0.z * ringNumber};
+			v2 *= ringNumber;
+			v3 *= ringNumber;
+			v2.y = v3.y = 1.0;
 		}
 
 		LDConditionalEdge* line = model.emplace<LDConditionalEdge>();
@@ -466,13 +469,13 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 
 	if (spec.type == PrimitiveModel::Ring or spec.type == PrimitiveModel::Cone)
 	{
-		QString spacing =
-			(spec.ringNumber < 10) ? "  " :
-			(spec.ringNumber < 100) ? " "  : "";
+		QString spacing = (spec.ringNumber < 10) ? " " : "";
 		description = format("%1 %2%3 x %4", PrimitiveModel::typeName(spec.type), spacing, spec.ringNumber, fraction);
 	}
 	else
+	{
 		description = format("%1 %2", PrimitiveModel::typeName(spec.type), fraction);
+	}
 
 	// Prepend "Hi-Res" or "Lo-Res" as appropriate.
 	if (spec.divisions == HighResolution)
