@@ -418,7 +418,7 @@ QString PrimitiveModel::typeName(PrimitiveModel::Type type)
 }
 
 
-QString PrimitiveModel::makeFileName() const
+QString PrimitiveModel::makeFileName(FilenameStyle style) const
 {
 	int numerator = segments;
 	int denominator = divisions;
@@ -442,8 +442,11 @@ QString PrimitiveModel::makeFileName() const
 
 	// Truncate the root if necessary (7-16rin4.dat for instance).
 	// However, always keep the root at least 2 characters.
-	int extra = (countof(frac) + countof(numberString) + countof(root)) - 8;
-	root.chop(qBound(0, extra, 2));
+	if (style == LegacyStyleName)
+	{
+		int extra = (countof(frac) + countof(numberString) + countof(root)) - 8;
+		root.chop(qBound(0, extra, 2));
+	}
 
 	// Stick them all together and return the result.
 	return prefix + frac + root + numberString + ".dat";
@@ -454,7 +457,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 {
 	// Make the description
 	QString fraction = QString::number ((float) spec.segments / spec.divisions);
-	QString fileName = spec.makeFileName();
+	QString fileName = spec.makeFileName(PrimitiveModel::NewStyleName);
 	QString description;
 
 	// Ensure that there's decimals, even if they're 0.
@@ -519,11 +522,20 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
  */
 LDDocument* PrimitiveManager::getPrimitive(const PrimitiveModel& model)
 {
-	QString name = model.makeFileName();
-	LDDocument* document = m_window->documents()->getDocumentByName (name);
+	// Try find with the new style name.
+	QString name = model.makeFileName(PrimitiveModel::NewStyleName);
+	LDDocument* document = m_window->documents()->getDocumentByName(name);
 
 	if (not document)
 	{
+		// Not found, try the legacy name
+		QString name = model.makeFileName(PrimitiveModel::LegacyStyleName);
+		document = m_window->documents()->getDocumentByName(name);
+	}
+
+	if (not document)
+	{
+		// Not found either, generate it.
 		document = generatePrimitive(model);
 		m_window->openDocumentForEditing(document);
 	}

@@ -40,6 +40,8 @@ struct Primitive
 
 struct PrimitiveModel
 {
+	enum FilenameStyle { NewStyleName, LegacyStyleName };
+
 	enum Type
 	{
 		Circle,
@@ -56,7 +58,7 @@ struct PrimitiveModel
 	QString typeName() const;
 	void generateBody(Model& model) const;
 	static QString typeName(Type type);
-	QString makeFileName() const;
+	QString makeFileName(FilenameStyle style) const;
 };
 
 class PrimitiveCategory : public QObject
