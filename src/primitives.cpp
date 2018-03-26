@@ -25,6 +25,7 @@
 #include "documentmanager.h"
 #include "editHistory.h"
 #include "algorithms/geometry.h"
+#include "generics/ring.h"
 #include "linetypes/comment.h"
 #include "linetypes/conditionaledge.h"
 #include "linetypes/edgeline.h"
@@ -257,8 +258,79 @@ void PrimitiveManager::loadCategories()
 	categoriesFile.close();
 }
 
+// Length of a single LDraw edge circle segment. Ideally, it is sqrt(2 - 2 * cos(π / 8)), but
+// rounding errors come into play so it's a tiny bit larger than that.
+// This actual value is given by: hypot(0.0761, 0.3827)
+static const double chordLength = 0.3901929010117944;
+
+void PrimitiveModel::generateCylinder(Model& model) const
+{
+	Q_ASSERT(this->type == Cylinder);
+	auto circle = makeCircle(this->segments, this->divisions, 1);
+	bool useTangents = (this->segments != this->divisions);
+
+	QPointF tangent_1;
+	QPointF tangent_2;
+
+	if (useTangents)
+	{
+		tangent_1 = {1.0, -chordLength};
+
+		double angle = double(segments) * 2 * pi / double(divisions) + (pi / 2);
+		tangent_2 = {
+			circle.last().p2().x() + chordLength * cos(angle),
+			circle.last().p2().y() + chordLength * sin(angle),
+		};
+	}
+
+	for (int i = 0; i < this->segments; i += 1)
+	{
+		double x0 = circle[i].x1();
+		double x1 = circle[i].x2();
+		double z0 = circle[i].y1();
+		double z1 = circle[i].y2();
+
+		LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(
+			Vertex {x1, 0.0, z1},
+			Vertex {x0, 0.0, z0},
+			Vertex {x0, 1.0, z0},
+			Vertex {x1, 1.0, z1}
+		);
+		quad->setColor(MainColor);
+	}
+
+	for (int i = 0; i < this->segments + 1; i += 1)
+	{
+		QPointF p0 = ::pointOnLDrawCircumference(i, divisions);
+		QPointF p2 = ::pointOnLDrawCircumference(i - 1, divisions);
+		QPointF p3 = ::pointOnLDrawCircumference(i + 1, divisions);
+
+		if (useTangents and i == 0)
+			p2 = tangent_1;
+		else if (useTangents and i == this->segments)
+			p3 = tangent_2;
+
+		Vertex v0 = {p0.x(), 1.0, p0.y()};
+		Vertex v1 = {v0.x, 0.0, v0.z};
+		Vertex v2 = {p2.x(), 1.0, p2.y()};
+		Vertex v3 = {p3.x(), 1.0, p3.y()};
+		LDConditionalEdge* line = model.emplace<LDConditionalEdge>();
+		line->setColor(EdgeColor);
+		line->setVertex(0, v0);
+		line->setVertex(1, v1);
+		line->setVertex(2, v2);
+		line->setVertex(3, v3);
+	}
+}
+
 void PrimitiveModel::generateBody(Model& model) const
 {
+	if (this->type == Cylinder)
+	{
+		this->generateCylinder(model);
+		return;
+	}
+
 	QVector<int> conditionalLineSegments;
 	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
 
@@ -280,51 +352,35 @@ void PrimitiveModel::generateBody(Model& model) const
 			}
 			break;
 
-		case Cylinder:
 		case Ring:
 		case Cone:
 			{
 				double x2, x3, z2, z3;
 				double y0, y1, y2, y3;
+				x2 = x1 * (ringNumber + 1);
+				x3 = x0 * (ringNumber + 1);
+				z2 = z1 * (ringNumber + 1);
+				z3 = z0 * (ringNumber + 1);
+				x0 *= ringNumber;
+				x1 *= ringNumber;
+				z0 *= ringNumber;
+				z1 *= ringNumber;
 
-				if (type == Cylinder)
+				if (type == Ring)
 				{
-					x2 = x1;
-					x3 = x0;
-					z2 = z1;
-					z3 = z0;
-					y0 = y1 = 0.0;
-					y2 = y3 = 1.0;
+					y0 = y1 = y2 = y3 = 0.0;
 				}
 				else
 				{
-					x2 = x1 * (ringNumber + 1);
-					x3 = x0 * (ringNumber + 1);
-					z2 = z1 * (ringNumber + 1);
-					z3 = z0 * (ringNumber + 1);
-					x0 *= ringNumber;
-					x1 *= ringNumber;
-					z0 *= ringNumber;
-					z1 *= ringNumber;
-
-					if (type == Ring)
-					{
-						y0 = y1 = y2 = y3 = 0.0;
-					}
-					else
-					{
-						y0 = y1 = 1.0;
-						y2 = y3 = 0.0;
-					}
+					y0 = y1 = 1.0;
+					y2 = y3 = 0.0;
 				}
 
 				Vertex v0 = {x0, y0, z0};
 				Vertex v1 = {x1, y1, z1};
 				Vertex v2 = {x2, y2, z2};
 				Vertex v3 = {x3, y3, z3};
-
-				if (type == Cylinder || type == Ring)
-					qSwap(v1, v3);
+				qSwap(v1, v3);
 
 				LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
 				quad->setColor(MainColor);
@@ -375,23 +431,13 @@ void PrimitiveModel::generateBody(Model& model) const
 		QPointF p0 = ::pointOnLDrawCircumference(i, divisions);
 		QPointF p2 = ::pointOnLDrawCircumference(i - 1, divisions);
 		QPointF p3 = ::pointOnLDrawCircumference(i + 1, divisions);
-		Vertex v0 = {p0.x(), 0.0, p0.y()};
-		Vertex v1;
+		Vertex v0 = {p0.x() * ringNumber, 1.0, p0.y() * ringNumber};
+		Vertex v1 = {v0.x * (ringNumber + 1), 0.0, v0.z * (ringNumber + 1)};
 		Vertex v2 = {p2.x(), 0.0, p2.y()};
 		Vertex v3 = {p3.x(), 0.0, p3.y()};
-
-		if (type == Cylinder)
-		{
-			v1 = {v0.x, 1.0f, v0.z};
-		}
-		else if (type == Cone)
-		{
-			v1 = {v0.x * (ringNumber + 1), 0.0, v0.z * (ringNumber + 1)};
-			v0 = {v0.x * ringNumber, 1.0, v0.z * ringNumber};
-			v2 *= ringNumber;
-			v3 *= ringNumber;
-			v2.y = v3.y = 1.0;
-		}
+		v2 *= ringNumber;
+		v3 *= ringNumber;
+		v2.y = v3.y = 1.0;
 
 		LDConditionalEdge* line = model.emplace<LDConditionalEdge>();
 		line->setColor(EdgeColor);
