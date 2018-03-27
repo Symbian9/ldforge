@@ -87,3 +87,61 @@ QSettings& settingsObject()
 	};
 	return settings;
 }
+
+QString largeNumberRep(int number)
+{
+	if (number < 0)
+	{
+		return "-" + largeNumberRep(-number);
+	}
+	else
+	{
+		QString rep;
+
+		while (number >= 1000)
+		{
+			rep = " " + QString::number(number % 1000);
+			number /= 1000;
+		}
+
+		return QString::number(number) + rep;
+	}
+}
+
+static const QString superscripts = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+static const QString subscripts = "₀₁₂₃₄₅₆₇₈₉";
+
+static QString customNumberRep(int number, const QString& script, const QString& minus)
+{
+	if (number < 0)
+	{
+		return minus + customNumberRep(-number, script, minus);
+	}
+	else
+	{
+		QString rep = "";
+		for (QChar character : QString::number(number))
+		{
+			if (character >= '0' and character <= '9')
+				rep += script[character.unicode() - '0'];
+			else
+				rep += character;
+		}
+		return rep;
+	}
+}
+
+QString superscript(int number)
+{
+	return customNumberRep(number, superscripts, "⁻");
+}
+
+QString subscript(int number)
+{
+	return customNumberRep(number, subscripts, "₋");
+}
+
+QString fractionRep(int numerator, int denominator)
+{
+	return superscript(numerator) + "⁄" + subscript(denominator);
+}

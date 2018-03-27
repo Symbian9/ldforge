@@ -839,7 +839,7 @@ void MainWindow::circleToolSegmentsChanged()
 	int numerator = this->ringToolSegments();
 	int denominator = this->ringToolDivisions();
 	simplify (numerator, denominator);
-	ui.ringToolSegmentsLabel->setText (format ("%1 / %2", numerator, denominator));
+	ui.ringToolSegmentsLabel->setText(fractionRep(numerator, denominator));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -90,6 +90,10 @@ static inline qreal abs(const QVector3D &vector)
 QString formatFileSize(qint64 size);
 int gcd(int a, int b);
 QString joinStrings(const QList<class StringFormatArg>& values, QString delimeter = " ");
+QString largeNumberRep(int number);
 double roundToDecimals(double value, int decimals);
 class QSettings& settingsObject();
 void simplify(int& numerator, int& denominator);
+QString superscript(int number);
+QString subscript(int number);
+QString fractionRep(int numerator, int denominator);

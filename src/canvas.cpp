@@ -57,7 +57,7 @@ void Canvas::overpaint(QPainter& painter)
 	// Render triangle count
 	{
 		QPoint renderPoint {4, height() - 4 - metrics.height() - metrics.descent()};
-		painter.drawText(renderPoint, format("△ %1", m_document.triangleCount()));
+		painter.drawText(renderPoint, format("△ %1", largeNumberRep(m_document.triangleCount())));
 	}
 
 	// Message log
