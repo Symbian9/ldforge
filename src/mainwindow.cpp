@@ -63,6 +63,12 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	ui.setupUi (this);
 	this->restoreGeometry(config::mainWindowGeometry());
 	this->restoreState(config::mainWindowState());
+
+	if (config::mainSplitterState().isEmpty())
+		this->ui.splitter->setSizes({this->width() * 2 / 3, this->width() / 3});
+	else
+		this->ui.splitter->restoreState(config::mainSplitterState());
+
 	m_updatingTabs = false;
 	m_tabs = new QTabBar;
 	m_tabs->setTabsClosable (true);
@@ -420,6 +426,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 		// Store the state of the main window before closing.
 		config::setMainWindowGeometry(this->saveGeometry());
 		config::setMainWindowState(this->saveState());
+		config::setMainSplitterState(this->ui.splitter->saveState());
 		settingsObject().sync();
 		event->accept();
 	}

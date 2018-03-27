@@ -70,6 +70,7 @@ option DrawLineLengths = true
 option DrawAngles = false
 option MainWindowState = QByteArray {}
 option MainWindowGeometry = QByteArray {}
+option MainSplitterState = QByteArray {}
 
 # File management options
 option Libraries = QVector<Library> {}
