@@ -63,7 +63,7 @@ public:
 	~MainWindow();
 
 	void addMessage (QString msg);
-	void applyToActions (std::function<void(QAction*)> function);
+	void applyToActions(function<void(QAction*)> function);
 	void changeDocument (LDDocument* f);
 	void clearSelection();
 	void closeInitialDocument();

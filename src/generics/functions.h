@@ -4,11 +4,18 @@
 #include "../basics.h"
 
 using std::abs;
+using std::acos;
+using std::asin;
+using std::atan;
 using std::atan2;
 using std::ceil;
 using std::cos;
 using std::floor;
+using std::function;
 using std::hypot;
+using std::log;
+using std::log2;
+using std::log10;
 using std::pow;
 using std::sin;
 using std::sort;

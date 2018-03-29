@@ -85,10 +85,10 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	updateActions();
 
 	// Connect all actions and save default sequences
-	applyToActions ([&](QAction* act)
+	applyToActions([&](QAction* action)
 	{
-		connect (act, SIGNAL (triggered()), this, SLOT (actionTriggered()));
-		m_defaultShortcuts[act] = act->shortcut();
+		connect(action, SIGNAL (triggered()), this, SLOT (actionTriggered()));
+		m_defaultShortcuts[action] = action->shortcut();
 	});
 	connect(
 		ui.header,
@@ -776,12 +776,12 @@ void MainWindow::loadShortcuts()
 //
 void MainWindow::saveShortcuts()
 {
-	applyToActions ([&](QAction* act)
+	applyToActions([&](QAction* action)
 	{
-		QString const key = "shortcut_" + act->objectName();
+		QString const key = "shortcut_" + action->objectName();
 
-		if (m_defaultShortcuts[act] != act->shortcut())
-			settingsObject().setValue(key, act->shortcut());
+		if (m_defaultShortcuts[action] != action->shortcut())
+			settingsObject().setValue(key, action->shortcut());
 		else
 			settingsObject().remove(key);
 	});
@@ -789,7 +789,7 @@ void MainWindow::saveShortcuts()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::applyToActions (std::function<void(QAction*)> function)
+void MainWindow::applyToActions(function<void(QAction*)> function)
 {
 	for (QAction* act : findChildren<QAction*>())
 	{
