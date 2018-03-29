@@ -91,6 +91,7 @@ QString formatFileSize(qint64 size);
 int gcd(int a, int b);
 QString joinStrings(const QList<class StringFormatArg>& values, QString delimeter = " ");
 QString largeNumberRep(int number);
+double log1000(double x);
 double roundToDecimals(double value, int decimals);
 class QSettings& settingsObject();
 void simplify(int& numerator, int& denominator);

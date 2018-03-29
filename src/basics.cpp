@@ -68,12 +68,45 @@ double roundToDecimals(double value, int decimals)
 	}
 }
 
+double log1000(double x)
+{
+	return log10(x) / 3.0;
+}
+
+/*
+ * Returns a string representation of the provided file size.
+ */
 QString formatFileSize(qint64 size)
 {
-	static const QString suffixes[] = {" bytes", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
-	int magnitude = (size > 0) ? floor(log10(size) / 3.0 + 1e-10) : 0;
-	magnitude = qBound(0, magnitude, countof(suffixes) - 1);
-	return QString::number(size / pow(1000, magnitude), 'f', 3) + suffixes[magnitude];
+	static const QString suffixes[] = {
+		QObject::tr("bytes"),
+		QObject::tr("kB", "kilobytes"),
+		QObject::tr("MB", "megabytes"),
+		QObject::tr("GB", "gigabytes"),
+		QObject::tr("TB", "terabytes"),
+		QObject::tr("PB", "petabytes"),
+		QObject::tr("EB", "exabytes"),
+		QObject::tr("ZB", "zettabytes"),
+		QObject::tr("YB", "yottabytes")
+	};
+
+	if (size == 1)
+	{
+		return QObject::tr("1 byte");
+	}
+	else if (size > 0)
+	{
+		// Find out which suffix to use by the use of 1000-base logarithm:
+		int magnitude = static_cast<int>(floor(log1000(size)));
+		// ensure that magnitude is within bounds (even if we somehow get 1000s of yottabytes)
+		magnitude = qBound(0, magnitude, countof(suffixes) - 1);
+		// prepare the representation
+		return QString::number(size / pow(1000, magnitude), 'g', 3) + " " + suffixes[magnitude];
+	}
+	else
+	{
+		return QString::number(size) + " " + suffixes[0];
+	}
 }
 
 /*
