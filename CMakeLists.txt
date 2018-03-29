@@ -93,7 +93,10 @@ set (LDFORGE_SOURCES
 	src/toolsets/viewtoolset.cpp
 	src/types/boundingbox.cpp
 	src/types/matrix.cpp
+	src/types/pattern.cpp
 	src/types/vertex.cpp
+	src/widgets/patterneditor.cpp
+	src/widgets/patternviewer.cpp
 	src/widgets/headeredit.cpp
 	src/widgets/vertexobjecteditor.cpp
 )
@@ -171,7 +174,10 @@ set (LDFORGE_HEADERS
 	src/types/boundingbox.h
 	src/types/library.h
 	src/types/matrix.h
+	src/types/pattern.h
 	src/types/vertex.h
+	src/widgets/patterneditor.h
+	src/widgets/patternviewer.h
 	src/widgets/headeredit.h
 	src/widgets/vertexobjecteditor.h
 )
@@ -200,6 +206,7 @@ set (LDFORGE_FORMS
 	src/partdownloader.ui
 	src/widgets/vertexobjecteditor.ui
 	src/widgets/headeredit.ui
+	src/widgets/patterneditor.ui
 )
 
 set (LDFORGE_OTHER_FILES

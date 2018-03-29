@@ -107,7 +107,9 @@
 	<file>./icons/visibility-toggle.png</file>
 	<file>./icons/wireframe.png</file>
 	<file>./icons/ytruder.png</file>
+	<file>data/pattern-background.png</file>
 	<file>data/primitive-categories.cfg</file>
+	<file>data/transparent-background.png</file>
 	<file>LICENSE</file>
 	<file>LICENSE.icons</file>
 </qresource>

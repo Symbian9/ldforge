@@ -21,6 +21,7 @@
 #include "documentmanager.h"
 #include "mainwindow.h"
 #include "generics/reverse.h"
+#include "widgets/patterneditor.h"
 
 int main (int argc, char* argv[])
 {
@@ -35,6 +36,13 @@ int main (int argc, char* argv[])
 	qRegisterMetaTypeStreamOperators<Vertex>("Vertex");
 	initializeCrashHandler();
 	LDColor::initColors();
+
+	Pattern pattern {{200, 100}};
+	PatternEditor* editor = new PatternEditor {pattern, nullptr};
+	editor->setMinimumSize({320, 200});
+	editor->show();
+	return app.exec();
+
 	MainWindow* mainWindow = new MainWindow;
 	mainWindow->show();
 
