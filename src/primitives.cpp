@@ -418,6 +418,9 @@ void PrimitiveModel::generateBody(Model& model) const
 				segment->setVertex(type == Disc ? 2 : 0, v2);
 			}
 			break;
+
+		case Cylinder:
+			break;
 		}
 	}
 

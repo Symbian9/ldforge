@@ -57,11 +57,13 @@ QString joinStrings(const QList<StringFormatArg>& values, QString delimeter)
 
 double roundToDecimals(double value, int decimals)
 {
+	decimals = max(0, decimals);
+
 	if (decimals == 0)
 	{
 		return round(value);
 	}
-	else if (decimals > 0)
+	else
 	{
 		qreal coefficient = pow(10, decimals);
 		return round(value * coefficient) / coefficient;
