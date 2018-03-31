@@ -47,8 +47,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>871</width>
-          <height>364</height>
+          <width>98</width>
+          <height>28</height>
          </rect>
         </property>
         <attribute name="label">
@@ -70,8 +70,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>871</width>
-          <height>364</height>
+          <width>926</width>
+          <height>389</height>
          </rect>
         </property>
         <attribute name="label">
@@ -86,6 +86,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
@@ -98,8 +101,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>871</width>
-          <height>364</height>
+          <width>227</width>
+          <height>126</height>
          </rect>
         </property>
         <attribute name="label">
@@ -202,8 +205,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>871</width>
-          <height>364</height>
+          <width>98</width>
+          <height>93</height>
          </rect>
         </property>
         <attribute name="label">
@@ -236,7 +239,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1765,7 +1768,6 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

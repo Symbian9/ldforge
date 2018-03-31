@@ -21,6 +21,7 @@
 #include "documentmanager.h"
 #include "generics/migrate.h"
 #include "editHistory.h"
+#include "lddocument.h"
 
 Model::Model(DocumentManager* manager) :
 	QAbstractListModel {manager},
@@ -310,6 +311,14 @@ QVariant Model::data(const QModelIndex& index, int role) const
 
 			if (object->isInverted())
 				result.prepend("↺ ");
+
+			if (object->type() == LDObjectType::SubfileReference)
+			{
+				LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
+				LDDocument* subfile = reference->fileInfo(this->documentManager());
+				if (subfile != nullptr)
+					result.prepend(subfile->header.description + "\n");
+			}
 
 			return result;
 		}
