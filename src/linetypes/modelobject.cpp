@@ -164,19 +164,24 @@ void LDSubfileReference::inlineContents(
 	bool deep,
 	bool render
 ) {
-	Model inlined {context};
-	fileInfo(context)->inlineContents(inlined, deep, render);
+	LDDocument* subfile = this->fileInfo(context);
 
-	// Transform the objects
-	for (LDObject* object : inlined)
+	if (subfile != nullptr)
 	{
-		if (::shouldInvert(this, parentWinding, context))
-			::invert(object, context);
+		Model inlined {context};
+		subfile->inlineContents(inlined, deep, render);
 
-		TransformObject(object, transformationMatrix(), position(), color());
+		// Transform the objects
+		for (LDObject* object : inlined)
+		{
+			if (::shouldInvert(this, parentWinding, context))
+				::invert(object, context);
+
+			TransformObject(object, transformationMatrix(), position(), color());
+		}
+
+		model.merge(inlined);
 	}
-
-	model.merge(inlined);
 }
 
 // =============================================================================

@@ -216,15 +216,14 @@ LDDocument* DocumentManager::openDocument(
 		if (fileToOverride == nullptr)
 			load = m_window->newDocument(implicit);
 
-		load->setFullPath(path);
-		load->setName(LDDocument::shortenName(path));
-
 		// Loading the file shouldn't count as actual edits to the document.
 		load->history()->setIgnoring (true);
 
 		Parser parser {file};
 		Winding winding = NoWinding;
 		load->header = parser.parseHeader(winding);
+		load->setFullPath(path);
+		load->setName(LDDocument::shortenName(path));
 		load->setWinding(winding);
 		parser.parseBody(*load);
 		file.close();
