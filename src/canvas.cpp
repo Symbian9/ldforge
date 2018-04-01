@@ -86,7 +86,7 @@ void Canvas::drawFixedCameraBackdrop()
 	Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
 	Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
 	qreal gridSize = grid()->coordinateSnap();
-	glEnable(GL_LINE_STIPPLE);
+	// glEnable(GL_LINE_STIPPLE);
 	glBegin(GL_LINES);
 
 	switch (grid()->type())

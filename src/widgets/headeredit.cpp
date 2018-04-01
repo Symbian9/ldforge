@@ -162,6 +162,33 @@ HeaderEdit::HeaderEdit(QWidget* parent) :
 				this->headerHistoryModel->removeRows(index.row(), 1, {});
 		}
 	);
+	connect(
+		ui.help,
+		&QPlainTextEdit::textChanged,
+		[&]()
+		{
+			if (this->hasValidHeader())
+				this->m_header->help = ui.help->document()->toPlainText();
+		}
+	);
+	connect(
+		ui.keywords,
+		&QPlainTextEdit::textChanged,
+		[&]()
+		{
+			if (this->hasValidHeader())
+				this->m_header->keywords = ui.keywords->document()->toPlainText();
+		}
+	);
+	connect(
+		ui.cmdline,
+		&QLineEdit::textChanged,
+		[&]()
+		{
+			if (this->hasValidHeader())
+				this->m_header->cmdline = ui.cmdline->text();
+		}
+	);
 	connect(ui.historyMoveUp, &QPushButton::clicked, [&](){ this->moveRows(-1); });
 	connect(ui.historyMoveDown, &QPushButton::clicked, [&](){ this->moveRows(+2); });
 	this->setEnabled(this->hasValidHeader());
