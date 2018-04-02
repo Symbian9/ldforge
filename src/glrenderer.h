@@ -54,6 +54,8 @@ class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public Hierarch
 
 public:
 	enum { BlackRgb = 0xff000000 };
+	static constexpr GLfloat near = 1.0f;
+	static constexpr GLfloat far = 10000.0f;
 
 	GLRenderer(const Model* model, QWidget* parent = nullptr);
 	~GLRenderer();

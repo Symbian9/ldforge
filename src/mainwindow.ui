@@ -1758,6 +1758,16 @@
     <string>Fi&amp;x rounding errors</string>
    </property>
   </action>
+  <action name="actionSetCullDepth">
+   <property name="text">
+    <string>Set cull depth</string>
+   </property>
+  </action>
+  <action name="actionClearCullDepth">
+   <property name="text">
+    <string>Clear cull depth</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

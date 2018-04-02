@@ -497,6 +497,8 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction (ui.actionSetDrawDepth);
+		contextMenu->addAction(ui.actionSetCullDepth);
+		contextMenu->addAction(ui.actionClearCullDepth);
 	}
 
 	contextMenu->exec(position);

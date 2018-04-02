@@ -175,9 +175,10 @@ void Model::replace(LDObject* object, Model& model)
 	if (index.isValid())
 	{
 		removeAt(index.row());
+		int position = index.row();
 
-		for (signed int i = countof(model.objects()) - 1; i >= 0; i -= 1)
-			insertCopy(index.row() + i, model.objects()[i]);
+		for (signed int i = 0; i < countof(model); i += 1)
+			insertCopy(position + i, model.objects()[i]);
 	}
 }
 

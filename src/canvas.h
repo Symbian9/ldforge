@@ -32,12 +32,15 @@ public:
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d) const;
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos) const;
+	void clearCurrentCullValue();
+	double currentCullValue() const;
 	double getDepthValue() const;
 	void getRelativeAxes(Axis& relX, Axis& relY) const;
 	Axis getRelativeZ() const;
 	QPen linePen() const;
 	const Vertex& position3D() const;
 	void setDepthValue(double depth);
+	void setCullValue(double value);
 	void setEditMode(EditModeType type);
 
 protected:
@@ -58,4 +61,5 @@ private:
 	AbstractEditMode* m_currentEditMode = nullptr;
 	Vertex m_position3D;
 	double m_depthValues[6] = {0};
+	double cullValues[6] = {0};
 };

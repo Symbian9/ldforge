@@ -86,15 +86,15 @@ void Canvas::drawFixedCameraBackdrop()
 	Vertex topLeft = currentCamera().idealize(currentCamera().convert2dTo3d({0, 0}));
 	Vertex bottomRight = currentCamera().idealize(currentCamera().convert2dTo3d({width(), height()}));
 	qreal gridSize = grid()->coordinateSnap();
-	// glEnable(GL_LINE_STIPPLE);
+	glEnable(GL_LINE_STIPPLE);
 	glBegin(GL_LINES);
 
 	switch (grid()->type())
 	{
 	case Grid::Cartesian:
 		{
-			qreal x0 = sign(topLeft.x) * (fabs(topLeft.x) - fmod(fabs(topLeft.x), gridSize));
-			qreal y0 = sign(topLeft.y) * (fabs(topLeft.y) - fmod(fabs(topLeft.y), gridSize));
+			qreal x0 = sign(topLeft.x) * (abs(topLeft.x) - fmod(abs(topLeft.x), gridSize));
+			qreal y0 = sign(topLeft.y) * (abs(topLeft.y) - fmod(abs(topLeft.y), gridSize));
 
 			static const auto prepareGridLine = [](qreal value) -> bool
 			{
@@ -198,6 +198,18 @@ void Canvas::drawFixedCameraBackdrop()
 
 	glEnd();
 	glDisable(GL_LINE_STIPPLE);
+
+	if (this->camera() < Camera::Free)
+	{
+		GLfloat cullz = this->cullValues[static_cast<int>(this->camera())];
+		GLRotationMatrix matrix = {
+			1, 0, 0, cullz,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1,
+		};
+		glMultMatrixf(matrix);
+	}
 }
 
 bool Canvas::freeCameraAllowed() const
@@ -375,4 +387,24 @@ void Canvas::dragEnterEvent(QDragEnterEvent* event)
 	if (m_window and event->source() == m_window->getPrimitivesTree() and m_window->getPrimitivesTree()->currentItem())
 		event->acceptProposedAction();
 	*/
+}
+
+double Canvas::currentCullValue() const
+{
+	if (this->camera() < Camera::Free)
+		return far - this->cullValues[static_cast<int>(this->camera())];
+	else
+		return 0.0;
+}
+
+void Canvas::setCullValue(double value)
+{
+	if (this->camera() < Camera::Free)
+		this->cullValues[static_cast<int>(this->camera())] = far - value;
+}
+
+void Canvas::clearCurrentCullValue()
+{
+	if (this->camera() < Camera::Free)
+		this->cullValues[static_cast<int>(this->camera())] = 0.0;
 }

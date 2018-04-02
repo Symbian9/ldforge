@@ -174,12 +174,51 @@ void ViewToolset::setDrawDepth()
 		return;
 
 	bool ok;
-	double depth = QInputDialog::getDouble(m_window, "Set Draw Depth",
-	                                       format("Depth value for %1:", m_window->renderer()->currentCamera().name()),
-	                                       m_window->renderer()->getDepthValue(), -10000.0f, 10000.0f, 3, &ok);
+	double depth = QInputDialog::getDouble(
+		m_window,
+		tr("Set draw depth"),
+		format(
+			tr("Depth value for %1:"),
+			m_window->renderer()->currentCamera().name()
+		),
+		m_window->renderer()->getDepthValue(),
+		-10000.0f,
+		10000.0f,
+		4,
+		&ok
+	);
 
 	if (ok)
-		m_window->renderer()->setDepthValue (depth);
+		m_window->renderer()->setDepthValue(depth);
+}
+
+void ViewToolset::setCullDepth()
+{
+	if (m_window->renderer()->camera() == Camera::Free)
+		return;
+
+	bool ok;
+	double depth = QInputDialog::getDouble(
+		m_window,
+		tr("Set cull value"),
+		format(
+			tr("Cull depth for %1:\nPolygons closer than at this depth are not shown."),
+			m_window->renderer()->currentCamera().name()
+		),
+		m_window->renderer()->currentCullValue(),
+		-GLRenderer::far,
+		GLRenderer::far,
+		4,
+		&ok
+	);
+
+	if (ok)
+		m_window->renderer()->setCullValue(depth);
+}
+
+void ViewToolset::clearCullDepth()
+{
+	m_window->renderer()->clearCurrentCullValue();
 }
 
 #if 0

@@ -341,7 +341,7 @@ void GLRenderer::resizeGL (int width, int height)
 	glViewport (0, 0, width, height);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective (45.0f, (double) width / (double) height, 1.0f, 10000.0f);
+	gluPerspective (45.0f, (double) width / (double) height, near, far);
 	glMatrixMode (GL_MODELVIEW);
 
 	// Unfortunately Qt does not provide a resized() signal so we have to manually feed the information.
