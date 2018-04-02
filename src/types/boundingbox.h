@@ -28,18 +28,19 @@ class BoundingBox
 public:
 	BoundingBox();
 
-	void calcVertex(const Vertex& vertex);
+	void consider(const Vertex& vertex);
 	Vertex center() const;
 	bool isEmpty() const;
-	double longestMeasurement() const;
-	void reset();
-	const Vertex& vertex0() const;
-	const Vertex& vertex1() const;
+	double longestMeasure() const;
+	void clear();
+	const Vertex& minimumVertex() const;
+	const Vertex& maximumVertex() const;
+	double spaceDiagonal() const;
 
 	BoundingBox& operator<<(const Vertex& v);
 
 private:
-	bool m_isEmpty;
-	Vertex m_vertex0;
-	Vertex m_vertex1;
+	bool storedIsEmpty = true;
+	Vertex minimum {inf, inf, inf};
+	Vertex maximum {-inf, -inf, -inf};
 };

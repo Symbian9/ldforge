@@ -78,6 +78,7 @@ inline Winding& operator^=(Winding& one, Winding other)
 }
 
 static const double pi = 3.14159265358979323846;
+static const double inf = std::numeric_limits<double>::infinity();
 
 /*
  * Returns the norm of a vector.

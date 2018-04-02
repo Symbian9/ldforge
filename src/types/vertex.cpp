@@ -191,11 +191,26 @@ Vertex Vertex::transformed(const GLRotationMatrix& matrix) const
 	};
 }
 
+/*
+ * Returns the distance from one vertex to another.
+ */
+qreal distance(const Vertex& one, const Vertex& other)
+{
+	return (one - other).length();
+}
+
+/*
+ * Inserts this vertex into a data stream. This is needed for vertices to be
+ * stored in QSettings.
+ */
 QDataStream& operator<<(QDataStream& out, const Vertex& vertex)
 {
 	return out << vertex.x << vertex.y << vertex.z;
 }
 
+/*
+ * Takes a vertex from a data stream.
+ */
 QDataStream& operator>>(QDataStream& in, Vertex& vertex)
 {
 	return in >> vertex.x >> vertex.y >> vertex.z;

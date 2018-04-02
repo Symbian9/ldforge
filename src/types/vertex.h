@@ -59,3 +59,5 @@ Q_DECLARE_METATYPE(Vertex)
 unsigned int qHash(const Vertex& key);
 QDataStream& operator<<(QDataStream& out, const Vertex& vertex);
 QDataStream& operator>>(QDataStream& in, Vertex& vertex);
+
+qreal distance(const Vertex& one, const Vertex& other);

@@ -18,82 +18,83 @@
 
 #include "boundingbox.h"
 
-// =============================================================================
-//
-BoundingBox::BoundingBox()
-{
-	reset();
-}
+BoundingBox::BoundingBox() {}
 
-// =============================================================================
-//
-BoundingBox& BoundingBox::operator<< (const Vertex& v)
+BoundingBox& BoundingBox::operator<<(const Vertex& vertex)
 {
-	calcVertex (v);
+	consider(vertex);
 	return *this;
 }
 
-// =============================================================================
-//
-void BoundingBox::calcVertex (const Vertex& vertex)
+void BoundingBox::consider(const Vertex& vertex)
 {
-	m_vertex0.x = qMin(vertex.x, m_vertex0.x);
-	m_vertex0.y = qMin(vertex.y, m_vertex0.y);
-	m_vertex0.z = qMin(vertex.z, m_vertex0.z);
-	m_vertex1.x = qMax(vertex.x, m_vertex1.x);
-	m_vertex1.y = qMax(vertex.y, m_vertex1.y);
-	m_vertex1.z = qMax(vertex.z, m_vertex1.z);
-	m_isEmpty = false;
+	this->minimum.x = min(vertex.x, this->minimum.x);
+	this->minimum.y = min(vertex.y, this->minimum.y);
+	this->minimum.z = min(vertex.z, this->minimum.z);
+	this->maximum.x = max(vertex.x, this->maximum.x);
+	this->maximum.y = max(vertex.y, this->maximum.y);
+	this->maximum.z = max(vertex.z, this->maximum.z);
+	this->storedIsEmpty = false;
 }
 
-// =============================================================================
-//
-// Clears the bounding box
-//
-void BoundingBox::reset()
+/*
+ * Clears the bounding box
+ */
+void BoundingBox::clear()
 {
-	m_vertex0 = {10000.0, 10000.0, 10000.0};
-	m_vertex1 = {-10000.0, -10000.0, -10000.0};
-	m_isEmpty = true;
+	(*this)	= {};
 }
 
-// =============================================================================
-//
-// Returns the length of the bounding box on the longest measure.
-//
-double BoundingBox::longestMeasurement() const
+/*
+ * Returns the length of the bounding box on the longest measure.
+ */
+double BoundingBox::longestMeasure() const
 {
-	double xscale = m_vertex0.x - m_vertex1.x;
-	double yscale = m_vertex0.y - m_vertex1.y;
-	double zscale = m_vertex0.z - m_vertex1.z;
-	double size = qMax(xscale, qMax(yscale, zscale));
-	return qMax(qAbs(size / 2.0), 1.0);
+	double dx = this->minimum.x - this->maximum.x;
+	double dy = this->minimum.y - this->maximum.y;
+	double dz = this->minimum.z - this->maximum.z;
+	double size = max(dx, dy, dz);
+	return max(abs(size / 2.0), 1.0);
 }
 
-// =============================================================================
-//
-// Yields the center of the bounding box.
-//
+
+/*
+ * Yields the center of the bounding box.
+ */
 Vertex BoundingBox::center() const
 {
 	return {
-		(m_vertex0.x + m_vertex1.x) / 2,
-		(m_vertex0.y + m_vertex1.y) / 2,
-		(m_vertex0.z + m_vertex1.z) / 2
+		(this->minimum.x + this->maximum.x) / 2,
+		(this->minimum.y + this->maximum.y) / 2,
+		(this->minimum.z + this->maximum.z) / 2
 	};
 }
 
 bool BoundingBox::isEmpty() const
 {
-	return m_isEmpty;
+	return this->storedIsEmpty;
 }
 
-const Vertex& BoundingBox::vertex0() const
+/*
+ * Returns the minimum vertex, the -X, -Y, -Z corner.
+ */
+const Vertex& BoundingBox::minimumVertex() const
 {
-	return m_vertex0;
+	return this->minimum;
 }
 
-const Vertex& BoundingBox::vertex1() const
+/*
+ * Returns the maximum vertex, the +X, +Y, +Z corner.
+ */
+const Vertex& BoundingBox::maximumVertex() const
 {
-	return m_vertex1;
+	return this->maximum;
+}
+
+/*
+ * Returns the length of the bounding box's space diagonal.
+ */
+double BoundingBox::spaceDiagonal() const
+{
+	return distance(this->minimumVertex(), this->maximumVertex());
 }
