@@ -20,6 +20,7 @@
 #include "main.h"
 #include "glrenderer.h"
 #include "glShared.h"
+#include "types/boundingbox.h"
 #include <QMap>
 #include <QSet>
 
@@ -35,6 +36,7 @@ public:
 	~GLCompiler();
 
 	void initialize();
+	Vertex modelCenter();
 	void prepareVBO (int vbonum);
 	GLuint vbo (int vbonum) const;
 	int vboSize (int vbonum) const;
@@ -77,9 +79,11 @@ private:
 	QSet<QPersistentModelIndex> m_staged; // Objects that need to be compiled
 	GLuint m_vbo[NumVbos];
 	bool m_vboChanged[NumVbos] = {true};
+	bool needBoundingBoxRebuild = true;
 	int m_vboSizes[NumVbos] = {0};
 	GLRenderer* m_renderer;
 	QItemSelectionModel* _selectionModel = nullptr;
+	BoundingBox boundingBox;
 
 private slots:
 	void handleRowInsertion(const QModelIndex&, int first, int last);

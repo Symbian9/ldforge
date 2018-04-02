@@ -28,6 +28,11 @@ inline void glMultMatrixf(const GLRotationMatrix& matrix)
 	glMultMatrixf(matrix.constData());
 }
 
+inline void glTranslatef(const Vertex& vertex)
+{
+	glTranslatef(vertex.x, vertex.y, vertex.z);
+}
+
 inline void glVertex(const Vertex& vertex)
 {
 	glVertex3f(vertex.x, vertex.y, vertex.z);

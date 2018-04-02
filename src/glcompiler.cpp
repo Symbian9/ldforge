@@ -331,6 +331,7 @@ void GLCompiler::dropObjectInfo(const QModelIndex& index)
 		// If we have data relating to this object, remove it.
 		// The VBOs have changed now and need to be merged.
 		m_objectInfo.remove(index);
+		this->needBoundingBoxRebuild = true;
 		needMerge();
 	}
 }
@@ -437,6 +438,12 @@ void GLCompiler::compilePolygon(
 		normals[i] = QVector3D::crossProduct(v3 - v2, v1 - v2).normalized();
 	}
 
+	if (not this->needBoundingBoxRebuild)
+	{
+		for (int i = 0; i < vertexCount; i += 1)
+			this->boundingBox.consider(poly.vertices[i]);
+	}
+
 	for (VboSubclass complement : iterateEnum<VboSubclass>())
 	{
 		const int vbonum = vboNumber (surface, complement);
@@ -473,6 +480,44 @@ void GLCompiler::compilePolygon(
 			}
 		}
 	}
+}
+
+/*
+ * Returns the center point of the model.
+ */
+Vertex GLCompiler::modelCenter()
+{
+	// If the bounding box is invalid, rebuild it now.
+	if (this->needBoundingBoxRebuild)
+	{
+		// If there's something still queued for compilation, we need to build those first so
+		// that they get into the bounding box.
+		this->compileStaged();
+		this->boundingBox = {};
+		QMapIterator<QPersistentModelIndex, ObjectVboData> iterator {m_objectInfo};
+
+		while (iterator.hasNext())
+		{
+			iterator.next();
+
+			for (VboClass vboclass : {VboClass::Triangles, VboClass::Quads})
+			{
+				// Read in the surface vertices and add them to the bounding box.
+				int vbonum = vboNumber(vboclass, VboSubclass::Surfaces);
+				const auto& vector = iterator.value().data[vbonum];
+
+				for (int i = 0; i + 2 < countof(vector); i += 3)
+					this->boundingBox.consider({vector[i], vector[i + 1], vector[i + 2]});
+			}
+		}
+
+		this->needBoundingBoxRebuild = false;
+	}
+
+	if (not this->boundingBox.isEmpty())
+		return this->boundingBox.center();
+	else
+		return {};
 }
 
 int GLCompiler::vboNumber (VboClass surface, VboSubclass complement)
@@ -529,6 +574,8 @@ void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex&
 {
 	for (int row = topLeft.row(); row <= bottomRight.row(); row += 1)
 		m_staged.insert(m_renderer->model()->index(row));
+
+	this->needBoundingBoxRebuild = true;
 }
 
 void GLCompiler::handleObjectHighlightingChanged(

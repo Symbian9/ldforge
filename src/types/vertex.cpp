@@ -200,6 +200,14 @@ qreal distance(const Vertex& one, const Vertex& other)
 }
 
 /*
+ * Returns a vertex with all coordinates inverted.
+ */
+Vertex operator-(const Vertex& vertex)
+{
+	return {-vertex.x, -vertex.y, -vertex.z};
+}
+
+/*
  * Inserts this vertex into a data stream. This is needed for vertices to be
  * stored in QSettings.
  */

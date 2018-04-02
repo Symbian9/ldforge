@@ -56,8 +56,8 @@ inline Vertex operator*(qreal scalar, const Vertex& vertex)
 }
 
 Q_DECLARE_METATYPE(Vertex)
+qreal distance(const Vertex& one, const Vertex& other);
 unsigned int qHash(const Vertex& key);
+Vertex operator-(const Vertex& vertex);
 QDataStream& operator<<(QDataStream& out, const Vertex& vertex);
 QDataStream& operator>>(QDataStream& in, Vertex& vertex);
-
-qreal distance(const Vertex& one, const Vertex& other);
