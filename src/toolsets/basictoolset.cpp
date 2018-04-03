@@ -280,12 +280,8 @@ void BasicToolset::edit()
 {
 	if (countof(selectedObjects()) == 1)
 	{
-		LDObject* obj = *selectedObjects().begin();
-		if (obj->numVertices() > 0)
-		{
-			VertexObjectEditor editor {obj};
-			editor.exec();
-		}
+		LDObject* object = *selectedObjects().begin();
+		::editObject(this->m_window, object);
 	}
 }
 
