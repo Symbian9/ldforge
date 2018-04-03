@@ -155,6 +155,18 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	}
 
 	QMetaObject::invokeMethod (this, "finishInitialization", Qt::QueuedConnection);
+
+	connect(
+		this->ui.objectList,
+		&QListView::doubleClicked,
+		[&](const QModelIndex& index)
+		{
+			LDObject* object = currentDocument()->lookup(index);
+
+			if (object)
+				::editObject(this, object);
+		}
+	);
 }
 
 void MainWindow::finishInitialization()
