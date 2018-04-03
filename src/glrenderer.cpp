@@ -88,6 +88,13 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 		info->camera = camera;
 	}
 
+	connect(
+		this->m_compiler,
+		&GLCompiler::sceneChanged,
+		this,
+		qOverload<>(&GLRenderer::update)
+	);
+
 	calcCameraIcons();
 }
 

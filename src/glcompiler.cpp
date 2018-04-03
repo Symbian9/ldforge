@@ -80,7 +80,7 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 	);
 	connect(
 		renderer->model(),
-		SIGNAL(rowsRemoved(QModelIndex, int, int)),
+		SIGNAL(rowsAboutToBeRemoved(QModelIndex, int, int)),
 		this,
 		SLOT(handleRowRemoval(QModelIndex, int, int))
 	);
@@ -415,22 +415,34 @@ void GLCompiler::compilePolygon(
 		::invertPolygon(poly);
 
 	VboClass surface;
-	int vertexCount;
 
 	switch (poly.num)
 	{
-	case 2:	surface = VboClass::Lines;				vertexCount = 2; break;
-	case 3:	surface = VboClass::Triangles;			vertexCount = 3; break;
-	case 4:	surface = VboClass::Quads;				vertexCount = 4; break;
-	case 5:	surface = VboClass::ConditionalLines;	vertexCount = 2; break;
-	default: return;
+	case 2:
+		surface = VboClass::Lines;
+		break;
+
+	case 3:
+		surface = VboClass::Triangles;
+		break;
+
+	case 4:
+		surface = VboClass::Quads;
+		break;
+
+	case 5:
+		surface = VboClass::ConditionalLines;
+		break;
+
+	default:
+		return;
 	}
 
 	// Determine the normals for the polygon.
 	QVector3D normals[4];
-	auto vertexRing = ring(poly.vertices, vertexCount);
+	auto vertexRing = ring(poly.vertices, poly.numPolygonVertices());
 
-	for (int i = 0; i < vertexCount; ++i)
+	for (int i = 0; i < poly.numPolygonVertices(); ++i)
 	{
 		const Vertex& v1 = vertexRing[i - 1];
 		const Vertex& v2 = vertexRing[i];
@@ -438,9 +450,15 @@ void GLCompiler::compilePolygon(
 		normals[i] = QVector3D::crossProduct(v3 - v2, v1 - v2).normalized();
 	}
 
-	if (not this->needBoundingBoxRebuild)
+	// Transform vertices so that they're suitable for GL rendering
+	for (int i = 0; i < poly.numPolygonVertices(); i += 1)
 	{
-		for (int i = 0; i < vertexCount; i += 1)
+		poly.vertices[i].y = -poly.vertices[i].y;
+		poly.vertices[i].z = -poly.vertices[i].z;
+
+		// Add these vertices to the bounding box (unless we're going to do it over
+		// from scratch afterwards)
+		if (not this->needBoundingBoxRebuild)
 			this->boundingBox.consider(poly.vertices[i]);
 	}
 
@@ -450,14 +468,14 @@ void GLCompiler::compilePolygon(
 		QVector<GLfloat>& vbodata = objectInfo.data[vbonum];
 		const QColor color = getColorForPolygon (poly, polygonOwnerIndex, complement);
 
-		for (int vert = 0; vert < vertexCount; ++vert)
+		for (int vert = 0; vert < poly.numPolygonVertices(); ++vert)
 		{
 			if (complement == VboSubclass::Surfaces)
 			{
 				// Write coordinates. Apparently Z must be flipped too?
 				vbodata	<< poly.vertices[vert].x
-						<< -poly.vertices[vert].y
-						<< -poly.vertices[vert].z;
+						<< poly.vertices[vert].y
+						<< poly.vertices[vert].z;
 			}
 			else if (complement == VboSubclass::Normals)
 			{
@@ -487,12 +505,13 @@ void GLCompiler::compilePolygon(
  */
 Vertex GLCompiler::modelCenter()
 {
+	// If there's something still queued for compilation, we need to build those first so
+	// that they get into the bounding box.
+	this->compileStaged();
+
 	// If the bounding box is invalid, rebuild it now.
 	if (this->needBoundingBoxRebuild)
 	{
-		// If there's something still queued for compilation, we need to build those first so
-		// that they get into the bounding box.
-		this->compileStaged();
 		this->boundingBox = {};
 		QMapIterator<QPersistentModelIndex, ObjectVboData> iterator {m_objectInfo};
 
@@ -500,8 +519,12 @@ Vertex GLCompiler::modelCenter()
 		{
 			iterator.next();
 
-			for (VboClass vboclass : {VboClass::Triangles, VboClass::Quads})
-			{
+			for (VboClass vboclass : {
+				VboClass::Lines,
+				VboClass::Triangles,
+				VboClass::Quads,
+				VboClass::ConditionalLines
+			}) {
 				// Read in the surface vertices and add them to the bounding box.
 				int vbonum = vboNumber(vboclass, VboSubclass::Surfaces);
 				const auto& vector = iterator.value().data[vbonum];
@@ -550,24 +573,25 @@ void GLCompiler::recompile()
 {
 	for (QModelIndex index : m_renderer->model()->indices())
 		compileObject(index);
+
+	emit sceneChanged();
 }
 
 void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
 {
 	for (int row = first; row <= last; row += 1)
 		m_staged.insert(m_renderer->model()->index(row));
+
+	emit sceneChanged();
 }
 
-void GLCompiler::handleRowRemoval(const QModelIndex&, int, int)
+void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
 {
-	// It looks like removing rows causes some key invalidation. Until I can figure that out,
-	// we're going scorched earth.
-	m_objectInfo.clear();
-	recompile();
-	/*
 	for (int row = last; row >= first; row -= 1)
 		forgetObject(m_renderer->model()->index(row));
-	*/
+
+	this->needBoundingBoxRebuild = true;
+	emit sceneChanged();
 }
 
 void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -576,6 +600,7 @@ void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex&
 		m_staged.insert(m_renderer->model()->index(row));
 
 	this->needBoundingBoxRebuild = true;
+	emit sceneChanged();
 }
 
 void GLCompiler::handleObjectHighlightingChanged(
@@ -584,6 +609,7 @@ void GLCompiler::handleObjectHighlightingChanged(
 ) {
 	m_staged.insert(oldIndex);
 	m_staged.insert(newIndex);
+	emit sceneChanged();
 }
 
 void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -595,6 +621,7 @@ void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSel
 		m_staged.insert(index);
 
 	m_renderer->update();
+	emit sceneChanged();
 }
 
 QItemSelectionModel* GLCompiler::selectionModel() const
@@ -624,9 +651,12 @@ void GLCompiler::setSelectionModel(QItemSelectionModel* selectionModel)
 			SLOT(clearSelectionModel())
 		);
 	}
+
+	emit sceneChanged();
 }
 
 void GLCompiler::clearSelectionModel()
 {
 	this->setSelectionModel(nullptr);
+	emit sceneChanged();
 }

@@ -49,6 +49,9 @@ public:
 public slots:
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+signals:
+	void sceneChanged();
+
 private:
 	struct ObjectVboData
 	{
