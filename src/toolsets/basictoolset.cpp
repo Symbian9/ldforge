@@ -279,10 +279,7 @@ void BasicToolset::newComment()
 void BasicToolset::edit()
 {
 	if (countof(selectedObjects()) == 1)
-	{
-		LDObject* object = *selectedObjects().begin();
-		::editObject(this->m_window, object);
-	}
+		::editObject(this->m_window, *selectedObjects().begin());
 }
 
 void BasicToolset::modeSelect()
