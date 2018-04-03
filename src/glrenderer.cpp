@@ -435,7 +435,10 @@ void GLRenderer::drawGLScene()
 		}
 
 		drawVbos (VboClass::Lines, VboSubclass::RegularColors);
-		glEnable (GL_LINE_STIPPLE);
+
+		if (config::useLineStipple())
+			glEnable (GL_LINE_STIPPLE);
+
 		drawVbos (VboClass::ConditionalLines, VboSubclass::RegularColors);
 		glDisable (GL_LINE_STIPPLE);
 

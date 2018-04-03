@@ -71,6 +71,7 @@ option DrawAngles = false
 option MainWindowState = QByteArray {}
 option MainWindowGeometry = QByteArray {}
 option MainSplitterState = QByteArray {}
+option UseLineStipple = true
 
 # File management options
 option Libraries = QVector<Library> {}
