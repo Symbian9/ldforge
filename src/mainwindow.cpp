@@ -896,21 +896,23 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 	}
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
+/*
+ * Returns the currently open document.
+ */
 LDDocument* MainWindow::currentDocument()
 {
 	return m_currentDocument;
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// TODO: document may be null, this shouldn't be the case
-//
-void MainWindow::changeDocument (LDDocument* document)
+/*
+ * Changes the current document to the specified document.
+ */
+void MainWindow::changeDocument(LDDocument* document)
 {
+	Q_ASSERT(document != nullptr);
+
 	// Implicit files were loaded for caching purposes and may never be switched to.
-	if (document and document->isFrozen())
+	if (document->isFrozen())
 		return;
 
 	m_currentDocument = document;
