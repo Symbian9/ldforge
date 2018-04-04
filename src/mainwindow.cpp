@@ -623,11 +623,6 @@ QPixmap MainWindow::getIcon(QString iconName)
 	return {format(":/icons/%1.png", iconName)};
 }
 
-MessageManager* MainWindow::messageLog() const
-{
-	return m_messageLog;
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::updateDocumentList()
@@ -952,7 +947,6 @@ Canvas* MainWindow::getRendererForDocument(LDDocument *document)
 		renderer = new Canvas {document, this};
 		m_renderers[document] = renderer;
 		ui.rendererStack->addWidget(renderer);
-		//connect(m_messageLog, SIGNAL(changed()), renderer, SLOT(update()));
 	}
 
 	return renderer;

@@ -27,7 +27,6 @@
 #include "linetypes/modelobject.h"
 #include "colors.h"
 
-class MessageManager;
 class QToolButton;
 class Canvas;
 class Toolset;
@@ -81,7 +80,6 @@ public:
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
-	MessageManager* messageLog() const;
 	LDDocument* newDocument (bool cache = false);
 	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
@@ -128,7 +126,6 @@ private:
 	struct ToolInfo;
 
 	class GuiUtilities* m_guiUtilities;
-	MessageManager* m_messageLog = nullptr;
 	QMap<LDDocument*, Canvas*> m_renderers;
 	QMap<LDDocument*, QItemSelectionModel*> m_selections;
 	PrimitiveManager* m_primitives;
