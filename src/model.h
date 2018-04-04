@@ -126,6 +126,7 @@ signals:
 	void aboutToRemoveObject(const QModelIndex& index);
 	void objectModified(LDObject* object);
 	void windingChanged(Winding newWinding);
+	void modelChanged();
 
 protected:
 	template<typename T, typename... Args> T* constructObject(Args&& ...args);

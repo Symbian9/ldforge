@@ -54,6 +54,14 @@ LDDocument::LDDocument (DocumentManager* parent) :
 		SLOT(handleImminentObjectRemoval(QModelIndex)),
 		Qt::DirectConnection
 	);
+	connect(
+		this,
+		&Model::modelChanged,
+		[&]()
+		{
+			this->m_needsRecache = true;
+		}
+	);
 }
 
 LDDocument::~LDDocument()
@@ -444,7 +452,7 @@ void LDDocument::initializeCachedData()
 	{
 		m_vertices.clear();
 		Model model {m_documents};
-		inlineContents(model, true, true);
+		this->inlineContents(model, true, true);
 
 		for (LDObject* obj : model.objects())
 		{

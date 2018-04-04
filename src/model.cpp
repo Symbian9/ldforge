@@ -35,7 +35,17 @@ Model::~Model()
 
 void Model::installObject(int row, LDObject* object)
 {
-	connect(object, SIGNAL(modified(LDObjectState, LDObjectState)), this, SLOT(recountTriangles()));
+	connect(
+		object,
+		&LDObject::modified,
+		[&]()
+		{
+			this->recountTriangles();
+			emit objectModified(static_cast<LDObject*>(sender()));
+			emit modelChanged();
+		}
+	);
+
 	beginInsertRows({}, row, row);
 	_objects.insert(row, object);
 
@@ -47,6 +57,7 @@ void Model::installObject(int row, LDObject* object)
 
 	_triangleCount += object->triangleCount(documentManager());
 	emit objectAdded(index(row));
+	emit modelChanged();
 	endInsertRows();
 }
 
@@ -157,6 +168,7 @@ void Model::removeAt(int position)
 	_objects.removeAt(position);
 	_needsTriangleRecount = true;
 	endRemoveRows();
+	emit modelChanged();
 	delete object;
 }
 

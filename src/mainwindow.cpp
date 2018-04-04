@@ -925,6 +925,7 @@ void MainWindow::changeDocument (LDDocument* document)
 		print ("Changed document to %1", document->getDisplayName());
 		ui.objectList->setModel(document);
 		ui.header->setDocument(document);
+		renderer->fullUpdate();
 		QItemSelectionModel* selection = m_selections.value(document);
 
 		if (selection == nullptr)
