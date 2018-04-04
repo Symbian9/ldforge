@@ -47,8 +47,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>926</width>
+          <height>336</height>
          </rect>
         </property>
         <attribute name="label">
@@ -71,7 +71,7 @@
           <x>0</x>
           <y>0</y>
           <width>926</width>
-          <height>389</height>
+          <height>336</height>
          </rect>
         </property>
         <attribute name="label">
@@ -101,8 +101,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>227</width>
-          <height>126</height>
+          <width>926</width>
+          <height>336</height>
          </rect>
         </property>
         <attribute name="label">
@@ -205,8 +205,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>93</height>
+          <width>926</width>
+          <height>336</height>
          </rect>
         </property>
         <attribute name="label">
@@ -239,7 +239,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -607,6 +607,7 @@
    <addaction name="actionCoverer"/>
    <addaction name="actionEdger2"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNewPart">
    <property name="icon">
     <iconset resource="../ldforge.qrc">
@@ -1778,6 +1779,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

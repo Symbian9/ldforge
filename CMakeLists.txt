@@ -50,7 +50,6 @@ set (LDFORGE_SOURCES
 	src/main.cpp
 	src/mainwindow.cpp
 	src/matrixinput.cpp
-	src/messageLog.cpp
 	src/model.cpp
 	src/partdownloader.cpp
 	src/partdownloadrequest.cpp
@@ -120,7 +119,6 @@ set (LDFORGE_HEADERS
 	src/main.h
 	src/mainwindow.h
 	src/matrixinput.h
-	src/messageLog.h
 	src/model.h
 	src/partdownloader.h
 	src/partdownloadrequest.h

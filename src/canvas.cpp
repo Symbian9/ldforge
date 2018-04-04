@@ -59,22 +59,6 @@ void Canvas::overpaint(QPainter& painter)
 		QPoint renderPoint {4, height() - 4 - metrics.height() - metrics.descent()};
 		painter.drawText(renderPoint, format("△ %1", largeNumberRep(m_document.triangleCount())));
 	}
-
-	// Message log
-	if (m_window->messageLog())
-	{
-		int y = 0;
-		int margin = 2;
-		QColor penColor = textPen().color();
-
-		for (const MessageManager::Line& line : m_window->messageLog()->getLines())
-		{
-			penColor.setAlphaF(line.alpha);
-			painter.setPen(penColor);
-			painter.drawText(QPoint {margin, y + margin + metrics.ascent()}, line.text);
-			y += metrics.height();
-		}
-	}
 }
 
 /*

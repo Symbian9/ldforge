@@ -27,7 +27,6 @@
 #include "canvas.h"
 #include "mainwindow.h"
 #include "lddocument.h"
-#include "messageLog.h"
 #include "ui_mainwindow.h"
 #include "primitives.h"
 #include "editmodes/abstractEditMode.h"
@@ -59,7 +58,15 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	m_documents (new DocumentManager (this)),
 	m_currentDocument (nullptr)
 {
-	m_messageLog = new MessageManager {this};
+	connect(
+		&singleton<Printer>(),
+		&Printer::linePrinted,
+		[&](const QString& line)
+		{
+			this->statusBar()->showMessage(line, 5000);
+		}
+	);
+
 	ui.setupUi (this);
 	this->restoreGeometry(config::mainWindowGeometry());
 	this->restoreState(config::mainWindowState());
@@ -608,14 +615,6 @@ bool MainWindow::save (LDDocument* doc, bool saveAs)
 	return false;
 }
 
-void MainWindow::addMessage(QString message)
-{
-	messageLog()->addLine(message);
-
-	// Also print it to stdout
-	fprint(stdout, "%1\n", message);
-}
-
 /*
  * Returns an icon from built-in resources.
  */
@@ -953,7 +952,7 @@ Canvas* MainWindow::getRendererForDocument(LDDocument *document)
 		renderer = new Canvas {document, this};
 		m_renderers[document] = renderer;
 		ui.rendererStack->addWidget(renderer);
-		connect(m_messageLog, SIGNAL(changed()), renderer, SLOT(update()));
+		//connect(m_messageLog, SIGNAL(changed()), renderer, SLOT(update()));
 	}
 
 	return renderer;

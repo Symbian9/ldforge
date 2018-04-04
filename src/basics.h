@@ -19,6 +19,7 @@
 #pragma once
 #include <cstdio>
 #include <cstdlib>
+#include <QDate>
 #include <QFile>
 #include <QLineF>
 #include <QMatrix4x4>

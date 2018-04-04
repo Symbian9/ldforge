@@ -145,3 +145,27 @@ void fprint (QIODevice& dev, QString fmtstr, Args... args)
 	formatHelper (fmtstr, args...);
 	dev.write (fmtstr.toUtf8());
 }
+
+class Printer : public QObject
+{
+	Q_OBJECT
+
+public:
+	void printLine(const QString& line)
+	{
+		printf("%s\n", line.toUtf8().constData());
+		emit linePrinted(line);
+	}
+
+signals:
+	void linePrinted(const QString& line);
+};
+
+/*
+ * Format and print the given args to stdout. Also is reflected to the status bar.
+ */
+template<typename... Args>
+void print(QString formatString, Args&&... args)
+{
+	singleton<Printer>().printLine(format(formatString, args...));
+}

@@ -20,7 +20,6 @@
 #include <QObject>
 #include "main.h"
 #include "configuration.h"
-#include "messageLog.h"
 #include "mainwindow.h"
 
 class GuiUtilities;
@@ -47,14 +46,6 @@ public:
 
 	// Utility functions
 	QString preferredLicenseText() const;
-
-	// Format and print the given args to the message log.
-	template<typename... Args>
-	void print(QString formatString, Args... args)
-	{
-		formatHelper(formatString, args...);
-		m_window->addMessage(formatString);
-	}
 
 protected:
 	MainWindow* m_window;

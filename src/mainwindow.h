@@ -62,7 +62,6 @@ public:
 	explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = 0);
 	~MainWindow();
 
-	void addMessage (QString msg);
 	void applyToActions(function<void(QAction*)> function);
 	void changeDocument (LDDocument* f);
 	void clearSelection();
@@ -108,13 +107,6 @@ public:
 	void updateRecentFilesMenu();
 
 	static QPixmap getIcon(QString iconName);
-
-	template<typename... Args>
-	void print(QString formatString, Args... args)
-	{
-		formatHelper(formatString, args...);
-		addMessage(formatString);
-	}
 
 signals:
 	void gridChanged();
