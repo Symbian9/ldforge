@@ -453,10 +453,10 @@ void ConfigDialog::slot_setColor()
 	}
 	else
 	{
-		ColorToolbarItem newentry (value, nullptr);
+		ColorToolbarItem newentry {value};
 		item = getSelectedQuickColor();
 		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : countof(quickColorItems);
-		quickColors.insert (idx, newentry);
+		quickColors.insert(idx, newentry);
 		entry = &quickColors[idx];
 	}
 

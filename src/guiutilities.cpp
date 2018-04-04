@@ -147,7 +147,7 @@ QVector<ColorToolbarItem> GuiUtilities::loadQuickColorList()
 			LDColor color = colorName.toInt();
 
 			if (color.isValid())
-				colors << ColorToolbarItem {color, nullptr};
+				colors.append(ColorToolbarItem {color});
 		}
 	}
 

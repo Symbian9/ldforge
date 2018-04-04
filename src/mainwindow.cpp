@@ -263,16 +263,29 @@ void MainWindow::updateColorToolbar()
 		}
 		else
 		{
-			QToolButton* colorButton = new QToolButton;
-			colorButton->setIcon (makeColorIcon (entry.color(), 16));
-			colorButton->setIconSize (QSize (16, 16));
-			colorButton->setToolTip (entry.color().name());
-
-			connect (colorButton, SIGNAL (clicked()), this, SLOT (quickColorClicked()));
+			QToolButton* colorButton = new QToolButton {this};
+			colorButton->setIcon(makeColorIcon(entry.color(), 16));
+			colorButton->setIconSize({16, 16});
+			colorButton->setToolTip(entry.color().name());
+			colorButton->setStatusTip(format(
+				tr("Changes the color of selected objects to %1"),
+				entry.color().name()
+			));
 			ui.toolBarColors->addWidget (colorButton);
 			m_colorButtons << colorButton;
+			connect(colorButton,
+				&QToolButton::clicked,
+				[&]()
+				{
+					for (LDObject* object : selectedObjects())
+					{
+						if (object->isColored())
+							object->setColor(entry.color());
+					}
 
-			entry.setToolButton (colorButton);
+					endAction();
+				}
+			);
 		}
 	}
 
@@ -348,37 +361,6 @@ void MainWindow::recentFileClicked()
 {
 	QAction* qAct = static_cast<QAction*> (sender());
 	documents()->openMainModel (qAct->text());
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::quickColorClicked()
-{
-	QToolButton* button = static_cast<QToolButton*> (sender());
-	LDColor color = LDColor::nullColor;
-
-	for (const ColorToolbarItem& entry : m_quickColors)
-	{
-		if (entry.toolButton() == button)
-		{
-			color = entry.color();
-			break;
-		}
-	}
-
-	if (not color.isValid())
-		return;
-
-	for (LDObject* obj : selectedObjects())
-	{
-		if (not obj->isColored())
-			continue; // uncolored object
-
-		obj->setColor (color);
-	}
-
-	endAction();
-	refresh();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1050,13 +1032,12 @@ void MainWindow::replaceSelection(const QItemSelection& selection)
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-ColorToolbarItem::ColorToolbarItem (LDColor color, QToolButton* toolButton) :
-	m_color (color),
-	m_toolButton (toolButton) {}
+ColorToolbarItem::ColorToolbarItem(LDColor color) :
+	m_color (color) {}
 
 ColorToolbarItem ColorToolbarItem::makeSeparator()
 {
-	return ColorToolbarItem (LDColor::nullColor, nullptr);
+	return {LDColor::nullColor};
 }
 
 bool ColorToolbarItem::isSeparator() const
@@ -1072,14 +1053,4 @@ LDColor ColorToolbarItem::color() const
 void ColorToolbarItem::setColor (LDColor color)
 {
 	m_color = color;
-}
-
-QToolButton* ColorToolbarItem::toolButton() const
-{
-	return m_toolButton;
-}
-
-void ColorToolbarItem::setToolButton (QToolButton* value)
-{
-	m_toolButton = value;
 }

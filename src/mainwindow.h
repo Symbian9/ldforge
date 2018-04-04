@@ -38,18 +38,15 @@ class LDDocument;
 class ColorToolbarItem
 {
 public:
-	ColorToolbarItem (LDColor color = LDColor{}, QToolButton* toolButton = nullptr);
+	ColorToolbarItem (LDColor color = {});
 	LDColor color() const;
 	bool isSeparator() const;
 	void setColor (LDColor color);
-	void setToolButton (QToolButton* value);
-	QToolButton* toolButton() const;
 
 	static ColorToolbarItem makeSeparator();
 
 private:
 	LDColor m_color;
-	QToolButton* m_toolButton;
 };
 
 // LDForge's main GUI class.
@@ -147,5 +144,4 @@ private:
 private slots:
 	void finishInitialization();
 	void recentFileClicked();
-	void quickColorClicked();
 };
