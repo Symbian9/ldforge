@@ -66,7 +66,6 @@ public:
 	void applyToActions(function<void(QAction*)> function);
 	void changeDocument (LDDocument* f);
 	void clearSelection();
-	void closeInitialDocument();
 	void createBlankDocument();
 	LDDocument* currentDocument();
 	void currentDocumentClosed();

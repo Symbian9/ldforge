@@ -864,7 +864,6 @@ void MainWindow::createBlankDocument()
 	LDDocument* f = newDocument();
 	f->setName ("");
 	changeDocument (f);
-	closeInitialDocument();
 	doFullRefresh();
 	updateActions();
 }
@@ -978,23 +977,6 @@ void MainWindow::documentClosed(LDDocument *document)
 	}
 
 	m_renderers.remove(document);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-// This little beauty closes the initial file that was open at first when opening a new file over it.
-//
-void MainWindow::closeInitialDocument()
-{
-/*
-	if (length(m_documents) == 2 and
-		m_documents[0]->name().isEmpty() and
-		not m_documents[1]->name().isEmpty() and
-		not m_documents[0]->hasUnsavedChanges())
-	{
-		m_documents.first()->close();
-	}
-*/
 }
 
 QModelIndexList MainWindow::selectedIndexes() const
