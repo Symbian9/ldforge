@@ -450,7 +450,6 @@ void LDDocument::initializeCachedData()
 {
 	if (m_needsRecache)
 	{
-		m_vertices.clear();
 		Model model {m_documents};
 		this->inlineContents(model, true, true);
 
