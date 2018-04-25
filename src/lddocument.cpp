@@ -450,6 +450,7 @@ void LDDocument::initializeCachedData()
 {
 	if (m_needsRecache)
 	{
+		this->m_polygonData.clear();
 		Model model {m_documents};
 		this->inlineContents(model, true, true);
 

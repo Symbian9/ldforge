@@ -18,6 +18,7 @@
 
 #include "headeredit.h"
 #include "ui_headeredit.h"
+#include "parser.h"
 #include "../lddocument.h"
 #include "../headerhistorymodel.h"
 
@@ -35,6 +36,14 @@ static const QStringList categories {
 	"Train", "Turntable", "Tyre", "Vehicle", "Wedge", "Wheel", "Winch", "Window", "Windscreen",
 	"Wing", "Znap",
 };
+
+LDHeader::FileType headerTypeCast(int index)
+{
+	if (Parser::typeStrings.values().contains(static_cast<LDHeader::FileType>(index)))
+		return static_cast<LDHeader::FileType>(index);
+	else
+		return LDHeader::NoHeader;
+}
 
 HeaderEdit::HeaderEdit(QWidget* parent) :
 	QWidget {parent},
@@ -93,6 +102,15 @@ HeaderEdit::HeaderEdit(QWidget* parent) :
 		{
 			if (this->hasValidHeader())
 				this->m_header->category = ::categories.value(index);
+		}
+	);
+	connect(
+		ui.type,
+		qOverload<int>(&QComboBox::currentIndexChanged),
+		[&](int index)
+		{
+			if (this->hasValidHeader())
+				this->m_header->type = headerTypeCast(index + 1);
 		}
 	);
 	connect(
