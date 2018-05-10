@@ -185,7 +185,7 @@ void SubfileReferenceEditor::scalingChanged()
 			{
 				for (int row : {0, 1, 2})
 				{
-					double cellValue = abs(this->matrixCell(row, column)->value());
+					double cellValue = this->matrixCell(row, column)->value();
 					cellValue *= newScaling / oldScaling;
 					QDoubleSpinBox* cellWidget = this->matrixCell(row, column);
 					cellWidget->blockSignals(true);

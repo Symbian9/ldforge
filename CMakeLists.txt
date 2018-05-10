@@ -93,6 +93,7 @@ set (LDFORGE_SOURCES
 	src/types/boundingbox.cpp
 	src/types/matrix.cpp
 	src/types/vertex.cpp
+	src/widgets/doublespinbox.cpp
 	src/widgets/headeredit.cpp
 	src/widgets/vertexobjecteditor.cpp
 )
@@ -170,6 +171,7 @@ set (LDFORGE_HEADERS
 	src/types/library.h
 	src/types/matrix.h
 	src/types/vertex.h
+	src/widgets/doublespinbox.h
 	src/widgets/headeredit.h
 	src/widgets/vertexobjecteditor.h
 )

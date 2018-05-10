@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>625</width>
+    <width>699</width>
     <height>644</height>
    </rect>
   </property>
@@ -70,7 +70,10 @@
      <item row="2" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QDoubleSpinBox" name="positionX">
+        <widget class="DoubleSpinBox" name="positionX">
+         <property name="prefix">
+          <string>𝑥 = </string>
+         </property>
          <property name="decimals">
           <number>5</number>
          </property>
@@ -83,7 +86,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="positionY">
+        <widget class="DoubleSpinBox" name="positionY">
+         <property name="prefix">
+          <string>𝑦 = </string>
+         </property>
          <property name="decimals">
           <number>5</number>
          </property>
@@ -96,7 +102,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="positionZ">
+        <widget class="DoubleSpinBox" name="positionZ">
+         <property name="prefix">
+          <string>𝑧 = </string>
+         </property>
          <property name="decimals">
           <number>5</number>
          </property>
@@ -127,7 +136,7 @@
      <item row="4" column="1">
       <layout class="QGridLayout" name="matrixLayout">
        <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="matrixE">
+        <widget class="DoubleSpinBox" name="matrixE">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -140,7 +149,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QDoubleSpinBox" name="matrixA">
+        <widget class="DoubleSpinBox" name="matrixA">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -153,7 +162,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QDoubleSpinBox" name="matrixG">
+        <widget class="DoubleSpinBox" name="matrixG">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -166,7 +175,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="matrixH">
+        <widget class="DoubleSpinBox" name="matrixH">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -179,7 +188,7 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QDoubleSpinBox" name="matrixI">
+        <widget class="DoubleSpinBox" name="matrixI">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -192,7 +201,7 @@
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QDoubleSpinBox" name="matrixF">
+        <widget class="DoubleSpinBox" name="matrixF">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -205,7 +214,7 @@
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QDoubleSpinBox" name="matrixC">
+        <widget class="DoubleSpinBox" name="matrixC">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -218,7 +227,7 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QDoubleSpinBox" name="matrixD">
+        <widget class="DoubleSpinBox" name="matrixD">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -231,7 +240,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QDoubleSpinBox" name="matrixB">
+        <widget class="DoubleSpinBox" name="matrixB">
          <property name="decimals">
           <number>5</number>
          </property>
@@ -255,7 +264,7 @@
      <item row="6" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QDoubleSpinBox" name="scalingX">
+        <widget class="DoubleSpinBox" name="scalingX">
          <property name="prefix">
           <string>𝑥 × </string>
          </property>
@@ -271,7 +280,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="scalingY">
+        <widget class="DoubleSpinBox" name="scalingY">
          <property name="prefix">
           <string>𝑦 × </string>
          </property>
@@ -287,7 +296,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="scalingZ">
+        <widget class="DoubleSpinBox" name="scalingZ">
          <property name="prefix">
           <string>𝑧 × </string>
          </property>
@@ -325,6 +334,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>widgets/doublespinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>primitivesTreeView</tabstop>
   <tabstop>referenceName</tabstop>
