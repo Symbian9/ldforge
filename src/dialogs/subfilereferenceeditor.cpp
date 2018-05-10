@@ -49,7 +49,15 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 	{
 		QLayoutItem* item = this->ui.matrixLayout->itemAtPosition(i, j);
 		QDoubleSpinBox* spinbox = item ? qobject_cast<QDoubleSpinBox*>(item->widget()) : nullptr;
+		spinbox->blockSignals(true);
 		spinbox->setValue(reference->transformationMatrix()(i, j));
+		spinbox->blockSignals(false);
+		connect(
+			spinbox,
+			qOverload<double>(&QDoubleSpinBox::valueChanged),
+			this,
+			&SubfileReferenceEditor::matrixChanged
+		);
 	}
 	connect(
 		this->ui.primitivesTreeView,
@@ -63,6 +71,69 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 				this->ui.referenceName->setText(primitiveName.toString());
 		}
 	);
+
+	for (QDoubleSpinBox* spinbox : {this->ui.scalingX, this->ui.scalingY, this->ui.scalingZ})
+	{
+		connect(
+			spinbox,
+			qOverload<double>(&QDoubleSpinBox::valueChanged),
+			this,
+			&SubfileReferenceEditor::scalingChanged
+		);
+	}
+
+	// Fill in the initial scaling values
+	for (int column : {0, 1, 2})
+	{
+		QDoubleSpinBox* spinbox = this->vectorElement(column);
+		spinbox->blockSignals(true);
+		spinbox->setValue(this->matrixScaling(column));
+		spinbox->blockSignals(false);
+	}
+}
+
+SubfileReferenceEditor::~SubfileReferenceEditor()
+{
+	delete &this->ui;
+}
+
+/*
+ * Returns a spinbox from the matrix grid at position (row, column).
+ * Row and column must be within [0, 2].
+ */
+QDoubleSpinBox* SubfileReferenceEditor::matrixCell(int row, int column) const
+{
+	if (qBound(0, row, 2) != row or qBound(0, column, 2) != column)
+	{
+		throw std::out_of_range {"bad row and column values"};
+	}
+	else
+	{
+		QLayoutItem* item = this->ui.matrixLayout->itemAtPosition(row, column);
+		return item ? qobject_cast<QDoubleSpinBox*>(item->widget()) : nullptr;
+	}
+}
+
+/*
+ * Returns a spinbox for the vector element at the given position
+ * Index must be within [0, 2]
+ */
+QDoubleSpinBox* SubfileReferenceEditor::vectorElement(int index)
+{
+	switch (index)
+	{
+	case 0:
+		return this->ui.scalingX;
+
+	case 1:
+		return this->ui.scalingY;
+
+	case 2:
+		return this->ui.scalingZ;
+
+	default:
+		throw std::out_of_range {"bad index"};
+	}
 }
 
 void SubfileReferenceEditor::accept()
@@ -72,9 +143,7 @@ void SubfileReferenceEditor::accept()
 	for (int i : {0, 1, 2})
 	for (int j : {0, 1, 2})
 	{
-		QLayoutItem* item = this->ui.matrixLayout->itemAtPosition(i, j);
-		QDoubleSpinBox* spinbox = item ? qobject_cast<QDoubleSpinBox*>(item->widget()) : nullptr;
-		transformationMatrix(i, j) = spinbox->value();
+		transformationMatrix(i, j) = this->matrixCell(i, j)->value();
 	}
 	this->reference->setTransformationMatrix(transformationMatrix);
 	this->reference->setPosition({
@@ -91,7 +160,74 @@ void SubfileReferenceEditor::setPrimitivesTree(PrimitiveManager* primitives)
 	this->ui.primitivesTreeView->setModel(primitives);
 }
 
-SubfileReferenceEditor::~SubfileReferenceEditor()
+double SubfileReferenceEditor::matrixScaling(int column) const
 {
-	delete &this->ui;
+	return sqrt(
+		pow(this->matrixCell(0, column)->value(), 2) +
+		pow(this->matrixCell(1, column)->value(), 2) +
+		pow(this->matrixCell(2, column)->value(), 2)
+	);
+}
+
+/*
+ * Updates the appropriate matrix column when a scaling vector element is changed.
+ */
+void SubfileReferenceEditor::scalingChanged()
+{
+	for (int column : {0, 1, 2})
+	{
+		if (this->sender() == this->vectorElement(column))
+		{
+			double oldScaling = this->matrixScaling(column);
+			double newScaling = static_cast<QDoubleSpinBox*>(this->sender())->value();
+
+			if (not qFuzzyCompare(newScaling, 0.0))
+			{
+				for (int row : {0, 1, 2})
+				{
+					double cellValue = abs(this->matrixCell(row, column)->value());
+					cellValue *= newScaling / oldScaling;
+					QDoubleSpinBox* cellWidget = this->matrixCell(row, column);
+					cellWidget->blockSignals(true);
+					cellWidget->setValue(cellValue);
+					cellWidget->blockSignals(false);
+				}
+			}
+
+			break;
+		}
+	}
+}
+
+/*
+ * Finds the position for the given cell widget.
+ */
+QPair<int, int> SubfileReferenceEditor::cellPosition(QDoubleSpinBox* cellWidget)
+{
+	for (int row : {0, 1, 2})
+	for (int column : {0, 1, 2})
+	{
+		if (this->matrixCell(row, column) == cellWidget)
+			return {row, column};
+	}
+
+	throw std::out_of_range {"widget is not in the matrix"};
+}
+
+/*
+ * Updates the appropriate scaling vector element when a matrix cell is changed.
+ */
+void SubfileReferenceEditor::matrixChanged()
+{
+	QDoubleSpinBox* cellWidget = static_cast<QDoubleSpinBox*>(this->sender());
+
+	try
+	{
+		int column = this->cellPosition(cellWidget).second;
+		QDoubleSpinBox* spinbox = this->vectorElement(column);
+		spinbox->blockSignals(true);
+		spinbox->setValue(this->matrixScaling(column));
+		spinbox->blockSignals(false);
+	}
+	catch (const std::out_of_range&) {}
 }
