@@ -180,3 +180,15 @@ QString fractionRep(int numerator, int denominator)
 {
 	return superscript(numerator) + "⁄" + subscript(denominator);
 }
+
+/*
+ * Temporarily blocks the signals of `object` and calls `function`. Returns whatever `function`
+ * returns. Assumes that the function does not change the signal blocking status of `object`.
+ */
+void withSignalsBlocked(QObject* object, std::function<void()> function)
+{
+	bool wasBlockingSignals = object->signalsBlocked();
+	object->blockSignals(true);
+	function();
+	object->blockSignals(wasBlockingSignals);
+}

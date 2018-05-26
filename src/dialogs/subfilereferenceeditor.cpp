@@ -49,9 +49,10 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 	{
 		QLayoutItem* item = this->ui.matrixLayout->itemAtPosition(i, j);
 		QDoubleSpinBox* spinbox = item ? qobject_cast<QDoubleSpinBox*>(item->widget()) : nullptr;
-		spinbox->blockSignals(true);
-		spinbox->setValue(reference->transformationMatrix()(i, j));
-		spinbox->blockSignals(false);
+		withSignalsBlocked(spinbox, [&]()
+		{
+			spinbox->setValue(reference->transformationMatrix()(i, j));
+		});
 		connect(
 			spinbox,
 			qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -86,9 +87,10 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 	for (int column : {0, 1, 2})
 	{
 		QDoubleSpinBox* spinbox = this->vectorElement(column);
-		spinbox->blockSignals(true);
-		spinbox->setValue(this->matrixScaling(column));
-		spinbox->blockSignals(false);
+		withSignalsBlocked(spinbox, [&]()
+		{
+			spinbox->setValue(this->matrixScaling(column));
+		});
 	}
 }
 
@@ -188,9 +190,10 @@ void SubfileReferenceEditor::scalingChanged()
 					double cellValue = this->matrixCell(row, column)->value();
 					cellValue *= newScaling / oldScaling;
 					QDoubleSpinBox* cellWidget = this->matrixCell(row, column);
-					cellWidget->blockSignals(true);
-					cellWidget->setValue(cellValue);
-					cellWidget->blockSignals(false);
+					withSignalsBlocked(cellWidget, [&]()
+					{
+						cellWidget->setValue(cellValue);
+					});
 				}
 			}
 
@@ -225,9 +228,10 @@ void SubfileReferenceEditor::matrixChanged()
 	{
 		int column = this->cellPosition(cellWidget).second;
 		QDoubleSpinBox* spinbox = this->vectorElement(column);
-		spinbox->blockSignals(true);
-		spinbox->setValue(this->matrixScaling(column));
-		spinbox->blockSignals(false);
+		withSignalsBlocked(spinbox, [&]()
+		{
+			spinbox->setValue(this->matrixScaling(column));
+		});
 	}
 	catch (const std::out_of_range&) {}
 }

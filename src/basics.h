@@ -100,3 +100,4 @@ void simplify(int& numerator, int& denominator);
 QString superscript(int number);
 QString subscript(int number);
 QString fractionRep(int numerator, int denominator);
+void withSignalsBlocked(QObject* object, std::function<void()> function);
