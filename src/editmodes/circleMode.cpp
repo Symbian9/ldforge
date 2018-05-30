@@ -60,6 +60,28 @@ double CircleMode::getCircleDrawDist(int position) const
 	return 0.0;
 }
 
+static Matrix shearMatrixForPlane(Canvas* renderer)
+{
+	const Plane& plane = renderer->drawPlane();
+	Axis localx, localy;
+	renderer->getRelativeAxes(localx, localy);
+	Axis localz = renderer->getRelativeZ();
+	Matrix shearMatrix = Matrix::identity;
+	Vertex normalAsVertex = Vertex::fromVector(plane.normal);
+
+	// Compute shear matrix values. The (Y, X) cell means a slope for Y in regard to X.
+	// If x grows by 2, y grows by 2 times this value. In the circle primitives,
+	// depth is Y, but in the orthogonal view, depth is Z. So Y and Z must be swapped.
+	if (not qFuzzyCompare(normalAsVertex[localz], 0.0))
+	{
+		// The slope of the vector is 90° offset from the normal vector. So Y/X slope is
+		// -X/Y from the normal vector.
+		shearMatrix(Y, X) = -normalAsVertex[localx] / normalAsVertex[localz];
+		shearMatrix(Y, Z) = -normalAsVertex[localy] / normalAsVertex[localz];
+	}
+
+	return shearMatrix;
+}
 
 void CircleMode::endDraw()
 {
@@ -72,28 +94,33 @@ void CircleMode::endDraw()
 	double dist1 (getCircleDrawDist (1));
 	LDDocument* primitiveFile;
 	Matrix transform;
+
 	bool circleOrDisc = false;
 
 	if (dist1 < dist0)
 		qSwap(dist0, dist1);
 
-	if (dist0 == dist1)
+	if (qFuzzyCompare(dist0, dist1))
 	{
-		// If the radii are the same, there's no ring space to fill. Use a circle.
+		// Special case: radii are the same, there's no area. Use a circle.
 		primitiveModel.type = PrimitiveModel::Circle;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix(dist0));
+		// transform = shearMatrixForPlane(renderer());
+		transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
+		transform *= Matrix::scaleMatrix(dist0);
 		circleOrDisc = true;
 	}
-	else if (dist0 == 0 or dist1 == 0)
+	else if (qFuzzyCompare(dist0, 0) or qFuzzyCompare(dist1, 0))
 	{
-		// If either radii is 0, use a disc.
+		// Special case #2: one radius is 0, so use a disc.
 		primitiveModel.type = PrimitiveModel::Disc;
 		primitiveFile = primitives()->getPrimitive(primitiveModel);
-		transform = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix((dist0 != 0) ? dist0 : dist1));
+		//transform = shearMatrixForPlane(renderer());
+		transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
+		transform *= Matrix::scaleMatrix(max(dist0, dist1));
 		circleOrDisc = true;
 	}
-	else if (g_RingFinder.findRings(dist0, dist1))
+	else if (g_RingFinder.findRings(dist0, dist1)) // Consult the ring finder now
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		primitiveModel.type = PrimitiveModel::Ring;
@@ -102,7 +129,8 @@ void CircleMode::endDraw()
 		{
 			primitiveModel.ringNumber = component.num;
 			primitiveFile = primitives()->getPrimitive(primitiveModel);
-			Matrix matrix = Matrix::fromRotationMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
+			Matrix matrix = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
+			// matrix = shearMatrixForPlane(renderer()) * matrix;
 			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix, m_drawedVerts.first());
 		}
 	}
@@ -118,7 +146,6 @@ void CircleMode::endDraw()
 		Vertex templ;
 		templ.setCoordinate(localx, x0);
 		templ.setCoordinate(localy, y0);
-		templ.setCoordinate(localz, renderer()->getDepthValue());
 
 		// Calculate circle coords
 		QVector<QLineF> c0 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist0);
@@ -141,13 +168,19 @@ void CircleMode::endDraw()
 			if (static_cast<int>(renderer()->camera()) % 3 <= 0)
 				qSwap(v1, v3);
 
+			// Project the vertices onto the draw plane.
+			for (Vertex* vertex : {&v0, &v1, &v2, &v3})
+				*vertex = projectToDrawPlane(*vertex);
+
 			LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
 			quad->setColor(MainColor);
 		}
 	}
 
 	if (circleOrDisc and primitiveFile)
+	{
 		model.emplace<LDSubfileReference>(primitiveFile->name(), transform, m_drawedVerts.first());
+	}
 
 	finishDraw (model);
 }

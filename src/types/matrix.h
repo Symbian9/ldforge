@@ -51,9 +51,11 @@ public:
 	ConstRowView operator[](int row) const;
 	double& operator()(int row, int column);
 	const double& operator()(int row, int column) const;
+	Matrix& operator*=(const Matrix& other);
 
 	static const Matrix identity;
-	static Matrix fromRotationMatrix(const GLRotationMatrix& rotationMatrix);
+	static Matrix fromQMatrix(const QMatrix4x4& matrix);
+	static Matrix scaleMatrix(qreal scalar);
 
 private:
 	double m_values[9];

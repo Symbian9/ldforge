@@ -19,6 +19,7 @@
 #pragma once
 #include "glrenderer.h"
 #include "editmodes/abstractEditMode.h"
+#include "geometry/plane.h"
 
 class Canvas : public GLRenderer
 {
@@ -27,6 +28,7 @@ public:
 	~Canvas();
 
 	EditModeType currentEditModeType() const;
+	const Plane& drawPlane() const;
 	int depthNegateFactor() const;
 	LDDocument* document() const;
 	void drawPoint(QPainter& painter, QPointF pos, QColor color = QColor (64, 192, 0)) const;
@@ -34,12 +36,11 @@ public:
 	void drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF pos) const;
 	void clearCurrentCullValue();
 	double currentCullValue() const;
-	double getDepthValue() const;
 	void getRelativeAxes(Axis& relX, Axis& relY) const;
 	Axis getRelativeZ() const;
 	QPen linePen() const;
 	const Vertex& position3D() const;
-	void setDepthValue(double depth);
+	void setDrawPlane(const Plane& plane);
 	void setCullValue(double value);
 	void setEditMode(EditModeType type);
 
@@ -60,6 +61,6 @@ private:
 	LDDocument& m_document;
 	AbstractEditMode* m_currentEditMode = nullptr;
 	Vertex m_position3D;
-	double m_depthValues[6] = {0};
+	Plane m_drawPlane;
 	double cullValues[6] = {0};
 };

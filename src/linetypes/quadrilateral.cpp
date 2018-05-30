@@ -55,3 +55,21 @@ LDObjectType LDQuadrilateral::type() const
 {
 	return LDObjectType::Quadrilateral;
 }
+
+/*
+ * Returns whether or not this quadrilateral is co-planar.
+ */
+bool LDQuadrilateral::isCoPlanar() const
+{
+	return planeAngle() < 0.001745329;
+}
+
+/*
+ * Returns the angle between the two planes in this quadrilateral.
+ */
+qreal LDQuadrilateral::planeAngle() const
+{
+	QVector3D vec_1 = QVector3D::crossProduct(vertex(2) - vertex(1), vertex(0) - vertex(1));
+	QVector3D vec_2 = QVector3D::crossProduct(vertex(0) - vertex(3), vertex(2) - vertex(3));
+	return vectorAngle(vec_1, vec_2);
+}

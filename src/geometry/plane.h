@@ -19,21 +19,24 @@
 #pragma once
 #include "../basics.h"
 #include "../types/vertex.h"
+#include "linesegment.h"
 
 /*
- * Models a 3D line segment.
+ * Models a plane in 3D space.
  */
-struct LineSegment
+struct Plane
 {
-	Vertex v_1;
-	Vertex v_2;
+	struct IntersectionResult
+	{
+		bool intersected = false;
+		Vertex vertex;
+	};
 
-	QPair<Vertex, Vertex> toPair() const;
+	QVector3D normal;
+	Vertex point;
+
+	IntersectionResult intersection(const Line& line) const;
+	bool isValid() const;
+
+	static Plane fromPoints(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 };
-
-LineSegment normalized(const LineSegment& segment);
-unsigned int qHash(const LineSegment& segment);
-bool operator==(const LineSegment& one, const LineSegment& other);
-bool operator<(const LineSegment& one, const LineSegment& other);
-
-using Line = LineSegment;

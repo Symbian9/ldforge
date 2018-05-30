@@ -29,6 +29,7 @@ public:
 	Q_INVOKABLE void axes();
 	Q_INVOKABLE void bfcView();
 	Q_INVOKABLE void clearCullDepth();
+	Q_INVOKABLE void clearDrawPlane();
 	Q_INVOKABLE void drawAngles();
 	Q_INVOKABLE void drawConditionalLines();
 	Q_INVOKABLE void drawEdgeLines();
@@ -41,8 +42,8 @@ public:
 	Q_INVOKABLE void selectAll();
 	Q_INVOKABLE void selectByColor();
 	Q_INVOKABLE void selectByType();
+	Q_INVOKABLE void setDrawPlane();
 	Q_INVOKABLE void setCullDepth();
-	Q_INVOKABLE void setDrawDepth();
 	Q_INVOKABLE void visibilityHide();
 	Q_INVOKABLE void visibilityReveal();
 	Q_INVOKABLE void visibilityToggle();

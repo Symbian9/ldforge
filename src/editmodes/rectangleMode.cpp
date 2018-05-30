@@ -78,16 +78,16 @@ void RectangleMode::updateRectVerts()
 	Axis localx, localy, localz;
 	renderer()->getRelativeAxes(localx, localy);
 	localz = renderer()->getRelativeZ();
+	m_rectangleVerts[0].setCoordinate(localx, v0[localx]);
+	m_rectangleVerts[0].setCoordinate(localy, v0[localy]);
+	m_rectangleVerts[1].setCoordinate(localx, v1[localx]);
+	m_rectangleVerts[1].setCoordinate(localy, v0[localy]);
+	m_rectangleVerts[2].setCoordinate(localx, v1[localx]);
+	m_rectangleVerts[2].setCoordinate(localy, v1[localy]);
+	m_rectangleVerts[3].setCoordinate(localx, v0[localx]);
+	m_rectangleVerts[3].setCoordinate(localy, v1[localy]);
 
+	// Compute local z from the draw plane
 	for (int i = 0; i < 4; ++i)
-		m_rectangleVerts[i].setCoordinate (localz, renderer()->getDepthValue());
-
-	m_rectangleVerts[0].setCoordinate (localx, v0[localx]);
-	m_rectangleVerts[0].setCoordinate (localy, v0[localy]);
-	m_rectangleVerts[1].setCoordinate (localx, v1[localx]);
-	m_rectangleVerts[1].setCoordinate (localy, v0[localy]);
-	m_rectangleVerts[2].setCoordinate (localx, v1[localx]);
-	m_rectangleVerts[2].setCoordinate (localy, v1[localy]);
-	m_rectangleVerts[3].setCoordinate (localx, v0[localx]);
-	m_rectangleVerts[3].setCoordinate (localy, v1[localy]);
+		m_rectangleVerts[i] = projectToDrawPlane(m_rectangleVerts[i]);
 }

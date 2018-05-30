@@ -224,6 +224,24 @@ T roundToInterval(T value, double interval)
 	return static_cast<T>(round(value / interval) * interval);
 }
 
+/*
+ * Returns the empty sum. (recursion base)
+ */
+template<typename T>
+T sum()
+{
+	return {};
+}
+
+/*
+ * Returns the sum of n arguments.
+ */
+template<typename T, typename... Rest>
+T sum(const T& arg, Rest&&... rest)
+{
+	return arg + sum<T>(rest...);
+}
+
 // Copy of qOverload so as to drop Qt version requirement from 5.7 to 5.5.
 #if (QT_VERSION < QT_VERSION_CHECK(5, 7, 0))
 template <typename... Args>

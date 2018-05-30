@@ -76,6 +76,7 @@ set (LDFORGE_SOURCES
 	src/editmodes/rectangleMode.cpp
 	src/editmodes/selectMode.cpp
 	src/geometry/linesegment.cpp
+	src/geometry/plane.cpp
 	src/linetypes/comment.cpp
 	src/linetypes/conditionaledge.cpp
 	src/linetypes/edgeline.cpp
@@ -153,6 +154,7 @@ set (LDFORGE_HEADERS
 	src/generics/ring.h
 	src/generics/transform.h
 	src/geometry/linesegment.h
+	src/geometry/plane.h
 	src/linetypes/comment.h
 	src/linetypes/conditionaledge.h
 	src/linetypes/edgeline.h

@@ -48,6 +48,8 @@ struct Vertex
 	double operator[](Axis ax) const;
 	bool operator==(const Vertex& other) const;
 	bool operator!=(const Vertex& other) const;
+
+	static Vertex fromVector(const QVector3D& vector);
 };
 
 inline Vertex operator*(qreal scalar, const Vertex& vertex)

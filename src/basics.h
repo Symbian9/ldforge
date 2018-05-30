@@ -89,6 +89,11 @@ static inline qreal abs(const QVector3D &vector)
 	return vector.length();
 }
 
+qreal determinant(qreal a, qreal b, qreal c, qreal d);
+qreal determinant(qreal a, qreal b, qreal c, qreal d, qreal e, qreal f, qreal g, qreal h, qreal i);
+qreal determinant(const QMatrix2x2& matrix);
+qreal determinant(const QMatrix3x3& matrix);
+qreal determinant(const QMatrix4x4& matrix);
 QString formatFileSize(qint64 size);
 int gcd(int a, int b);
 QString joinStrings(const QList<class StringFormatArg>& values, QString delimeter = " ");
@@ -100,4 +105,5 @@ void simplify(int& numerator, int& denominator);
 QString superscript(int number);
 QString subscript(int number);
 QString fractionRep(int numerator, int denominator);
+qreal vectorAngle(const QVector3D& vec_1, const QVector3D& vec_2);
 void withSignalsBlocked(QObject* object, std::function<void()> function);

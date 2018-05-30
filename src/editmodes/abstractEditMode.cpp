@@ -314,7 +314,7 @@ Vertex AbstractDrawMode::getCursorVertex() const
 		result.setCoordinate(relativeY, point.y());
 	}
 
-	return result;
+	return projectToDrawPlane(result);
 }
 
 /*
@@ -349,3 +349,23 @@ bool AbstractDrawMode::preAddVertex (Vertex const&)
  * TODO: the two method names are too similar and should be renamed.
  */
 void AbstractDrawMode::endDraw() {}
+
+/*
+ * Sets the depth value of the vertex so that it's in the draw plane.
+ */
+Vertex AbstractDrawMode::projectToDrawPlane(const Vertex& vertex) const
+{
+	Axis localx, localy;
+	renderer()->getRelativeAxes(localx, localy);
+	Axis localz = renderer()->getRelativeZ();
+	Line line;
+	line.v_1 = line.v_2 = vertex;
+	line.v_1[localz] = 1;
+	line.v_2[localz] = -1;
+	Plane::IntersectionResult intersection = renderer()->drawPlane().intersection(line);
+
+	if (intersection.intersected)
+		return intersection.vertex;
+	else
+		return vertex;
+}

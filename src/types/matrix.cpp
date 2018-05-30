@@ -238,13 +238,28 @@ int Matrix::ConstRowView::row()
 	return _row;
 }
 
-Matrix Matrix::fromRotationMatrix(const GLRotationMatrix& rotationMatrix)
+Matrix Matrix::fromQMatrix(const QMatrix4x4& matrix)
 {
 	Matrix result;
 
 	for (int i = 0; i < 3; ++i)
 	for (int j = 0; j < 3; ++j)
-		result(i, j) = rotationMatrix(i, j);
+		result(i, j) = matrix(i, j);
 
 	return result;
+}
+
+Matrix Matrix::scaleMatrix(qreal scalar)
+{
+	return {
+		scalar, 0, 0,
+		0, scalar, 0,
+		0, 0, scalar
+	};
+}
+
+Matrix& Matrix::operator*=(const Matrix& other)
+{
+	*this = *this * other;
+	return *this;
 }

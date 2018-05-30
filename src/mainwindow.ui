@@ -332,7 +332,8 @@
     <addaction name="actionModeCircle"/>
     <addaction name="actionModeLinePath"/>
     <addaction name="separator"/>
-    <addaction name="actionSetDrawDepth"/>
+    <addaction name="actionSetDrawPlane"/>
+    <addaction name="actionClearDrawPlane"/>
     <addaction name="separator"/>
     <addaction name="actionJumpTo"/>
    </widget>
@@ -1029,9 +1030,12 @@
     <string>D</string>
    </property>
   </action>
-  <action name="actionSetDrawDepth">
+  <action name="actionSetDrawPlane">
    <property name="text">
-    <string>Set Draw Dept&amp;h</string>
+    <string>Set draw plane</string>
+   </property>
+   <property name="toolTip">
+    <string>Locks draw tools into a plane defined by a triangle or a coplanar quadrilateral.</string>
    </property>
   </action>
   <action name="actionSetColor">
@@ -1767,6 +1771,14 @@
   <action name="actionClearCullDepth">
    <property name="text">
     <string>Clear cull depth</string>
+   </property>
+  </action>
+  <action name="actionClearDrawPlane">
+   <property name="text">
+    <string>Clear draw plane</string>
+   </property>
+   <property name="toolTip">
+    <string>Resets the drawing plane</string>
    </property>
   </action>
  </widget>

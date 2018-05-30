@@ -347,20 +347,16 @@ Axis Canvas::getRelativeZ() const
 
 // =============================================================================
 //
-void Canvas::setDepthValue (double depth)
+void Canvas::setDrawPlane(const Plane& plane)
 {
-	if (camera() < Camera::Free)
-		m_depthValues[static_cast<int>(camera())] = depth;
+	m_drawPlane = plane;
 }
 
 // =============================================================================
 //
-double Canvas::getDepthValue() const
+const Plane& Canvas::drawPlane() const
 {
-	if (camera() < Camera::Free)
-		return m_depthValues[static_cast<int>(camera())];
-	else
-		return 0.0;
+	return m_drawPlane;
 }
 
 void Canvas::contextMenuEvent(QContextMenuEvent* event)

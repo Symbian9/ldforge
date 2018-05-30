@@ -26,6 +26,7 @@
 #include "../colors.h"
 #include "../glcompiler.h"
 #include "../documentmanager.h"
+#include "../linetypes/quadrilateral.h"
 #include "viewtoolset.h"
 
 ViewToolset::ViewToolset (MainWindow *parent) :
@@ -168,28 +169,53 @@ void ViewToolset::drawAngles()
 	m_window->renderer()->update();
 }
 
-void ViewToolset::setDrawDepth()
+/*
+ * If the given object is within a single plane, returns that plane.
+ * Should probably be smarter than this.
+ */
+static Plane drawPlaneFromObject(LDObject* object)
 {
-	if (m_window->renderer()->camera() == Camera::Free)
-		return;
+	switch (object->type())
+	{
+	case LDObjectType::Quadrilateral:
+		if (not static_cast<LDQuadrilateral*>(object)->isCoPlanar())
+			return {};
+	case LDObjectType::Triangle:
+		return Plane::fromPoints(object->vertex(0), object->vertex(1), object->vertex(2));
 
-	bool ok;
-	double depth = QInputDialog::getDouble(
-		m_window,
-		tr("Set draw depth"),
-		format(
-			tr("Depth value for %1:"),
-			m_window->renderer()->currentCamera().name()
-		),
-		m_window->renderer()->getDepthValue(),
-		-10000.0f,
-		10000.0f,
-		4,
-		&ok
-	);
+	default:
+		return {};
+	}
+}
 
-	if (ok)
-		m_window->renderer()->setDepthValue(depth);
+void ViewToolset::setDrawPlane()
+{
+	QSet<LDObject*> objects = selectedObjects();
+
+	if (objects.size() == 1)
+	{
+		LDObject* object = *objects.begin();
+		Plane plane = drawPlaneFromObject(object);
+
+		if (plane.isValid())
+		{
+			m_window->renderer()->setDrawPlane(plane);
+		}
+		else
+		{
+			QMessageBox::critical(
+				m_window,
+				tr("Error"),
+				tr("This object does not define a single plane"),
+				QMessageBox::Ok,
+				QMessageBox::Ok);
+		}
+	}
+}
+
+void ViewToolset::clearDrawPlane()
+{
+	m_window->renderer()->setDrawPlane({});
 }
 
 void ViewToolset::setCullDepth()

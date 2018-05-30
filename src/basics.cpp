@@ -192,3 +192,70 @@ void withSignalsBlocked(QObject* object, std::function<void()> function)
 	function();
 	object->blockSignals(wasBlockingSignals);
 }
+
+/*
+ * Returns the angle between two vectors
+ */
+qreal vectorAngle(const QVector3D& vec_1, const QVector3D& vec_2)
+{
+	return acos(QVector3D::dotProduct(vec_1, vec_2) / vec_1.length() / vec_2.length());
+}
+
+/*
+ * Computes the determinant of a 2×2 matrix with each variable passed in row-major order.
+ */
+qreal determinant(qreal a, qreal b, qreal c, qreal d)
+{
+	return a * d - b * c;
+}
+
+/*
+ * Computes the determinant of a 3×3 matrix with each variable passed in row-major order.
+ */
+qreal determinant(qreal a, qreal b, qreal c, qreal d, qreal e, qreal f, qreal g, qreal h, qreal i)
+{
+	return a*e*i + b*f*g + c*d*h - a*f*h - b*d*i - c*e*g;
+}
+
+/*
+ * Computes the determinant of a 2×2 matrix.
+ */
+qreal determinant(const QMatrix2x2& matrix)
+{
+	return matrix(0, 0) * matrix(1, 1) - matrix(0, 1) * matrix(1, 0);
+}
+
+/*
+ * Computes the determinant of a 3×3 matrix.
+ */
+qreal determinant(const QMatrix3x3& matrix)
+{
+	return sum(
+		+matrix(0, 0) * matrix(1, 1) * matrix(2, 2),
+		-matrix(0, 0) * matrix(1, 2) * matrix(2, 1),
+		-matrix(0, 1) * matrix(1, 0) * matrix(2, 2),
+		+matrix(0, 1) * matrix(1, 2) * matrix(2, 0),
+		+matrix(0, 2) * matrix(1, 0) * matrix(2, 1),
+		-matrix(0, 2) * matrix(1, 1) * matrix(2, 0));
+}
+
+/*
+ * Computes the determinant of a 4×4 matrix.
+ */
+qreal determinant(const QMatrix4x4& matrix)
+{
+	qreal sum = 0;
+
+	for (int column : {0, 1, 2, 3})
+	{
+		int column_1 = (column >= 1) ? 0 : 1;
+		int column_2 = (column >= 2) ? 1 : 2;
+		int column_3 = (column >= 3) ? 2 : 3;
+		sum += ((column % 1) ? -1 : 1) * determinant(
+			matrix(1, column_1), matrix(1, column_2), matrix(1, column_3),
+			matrix(2, column_1), matrix(2, column_2), matrix(2, column_3),
+			matrix(3, column_1), matrix(3, column_2), matrix(3, column_3));
+	}
+
+	return sum;
+}

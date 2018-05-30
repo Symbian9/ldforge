@@ -497,7 +497,8 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 	if (renderer()->camera() != Camera::Free)
 	{
 		contextMenu->addSeparator();
-		contextMenu->addAction (ui.actionSetDrawDepth);
+		contextMenu->addAction(ui.actionSetDrawPlane);
+		contextMenu->addAction(ui.actionClearDrawPlane);
 		contextMenu->addAction(ui.actionSetCullDepth);
 		contextMenu->addAction(ui.actionClearCullDepth);
 	}

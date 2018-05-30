@@ -95,6 +95,7 @@ public:
 	virtual int maxVertices() const;
 	bool mouseReleased(const AbstractEditMode::MouseEventData& data) override;
 	virtual bool preAddVertex(Vertex const&);
+	Vertex projectToDrawPlane(const Vertex& vertex) const;
 	void renderPolygon(QPainter& painter, const QVector<Vertex>& poly3d, bool withlengths, bool withangles) const;
 };
 

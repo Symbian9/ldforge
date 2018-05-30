@@ -31,6 +31,8 @@ public:
 	LDQuadrilateral(const Vertex& v1, const Vertex& v2, const Vertex& v3, const Vertex& v4);
 
 	QString asText() const override;
+	bool isCoPlanar() const;
+	qreal planeAngle() const;
 	int numVertices() const override;
 	int triangleCount(DocumentManager*) const override;
 	LDObjectType type() const override;

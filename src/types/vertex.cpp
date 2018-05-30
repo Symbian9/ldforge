@@ -92,6 +92,11 @@ QString Vertex::toString(bool mangled) const
 		return ::format("%1 %2 %3", this->x, this->y, this->z);
 }
 
+Vertex Vertex::fromVector(const QVector3D& vector)
+{
+	return {vector.x(), vector.y(), vector.z()};
+}
+
 Vertex Vertex::operator*(qreal scalar) const
 {
 	return {this->x * scalar, this->y * scalar, this->z * scalar};
