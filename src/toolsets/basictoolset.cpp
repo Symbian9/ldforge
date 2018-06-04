@@ -104,34 +104,37 @@ void BasicToolset::remove()
 
 void BasicToolset::doInline (bool deep)
 {
-	for (LDSubfileReference* reference : filterByType<LDSubfileReference> (selectedObjects()))
+	for (LDObject* object : selectedObjects())
 	{
-		// Get the index of the subfile so we know where to insert the
-		// inlined contents.
-		QPersistentModelIndex referenceIndex = currentDocument()->indexOf(reference);
-		int row = referenceIndex.row();
-
-		if (referenceIndex.isValid())
+		if (object->isRasterizable())
 		{
-			Model inlined {m_documents};
-			reference->inlineContents(
-				m_documents,
-				currentDocument()->winding(),
-				inlined,
-				deep,
-				false
-			);
+			// Get the index of the subfile so we know where to insert the
+			// inlined contents.
+			QPersistentModelIndex referenceIndex = currentDocument()->indexOf(object);
+			int row = referenceIndex.row();
 
-			// Merge in the inlined objects
-			for (LDObject* inlinedObject : inlined.objects())
+			if (referenceIndex.isValid())
 			{
-				currentDocument()->insertCopy(row, inlinedObject);
-				mainWindow()->select(currentDocument()->index(row));
-				row += 1;
-			}
+				Model inlined {m_documents};
+				object->rasterize(
+					m_documents,
+					currentDocument()->winding(),
+					inlined,
+					deep,
+					false
+				);
 
-			// Delete the subfile now as it's been inlined.
-			currentDocument()->removeRow(referenceIndex.row());
+				// Merge in the inlined objects
+				for (LDObject* inlinedObject : inlined.objects())
+				{
+					currentDocument()->insertCopy(row, inlinedObject);
+					mainWindow()->select(currentDocument()->index(row));
+					row += 1;
+				}
+
+				// Delete the subfile now as it's been inlined.
+				currentDocument()->removeRow(referenceIndex.row());
+			}
 		}
 	}
 

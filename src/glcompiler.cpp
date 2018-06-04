@@ -373,20 +373,6 @@ void GLCompiler::compileObject(const QModelIndex& index)
 			break;
 		}
 
-	// TODO: try use interfaces to remove these special treatments?
-	case LDObjectType::SubfileReference:
-		{
-			LDSubfileReference* subfileReference = static_cast<LDSubfileReference*>(object);
-			auto data = subfileReference->inlinePolygons(
-				m_documents,
-				m_renderer->model()->winding()
-			);
-
-			for (LDPolygon& poly : data)
-				compilePolygon (poly, index, info);
-			break;
-		}
-
 	case LDObjectType::BezierCurve:
 		{
 			LDBezierCurve* curve = static_cast<LDBezierCurve*>(object);
@@ -396,6 +382,13 @@ void GLCompiler::compileObject(const QModelIndex& index)
 		break;
 
 	default:
+		if (object->isRasterizable())
+		{
+			auto data = object->rasterizePolygons(m_documents, m_renderer->model()->winding());
+
+			for (LDPolygon& poly : data)
+				compilePolygon(poly, index, info);
+		}
 		break;
 	}
 

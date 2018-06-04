@@ -64,7 +64,7 @@ private:
 		const QModelIndex& polygonOwnerIndex,
 		ObjectVboData& objectInfo
 	);
-	Q_SLOT void compileObject (const QModelIndex &index);
+	Q_SLOT void compileObject(const QModelIndex &index);
 	QColor getColorForPolygon(
 		LDPolygon& poly,
 		const QModelIndex& polygonOwnerIndex,

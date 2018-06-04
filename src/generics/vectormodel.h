@@ -1,0 +1,4 @@
+#ifndef VECTORMODEL_H
+#define VECTORMODEL_H
+
+#endif // VECTORMODEL_H

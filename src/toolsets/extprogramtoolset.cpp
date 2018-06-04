@@ -152,11 +152,10 @@ void ExtProgramToolset::writeObjects (const QVector<LDObject*>& objects, QFile& 
 {
 	for (LDObject* obj : objects)
 	{
-		if (obj->type() == LDObjectType::SubfileReference)
+		if (obj->isRasterizable())
 		{
-			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
 			Model model {m_documents};
-			ref->inlineContents(m_documents, CounterClockwise, model, true, false);
+			obj->rasterize(m_documents, CounterClockwise, model, true, false);
 			writeObjects(model.objects(), f);
 		}
 		else if (obj->type() == LDObjectType::BezierCurve)

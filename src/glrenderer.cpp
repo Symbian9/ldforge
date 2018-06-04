@@ -247,6 +247,12 @@ void GLRenderer::resetAllAngles()
 void GLRenderer::initializeGL()
 {
 	initializeOpenGLFunctions();
+
+	if (glGetError() != GL_NO_ERROR)
+	{
+		abort();
+	}
+
 	setBackground();
 	glLineWidth (config::lineThickness());
 	glLineStipple (1, 0x6666);

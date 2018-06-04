@@ -57,7 +57,7 @@ struct PrimitiveModel
 
 	QString typeName() const;
 	void generateBody(Model& model) const;
-	void generateCylinder(Model& model) const;
+	void generateCylinder(Model& model, Winding winding = CounterClockwise) const;
 	static QString typeName(Type type);
 	QString makeFileName(FilenameStyle style) const;
 };

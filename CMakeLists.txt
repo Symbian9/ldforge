@@ -79,6 +79,7 @@ set (LDFORGE_SOURCES
 	src/geometry/plane.cpp
 	src/linetypes/comment.cpp
 	src/linetypes/conditionaledge.cpp
+	src/linetypes/cylinder.cpp
 	src/linetypes/edgeline.cpp
 	src/linetypes/empty.cpp
 	src/linetypes/modelobject.cpp
@@ -96,6 +97,7 @@ set (LDFORGE_SOURCES
 	src/types/vertex.cpp
 	src/widgets/doublespinbox.cpp
 	src/widgets/headeredit.cpp
+	src/widgets/matrixeditor.cpp
 	src/widgets/vertexobjecteditor.cpp
 )
 
@@ -157,6 +159,7 @@ set (LDFORGE_HEADERS
 	src/geometry/plane.h
 	src/linetypes/comment.h
 	src/linetypes/conditionaledge.h
+	src/linetypes/cylinder.h
 	src/linetypes/edgeline.h
 	src/linetypes/empty.h
 	src/linetypes/modelobject.h
@@ -175,6 +178,7 @@ set (LDFORGE_HEADERS
 	src/types/vertex.h
 	src/widgets/doublespinbox.h
 	src/widgets/headeredit.h
+	src/widgets/matrixeditor.h
 	src/widgets/vertexobjecteditor.h
 )
 
@@ -202,6 +206,7 @@ set (LDFORGE_FORMS
 	src/partdownloader.ui
 	src/widgets/vertexobjecteditor.ui
 	src/widgets/headeredit.ui
+	src/widgets/matrixeditor.ui
 )
 
 set (LDFORGE_OTHER_FILES
@@ -234,6 +239,7 @@ if (NOT MSVC)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG")
 	endif()
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wpedantic -Werror=switch")
 endif()
 
 qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})

@@ -105,7 +105,7 @@ void LDDocument::setTabIndex (int value)
 	m_tabIndex = value;
 }
 
-const QList<LDPolygon>& LDDocument::polygonData() const
+const QVector<LDPolygon>& LDDocument::polygonData() const
 {
 	return m_polygonData;
 }
@@ -505,7 +505,7 @@ void LDDocument::initializeCachedData()
 
 // =============================================================================
 //
-QList<LDPolygon> LDDocument::inlinePolygons()
+QVector<LDPolygon> LDDocument::inlinePolygons()
 {
 	initializeCachedData();
 	return polygonData();
@@ -534,7 +534,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 					if (deep and object->type() == LDObjectType::SubfileReference)
 					{
 						LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
-						reference->inlineContents(
+						reference->rasterize(
 							documentManager(),
 							this->winding(),
 							model,

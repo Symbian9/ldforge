@@ -263,7 +263,7 @@ void PrimitiveManager::loadCategories()
 // This actual value is given by: hypot(0.0761, 0.3827)
 static const double chordLength = 0.3901929010117944;
 
-void PrimitiveModel::generateCylinder(Model& model) const
+void PrimitiveModel::generateCylinder(Model& model, Winding winding) const
 {
 	Q_ASSERT(this->type == Cylinder);
 	auto circle = makeCircle(this->segments, this->divisions, 1);
@@ -289,12 +289,14 @@ void PrimitiveModel::generateCylinder(Model& model) const
 		double x1 = circle[i].x2();
 		double z0 = circle[i].y1();
 		double z1 = circle[i].y2();
+		double y1 = (winding == CounterClockwise) ? 0.0 : 1.0;
+		double y2 = (winding == CounterClockwise) ? 1.0 : 0.0;
 
 		LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(
-			Vertex {x1, 0.0, z1},
-			Vertex {x0, 0.0, z0},
-			Vertex {x0, 1.0, z0},
-			Vertex {x1, 1.0, z1}
+			Vertex {x1, y1, z1},
+			Vertex {x0, y1, z0},
+			Vertex {x0, y2, z0},
+			Vertex {x1, y2, z1}
 		);
 		quad->setColor(MainColor);
 	}

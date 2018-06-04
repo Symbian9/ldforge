@@ -100,13 +100,13 @@ public:
 	EditHistory* history() const;
 	void initializeCachedData();
 	void inlineContents(Model& model, bool deep, bool renderinline);
-	QList<LDPolygon> inlinePolygons();
+	QVector<LDPolygon> inlinePolygons();
 	const QSet<Vertex>& inlineVertices();
 	bool isFrozen() const;
 	bool isSafeToClose();
 	QString name() const;
 	void objectRemoved(LDObject* object, int index);
-	const QList<LDPolygon>& polygonData() const;
+	const QVector<LDPolygon>& polygonData() const;
 	void recountTriangles();
 	void redo();
 	void redoVertices();
@@ -139,7 +139,7 @@ private:
 	long m_savePosition;
 	int m_tabIndex;
 	int m_triangleCount;
-	QList<LDPolygon> m_polygonData;
+	QVector<LDPolygon> m_polygonData;
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
 	DocumentManager* m_manager;

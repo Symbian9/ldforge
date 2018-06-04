@@ -40,6 +40,7 @@ enum class LDObjectType
 	Error,				//	Object is the result of failed parsing
 	Empty,				//	Object represents an empty line
 	BezierCurve,		//	Object represents a Bézier curve
+	Cylinder,
 	_End
 };
 
@@ -69,12 +70,15 @@ public:
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
 	virtual bool isColored() const;
 	bool isHidden() const;
+	virtual bool isRasterizable() const { return false; } // Can this object be rasterized?
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
 	void move (const QVector3D vector);
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;
 	QColor randomColor() const;
+	virtual void rasterize(DocumentManager*, Winding, Model&, bool, bool) {}
+	virtual QVector<LDPolygon> rasterizePolygons(DocumentManager*, Winding);
 	void setColor (LDColor color);
 	void setHidden (bool value);
 	void setVertex (int i, const Vertex& vert);
@@ -92,6 +96,7 @@ signals:
 	void modified(const LDObjectState& before, const LDObjectState& after);
 
 protected:
+	virtual Winding nativeWinding(DocumentManager*) const;
 	template<typename T>
 	void changeProperty(T* property, const T& value);
 
@@ -114,12 +119,16 @@ public:
 	LDMatrixObject() = default;
 	LDMatrixObject(const Matrix& transformationMatrix, const Vertex& pos);
 
+	bool hasMatrix() const override { return true; }
 	const Vertex& position() const;
 	void setCoordinate (const Axis ax, double value);
 	void setPosition (const Vertex& a);
 	void setTransformationMatrix (const Matrix& value);
 	const Matrix& transformationMatrix() const;
 	void serialize(class Serializer& serializer) override;
+
+protected:
+	bool shouldInvert(Winding winding, DocumentManager* context);
 
 private:
 	Vertex m_position;
@@ -171,22 +180,25 @@ public:
 
 	virtual QString asText() const override;
 	LDDocument* fileInfo(DocumentManager *context) const;
+	bool isRasterizable() const override { return true; }
 	virtual void getVertices(DocumentManager *context, QSet<Vertex>& verts) const override;
-	void inlineContents(
+	void rasterize(
 		DocumentManager* context,
 		Winding parentWinding,
 		Model& model,
 		bool deep,
 		bool render
-	);
-	QList<LDPolygon> inlinePolygons(DocumentManager* context, Winding parentWinding);
+	) override;
+	QVector<LDPolygon> rasterizePolygons(DocumentManager* context, Winding parentWinding) override;
 	QString objectListText() const override;
 	QString referenceName() const;
 	int triangleCount(DocumentManager *context) const override;
-	bool hasMatrix() const override { return true; }
 	QString typeName() const override { return "subfilereference"; }
 	void serialize(class Serializer& serializer) override;
 	void setReferenceName(const QString& newReferenceName);
+
+protected:
+	Winding nativeWinding(DocumentManager* context) const override;
 
 private:
 	QString m_referenceName;

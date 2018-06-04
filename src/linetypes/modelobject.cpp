@@ -31,6 +31,7 @@
 #include "conditionaledge.h"
 #include "comment.h"
 #include "empty.h"
+#include "cylinder.h"
 
 // List of all LDObjects
 QMap<qint32, LDObject*> g_allObjects;
@@ -146,18 +147,41 @@ static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColo
 		obj->setColor (parentcolor);
 }
 
-bool shouldInvert(LDSubfileReference* reference, Winding winding, DocumentManager* context)
+/*
+ * Returns whether or not a compound object should be inverted.
+ */
+bool LDMatrixObject::shouldInvert(Winding winding, DocumentManager* context)
 {
 	bool result = false;
-	result ^= (reference->isInverted());
-	result ^= (reference->transformationMatrix().determinant() < 0);
-	result ^= (reference->fileInfo(context)->winding() != winding);
+	result ^= (isInverted());
+	result ^= (transformationMatrix().determinant() < 0);
+	result ^= (nativeWinding(context) != winding);
 	return result;
+}
+
+/*
+ * The winding used by the object's geometry. By default it's CCW but some documents referenced by
+ * a subfile reference may use CW geometry.
+ *
+ * Since the native winding of a subfile reference depends on the actual document it references,
+ * determining the winding requires the libraries for reference.
+ */
+Winding LDObject::nativeWinding(DocumentManager* /*context*/) const
+{
+	return CounterClockwise;
+}
+
+/*
+ * Reimplementation of LDObject::nativeWinding for subfile references
+ */
+Winding LDSubfileReference::nativeWinding(DocumentManager* context) const
+{
+	return fileInfo(context)->winding();
 }
 
 // =============================================================================
 // -----------------------------------------------------------------------------
-void LDSubfileReference::inlineContents(
+void LDSubfileReference::rasterize(
 	DocumentManager* context,
 	Winding parentWinding,
 	Model& model,
@@ -174,7 +198,7 @@ void LDSubfileReference::inlineContents(
 		// Transform the objects
 		for (LDObject* object : inlined)
 		{
-			if (::shouldInvert(this, parentWinding, context))
+			if (shouldInvert(parentWinding, context))
 				::invert(object, context);
 
 			TransformObject(object, transformationMatrix(), position(), color());
@@ -230,20 +254,20 @@ bool LDObject::hasMatrix() const
 
 // =============================================================================
 //
-QList<LDPolygon> LDSubfileReference::inlinePolygons(DocumentManager* context, Winding parentWinding)
+QVector<LDPolygon> LDSubfileReference::rasterizePolygons(DocumentManager* context, Winding parentWinding)
 {
 	LDDocument* file = fileInfo(context);
 
 	if (file)
 	{
-		QList<LDPolygon> data = fileInfo(context)->inlinePolygons();
+		QVector<LDPolygon> data = fileInfo(context)->inlinePolygons();
 
 		for (LDPolygon& entry : data)
 		{
 			for (int i = 0; i < entry.numVertices(); ++i)
 				entry.vertices[i].transform (transformationMatrix(), position());
 
-			if (::shouldInvert(this, parentWinding, context))
+			if (shouldInvert(parentWinding, context))
 				::invertPolygon(entry);
 		}
 
@@ -331,6 +355,9 @@ LDObject* LDObject::newFromType(LDObjectType type)
 
 	case LDObjectType::BezierCurve:
 		return new LDBezierCurve {};
+
+	case LDObjectType::Cylinder:
+		return new LDCylinder {};
 
 	case LDObjectType::_End:
 		break;
@@ -516,6 +543,11 @@ QString LDObject::objectListText() const
 	{
 		return typeName();
 	}
+}
+
+QVector<LDPolygon> LDObject::rasterizePolygons(DocumentManager*, Winding)
+{
+	return {};
 }
 
 QString LDError::objectListText() const

@@ -24,6 +24,7 @@
 #include "linetypes/empty.h"
 #include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
+#include "linetypes/cylinder.h"
 
 /*
  * Constructs an LDraw parser
@@ -381,13 +382,33 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 				CheckTokenCount (tokens, 15);
 				CheckTokenNumbers (tokens, 1, 13);
 
-				Vertex referncePosition = parseVertex (tokens, 2);  // 2 - 4
+				Vertex displacement = parseVertex (tokens, 2);  // 2 - 4
 				Matrix transform;
+				QString referenceName = tokens[14];
 
 				for (int i = 0; i < 9; ++i)
 					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
 
-				LDSubfileReference* obj = model.emplaceAt<LDSubfileReference>(position, tokens[14], transform, referncePosition);
+				static const QRegExp cylinderRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)cyli\.dat)"};
+				LDObject* obj;
+
+				if (cylinderRegexp.exactMatch(referenceName))
+				{
+					int resolution = MediumResolution;
+
+					if (not cylinderRegexp.capturedTexts()[1].isEmpty())
+						resolution = cylinderRegexp.capturedTexts()[1].toInt();
+
+					int numerator = cylinderRegexp.capturedTexts()[2].toInt();
+					int denominator = cylinderRegexp.capturedTexts()[3].toInt();
+					int segments = (numerator * resolution) / denominator;
+					obj = model.emplaceAt<LDCylinder>(position, segments, resolution, transform, displacement);
+				}
+				else
+				{
+					obj = model.emplaceAt<LDSubfileReference>(position, referenceName, transform, displacement);
+				}
+
 				obj->setColor (tokens[1].toInt(nullptr, 0));
 				return obj;
 			}

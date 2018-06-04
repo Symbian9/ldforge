@@ -33,16 +33,7 @@ public:
 	void accept() override;
 	void setPrimitivesTree(class PrimitiveManager* primitives);
 
-private slots:
-	void scalingChanged();
-	void matrixChanged();
-
 private:
-	QDoubleSpinBox* matrixCell(int row, int column) const;
-	double matrixScaling(int column) const;
-	QPair<int, int> cellPosition(QDoubleSpinBox* cellWidget);
-	QDoubleSpinBox* vectorElement(int index);
-
 	class Ui_SubfileReferenceEditor& ui;
 	class LDSubfileReference* const reference;
 	LDColor color;
