@@ -25,9 +25,9 @@
 
 VertexObjectEditor::VertexObjectEditor(LDObject* object, QWidget *parent) :
 	QDialog {parent},
-	object {object},
 	ui {*new Ui_VertexObjectEditor},
-	vertexGrid {new QGridLayout}
+	vertexGrid {new QGridLayout},
+	object {object}
 {
 	this->ui.setupUi(this);
 	this->ui.verticesContainer->setLayout(this->vertexGrid);

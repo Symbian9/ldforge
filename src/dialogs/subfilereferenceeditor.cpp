@@ -25,8 +25,8 @@
 
 SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QWidget* parent) :
 	QDialog {parent},
-	reference {reference},
-	ui {*new Ui::SubfileReferenceEditor}
+	ui {*new Ui::SubfileReferenceEditor},
+	reference {reference}
 {
 	this->ui.setupUi(this);
 	this->ui.referenceName->setText(reference->referenceName());

@@ -96,5 +96,5 @@ private slots:
 	void clearSelectionModel();
 };
 
-#define CHECK_GL_ERROR() { checkGLError(this, __FILE__, __LINE__); }
-void checkGLError (HierarchyElement* element, QString file, int line);
+#define CHECK_GL_ERROR() { checkGLError(__FILE__, __LINE__); }
+void checkGLError (QString file, int line);

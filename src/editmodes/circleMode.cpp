@@ -60,6 +60,7 @@ double CircleMode::getCircleDrawDist(int position) const
 	return 0.0;
 }
 
+#if 0
 static Matrix shearMatrixForPlane(Canvas* renderer)
 {
 	const Plane& plane = renderer->drawPlane();
@@ -82,6 +83,7 @@ static Matrix shearMatrixForPlane(Canvas* renderer)
 
 	return shearMatrix;
 }
+#endif
 
 void CircleMode::endDraw()
 {
@@ -137,9 +139,8 @@ void CircleMode::endDraw()
 	else
 	{
 		// Ring finder failed, last resort: draw the ring with quads
-		Axis localx, localy, localz;
+		Axis localx, localy;
 		renderer()->getRelativeAxes (localx, localy);
-		localz = (Axis) (3 - localx - localy);
 		double x0 = m_drawedVerts[0][localx];
 		double y0 = m_drawedVerts[0][localy];
 

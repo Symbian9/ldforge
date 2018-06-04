@@ -74,8 +74,8 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
-	libraries {config::libraries()},
-	librariesModel {new LibrariesModel {this->libraries, this}}
+	librariesModel {new LibrariesModel {this->libraries, this}},
+	libraries {config::libraries()}
 {
 	ui.setupUi (this);
 	ui.librariesView->setModel(this->librariesModel);

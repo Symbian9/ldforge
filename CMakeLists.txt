@@ -30,6 +30,7 @@ add_custom_target (revision_check ALL
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 set_source_files_properties (${CMAKE_BINARY_DIR}/configuration.cpp PROPERTIES GENERATED TRUE)
+set_property(SOURCE configuration.cpp PROPERTY SKIP_AUTOMOC ON)
 
 set (LDFORGE_SOURCES
 	src/basics.cpp
@@ -239,7 +240,8 @@ if (NOT MSVC)
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG")
 	endif()
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wpedantic -Werror=switch")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=all -Wextra")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-fallthrough")
 endif()
 
 qt5_add_resources (LDFORGE_QRC ${LDFORGE_RESOURCES})

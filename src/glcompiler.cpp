@@ -26,7 +26,7 @@
 #include "algorithms/invert.h"
 #include "generics/ring.h"
 
-void checkGLError(HierarchyElement* element, QString file, int line)
+void checkGLError(QString file, int line)
 {
 	struct ErrorInfo
 	{
