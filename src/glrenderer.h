@@ -112,7 +112,6 @@ protected:
 	bool mouseHasMoved() const;
 	virtual void overpaint(QPainter& painter);
 	double panning (Axis ax) const;
-	const QGenericMatrix<4, 4, GLfloat>& rotationMatrix() const;
 	double zoom();
 
 	template<typename... Args>
@@ -129,7 +128,7 @@ private:
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
 	Qt::KeyboardModifiers m_currentKeyboardModifiers;
-	QGenericMatrix<4, 4, GLfloat> m_rotationMatrix;
+	QQuaternion m_rotation;
 	GLCamera m_cameras[7];
 	bool m_useDarkBackground = false;
 	bool m_panning = false;

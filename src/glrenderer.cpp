@@ -214,14 +214,8 @@ void GLRenderer::resetAngles()
 {
 	if (m_initialized)
 	{
-		// Why did I even bother trying to compute this by pen and paper? Let GL figure it out...
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glRotatef(30, 1, 0, 0);
-		glRotatef(330, 0, 1, 0);
-		glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
-		glPopMatrix();
+		m_rotation = QQuaternion::fromAxisAndAngle({1, 0, 0}, 30);
+		m_rotation *= QQuaternion::fromAxisAndAngle({0, 1, 0}, 330);
 	}
 	currentCamera().setPanning(0, 0);
 	needZoomToFit();
@@ -362,6 +356,19 @@ void GLRenderer::resizeGL (int width, int height)
 		camera.rendererResized(width, height);
 }
 
+/*
+ * Pads a 3×3 matrix into a 4×4 one by adding cells from the identity matrix.
+ */
+GLRotationMatrix padMatrix(const QMatrix3x3& stub)
+{
+	return {
+		stub(0, 0), stub(0, 1), stub(0, 2), 0,
+		stub(1, 0), stub(1, 1), stub(1, 2), 0,
+		stub(2, 0), stub(2, 1), stub(2, 2), 0,
+		0, 0, 0, 1
+	};
+}
+
 // =============================================================================
 //
 void GLRenderer::drawGLScene()
@@ -399,7 +406,7 @@ void GLRenderer::drawGLScene()
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
-		glMultMatrixf(m_rotationMatrix.constData());
+		glMultMatrixf(padMatrix(m_rotation.toRotationMatrix()).constData());
 		glTranslatef(-this->m_compiler->modelCenter());
 	}
 
@@ -645,15 +652,8 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 	}
 	else if (left and camera() == Camera::Free and (xMove != 0 or yMove != 0))
 	{
-		// Apply current rotation input to the rotation matrix
-		// ref: https://forums.ldraw.org/thread-22006-post-24426.html#pid24426
-		glPushMatrix();
-		glLoadIdentity();
-		// 0.6 is an arbitrary rotation sensitivity scalar
-		glRotatef(0.6 * hypot(xMove, yMove), yMove, xMove, 0);
-		glMultMatrixf(m_rotationMatrix.constData());
-		glGetFloatv(GL_MODELVIEW_MATRIX, m_rotationMatrix.data());
-		glPopMatrix();
+		QQuaternion versor = QQuaternion::fromAxisAndAngle(yMove, xMove, 0, 0.6 * hypot(xMove, yMove));
+		m_rotation = versor * m_rotation;
 		m_isCameraMoving = true;
 	}
 
@@ -1019,11 +1019,6 @@ double GLRenderer::panning (Axis ax) const
 double GLRenderer::zoom()
 {
 	return currentCamera().zoom();
-}
-
-const QGenericMatrix<4, 4, GLfloat>& GLRenderer::rotationMatrix() const
-{
-	return m_rotationMatrix;
 }
 
 bool GLRenderer::isDrawingSelectionScene() const
