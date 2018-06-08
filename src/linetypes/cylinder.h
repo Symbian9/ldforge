@@ -32,7 +32,7 @@ public:
 
 private:
 	QString buildFilename() const;
-	void buildPrimitiveBody(Model& model, Winding winding = CounterClockwise) const;
+	void buildPrimitiveBody(Model& model) const;
 
 	int m_segments;
 	int m_divisions;

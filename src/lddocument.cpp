@@ -531,7 +531,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 				{
 					// Got another sub-file reference, recurse and inline it too if we're deep-inlining.
 					// If not, just add it into the objects normally.
-					if (deep and object->type() == LDObjectType::SubfileReference)
+					if (deep and object->isRasterizable())
 					{
 						LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
 						reference->rasterize(

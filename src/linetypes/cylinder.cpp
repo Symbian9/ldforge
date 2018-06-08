@@ -77,8 +77,9 @@ void LDCylinder::rasterize(
 QVector<LDPolygon> LDCylinder::rasterizePolygons(DocumentManager* context, Winding winding)
 {
 	Model cylinderBody {context};
-	buildPrimitiveBody(cylinderBody, winding);
+	buildPrimitiveBody(cylinderBody);
 	QVector<LDPolygon> result;
+	bool cachedShouldInvert = shouldInvert(winding, context);
 
 	for (LDObject* object : cylinderBody.objects())
 	{
@@ -93,7 +94,7 @@ QVector<LDPolygon> LDCylinder::rasterizePolygons(DocumentManager* context, Windi
 
 		if (polygon)
 		{
-			if (shouldInvert(winding, context))
+			if (cachedShouldInvert)
 				invertPolygon(*polygon);
 
 			result.append(*polygon);
@@ -105,14 +106,14 @@ QVector<LDPolygon> LDCylinder::rasterizePolygons(DocumentManager* context, Windi
 	return result;
 }
 
-void LDCylinder::buildPrimitiveBody(Model& model, Winding winding) const
+void LDCylinder::buildPrimitiveBody(Model& model) const
 {
 	PrimitiveModel primitive;
 	primitive.type = PrimitiveModel::Cylinder;
 	primitive.segments = m_segments;
 	primitive.divisions = m_divisions;
 	primitive.ringNumber = 0;
-	primitive.generateCylinder(model, winding);
+	primitive.generateCylinder(model);
 }
 
 QString LDCylinder::objectListText() const
