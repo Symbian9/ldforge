@@ -201,5 +201,5 @@ QString LDCircularPrimitive::typeName() const
 void LDCircularPrimitive::serialize(class Serializer& serializer)
 {
 	LDMatrixObject::serialize(serializer);
-	serializer << m_segments << m_divisions;
+	serializer << m_segments << m_divisions << m_type;
 }

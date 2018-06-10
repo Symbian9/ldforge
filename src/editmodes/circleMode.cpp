@@ -105,6 +105,7 @@ void CircleMode::endDraw()
 		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
 		transform *= Matrix::scaleMatrix(dist0);
 		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, segments, divisions, transform, displacement);
+		finishDraw(model);
 		return;
 	}
 	else if (qFuzzyCompare(dist0, 0) or qFuzzyCompare(dist1, 0))
@@ -114,6 +115,7 @@ void CircleMode::endDraw()
 		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
 		transform *= Matrix::scaleMatrix(max(dist0, dist1));
 		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, segments, divisions, transform, displacement);
+		finishDraw(model);
 		return;
 	}
 	else if (g_RingFinder.findRings(dist0, dist1)) // Consult the ring finder now

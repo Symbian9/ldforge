@@ -63,6 +63,8 @@ struct PrimitiveModel
 	QString makeFileName(FilenameStyle style) const;
 };
 
+Q_DECLARE_METATYPE(PrimitiveModel::Type)
+
 class PrimitiveCategory : public QObject
 {
 	Q_OBJECT
