@@ -17,18 +17,14 @@ QString LDCircularPrimitive::buildFilename() const
 
 	simplify(numerator, denominator);
 
-	switch (m_type)
+	// Ensure that the denominator is at least 4, expand if necessary
+	if (denominator < 4)
 	{
-	case PrimitiveModel::Cylinder:
-		return format("%1%2-%3cyli.dat", prefix, numerator, denominator);
-
-	case PrimitiveModel::Circle:
-		return format("%1%2-%3edge.dat", prefix, numerator, denominator);
-
-	default:
-		Q_ASSERT(false);
-		return "";
+		numerator = static_cast<int>(round(numerator * 4.0 / denominator));
+		denominator = 4;
 	}
+
+	return format("%1%2-%3%4.dat", prefix, numerator, denominator, stem());
 }
 
 LDCircularPrimitive::LDCircularPrimitive(
@@ -70,7 +66,10 @@ void LDCircularPrimitive::getVertices(DocumentManager* /* context */, QSet<Verte
 	}
 }
 
-bool LDCircularPrimitive::isRasterizable() const { return true; }
+bool LDCircularPrimitive::isRasterizable() const
+{
+	return true;
+}
 
 void LDCircularPrimitive::rasterize(
 	DocumentManager* context,
@@ -135,6 +134,27 @@ void LDCircularPrimitive::buildPrimitiveBody(Model& model) const
 	primitive.divisions = m_divisions;
 	primitive.ringNumber = 0;
 	primitive.generateBody(model);
+}
+
+QString LDCircularPrimitive::stem() const
+{
+	switch (m_type)
+	{
+	case PrimitiveModel::Cylinder:
+		return "cyli";
+
+	case PrimitiveModel::Circle:
+		return "edge";
+
+	case PrimitiveModel::Disc:
+		return "disc";
+
+	case PrimitiveModel::DiscNegative:
+		return "ndis";
+
+	default:
+		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
+	}
 }
 
 QString LDCircularPrimitive::objectListText() const

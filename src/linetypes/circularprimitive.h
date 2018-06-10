@@ -36,6 +36,7 @@ public:
 private:
 	QString buildFilename() const;
 	void buildPrimitiveBody(Model& model) const;
+	QString stem() const;
 
 	PrimitiveModel::Type m_type = PrimitiveModel::Circle;
 	int m_segments = MediumResolution;

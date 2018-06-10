@@ -27,6 +27,7 @@
 #include "../grid.h"
 #include "../linetypes/modelobject.h"
 #include "../linetypes/quadrilateral.h"
+#include "../linetypes/circularprimitive.h"
 #include "../algorithms/geometry.h"
 
 CircleMode::CircleMode(Canvas* canvas) :
@@ -88,16 +89,11 @@ static Matrix shearMatrixForPlane(Canvas* renderer)
 void CircleMode::endDraw()
 {
 	Model model {m_documents};
-	PrimitiveModel primitiveModel;
-	primitiveModel.segments = m_window->ringToolSegments();
-	primitiveModel.divisions = m_window->ringToolDivisions();
-	primitiveModel.ringNumber = 0;
-	double dist0 (getCircleDrawDist (0));
-	double dist1 (getCircleDrawDist (1));
-	LDDocument* primitiveFile;
-	Matrix transform;
-
-	bool circleOrDisc = false;
+	int segments = m_window->ringToolSegments();
+	int divisions = m_window->ringToolDivisions();
+	double dist0 = getCircleDrawDist(0);
+	double dist1 = getCircleDrawDist(1);
+	Vertex displacement = m_drawedVerts.first();
 
 	if (dist1 < dist0)
 		qSwap(dist0, dist1);
@@ -105,32 +101,33 @@ void CircleMode::endDraw()
 	if (qFuzzyCompare(dist0, dist1))
 	{
 		// Special case: radii are the same, there's no area. Use a circle.
-		primitiveModel.type = PrimitiveModel::Circle;
-		primitiveFile = primitives()->getPrimitive(primitiveModel);
 		// transform = shearMatrixForPlane(renderer());
-		transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
+		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
 		transform *= Matrix::scaleMatrix(dist0);
-		circleOrDisc = true;
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, segments, divisions, transform, displacement);
+		return;
 	}
 	else if (qFuzzyCompare(dist0, 0) or qFuzzyCompare(dist1, 0))
 	{
 		// Special case #2: one radius is 0, so use a disc.
-		primitiveModel.type = PrimitiveModel::Disc;
-		primitiveFile = primitives()->getPrimitive(primitiveModel);
 		//transform = shearMatrixForPlane(renderer());
-		transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
+		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
 		transform *= Matrix::scaleMatrix(max(dist0, dist1));
-		circleOrDisc = true;
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, segments, divisions, transform, displacement);
+		return;
 	}
 	else if (g_RingFinder.findRings(dist0, dist1)) // Consult the ring finder now
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
+		PrimitiveModel primitiveModel;
+		primitiveModel.segments = m_window->ringToolSegments();
+		primitiveModel.divisions = m_window->ringToolDivisions();
 		primitiveModel.type = PrimitiveModel::Ring;
 
 		for (const RingFinder::Component& component : g_RingFinder.bestSolution()->getComponents())
 		{
 			primitiveModel.ringNumber = component.num;
-			primitiveFile = primitives()->getPrimitive(primitiveModel);
+			LDDocument* primitiveFile = primitives()->getPrimitive(primitiveModel);
 			Matrix matrix = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
 			// matrix = shearMatrixForPlane(renderer()) * matrix;
 			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix, m_drawedVerts.first());
@@ -149,10 +146,10 @@ void CircleMode::endDraw()
 		templ.setCoordinate(localy, y0);
 
 		// Calculate circle coords
-		QVector<QLineF> c0 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist0);
-		QVector<QLineF> c1 = makeCircle(primitiveModel.segments, primitiveModel.divisions, dist1);
+		QVector<QLineF> c0 = makeCircle(segments, divisions, dist0);
+		QVector<QLineF> c1 = makeCircle(segments, divisions, dist1);
 
-		for (int i = 0; i < primitiveModel.segments; ++i)
+		for (int i = 0; i < segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;
@@ -176,11 +173,6 @@ void CircleMode::endDraw()
 			LDQuadrilateral* quad = model.emplace<LDQuadrilateral>(v0, v1, v2, v3);
 			quad->setColor(MainColor);
 		}
-	}
-
-	if (circleOrDisc and primitiveFile)
-	{
-		model.emplace<LDSubfileReference>(primitiveFile->name(), transform, m_drawedVerts.first());
 	}
 
 	finishDraw (model);

@@ -389,7 +389,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 				for (int i = 0; i < 9; ++i)
 					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
 
-				static const QRegExp circularPrimitiveRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge)\.dat)"};
+				static const QRegExp circularPrimitiveRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge|disc|ndis)\.dat)"};
 				LDObject* obj;
 
 				if (circularPrimitiveRegexp.exactMatch(referenceName))
@@ -401,11 +401,16 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 
 					int numerator = circularPrimitiveRegexp.capturedTexts()[2].toInt();
 					int denominator = circularPrimitiveRegexp.capturedTexts()[3].toInt();
+					QString stem = circularPrimitiveRegexp.capturedTexts()[4];
 					int segments = (numerator * resolution) / denominator;
 					PrimitiveModel::Type type = PrimitiveModel::Cylinder;
 
-					if (circularPrimitiveRegexp.capturedTexts()[4] == "edge")
+					if (stem == "edge")
 						type = PrimitiveModel::Circle;
+					else if (stem == "disc")
+						type = PrimitiveModel::Disc;
+					else if (stem == "ndis")
+						type = PrimitiveModel::DiscNegative;
 
 					obj = model.emplaceAt<LDCircularPrimitive>(
 						position,
