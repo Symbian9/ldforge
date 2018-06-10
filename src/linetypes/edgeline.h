@@ -38,5 +38,5 @@ public:
 	virtual QString asText() const override;
 	int numVertices() const override { return 2; }
 	LDColor defaultColor() const override { return EdgeColor; }
-	QString typeName() const override { return "line"; }
+	QString iconName() const override { return "line"; }
 };

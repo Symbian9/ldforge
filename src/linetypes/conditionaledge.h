@@ -39,5 +39,5 @@ public:
 	int numVertices() const override { return 4; }
 	int numPolygonVertices() const override { return 2; }
 	LDColor defaultColor() const override { return EdgeColor; }
-	QString typeName() const override { return "condline"; }
+	QString iconName() const override { return "condline"; }
 };

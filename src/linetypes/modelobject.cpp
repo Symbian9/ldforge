@@ -556,7 +556,7 @@ QString LDObject::objectListText() const
 	}
 	else
 	{
-		return typeName();
+		return iconName();
 	}
 }
 

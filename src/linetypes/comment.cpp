@@ -27,7 +27,7 @@ LDObjectType LDComment::type() const
 	return LDObjectType::Comment;
 }
 
-QString LDComment::typeName() const
+QString LDComment::iconName() const
 {
 	return "comment";
 }

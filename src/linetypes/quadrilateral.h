@@ -36,5 +36,5 @@ public:
 	int numVertices() const override;
 	int triangleCount(DocumentManager*) const override;
 	LDObjectType type() const override;
-	QString typeName() const override;
+	QString iconName() const override;
 };

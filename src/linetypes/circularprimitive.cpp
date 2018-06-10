@@ -157,12 +157,22 @@ QString LDCircularPrimitive::stem() const
 
 QString LDCircularPrimitive::objectListText() const
 {
+	QString prefix;
+
+	if (m_divisions == HighResolution)
+		prefix = "Hi-Res";
+	else if (m_divisions == LowResolution)
+		prefix = "Lo-Res";
+	else if (m_divisions != MediumResolution)
+		prefix = format("%1-resolution", m_divisions);
+
 	QString result = format(
-		"%1 %2 %3, (",
+		"%1 %2 %3 %4, (",
+		prefix,
 		PrimitiveModel::typeName(m_type),
 		m_segments / m_divisions,
 		position().toString(true)
-	);
+	).simplified();
 
 	for (int i = 0; i < 9; ++i)
 		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");
@@ -193,9 +203,28 @@ int LDCircularPrimitive::triangleCount(DocumentManager*) const
 	return 0;
 }
 
-QString LDCircularPrimitive::typeName() const
+QString LDCircularPrimitive::iconName() const
 {
-	return "circular-primitive";
+	switch (m_type)
+	{
+	case PrimitiveModel::Ring:
+	case PrimitiveModel::Cone:
+		break;
+
+	case PrimitiveModel::Cylinder:
+		return "cylinder";
+
+	case PrimitiveModel::Disc:
+		return "disc";
+
+	case PrimitiveModel::DiscNegative:
+		return "disc-negative";
+
+	case PrimitiveModel::Circle:
+		return "circle";
+	}
+
+	return "";
 }
 
 void LDCircularPrimitive::serialize(class Serializer& serializer)

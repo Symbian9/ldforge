@@ -19,7 +19,7 @@
 
 #include "empty.h"
 
-QString LDEmpty::typeName() const
+QString LDEmpty::iconName() const
 {
 	return "empty";
 }

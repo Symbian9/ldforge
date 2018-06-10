@@ -86,7 +86,7 @@ public:
 	void setInverted(bool value);
 	virtual int triangleCount(DocumentManager* context) const;
 	virtual LDObjectType type() const = 0;
-	virtual QString typeName() const = 0;
+	virtual QString iconName() const = 0;
 	const Vertex& vertex (int i) const;
 	virtual void serialize(class Serializer& serializer);
 
@@ -154,7 +154,7 @@ public:
 	QString contents() const;
 	QString objectListText() const override;
 	bool isColored() const override { return false; }
-	QString typeName() const override { return "error"; }
+	QString iconName() const override { return "error"; }
 	void serialize(class Serializer& serializer) override;
 
 private:
@@ -193,7 +193,7 @@ public:
 	QString objectListText() const override;
 	QString referenceName() const;
 	int triangleCount(DocumentManager *context) const override;
-	QString typeName() const override { return "subfilereference"; }
+	QString iconName() const override { return "subfilereference"; }
 	void serialize(class Serializer& serializer) override;
 	void setReferenceName(const QString& newReferenceName);
 
@@ -226,7 +226,7 @@ public:
 	QVector<LDPolygon> rasterizePolygons (int segments);
 	int numVertices() const override { return 4; }
 	LDColor defaultColor() const override { return EdgeColor; }
-	QString typeName() const override { return "beziercurve"; }
+	QString iconName() const override { return "beziercurve"; }
 };
 
 enum

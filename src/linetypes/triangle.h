@@ -38,5 +38,5 @@ public:
 	virtual QString asText() const override;
 	int triangleCount(DocumentManager*) const override;
 	int numVertices() const override { return 3; }
-	QString typeName() const override { return "triangle"; }
+	QString iconName() const override { return "triangle"; }
 };

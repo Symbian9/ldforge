@@ -30,5 +30,5 @@ public:
 	QString asText() const override;
 	QString objectListText() const override;
 	LDObjectType type() const override;
-	QString typeName() const override;
+	QString iconName() const override;
 };

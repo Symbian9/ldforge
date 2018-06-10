@@ -337,7 +337,7 @@ QVariant Model::data(const QModelIndex& index, int role) const
 		}
 
 	case Qt::DecorationRole:
-		return MainWindow::getIcon(object->typeName());
+		return MainWindow::getIcon(object->iconName());
 
 	case Qt::BackgroundColorRole:
 		if (object->type() == LDObjectType::Error)

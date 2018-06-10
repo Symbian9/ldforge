@@ -30,7 +30,7 @@ public:
 	QVector<LDPolygon> rasterizePolygons(DocumentManager* context, Winding parentWinding) override;
 	QString objectListText() const override;
 	int triangleCount(DocumentManager*) const override;
-	QString typeName() const override;
+	QString iconName() const override;
 	void serialize(class Serializer& serializer) override;
 
 private:

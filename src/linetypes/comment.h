@@ -35,7 +35,7 @@ public:
 	QString objectListText() const override;
 	QString text() const;
 	LDObjectType type() const override;
-	QString typeName() const override;
+	QString iconName() const override;
 	void setText(QString value);
 	void serialize(class Serializer& serializer) override;
 

@@ -31,7 +31,7 @@ int LDQuadrilateral::numVertices() const
 	return 4;
 }
 
-QString LDQuadrilateral::typeName() const
+QString LDQuadrilateral::iconName() const
 {
 	return "quad";
 }
