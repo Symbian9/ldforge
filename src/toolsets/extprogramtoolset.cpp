@@ -540,8 +540,8 @@ void ExtProgramToolset::coverer()
 	if (not dlg->exec())
 		return;
 
-	LDColor in1Col = ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt();
-	LDColor in2Col = ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt();
+	LDColor in1Col {ui.cmb_col1->itemData (ui.cmb_col1->currentIndex()).toInt()};
+	LDColor in2Col {ui.cmb_col2->itemData (ui.cmb_col2->currentIndex()).toInt()};
 	QTemporaryFile in1dat, in2dat, outdat;
 	QString in1DATName, in2DATName, outDATName;
 

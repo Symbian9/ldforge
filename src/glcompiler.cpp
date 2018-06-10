@@ -179,7 +179,7 @@ QColor GLCompiler::getColorForPolygon(
 
 	case VboSubclass::RegularColors:
 		// For normal colors, use the polygon's color.
-		if (polygon.color == MainColor)
+		if (LDColor {polygon.color} == MainColor)
 		{
 			// If it's the main color, use the polygon owner's color.
 			if (polygonOwner->color() == MainColor)
@@ -192,7 +192,7 @@ QColor GLCompiler::getColorForPolygon(
 				color = polygonOwner->color().faceColor();
 			}
 		}
-		else if (polygon.color == EdgeColor)
+		else if (LDColor {polygon.color} == EdgeColor)
 		{
 			// Edge color is black, unless we have a dark background, in which case lines need to be bright.
 			color = luma(config::backgroundColor()) > 40 ? Qt::black : Qt::white;

@@ -464,7 +464,7 @@ void LDBezierCurve::rasterize(Model& model, int segments)
 	for (LDPolygon& poly : polygons)
 	{
 		LDEdgeLine* line = model.emplace<LDEdgeLine>(poly.vertices[0], poly.vertices[1]);
-		line->setColor (poly.color);
+		line->setColor(LDColor {poly.color});
 	}
 }
 

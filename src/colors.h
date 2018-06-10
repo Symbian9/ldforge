@@ -55,8 +55,7 @@ class LDColor
 {
 public:
 	LDColor();
-	LDColor(qint32 index);
-	LDColor(QColor color, bool transparent = false);
+	explicit LDColor(qint32 index);
 	LDColor(const LDColor& other) = default;
 
 	bool isLDConfigColor() const;
@@ -70,15 +69,15 @@ public:
 	QString indexString() const;
 
 	static const LDColor nullColor;
-	static qint32 directColorIndex(QColor color, bool transparent = false);
+	static LDColor directColor(QColor color, bool transparent = false);
 	static void initColors();
 
 	LDColor& operator=(qint32 index) { m_index = index; return *this; }
 	LDColor& operator=(const LDColor &other) = default;
-	LDColor operator++() { return ++m_index; }
-	LDColor operator++(int) { return m_index++; }
-	LDColor operator--() { return --m_index; }
-	LDColor operator--(int) { return m_index--; }
+	LDColor operator++() { return LDColor {++m_index}; }
+	LDColor operator++(int) { return LDColor {m_index++}; }
+	LDColor operator--() { return LDColor {--m_index}; }
+	LDColor operator--(int) { return LDColor {m_index--}; }
 	bool operator==(LDColor other) const { return index() == other.index(); }
 	bool operator!=(LDColor other) const { return index() != other.index(); }
 	bool operator<(LDColor other) const { return index() < other.index(); }
@@ -117,8 +116,5 @@ private:
 
 int luma(const QColor& col);
 
-enum
-{
-	MainColor = 16,
-	EdgeColor = 24,
-};
+static const LDColor MainColor {16};
+static const LDColor EdgeColor {24};

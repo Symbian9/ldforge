@@ -363,7 +363,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 						CheckTokenCount (tokens, 16);
 						CheckTokenNumbers (tokens, 3, 15);
 						LDBezierCurve* obj = model.emplaceAt<LDBezierCurve>(position);
-						obj->setColor(tokens[3].toInt(nullptr, 0));
+						obj->setColor(LDColor {tokens[3].toInt(nullptr, 0)});
 
 						for (int i = 0; i < 4; ++i)
 							obj->setVertex (i, parseVertex (tokens, 4 + (i * 3)));
@@ -409,7 +409,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 					obj = model.emplaceAt<LDSubfileReference>(position, referenceName, transform, displacement);
 				}
 
-				obj->setColor (tokens[1].toInt(nullptr, 0));
+				obj->setColor(LDColor {tokens[1].toInt(nullptr, 0)});
 				return obj;
 			}
 
@@ -420,7 +420,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 
 				// Line
 				LDEdgeLine* obj = model.emplaceAt<LDEdgeLine>(position);
-				obj->setColor (tokens[1].toInt(nullptr, 0));
+				obj->setColor(LDColor {tokens[1].toInt(nullptr, 0)});
 
 				for (int i = 0; i < 2; ++i)
 					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 7
@@ -435,7 +435,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 
 				// Triangle
 				LDTriangle* obj = model.emplaceAt<LDTriangle>(position);
-				obj->setColor (tokens[1].toInt(nullptr, 0));
+				obj->setColor(LDColor {tokens[1].toInt(nullptr, 0)});
 
 				for (int i = 0; i < 3; ++i)
 					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 10
@@ -457,7 +457,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 				else
 					obj = model.emplaceAt<LDConditionalEdge>(position);
 
-				obj->setColor (tokens[1].toInt(nullptr, 0));
+				obj->setColor(LDColor {tokens[1].toInt(nullptr, 0)});
 
 				for (int i = 0; i < 4; ++i)
 					obj->setVertex (i, parseVertex (tokens, 2 + (i * 3)));   // 2 - 13

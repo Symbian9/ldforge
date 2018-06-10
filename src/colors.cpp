@@ -22,7 +22,7 @@
 #include "main.h"
 
 ColorData* LDColor::colorData = nullptr;
-const LDColor LDColor::nullColor = -1;
+const LDColor LDColor::nullColor {-1};
 
 /*
  * Initializes the color information module.
@@ -45,12 +45,6 @@ LDColor::LDColor() :
  */
 LDColor::LDColor(qint32 index) :
     m_index {index} {}
-
-/*
- * Constructs a direct color.
- */
-LDColor::LDColor(QColor color, bool transparent) :
-    m_index {directColorIndex(color, transparent)} {}
 
 /*
  * Returns whether or not the color is valid.
@@ -180,13 +174,13 @@ bool LDColor::isDirect() const
 /*
  * Returns the LDraw color index for a direct color.
  */
-qint32 LDColor::directColorIndex(QColor color, bool transparent)
+LDColor LDColor::directColor(QColor color, bool transparent)
 {
 	qint32 index = transparent ? 0x03000000 : 0x02000000;
 	index |= color.red() << 16;
 	index |= color.green() << 8;
 	index |= color.blue();
-	return index;
+	return LDColor {index};
 }
 
 /*
@@ -212,12 +206,12 @@ int luma(const QColor& color)
 ColorData::ColorData()
 {
 	// Initialize main and edge colors, they're special like that.
-	m_data[MainColor].faceColor = "#AAAAAA";
-	m_data[MainColor].edgeColor = Qt::black;
-	m_data[MainColor].name = "Main color";
-	m_data[EdgeColor].faceColor = Qt::black;
-	m_data[EdgeColor].edgeColor = Qt::black;
-	m_data[EdgeColor].name = "Edge color";
+	m_data[MainColor.index()].faceColor = "#AAAAAA";
+	m_data[MainColor.index()].edgeColor = Qt::black;
+	m_data[MainColor.index()].name = "Main color";
+	m_data[EdgeColor.index()].faceColor = Qt::black;
+	m_data[EdgeColor.index()].edgeColor = Qt::black;
+	m_data[EdgeColor.index()].name = "Edge color";
 }
 
 /*

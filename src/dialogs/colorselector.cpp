@@ -119,11 +119,11 @@ void ColorSelector::colorButtonClicked()
  */
 void ColorSelector::chooseDirectColor()
 {
-	QColor defaultColor = selectedColor() != -1 ? selectedColor().faceColor() : Qt::white;
+	QColor defaultColor = selectedColor().isValid() ? selectedColor().faceColor() : Qt::white;
 	QColor newColor = QColorDialog::getColor(defaultColor);
 
 	if (newColor.isValid())
-		setSelectedColor({newColor, ui.transparentDirectColor->isChecked()});
+		setSelectedColor(LDColor::directColor(newColor, ui.transparentDirectColor->isChecked()));
 }
 
 /*
@@ -132,7 +132,7 @@ void ColorSelector::chooseDirectColor()
 void ColorSelector::transparentCheckboxClicked()
 {
 	if (selectedColor().isDirect())
-		setSelectedColor({selectedColor().faceColor(), ui.transparentDirectColor->isChecked()});
+		setSelectedColor(LDColor::directColor(selectedColor().faceColor(), ui.transparentDirectColor->isChecked()));
 }
 
 /*
