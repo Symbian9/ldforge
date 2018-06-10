@@ -1,22 +1,14 @@
-#ifndef CYLINDEREDITOR_H
-#define CYLINDEREDITOR_H
-
+#pragma once
 #include <QDialog>
-
-namespace Ui {
-class CylinderEditor;
-}
 
 class CylinderEditor : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit CylinderEditor(QWidget *parent = 0);
+	explicit CylinderEditor(QWidget* parent = nullptr);
 	~CylinderEditor();
 
 private:
-	Ui::CylinderEditor *ui;
+	class Ui_CylinderEditor& ui;
 };
-
-#endif // CYLINDEREDITOR_H

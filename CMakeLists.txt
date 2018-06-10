@@ -63,6 +63,7 @@ set (LDFORGE_SOURCES
 	src/algorithms/invert.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
+	src/dialogs/cylindereditor.cpp
 	src/dialogs/externalprogrampathdialog.cpp
 	src/dialogs/generateprimitivedialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
@@ -96,6 +97,7 @@ set (LDFORGE_SOURCES
 	src/types/boundingbox.cpp
 	src/types/matrix.cpp
 	src/types/vertex.cpp
+	src/widgets/colorbutton.cpp
 	src/widgets/doublespinbox.cpp
 	src/widgets/headeredit.cpp
 	src/widgets/matrixeditor.cpp
@@ -136,6 +138,7 @@ set (LDFORGE_HEADERS
 	src/algorithms/invert.h
 	src/dialogs/colorselector.h
 	src/dialogs/configdialog.h
+	src/dialogs/cylindereditor.h
 	src/dialogs/externalprogrampathdialog.h
 	src/dialogs/generateprimitivedialog.h
 	src/dialogs/ldrawpathdialog.h
@@ -177,6 +180,7 @@ set (LDFORGE_HEADERS
 	src/types/library.h
 	src/types/matrix.h
 	src/types/vertex.h
+	src/widgets/colorbutton.h
 	src/widgets/doublespinbox.h
 	src/widgets/headeredit.h
 	src/widgets/matrixeditor.h
@@ -188,6 +192,7 @@ set (LDFORGE_FORMS
 	src/dialogs/colorselector.ui
 	src/dialogs/configdialog.ui
 	src/dialogs/covererdialog.ui
+	src/dialogs/cylindereditor.ui
 	src/dialogs/edger2dialog.ui
 	src/dialogs/editrawdialog.ui
 	src/dialogs/externalprogrampathdialog.ui

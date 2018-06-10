@@ -17,23 +17,24 @@
  */
 
 #pragma once
-#include <QDialog>
 #include "../main.h"
+#include "../colors.h"
+#include <QPushButton>
 
-class VertexObjectEditor : public QDialog
+class ColorButton : public QPushButton
 {
 	Q_OBJECT
 
 public:
-	VertexObjectEditor(LDObject* object = nullptr, QWidget* parent = nullptr);
-	~VertexObjectEditor();
+	explicit ColorButton(LDColor color, QWidget* parent = nullptr);
+	explicit ColorButton(QWidget* parent = nullptr);
 
-	void accept() override;
+	LDColor color() const;
+	void setColor(LDColor color);
+
+signals:
+	void colorChanged(LDColor color);
 
 private:
-	class QDoubleSpinBox* spinboxAt(int i, Axis axis);
-
-	class Ui_VertexObjectEditor& ui;
-	class QGridLayout* vertexGrid;
-	LDObject* const object;
+	LDColor _color;
 };

@@ -31,18 +31,7 @@ VertexObjectEditor::VertexObjectEditor(LDObject* object, QWidget *parent) :
 {
 	this->ui.setupUi(this);
 	this->ui.verticesContainer->setLayout(this->vertexGrid);
-	this->currentColor = this->object->color();
-	setColorButton(this->ui.color, this->currentColor);
-
-	connect(
-		this->ui.color,
-		&QPushButton::clicked,
-		[&]()
-		{
-			if (ColorSelector::selectColor(this, this->currentColor, this->currentColor))
-				::setColorButton(this->ui.color, this->currentColor);
-		}
-	);
+	this->ui.colorButton->setColor(object->color());
 
 	for (int i : range(0, 1, object->numVertices() - 1))
 	{
@@ -96,6 +85,6 @@ void VertexObjectEditor::accept()
 		this->object->setVertex(i, vertex);
 	}
 
-	this->object->setColor(this->currentColor);
+	this->object->setColor(ui.colorButton->color());
 	QDialog::accept();
 }

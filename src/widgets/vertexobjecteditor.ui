@@ -44,7 +44,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="color">
+      <widget class="ColorButton" name="colorButton">
        <property name="text">
         <string/>
        </property>
@@ -64,6 +64,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorButton</class>
+   <extends>QPushButton</extends>
+   <header>widgets/colorbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
