@@ -40,7 +40,7 @@ enum class LDObjectType
 	Error,				//	Object is the result of failed parsing
 	Empty,				//	Object represents an empty line
 	BezierCurve,		//	Object represents a Bézier curve
-	Cylinder,
+	CircularPrimitive,
 	_End
 };
 

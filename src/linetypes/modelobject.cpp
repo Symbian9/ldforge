@@ -31,7 +31,7 @@
 #include "conditionaledge.h"
 #include "comment.h"
 #include "empty.h"
-#include "cylinder.h"
+#include "circularprimitive.h"
 
 // List of all LDObjects
 QMap<qint32, LDObject*> g_allObjects;
@@ -356,8 +356,8 @@ LDObject* LDObject::newFromType(LDObjectType type)
 	case LDObjectType::BezierCurve:
 		return new LDBezierCurve {};
 
-	case LDObjectType::Cylinder:
-		return new LDCylinder {};
+	case LDObjectType::CircularPrimitive:
+		return new LDCircularPrimitive {};
 
 	case LDObjectType::_End:
 		break;

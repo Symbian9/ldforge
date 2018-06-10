@@ -24,7 +24,7 @@
 #include "linetypes/empty.h"
 #include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
-#include "linetypes/cylinder.h"
+#include "linetypes/circularprimitive.h"
 
 /*
  * Constructs an LDraw parser
@@ -389,20 +389,32 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 				for (int i = 0; i < 9; ++i)
 					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
 
-				static const QRegExp cylinderRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)cyli\.dat)"};
+				static const QRegExp circularPrimitiveRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge)\.dat)"};
 				LDObject* obj;
 
-				if (cylinderRegexp.exactMatch(referenceName))
+				if (circularPrimitiveRegexp.exactMatch(referenceName))
 				{
 					int resolution = MediumResolution;
 
-					if (not cylinderRegexp.capturedTexts()[1].isEmpty())
-						resolution = cylinderRegexp.capturedTexts()[1].toInt();
+					if (not circularPrimitiveRegexp.capturedTexts()[1].isEmpty())
+						resolution = circularPrimitiveRegexp.capturedTexts()[1].toInt();
 
-					int numerator = cylinderRegexp.capturedTexts()[2].toInt();
-					int denominator = cylinderRegexp.capturedTexts()[3].toInt();
+					int numerator = circularPrimitiveRegexp.capturedTexts()[2].toInt();
+					int denominator = circularPrimitiveRegexp.capturedTexts()[3].toInt();
 					int segments = (numerator * resolution) / denominator;
-					obj = model.emplaceAt<LDCylinder>(position, segments, resolution, transform, displacement);
+					PrimitiveModel::Type type = PrimitiveModel::Cylinder;
+
+					if (circularPrimitiveRegexp.capturedTexts()[4] == "edge")
+						type = PrimitiveModel::Circle;
+
+					obj = model.emplaceAt<LDCircularPrimitive>(
+						position,
+						type,
+						segments,
+						resolution,
+						transform,
+						displacement
+					);
 				}
 				else
 				{

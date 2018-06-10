@@ -79,9 +79,9 @@ set (LDFORGE_SOURCES
 	src/editmodes/selectMode.cpp
 	src/geometry/linesegment.cpp
 	src/geometry/plane.cpp
+	src/linetypes/circularprimitive.cpp
 	src/linetypes/comment.cpp
 	src/linetypes/conditionaledge.cpp
-	src/linetypes/cylinder.cpp
 	src/linetypes/edgeline.cpp
 	src/linetypes/empty.cpp
 	src/linetypes/modelobject.cpp
@@ -161,9 +161,9 @@ set (LDFORGE_HEADERS
 	src/generics/transform.h
 	src/geometry/linesegment.h
 	src/geometry/plane.h
+	src/linetypes/circularprimitive.h
 	src/linetypes/comment.h
 	src/linetypes/conditionaledge.h
-	src/linetypes/cylinder.h
 	src/linetypes/edgeline.h
 	src/linetypes/empty.h
 	src/linetypes/modelobject.h

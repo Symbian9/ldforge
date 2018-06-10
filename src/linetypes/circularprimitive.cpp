@@ -2,11 +2,11 @@
 #include "../glShared.h"
 #include "../model.h"
 #include "../algorithms/invert.h"
-#include "cylinder.h"
+#include "circularprimitive.h"
 #include "quadrilateral.h"
 #include "primitives.h"
 
-QString LDCylinder::buildFilename() const
+QString LDCircularPrimitive::buildFilename() const
 {
 	int numerator = this->m_segments;
 	int denominator = this->m_divisions;
@@ -16,25 +16,44 @@ QString LDCylinder::buildFilename() const
 		prefix = QString::number(m_divisions) + '\\';
 
 	simplify(numerator, denominator);
-	return format("%1%2-%3cyli.dat", prefix, numerator, denominator);
+
+	switch (m_type)
+	{
+	case PrimitiveModel::Cylinder:
+		return format("%1%2-%3cyli.dat", prefix, numerator, denominator);
+
+	case PrimitiveModel::Circle:
+		return format("%1%2-%3edge.dat", prefix, numerator, denominator);
+
+	default:
+		Q_ASSERT(false);
+		return "";
+	}
 }
 
-LDCylinder::LDCylinder(
+LDCircularPrimitive::LDCircularPrimitive(
+	PrimitiveModel::Type type,
 	int segments,
 	int divisions,
 	const Matrix& transformationMatrix,
 	const Vertex& position
 ) :
 	LDMatrixObject {transformationMatrix, position},
+	m_type {type},
 	m_segments {segments},
 	m_divisions {divisions} {}
 
-QString LDCylinder::asText() const
+LDObjectType LDCircularPrimitive::type() const
+{
+	return SubclassType;
+}
+
+QString LDCircularPrimitive::asText() const
 {
 	return LDSubfileReference(buildFilename(), transformationMatrix(), position()).asText();
 }
 
-void LDCylinder::getVertices(DocumentManager* /* context */, QSet<Vertex>& vertices) const
+void LDCircularPrimitive::getVertices(DocumentManager* /* context */, QSet<Vertex>& vertices) const
 {
 	int endSegment = (m_segments == m_divisions) ? m_segments : m_segments + 1;
 
@@ -51,7 +70,9 @@ void LDCylinder::getVertices(DocumentManager* /* context */, QSet<Vertex>& verti
 	}
 }
 
-void LDCylinder::rasterize(
+bool LDCircularPrimitive::isRasterizable() const { return true; }
+
+void LDCircularPrimitive::rasterize(
 	DocumentManager* context,
 	Winding /* parentWinding */,
 	Model& model,
@@ -74,7 +95,7 @@ void LDCylinder::rasterize(
 	model.merge(cylinderBody);
 }
 
-QVector<LDPolygon> LDCylinder::rasterizePolygons(DocumentManager* context, Winding winding)
+QVector<LDPolygon> LDCircularPrimitive::rasterizePolygons(DocumentManager* context, Winding winding)
 {
 	Model cylinderBody {context};
 	buildPrimitiveBody(cylinderBody);
@@ -106,19 +127,24 @@ QVector<LDPolygon> LDCylinder::rasterizePolygons(DocumentManager* context, Windi
 	return result;
 }
 
-void LDCylinder::buildPrimitiveBody(Model& model) const
+void LDCircularPrimitive::buildPrimitiveBody(Model& model) const
 {
 	PrimitiveModel primitive;
-	primitive.type = PrimitiveModel::Cylinder;
+	primitive.type = m_type;
 	primitive.segments = m_segments;
 	primitive.divisions = m_divisions;
 	primitive.ringNumber = 0;
-	primitive.generateCylinder(model);
+	primitive.generateBody(model);
 }
 
-QString LDCylinder::objectListText() const
+QString LDCircularPrimitive::objectListText() const
 {
-	QString result = format("Cylinder %1 %2, (", m_segments / m_divisions, position().toString(true));
+	QString result = format(
+		"%1 %2 %3, (",
+		PrimitiveModel::typeName(m_type),
+		m_segments / m_divisions,
+		position().toString(true)
+	);
 
 	for (int i = 0; i < 9; ++i)
 		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");
@@ -127,7 +153,34 @@ QString LDCylinder::objectListText() const
 	return result;
 }
 
-void LDCylinder::serialize(class Serializer& serializer)
+int LDCircularPrimitive::triangleCount(DocumentManager*) const
+{
+	switch (m_type)
+	{
+	case PrimitiveModel::Ring:
+	case PrimitiveModel::Cone:
+		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
+
+	case PrimitiveModel::Cylinder:
+		return 2 * m_segments;
+
+	case PrimitiveModel::Disc:
+	case PrimitiveModel::DiscNegative:
+		return m_segments;
+
+	case PrimitiveModel::Circle:
+		return 0;
+	}
+
+	return 0;
+}
+
+QString LDCircularPrimitive::typeName() const
+{
+	return "circular-primitive";
+}
+
+void LDCircularPrimitive::serialize(class Serializer& serializer)
 {
 	LDMatrixObject::serialize(serializer);
 	serializer << m_segments << m_divisions;

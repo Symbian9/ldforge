@@ -325,12 +325,41 @@ void PrimitiveModel::generateCylinder(Model& model, Winding winding) const
 	}
 }
 
+/*
+ * Builds a circle primitive.
+ */
+void PrimitiveModel::generateCircle(Model& model) const
+{
+	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
+
+	for (int i = 0; i < segments; ++i)
+	{
+		double x0 = circle[i].x1();
+		double x1 = circle[i].x2();
+		double z0 = circle[i].y1();
+		double z1 = circle[i].y2();
+
+		LDEdgeLine* line = model.emplace<LDEdgeLine>();
+		line->setVertex(0, Vertex {x0, 0.0f, z0});
+		line->setVertex(1, Vertex {x1, 0.0f, z1});
+		line->setColor(EdgeColor);
+	}
+}
+
 void PrimitiveModel::generateBody(Model& model) const
 {
-	if (this->type == Cylinder)
+	switch (type)
 	{
-		this->generateCylinder(model);
+	case Cylinder:
+		generateCylinder(model);
 		return;
+
+	case Circle:
+		generateCircle(model);
+		return;
+
+	default:
+		break;
 	}
 
 	QVector<int> conditionalLineSegments;
@@ -345,15 +374,6 @@ void PrimitiveModel::generateBody(Model& model) const
 
 		switch (type)
 		{
-		case Circle:
-		    {
-			    LDEdgeLine* line = model.emplace<LDEdgeLine>();
-				line->setVertex(0, Vertex {x0, 0.0f, z0});
-				line->setVertex(1, Vertex {x1, 0.0f, z1});
-				line->setColor(EdgeColor);
-			}
-			break;
-
 		case Ring:
 		case Cone:
 			{
@@ -421,6 +441,7 @@ void PrimitiveModel::generateBody(Model& model) const
 			}
 			break;
 
+		case Circle:
 		case Cylinder:
 			break;
 		}
