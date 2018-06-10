@@ -65,7 +65,7 @@ public:
 	virtual QString asText() const = 0; // This object as LDraw code
 	LDColor color() const;
 	virtual LDColor defaultColor() const; // What color does the object default to?
-	LDPolygon* getPolygon();
+	LDPolygon getPolygon();
 	virtual void getVertices (DocumentManager *context, QSet<Vertex>& verts) const;
 	virtual bool hasMatrix() const; // Does this object have a matrix and position? (see LDMatrixObject)
 	virtual bool isColored() const;

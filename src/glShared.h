@@ -17,10 +17,11 @@
  */
 
 #pragma once
-
 #include <QOpenGLFunctions>
 #include <QGenericMatrix>
 #include "basics.h"
+#include "colors.h"
+#include "generics/enums.h"
 #include "types/vertex.h"
 
 inline void glMultMatrixf(const GLRotationMatrix& matrix)
@@ -42,18 +43,43 @@ class LDObject;
 
 struct LDPolygon
 {
-	char		num;
-	Vertex		vertices[4];
-	int			color;
+	enum class Type : qint8 { InvalidPolygon, EdgeLine, Triangle, Quadrilateral, ConditionalEdge };
+	Type type = Type::InvalidPolygon;
+	Vertex vertices[4];
+	LDColor color;
 
 	inline int numPolygonVertices() const
 	{
-		return (num == 5) ? 2 : num;
+		if (type == Type::ConditionalEdge)
+			return 2;
+		else
+			return numVertices();
 	}
 
 	inline int numVertices() const
 	{
-		return (num == 5) ? 4 : num;
+		switch (type)
+		{
+		case Type::EdgeLine:
+			return 2;
+
+		case Type::Triangle:
+			return 3;
+
+		case Type::ConditionalEdge:
+		case Type::Quadrilateral:
+			return 4;
+
+		case Type::InvalidPolygon:
+			return 0;
+		}
+
+		return 0;
+	}
+
+	bool isValid() const
+	{
+		return type != Type::InvalidPolygon;
 	}
 };
 

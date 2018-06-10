@@ -110,17 +110,15 @@ QVector<LDPolygon> LDCircularPrimitive::rasterizePolygons(DocumentManager* conte
 			object->setVertex(i, vertex);
 		}
 
-		LDPolygon* polygon = object->getPolygon();
+		LDPolygon polygon = object->getPolygon();
 
-		if (polygon)
+		if (polygon.isValid())
 		{
 			if (cachedShouldInvert)
-				invertPolygon(*polygon);
+				invertPolygon(polygon);
 
-			result.append(*polygon);
+			result.append(polygon);
 		}
-
-		delete polygon;
 	}
 
 	return result;

@@ -227,13 +227,13 @@ QColor GLCompiler::getColorForPolygon(
 	else
 	{
 		// The color was unknown. Use main color to make the polygon at least not appear pitch-black.
-		if (polygon.num != 2 and polygon.num != 5)
+		if (polygon.type != LDPolygon::Type::EdgeLine and polygon.type != LDPolygon::Type::ConditionalEdge)
 			color = guiUtilities()->mainColorRepresentation();
 		else
 			color = Qt::black;
 
 		// Warn about the unknown color, but only once.
-		static QSet<int> warnedColors;
+		static QSet<LDColor> warnedColors;
 		if (not warnedColors.contains(polygon.color))
 		{
 			print(tr("Unknown color %1!\n"), polygon.color);
@@ -367,11 +367,10 @@ void GLCompiler::compileObject(const QModelIndex& index)
 	case LDObjectType::EdgeLine:
 	case LDObjectType::ConditionalEdge:
 		{
-			LDPolygon* poly = object->getPolygon();
-			compilePolygon (*poly, index, info);
-			delete poly;
-			break;
+			LDPolygon polygon = object->getPolygon();
+			compilePolygon(polygon, index, info);
 		}
+		break;
 
 	case LDObjectType::BezierCurve:
 		{
@@ -409,21 +408,21 @@ void GLCompiler::compilePolygon(
 
 	VboClass surface;
 
-	switch (poly.num)
+	switch (poly.type)
 	{
-	case 2:
+	case LDPolygon::Type::EdgeLine:
 		surface = VboClass::Lines;
 		break;
 
-	case 3:
+	case LDPolygon::Type::Triangle:
 		surface = VboClass::Triangles;
 		break;
 
-	case 4:
+	case LDPolygon::Type::Quadrilateral:
 		surface = VboClass::Quads;
 		break;
 
-	case 5:
+	case LDPolygon::Type::ConditionalEdge:
 		surface = VboClass::ConditionalLines;
 		break;
 

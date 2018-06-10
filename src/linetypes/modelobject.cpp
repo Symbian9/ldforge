@@ -210,24 +210,39 @@ void LDSubfileReference::rasterize(
 
 // =============================================================================
 //
-LDPolygon* LDObject::getPolygon()
+LDPolygon LDObject::getPolygon()
 {
 	LDObjectType ot = type();
-	int num = (ot == LDObjectType::EdgeLine)		? 2
-			: (ot == LDObjectType::Triangle)	? 3
-			: (ot == LDObjectType::Quadrilateral)		? 4
-			: (ot == LDObjectType::ConditionalEdge)	? 5
-			: 0;
+	LDPolygon::Type polygonType;
 
-	if (num == 0)
-		return nullptr;
+	switch (ot)
+	{
+	case LDObjectType::EdgeLine:
+		polygonType = LDPolygon::Type::EdgeLine;
+		break;
 
-	LDPolygon* data = new LDPolygon;
-	data->num = num;
-	data->color = color().index();
+	case LDObjectType::Triangle:
+		polygonType = LDPolygon::Type::Triangle;
+		break;
 
-	for (int i = 0; i < data->numVertices(); ++i)
-		data->vertices[i] = vertex (i);
+	case LDObjectType::Quadrilateral:
+		polygonType = LDPolygon::Type::Quadrilateral;
+		break;
+
+	case LDObjectType::ConditionalEdge:
+		polygonType = LDPolygon::Type::ConditionalEdge;
+		break;
+
+	default:
+		return {};
+	}
+
+	LDPolygon data;
+	data.type = polygonType;
+	data.color = color();
+
+	for (int i = 0; i < data.numVertices(); ++i)
+		data.vertices[i] = vertex(i);
 
 	return data;
 }
@@ -480,7 +495,7 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 	parms.append (pointAt (1.0));
 	LDPolygon poly;
 	poly.color = color().index();
-	poly.num = 2;
+	poly.type = LDPolygon::Type::EdgeLine;
 
 	for (int i = 0; i < segments; ++i)
 	{

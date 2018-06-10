@@ -464,13 +464,10 @@ void LDDocument::initializeCachedData()
 				continue;
 			}
 
-			LDPolygon* data = obj->getPolygon();
+			LDPolygon data = obj->getPolygon();
 
-			if (data)
-			{
-				m_polygonData << *data;
-				delete data;
-			}
+			if (data.isValid())
+				m_polygonData << data;
 		}
 
 		m_needsRecache = false;
