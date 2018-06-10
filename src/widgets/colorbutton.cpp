@@ -55,7 +55,7 @@ ColorButton::ColorButton(QWidget* parent) :
 			if (_color.isValid())
 			{
 				setFlat(true);
-				setText(_color.name());
+				setText(format("[%1] %2", _color.indexString(), _color.name()));
 				setStyleSheet(format(
 					"background-color: %1; color: %2; border:none;",
 					_color.hexcode(),
