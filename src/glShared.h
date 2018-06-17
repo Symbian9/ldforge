@@ -24,11 +24,6 @@
 #include "generics/enums.h"
 #include "types/vertex.h"
 
-inline void glMultMatrixf(const GLRotationMatrix& matrix)
-{
-	glMultMatrixf(matrix.constData());
-}
-
 inline void glTranslatef(const Vertex& vertex)
 {
 	glTranslatef(vertex.x, vertex.y, vertex.z);

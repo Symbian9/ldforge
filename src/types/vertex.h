@@ -34,7 +34,7 @@ struct Vertex
 	QVector3D toVector() const;
 	void transform(const QMatrix4x4& matrix);
 	void rotate(const QQuaternion& orientation);
-	Vertex transformed(const GLRotationMatrix& matrix) const;
+	Vertex transformed(const QMatrix4x4& matrix) const;
 	void setCoordinate(Axis ax, qreal value);
 
 	Vertex& operator+=(const QVector3D& other);

@@ -22,7 +22,7 @@
 
 struct FixedCameraParameters
 {
-	GLRotationMatrix rotationMatrix;
+	QMatrix4x4 rotationMatrix;
 	Axis localX;
 	Axis localY;
 	bool negatedX;
@@ -59,12 +59,12 @@ public:
 	Q_SLOT void rendererResized(int width, int height);
 	void setPanning(double x, double y);
 	void setZoom(double zoom);
-	const GLRotationMatrix& transformationMatrix() const;
-	GLRotationMatrix transformationMatrix(double scale) const;
+	const QMatrix4x4& transformationMatrix() const;
+	QMatrix4x4 transformationMatrix(double scale) const;
 	const QSizeF& virtualSize() const;
 	double zoom() const;
 	void zoomNotch(bool inward);
-	GLRotationMatrix realMatrix() const;
+	QMatrix4x4 realMatrix() const;
 
 private:
 	QString m_name;
@@ -74,7 +74,7 @@ private:
 	double m_zoom = 30;
 	QSize m_size;
 	QSizeF m_virtualSize;
-	GLRotationMatrix m_rotationMatrix;
+	QMatrix4x4 m_rotationMatrix;
 	Axis m_localX = X; // Which axis to use for Y
 	Axis m_localY = Y; // Which axis to use for Y
 	bool m_isFree = false; // Is this the free camera?

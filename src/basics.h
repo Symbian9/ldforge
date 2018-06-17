@@ -44,7 +44,6 @@ public: \
 	using Super = SUPER;
 
 class LDObject;
-using GLRotationMatrix = QMatrix4x4;
 
 enum Axis
 {

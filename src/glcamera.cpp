@@ -236,7 +236,7 @@ const QString& GLCamera::name() const
 	return m_name;
 }
 
-const GLRotationMatrix& GLCamera::transformationMatrix() const
+const QMatrix4x4& GLCamera::transformationMatrix() const
 {
 	return m_rotationMatrix;
 }
@@ -244,9 +244,9 @@ const GLRotationMatrix& GLCamera::transformationMatrix() const
 /*
  * Returns the camera's transformation matrix, scaled by the given scale value.
  */
-GLRotationMatrix GLCamera::transformationMatrix(double scale) const
+QMatrix4x4 GLCamera::transformationMatrix(double scale) const
 {
-	GLRotationMatrix matrix = m_rotationMatrix;
+	QMatrix4x4 matrix = m_rotationMatrix;
 
 	for (int i = 0; i < 4; ++i)
 	for (int j = 0; j < 4; ++j)
@@ -255,7 +255,7 @@ GLRotationMatrix GLCamera::transformationMatrix(double scale) const
 	return matrix;
 }
 
-static const GLRotationMatrix ldrawToIdealAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+static const QMatrix4x4 ldrawToIdealAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
 
 /*
  * Converts from rea co-ordinates to ideal co-ordinates.
@@ -275,19 +275,19 @@ Vertex GLCamera::realize(const Vertex& idealCoordinates) const
 	return idealCoordinates.transformed(ldrawToIdealAdapterMatrix).transformed(m_rotationMatrix.inverted());
 }
 
-GLRotationMatrix GLCamera::realMatrix() const
+QMatrix4x4 GLCamera::realMatrix() const
 {
 	/* glOrtho(-virtualSize.width(), virtualSize.width(),
 			-virtualSize.height(), virtualSize.height(),
 			-1000.0f, 1000.0f); */
-	GLRotationMatrix ortho {
+	QMatrix4x4 ortho {
 		1 / float(m_virtualSize.width()), 0, 0, 0,
 		0, 1 / float(m_virtualSize.height()), 0, 0,
 		0, 0, -0.0001, 0,
 		0, 0, 0, 1
 	};
 
-	GLRotationMatrix panningMatrix {
+	QMatrix4x4 panningMatrix {
 		1, 0, 0, float(m_panningX),
 		0, 1, 0, float(m_panningY),
 		0, 0, 1, 0,

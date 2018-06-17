@@ -195,7 +195,7 @@ bool Vertex::operator<(const Vertex& other) const
 /*
  * Transforms this vertex with a tranformation matrix and returns the result.
  */
-Vertex Vertex::transformed(const GLRotationMatrix& matrix) const
+Vertex Vertex::transformed(const QMatrix4x4& matrix) const
 {
 	return {
 		matrix(0, 0) * this->x

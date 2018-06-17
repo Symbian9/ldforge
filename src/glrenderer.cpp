@@ -37,15 +37,15 @@
 const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
 
 // Transformation matrices for the fixed cameras.
-const GLRotationMatrix GLRenderer::topCameraMatrix = GLRotationMatrix {};
-const GLRotationMatrix GLRenderer::frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
-const GLRotationMatrix GLRenderer::leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
-const GLRotationMatrix GLRenderer::bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
-const GLRotationMatrix GLRenderer::backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-const GLRotationMatrix GLRenderer::rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::topCameraMatrix = QMatrix4x4 {};
+const QMatrix4x4 GLRenderer::frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
 
 // Conversion matrix from LDraw to OpenGL coordinates.
-const GLRotationMatrix GLRenderer::ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+const QMatrix4x4 GLRenderer::ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
 
 /*
  * Constructs a GL renderer.
@@ -359,7 +359,7 @@ void GLRenderer::resizeGL (int width, int height)
 /*
  * Pads a 3×3 matrix into a 4×4 one by adding cells from the identity matrix.
  */
-GLRotationMatrix padMatrix(const QMatrix3x3& stub)
+QMatrix4x4 padMatrix(const QMatrix3x3& stub)
 {
 	return {
 		stub(0, 0), stub(0, 1), stub(0, 2), 0,
@@ -395,8 +395,8 @@ void GLRenderer::drawGLScene()
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
 		glLoadIdentity();
-		glMultMatrixf(currentCamera().realMatrix());
-		glMultMatrixf(ldrawToGLAdapterMatrix);
+		glMultMatrixf(currentCamera().realMatrix().constData());
+		glMultMatrixf(ldrawToGLAdapterMatrix.constData());
 		drawFixedCameraBackdrop();
 	}
 	else

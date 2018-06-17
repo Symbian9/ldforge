@@ -81,13 +81,13 @@ public:
 	void setSelectionModel(QItemSelectionModel* selectionModel);
 
 	static const QPen thinBorderPen;
-	static const GLRotationMatrix topCameraMatrix;
-	static const GLRotationMatrix frontCameraMatrix;
-	static const GLRotationMatrix leftCameraMatrix;
-	static const GLRotationMatrix bottomCameraMatrix;
-	static const GLRotationMatrix backCameraMatrix;
-	static const GLRotationMatrix rightCameraMatrix;
-	static const GLRotationMatrix ldrawToGLAdapterMatrix;
+	static const QMatrix4x4 topCameraMatrix;
+	static const QMatrix4x4 frontCameraMatrix;
+	static const QMatrix4x4 leftCameraMatrix;
+	static const QMatrix4x4 bottomCameraMatrix;
+	static const QMatrix4x4 backCameraMatrix;
+	static const QMatrix4x4 rightCameraMatrix;
+	static const QMatrix4x4 ldrawToGLAdapterMatrix;
 
 signals:
 	void objectHighlightingChanged(const QModelIndex& oldIndex, const QModelIndex& newIndex);

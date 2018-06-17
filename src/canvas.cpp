@@ -189,13 +189,13 @@ void Canvas::drawFixedCameraBackdrop()
 	if (this->camera() < Camera::Free)
 	{
 		GLfloat cullz = this->cullValues[static_cast<int>(this->camera())];
-		GLRotationMatrix matrix = {
+		QMatrix4x4 matrix = {
 			1, 0, 0, cullz,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1,
 		};
-		glMultMatrixf(matrix);
+		glMultMatrixf(matrix.constData());
 	}
 }
 
