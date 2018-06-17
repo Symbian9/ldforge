@@ -17,9 +17,12 @@ public:
 	QMatrix4x4 matrix() const;
 	void setMatrix(const QMatrix4x4& matrix);
 
+signals:
+	void matrixChanged(const QMatrix4x4& matrix);
+
 private slots:
 	void scalingChanged();
-	void matrixChanged();
+	void matrix3x3Changed();
 
 private:
 	QDoubleSpinBox* matrixCell(int row, int column) const;

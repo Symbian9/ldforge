@@ -15,7 +15,7 @@ MatrixEditor::MatrixEditor(const QMatrix4x4& matrix, QWidget *parent) :
 			matrixCell(i, j),
 			qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this,
-			&MatrixEditor::matrixChanged
+			&MatrixEditor::matrix3x3Changed
 		);
 	}
 
@@ -26,6 +26,15 @@ MatrixEditor::MatrixEditor(const QMatrix4x4& matrix, QWidget *parent) :
 			qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this,
 			&MatrixEditor::scalingChanged
+		);
+	}
+
+	for (QDoubleSpinBox* spinbox : {ui.positionX, ui.positionY, ui.positionZ})
+	{
+		connect(
+			spinbox,
+			qOverload<double>(&QDoubleSpinBox::valueChanged),
+			[&](){ emit matrixChanged(this->matrix()); }
 		);
 	}
 }
@@ -109,6 +118,7 @@ void MatrixEditor::scalingChanged()
 					{
 						cellWidget->setValue(cellValue);
 					});
+					emit matrixChanged(this->matrix());
 				}
 			}
 
@@ -135,7 +145,7 @@ QPair<int, int> MatrixEditor::cellPosition(QDoubleSpinBox* cellWidget)
 /*
  * Updates the appropriate scaling vector element when a matrix cell is changed.
  */
-void MatrixEditor::matrixChanged()
+void MatrixEditor::matrix3x3Changed()
 {
 	QDoubleSpinBox* cellWidget = static_cast<QDoubleSpinBox*>(this->sender());
 
@@ -147,6 +157,7 @@ void MatrixEditor::matrixChanged()
 		{
 			spinbox->setValue(this->matrixScaling(column));
 		});
+		emit matrixChanged(this->matrix());
 	}
 	catch (const std::out_of_range&) {}
 }
@@ -161,7 +172,13 @@ QMatrix4x4 MatrixEditor::matrix() const
 		transformationMatrix(i, j) = this->matrixCell(i, j)->value();
 	}
 
-	transformationMatrix.translate(ui.positionX->value(), ui.positionY->value(), ui.positionZ->value());
+	QVector4D translation {
+		(float) ui.positionX->value(),
+		(float) ui.positionY->value(),
+		(float) ui.positionZ->value(),
+		0.0f
+	};
+	transformationMatrix.setColumn(3, translation);
 	return transformationMatrix;
 }
 

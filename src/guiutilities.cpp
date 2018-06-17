@@ -27,7 +27,9 @@
 #include "mainwindow.h"
 #include "linetypes/modelobject.h"
 #include "linetypes/comment.h"
+#include "linetypes/circularprimitive.h"
 #include "dialogs/subfilereferenceeditor.h"
+#include "dialogs/circularprimitiveeditor.h"
 #include "widgets/vertexobjecteditor.h"
 
 GuiUtilities::GuiUtilities (QObject* parent) :
@@ -179,6 +181,12 @@ void editObject(MainWindow* parent, LDObject* object)
 		LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
 		SubfileReferenceEditor editor {reference, parent};
 		editor.setPrimitivesTree(parent->primitives());
+		editor.exec();
+	}
+	else if (object->type() == LDObjectType::CircularPrimitive)
+	{
+		LDCircularPrimitive* primitive = static_cast<LDCircularPrimitive*>(object);
+		CircularPrimitiveEditor editor {primitive, parent};
 		editor.exec();
 	}
 	else if (object->type() == LDObjectType::Comment)

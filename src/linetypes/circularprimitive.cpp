@@ -179,6 +179,36 @@ QString LDCircularPrimitive::objectListText() const
 	return result;
 }
 
+PrimitiveModel::Type LDCircularPrimitive::primitiveType() const
+{
+	return m_type;
+}
+
+void LDCircularPrimitive::setPrimitiveType(PrimitiveModel::Type newType)
+{
+	changeProperty(&m_type, newType);
+}
+
+int LDCircularPrimitive::segments() const
+{
+	return m_segments;
+}
+
+void LDCircularPrimitive::setSegments(int newSegments)
+{
+	changeProperty(&m_segments, newSegments);
+}
+
+int LDCircularPrimitive::divisions() const
+{
+	return m_divisions;
+}
+
+void LDCircularPrimitive::setDivisions(int newDivisions)
+{
+	changeProperty(&m_divisions, newDivisions);
+}
+
 int LDCircularPrimitive::triangleCount(DocumentManager*) const
 {
 	switch (m_type)

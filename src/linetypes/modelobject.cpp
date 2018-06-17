@@ -596,6 +596,14 @@ void LDObject::serialize(Serializer& serializer)
 	serializer << m_coords[3];
 }
 
+void LDObject::restore(LDObjectState& archive)
+{
+	Serializer restorer {archive, Serializer::Restore};
+	Serializer::Archive before = Serializer::store(this);
+	serialize(restorer);
+	emit modified(before, Serializer::store(this));
+}
+
 void LDMatrixObject::serialize(Serializer& serializer)
 {
 	LDObject::serialize(serializer);

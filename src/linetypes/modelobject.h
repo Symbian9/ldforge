@@ -89,6 +89,7 @@ public:
 	virtual QString iconName() const = 0;
 	const Vertex& vertex (int i) const;
 	virtual void serialize(class Serializer& serializer);
+	void restore(LDObjectState& archive);
 
 	static LDObject* newFromType(LDObjectType type);
 

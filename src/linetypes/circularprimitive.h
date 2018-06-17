@@ -28,6 +28,12 @@ public:
 	) override;
 	QVector<LDPolygon> rasterizePolygons(DocumentManager* context, Winding parentWinding) override;
 	QString objectListText() const override;
+	PrimitiveModel::Type primitiveType() const;
+	void setPrimitiveType(PrimitiveModel::Type newType);
+	int segments() const;
+	void setSegments(int newSegments);
+	int divisions() const;
+	void setDivisions(int newDivisions);
 	int triangleCount(DocumentManager*) const override;
 	QString iconName() const override;
 	void serialize(class Serializer& serializer) override;
