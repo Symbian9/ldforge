@@ -200,13 +200,16 @@ Vertex Vertex::transformed(const QMatrix4x4& matrix) const
 	return {
 		matrix(0, 0) * this->x
 			+ matrix(0, 1) * this->y
-			+ matrix(0, 2) * this->z,
+			+ matrix(0, 2) * this->z
+			+ matrix(0, 3),
 		matrix(1, 0) * this->x
 			+ matrix(1, 1) * this->y
-			+ matrix(1, 2) * this->z,
+			+ matrix(1, 2) * this->z
+			+ matrix(1, 3),
 		matrix(2, 0) * this->x
 			+ matrix(2, 1) * this->y
-			+ matrix(2, 2) * this->z,
+			+ matrix(2, 2) * this->z
+			+ matrix(2, 3),
 	};
 }
 

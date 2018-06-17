@@ -76,7 +76,7 @@ void LDCircularPrimitive::rasterize(
 	bool /* render */
 ) {
 	Model cylinderBody {context};
-	buildPrimitiveBody(cylinderBody);
+	buildPrimitiveBody(cylinderBody, false);
 
 	for (LDObject* object : cylinderBody.objects())
 	{
@@ -94,7 +94,7 @@ void LDCircularPrimitive::rasterize(
 QVector<LDPolygon> LDCircularPrimitive::rasterizePolygons(DocumentManager* context, Winding winding)
 {
 	Model cylinderBody {context};
-	buildPrimitiveBody(cylinderBody);
+	buildPrimitiveBody(cylinderBody, true);
 	QVector<LDPolygon> result;
 	bool cachedShouldInvert = shouldInvert(winding, context);
 
@@ -121,14 +121,14 @@ QVector<LDPolygon> LDCircularPrimitive::rasterizePolygons(DocumentManager* conte
 	return result;
 }
 
-void LDCircularPrimitive::buildPrimitiveBody(Model& model) const
+void LDCircularPrimitive::buildPrimitiveBody(Model& model, bool deep) const
 {
 	PrimitiveModel primitive;
 	primitive.type = m_type;
 	primitive.segments = m_segments;
 	primitive.divisions = m_divisions;
 	primitive.ringNumber = 0;
-	primitive.generateBody(model);
+	primitive.generateBody(model, deep);
 }
 
 QString LDCircularPrimitive::stem() const
@@ -146,6 +146,12 @@ QString LDCircularPrimitive::stem() const
 
 	case PrimitiveModel::DiscNegative:
 		return "ndis";
+
+	case PrimitiveModel::CylinderClosed:
+		return "cylc";
+
+	case PrimitiveModel::CylinderOpen:
+		return "cylo";
 
 	default:
 		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
@@ -218,6 +224,8 @@ int LDCircularPrimitive::triangleCount(DocumentManager*) const
 		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
 
 	case PrimitiveModel::Cylinder:
+	case PrimitiveModel::CylinderClosed:
+	case PrimitiveModel::CylinderOpen:
 		return 2 * m_segments;
 
 	case PrimitiveModel::Disc:
@@ -250,6 +258,12 @@ QString LDCircularPrimitive::iconName() const
 
 	case PrimitiveModel::Circle:
 		return "circle";
+
+	case PrimitiveModel::CylinderClosed:
+		return "cylinder-closed";
+
+	case PrimitiveModel::CylinderOpen:
+		return "cylinder-open";
 	}
 
 	return "";

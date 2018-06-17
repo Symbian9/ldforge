@@ -40,7 +40,7 @@ public:
 
 private:
 	QString buildFilename() const;
-	void buildPrimitiveBody(Model& model) const;
+	void buildPrimitiveBody(Model& model, bool newParameter = false) const;
 	QString stem() const;
 
 	PrimitiveModel::Type m_type = PrimitiveModel::Circle;

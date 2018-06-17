@@ -32,6 +32,7 @@
 #include "linetypes/empty.h"
 #include "linetypes/quadrilateral.h"
 #include "linetypes/triangle.h"
+#include "linetypes/circularprimitive.h"
 
 PrimitiveManager::PrimitiveManager(QObject* parent) :
 	QAbstractItemModel {parent},
@@ -265,7 +266,6 @@ static const double chordLength = 0.3901929010117944;
 
 void PrimitiveModel::generateCylinder(Model& model, Winding winding) const
 {
-	Q_ASSERT(this->type == Cylinder);
 	auto circle = makeCircle(this->segments, this->divisions, 1);
 	bool useTangents = (this->segments != this->divisions);
 
@@ -328,7 +328,7 @@ void PrimitiveModel::generateCylinder(Model& model, Winding winding) const
 /*
  * Builds a circle primitive.
  */
-void PrimitiveModel::generateCircle(Model& model) const
+void PrimitiveModel::generateCircle(Model& model, const QMatrix4x4& matrix) const
 {
 	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
 
@@ -340,13 +340,41 @@ void PrimitiveModel::generateCircle(Model& model) const
 		double z1 = circle[i].y2();
 
 		LDEdgeLine* line = model.emplace<LDEdgeLine>();
-		line->setVertex(0, Vertex {x0, 0.0f, z0});
-		line->setVertex(1, Vertex {x1, 0.0f, z1});
+		line->setVertex(0, Vertex {x0, 0.0f, z0}.transformed(matrix));
+		line->setVertex(1, Vertex {x1, 0.0f, z1}.transformed(matrix));
 		line->setColor(EdgeColor);
 	}
 }
 
-void PrimitiveModel::generateBody(Model& model) const
+void PrimitiveModel::generateDisc(Model& model) const
+{
+	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
+
+	for (int i = 0; i < segments; ++i)
+	{
+		LDTriangle* segment = model.emplace<LDTriangle>();
+		segment->setColor(MainColor);
+		segment->setVertex(0, {circle[i].x1(), 0.0, circle[i].y1()});
+		segment->setVertex(1, {circle[i].x2(), 0.0, circle[i].y2()});
+		segment->setVertex(2, {0.0, 0.0, 0.0});
+	}
+}
+
+void PrimitiveModel::generateDiscNegative(Model& model) const
+{
+	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
+
+	for (int i = 0; i < segments; ++i)
+	{
+		LDTriangle* segment = model.emplace<LDTriangle>();
+		segment->setColor(MainColor);
+		segment->setVertex(0, {(circle[i].x1() >= 0.0) ? 1.0 : -1.0, 0.0, (circle[i].y1() >= 0.0) ? 1.0 : -1.0});
+		segment->setVertex(1, {circle[i].x2(), 0.0, circle[i].y2()});
+		segment->setVertex(2, {circle[i].x1(), 0.0, circle[i].y1()});
+	}
+}
+
+void PrimitiveModel::generateBody(Model& model, bool deep) const
 {
 	switch (type)
 	{
@@ -356,6 +384,39 @@ void PrimitiveModel::generateBody(Model& model) const
 
 	case Circle:
 		generateCircle(model);
+		return;
+
+	case Disc:
+		generateDisc(model);
+		return;
+
+	case DiscNegative:
+		generateDiscNegative(model);
+		return;
+
+	case CylinderClosed:
+		if (deep)
+			generateDisc(model);
+		else
+			model.emplace<LDCircularPrimitive>(Disc, segments, divisions, QMatrix4x4 {});
+	case CylinderOpen:
+		{
+			QMatrix4x4 endCircleMatrix;
+			endCircleMatrix.translate(0, 1, 0);
+
+			if (deep)
+			{
+				generateCylinder(model);
+				generateCircle(model);
+				generateCircle(model, endCircleMatrix);
+			}
+			else
+			{
+				model.emplace<LDCircularPrimitive>(Cylinder, segments, divisions, QMatrix4x4 {});
+				model.emplace<LDCircularPrimitive>(Circle, segments, divisions, QMatrix4x4 {});
+				model.emplace<LDCircularPrimitive>(Circle, segments, divisions, endCircleMatrix);
+			}
+		}
 		return;
 
 	default:
@@ -414,35 +475,10 @@ void PrimitiveModel::generateBody(Model& model) const
 
 		case Disc:
 		case DiscNegative:
-			{
-				double x2, z2;
-
-				if (type == Disc)
-				{
-					x2 = z2 = 0.0;
-				}
-				else
-				{
-					x2 = (x0 >= 0.0) ? 1.0 : -1.0;
-					z2 = (z0 >= 0.0) ? 1.0 : -1.0;
-				}
-
-				Vertex v0 = {x0, 0.0, z0};
-				Vertex v1 = {x1, 0.0, z1};
-				Vertex v2 = {x2, 0.0, z2};
-
-				// Disc negatives need to go the other way around, otherwise
-				// they'll end up upside-down.
-				LDTriangle* segment = model.emplace<LDTriangle>();
-				segment->setColor(MainColor);
-				segment->setVertex(type == Disc ? 0 : 2, v0);
-				segment->setVertex(1, v1);
-				segment->setVertex(type == Disc ? 2 : 0, v2);
-			}
-			break;
-
 		case Circle:
 		case Cylinder:
+		case CylinderClosed:
+		case CylinderOpen:
 			break;
 		}
 	}
@@ -484,7 +520,17 @@ QString PrimitiveModel::typeName() const
 QString PrimitiveModel::typeName(PrimitiveModel::Type type)
 {
 	// Not translated as primitives are in English.
-	const char* names[] = {"Circle", "Cylinder", "Disc", "Disc Negative", "Ring", "Cone"};
+	const char* names[] =
+	{
+		"Circle",
+		"Cylinder",
+		"Disc",
+		"Disc Negative",
+		"Ring",
+		"Cone",
+		"Cylinder Closed",
+		"Cylinder Open"
+	};
 
 	if (type >= 0 and type < countof(names))
 		return names[type];

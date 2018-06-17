@@ -50,17 +50,23 @@ struct PrimitiveModel
 		DiscNegative,
 		Ring,
 		Cone,
+		CylinderClosed,
+		CylinderOpen,
 	} type;
 	int segments;
 	int divisions;
 	int ringNumber;
 
 	QString typeName() const;
-	void generateBody(Model& model) const;
+	void generateBody(Model& model, bool deep = false) const;
 	void generateCylinder(Model& model, Winding winding = CounterClockwise) const;
-	void generateCircle(Model& model) const;
+	void generateCircle(Model& model, const QMatrix4x4& matrix = {}) const;
 	static QString typeName(Type type);
 	QString makeFileName(FilenameStyle style) const;
+	void generateDisc(Model& model) const;
+
+private:
+	void generateDiscNegative(Model& model) const;
 };
 
 Q_DECLARE_METATYPE(PrimitiveModel::Type)
