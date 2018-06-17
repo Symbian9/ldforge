@@ -384,7 +384,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 
 				Vertex displacement = parseVertex (tokens, 2);  // 2 - 4
 				QMatrix4x4 matrix;
-				matrix.translate(displacement.x, displacement.y, displacement.z);
+				matrix.translate(displacement.toVector());
 				QString referenceName = tokens[14];
 
 				for (int i = 0; i < 9; ++i)

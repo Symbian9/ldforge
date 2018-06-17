@@ -24,16 +24,6 @@
 #include "generics/enums.h"
 #include "types/vertex.h"
 
-inline void glTranslatef(const Vertex& vertex)
-{
-	glTranslatef(vertex.x, vertex.y, vertex.z);
-}
-
-inline void glVertex(const Vertex& vertex)
-{
-	glVertex3f(vertex.x, vertex.y, vertex.z);
-}
-
 class LDObject;
 
 struct LDPolygon

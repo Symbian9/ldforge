@@ -104,8 +104,8 @@ void Canvas::drawFixedCameraBackdrop()
 			{
 				if (prepareGridLine(x))
 				{
-					glVertex(currentCamera().realize({x, -10000, 999}));
-					glVertex(currentCamera().realize({x, 10000, 999}));
+					xyz(glVertex3f, currentCamera().realize({x, -10000, 999}));
+					xyz(glVertex3f, currentCamera().realize({x, 10000, 999}));
 				}
 			}
 
@@ -113,8 +113,8 @@ void Canvas::drawFixedCameraBackdrop()
 			{
 				if (prepareGridLine(y))
 				{
-					glVertex(currentCamera().realize({-10000, y, 999}));
-					glVertex(currentCamera().realize({10000, y, 999}));
+					xyz(glVertex3f, currentCamera().realize({-10000, y, 999}));
+					xyz(glVertex3f, currentCamera().realize({10000, y, 999}));
 				}
 			}
 		}
@@ -154,8 +154,8 @@ void Canvas::drawFixedCameraBackdrop()
 					QPointF extremum = {cos(azimuth) * 10000, sin(azimuth) * 10000};
 					QPointF A = pole + extremum;
 					QPointF B = pole - extremum;
-					glVertex(currentCamera().realize({A.x(), A.y(), 999}));
-					glVertex(currentCamera().realize({B.x(), B.y(), 999}));
+					xyz(glVertex3f, currentCamera().realize({A.x(), A.y(), 999}));
+					xyz(glVertex3f, currentCamera().realize({B.x(), B.y(), 999}));
 				}
 			}
 
@@ -174,8 +174,8 @@ void Canvas::drawFixedCameraBackdrop()
 
 					for (int i = 0; i < grid()->polarDivisions(); ++i)
 					{
-						glVertex(points[i]);
-						glVertex(ring(points, grid()->polarDivisions())[i + 1]);
+						xyz(glVertex3f, points[i]);
+						xyz(glVertex3f, ring(points, grid()->polarDivisions())[i + 1]);
 					}
 				}
 			}

@@ -58,6 +58,15 @@ inline Vertex operator*(qreal scalar, const Vertex& vertex)
 	return vertex * scalar;
 }
 
+/*
+ * Call 'function' with the x, y and z coordinates of 'vertex'.
+ */
+template<typename Function>
+inline void xyz(Function function, const Vertex& vertex)
+{
+	function(vertex.x, vertex.y, vertex.z);
+}
+
 Q_DECLARE_METATYPE(Vertex)
 qreal distance(const Vertex& one, const Vertex& other);
 unsigned int qHash(const Vertex& key);

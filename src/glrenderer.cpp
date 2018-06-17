@@ -407,7 +407,7 @@ void GLRenderer::drawGLScene()
 		glTranslatef(0.0f, 0.0f, -2.0f);
 		glTranslatef(panning (X), panning (Y), -zoom());
 		glMultMatrixf(padMatrix(m_rotation.toRotationMatrix()).constData());
-		glTranslatef(-this->m_compiler->modelCenter());
+		xyz(glTranslatef, -m_compiler->modelCenter());
 	}
 
 	glEnableClientState (GL_NORMAL_ARRAY);
