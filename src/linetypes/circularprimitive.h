@@ -12,8 +12,7 @@ public:
 		PrimitiveModel::Type type,
 		int segments,
 		int divisions,
-		const Matrix& transformationMatrix,
-		const Vertex& position
+		const QMatrix4x4& matrix
 	);
 
 	LDObjectType type() const override;

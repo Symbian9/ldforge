@@ -383,12 +383,14 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 				CheckTokenNumbers (tokens, 1, 13);
 
 				Vertex displacement = parseVertex (tokens, 2);  // 2 - 4
-				Matrix transform;
+				QMatrix4x4 matrix;
+				matrix.translate(displacement.x, displacement.y, displacement.z);
 				QString referenceName = tokens[14];
 
 				for (int i = 0; i < 9; ++i)
-					transform.value(i) = tokens[i + 5].toDouble(); // 5 - 13
+					matrix(i / 3, i % 3) = tokens[i + 5].toDouble(); // 5 - 13
 
+				matrix.optimize();
 				static const QRegExp circularPrimitiveRegexp {R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge|disc|ndis)\.dat)"};
 				LDObject* obj;
 
@@ -417,13 +419,12 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 						type,
 						segments,
 						resolution,
-						transform,
-						displacement
+						matrix
 					);
 				}
 				else
 				{
-					obj = model.emplaceAt<LDSubfileReference>(position, referenceName, transform, displacement);
+					obj = model.emplaceAt<LDSubfileReference>(position, referenceName, matrix);
 				}
 
 				obj->setColor(LDColor {tokens[1].toInt(nullptr, 0)});

@@ -22,7 +22,6 @@
 #include <QModelIndex>
 #include "basics.h"
 #include "colors.h"
-#include "types/matrix.h"
 #include "types/vertex.h"
 
 // Converts a given value into a string that can be retrieved with text().
@@ -39,7 +38,6 @@ public:
 	StringFormatArg (float a) : m_text (QString::number (a)) {}
 	StringFormatArg (double a) : m_text (QString::number (a)) {}
 	StringFormatArg (const Vertex& a) : m_text (a.toString()) {}
-	StringFormatArg (const Matrix& a) : m_text (a.toString()) {}
 	StringFormatArg (const char* a) : m_text (a) {}
 	StringFormatArg (LDColor a) : m_text (a.indexString()) {}
 

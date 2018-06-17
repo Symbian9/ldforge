@@ -69,9 +69,9 @@ bool isflat(Model* model, Axis* flatDimension)
 /*
  * Returns a matrix that causes a flip on the given dimension.
  */
-Matrix flipmatrix(Axis dimension)
+QMatrix4x4 flipmatrix(Axis dimension)
 {
-	Matrix result = Matrix::identity;
+	QMatrix4x4 result;
 
 	switch (dimension)
 	{

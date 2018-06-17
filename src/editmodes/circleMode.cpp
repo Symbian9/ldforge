@@ -93,7 +93,7 @@ void CircleMode::endDraw()
 	int divisions = m_window->ringToolDivisions();
 	double dist0 = getCircleDrawDist(0);
 	double dist1 = getCircleDrawDist(1);
-	Vertex displacement = m_drawedVerts.first();
+	QVector3D translation = m_drawedVerts.first().toVector();
 
 	if (dist1 < dist0)
 		qSwap(dist0, dist1);
@@ -102,9 +102,10 @@ void CircleMode::endDraw()
 	{
 		// Special case: radii are the same, there's no area. Use a circle.
 		// transform = shearMatrixForPlane(renderer());
-		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
-		transform *= Matrix::scaleMatrix(dist0);
-		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, segments, divisions, transform, displacement);
+		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
+		transform.scale(dist0);
+		transform.translate(translation);
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, segments, divisions, transform);
 		finishDraw(model);
 		return;
 	}
@@ -112,9 +113,10 @@ void CircleMode::endDraw()
 	{
 		// Special case #2: one radius is 0, so use a disc.
 		//transform = shearMatrixForPlane(renderer());
-		Matrix transform = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(1));
-		transform *= Matrix::scaleMatrix(max(dist0, dist1));
-		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, segments, divisions, transform, displacement);
+		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
+		transform.scale(max(dist0, dist1));
+		transform.translate(translation);
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, segments, divisions, transform);
 		finishDraw(model);
 		return;
 	}
@@ -130,9 +132,10 @@ void CircleMode::endDraw()
 		{
 			primitiveModel.ringNumber = component.num;
 			LDDocument* primitiveFile = primitives()->getPrimitive(primitiveModel);
-			Matrix matrix = Matrix::fromQMatrix(renderer()->currentCamera().transformationMatrix(component.scale));
+			QMatrix4x4 matrix = renderer()->currentCamera().transformationMatrix(component.scale);
+			matrix.translate(translation);
 			// matrix = shearMatrixForPlane(renderer()) * matrix;
-			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix, m_drawedVerts.first());
+			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix);
 		}
 	}
 	else

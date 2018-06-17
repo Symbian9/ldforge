@@ -51,11 +51,25 @@ LDObject::LDObject() :
 //
 QString LDSubfileReference::asText() const
 {
-	QString val = format ("1 %1 %2 ", color(), position());
-	val += transformationMatrix().toString();
-	val += ' ';
-	val += m_referenceName;
-	return val;
+	auto cellString = [&](int row, int column) { return QString::number(transformationMatrix()(row, column)); };
+
+	return QStringList {
+		"1",
+		color().indexString(),
+		cellString(0, 3), // x
+		cellString(1, 3), // y
+		cellString(2, 3), // z
+		cellString(0, 0), // matrix start
+		cellString(0, 1), // ...
+		cellString(0, 2), // ...
+		cellString(1, 0), // ...
+		cellString(1, 1), // ...
+		cellString(1, 2), // ...
+		cellString(2, 0), // ...
+		cellString(2, 1), // ...
+		cellString(2, 2), // matrix end
+		referenceName()
+	}.join(" ");
 }
 
 QString LDBezierCurve::asText() const
@@ -112,39 +126,25 @@ LDBezierCurve::LDBezierCurve(const Vertex& v0, const Vertex& v1, const Vertex& v
 
 // =============================================================================
 //
-static void TransformObject (LDObject* obj, Matrix transform, Vertex pos, LDColor parentcolor)
+static void TransformObject (LDObject* object, const QMatrix4x4& matrix, LDColor parentcolor)
 {
-	switch (obj->type())
+	if (object->hasMatrix()) {
+		LDMatrixObject* reference = static_cast<LDMatrixObject*>(object);
+		QMatrix4x4 newMatrix = matrix * reference->transformationMatrix();
+		reference->setTransformationMatrix(newMatrix);
+	}
+	else
 	{
-	case LDObjectType::EdgeLine:
-	case LDObjectType::ConditionalEdge:
-	case LDObjectType::Triangle:
-	case LDObjectType::Quadrilateral:
-		for (int i = 0; i < obj->numVertices(); ++i)
+		for (int i = 0; i < object->numVertices(); ++i)
 		{
-			Vertex v = obj->vertex (i);
-			v.transform (transform, pos);
-			obj->setVertex (i, v);
+			Vertex vertex = object->vertex(i);
+			vertex.transform(matrix);
+			object->setVertex(i, vertex);
 		}
-		break;
-
-	case LDObjectType::SubfileReference:
-		{
-			LDSubfileReference* ref = static_cast<LDSubfileReference*> (obj);
-			Matrix newMatrix = transform * ref->transformationMatrix();
-			Vertex newpos = ref->position();
-			newpos.transform (transform, pos);
-			ref->setPosition (newpos);
-			ref->setTransformationMatrix (newMatrix);
-		}
-		break;
-
-	default:
-		break;
 	}
 
-	if (obj->color() == MainColor)
-		obj->setColor (parentcolor);
+	if (object->color() == MainColor)
+		object->setColor(parentcolor);
 }
 
 /*
@@ -201,7 +201,7 @@ void LDSubfileReference::rasterize(
 			if (shouldInvert(parentWinding, context))
 				::invert(object, context);
 
-			TransformObject(object, transformationMatrix(), position(), color());
+			TransformObject(object, transformationMatrix(), color());
 		}
 
 		model.merge(inlined);
@@ -280,7 +280,7 @@ QVector<LDPolygon> LDSubfileReference::rasterizePolygons(DocumentManager* contex
 		for (LDPolygon& entry : data)
 		{
 			for (int i = 0; i < entry.numVertices(); ++i)
-				entry.vertices[i].transform (transformationMatrix(), position());
+				entry.vertices[i].transform(transformationMatrix());
 
 			if (shouldInvert(parentWinding, context))
 				::invertPolygon(entry);
@@ -303,12 +303,12 @@ void LDSubfileReference::setReferenceName(const QString& newReferenceName)
 //
 // Moves this object using the given vector
 //
-void LDObject::move (const QVector3D vector)
+void LDObject::move(const QVector3D& vector)
 {
 	if (hasMatrix())
 	{
 		LDMatrixObject* mo = static_cast<LDMatrixObject*> (this);
-		mo->setPosition (mo->position() + vector);
+		mo->translate(vector);
 	}
 	else
 	{
@@ -409,39 +409,32 @@ void LDObject::setVertex (int i, const Vertex& vert)
 	changeProperty(&m_coords[i], vert);
 }
 
-LDMatrixObject::LDMatrixObject (const Matrix& transform, const Vertex& pos) :
-	m_position (pos),
-	m_transformationMatrix (transform) {}
+LDMatrixObject::LDMatrixObject(const QMatrix4x4& matrix) :
+	m_transformationMatrix {matrix} {}
 
-void LDMatrixObject::setCoordinate (const Axis axis, double value)
+Vertex LDMatrixObject::position() const
 {
-	Vertex position = this->position();
-	position.setCoordinate(axis, value);
-	this->setPosition(position);
-}
-
-const Vertex& LDMatrixObject::position() const
-{
-	return m_position;
+	QVector4D column = m_transformationMatrix.column(3);
+	return {column.x(), column.y(), column.z()};
 }
 
 // =============================================================================
 //
-void LDMatrixObject::setPosition (const Vertex& a)
-{
-	changeProperty(&m_position, a);
-}
-
-// =============================================================================
-//
-const Matrix& LDMatrixObject::transformationMatrix() const
+const QMatrix4x4& LDMatrixObject::transformationMatrix() const
 {
 	return m_transformationMatrix;
 }
 
-void LDMatrixObject::setTransformationMatrix (const Matrix& val)
+void LDMatrixObject::translate(const QVector3D& offset)
 {
-	changeProperty(&m_transformationMatrix, val);
+	QMatrix4x4 matrix = transformationMatrix();
+	matrix.translate(offset);
+	setTransformationMatrix(matrix);
+}
+
+void LDMatrixObject::setTransformationMatrix(const QMatrix4x4& newMatrix)
+{
+	changeProperty(&m_transformationMatrix, newMatrix);
 }
 
 LDError::LDError (QString contents, QString reason) :
@@ -509,10 +502,9 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 
 LDSubfileReference::LDSubfileReference(
 	QString referenceName,
-	const Matrix& transformationMatrix,
-	const Vertex& position
+	const QMatrix4x4& matrix
 ) :
-	LDMatrixObject {transformationMatrix, position},
+	LDMatrixObject {matrix},
 	m_referenceName {referenceName} {}
 
 // =============================================================================
@@ -574,8 +566,9 @@ QString LDSubfileReference::objectListText() const
 {
 	QString result = format ("%1 %2, (", referenceName(), position().toString(true));
 
-	for (int i = 0; i < 9; ++i)
-		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");
+	for (int i = 0; i < 3; ++i)
+	for (int j = 0; j < 3; ++j)
+		result += format("%1%2", transformationMatrix()(i, j), (i != 2 or j != 2) ? " " : "");
 
 	result += ')';
 	return result;
@@ -606,7 +599,6 @@ void LDObject::serialize(Serializer& serializer)
 void LDMatrixObject::serialize(Serializer& serializer)
 {
 	LDObject::serialize(serializer);
-	serializer << m_position;
 	serializer << m_transformationMatrix;
 }
 

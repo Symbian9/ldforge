@@ -31,6 +31,5 @@ double ldrawcos(double angle);
 QPointF pointOnLDrawCircumference(int segment, int divisions);
 QVector<QLineF> makeCircle(int segments, int divisions, double radius);
 qreal distanceFromPointToRectangle(const QPointF& point, const QRectF& rectangle);
-void rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& objects);
+void rotateObjects(float l, float m, float n, double angle, const QVector<LDObject*>& objects);
 Vertex getRotationPoint(const QVector<LDObject*>& objs);
-void rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix);

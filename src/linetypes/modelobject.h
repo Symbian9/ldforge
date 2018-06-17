@@ -72,7 +72,7 @@ public:
 	bool isHidden() const;
 	virtual bool isRasterizable() const { return false; } // Can this object be rasterized?
 	virtual bool isScemantic() const; // Does this object have meaning in the part model?
-	void move (const QVector3D vector);
+	void move (const QVector3D& vector);
 	virtual int numVertices() const;
 	virtual int numPolygonVertices() const;
 	virtual QString objectListText() const;
@@ -117,22 +117,20 @@ class LDMatrixObject : public LDObject
 {
 public:
 	LDMatrixObject() = default;
-	LDMatrixObject(const Matrix& transformationMatrix, const Vertex& pos);
+	LDMatrixObject(const QMatrix4x4& matrix);
 
 	bool hasMatrix() const override { return true; }
-	const Vertex& position() const;
-	void setCoordinate (const Axis ax, double value);
-	void setPosition (const Vertex& a);
-	void setTransformationMatrix (const Matrix& value);
-	const Matrix& transformationMatrix() const;
+	Vertex position() const;
+	void setTransformationMatrix(const QMatrix4x4& newMatrix);
+	const QMatrix4x4& transformationMatrix() const;
+	void translate(const QVector3D& offset);
 	void serialize(class Serializer& serializer) override;
 
 protected:
 	bool shouldInvert(Winding winding, DocumentManager* context);
 
 private:
-	Vertex m_position;
-	Matrix m_transformationMatrix = Matrix::identity;
+	QMatrix4x4 m_transformationMatrix;
 };
 
 /*
@@ -171,7 +169,7 @@ public:
 	static const LDObjectType SubclassType = LDObjectType::SubfileReference;
 
 	LDSubfileReference() = default;
-	LDSubfileReference(QString referenceName, const Matrix& transformationMatrix, const Vertex& position);
+	LDSubfileReference(QString referenceName, const QMatrix4x4& matrix = {});
 
 	virtual LDObjectType type() const override
 	{

@@ -116,7 +116,7 @@ void MoveToolset::moveZPos()
 
 double MoveToolset::getRotateActionAngle()
 {
-	return (pi * grid()->angleSnap()) / 180;
+	return grid()->angleSnap();
 }
 
 void MoveToolset::rotateXPos()

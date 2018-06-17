@@ -1,12 +1,11 @@
 #include "matrixeditor.h"
 #include "ui_matrixeditor.h"
 
-MatrixEditor::MatrixEditor(const Matrix& matrix, const Vertex& position, QWidget *parent) :
+MatrixEditor::MatrixEditor(const QMatrix4x4& matrix, QWidget *parent) :
 	QWidget {parent},
 	ui {*new Ui_MatrixEditor}
 {
 	this->ui.setupUi(this);
-	this->setPosition(position);
 	this->setMatrix(matrix);
 
 	for (int i : {0, 1, 2})
@@ -32,7 +31,7 @@ MatrixEditor::MatrixEditor(const Matrix& matrix, const Vertex& position, QWidget
 }
 
 MatrixEditor::MatrixEditor(QWidget* parent) :
-	MatrixEditor {Matrix::identity, {0, 0, 0}, parent} {}
+	MatrixEditor {{}, parent} {}
 
 MatrixEditor::~MatrixEditor()
 {
@@ -152,18 +151,9 @@ void MatrixEditor::matrixChanged()
 	catch (const std::out_of_range&) {}
 }
 
-Vertex MatrixEditor::position() const
+QMatrix4x4 MatrixEditor::matrix() const
 {
-	return {
-		this->ui.positionX->value(),
-		this->ui.positionY->value(),
-		this->ui.positionZ->value()
-	};
-}
-
-Matrix MatrixEditor::matrix() const
-{
-	Matrix transformationMatrix;
+	QMatrix4x4 transformationMatrix;
 
 	for (int i : {0, 1, 2})
 	for (int j : {0, 1, 2})
@@ -171,17 +161,11 @@ Matrix MatrixEditor::matrix() const
 		transformationMatrix(i, j) = this->matrixCell(i, j)->value();
 	}
 
+	transformationMatrix.translate(ui.positionX->value(), ui.positionY->value(), ui.positionZ->value());
 	return transformationMatrix;
 }
 
-void MatrixEditor::setPosition(const Vertex& position)
-{
-	this->ui.positionX->setValue(position.x);
-	this->ui.positionY->setValue(position.y);
-	this->ui.positionZ->setValue(position.z);
-}
-
-void MatrixEditor::setMatrix(const Matrix& matrix)
+void MatrixEditor::setMatrix(const QMatrix4x4& matrix)
 {
 	for (int i : {0, 1, 2})
 	for (int j : {0, 1, 2})
@@ -189,6 +173,10 @@ void MatrixEditor::setMatrix(const Matrix& matrix)
 		QDoubleSpinBox* spinbox = matrixCell(i, j);
 		withSignalsBlocked(spinbox, [&](){ spinbox->setValue(matrix(i, j)); });
 	}
+
+	ui.positionX->setValue(matrix(0, 3));
+	ui.positionY->setValue(matrix(1, 3));
+	ui.positionZ->setValue(matrix(2, 3));
 
 	// Fill in the initial scaling values
 	for (int column : {0, 1, 2})

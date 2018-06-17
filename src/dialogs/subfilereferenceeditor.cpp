@@ -30,7 +30,6 @@ SubfileReferenceEditor::SubfileReferenceEditor(LDSubfileReference* reference, QW
 {
 	this->ui.setupUi(this);
 	this->ui.referenceName->setText(reference->referenceName());
-	this->ui.matrixEditor->setPosition(reference->position());
 	this->ui.matrixEditor->setMatrix(reference->transformationMatrix());
 	this->color = reference->color();
 	::setColorButton(this->ui.colorButton, this->color);
@@ -67,7 +66,6 @@ void SubfileReferenceEditor::accept()
 	this->reference->setReferenceName(this->ui.referenceName->text());
 	this->reference->setColor(this->color);
 	this->reference->setTransformationMatrix(this->ui.matrixEditor->matrix());
-	this->reference->setPosition(this->ui.matrixEditor->position());
 	QDialog::accept();
 }
 

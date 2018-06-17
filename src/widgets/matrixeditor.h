@@ -10,18 +10,12 @@ class MatrixEditor : public QWidget
 	Q_OBJECT
 
 public:
-	MatrixEditor(
-		const Matrix& matrix = Matrix::identity,
-		const Vertex& position = {0, 0, 0},
-		QWidget* parent = nullptr
-	);
+	MatrixEditor(const QMatrix4x4& matrix = {}, QWidget* parent = nullptr);
 	MatrixEditor(QWidget* parent);
 	~MatrixEditor();
 
-	Vertex position() const;
-	Matrix matrix() const;
-	void setPosition(const Vertex& position);
-	void setMatrix(const Matrix& matrix);
+	QMatrix4x4 matrix() const;
+	void setMatrix(const QMatrix4x4& matrix);
 
 private slots:
 	void scalingChanged();

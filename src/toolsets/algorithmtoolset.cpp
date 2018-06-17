@@ -161,17 +161,12 @@ void AlgorithmToolset::roundCoordinates()
 
 		if (mo)
 		{
-			Vertex position = mo->position();
-			Matrix matrix = mo->transformationMatrix();
+			QMatrix4x4 matrix = mo->transformationMatrix();
 
-			for (Axis axis : {X, Y, Z})
-				position[axis] = roundToDecimals(position[axis], config::roundPositionPrecision());
-
-			for (int i : {0, 1, 2})
-			for (int j : {0, 1, 2})
+			for (int i : {0, 1, 2, 3})
+			for (int j : {0, 1, 2, 3})
 				matrix(i, j) = roundToDecimals(matrix(i, j), config::roundMatrixPrecision());
 
-			mo->setPosition(position);
 			mo->setTransformationMatrix(matrix);
 			num += 12;
 		}
@@ -266,12 +261,14 @@ void AlgorithmToolset::fixRoundingErrors()
 					fixVertex(point);
 					object->setVertex(i, point);
 				}
-				if (object->type() == LDObjectType::SubfileReference)
+				if (object->hasMatrix())
 				{
-					LDSubfileReference* reference = static_cast<LDSubfileReference*>(object);
+					LDMatrixObject* reference = static_cast<LDMatrixObject*>(object);
 					Vertex point = reference->position();
 					fixVertex(point);
-					reference->setPosition(point);
+					QMatrix4x4 matrix = reference->transformationMatrix();
+					matrix.setColumn(3, {(float) point.x, (float) point.y, (float) point.z, 1});
+					reference->setTransformationMatrix(matrix);
 				}
 			}
 		}
@@ -607,7 +604,7 @@ void AlgorithmToolset::subfileSelection()
 			currentDocument()->remove(object);
 
 		// Add a reference to the new subfile to where the selection was
-		currentDocument()->emplaceAt<LDSubfileReference>(referencePosition, subfile->name(), Matrix::identity, Vertex {0, 0, 0});
+		currentDocument()->emplaceAt<LDSubfileReference>(referencePosition, subfile->name());
 
 		// Refresh stuff
 		m_window->updateDocumentList();

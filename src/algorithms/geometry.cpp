@@ -69,35 +69,10 @@ QVector<QLineF> makeCircle(int segments, int divisions, double radius)
 }
 
 
-void rotateVertex(Vertex& vertex, const Vertex& rotationPoint, const Matrix& transformationMatrix)
+void rotateObjects(float l, float m, float n, double angle, const QVector<LDObject*>& objects)
 {
-	vertex -= rotationPoint.toVector();
-	vertex.transform (transformationMatrix, {0, 0, 0});
-	vertex += rotationPoint.toVector();
-}
-
-
-void rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& objects)
-{
-	Vertex rotationPoint = getRotationPoint (objects);
-	double cosAngle = cos(angle);
-	double sinAngle = sin(angle);
-
-	// ref: http://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
-	Matrix transformationMatrix (
-	{
-		(l * l * (1 - cosAngle)) + cosAngle,
-		(m * l * (1 - cosAngle)) - (n * sinAngle),
-		(n * l * (1 - cosAngle)) + (m * sinAngle),
-
-		(l * m * (1 - cosAngle)) + (n * sinAngle),
-		(m * m * (1 - cosAngle)) + cosAngle,
-		(n * m * (1 - cosAngle)) - (l * sinAngle),
-
-		(l * n * (1 - cosAngle)) - (m * sinAngle),
-		(m * n * (1 - cosAngle)) + (l * sinAngle),
-		(n * n * (1 - cosAngle)) + cosAngle
-	});
+	QVector3D rotationPoint = getRotationPoint (objects).toVector();
+	QQuaternion orientation = QQuaternion::fromAxisAndAngle({l, m, n}, angle);
 
 	// Apply the above matrix to everything
 	for (LDObject* obj : objects)
@@ -107,21 +82,20 @@ void rotateObjects(int l, int m, int n, double angle, const QVector<LDObject*>& 
 			for (int i = 0; i < obj->numVertices(); ++i)
 			{
 				Vertex v = obj->vertex (i);
-				rotateVertex(v, rotationPoint, transformationMatrix);
+				v += rotationPoint;
+				v.rotate(orientation);
+				v -= rotationPoint;
 				obj->setVertex (i, v);
 			}
 		}
 		else if (obj->hasMatrix())
 		{
 			LDMatrixObject* mo = dynamic_cast<LDMatrixObject*> (obj);
-
-			// Transform the position
-			Vertex v = mo->position();
-			rotateVertex(v, rotationPoint, transformationMatrix);
-			mo->setPosition (v);
-
-			// Transform the matrix
-			mo->setTransformationMatrix(transformationMatrix * mo->transformationMatrix());
+			QMatrix4x4 matrix = mo->transformationMatrix();
+			matrix.translate(rotationPoint);
+			matrix.rotate(orientation);
+			matrix.translate(-rotationPoint);
+			mo->setTransformationMatrix(matrix);
 		}
 	}
 }
@@ -138,15 +112,8 @@ Vertex getRotationPoint(const QVector<LDObject*>& objs)
 			// Calculate center vertex
 			for (LDObject* obj : objs)
 			{
-				if (obj->hasMatrix())
-				{
-					box << static_cast<LDMatrixObject*> (obj)->position();
-				}
-				else
-				{
-					for (int i = 0; i < obj->numVertices(); ++i)
-						box << obj->vertex(i);
-				}
+				for (int i = 0; i < obj->numVertices(); ++i)
+					box << obj->vertex(i);
 			}
 
 			return box.center();

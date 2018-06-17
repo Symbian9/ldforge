@@ -50,7 +50,6 @@ set (LDFORGE_SOURCES
 	src/librariesmodel.cpp
 	src/main.cpp
 	src/mainwindow.cpp
-	src/matrixinput.cpp
 	src/model.cpp
 	src/partdownloader.cpp
 	src/partdownloadrequest.cpp
@@ -95,7 +94,6 @@ set (LDFORGE_SOURCES
 	src/toolsets/toolset.cpp
 	src/toolsets/viewtoolset.cpp
 	src/types/boundingbox.cpp
-	src/types/matrix.cpp
 	src/types/vertex.cpp
 	src/widgets/colorbutton.cpp
 	src/widgets/doublespinbox.cpp
@@ -125,7 +123,6 @@ set (LDFORGE_HEADERS
 	src/librariesmodel.h
 	src/main.h
 	src/mainwindow.h
-	src/matrixinput.h
 	src/model.h
 	src/partdownloader.h
 	src/partdownloadrequest.h
@@ -178,7 +175,6 @@ set (LDFORGE_HEADERS
 	src/toolsets/viewtoolset.h
 	src/types/boundingbox.h
 	src/types/library.h
-	src/types/matrix.h
 	src/types/vertex.h
 	src/widgets/colorbutton.h
 	src/widgets/doublespinbox.h

@@ -20,6 +20,6 @@
 #include "../main.h"
 
 bool isflat(class Model* model, Axis* axis);
-Matrix flipmatrix(Axis axis);
+QMatrix4x4 flipmatrix(Axis dimension);
 void invert(LDObject* obj, class DocumentManager* context);
 void invertPolygon(LDPolygon& polygon);

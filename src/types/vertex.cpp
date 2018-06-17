@@ -19,14 +19,28 @@
 #include "vertex.h"
 #include "../format.h"
 
-void Vertex::transform(const Matrix& matrix, const Vertex& pos)
+template<typename MatrixType>
+void transformVertex(Vertex& vertex, const MatrixType& matrix)
 {
-	double x2 = (matrix(0, 0) * x) + (matrix(0, 1) * y) + (matrix(0, 2) * z) + pos.x;
-	double y2 = (matrix(1, 0) * x) + (matrix(1, 1) * y) + (matrix(1, 2) * z) + pos.y;
-	double z2 = (matrix(2, 0) * x) + (matrix(2, 1) * y) + (matrix(2, 2) * z) + pos.z;
-	this->x = x2;
-	this->y = y2;
-	this->z = z2;
+	double newX = (matrix(0, 0) * vertex.x) + (matrix(0, 1) * vertex.y) + (matrix(0, 2) * vertex.z);
+	double newY = (matrix(1, 0) * vertex.x) + (matrix(1, 1) * vertex.y) + (matrix(1, 2) * vertex.z);
+	double newZ = (matrix(2, 0) * vertex.x) + (matrix(2, 1) * vertex.y) + (matrix(2, 2) * vertex.z);
+	vertex.x = newX;
+	vertex.y = newY;
+	vertex.z = newZ;
+}
+
+void Vertex::transform(const QMatrix4x4& matrix)
+{
+	transformVertex(*this, matrix);
+	x += matrix(0, 3);
+	y += matrix(1, 3);
+	z += matrix(2, 3);
+}
+
+void Vertex::rotate(const QQuaternion& orientation)
+{
+	*this = Vertex {0, 0, 0} + orientation.rotatedVector(toVector());
 }
 
 void Vertex::apply(ApplyFunction func)

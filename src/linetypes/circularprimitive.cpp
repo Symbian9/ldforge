@@ -27,14 +27,11 @@ QString LDCircularPrimitive::buildFilename() const
 	return format("%1%2-%3%4.dat", prefix, numerator, denominator, stem());
 }
 
-LDCircularPrimitive::LDCircularPrimitive(
-	PrimitiveModel::Type type,
+LDCircularPrimitive::LDCircularPrimitive(PrimitiveModel::Type type,
 	int segments,
 	int divisions,
-	const Matrix& transformationMatrix,
-	const Vertex& position
-) :
-	LDMatrixObject {transformationMatrix, position},
+	const QMatrix4x4& matrix) :
+	LDMatrixObject {matrix},
 	m_type {type},
 	m_segments {segments},
 	m_divisions {divisions} {}
@@ -46,7 +43,7 @@ LDObjectType LDCircularPrimitive::type() const
 
 QString LDCircularPrimitive::asText() const
 {
-	return LDSubfileReference(buildFilename(), transformationMatrix(), position()).asText();
+	return LDSubfileReference(buildFilename(), transformationMatrix()).asText();
 }
 
 void LDCircularPrimitive::getVertices(DocumentManager* /* context */, QSet<Vertex>& vertices) const
@@ -60,7 +57,7 @@ void LDCircularPrimitive::getVertices(DocumentManager* /* context */, QSet<Verte
 		for (double y_value : {0.0, 1.0})
 		{
 			Vertex vertex {point2d.x(), y_value, point2d.y()};
-			vertex.transform(transformationMatrix(), position());
+			vertex.transform(transformationMatrix());
 			vertices.insert(vertex);
 		}
 	}
@@ -86,7 +83,7 @@ void LDCircularPrimitive::rasterize(
 		for (int i = 0; i < object->numVertices(); i += 1)
 		{
 			Vertex vertex = object->vertex(i);
-			vertex.transform(transformationMatrix(), position());
+			vertex.transform(transformationMatrix());
 			object->setVertex(i, vertex);
 		}
 	}
@@ -106,7 +103,7 @@ QVector<LDPolygon> LDCircularPrimitive::rasterizePolygons(DocumentManager* conte
 		for (int i = 0; i < object->numVertices(); i += 1)
 		{
 			Vertex vertex = object->vertex(i);
-			vertex.transform(transformationMatrix(), position());
+			vertex.transform(transformationMatrix());
 			object->setVertex(i, vertex);
 		}
 
@@ -174,8 +171,9 @@ QString LDCircularPrimitive::objectListText() const
 		position().toString(true)
 	).simplified();
 
-	for (int i = 0; i < 9; ++i)
-		result += format("%1%2", transformationMatrix().value(i), (i != 8) ? " " : "");
+	for (int i = 0; i < 3; ++i)
+	for (int j = 0; j < 3; ++j)
+		result += format("%1%2", transformationMatrix()(i, j), (i != 2 or j != 2) ? " " : "");
 
 	result += ')';
 	return result;
