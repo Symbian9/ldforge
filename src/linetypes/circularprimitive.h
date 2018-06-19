@@ -19,6 +19,7 @@ public:
 	QString asText() const override;
 	void getVertices(DocumentManager *context, QSet<Vertex>& verts) const override;
 	bool isRasterizable() const override;
+	bool isFlat() const;
 	void rasterize(
 		DocumentManager* context,
 		Winding parentWinding,

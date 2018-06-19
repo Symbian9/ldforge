@@ -17,6 +17,7 @@
  */
 
 #include "../linetypes/modelobject.h"
+#include "../linetypes/circularprimitive.h"
 #include "../lddocument.h"
 #include "../glShared.h"
 
@@ -127,6 +128,15 @@ void invert(LDObject* obj, DocumentManager* context)
 			// Subfile is not flat. Resort to invertnext.
 			reference->setInverted(not reference->isInverted());
 		}
+	}
+	else if (obj->type() == LDObjectType::CircularPrimitive)
+	{
+		auto primitive = static_cast<LDCircularPrimitive*>(obj);
+
+		if (primitive->isFlat())
+			primitive->setTransformationMatrix(primitive->transformationMatrix() * ::flipmatrix(Y));
+		else
+			primitive->setInverted(not primitive->isInverted());
 	}
 }
 

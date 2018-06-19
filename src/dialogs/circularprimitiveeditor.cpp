@@ -120,6 +120,11 @@ CircularPrimitiveEditor::CircularPrimitiveEditor(LDCircularPrimitive* primitive,
 				this->primitive->setTransformationMatrix(newMatrix);
 		}
 	);
+	connect(ui.inverted, &QCheckBox::clicked, [&](bool checked)
+	{
+		if (this->primitive)
+			this->primitive->setInverted(checked);
+	});
 	// Connect the reset button, "reset button" here meaning any button with the reset role.
 	connect(
 		ui.buttonBox,
@@ -176,6 +181,7 @@ void CircularPrimitiveEditor::updateWidgets()
 		});
 		withSignalsBlocked(ui.color, [&](){ ui.color->setColor(primitive->color()); });
 		withSignalsBlocked(ui.matrix, [&](){ ui.matrix->setMatrix(primitive->transformationMatrix()); });
+		withSignalsBlocked(ui.inverted, [&](){ ui.inverted->setChecked(primitive->isInverted()); });
 	}
 }
 

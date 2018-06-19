@@ -68,6 +68,20 @@ bool LDCircularPrimitive::isRasterizable() const
 	return true;
 }
 
+bool LDCircularPrimitive::isFlat() const
+{
+	switch (m_type)
+	{
+	case PrimitiveModel::Cylinder:
+	case PrimitiveModel::CylinderClosed:
+	case PrimitiveModel::CylinderOpen:
+		return false;
+
+	default:
+		return true;
+	}
+}
+
 void LDCircularPrimitive::rasterize(
 	DocumentManager* context,
 	Winding /* parentWinding */,
