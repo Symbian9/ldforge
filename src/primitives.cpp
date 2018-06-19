@@ -374,6 +374,20 @@ void PrimitiveModel::generateDiscNegative(Model& model) const
 	}
 }
 
+void PrimitiveModel::generateChord(Model& model) const
+{
+	QVector<QLineF> circle = makeCircle(segments, divisions, 1);
+
+	for (int i = 1; i < segments; ++i)
+	{
+		LDTriangle* segment = model.emplace<LDTriangle>();
+		segment->setColor(MainColor);
+		segment->setVertex(0, {circle[0].x1(), 0.0, circle[0].y1()});
+		segment->setVertex(1, {circle[i].x1(), 0.0, circle[i].y1()});
+		segment->setVertex(2, {circle[i].x2(), 0.0, circle[i].y2()});
+	}
+}
+
 void PrimitiveModel::generateBody(Model& model, bool deep) const
 {
 	switch (type)
@@ -417,6 +431,10 @@ void PrimitiveModel::generateBody(Model& model, bool deep) const
 				model.emplace<LDCircularPrimitive>(Circle, segments, divisions, endCircleMatrix);
 			}
 		}
+		return;
+
+	case Chord:
+		generateChord(model);
 		return;
 
 	default:
@@ -473,6 +491,7 @@ void PrimitiveModel::generateBody(Model& model, bool deep) const
 			}
 			break;
 
+		case Chord:
 		case Disc:
 		case DiscNegative:
 		case Circle:
@@ -529,7 +548,8 @@ QString PrimitiveModel::typeName(PrimitiveModel::Type type)
 		"Ring",
 		"Cone",
 		"Cylinder Closed",
-		"Cylinder Open"
+		"Cylinder Open",
+		"Chord"
 	};
 
 	if (type >= 0 and type < countof(names))
@@ -557,7 +577,7 @@ QString PrimitiveModel::makeFileName(FilenameStyle style) const
 	// Compose some general information: prefix, fraction, root, ring number
 	QString prefix = (divisions == MediumResolution) ? "" : format ("%1\\", divisions);
 	QString frac = format ("%1-%2", numerator, denominator);
-	static const char* roots[] = {"edge", "cyli", "disc", "ndis", "ring", "con"};
+	static const char* roots[] = {"edge", "cyli", "disc", "ndis", "ring", "con", "chrd"};
 	QString root = roots[type];
 	QString numberString = (type == Ring or type == Cone) ? format ("%1", ringNumber) : "";
 

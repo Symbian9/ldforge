@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Edit circular primitive</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,0">
    <item>
@@ -113,6 +113,13 @@
        <widget class="QRadioButton" name="cylinderOpen">
         <property name="text">
          <string>Open cylinder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="chord">
+        <property name="text">
+         <string>Chord</string>
         </property>
        </widget>
       </item>

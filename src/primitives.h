@@ -52,6 +52,7 @@ struct PrimitiveModel
 		Cone,
 		CylinderClosed,
 		CylinderOpen,
+		Chord,
 	} type;
 	int segments;
 	int divisions;
@@ -67,6 +68,7 @@ struct PrimitiveModel
 
 private:
 	void generateDiscNegative(Model& model) const;
+	void generateChord(Model& model) const;
 };
 
 Q_DECLARE_METATYPE(PrimitiveModel::Type)

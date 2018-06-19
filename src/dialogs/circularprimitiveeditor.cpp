@@ -42,6 +42,7 @@ static const struct
 	MAP_RADIO_BUTTON(discNegative, DiscNegative),
 	MAP_RADIO_BUTTON(cylinderClosed, CylinderClosed),
 	MAP_RADIO_BUTTON(cylinderOpen, CylinderOpen),
+	MAP_RADIO_BUTTON(chord, Chord),
 #undef MAP_RADIO_BUTTON
 };
 

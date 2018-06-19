@@ -153,9 +153,15 @@ QString LDCircularPrimitive::stem() const
 	case PrimitiveModel::CylinderOpen:
 		return "cylo";
 
-	default:
-		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
+	case PrimitiveModel::Chord:
+		return "chrd";
+
+	case PrimitiveModel::Ring:
+	case PrimitiveModel::Cone:
+		break;
 	}
+
+	throw std::logic_error("Bad primitive type to LDCircularPrimitive");
 }
 
 QString LDCircularPrimitive::objectListText() const
@@ -234,6 +240,9 @@ int LDCircularPrimitive::triangleCount(DocumentManager*) const
 
 	case PrimitiveModel::Circle:
 		return 0;
+
+	case PrimitiveModel::Chord:
+		return m_segments - 1;
 	}
 
 	return 0;
@@ -264,6 +273,9 @@ QString LDCircularPrimitive::iconName() const
 
 	case PrimitiveModel::CylinderOpen:
 		return "cylinder-open";
+
+	case PrimitiveModel::Chord:
+		return "chord";
 	}
 
 	return "";

@@ -176,9 +176,10 @@ QMatrix4x4 MatrixEditor::matrix() const
 		(float) ui.positionX->value(),
 		(float) ui.positionY->value(),
 		(float) ui.positionZ->value(),
-		0.0f
+		1.0f
 	};
 	transformationMatrix.setColumn(3, translation);
+	transformationMatrix.optimize();
 	return transformationMatrix;
 }
 

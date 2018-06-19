@@ -268,7 +268,7 @@ void Parser::parseBody(Model& model)
 		}
 		*/
 
-		if (invertNext and object->type() == LDObjectType::SubfileReference)
+		if (invertNext and object->isRasterizable())
 			object->setInverted(true);
 
 		invertNext = false;
@@ -392,7 +392,7 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 
 				matrix.optimize();
 				static const QRegExp circularPrimitiveRegexp {
-					R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge|disc|ndis|cylc|cylo)\.dat)"
+					R"((?:(\d+)\\)?(\d+)-(\d+)(cyli|edge|disc|ndis|cylc|cylo|chrd)\.dat)"
 				};
 				LDObject* obj;
 
@@ -419,6 +419,8 @@ LDObject* Parser::parseFromString(Model& model, int position, QString line)
 						type = PrimitiveModel::CylinderClosed;
 					else if (stem == "cylo")
 						type = PrimitiveModel::CylinderOpen;
+					else if (stem == "chrd")
+						type = PrimitiveModel::Chord;
 
 					obj = model.emplaceAt<LDCircularPrimitive>(
 						position,
