@@ -31,6 +31,7 @@ public:
 private:
 	Q_SLOT void updateWidgets();
 	Q_SLOT void reset();
+	void rotate(double factor);
 
 	class Ui_CircularPrimitiveEditor& ui;
 	LDCircularPrimitive* primitive;

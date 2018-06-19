@@ -125,6 +125,8 @@ CircularPrimitiveEditor::CircularPrimitiveEditor(LDCircularPrimitive* primitive,
 		if (this->primitive)
 			this->primitive->setInverted(checked);
 	});
+	connect(ui.rotateCcw, &QPushButton::clicked, [&](){ rotate(-1); });
+	connect(ui.rotateCw, &QPushButton::clicked, [&](){ rotate(1); });
 	// Connect the reset button, "reset button" here meaning any button with the reset role.
 	connect(
 		ui.buttonBox,
@@ -192,4 +194,17 @@ void CircularPrimitiveEditor::reset()
 {
 	if (primitive)
 		primitive->restore(originalState); // Restoring does not change 'originalState'
+}
+
+void CircularPrimitiveEditor::rotate(double factor)
+{
+	if (primitive)
+	{
+		double angle = factor * 360.0 / primitive->divisions();
+
+		QQuaternion rotation = QQuaternion::fromAxisAndAngle({0.0f, 1.0f, 0.0f}, angle);
+		QMatrix4x4 matrix = primitive->transformationMatrix();
+		matrix.rotate(rotation);
+		primitive->setTransformationMatrix(matrix);
+	}
 }
