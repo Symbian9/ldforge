@@ -196,15 +196,16 @@ void CircularPrimitiveEditor::reset()
 		primitive->restore(originalState); // Restoring does not change 'originalState'
 }
 
+/*
+ * Rotates the primitive around its origin. The angle depends on its resolution and the passed 'factor' parameter.
+ */
 void CircularPrimitiveEditor::rotate(double factor)
 {
 	if (primitive)
 	{
 		double angle = factor * 360.0 / primitive->divisions();
-
-		QQuaternion rotation = QQuaternion::fromAxisAndAngle({0.0f, 1.0f, 0.0f}, angle);
 		QMatrix4x4 matrix = primitive->transformationMatrix();
-		matrix.rotate(rotation);
+		matrix.rotate(QQuaternion::fromAxisAndAngle({0.0f, 1.0f, 0.0f}, angle));
 		primitive->setTransformationMatrix(matrix);
 	}
 }
