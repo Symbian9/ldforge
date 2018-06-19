@@ -205,7 +205,7 @@ void CircularPrimitiveEditor::rotate(double factor)
 	{
 		double angle = factor * 360.0 / primitive->divisions();
 		QMatrix4x4 matrix = primitive->transformationMatrix();
-		matrix.rotate(QQuaternion::fromAxisAndAngle({0.0f, 1.0f, 0.0f}, angle));
+		matrix.rotate(angle, 0, 1, 0);
 		primitive->setTransformationMatrix(matrix);
 	}
 }
