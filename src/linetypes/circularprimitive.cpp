@@ -242,7 +242,10 @@ int LDCircularPrimitive::triangleCount(DocumentManager*) const
 		return 0;
 
 	case PrimitiveModel::Chord:
-		return m_segments - 1;
+		if (m_segments >= m_divisions -1)
+			return m_divisions - 2;
+		else
+			return max(0, m_segments - 1);
 	}
 
 	return 0;
