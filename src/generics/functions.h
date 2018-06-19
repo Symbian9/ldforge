@@ -118,24 +118,13 @@ int countof(const std::initializer_list<T>& vector)
 }
 
 /*
- * Extracts the sign of x.
+ * Extracts the sign of 'value'.
+ * From: https://stackoverflow.com/q/1903954
  */
 template<typename T>
-T sign(T x)
+int sign(T value)
 {
-	if (isZero(x))
-		return {};
-	else
-		return x / qAbs(x);
-}
-
-template<>
-inline int sign(int x)
-{
-	if (x == 0)
-		return 0;
-	else
-		return x / qAbs(x);
+	return (0 < value) - (value < 0);
 }
 
 /*

@@ -368,7 +368,8 @@ void PrimitiveModel::generateDiscNegative(Model& model) const
 	{
 		LDTriangle* segment = model.emplace<LDTriangle>();
 		segment->setColor(MainColor);
-		segment->setVertex(0, {(circle[i].x1() >= 0.0) ? 1.0 : -1.0, 0.0, (circle[i].y1() >= 0.0) ? 1.0 : -1.0});
+		double angle = (i + 0.5) * 2.0 * pi / divisions;
+		segment->setVertex(0, {double(sign(cos(angle))), 0.0, double(sign(sin(angle)))});
 		segment->setVertex(1, {circle[i].x2(), 0.0, circle[i].y2()});
 		segment->setVertex(2, {circle[i].x1(), 0.0, circle[i].y1()});
 	}
