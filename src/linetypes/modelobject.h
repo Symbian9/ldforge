@@ -221,11 +221,17 @@ public:
 
 	virtual QString asText() const override;
 	Vertex pointAt (qreal t) const;
-	void rasterize(Model& model, int segments);
-	QVector<LDPolygon> rasterizePolygons (int segments);
+	void rasterize(DocumentManager*context, Winding winding, Model&, bool, bool) override;
+	QVector<LDPolygon> rasterizePolygons(DocumentManager*, Winding) override;
 	int numVertices() const override { return 4; }
 	LDColor defaultColor() const override { return EdgeColor; }
 	QString iconName() const override { return "beziercurve"; }
+	void serialize(class Serializer& serializer) override;
+	int segments() const;
+	void setSegments(int newSegments);
+
+private:
+	int m_segments = 8;
 };
 
 enum

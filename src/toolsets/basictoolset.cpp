@@ -137,13 +137,6 @@ void BasicToolset::doInline (bool deep)
 			}
 		}
 	}
-
-	for (LDBezierCurve* curve : filterByType<LDBezierCurve> (selectedObjects()))
-	{
-		Model curveModel {m_documents};
-		curve->rasterize(curveModel, grid()->bezierCurveSegments());
-		currentDocument()->replace(curve, curveModel);
-	}
 }
 
 void BasicToolset::inlineShallow()

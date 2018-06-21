@@ -465,9 +465,9 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 		return Vertex();
 }
 
-void LDBezierCurve::rasterize(Model& model, int segments)
+void LDBezierCurve::rasterize(DocumentManager* context, Winding winding, Model& model, bool, bool)
 {
-	QVector<LDPolygon> polygons = rasterizePolygons(segments);
+	QVector<LDPolygon> polygons = rasterizePolygons(context, winding);
 
 	for (LDPolygon& poly : polygons)
 	{
@@ -476,21 +476,21 @@ void LDBezierCurve::rasterize(Model& model, int segments)
 	}
 }
 
-QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
+QVector<LDPolygon> LDBezierCurve::rasterizePolygons(DocumentManager*, Winding)
 {
 	QVector<LDPolygon> result;
 	QVector<Vertex> parms;
 	parms.append (pointAt (0.0));
 
-	for (int i = 1; i < segments; ++i)
-		parms.append (pointAt (double (i) / segments));
+	for (int i = 1; i < m_segments; ++i)
+		parms.append (pointAt (double (i) / m_segments));
 
 	parms.append (pointAt (1.0));
 	LDPolygon poly;
 	poly.color = color().index();
 	poly.type = LDPolygon::Type::EdgeLine;
 
-	for (int i = 0; i < segments; ++i)
+	for (int i = 0; i < m_segments; ++i)
 	{
 		poly.vertices[0] = parms[i];
 		poly.vertices[1] = parms[i + 1];
@@ -498,6 +498,22 @@ QVector<LDPolygon> LDBezierCurve::rasterizePolygons(int segments)
 	}
 
 	return result;
+}
+
+void LDBezierCurve::serialize(Serializer& serializer)
+{
+	LDObject::serialize(serializer);
+	serializer << m_segments;
+}
+
+int LDBezierCurve::segments() const
+{
+	return m_segments;
+}
+
+void LDBezierCurve::setSegments(int newSegments)
+{
+	changeProperty(&m_segments, newSegments);
 }
 
 LDSubfileReference::LDSubfileReference(

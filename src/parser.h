@@ -20,7 +20,7 @@
 #include "main.h"
 #include "lddocument.h"
 
-class LDHeader;
+struct LDHeader;
 class Model;
 
 class Parser : public QObject

@@ -19,7 +19,7 @@
 #pragma once
 #include <QAbstractTableModel>
 
-class LDHeader;
+struct LDHeader;
 
 class HeaderHistoryModel : public QAbstractTableModel
 {

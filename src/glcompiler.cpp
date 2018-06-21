@@ -372,14 +372,6 @@ void GLCompiler::compileObject(const QModelIndex& index)
 		}
 		break;
 
-	case LDObjectType::BezierCurve:
-		{
-			LDBezierCurve* curve = static_cast<LDBezierCurve*>(object);
-			for (LDPolygon& polygon : curve->rasterizePolygons(grid()->bezierCurveSegments()))
-				compilePolygon (polygon, index, info);
-		}
-		break;
-
 	default:
 		if (object->isRasterizable())
 		{

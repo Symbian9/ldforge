@@ -158,13 +158,6 @@ void ExtProgramToolset::writeObjects (const QVector<LDObject*>& objects, QFile& 
 			obj->rasterize(m_documents, CounterClockwise, model, true, false);
 			writeObjects(model.objects(), f);
 		}
-		else if (obj->type() == LDObjectType::BezierCurve)
-		{
-			LDBezierCurve* curve = static_cast<LDBezierCurve*> (obj);
-			Model model {m_documents};
-			curve->rasterize(model, grid()->bezierCurveSegments());
-			writeObjects(model.objects(), f);
-		}
 		else
 			f.write ((obj->asText() + "\r\n").toUtf8());
 	}
