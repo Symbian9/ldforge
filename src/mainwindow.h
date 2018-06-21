@@ -83,8 +83,7 @@ public:
 	Canvas* renderer();
 	void refresh();
 	void replaceSelection(const QItemSelection& selection);
-	int ringToolDivisions() const;
-	int ringToolSegments() const;
+	CircularSection circleToolSection() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void saveShortcuts();
 	void select(const QModelIndex& objectIndex);
@@ -108,10 +107,8 @@ signals:
 
 public slots:
 	void actionTriggered();
-	void circleToolSegmentsChanged();
 	void closeTab (int tabindex);
 	void historyTraversed();
-	void ringToolDivisionsChanged();
 	void tabSelected();
 	void documentClosed(LDDocument* document);
 	void updateTitle();

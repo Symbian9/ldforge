@@ -59,6 +59,12 @@ enum Winding
 	Clockwise,
 };
 
+struct CircularSection
+{
+	int segments = 16;
+	int divisions = 16;
+};
+
 /*
  * Special operator definition that implements the XOR operator for windings.
  * However, if either winding is NoWinding, then this function returns NoWinding.

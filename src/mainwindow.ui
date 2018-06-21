@@ -40,15 +40,15 @@
       </widget>
       <widget class="QToolBox" name="toolBox">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="page">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>926</width>
-          <height>336</height>
+          <width>100</width>
+          <height>30</height>
          </rect>
         </property>
         <attribute name="label">
@@ -71,7 +71,7 @@
           <x>0</x>
           <y>0</y>
           <width>926</width>
-          <height>336</height>
+          <height>366</height>
          </rect>
         </property>
         <attribute name="label">
@@ -102,7 +102,7 @@
           <x>0</x>
           <y>0</y>
           <width>926</width>
-          <height>336</height>
+          <height>366</height>
          </rect>
         </property>
         <attribute name="label">
@@ -114,76 +114,11 @@
            <property name="title">
             <string>Circle Tool Options</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
-             <layout class="QFormLayout" name="formLayout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>Divisions:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Segments:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                 <widget class="QSpinBox" name="ringToolSegments">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="minimum">
-                   <number>1</number>
-                  </property>
-                  <property name="maximum">
-                   <number>16</number>
-                  </property>
-                  <property name="value">
-                   <number>16</number>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="ringToolSegmentsLabel">
-                  <property name="text">
-                   <string>a / b</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="ringToolDivisions">
-                <property name="currentIndex">
-                 <number>1</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>8</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>16</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>48</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+           <layout class="QVBoxLayout" name="verticalLayout_5"/>
           </widget>
+         </item>
+         <item>
+          <widget class="CircularSectionEditor" name="circleToolSection" native="true"/>
          </item>
          <item>
           <spacer name="verticalSpacer">
@@ -205,8 +140,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>926</width>
-          <height>336</height>
+          <width>93</width>
+          <height>93</height>
          </rect>
         </property>
         <attribute name="label">
@@ -239,7 +174,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1789,9 +1724,14 @@
    <header>widgets/headeredit.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>CircularSectionEditor</class>
+   <extends>QWidget</extends>
+   <header>widgets/circularsectioneditor.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
-  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

@@ -89,8 +89,7 @@ static Matrix shearMatrixForPlane(Canvas* renderer)
 void CircleMode::endDraw()
 {
 	Model model {m_documents};
-	int segments = m_window->ringToolSegments();
-	int divisions = m_window->ringToolDivisions();
+	CircularSection section = m_window->circleToolSection();
 	double dist0 = getCircleDrawDist(0);
 	double dist1 = getCircleDrawDist(1);
 	QVector3D translation = m_drawedVerts.first().toVector();
@@ -105,7 +104,7 @@ void CircleMode::endDraw()
 		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
 		transform.scale(dist0);
 		transform.translate(translation);
-		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, segments, divisions, transform);
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, section.segments, section.divisions, transform);
 		finishDraw(model);
 		return;
 	}
@@ -116,7 +115,7 @@ void CircleMode::endDraw()
 		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
 		transform.scale(max(dist0, dist1));
 		transform.translate(translation);
-		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, segments, divisions, transform);
+		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, section.segments, section.divisions, transform);
 		finishDraw(model);
 		return;
 	}
@@ -124,8 +123,9 @@ void CircleMode::endDraw()
 	{
 		// The ring finder found a solution, use that. Add the component rings to the file.
 		PrimitiveModel primitiveModel;
-		primitiveModel.segments = m_window->ringToolSegments();
-		primitiveModel.divisions = m_window->ringToolDivisions();
+		CircularSection section = m_window->circleToolSection();
+		primitiveModel.segments = section.segments;
+		primitiveModel.divisions = section.divisions;
 		primitiveModel.type = PrimitiveModel::Ring;
 
 		for (const RingFinder::Component& component : g_RingFinder.bestSolution()->getComponents())
@@ -151,10 +151,10 @@ void CircleMode::endDraw()
 		templ.setCoordinate(localy, y0);
 
 		// Calculate circle coords
-		QVector<QLineF> c0 = makeCircle(segments, divisions, dist0);
-		QVector<QLineF> c1 = makeCircle(segments, divisions, dist1);
+		QVector<QLineF> c0 = makeCircle(section.segments, section.divisions, dist0);
+		QVector<QLineF> c1 = makeCircle(section.segments, section.divisions, dist1);
 
-		for (int i = 0; i < segments; ++i)
+		for (int i = 0; i < section.segments; ++i)
 		{
 			Vertex v0, v1, v2, v3;
 			v0 = v1 = v2 = v3 = templ;
@@ -191,7 +191,7 @@ double CircleMode::orientation() const
 {
 	if (not m_drawedVerts.isEmpty())
 	{
-		int divisions = m_window->ringToolDivisions();
+		int divisions = m_window->circleToolSection().divisions;
 		QPointF originSpot = renderer()->currentCamera().convert3dTo2d(m_drawedVerts.first());
 		// Line from the origin of the circle to current mouse position
 		QLineF hand1 = {originSpot, renderer()->mousePositionF()};
@@ -227,15 +227,14 @@ void CircleMode::render (QPainter& painter) const
 	QVector<QPointF> innerverts2d, outerverts2d;
 	double innerdistance = getCircleDrawDist(0);
 	double outerdistance = countof(m_drawedVerts) >= 2 ? getCircleDrawDist (1) : -1;
-	int divisions = m_window->ringToolDivisions();
-	int segments = m_window->ringToolSegments();
-	double angleUnit = 2 * pi / divisions;
+	CircularSection section = m_window->circleToolSection();
+	double angleUnit = 2 * pi / section.divisions;
 	Axis relX, relY;
 	renderer()->getRelativeAxes(relX, relY);
 	double angleoffset = (countof(m_drawedVerts) < 3 ? orientation() : m_angleOffset);
 
 	// Calculate the preview positions of vertices
-	for (int i = 0; i < segments + 1; ++i)
+	for (int i = 0; i < section.segments + 1; ++i)
 	{
 		const double sinangle = ldrawsin(angleoffset + i * angleUnit);
 		const double cosangle = ldrawcos(angleoffset + i * angleUnit);
@@ -260,10 +259,10 @@ void CircleMode::render (QPainter& painter) const
 	{
 		painter.setBrush(m_polybrush);
 		painter.setPen(Qt::NoPen);
-		lines.reserve(segments * 2);
+		lines.reserve(section.segments * 2);
 
 		// Compile polygons
-		for (int i = 0; i < segments; ++i)
+		for (int i = 0; i < section.segments; ++i)
 		{
 			QVector<QPointF> points;
 			points << innerverts2d[i]
@@ -276,7 +275,7 @@ void CircleMode::render (QPainter& painter) const
 		}
 
 		// Add bordering edges for unclosed rings/discs
-		if (segments != divisions)
+		if (section.segments != section.divisions)
 		{
 			lines.append({innerverts2d.first(), outerverts2d.first()});
 			lines.append({innerverts2d.last(), outerverts2d.last()});
@@ -284,9 +283,9 @@ void CircleMode::render (QPainter& painter) const
 	}
 	else
 	{
-		lines.reserve(segments);
+		lines.reserve(section.segments);
 
-		for (int i = 0; i < segments; ++i)
+		for (int i = 0; i < section.segments; ++i)
 			lines.append({innerverts2d[i], innerverts2d[i + 1]});
 	}
 

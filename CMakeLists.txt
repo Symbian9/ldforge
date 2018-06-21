@@ -95,6 +95,7 @@ set (LDFORGE_SOURCES
 	src/toolsets/viewtoolset.cpp
 	src/types/boundingbox.cpp
 	src/types/vertex.cpp
+	src/widgets/circularsectioneditor.cpp
 	src/widgets/colorbutton.cpp
 	src/widgets/doublespinbox.cpp
 	src/widgets/headeredit.cpp
@@ -176,6 +177,7 @@ set (LDFORGE_HEADERS
 	src/types/boundingbox.h
 	src/types/library.h
 	src/types/vertex.h
+	src/widgets/circularsectioneditor.h
 	src/widgets/colorbutton.h
 	src/widgets/doublespinbox.h
 	src/widgets/headeredit.h
@@ -206,6 +208,7 @@ set (LDFORGE_FORMS
 	src/toolsets/fixroundingerrors.ui
 	src/mainwindow.ui
 	src/partdownloader.ui
+	src/widgets/circularsectioneditor.ui
 	src/widgets/vertexobjecteditor.ui
 	src/widgets/headeredit.ui
 	src/widgets/matrixeditor.ui

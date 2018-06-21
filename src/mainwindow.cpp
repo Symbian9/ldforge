@@ -111,9 +111,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	updateTitle();
 	loadShortcuts();
 	setMinimumSize (300, 200);
-	connect(ui.ringToolDivisions, SIGNAL(currentTextChanged(QString)), this, SLOT(ringToolDivisionsChanged()));
-	connect(ui.ringToolSegments, SIGNAL(valueChanged(int)), this, SLOT(circleToolSegmentsChanged()));
-	circleToolSegmentsChanged(); // invoke it manually for initial label text
+	connect(ui.circleToolSection, &CircularSectionEditor::sectionChanged, [&](){this->renderer()->update();});
 
 	// Examine the toolsets and make a dictionary of tools
 	m_toolsets = Toolset::createToolsets (this);
@@ -796,41 +794,9 @@ QKeySequence MainWindow::defaultShortcut (QAction* act)
 	return m_defaultShortcuts[act];
 }
 
-int MainWindow::ringToolDivisions() const
+CircularSection MainWindow::circleToolSection() const
 {
-	return ui.ringToolDivisions->currentText().toInt();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-int MainWindow::ringToolSegments() const
-{
-	return ui.ringToolSegments->value();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::ringToolDivisionsChanged()
-{
-	// Scale the segments value to fit.
-	int divisions = this->ringToolDivisions();
-	int newSegments = static_cast<int>(round(
-		this->ringToolSegments() * double(divisions) / this->previousDivisions
-	));
-	this->ui.ringToolSegments->setMaximum(divisions);
-	this->ui.ringToolSegments->setValue(newSegments);
-	this->previousDivisions = divisions;
-	this->renderer()->update();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-void MainWindow::circleToolSegmentsChanged()
-{
-	int numerator = this->ringToolSegments();
-	int denominator = this->ringToolDivisions();
-	simplify (numerator, denominator);
-	ui.ringToolSegmentsLabel->setText(fractionRep(numerator, denominator));
+	return ui.circleToolSection->section();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
