@@ -35,6 +35,8 @@ public:
 	void setSegments(int newSegments);
 	int divisions() const;
 	void setDivisions(int newDivisions);
+	const CircularSection& section() const;
+	void setSection(const CircularSection& newSection);
 	int triangleCount(DocumentManager*) const override;
 	QString iconName() const override;
 	void serialize(class Serializer& serializer) override;
@@ -45,6 +47,5 @@ private:
 	QString stem() const;
 
 	PrimitiveModel::Type m_type = PrimitiveModel::Circle;
-	int m_segments = MediumResolution;
-	int m_divisions = MediumResolution;
+	CircularSection m_section;
 };

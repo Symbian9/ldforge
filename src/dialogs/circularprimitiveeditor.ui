@@ -13,60 +13,27 @@
   <property name="windowTitle">
    <string>Edit circular primitive</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,0">
+   <item>
+    <widget class="CircularSectionEditor" name="section" native="true"/>
+   </item>
    <item>
     <layout class="QFormLayout" name="formLayout_2">
      <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Segments:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="segments"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Divisions:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="divisions">
-       <item>
-        <property name="text">
-         <string>8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>48</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Colour:</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="0" column="1">
       <widget class="ColorButton" name="color">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="1" column="1">
       <widget class="QCheckBox" name="inverted">
        <property name="text">
         <string>Inverted</string>
@@ -176,6 +143,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>CircularSectionEditor</class>
+   <extends>QWidget</extends>
+   <header>widgets/circularsectioneditor.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>MatrixEditor</class>
    <extends>QWidget</extends>

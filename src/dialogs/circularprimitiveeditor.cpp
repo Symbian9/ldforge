@@ -85,21 +85,12 @@ CircularPrimitiveEditor::CircularPrimitiveEditor(LDCircularPrimitive* primitive,
 
 	// Connect various widgets so that changing them changes the primitive object.
 	connect(
-		ui.segments,
-		qOverload<int>(&QSpinBox::valueChanged),
-		[&](int newSegments)
+		ui.section,
+		&CircularSectionEditor::sectionChanged,
+		[&](const CircularSection& newSection)
 		{
 			if (this->primitive)
-				this->primitive->setSegments(newSegments);
-		}
-	);
-	connect(
-		ui.divisions,
-		&QComboBox::currentTextChanged,
-		[&](const QString& newDivisions)
-		{
-			if (this->primitive)
-				this->primitive->setDivisions(newDivisions.toInt());
+				this->primitive->setSection(newSection);
 		}
 	);
 	connect(
@@ -176,11 +167,7 @@ void CircularPrimitiveEditor::updateWidgets()
 		}
 
 		// Set the values of the form.
-		withSignalsBlocked(ui.segments, [&](){ ui.segments->setValue(primitive->segments()); });
-		withSignalsBlocked(ui.divisions, [&]()
-		{
-			ui.divisions->setCurrentText(QString::number(primitive->divisions()));
-		});
+		withSignalsBlocked(ui.section, [&](){ ui.section->setSection(primitive->section()); });
 		withSignalsBlocked(ui.color, [&](){ ui.color->setColor(primitive->color()); });
 		withSignalsBlocked(ui.matrix, [&](){ ui.matrix->setMatrix(primitive->transformationMatrix()); });
 		withSignalsBlocked(ui.inverted, [&](){ ui.inverted->setChecked(primitive->isInverted()); });

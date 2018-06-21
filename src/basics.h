@@ -65,6 +65,10 @@ struct CircularSection
 	int divisions = 16;
 };
 
+Q_DECLARE_METATYPE(CircularSection)
+bool operator==(const CircularSection& one, const CircularSection& other);
+bool operator!=(const CircularSection& one, const CircularSection& other);
+
 /*
  * Special operator definition that implements the XOR operator for windings.
  * However, if either winding is NoWinding, then this function returns NoWinding.

@@ -259,3 +259,13 @@ qreal determinant(const QMatrix4x4& matrix)
 
 	return sum;
 }
+
+bool operator==(const CircularSection& one, const CircularSection& other)
+{
+	return one.segments == other.segments and one.divisions == other.divisions;
+}
+
+bool operator!=(const CircularSection& one, const CircularSection& other)
+{
+	return not (one == other);
+}

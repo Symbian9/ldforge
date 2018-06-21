@@ -8,12 +8,12 @@
 
 QString LDCircularPrimitive::buildFilename() const
 {
-	int numerator = this->m_segments;
-	int denominator = this->m_divisions;
+	int numerator = segments();
+	int denominator = divisions();
 	QString prefix;
 
-	if (m_divisions != MediumResolution)
-		prefix = QString::number(m_divisions) + '\\';
+	if (divisions() != MediumResolution)
+		prefix = QString::number(divisions()) + '\\';
 
 	simplify(numerator, denominator);
 
@@ -33,8 +33,7 @@ LDCircularPrimitive::LDCircularPrimitive(PrimitiveModel::Type type,
 	const QMatrix4x4& matrix) :
 	LDMatrixObject {matrix},
 	m_type {type},
-	m_segments {segments},
-	m_divisions {divisions} {}
+	m_section {segments, divisions} {}
 
 LDObjectType LDCircularPrimitive::type() const
 {
@@ -48,11 +47,11 @@ QString LDCircularPrimitive::asText() const
 
 void LDCircularPrimitive::getVertices(DocumentManager* /* context */, QSet<Vertex>& vertices) const
 {
-	int endSegment = (m_segments == m_divisions) ? m_segments : m_segments + 1;
+	int endSegment = (segments() == divisions()) ? segments() : segments() + 1;
 
 	for (int i = 0; i < endSegment; i += 1)
 	{
-		QPointF point2d = pointOnLDrawCircumference(i, m_divisions);
+		QPointF point2d = pointOnLDrawCircumference(i, divisions());
 
 		for (double y_value : {0.0, 1.0})
 		{
@@ -139,8 +138,8 @@ void LDCircularPrimitive::buildPrimitiveBody(Model& model, bool deep) const
 {
 	PrimitiveModel primitive;
 	primitive.type = m_type;
-	primitive.segments = m_segments;
-	primitive.divisions = m_divisions;
+	primitive.segments = segments();
+	primitive.divisions = divisions();
 	primitive.ringNumber = 0;
 	primitive.generateBody(model, deep);
 }
@@ -182,18 +181,18 @@ QString LDCircularPrimitive::objectListText() const
 {
 	QString prefix;
 
-	if (m_divisions == HighResolution)
+	if (divisions() == HighResolution)
 		prefix = "Hi-Res";
-	else if (m_divisions == LowResolution)
+	else if (divisions() == LowResolution)
 		prefix = "Lo-Res";
-	else if (m_divisions != MediumResolution)
-		prefix = format("%1-resolution", m_divisions);
+	else if (divisions() != MediumResolution)
+		prefix = format("%1-resolution", divisions());
 
 	QString result = format(
 		"%1 %2 %3 %4, (",
 		prefix,
 		PrimitiveModel::typeName(m_type),
-		m_segments / m_divisions,
+		double(segments()) / double(divisions()),
 		position().toString(true)
 	).simplified();
 
@@ -217,22 +216,32 @@ void LDCircularPrimitive::setPrimitiveType(PrimitiveModel::Type newType)
 
 int LDCircularPrimitive::segments() const
 {
-	return m_segments;
+	return m_section.segments;
 }
 
 void LDCircularPrimitive::setSegments(int newSegments)
 {
-	changeProperty(&m_segments, newSegments);
+	changeProperty(&m_section.segments, newSegments);
 }
 
 int LDCircularPrimitive::divisions() const
 {
-	return m_divisions;
+	return m_section.divisions;
 }
 
 void LDCircularPrimitive::setDivisions(int newDivisions)
 {
-	changeProperty(&m_divisions, newDivisions);
+	changeProperty(&m_section.divisions, newDivisions);
+}
+
+const CircularSection&LDCircularPrimitive::section() const
+{
+	return m_section;
+}
+
+void LDCircularPrimitive::setSection(const CircularSection& newSection)
+{
+	changeProperty(&m_section, newSection);
 }
 
 int LDCircularPrimitive::triangleCount(DocumentManager*) const
@@ -244,19 +253,21 @@ int LDCircularPrimitive::triangleCount(DocumentManager*) const
 		throw std::logic_error("Bad primitive type to LDCircularPrimitive");
 
 	case PrimitiveModel::Cylinder:
-	case PrimitiveModel::CylinderClosed:
 	case PrimitiveModel::CylinderOpen:
-		return 2 * m_segments;
+		return 2 * segments();
+
+	case PrimitiveModel::CylinderClosed:
+		return 3 * segments();
 
 	case PrimitiveModel::Disc:
 	case PrimitiveModel::DiscNegative:
-		return m_segments;
+		return segments();
 
 	case PrimitiveModel::Circle:
 		return 0;
 
 	case PrimitiveModel::Chord:
-		return qBound(0, m_segments - 1, m_divisions - 2);
+		return qBound(0, segments() - 1, divisions() - 2);
 	}
 
 	return 0;
@@ -298,5 +309,5 @@ QString LDCircularPrimitive::iconName() const
 void LDCircularPrimitive::serialize(class Serializer& serializer)
 {
 	LDMatrixObject::serialize(serializer);
-	serializer << m_segments << m_divisions << m_type;
+	serializer << m_section << m_type;
 }
