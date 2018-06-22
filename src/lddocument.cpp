@@ -29,8 +29,7 @@ LDDocument::LDDocument (DocumentManager* parent) :
 	HierarchyElement (parent),
     m_history (new EditHistory (this)),
 	m_savePosition(-1),
-    m_tabIndex(-1),
-	m_manager (parent)
+    m_tabIndex(-1)
 {
 	connect(
 		this,
@@ -165,7 +164,7 @@ void LDDocument::close()
 	if (not isFrozen())
 	{
 		setFrozen(true);
-		m_manager->documentClosed(this);
+		documentManager()->documentClosed(this);
 	}
 }
 
@@ -519,7 +518,7 @@ void LDDocument::inlineContents(Model& model, bool deep, bool renderinline)
 		m_isInlining = true;
 
 		// First ask the manager to deal with this inline (this takes logoed studs into account)
-		if (not m_manager->preInline(this, model, deep, renderinline))
+		if (not documentManager()->preInline(this, model, deep, renderinline))
 		{
 			for (LDObject* object : objects())
 			{

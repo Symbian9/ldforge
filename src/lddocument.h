@@ -142,7 +142,6 @@ private:
 	QVector<LDPolygon> m_polygonData;
 	QMap<LDObject*, QSet<Vertex>> m_objectVertices;
 	QSet<Vertex> m_vertices;
-	DocumentManager* m_manager;
 
 private slots:
 	void objectChanged(const LDObjectState &before, const LDObjectState &after);
