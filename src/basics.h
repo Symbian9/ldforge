@@ -105,7 +105,7 @@ qreal determinant(const QMatrix3x3& matrix);
 qreal determinant(const QMatrix4x4& matrix);
 QString formatFileSize(qint64 size);
 int gcd(int a, int b);
-QString joinStrings(const QList<class StringFormatArg>& values, QString delimeter = " ");
+QString joinStrings(const QVector<class StringFormatArg>& values, QString delimeter = " ");
 QString largeNumberRep(int number);
 double log1000(double x);
 double roundToDecimals(double value, int decimals);

@@ -28,7 +28,7 @@ LinePathMode::LinePathMode (Canvas* canvas) :
 void LinePathMode::render (QPainter& painter) const
 {
 	QVector<QPointF> points;
-	QList<Vertex> points3d = m_drawedVerts;
+	QVector<Vertex> points3d = m_drawedVerts;
 	points3d << renderer()->position3D();
 
 	for (Vertex const& vrt : points3d)

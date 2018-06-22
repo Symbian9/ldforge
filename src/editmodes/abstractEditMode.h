@@ -79,7 +79,7 @@ class AbstractDrawMode : public AbstractEditMode
 	DEFINE_CLASS (AbstractDrawMode, AbstractEditMode)
 
 protected:
-	QList<Vertex>			m_drawedVerts;
+	QVector<Vertex>			m_drawedVerts;
 	QBrush					m_polybrush;
 
 public:

@@ -44,7 +44,7 @@ void simplify(int& numerator, int& denominator)
 }
 
 
-QString joinStrings(const QList<StringFormatArg>& values, QString delimeter)
+QString joinStrings(const QVector<StringFormatArg>& values, QString delimeter)
 {
 	QStringList list;
 

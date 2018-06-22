@@ -100,9 +100,9 @@ int countof(const QVector<T>& vector)
 }
 
 template<typename T>
-int countof(const QList<T>& vector)
+int countof(const QList<T>& list)
 {
-	return vector.size();
+	return list.size();
 }
 
 template<typename T>

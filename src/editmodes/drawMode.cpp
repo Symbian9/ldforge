@@ -67,7 +67,7 @@ bool DrawMode::preAddVertex (Vertex const& pos)
 void DrawMode::endDraw()
 {
 	// Clean the selection and create the object
-	QList<Vertex>& verts = m_drawedVerts;
+	QVector<Vertex>& verts = m_drawedVerts;
 	Model model {m_documents};
 
 	switch (countof(verts))

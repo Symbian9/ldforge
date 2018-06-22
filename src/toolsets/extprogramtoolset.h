@@ -62,7 +62,7 @@ private:
 	bool makeTempFile (class QTemporaryFile& tmp, QString& fname);
 	bool runExtProgram (ExtProgramType prog, QString argvstr);
 	QString errorCodeString (ExtProgramType program, class QProcess& process);
-	void insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace);
+	void insertOutput (QString fname, bool replace, const QVector<LDColor>& colorsToReplace);
 	void writeColorGroup (LDColor color, QString fname);
 	void writeObjects (const QVector<LDObject*>& objects, QFile& f);
 	void writeObjects (const QVector<LDObject*>& objects, QString fname);

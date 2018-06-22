@@ -553,7 +553,7 @@ void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 //
 // Finds the given list widget item in the list of widget items given.
 //
-int ConfigDialog::getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& haystack)
+int ConfigDialog::getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& haystack)
 {
 	int i = 0;
 
@@ -582,9 +582,9 @@ QListWidgetItem* ConfigDialog::getSelectedQuickColor()
 //
 // Get the list of shortcuts selected
 //
-QList<ShortcutListItem*> ConfigDialog::getShortcutSelection()
+QVector<ShortcutListItem*> ConfigDialog::getShortcutSelection()
 {
-	QList<ShortcutListItem*> out;
+	QVector<ShortcutListItem*> out;
 
 	for (QListWidgetItem* entry : ui.shortcutsList->selectedItems())
 		out << static_cast<ShortcutListItem*> (entry);
@@ -597,7 +597,7 @@ QList<ShortcutListItem*> ConfigDialog::getShortcutSelection()
 //
 void ConfigDialog::slot_setShortcut()
 {
-	QList<ShortcutListItem*> sel = getShortcutSelection();
+	QVector<ShortcutListItem*> sel = getShortcutSelection();
 
 	if (countof(sel) < 1)
 		return;
@@ -613,7 +613,7 @@ void ConfigDialog::slot_setShortcut()
 //
 void ConfigDialog::slot_resetShortcut()
 {
-	QList<ShortcutListItem*> sel = getShortcutSelection();
+	QVector<ShortcutListItem*> sel = getShortcutSelection();
 
 	for (ShortcutListItem* item : sel)
 	{
@@ -627,7 +627,7 @@ void ConfigDialog::slot_resetShortcut()
 //
 void ConfigDialog::slot_clearShortcut()
 {
-	QList<ShortcutListItem*> sel = getShortcutSelection();
+	QVector<ShortcutListItem*> sel = getShortcutSelection();
 
 	for (ShortcutListItem* item : sel)
 	{

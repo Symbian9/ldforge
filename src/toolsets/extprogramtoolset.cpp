@@ -285,7 +285,7 @@ bool ExtProgramToolset::runExtProgram (ExtProgramType program, QString argvstr)
 
 // =============================================================================
 //
-void ExtProgramToolset::insertOutput (QString fname, bool replace, QList<LDColor> colorsToReplace)
+void ExtProgramToolset::insertOutput (QString fname, bool replace, const QVector<LDColor>& colorsToReplace)
 {
 #ifdef DEBUG
 	QFile::copy (fname, "./debug_lastOutput");

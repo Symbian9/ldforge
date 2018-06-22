@@ -69,7 +69,7 @@ public:
 
 private:
 	class Ui_ConfigDialog& ui;
-	QList<QListWidgetItem*> quickColorItems;
+	QVector<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
 	QVector<ColorToolbarItem> quickColors;
@@ -81,10 +81,10 @@ private:
 	void setButtonBackground (QPushButton* button, QString value);
 	void updateQuickColorList (ColorToolbarItem* sel = nullptr);
 	void setShortcutText (ShortcutListItem* item);
-	int getItemRow (QListWidgetItem* item, QList<QListWidgetItem*>& haystack);
+	int getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& haystack);
 	QString quickColorString();
 	QListWidgetItem* getSelectedQuickColor();
-	QList<ShortcutListItem*> getShortcutSelection();
+	QVector<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
 	void applyToWidgetOptions (std::function<void (QWidget*, QString)> func);
 

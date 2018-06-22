@@ -90,8 +90,8 @@ public:
 		PatternType	type;
 	};
 
-	QList<RegexEntry> patterns;
-	QList<Primitive> primitives;
+	QVector<RegexEntry> patterns;
+	QVector<Primitive> primitives;
 
 	explicit PrimitiveCategory (QString name, QObject* parent = 0);
 	bool isValidToInclude();
@@ -129,7 +129,7 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
-	QList<PrimitiveCategory*> m_categories;
+	QVector<PrimitiveCategory*> m_categories;
 	PrimitiveScanner* m_activeScanner;
 	QVector<Primitive> m_primitives;
 	PrimitiveCategory* m_unmatched;

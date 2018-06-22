@@ -28,7 +28,7 @@ class EditHistory : public QObject
 	Q_OBJECT
 
 public:
-	using Changeset = QList<AbstractHistoryEntry*>;
+	using Changeset = QVector<AbstractHistoryEntry*>;
 
 	EditHistory (LDDocument* document);
 	~EditHistory();
@@ -59,7 +59,7 @@ signals:
 private:
 	LDDocument* m_document;
 	Changeset m_currentChangeset;
-	QList<Changeset> m_changesets;
+	QVector<Changeset> m_changesets;
 	bool m_isIgnoring;
 	int m_position;
 };

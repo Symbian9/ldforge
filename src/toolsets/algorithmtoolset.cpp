@@ -289,7 +289,7 @@ void AlgorithmToolset::replaceCoordinates()
 	const bool replaceAllValues= ui.any->isChecked();
 	const bool relative = ui.relative->isChecked();
 
-	QList<Axis> selectedAxes;
+	QVector<Axis> selectedAxes;
 	int count = 0;
 
 	if (ui.x->isChecked())
@@ -333,7 +333,7 @@ void AlgorithmToolset::flip()
 	if (not dialog.exec())
 		return;
 
-	QList<Axis> sel;
+	QVector<Axis> sel;
 
 	if (ui.x->isChecked()) sel << X;
 	if (ui.y->isChecked()) sel << Y;

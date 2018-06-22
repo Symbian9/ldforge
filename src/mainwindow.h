@@ -125,8 +125,8 @@ private:
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	QVector<ColorToolbarItem>	m_quickColors;
-	QList<QToolButton*>	m_colorButtons;
-	QList<QAction*> m_recentFiles;
+	QVector<QToolButton*>	m_colorButtons;
+	QVector<QAction*> m_recentFiles;
 	class Ui_MainWindow& ui;
 	QTabBar* m_tabs;
 	bool m_updatingTabs;
