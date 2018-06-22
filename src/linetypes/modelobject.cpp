@@ -465,6 +465,11 @@ Vertex LDBezierCurve::pointAt (qreal t) const
 		return Vertex();
 }
 
+bool LDBezierCurve::isRasterizable() const
+{
+	return true;
+}
+
 void LDBezierCurve::rasterize(DocumentManager* context, Winding winding, Model& model, bool, bool)
 {
 	QVector<LDPolygon> polygons = rasterizePolygons(context, winding);

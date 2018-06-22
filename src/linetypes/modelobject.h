@@ -221,6 +221,7 @@ public:
 
 	virtual QString asText() const override;
 	Vertex pointAt (qreal t) const;
+	bool isRasterizable() const override;
 	void rasterize(DocumentManager*context, Winding winding, Model&, bool, bool) override;
 	QVector<LDPolygon> rasterizePolygons(DocumentManager*, Winding) override;
 	int numVertices() const override { return 4; }
