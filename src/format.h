@@ -101,47 +101,33 @@ private:
 	QString m_text;
 };
 
-
-// Helper function for format()
-template<typename Arg1, typename... Rest>
-void formatHelper (QString& str, Arg1 arg1, Rest... rest)
-{
-	str = str.arg (StringFormatArg (arg1).text());
-	formatHelper (str, rest...);
-}
-
-
-static void formatHelper (QString& str) __attribute__ ((unused));
-static void formatHelper (QString& str)
-{
-	(void) str;
-}
-
-
 // Format the message with the given args.
 //
 // The formatting ultimately uses String's arg() method to actually format the args so the format string should be
 // prepared accordingly, with %1 referring to the first arg, %2 to the second, etc.
-template<typename... Args>
-QString format (QString fmtstr, Args... args)
+template<typename T, typename... Rest>
+QString format(const QString& formatString, const T& arg, Rest... rest)
 {
-	formatHelper (fmtstr, args...);
-	return fmtstr;
+	return format(formatString.arg(StringFormatArg(arg).text()), rest...);
+}
+
+// Recursion base
+inline QString format(const QString& formatString)
+{
+	return formatString;
 }
 
 template<typename... Args>
-void fprint (FILE* fp, QString fmtstr, Args... args)
+void fprint(FILE* fp, const QString& formatString, Args... args)
 {
-	formatHelper (fmtstr, args...);
-	fprintf (fp, "%s", qPrintable (fmtstr));
+	fprintf(fp, "%s", qPrintable(format(formatString, args...)));
 }
 
 
 template<typename... Args>
-void fprint (QIODevice& dev, QString fmtstr, Args... args)
+void fprint (QIODevice& dev, const QString& formatString, Args... args)
 {
-	formatHelper (fmtstr, args...);
-	dev.write (fmtstr.toUtf8());
+	dev.write(format(formatString, args...).toUtf8());
 }
 
 class Printer : public QObject
