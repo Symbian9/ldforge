@@ -7,6 +7,8 @@
 
 project (ldforge)
 cmake_minimum_required (VERSION 2.6)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+include(cotire)
 
 option (TRANSPARENT_DIRECT_COLORS "Enables non-standard transparent direct colors" OFF)
 
@@ -258,6 +260,7 @@ set_source_files_properties(${LDFORGE_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties(${LDFORGE_OTHER_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 set_target_properties (ldforge PROPERTIES AUTOMOC 1)
 target_link_libraries (ldforge Qt5::Widgets Qt5::Network Qt5::OpenGL ${OPENGL_LIBRARIES})
+cotire(ldforge)
 
 add_custom_target (config_collection ALL
 	COMMAND python3
