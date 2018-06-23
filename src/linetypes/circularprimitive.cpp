@@ -282,6 +282,7 @@ QString LDCircularPrimitive::iconName() const
 		break;
 
 	case PrimitiveModel::Cylinder:
+	case PrimitiveModel::CylinderOpen:
 		return "cylinder";
 
 	case PrimitiveModel::Disc:
@@ -294,10 +295,7 @@ QString LDCircularPrimitive::iconName() const
 		return "circle";
 
 	case PrimitiveModel::CylinderClosed:
-		return "cylinder-closed";
-
-	case PrimitiveModel::CylinderOpen:
-		return "cylinder-open";
+		return "closed-cylinder";
 
 	case PrimitiveModel::Chord:
 		return "chord";

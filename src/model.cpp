@@ -311,6 +311,8 @@ int Model::rowCount(const QModelIndex&) const
 
 QVariant Model::data(const QModelIndex& index, int role) const
 {
+	static QMap<QString, QPixmap> scaledIcons;
+
 	if (index.row() < 0 or index.row() >= size())
 		return {};
 
@@ -337,7 +339,17 @@ QVariant Model::data(const QModelIndex& index, int role) const
 		}
 
 	case Qt::DecorationRole:
-		return MainWindow::getIcon(object->iconName());
+		{
+			QString iconName = object->iconName();
+			auto it = scaledIcons.find(iconName);
+			if (it == scaledIcons.end())
+			{
+				QPixmap pixmap = MainWindow::getIcon(object->iconName())
+					.scaled({24, 24}, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+				it = scaledIcons.insert(iconName, pixmap);
+			}
+			return *it;
+		}
 
 	case Qt::BackgroundColorRole:
 		if (object->type() == LDObjectType::Error)

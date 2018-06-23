@@ -29,16 +29,23 @@
 	<file>./icons/camera-right.png</file>
 	<file>./icons/camera-top.png</file>
 	<file>./icons/checkerboard.png</file>
+	<file>./icons/chord.png</file>
+	<file>./icons/circle.png</file>
+	<file>./icons/closed-cylinder.png</file>
 	<file>./icons/colorcursor.png</file>
 	<file>./icons/colorselect.png</file>
 	<file>./icons/colors.txt</file>
 	<file>./icons/comment.png</file>
 	<file>./icons/condline.png</file>
+	<file>./icons/cone.png</file>
 	<file>./icons/copy.png</file>
 	<file>./icons/coverer.png</file>
 	<file>./icons/cut.png</file>
+	<file>./icons/cylinder.png</file>
 	<file>./icons/delete.png</file>
 	<file>./icons/del-line.png</file>
+	<file>./icons/disc-negative.png</file>
+	<file>./icons/disc.png</file>
 	<file>./icons/empty.png</file>
 	<file>./icons/error.png</file>
 	<file>./icons/exit.png</file>
@@ -91,6 +98,7 @@
 	<file>./icons/rectifier.png</file>
 	<file>./icons/redo.png</file>
 	<file>./icons/replace-coords.png</file>
+	<file>./icons/ring.png</file>
 	<file>./icons/round-coords.png</file>
 	<file>./icons/screencap.png</file>
 	<file>./icons/select-all.png</file>
