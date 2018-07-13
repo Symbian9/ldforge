@@ -308,7 +308,11 @@ void LDObject::move(const QVector3D& vector)
 	if (hasMatrix())
 	{
 		LDMatrixObject* mo = static_cast<LDMatrixObject*> (this);
-		mo->translate(vector);
+		QMatrix4x4 matrix = mo->transformationMatrix();
+		matrix(0, 3) += vector.x();
+		matrix(1, 3) += vector.y();
+		matrix(2, 3) += vector.z();
+		mo->setTransformationMatrix(matrix);
 	}
 	else
 	{
