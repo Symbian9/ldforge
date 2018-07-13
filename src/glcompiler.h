@@ -61,7 +61,7 @@ private:
 	void compileStaged();
 	void compilePolygon(LDPolygon& poly, const QModelIndex& polygonOwnerIndex, ObjectVboData& objectInfo);
 	Q_SLOT void compileObject(const QModelIndex &index);
-	QColor getColorForPolygon(LDPolygon& poly, const QModelIndex& polygonOwnerIndex, VboSubclass complement);
+	QColor getColorForPolygon(const LDPolygon& polygon, const QModelIndex& polygonOwnerIndex, VboSubclass complement);
 	QColor indexColorForID (qint32 id) const;
 	void needMerge();
 	Q_SLOT void recompile();

@@ -144,7 +144,7 @@ QColor GLCompiler::indexColorForID (qint32 id) const
  * - subclass provides context for the polygon.
  */
 QColor GLCompiler::getColorForPolygon(
-	LDPolygon& polygon,
+	const LDPolygon& polygon,
 	const QModelIndex& polygonOwnerIndex,
 	VboSubclass subclass
 ) {
