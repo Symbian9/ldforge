@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
+	connect(m_documents, &DocumentManager::documentCreated, this, &MainWindow::newDocument);
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
 
 	m_quickColors = m_guiUtilities->loadQuickColorList();
@@ -613,14 +614,14 @@ void MainWindow::updateDocumentList()
 	while (m_tabs->count() > 0)
 		m_tabs->removeTab (0);
 
-	for (LDDocument* document : m_documents->allDocuments())
+	for (auto& document : *m_documents)
 	{
 		if (not document->isFrozen())
 		{
 			// Add an item to the list for this file and store the tab index
 			// in the document so we can find documents by tab index.
 			document->setTabIndex (m_tabs->addTab (""));
-			updateDocumentListItem (document);
+			updateDocumentListItem(document.get());
 		}
 	}
 
@@ -671,11 +672,11 @@ void MainWindow::tabSelected()
 	int tabIndex = m_tabs->currentIndex();
 
 	// Find the file pointer of the item that was selected.
-	for (LDDocument* document : m_documents->allDocuments())
+	for (auto& document : *m_documents)
 	{
 		if (not document->isFrozen() and document->tabIndex() == tabIndex)
 		{
-			switchee = document;
+			switchee = document.get();
 			break;
 		}
 	}
@@ -721,6 +722,7 @@ PrimitiveManager* MainWindow::primitives()
 //
 Canvas* MainWindow::renderer()
 {
+	Q_ASSERT(ui.rendererStack->count() > 0);
 	return static_cast<Canvas*>(ui.rendererStack->currentWidget());
 }
 
@@ -736,10 +738,10 @@ void MainWindow::setQuickColors (const QVector<ColorToolbarItem>& colors)
 //
 void MainWindow::closeTab (int tabindex)
 {
-	LDDocument* doc = m_documents->findDocumentByName (m_tabs->tabData (tabindex).toString());
+	auto iterator = m_documents->findDocumentByName(m_tabs->tabData (tabindex).toString());
 
-	if (doc)
-		doc->close();
+	if (iterator != m_documents->end())
+		(*iterator)->close();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -804,26 +806,23 @@ CircularSection MainWindow::circleToolSection() const
 void MainWindow::createBlankDocument()
 {
 	// Create a new anonymous file and set it to our current
-	LDDocument* f = newDocument();
-	f->setName ("");
-	changeDocument (f);
-	doFullRefresh();
+	LDDocument* document = m_documents->createNew(false);
+	document->setName ("");
+	document->setFrozen(false);
+	changeDocument (document);
 	updateActions();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-LDDocument* MainWindow::newDocument (bool cache)
+void MainWindow::newDocument(LDDocument* document, bool cache)
 {
-	LDDocument* document = m_documents->createNew();
 	connect (document->history(), SIGNAL (undone()), this, SLOT (historyTraversed()));
 	connect (document->history(), SIGNAL (redone()), this, SLOT (historyTraversed()));
 	connect (document->history(), SIGNAL (stepAdded()), this, SLOT (updateActions()));
 
 	if (not cache)
 		openDocumentForEditing(document);
-
-	return document;
 }
 
 void MainWindow::openDocumentForEditing(LDDocument* document)
@@ -945,11 +944,11 @@ void MainWindow::currentDocumentClosed()
 	LDDocument* old = currentDocument();
 
 	// Find a replacement document to use
-	for (LDDocument* doc : m_documents->allDocuments())
+	for (auto &iterator : m_documents->allDocuments())
 	{
-		if (doc != old and not doc->isFrozen())
+		if (iterator.get() != old and not iterator->isFrozen())
 		{
-			changeDocument (doc);
+			changeDocument(iterator.get());
 			break;
 		}
 	}

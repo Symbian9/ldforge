@@ -19,6 +19,7 @@
 #pragma once
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <QDate>
 #include <QFile>
 #include <QLineF>
@@ -96,6 +97,12 @@ static const double inf = std::numeric_limits<double>::infinity();
 static inline qreal abs(const QVector3D &vector)
 {
 	return vector.length();
+}
+
+template<typename T>
+unsigned int qHash(const std::unique_ptr<T>& pointer)
+{
+	return qHash(pointer.get());
 }
 
 qreal determinant(qreal a, qreal b, qreal c, qreal d);

@@ -27,4 +27,5 @@
 #include "types/library.h"
 #include "configuration.h"
 #include "generics/range.h"
+#include "generics/oneof.h"
 #include "types/vertex.h"

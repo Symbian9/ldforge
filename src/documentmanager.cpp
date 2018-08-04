@@ -46,12 +46,6 @@ DocumentManager::~DocumentManager()
 
 void DocumentManager::clear()
 {
-	for (LDDocument* document : m_documents)
-	{
-		document->close();
-		delete document;
-	}
-
 	m_documents.clear();
 }
 
@@ -59,17 +53,20 @@ LDDocument* DocumentManager::getDocumentByName (QString filename)
 {
 	if (not filename.isEmpty())
 	{
-		LDDocument* doc = findDocumentByName (filename);
+		auto iterator = findDocumentByName (filename);
 
-		if (doc == nullptr)
+		if (iterator == end())
 		{
 			bool tmp = m_loadingMainFile;
 			m_loadingMainFile = false;
-			doc = openDocument (filename, true, true);
+			LDDocument *doc = openDocument(filename, true, true);
 			m_loadingMainFile = tmp;
+			return doc;
 		}
-
-		return doc;
+		else
+		{
+			return iterator->get();
+		}
 	}
 	else
 	{
@@ -79,36 +76,20 @@ LDDocument* DocumentManager::getDocumentByName (QString filename)
 
 void DocumentManager::openMainModel (QString path)
 {
-	// If there's already a file with the same name, this file must replace it.
-	LDDocument* documentToReplace = nullptr;
-	LDDocument* file = nullptr;
-	QString shortName = LDDocument::shortenName (path);
-
-	for (LDDocument* doc : m_documents)
+	// If there's already a file with the same name, this file must replace it. Thus, we cannot open this file if the
+	// document this would replace is not safe to close.
+	auto documentToReplace = findDocumentByName(LDDocument::shortenName(path));
+	if (documentToReplace != end())
 	{
-		if (doc->name() == shortName)
-		{
-			documentToReplace = doc;
-			break;
-		}
-	}
+		if (not (*documentToReplace)->isSafeToClose())
+			return;
 
-	// We cannot open this file if the document this would replace is not
-	// safe to close.
-	if (documentToReplace and not documentToReplace->isSafeToClose())
-		return;
+		(*documentToReplace)->close();
+		m_documents.erase(documentToReplace);
+	}
 
 	m_loadingMainFile = true;
-
-	// If we're replacing an existing document, clear the document and
-	// make it ready for being loaded to.
-	if (documentToReplace)
-	{
-		file = documentToReplace;
-		file->clear();
-	}
-
-	file = openDocument (path, false, false, file);
+	LDDocument* file = openDocument(path, false, false);
 
 	if (file == nullptr)
 	{
@@ -155,18 +136,18 @@ void DocumentManager::openMainModel (QString path)
 	}
 }
 
-LDDocument* DocumentManager::findDocumentByName (QString name)
+DocumentManager::iterator DocumentManager::findDocumentByName(const QString& name)
 {
 	if (not name.isEmpty())
 	{
-		for (LDDocument* document : m_documents)
+		for (auto it = begin(); it != end(); ++it)
 		{
-			if (isOneOf (name, document->name(), document->defaultName()))
-				return document;
+			if (name == oneOf((*it)->name(), (*it)->defaultName()))
+				return it;
 		}
 	}
 
-	return nullptr;
+	return end();
 }
 
 QString DocumentManager::findDocument(QString name) const
@@ -192,12 +173,8 @@ void DocumentManager::printParseErrorMessage(QString message)
 	print(message);
 }
 
-LDDocument* DocumentManager::openDocument(
-	QString path,
-	bool search,
-	bool implicit,
-	LDDocument* fileToOverride
-) {
+LDDocument* DocumentManager::openDocument(QString path, bool search, bool implicit)
+{
 	if (search and not QFileInfo {path}.exists())
 	{
 		// Convert the file name to lowercase when searching because some parts contain subfile
@@ -210,10 +187,7 @@ LDDocument* DocumentManager::openDocument(
 
 	if (file.open(QIODevice::ReadOnly))
 	{
-		LDDocument* load = fileToOverride;
-
-		if (fileToOverride == nullptr)
-			load = m_window->newDocument(implicit);
+		LDDocument* load = createNew(implicit);
 
 		// Loading the file shouldn't count as actual edits to the document.
 		load->history()->setIgnoring (true);
@@ -275,9 +249,19 @@ void DocumentManager::addRecentFile (QString path)
 	m_window->updateRecentFilesMenu();
 }
 
+const DocumentManager::Documents& DocumentManager::allDocuments() const
+{
+	return m_documents;
+}
+
+DocumentManager::Documents::iterator DocumentManager::begin()
+{
+	return m_documents.begin();
+}
+
 bool DocumentManager::isSafeToCloseAll()
 {
-	for (LDDocument* document : m_documents)
+	for (const std::unique_ptr<LDDocument>& document : m_documents)
 	{
 		if (not document->isSafeToClose())
 			return false;
@@ -324,9 +308,14 @@ bool DocumentManager::preInline (LDDocument* doc, Model& model, bool deep, bool 
 	return false;
 }
 
-LDDocument* DocumentManager::createNew()
+LDDocument* DocumentManager::createNew(bool implicit)
 {
-	LDDocument* document = new LDDocument (this);
-	m_documents.insert (document);
-	return document;
+	auto pair = m_documents.emplace(std::make_unique<LDDocument>(this));
+	emit documentCreated(pair.first->get(), implicit);
+	return pair.first->get();
+}
+
+DocumentManager::Documents::iterator DocumentManager::end()
+{
+	return m_documents.end();
 }

@@ -72,8 +72,8 @@ void FileToolset::saveAs()
 
 void FileToolset::saveAll()
 {
-	for (LDDocument* document : m_documents->allDocuments())
-		m_window->save(document, false);
+	for (auto& document : *m_documents)
+		m_window->save(document.get(), false);
 }
 
 void FileToolset::close()

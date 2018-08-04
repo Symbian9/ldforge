@@ -571,8 +571,10 @@ void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
 
 void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
 {
-	for (int row = last; row >= first; row -= 1)
-		forgetObject(m_renderer->model()->index(row));
+	for (int row = last; row >= first; row -= 1) {
+		auto index = m_renderer->model()->index(row);
+		forgetObject(index);
+	}
 
 	this->needBoundingBoxRebuild = true;
 	emit sceneChanged();

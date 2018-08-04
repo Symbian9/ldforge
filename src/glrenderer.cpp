@@ -64,6 +64,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
         {"Free camera", GLCamera::FreeCamera}, // free
     }
 {
+	Q_ASSERT(model != nullptr);
 	m_camera = (Camera) config::camera();
 	m_compiler = new GLCompiler (this);
 	m_toolTipTimer = new QTimer (this);

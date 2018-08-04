@@ -77,7 +77,6 @@ public:
 	Grid* grid();
 	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
-	LDDocument* newDocument (bool cache = false);
 	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
 	Canvas* renderer();
@@ -112,6 +111,7 @@ public slots:
 	void tabSelected();
 	void documentClosed(LDDocument* document);
 	void updateTitle();
+	void newDocument (LDDocument* document, bool cache = false);
 
 protected:
 	void closeEvent (QCloseEvent* event);

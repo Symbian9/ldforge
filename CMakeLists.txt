@@ -155,6 +155,7 @@ set (LDFORGE_HEADERS
 	src/generics/enums.h
 	src/generics/functions.h
 	src/generics/migrate.h
+	src/generics/oneof.h
 	src/generics/range.h
 	src/generics/reverse.h
 	src/generics/ring.h

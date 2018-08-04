@@ -569,13 +569,13 @@ void AlgorithmToolset::subfileSelection()
 			fullSubfilePath = subfileDirectory.filePath(subfileName);
 			subfileIndex += 1;
 		} while (
-			m_documents->findDocumentByName("s\\" + subfileName) != nullptr
+			m_documents->findDocumentByName("s\\" + subfileName) != m_documents->end()
 			or QFileInfo {fullSubfilePath}.exists()
 		);
 	}
 
 	// Create the new subfile document
-	LDDocument* subfile = m_window->newDocument();
+	LDDocument* subfile = m_documents->createNew(false);
 	subfile->setFullPath(fullSubfilePath);
 	subfile->header.description = subfileTitle;
 	subfile->header.type = LDHeader::Subpart;

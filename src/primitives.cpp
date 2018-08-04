@@ -622,7 +622,7 @@ LDDocument* PrimitiveManager::generatePrimitive(const PrimitiveModel& spec)
 	else if (spec.divisions == LowResolution)
 		description.insert (0, "Lo-Res ");
 
-	LDDocument* document = m_window->newDocument();
+	LDDocument* document = m_documents->createNew(false);
 	document->setDefaultName(fileName);
 
 	if (not config::defaultName().isEmpty())

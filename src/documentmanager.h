@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include <QSet>
+#include <set>
 #include "main.h"
 #include "hierarchyelement.h"
 
@@ -28,36 +28,35 @@ class DocumentManager : public QObject, public HierarchyElement
 	Q_OBJECT
 
 public:
-	using Documents = QSet<LDDocument*>;
+	using Documents = std::set<std::unique_ptr<LDDocument>>;
+	using iterator = Documents::iterator;
 
 	DocumentManager (QObject* parent = nullptr);
 	~DocumentManager();
 
 	void addRecentFile (QString path);
-	const Documents& allDocuments() const { return m_documents; }
+	const Documents& allDocuments() const;
+	Documents::iterator begin();
 	void clear();
-	LDDocument* createNew();
+	LDDocument* createNew(bool implicit);
+	Documents::iterator end();
 	QString findDocument(QString name) const;
-	LDDocument* findDocumentByName (QString name);
+	iterator findDocumentByName(const QString& name);
 	LDDocument* getDocumentByName (QString filename);
 	bool isSafeToCloseAll();
 	void loadLogoedStuds();
-	LDDocument* openDocument(
-		QString path,
-		bool search,
-		bool implicit,
-		LDDocument* fileToOverride = nullptr
-	);
+	LDDocument* openDocument(QString path, bool search, bool implicit);
 	void openMainModel (QString path);
 	bool preInline (LDDocument* doc, Model& model, bool deep, bool renderinline);
 
 signals:
+	void documentCreated(LDDocument* document, bool cache);
 	void documentClosed(LDDocument* document);
 
 private:
 	Q_SLOT void printParseErrorMessage(QString message);
 
-	Documents m_documents;
+	std::set<std::unique_ptr<LDDocument>> m_documents;
 	bool m_loadingMainFile;
 	bool m_isLoadingLogoedStuds;
 	LDDocument* m_logoedStud;
