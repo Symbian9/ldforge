@@ -62,7 +62,7 @@ EnumIterShell<Enum> iterateEnum()
  * Casts an enum into its underlying type.
  */
 template<typename T>
-typename std::underlying_type<T>::type& enum_cast(T& enu)
+constexpr typename std::underlying_type<T>::type& enum_cast(T& enu)
 {
 	return *reinterpret_cast<typename std::underlying_type<T>::type*>(&enu);
 }
@@ -71,7 +71,7 @@ typename std::underlying_type<T>::type& enum_cast(T& enu)
  * Returns whether an enum value is within proper bounds.
  */
 template<typename Enum>
-bool valueInEnum(Enum enumerator)
+constexpr bool valueInEnum(Enum enumerator)
 {
 	auto index = enum_cast(enumerator);
 	return index >= EnumLimits<Enum>::First and index <= EnumLimits<Enum>::Last;

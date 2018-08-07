@@ -25,7 +25,7 @@ using std::sqrt;
  * Returns whether the argument is reasonably close to zero.
  */
 template<typename T>
-bool isZero(T a)
+constexpr bool isZero(T a)
 {
 	return qFuzzyCompare(a + 1.0, 1.0);
 }
@@ -43,7 +43,7 @@ T squared(T value)
 }
 
 template<>
-inline int squared<int>(int value)
+constexpr int squared<int>(int value)
 {
 	return value * value;
 }
@@ -68,13 +68,13 @@ bool isOneOf(const T&)
 
 // http://stackoverflow.com/a/18204188/3629665
 template<typename T>
-inline int rotl10(T x)
+constexpr int rotl10(T x)
 {
 	return (((x) << 10) | (((x) >> 22) & 0x000000ff));
 }
 
 template<typename T>
-inline int rotl20(T x)
+constexpr int rotl20(T x)
 {
 	return (((x) << 20) | (((x) >> 12) & 0x000000ff));
 }
@@ -82,12 +82,13 @@ inline int rotl20(T x)
 //
 // Get the amount of elements in something.
 //
-template<typename T, size_t N>
-int countof(T(&)[N])
+template<typename T, int N>
+constexpr int countof(T(&)[N])
 {
 	return N;
 }
 
+[[maybe_unused]]
 static inline int countof(const QString& string)
 {
 	return string.length();
@@ -122,7 +123,7 @@ int countof(const std::initializer_list<T>& vector)
  * From: https://stackoverflow.com/q/1903954
  */
 template<typename T>
-int sign(T value)
+constexpr int sign(T value)
 {
 	return (0 < value) - (value < 0);
 }
@@ -131,7 +132,7 @@ int sign(T value)
  * Returns the maximum of a single parameter (the parameter itself).
  */
 template <typename T>
-T max(T a)
+constexpr T max(T a)
 {
 	return a;
 }
@@ -140,7 +141,7 @@ T max(T a)
  * Returns the maximum of two parameters.
  */
 template <typename T>
-T max(T a, T b)
+constexpr T max(T a, T b)
 {
 	return a > b ? a : b;
 }
@@ -149,7 +150,7 @@ T max(T a, T b)
  * Returns the maximum of n parameters.
  */
 template <typename T, typename... Rest>
-T max(T a, Rest&&... rest)
+constexpr T max(T a, Rest&&... rest)
 {
 	return max(a, max(rest...));
 }
@@ -158,7 +159,7 @@ T max(T a, Rest&&... rest)
  * Returns the minimum of a single parameter (the parameter itself).
  */
 template <typename T>
-T min(T a)
+constexpr T min(T a)
 {
 	return a;
 }
@@ -167,7 +168,7 @@ T min(T a)
  * Returns the minimum of two parameters.
  */
 template <typename T>
-T min(T a, T b)
+constexpr T min(T a, T b)
 {
 	return a < b ? a : b;
 }
@@ -176,7 +177,7 @@ T min(T a, T b)
  * Returns the minimum of n parameters.
  */
 template <typename T, typename... Rest>
-T min(T a, Rest&&... rest)
+constexpr T min(T a, Rest&&... rest)
 {
 	return min(a, min(rest...));
 }
@@ -217,7 +218,7 @@ T roundToInterval(T value, double interval)
  * Returns the empty sum. (recursion base)
  */
 template<typename T>
-T sum()
+constexpr T sum()
 {
 	return {};
 }
@@ -226,7 +227,7 @@ T sum()
  * Returns the sum of n arguments.
  */
 template<typename T, typename... Rest>
-T sum(const T& arg, Rest&&... rest)
+constexpr T sum(const T& arg, Rest&&... rest)
 {
 	return arg + sum<T>(rest...);
 }
