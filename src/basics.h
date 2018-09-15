@@ -74,7 +74,7 @@ bool operator!=(const CircularSection& one, const CircularSection& other);
  * Special operator definition that implements the XOR operator for windings.
  * However, if either winding is NoWinding, then this function returns NoWinding.
  */
-inline Winding operator^(Winding one, Winding other)
+Winding constexpr operator^(Winding one, Winding other)
 {
 	if (one == NoWinding or other == NoWinding)
 		return NoWinding;
@@ -88,13 +88,13 @@ inline Winding& operator^=(Winding& one, Winding other)
 	return one;
 }
 
-static const double pi = 3.14159265358979323846;
-static const double inf = std::numeric_limits<double>::infinity();
+constexpr double pi = 3.14159265358979323846;
+constexpr double inf = std::numeric_limits<double>::infinity();
 
 /*
  * Returns the norm of a vector.
  */
-static inline qreal abs(const QVector3D &vector)
+inline qreal abs(const QVector3D &vector)
 {
 	return vector.length();
 }
@@ -103,6 +103,13 @@ template<typename T>
 unsigned int qHash(const std::unique_ptr<T>& pointer)
 {
 	return qHash(pointer.get());
+}
+
+inline void offset(QMatrix4x4& matrix, const QVector3D& vector)
+{
+	matrix(0, 3) += vector.x();
+	matrix(1, 3) += vector.y();
+	matrix(2, 3) += vector.z();
 }
 
 qreal determinant(qreal a, qreal b, qreal c, qreal d);

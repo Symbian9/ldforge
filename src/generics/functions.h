@@ -37,13 +37,7 @@ bool isInteger(T a)
 }
 
 template<typename T>
-T squared(T value)
-{
-	return ::pow(value, 2);
-}
-
-template<>
-constexpr int squared<int>(int value)
+auto constexpr squared(T value)
 {
 	return value * value;
 }
@@ -70,13 +64,13 @@ bool isOneOf(const T&)
 template<typename T>
 constexpr int rotl10(T x)
 {
-	return (((x) << 10) | (((x) >> 22) & 0x000000ff));
+	return (x << 10) | ((x >> 22) & 0x000000ff);
 }
 
 template<typename T>
 constexpr int rotl20(T x)
 {
-	return (((x) << 20) | (((x) >> 12) & 0x000000ff));
+	return (x << 20) | ((x >> 12) & 0x000000ff);
 }
 
 //

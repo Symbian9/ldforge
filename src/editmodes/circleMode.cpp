@@ -103,7 +103,7 @@ void CircleMode::endDraw()
 		// transform = shearMatrixForPlane(renderer());
 		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
 		transform.scale(dist0);
-		transform.translate(translation);
+		offset(transform, translation);
 		model.emplace<LDCircularPrimitive>(PrimitiveModel::Circle, section.segments, section.divisions, transform);
 		finishDraw(model);
 		return;
@@ -114,7 +114,7 @@ void CircleMode::endDraw()
 		//transform = shearMatrixForPlane(renderer());
 		QMatrix4x4 transform = renderer()->currentCamera().transformationMatrix(1);
 		transform.scale(max(dist0, dist1));
-		transform.translate(translation);
+		offset(transform, translation);
 		model.emplace<LDCircularPrimitive>(PrimitiveModel::Disc, section.segments, section.divisions, transform);
 		finishDraw(model);
 		return;
@@ -133,7 +133,7 @@ void CircleMode::endDraw()
 			primitiveModel.ringNumber = component.num;
 			LDDocument* primitiveFile = primitives()->getPrimitive(primitiveModel);
 			QMatrix4x4 matrix = renderer()->currentCamera().transformationMatrix(component.scale);
-			matrix.translate(translation);
+			offset(matrix, translation);
 			// matrix = shearMatrixForPlane(renderer()) * matrix;
 			model.emplace<LDSubfileReference>(primitiveFile->name(), matrix);
 		}
