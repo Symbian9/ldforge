@@ -210,7 +210,7 @@ void AbstractDrawMode::drawLineLength(QPainter &painter, const Vertex &v0, const
 	if (not config::drawLineLengths())
 		return;
 
-	const QString label = QString::number(abs(v1 - v0), 'f', 2);
+    const QString label = QString::number((v1 - v0).length(), 'f', 2);
 	QPoint origin = QLineF {v0p, v1p}.pointAt(0.5).toPoint();
 	painter.drawText (origin, label);
 }

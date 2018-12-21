@@ -25,7 +25,7 @@
 #	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 #	PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 #	PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-#	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+#	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT(INCLUDING
 #	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
@@ -36,32 +36,33 @@ import outputfile
 def main():
 	import subprocess
 	from datetime import datetime
-	parser = argparse.ArgumentParser (description='Writes a header file with Hg commit information')
-	parser.add_argument ('output')
+	parser = argparse.ArgumentParser(description='Writes a header file with Hg commit information')
+	parser.add_argument('--cwd', default = '.')
+	parser.add_argument('output')
 	args = parser.parse_args()
-	f = outputfile.OutputFile (args.output)
-	data = subprocess.check_output (['hg', 'log', '-r.', '--template',
-		'{node|short} {branch} {date|hgdate}']).replace ('\n', '').split (' ')
+	f = outputfile.OutputFile(args.output)
+	data = subprocess.check_output(['hg', 'log', '--cwd', args.cwd, '-r.', '--template',
+		'{node|short} {branch} {date|hgdate}']).decode().replace('\n', '').split(' ')
 
 	rev = data[0]
 	branch = data[1]
-	timestamp = int (data[2])
-	date = datetime.utcfromtimestamp (timestamp)
-	datestring = date.strftime ('%y%m%d-%H%M') if date.year >= 2000 else '000000-0000'
+	timestamp = int(data[2])
+	date = datetime.utcfromtimestamp(timestamp)
+	datestring = date.strftime('%y%m%d-%H%M') if date.year >= 2000 else '000000-0000'
 
 	if len(rev) > 7:
 		rev = rev[0:7]
 
-	if subprocess.check_output (['hg', 'id', '-n']).replace ('\n', '')[-1] == '+':
+	if subprocess.check_output(['hg', 'id', '--cwd', args.cwd, '-n']).decode().replace('\n', '').endswith('+'):
 		rev += '+'
 
-	f.write ('#define HG_NODE "%s"\n' % rev)
-	f.write ('#define HG_BRANCH "%s"\n' % branch)
-	f.write ('#define HG_DATE_VERSION "%s"\n' % datestring)
-	f.write ('#define HG_DATE_STRING "%s"\n' % date.strftime ('%d %b %Y'))
-	f.write ('#define HG_DATE_TIME %d\n' % int (timestamp))
+	f.write('#define HG_NODE "%s"\n' % rev)
+	f.write('#define HG_BRANCH "%s"\n' % branch)
+	f.write('#define HG_DATE_VERSION "%s"\n' % datestring)
+	f.write('#define HG_DATE_STRING "%s"\n' % date.strftime('%d %b %Y'))
+	f.write('#define HG_DATE_TIME %d\n' % int(timestamp))
 	if f.save():
-		print '%s updated to %s' % (f.filename, rev)
+		print('%s updated to %s' %(f.filename, rev))
 
 if __name__ == '__main__':
 	main()

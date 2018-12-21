@@ -26,7 +26,7 @@ set (CMAKE_AUTOMOC ON)
 find_package (OpenGL REQUIRED)
 
 add_custom_target (revision_check ALL
-	COMMAND python "${CMAKE_SOURCE_DIR}/tools/updaterevision.py" hginfo.h
+	COMMAND python3 "${CMAKE_SOURCE_DIR}/tools/updaterevision.py" --cwd "$(CMAKE_SOURCE_DIR)" hginfo.h
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories (${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})

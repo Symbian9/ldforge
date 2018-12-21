@@ -91,14 +91,6 @@ inline Winding& operator^=(Winding& one, Winding other)
 constexpr double pi = 3.14159265358979323846;
 constexpr double inf = std::numeric_limits<double>::infinity();
 
-/*
- * Returns the norm of a vector.
- */
-inline qreal abs(const QVector3D &vector)
-{
-	return vector.length();
-}
-
 template<typename T>
 unsigned int qHash(const std::unique_ptr<T>& pointer)
 {
