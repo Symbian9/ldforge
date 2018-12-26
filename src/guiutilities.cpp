@@ -110,11 +110,9 @@ void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
 }
 
 /*
- * mainColorRepresentation
- *
  * Returns the user-preferred appearance for the main color.
  */
-QColor GuiUtilities::mainColorRepresentation()
+QColor mainColorRepresentation()
 {
 	QColor result = {config::mainColor()};
 
@@ -128,17 +126,6 @@ QColor GuiUtilities::mainColorRepresentation()
 		return QColor {0, 0, 0};
 	}
 }
-
-/*
- * loadQuickColorList
- *
- * Returns a list of contents for the color toolbar, based on configuration.
- */
-QVector<LDColor> GuiUtilities::loadQuickColorList()
-{
-    return config::quickColorToolbar();
-}
-
 
 void setColorButton(QPushButton* button, LDColor color)
 {

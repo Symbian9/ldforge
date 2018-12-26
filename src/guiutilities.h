@@ -33,10 +33,9 @@ public:
 	explicit GuiUtilities (QObject* parent);
 
 	void fillUsedColorsToComboBox (class QComboBox* box);
-	QColor mainColorRepresentation();
-    QVector<LDColor> loadQuickColorList();
 };
 
+QColor mainColorRepresentation();
 QIcon makeColorIcon(LDColor color, int size);
 void setColorButton(class QPushButton* button, LDColor color);
 void editObject(MainWindow* parent, LDObject* object);

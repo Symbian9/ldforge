@@ -185,7 +185,7 @@ QColor GLCompiler::getColorForPolygon(
 			if (polygonOwner->color() == MainColor)
 			{
 				// If that also is the main color, then we whatever the user has configured the main color to look like.
-				color = guiUtilities()->mainColorRepresentation();
+				color = mainColorRepresentation();
 			}
 			else
 			{
@@ -228,7 +228,7 @@ QColor GLCompiler::getColorForPolygon(
 	{
 		// The color was unknown. Use main color to make the polygon at least not appear pitch-black.
 		if (polygon.type != LDPolygon::Type::EdgeLine and polygon.type != LDPolygon::Type::ConditionalEdge)
-			color = guiUtilities()->mainColorRepresentation();
+			color = mainColorRepresentation();
 		else
 			color = Qt::black;
 
