@@ -34,7 +34,7 @@ public:
 
 	void fillUsedColorsToComboBox (class QComboBox* box);
 	QColor mainColorRepresentation();
-	QVector<ColorToolbarItem> loadQuickColorList();
+    QVector<LDColor> loadQuickColorList();
 };
 
 QIcon makeColorIcon(LDColor color, int size);

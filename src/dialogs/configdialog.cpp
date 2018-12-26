@@ -129,20 +129,11 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 
 	ui.shortcutsList->setSortingEnabled (true);
 	ui.shortcutsList->sortItems();
-	quickColors = guiUtilities()->loadQuickColorList();
-	updateQuickColorList();
 	initExtProgs();
 	selectPage (defaulttab);
 	connect (ui.shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
 	connect (ui.shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
 	connect (ui.shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
-	connect (ui.quickColor_add, SIGNAL (clicked()), this, SLOT (slot_setColor()));
-	connect (ui.quickColor_remove, SIGNAL (clicked()), this, SLOT (slot_delColor()));
-	connect (ui.quickColor_edit, SIGNAL (clicked()), this, SLOT (slot_setColor()));
-	connect (ui.quickColor_addSep, SIGNAL (clicked()), this, SLOT (slot_addColorSeparator()));
-	connect (ui.quickColor_moveUp, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
-	connect (ui.quickColor_moveDown, SIGNAL (clicked()), this, SLOT (slot_moveColor()));
-	connect (ui.quickColor_clear, SIGNAL (clicked()), this, SLOT (slot_clearColors()));
 	connect (ui.findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
 	connect (ui.buttonBox, SIGNAL (clicked (QAbstractButton*)),
 		this, SLOT (buttonClicked (QAbstractButton*)));
@@ -318,9 +309,7 @@ void ConfigDialog::applySettings()
 		settingsObject().setValue(confname, value);
 	});
 
-	// Rebuild the quick color toolbar
-	m_window->setQuickColors (quickColors);
-	config::setQuickColorToolbar (quickColorString());
+	ui.colorToolbarEditor->saveChanges();
 	config::setLibraries(this->libraries);
 
 	// Ext program settings
@@ -343,10 +332,7 @@ void ConfigDialog::applySettings()
 	}
 
 	settingsObject().sync();
-	m_documents->loadLogoedStuds();
-	m_window->renderer()->setBackground();
-	m_window->doFullRefresh();
-	m_window->updateDocumentList();
+	emit settingsChanged();
 }
 
 //
@@ -369,152 +355,6 @@ void ConfigDialog::buttonClicked (QAbstractButton* button)
 	{
 		reject();
 	}
-}
-
-//
-// Update the list of color toolbar items in the quick color tab.
-//
-void ConfigDialog::updateQuickColorList (ColorToolbarItem* sel)
-{
-	for (QListWidgetItem * item : quickColorItems)
-		delete item;
-
-	quickColorItems.clear();
-
-	// Init table items
-	for (ColorToolbarItem& entry : quickColors)
-	{
-		QListWidgetItem* item = new QListWidgetItem;
-
-		if (entry.isSeparator())
-		{
-			item->setText ("<hr />");
-			item->setIcon (MainWindow::getIcon ("empty"));
-		}
-		else
-		{
-			LDColor color = entry.color();
-
-			if (color.isValid())
-			{
-				item->setText (color.name());
-				item->setIcon (makeColorIcon (color, 16));
-			}
-			else
-			{
-				item->setText ("[[unknown color]]");
-				item->setIcon (MainWindow::getIcon ("error"));
-			}
-		}
-
-		ui.quickColorList->addItem (item);
-		quickColorItems << item;
-
-		if (sel and &entry == sel)
-		{
-			ui.quickColorList->setCurrentItem (item);
-			ui.quickColorList->scrollToItem (item);
-		}
-	}
-}
-
-//
-// Quick colors: add or edit button was clicked.
-//
-void ConfigDialog::slot_setColor()
-{
-	ColorToolbarItem* entry = nullptr;
-	QListWidgetItem* item = nullptr;
-	const bool isNew = static_cast<QPushButton*> (sender()) == ui.quickColor_add;
-
-	if (not isNew)
-	{
-		item = getSelectedQuickColor();
-
-		if (not item)
-			return;
-
-		int i = getItemRow (item, quickColorItems);
-		entry = &quickColors[i];
-
-		if (entry->isSeparator() == true)
-			return; // don't color separators
-	}
-
-	LDColor defaultValue = entry ? entry->color() : LDColor::nullColor;
-	LDColor value;
-
-	if (not ColorSelector::selectColor (this, value, defaultValue))
-		return;
-
-	if (entry)
-	{
-		entry->setColor (value);
-	}
-	else
-	{
-		ColorToolbarItem newentry {value};
-		item = getSelectedQuickColor();
-		int idx = (item) ? getItemRow (item, quickColorItems) + 1 : countof(quickColorItems);
-		quickColors.insert(idx, newentry);
-		entry = &quickColors[idx];
-	}
-
-	updateQuickColorList (entry);
-}
-
-//
-// Remove a quick color
-//
-void ConfigDialog::slot_delColor()
-{
-	if (ui.quickColorList->selectedItems().isEmpty())
-		return;
-
-	QListWidgetItem* item = ui.quickColorList->selectedItems() [0];
-	quickColors.removeAt (getItemRow (item, quickColorItems));
-	updateQuickColorList();
-}
-
-//
-// Move a quick color up/down
-//
-void ConfigDialog::slot_moveColor()
-{
-	const bool up = (static_cast<QPushButton*> (sender()) == ui.quickColor_moveUp);
-
-	if (ui.quickColorList->selectedItems().isEmpty())
-		return;
-
-	QListWidgetItem* item = ui.quickColorList->selectedItems() [0];
-	int idx = getItemRow (item, quickColorItems);
-	int dest = up ? (idx - 1) : (idx + 1);
-
-	if (dest < 0 or dest >= countof(quickColorItems))
-		return; // destination out of bounds
-
-	qSwap (quickColors[dest], quickColors[idx]);
-	updateQuickColorList (&quickColors[dest]);
-}
-
-//
-//
-// Add a separator to quick colors
-//
-void ConfigDialog::slot_addColorSeparator()
-{
-	quickColors << ColorToolbarItem::makeSeparator();
-	updateQuickColorList (&quickColors[countof(quickColors) - 1]);
-}
-
-//
-//
-// Clear all quick colors
-//
-void ConfigDialog::slot_clearColors()
-{
-	quickColors.clear();
-	updateQuickColorList();
 }
 
 //
@@ -566,17 +406,6 @@ int ConfigDialog::getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& 
 	}
 
 	return -1;
-}
-
-//
-// Which quick color is currently selected?
-//
-QListWidgetItem* ConfigDialog::getSelectedQuickColor()
-{
-	if (ui.quickColorList->selectedItems().isEmpty())
-		return nullptr;
-
-	return ui.quickColorList->selectedItems() [0];
 }
 
 //
@@ -688,27 +517,6 @@ void ConfigDialog::setShortcutText (ShortcutListItem* item)
 	QString label = act->iconText();
 	QString keybind = item->sequence().toString();
 	item->setText (format ("%1 (%2)", label, keybind));
-}
-
-//
-// Gets the configuration string of the quick color toolbar
-//
-QString ConfigDialog::quickColorString()
-{
-	QString val;
-
-	for (const ColorToolbarItem& entry : quickColors)
-	{
-		if (not val.isEmpty())
-			val += ':';
-
-		if (entry.isSeparator())
-			val += '|';
-		else
-			val += format ("%1", entry.color().index());
-	}
-
-	return val;
 }
 
 //

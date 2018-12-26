@@ -118,3 +118,9 @@ int luma(const QColor& col);
 
 static const LDColor MainColor {16};
 static const LDColor EdgeColor {24};
+static const QVector<LDColor> defaultColorToolbar {
+	LDColor(4), LDColor(25), LDColor(14), LDColor(27),
+	LDColor(2), LDColor(3), LDColor(11), LDColor(1), LDColor(22),
+	LDColor::nullColor,
+	LDColor(0), LDColor(72), LDColor(71), LDColor(15)
+};

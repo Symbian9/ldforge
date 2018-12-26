@@ -62,6 +62,7 @@ set (LDFORGE_SOURCES
 	src/version.cpp
 	src/algorithms/geometry.cpp
 	src/algorithms/invert.cpp
+	src/dialogs/colortoolbareditor.cpp
 	src/dialogs/colorselector.cpp
 	src/dialogs/configdialog.cpp
 	src/dialogs/circularprimitiveeditor.cpp
@@ -137,6 +138,7 @@ set (LDFORGE_HEADERS
 	src/algorithms/geometry.h
 	src/algorithms/invert.h
 	src/dialogs/colorselector.h
+	src/dialogs/colortoolbareditor.h
 	src/dialogs/configdialog.h
 	src/dialogs/circularprimitiveeditor.h
 	src/dialogs/externalprogrampathdialog.h
@@ -191,6 +193,7 @@ set (LDFORGE_HEADERS
 set (LDFORGE_FORMS
 	src/dialogs/aboutdialog.ui
 	src/dialogs/colorselector.ui
+	src/dialogs/colortoolbareditor.ui
 	src/dialogs/configdialog.ui
 	src/dialogs/covererdialog.ui
 	src/dialogs/circularprimitiveeditor.ui

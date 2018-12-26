@@ -89,7 +89,6 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	connect(m_documents, &DocumentManager::documentCreated, this, &MainWindow::newDocument);
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
 
-	m_quickColors = m_guiUtilities->loadQuickColorList();
 	updateActions();
 
 	// Connect all actions and save default sequences
@@ -254,21 +253,22 @@ void MainWindow::updateColorToolbar()
 	ui.toolBarColors->addAction (ui.actionUncolor);
 	ui.toolBarColors->addSeparator();
 
-	for (ColorToolbarItem& entry : m_quickColors)
+	for (LDColor entry : config::quickColorToolbar())
 	{
-		if (entry.isSeparator())
+		if (entry == LDColor::nullColor)
 		{
+			// Null color is used as a separator
 			ui.toolBarColors->addSeparator();
 		}
 		else
 		{
 			QToolButton* colorButton = new QToolButton {this};
-			colorButton->setIcon(makeColorIcon(entry.color(), 16));
+			colorButton->setIcon(makeColorIcon(entry, 16));
 			colorButton->setIconSize({16, 16});
-			colorButton->setToolTip(entry.color().name());
+			colorButton->setToolTip(entry.name());
 			colorButton->setStatusTip(format(
 				tr("Changes the color of selected objects to %1"),
-				entry.color().name()
+				entry.name()
 			));
 			ui.toolBarColors->addWidget (colorButton);
 			m_colorButtons << colorButton;
@@ -279,7 +279,7 @@ void MainWindow::updateColorToolbar()
 					for (LDObject* object : selectedObjects())
 					{
 						if (object->isColored())
-							object->setColor(entry.color());
+							object->setColor(entry);
 					}
 
 					endAction();
@@ -728,14 +728,6 @@ Canvas* MainWindow::renderer()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::setQuickColors (const QVector<ColorToolbarItem>& colors)
-{
-	m_quickColors = colors;
-	updateColorToolbar();
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
 void MainWindow::closeTab (int tabindex)
 {
 	auto iterator = m_documents->findDocumentByName(m_tabs->tabData (tabindex).toString());
@@ -823,6 +815,15 @@ void MainWindow::newDocument(LDDocument* document, bool cache)
 
 	if (not cache)
 		openDocumentForEditing(document);
+}
+
+void MainWindow::settingsChanged()
+{
+	m_documents->loadLogoedStuds();
+	updateColorToolbar();
+	renderer()->setBackground();
+	doFullRefresh();
+	updateDocumentList();
 }
 
 void MainWindow::openDocumentForEditing(LDDocument* document)
@@ -994,29 +995,4 @@ QItemSelectionModel* MainWindow::currentSelectionModel()
 void MainWindow::replaceSelection(const QItemSelection& selection)
 {
 	m_selections[m_currentDocument]->select(selection, QItemSelectionModel::ClearAndSelect);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
-ColorToolbarItem::ColorToolbarItem(LDColor color) :
-	m_color (color) {}
-
-ColorToolbarItem ColorToolbarItem::makeSeparator()
-{
-	return {LDColor::nullColor};
-}
-
-bool ColorToolbarItem::isSeparator() const
-{
-	return color() == LDColor::nullColor;
-}
-
-LDColor ColorToolbarItem::color() const
-{
-	return m_color;
-}
-
-void ColorToolbarItem::setColor (LDColor color)
-{
-	m_color = color;
 }

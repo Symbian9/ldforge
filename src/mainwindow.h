@@ -35,20 +35,6 @@ class Grid;
 class DocumentManager;
 class LDDocument;
 
-class ColorToolbarItem
-{
-public:
-	ColorToolbarItem (LDColor color = {});
-	LDColor color() const;
-	bool isSeparator() const;
-	void setColor (LDColor color);
-
-	static ColorToolbarItem makeSeparator();
-
-private:
-	LDColor m_color;
-};
-
 // LDForge's main GUI class.
 class MainWindow : public QMainWindow
 {
@@ -88,7 +74,6 @@ public:
 	void select(const QModelIndex& objectIndex);
 	QModelIndexList selectedIndexes() const;
 	QSet<LDObject*> selectedObjects() const;
-	void setQuickColors (const QVector<ColorToolbarItem> &colors);
 	void spawnContextMenu (const QPoint& position);
 	int suggestInsertPoint();
 	Q_SLOT void updateActions();
@@ -112,6 +97,7 @@ public slots:
 	void documentClosed(LDDocument* document);
 	void updateTitle();
 	void newDocument (LDDocument* document, bool cache = false);
+	void settingsChanged();
 
 protected:
 	void closeEvent (QCloseEvent* event);
@@ -124,7 +110,6 @@ private:
 	QMap<LDDocument*, QItemSelectionModel*> m_selections;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
-	QVector<ColorToolbarItem>	m_quickColors;
 	QVector<QToolButton*>	m_colorButtons;
 	QVector<QAction*> m_recentFiles;
 	class Ui_MainWindow& ui;

@@ -90,7 +90,9 @@ void FileToolset::closeAll()
 
 void FileToolset::settings()
 {
-	(new ConfigDialog {m_window})->exec();
+	ConfigDialog dialog {m_window};
+	connect(&dialog, &ConfigDialog::settingsChanged, m_window, &MainWindow::settingsChanged);
+	dialog.exec();
 }
 
 void FileToolset::exit()

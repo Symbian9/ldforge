@@ -67,23 +67,22 @@ public:
 
 	static const char* const externalProgramPathFilter;
 
+signals:
+	void settingsChanged();
+
 private:
 	class Ui_ConfigDialog& ui;
 	QVector<QListWidgetItem*> quickColorItems;
 	QMap<QPushButton*, QColor> m_buttonColors;
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
-	QVector<ColorToolbarItem> quickColors;
 	class LibrariesModel* librariesModel;
 	Libraries libraries;
 
 	void applySettings();
 	void addShortcut (QAction* act);
 	void setButtonBackground (QPushButton* button, QString value);
-	void updateQuickColorList (ColorToolbarItem* sel = nullptr);
 	void setShortcutText (ShortcutListItem* item);
 	int getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& haystack);
-	QString quickColorString();
-	QListWidgetItem* getSelectedQuickColor();
 	QVector<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
 	void applyToWidgetOptions (std::function<void (QWidget*, QString)> func);
@@ -93,11 +92,6 @@ private slots:
 	void slot_setShortcut();
 	void slot_resetShortcut();
 	void slot_clearShortcut();
-	void slot_setColor();
-	void slot_delColor();
-	void slot_addColorSeparator();
-	void slot_moveColor();
-	void slot_clearColors();
 	void slot_setExtProgPath();
 	void slot_findDownloadFolder();
 	void buttonClicked (QAbstractButton* button);

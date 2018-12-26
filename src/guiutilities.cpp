@@ -134,26 +134,9 @@ QColor GuiUtilities::mainColorRepresentation()
  *
  * Returns a list of contents for the color toolbar, based on configuration.
  */
-QVector<ColorToolbarItem> GuiUtilities::loadQuickColorList()
+QVector<LDColor> GuiUtilities::loadQuickColorList()
 {
-	QVector<ColorToolbarItem> colors;
-
-	for (QString colorName : config::quickColorToolbar().split(":"))
-	{
-		if (colorName == "|")
-		{
-			colors << ColorToolbarItem::makeSeparator();
-		}
-		else
-		{
-			LDColor color {colorName.toInt()};
-
-			if (color.isValid())
-				colors.append(ColorToolbarItem {color});
-		}
-	}
-
-	return colors;
+    return config::quickColorToolbar();
 }
 
 
