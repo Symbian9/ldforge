@@ -14,10 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *  =====================================================================
- *
- *  configDialog.cxx: Settings dialog and everything related to it.
- *  Actual configuration core is in config.cxx.
  */
 
 #include <QGridLayout>
@@ -47,38 +43,19 @@ const char* const ConfigDialog::externalProgramPathFilter =
 #endif
 	"All files (*.*)(*.*)";
 
-ShortcutListItem::ShortcutListItem (QListWidget* view, int type) :
-	QListWidgetItem (view, type) {}
-
-QAction* ShortcutListItem::action() const
-{
-	return m_action;
-}
-
-void ShortcutListItem::setAction (QAction* action)
-{
-	m_action = action;
-}
-
-QKeySequence ShortcutListItem::sequence() const
-{
-	return m_sequence;
-}
-
-void ShortcutListItem::setSequence (const QKeySequence& sequence)
-{
-	m_sequence = sequence;
-}
-
 ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::WindowFlags f) :
 	QDialog (parent, f),
 	HierarchyElement (parent),
 	ui (*new Ui_ConfigDialog),
 	librariesModel {new LibrariesModel {this->libraries, this}},
-	libraries {config::libraries()}
+	libraries {config::libraries()},
+	shortcuts {m_window},
+	shortcutsDelegate {this}
 {
 	ui.setupUi (this);
 	ui.librariesView->setModel(this->librariesModel);
+	ui.shortcutsList->setModel(&shortcuts);
+	ui.shortcutsList->setItemDelegateForColumn(ShortcutsModel::KeySequenceColumn, &shortcutsDelegate);
 
 	// Set defaults
 	applyToWidgetOptions([&](QWidget* widget, QString confname)
@@ -122,18 +99,8 @@ ConfigDialog::ConfigDialog (QWidget* parent, ConfigDialog::Tab defaulttab, Qt::W
 		}
 	});
 
-	m_window->applyToActions ([&](QAction* act)
-	{
-		addShortcut (act);
-	});
-
-	ui.shortcutsList->setSortingEnabled (true);
-	ui.shortcutsList->sortItems();
 	initExtProgs();
 	selectPage (defaulttab);
-	connect (ui.shortcut_set, SIGNAL (clicked()), this, SLOT (slot_setShortcut()));
-	connect (ui.shortcut_reset, SIGNAL (clicked()), this, SLOT (slot_resetShortcut()));
-	connect (ui.shortcut_clear, SIGNAL (clicked()), this, SLOT (slot_clearShortcut()));
 	connect (ui.findDownloadPath, SIGNAL (clicked (bool)), this, SLOT (slot_findDownloadFolder()));
 	connect (ui.buttonBox, SIGNAL (clicked (QAbstractButton*)),
 		this, SLOT (buttonClicked (QAbstractButton*)));
@@ -192,25 +159,6 @@ void ConfigDialog::selectPage (int row)
 {
 	ui.m_pagelist->setCurrentRow (row);
 	ui.m_pages->setCurrentIndex (row);
-}
-
-//
-// Adds a shortcut entry to the list of shortcuts.
-//
-void ConfigDialog::addShortcut (QAction* act)
-{
-	ShortcutListItem* item = new ShortcutListItem;
-	item->setIcon (act->icon());
-	item->setAction (act);
-	item->setSequence (act->shortcut());
-	setShortcutText (item);
-
-	// If the action doesn't have a valid icon, use an empty one
-	// so that the list is kept aligned.
-	if (act->icon().isNull())
-		item->setIcon (MainWindow::getIcon ("empty"));
-
-	ui.shortcutsList->insertItem (ui.shortcutsList->count(), item);
 }
 
 //
@@ -310,6 +258,7 @@ void ConfigDialog::applySettings()
 	});
 
 	ui.colorToolbarEditor->saveChanges();
+	shortcuts.saveChanges();
 	config::setLibraries(this->libraries);
 
 	// Ext program settings
@@ -322,13 +271,6 @@ void ConfigDialog::applySettings()
 
 		if (widgets.wineBox)
 			toolset->setWineSetting (program, widgets.wineBox->isChecked());
-	}
-
-	// Apply shortcuts
-	for (int i = 0; i < ui.shortcutsList->count(); ++i)
-	{
-		auto item = static_cast<ShortcutListItem*> (ui.shortcutsList->item (i));
-		item->action()->setShortcut (item->sequence());
 	}
 
 	settingsObject().sync();
@@ -391,81 +333,6 @@ void ConfigDialog::setButtonBackground (QPushButton* button, QString value)
 }
 
 //
-// Finds the given list widget item in the list of widget items given.
-//
-int ConfigDialog::getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& haystack)
-{
-	int i = 0;
-
-	for (QListWidgetItem* it : haystack)
-	{
-		if (it == item)
-			return i;
-
-		++i;
-	}
-
-	return -1;
-}
-
-//
-// Get the list of shortcuts selected
-//
-QVector<ShortcutListItem*> ConfigDialog::getShortcutSelection()
-{
-	QVector<ShortcutListItem*> out;
-
-	for (QListWidgetItem* entry : ui.shortcutsList->selectedItems())
-		out << static_cast<ShortcutListItem*> (entry);
-
-	return out;
-}
-
-//
-// Edit the shortcut of a given action.
-//
-void ConfigDialog::slot_setShortcut()
-{
-	QVector<ShortcutListItem*> sel = getShortcutSelection();
-
-	if (countof(sel) < 1)
-		return;
-
-	ShortcutListItem* item = sel[0];
-
-	if (KeySequenceDialog::staticDialog (item, this))
-		setShortcutText (item);
-}
-
-//
-// Reset a shortcut to defaults
-//
-void ConfigDialog::slot_resetShortcut()
-{
-	QVector<ShortcutListItem*> sel = getShortcutSelection();
-
-	for (ShortcutListItem* item : sel)
-	{
-		item->setSequence (m_window->defaultShortcut (item->action()));
-		setShortcutText (item);
-	}
-}
-
-//
-// Remove the shortcut of an action.
-//
-void ConfigDialog::slot_clearShortcut()
-{
-	QVector<ShortcutListItem*> sel = getShortcutSelection();
-
-	for (ShortcutListItem* item : sel)
-	{
-		item->setSequence (QKeySequence());
-		setShortcutText (item);
-	}
-}
-
-//
 // Set the path of an external program
 //
 void ConfigDialog::slot_setExtProgPath()
@@ -505,73 +372,4 @@ void ConfigDialog::slot_findDownloadFolder()
 
 	if (not dpath.isEmpty())
 		ui.configDownloadFilePath->setText (dpath);
-}
-
-//
-//
-// Updates the text string for a given shortcut list item
-//
-void ConfigDialog::setShortcutText (ShortcutListItem* item)
-{
-	QAction* act = item->action();
-	QString label = act->iconText();
-	QString keybind = item->sequence().toString();
-	item->setText (format ("%1 (%2)", label, keybind));
-}
-
-//
-//
-KeySequenceDialog::KeySequenceDialog (QKeySequence seq, QWidget* parent, Qt::WindowFlags f) :
-	QDialog (parent, f), seq (seq)
-{
-	lb_output = new QLabel;
-
-	bbx_buttons = new QDialogButtonBox (QDialogButtonBox::Ok | QDialogButtonBox::Cancel); \
-	connect (bbx_buttons, SIGNAL (accepted()), this, SLOT (accept())); \
-	connect (bbx_buttons, SIGNAL (rejected()), this, SLOT (reject())); \
-
-	setWhatsThis (tr ("Into this dialog you can input a key sequence for use as a "
-		"shortcut in LDForge. Use OK to confirm the new shortcut and Cancel to "
-		"dismiss."));
-
-	QVBoxLayout* layout = new QVBoxLayout;
-	layout->addWidget (lb_output);
-	layout->addWidget (bbx_buttons);
-	setLayout (layout);
-
-	updateOutput();
-}
-
-//
-//
-bool KeySequenceDialog::staticDialog (ShortcutListItem* item, QWidget* parent)
-{
-	KeySequenceDialog dlg (item->sequence(), parent);
-
-	if (dlg.exec() == QDialog::Rejected)
-		return false;
-
-	item->setSequence (dlg.seq);
-	return true;
-}
-
-//
-//
-void KeySequenceDialog::updateOutput()
-{
-	QString shortcut = seq.toString();
-
-	if (seq == QKeySequence())
-		shortcut = "&lt;empty&gt;";
-
-	QString text = format ("<center><b>%1</b></center>", shortcut);
-	lb_output->setText (text);
-}
-
-//
-//
-void KeySequenceDialog::keyPressEvent (QKeyEvent* ev)
-{
-	seq = ev->key() + ev->modifiers();
-	updateOutput();
 }

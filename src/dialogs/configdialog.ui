@@ -84,7 +84,7 @@
      <item>
       <widget class="QStackedWidget" name="m_pages">
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_3">
         <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -617,57 +617,26 @@ Shortcut changes apply immediately after closing this window.</string>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QListWidget" name="shortcutsList">
+             <widget class="QTableView" name="shortcutsList">
               <property name="verticalScrollBarPolicy">
                <enum>Qt::ScrollBarAsNeeded</enum>
               </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>200</number>
+              </attribute>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
              </widget>
-            </item>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QPushButton" name="shortcut_set">
-                <property name="text">
-                 <string>Set</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="shortcut_reset">
-                <property name="text">
-                 <string>Reset</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../../ldforge.qrc">
-                  <normaloff>:/icons/undo.png</normaloff>:/icons/undo.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="shortcut_clear">
-                <property name="text">
-                 <string>Clear</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../../ldforge.qrc">
-                  <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
             </item>
            </layout>
           </widget>

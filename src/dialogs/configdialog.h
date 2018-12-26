@@ -19,23 +19,8 @@
 #pragma once
 #include "../mainwindow.h"
 #include "../toolsets/extprogramtoolset.h"
+#include "shortcutsmodel.h"
 #include <QDialog>
-
-// =============================================================================
-class ShortcutListItem : public QListWidgetItem
-{
-public:
-	explicit ShortcutListItem (QListWidget* view = nullptr, int type = Type);
-
-	QAction* action() const;
-	QKeySequence sequence() const;
-	void setAction (QAction* action);
-	void setSequence (const QKeySequence& sequence);
-
-private:
-	QAction* m_action;
-	QKeySequence m_sequence;
-};
 
 struct ExternalProgramWidgets
 {
@@ -44,7 +29,6 @@ struct ExternalProgramWidgets
 	class QCheckBox* wineBox;
 };
 
-// =============================================================================
 class ConfigDialog : public QDialog, public HierarchyElement
 {
 	Q_OBJECT
@@ -77,44 +61,18 @@ private:
 	ExternalProgramWidgets m_externalProgramWidgets[NumExternalPrograms];
 	class LibrariesModel* librariesModel;
 	Libraries libraries;
+	ShortcutsModel shortcuts;
+	KeySequenceDelegate shortcutsDelegate;
 
 	void applySettings();
-	void addShortcut (QAction* act);
 	void setButtonBackground (QPushButton* button, QString value);
-	void setShortcutText (ShortcutListItem* item);
-	int getItemRow (QListWidgetItem* item, QVector<QListWidgetItem*>& haystack);
-	QVector<ShortcutListItem*> getShortcutSelection();
 	void initExtProgs();
 	void applyToWidgetOptions (std::function<void (QWidget*, QString)> func);
 
 private slots:
 	void setButtonColor();
-	void slot_setShortcut();
-	void slot_resetShortcut();
-	void slot_clearShortcut();
 	void slot_setExtProgPath();
 	void slot_findDownloadFolder();
 	void buttonClicked (QAbstractButton* button);
 	void selectPage (int row);
-};
-
-// =============================================================================
-//
-class KeySequenceDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit KeySequenceDialog (QKeySequence seq, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
-	static bool staticDialog (ShortcutListItem* item, QWidget* parent = nullptr);
-
-	class QLabel* lb_output;
-	class QDialogButtonBox* bbx_buttons;
-	QKeySequence seq;
-
-private:
-	void updateOutput();
-
-private slots:
-	virtual void keyPressEvent (QKeyEvent* ev) override;
 };

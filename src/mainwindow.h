@@ -70,7 +70,6 @@ public:
 	void replaceSelection(const QItemSelection& selection);
 	CircularSection circleToolSection() const;
 	bool save (LDDocument* doc, bool saveAs);
-	void saveShortcuts();
 	void select(const QModelIndex& objectIndex);
 	QModelIndexList selectedIndexes() const;
 	QSet<LDObject*> selectedObjects() const;

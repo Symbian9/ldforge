@@ -757,21 +757,6 @@ void MainWindow::loadShortcuts()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-void MainWindow::saveShortcuts()
-{
-	applyToActions([&](QAction* action)
-	{
-		QString const key = "shortcut_" + action->objectName();
-
-		if (m_defaultShortcuts[action] != action->shortcut())
-			settingsObject().setValue(key, action->shortcut());
-		else
-			settingsObject().remove(key);
-	});
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-//
 void MainWindow::applyToActions(function<void(QAction*)> function)
 {
 	for (QAction* act : findChildren<QAction*>())

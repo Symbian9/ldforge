@@ -69,6 +69,7 @@ set (LDFORGE_SOURCES
 	src/dialogs/externalprogrampathdialog.cpp
 	src/dialogs/generateprimitivedialog.cpp
 	src/dialogs/ldrawpathdialog.cpp
+	src/dialogs/shortcutsmodel.cpp
 	src/dialogs/subfilereferenceeditor.cpp
 	src/dialogs/newpartdialog.cpp
 	src/editmodes/abstractEditMode.cpp
@@ -101,6 +102,7 @@ set (LDFORGE_SOURCES
 	src/widgets/circularsectioneditor.cpp
 	src/widgets/colorbutton.cpp
 	src/widgets/doublespinbox.cpp
+	src/widgets/extendedkeysequenceeditor.cpp
 	src/widgets/headeredit.cpp
 	src/widgets/matrixeditor.cpp
 	src/widgets/vertexobjecteditor.cpp
@@ -145,6 +147,7 @@ set (LDFORGE_HEADERS
 	src/dialogs/generateprimitivedialog.h
 	src/dialogs/ldrawpathdialog.h
 	src/dialogs/newpartdialog.h
+	src/dialogs/shortcutsmodel.h
 	src/dialogs/subfilereferenceeditor.h
 	src/editmodes/abstractEditMode.h
 	src/editmodes/circleMode.h
@@ -185,6 +188,7 @@ set (LDFORGE_HEADERS
 	src/widgets/circularsectioneditor.h
 	src/widgets/colorbutton.h
 	src/widgets/doublespinbox.h
+	src/widgets/extendedkeysequenceeditor.h
 	src/widgets/headeredit.h
 	src/widgets/matrixeditor.h
 	src/widgets/vertexobjecteditor.h

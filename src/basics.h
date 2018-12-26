@@ -104,6 +104,9 @@ inline void offset(QMatrix4x4& matrix, const QVector3D& vector)
 	matrix(2, 3) += vector.z();
 }
 
+template<typename... Ts>
+inline void ignore(Ts&&...) {}
+
 qreal determinant(qreal a, qreal b, qreal c, qreal d);
 qreal determinant(qreal a, qreal b, qreal c, qreal d, qreal e, qreal f, qreal g, qreal h, qreal i);
 qreal determinant(const QMatrix2x2& matrix);
