@@ -19,7 +19,6 @@
 #include <QMetaObject>
 #include "hierarchyelement.h"
 #include "mainwindow.h"
-#include "guiutilities.h"
 
 
 HierarchyElement::HierarchyElement (QObject* parent) :
@@ -42,12 +41,6 @@ HierarchyElement::HierarchyElement (QObject* parent) :
 	}
 
 	m_documents = m_window->documents();
-}
-
-
-GuiUtilities* HierarchyElement::guiUtilities() const
-{
-	return m_window->guiUtilities();
 }
 
 

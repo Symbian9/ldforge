@@ -22,7 +22,6 @@
 #include "configuration.h"
 #include "mainwindow.h"
 
-class GuiUtilities;
 class LDDocument;
 class DocumentManager;
 class PrimitiveManager;
@@ -40,7 +39,6 @@ public:
 
 	QSet<LDObject *> selectedObjects();
 	LDDocument* currentDocument() const;
-	GuiUtilities* guiUtilities() const;
 	PrimitiveManager* primitives();
 	Grid* grid() const;
 

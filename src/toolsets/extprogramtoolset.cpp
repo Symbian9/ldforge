@@ -439,8 +439,8 @@ void ExtProgramToolset::intersector()
 	QDialog* dlg = new QDialog;
 	Ui::IntersectorUI ui;
 	ui.setupUi (dlg);
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_incol);
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_cutcol);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_incol);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_cutcol);
 	ui.cb_repeat->setWhatsThis ("If this is set, " APPNAME " runs Intersector a second time with inverse files to cut "
 								" the cutter group with the input group. Both groups are cut by the intersection.");
 	ui.cb_edges->setWhatsThis ("Makes " APPNAME " try run Isecalc to create edgelines for the intersection.");
@@ -527,8 +527,8 @@ void ExtProgramToolset::coverer()
 	QDialog* dlg = new QDialog;
 	Ui::CovererUI ui;
 	ui.setupUi (dlg);
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col1);
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col2);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_col1);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_col2);
 
 	if (not dlg->exec())
 		return;
@@ -578,8 +578,8 @@ void ExtProgramToolset::isecalc()
 	QDialog* dlg = new QDialog;
 	ui.setupUi (dlg);
 
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col1);
-	guiUtilities()->fillUsedColorsToComboBox (ui.cmb_col2);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_col1);
+	fillUsedColorsToComboBox(currentDocument(), ui.cmb_col2);
 
 	LDColor in1Col, in2Col;
 

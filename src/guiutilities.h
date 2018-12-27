@@ -21,20 +21,7 @@
 #include "main.h"
 #include "mainwindow.h"
 
-/*
- * GuiUtilities
- *
- * Contains generic state-aware GUI functions.
- */
-class GuiUtilities : public QObject, public HierarchyElement
-{
-	Q_OBJECT
-public:
-	explicit GuiUtilities (QObject* parent);
-
-	void fillUsedColorsToComboBox (class QComboBox* box);
-};
-
+void fillUsedColorsToComboBox(Model* model, class QComboBox* box);
 QColor mainColorRepresentation();
 QIcon makeColorIcon(LDColor color, int size);
 void setColorButton(class QPushButton* button, LDColor color);

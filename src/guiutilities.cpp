@@ -32,10 +32,6 @@
 #include "dialogs/circularprimitiveeditor.h"
 #include "widgets/vertexobjecteditor.h"
 
-GuiUtilities::GuiUtilities (QObject* parent) :
-	QObject (parent),
-	HierarchyElement (parent) {}
-
 /*
  * makeColorIcon
  *
@@ -78,11 +74,11 @@ QIcon makeColorIcon(LDColor color, int size)
  *
  * Fills the provided combo box with the colors used in the current document.
  */
-void GuiUtilities::fillUsedColorsToComboBox (QComboBox* box)
+void fillUsedColorsToComboBox(Model* model, QComboBox* box)
 {
 	QMap<LDColor, int> frequencies;
 
-	for (LDObject* object : currentDocument()->objects())
+	for (LDObject* object : model->objects())
 	{
 		if (object->isColored() and object->color().isValid())
 		{

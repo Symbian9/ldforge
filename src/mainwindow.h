@@ -61,7 +61,6 @@ public:
 	LDColor getUniformSelectedColor();
 	Canvas* getRendererForDocument(LDDocument* document);
 	Grid* grid();
-	class GuiUtilities* guiUtilities();
 	void loadShortcuts();
 	void openDocumentForEditing(LDDocument* document);
 	PrimitiveManager* primitives();
@@ -104,7 +103,6 @@ protected:
 private:
 	struct ToolInfo;
 
-	class GuiUtilities* m_guiUtilities;
 	QMap<LDDocument*, Canvas*> m_renderers;
 	QMap<LDDocument*, QItemSelectionModel*> m_selections;
 	PrimitiveManager* m_primitives;
