@@ -34,23 +34,10 @@
 #include "documentmanager.h"
 #include "grid.h"
 
-const QPen GLRenderer::thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
-
-// Transformation matrices for the fixed cameras.
-const QMatrix4x4 GLRenderer::topCameraMatrix = QMatrix4x4 {};
-const QMatrix4x4 GLRenderer::frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
-const QMatrix4x4 GLRenderer::leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
-const QMatrix4x4 GLRenderer::bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
-const QMatrix4x4 GLRenderer::backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-const QMatrix4x4 GLRenderer::rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
-
-// Conversion matrix from LDraw to OpenGL coordinates.
-const QMatrix4x4 GLRenderer::ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-
 /*
  * Constructs a GL renderer.
  */
-GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
+gl::Renderer::Renderer(const Model* model, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
     m_model {model},
@@ -65,8 +52,8 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
     }
 {
 	Q_ASSERT(model != nullptr);
-	m_camera = (Camera) config::camera();
-	m_compiler = new GLCompiler (this);
+	m_camera = (gl::CameraType) config::camera();
+	m_compiler = new gl::Compiler (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	setAcceptDrops (true);
@@ -75,9 +62,9 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 	m_needZoomToFit = true;
 
 	// Init camera icons
-	for (Camera camera : iterateEnum<Camera>())
+	for (gl::CameraType camera : iterateEnum<gl::CameraType>())
 	{
-		const char* cameraIconNames[EnumLimits<Camera>::Count] =
+		const char* cameraIconNames[EnumLimits<gl::CameraType>::Count] =
 		{
 		    "camera-top", "camera-front", "camera-left",
 		    "camera-bottom", "camera-back", "camera-right",
@@ -91,9 +78,9 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 
 	connect(
 		this->m_compiler,
-		&GLCompiler::sceneChanged,
+		&gl::Compiler::sceneChanged,
 		this,
-		qOverload<>(&GLRenderer::update)
+		qOverload<>(&gl::Renderer::update)
 	);
 
 	calcCameraIcons();
@@ -102,7 +89,7 @@ GLRenderer::GLRenderer(const Model* model, QWidget* parent) :
 /*
  * Destructs the GL renderer.
  */
-GLRenderer::~GLRenderer()
+gl::Renderer::~Renderer()
 {
 	freeAxes();
 }
@@ -110,7 +97,7 @@ GLRenderer::~GLRenderer()
 /*
  * Deletes the axes VBOs
  */
-void GLRenderer::freeAxes()
+void gl::Renderer::freeAxes()
 {
 	if (m_axesInitialized)
 	{
@@ -123,7 +110,7 @@ void GLRenderer::freeAxes()
 /*
  * Calculates the camera icon locations.
  */
-void GLRenderer::calcCameraIcons()
+void gl::Renderer::calcCameraIcons()
 {
 	int i = 0;
 	const int columns = 3;
@@ -157,7 +144,7 @@ void GLRenderer::calcCameraIcons()
 /*
  * Returns the camera currently in use.
  */
-GLCamera& GLRenderer::currentCamera()
+GLCamera& gl::Renderer::currentCamera()
 {
 	return m_cameras[static_cast<int>(camera())];
 }
@@ -165,7 +152,7 @@ GLCamera& GLRenderer::currentCamera()
 /*
  * Returns the camera currently in use.
  */
-const GLCamera& GLRenderer::currentCamera() const
+const GLCamera& gl::Renderer::currentCamera() const
 {
 	return m_cameras[static_cast<int>(camera())];
 }
@@ -173,7 +160,7 @@ const GLCamera& GLRenderer::currentCamera() const
 /*
  * Prepares the GL context for rendering.
  */
-void GLRenderer::initGLData()
+void gl::Renderer::initGLData()
 {
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -197,21 +184,21 @@ void GLRenderer::initGLData()
 /*
  * Returns the object currently highlighted by the cursor.
  */
-QPersistentModelIndex GLRenderer::objectAtCursor() const
+QPersistentModelIndex gl::Renderer::objectAtCursor() const
 {
 	return m_objectAtCursor;
 }
 
 // =============================================================================
 //
-void GLRenderer::needZoomToFit()
+void gl::Renderer::needZoomToFit()
 {
 	m_needZoomToFit = true;
 }
 
 // =============================================================================
 //
-void GLRenderer::resetAngles()
+void gl::Renderer::resetAngles()
 {
 	if (m_initialized)
 	{
@@ -224,11 +211,11 @@ void GLRenderer::resetAngles()
 
 // =============================================================================
 //
-void GLRenderer::resetAllAngles()
+void gl::Renderer::resetAllAngles()
 {
-	Camera oldCamera = camera();
+	gl::CameraType const oldCamera = camera();
 
-	for (Camera camera : iterateEnum<Camera>())
+	for (gl::CameraType camera : iterateEnum<gl::CameraType>())
 	{
 		setCamera(camera);
 		resetAngles();
@@ -239,7 +226,7 @@ void GLRenderer::resetAllAngles()
 
 // =============================================================================
 //
-void GLRenderer::initializeGL()
+void gl::Renderer::initializeGL()
 {
 	initializeOpenGLFunctions();
 
@@ -262,7 +249,7 @@ void GLRenderer::initializeGL()
 	resetAllAngles();
 }
 
-void GLRenderer::initializeLighting()
+void gl::Renderer::initializeLighting()
 {
 	GLfloat materialShininess[] = {5.0};
 	GLfloat lightPosition[] = {1.0, 1.0, 1.0, 0.0};
@@ -280,7 +267,7 @@ void GLRenderer::initializeLighting()
 
 // =============================================================================
 //
-void GLRenderer::initializeAxes()
+void gl::Renderer::initializeAxes()
 {
 	freeAxes();
 	float axisVertexData[3][6];
@@ -314,7 +301,7 @@ void GLRenderer::initializeAxes()
 
 // =============================================================================
 //
-void GLRenderer::setBackground()
+void gl::Renderer::setBackground()
 {
 	if (not m_isDrawingSelectionScene)
 	{
@@ -336,14 +323,14 @@ void GLRenderer::setBackground()
 	}
 }
 
-QColor GLRenderer::backgroundColor() const
+QColor gl::Renderer::backgroundColor() const
 {
 	return m_backgroundColor;
 }
 
 // =============================================================================
 //
-void GLRenderer::resizeGL (int width, int height)
+void gl::Renderer::resizeGL (int width, int height)
 {
 	calcCameraIcons();
 	glViewport (0, 0, width, height);
@@ -372,7 +359,7 @@ QMatrix4x4 padMatrix(const QMatrix3x3& stub)
 
 // =============================================================================
 //
-void GLRenderer::drawGLScene()
+void gl::Renderer::drawGLScene()
 {
 	if (m_needZoomToFit)
 	{
@@ -391,7 +378,7 @@ void GLRenderer::drawGLScene()
 	else
 		glDisable(GL_LIGHTING);
 
-	if (camera() != Camera::Free)
+	if (camera() != gl::FreeCamera)
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
@@ -487,7 +474,7 @@ void GLRenderer::drawGLScene()
  * - surface determines what kind of surface to draw (triangles, quadrilaterals, edges or conditional edges)
  * - colors determines what VBO subclass to use for colors
  */
-void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
+void gl::Renderer::drawVbos(VboClass surface, VboSubclass colors)
 {
 	// Filter this through some configuration options
 	if ((isOneOf(surface, VboClass::Quads, VboClass::Triangles) and config::drawSurfaces() == false)
@@ -550,17 +537,17 @@ void GLRenderer::drawVbos(VboClass surface, VboSubclass colors)
 	}
 }
 
-QPen GLRenderer::textPen() const
+QPen gl::Renderer::textPen() const
 {
 	return {m_useDarkBackground ? Qt::white : Qt::black};
 }
 
-bool GLRenderer::freeCameraAllowed() const
+bool gl::Renderer::freeCameraAllowed() const
 {
 	return true;
 }
 
-void GLRenderer::paintEvent(QPaintEvent*)
+void gl::Renderer::paintEvent(QPaintEvent*)
 {
 	makeCurrent();
 	initGLData();
@@ -574,7 +561,7 @@ void GLRenderer::paintEvent(QPaintEvent*)
 	overpaint(painter);
 }
 
-void GLRenderer::overpaint(QPainter &painter)
+void gl::Renderer::overpaint(QPainter &painter)
 {
 	// Draw a background for the selected camera
 	painter.setPen(thinBorderPen);
@@ -585,7 +572,7 @@ void GLRenderer::overpaint(QPainter &painter)
 	for (const CameraIcon& info : m_cameraIcons)
 	{
 		// Don't draw the free camera icon when we can't use the free camera
-		if (info.camera == Camera::Free and not freeCameraAllowed())
+		if (info.camera == gl::FreeCamera and not freeCameraAllowed())
 			continue;
 
 		painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
@@ -602,7 +589,7 @@ void GLRenderer::overpaint(QPainter &painter)
 
 // =============================================================================
 //
-void GLRenderer::mouseReleaseEvent(QMouseEvent* event)
+void gl::Renderer::mouseReleaseEvent(QMouseEvent* event)
 {
 	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (event->buttons() & Qt::LeftButton);
 	m_panning = false;
@@ -626,7 +613,7 @@ void GLRenderer::mouseReleaseEvent(QMouseEvent* event)
 
 // =============================================================================
 //
-void GLRenderer::mousePressEvent(QMouseEvent* event)
+void gl::Renderer::mousePressEvent(QMouseEvent* event)
 {
 	m_lastButtons = event->buttons();
 	m_totalMouseMove = 0;
@@ -634,7 +621,7 @@ void GLRenderer::mousePressEvent(QMouseEvent* event)
 
 // =============================================================================
 //
-void GLRenderer::mouseMoveEvent(QMouseEvent* event)
+void gl::Renderer::mouseMoveEvent(QMouseEvent* event)
 {
 	int xMove = event->x() - m_mousePosition.x();
 	int yMove = event->y() - m_mousePosition.y();
@@ -651,7 +638,7 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 		m_panning = true;
 		m_isCameraMoving = true;
 	}
-	else if (left and camera() == Camera::Free and (xMove != 0 or yMove != 0))
+	else if (left and camera() == gl::FreeCamera and (xMove != 0 or yMove != 0))
 	{
 		QQuaternion versor = QQuaternion::fromAxisAndAngle(yMove, xMove, 0, 0.6 * hypot(xMove, yMove));
 		m_rotation = versor * m_rotation;
@@ -673,14 +660,14 @@ void GLRenderer::mouseMoveEvent(QMouseEvent* event)
 
 // =============================================================================
 //
-void GLRenderer::keyPressEvent(QKeyEvent* event)
+void gl::Renderer::keyPressEvent(QKeyEvent* event)
 {
 	m_currentKeyboardModifiers = event->modifiers();
 }
 
 // =============================================================================
 //
-void GLRenderer::keyReleaseEvent(QKeyEvent* event)
+void gl::Renderer::keyReleaseEvent(QKeyEvent* event)
 {
 	m_currentKeyboardModifiers = event->modifiers();
 	update();
@@ -688,7 +675,7 @@ void GLRenderer::keyReleaseEvent(QKeyEvent* event)
 
 // =============================================================================
 //
-void GLRenderer::wheelEvent(QWheelEvent* ev)
+void gl::Renderer::wheelEvent(QWheelEvent* ev)
 {
 	makeCurrent();
 	currentCamera().zoomNotch(ev->delta() > 0);
@@ -699,7 +686,7 @@ void GLRenderer::wheelEvent(QWheelEvent* ev)
 
 // =============================================================================
 //
-void GLRenderer::leaveEvent(QEvent*)
+void gl::Renderer::leaveEvent(QEvent*)
 {
 	m_toolTipTimer->stop();
 	update();
@@ -707,10 +694,10 @@ void GLRenderer::leaveEvent(QEvent*)
 
 // =============================================================================
 //
-void GLRenderer::setCamera(Camera camera)
+void gl::Renderer::setCamera(gl::CameraType camera)
 {
 	// The edit mode may forbid the free camera.
-	if (freeCameraAllowed() or camera != Camera::Free)
+	if (freeCameraAllowed() or camera != gl::FreeCamera)
 	{
 		m_camera = camera;
 		config::setCamera(static_cast<int>(camera));
@@ -729,7 +716,7 @@ static QRgb colorFromPixel(uint8_t* pixel)
 /*
  * Returns the set of objects found in the specified pixel area.
  */
-QItemSelection GLRenderer::pick(const QRect& range)
+QItemSelection gl::Renderer::pick(const QRect& range)
 {
 	makeCurrent();
 	QItemSelection result;
@@ -787,9 +774,9 @@ QItemSelection GLRenderer::pick(const QRect& range)
 }
 
 /*
- * Simpler version of GLRenderer::pick which simply picks whatever object on the cursor
+ * Simpler version of gl::Renderer::pick which simply picks whatever object on the cursor
  */
-QModelIndex GLRenderer::pick(int mouseX, int mouseY)
+QModelIndex gl::Renderer::pick(int mouseX, int mouseY)
 {
 	makeCurrent();
 	setPicking(true);
@@ -804,7 +791,7 @@ QModelIndex GLRenderer::pick(int mouseX, int mouseY)
 
 // =============================================================================
 //
-void GLRenderer::setPicking(bool picking)
+void gl::Renderer::setPicking(bool picking)
 {
 	m_isDrawingSelectionScene = picking;
 	setBackground();
@@ -828,7 +815,7 @@ void GLRenderer::setPicking(bool picking)
 /*
  * Returns an image containing the current render of the scene.
  */
-QImage GLRenderer::screenCapture()
+QImage gl::Renderer::screenCapture()
 {
 	// Read the current render to a buffer of pixels. We use RGBA format even though the image should be fully opaque at all times.
 	// This is because apparently GL_RGBA/GL_UNSIGNED_BYTE is the only setting pair that is guaranteed to actually work!
@@ -845,7 +832,7 @@ QImage GLRenderer::screenCapture()
 /*
  * Show a tooltip if the cursor is currently hovering over a camera icon.
  */
-void GLRenderer::showCameraIconTooltip()
+void gl::Renderer::showCameraIconTooltip()
 {
 	for (CameraIcon & icon : m_cameraIcons)
 	{
@@ -860,7 +847,7 @@ void GLRenderer::showCameraIconTooltip()
 
 // =============================================================================
 //
-void GLRenderer::zoomToFit()
+void gl::Renderer::zoomToFit()
 {
 	currentCamera().setZoom(30.0f);
 	bool lastfilled = false;
@@ -945,14 +932,14 @@ void GLRenderer::zoomToFit()
 
 // =============================================================================
 //
-void GLRenderer::zoomAllToFit()
+void gl::Renderer::zoomAllToFit()
 {
 	zoomToFit();
 }
 
 // =============================================================================
 //
-void GLRenderer::highlightCursorObject()
+void gl::Renderer::highlightCursorObject()
 {
 	if (not config::highlightObjectBelowCursor() and not objectAtCursor().isValid())
 		return;
@@ -987,52 +974,52 @@ void GLRenderer::highlightCursorObject()
 	update();
 }
 
-bool GLRenderer::mouseHasMoved() const
+bool gl::Renderer::mouseHasMoved() const
 {
 	return m_totalMouseMove >= 10;
 }
 
-QPoint const& GLRenderer::mousePosition() const
+QPoint const& gl::Renderer::mousePosition() const
 {
 	return m_mousePosition;
 }
 
-QPointF const& GLRenderer::mousePositionF() const
+QPointF const& gl::Renderer::mousePositionF() const
 {
 	return m_mousePositionF;
 }
 
-Qt::KeyboardModifiers GLRenderer::keyboardModifiers() const
+Qt::KeyboardModifiers gl::Renderer::keyboardModifiers() const
 {
 	return m_currentKeyboardModifiers;
 }
 
-Camera GLRenderer::camera() const
+gl::CameraType gl::Renderer::camera() const
 {
 	return m_camera;
 }
 
-double GLRenderer::panning (Axis ax) const
+double gl::Renderer::panning (Axis ax) const
 {
 	return (ax == X) ? currentCamera().panningX() : currentCamera().panningY();
 }
 
-double GLRenderer::zoom()
+double gl::Renderer::zoom()
 {
 	return currentCamera().zoom();
 }
 
-bool GLRenderer::isDrawingSelectionScene() const
+bool gl::Renderer::isDrawingSelectionScene() const
 {
 	return m_isDrawingSelectionScene;
 }
 
-Qt::MouseButtons GLRenderer::lastButtons() const
+Qt::MouseButtons gl::Renderer::lastButtons() const
 {
 	return m_lastButtons;
 }
 
-const Model* GLRenderer::model() const
+const Model* gl::Renderer::model() const
 {
 	return m_model;
 }
@@ -1041,19 +1028,19 @@ const Model* GLRenderer::model() const
  * This virtual function lets derivative classes render something to the fixed camera
  * before the main brick is rendered.
  */
-void GLRenderer::drawFixedCameraBackdrop() {}
+void gl::Renderer::drawFixedCameraBackdrop() {}
 
-QItemSelectionModel* GLRenderer::selectionModel() const
+QItemSelectionModel* gl::Renderer::selectionModel() const
 {
 	return m_compiler->selectionModel();
 }
 
-void GLRenderer::setSelectionModel(QItemSelectionModel* selectionModel)
+void gl::Renderer::setSelectionModel(QItemSelectionModel* selectionModel)
 {
 	this->m_compiler->setSelectionModel(selectionModel);
 }
 
-void GLRenderer::fullUpdate()
+void gl::Renderer::fullUpdate()
 {
 	this->m_compiler->fullUpdate();
 	update();

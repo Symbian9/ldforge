@@ -24,43 +24,62 @@
 #include "glcamera.h"
 #include "hierarchyelement.h"
 
-enum class Camera
+namespace gl
 {
-	Top,
-	Front,
-	Left,
-	Bottom,
-	Back,
-	Right,
-	Free,
-	_End
-};
+	enum CameraType
+	{
+		TopCamera,
+		FrontCamera,
+		LeftCamera,
+		BottomCamera,
+		BackCamera,
+		RightCamera,
+		FreeCamera,
+		_End
+	};
 
-struct CameraIcon
-{
-	QPixmap image;
-	QRect sourceRect;
-	QRect targetRect;
-	QRect hitRect;
-	Camera camera;
-};
+	struct CameraIcon
+	{
+		QPixmap image;
+		QRect sourceRect;
+		QRect targetRect;
+		QRect hitRect;
+		CameraType camera;
+	};
 
-MAKE_ITERABLE_ENUM(Camera)
+	class Renderer;
+	class Compiler;
+
+	static const QPen thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+
+	// Transformation matrices for the fixed cameras.
+	static const QMatrix4x4 topCameraMatrix = {};
+	static const QMatrix4x4 frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
+
+	// Conversion matrix from LDraw to OpenGL coordinates.
+	static const QMatrix4x4 ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+
+	enum { BlackRgb = 0xff000000 };
+	static constexpr GLfloat near = 1.0f;
+	static constexpr GLfloat far = 10000.0f;
+}
+
+MAKE_ITERABLE_ENUM(gl::CameraType)
 
 // The main renderer object, draws the brick on the screen, manages the camera and selection picking.
-class GLRenderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
+class gl::Renderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
 {
 	Q_OBJECT
 
 public:
-	enum { BlackRgb = 0xff000000 };
-	static constexpr GLfloat near = 1.0f;
-	static constexpr GLfloat far = 10000.0f;
+	Renderer(const Model* model, QWidget* parent = nullptr);
+	~Renderer();
 
-	GLRenderer(const Model* model, QWidget* parent = nullptr);
-	~GLRenderer();
-
-	Camera camera() const;
+	gl::CameraType camera() const;
 	GLCamera& currentCamera();
 	const GLCamera& currentCamera() const;
 	Q_SLOT void fullUpdate();
@@ -75,19 +94,10 @@ public:
 	void resetAngles();
 	QImage screenCapture();
 	void setBackground();
-	void setCamera(Camera cam);
+	void setCamera(gl::CameraType cam);
 	QPen textPen() const;
 	QItemSelectionModel* selectionModel() const;
 	void setSelectionModel(QItemSelectionModel* selectionModel);
-
-	static const QPen thinBorderPen;
-	static const QMatrix4x4 topCameraMatrix;
-	static const QMatrix4x4 frontCameraMatrix;
-	static const QMatrix4x4 leftCameraMatrix;
-	static const QMatrix4x4 bottomCameraMatrix;
-	static const QMatrix4x4 backCameraMatrix;
-	static const QMatrix4x4 rightCameraMatrix;
-	static const QMatrix4x4 ldrawToGLAdapterMatrix;
 
 signals:
 	void objectHighlightingChanged(const QModelIndex& oldIndex, const QModelIndex& newIndex);
@@ -122,9 +132,9 @@ protected:
 
 private:
 	const Model* const m_model;
-	class GLCompiler* m_compiler;
+	gl::Compiler* m_compiler;
 	QPersistentModelIndex m_objectAtCursor;
-	CameraIcon m_cameraIcons[7];
+	gl::CameraIcon m_cameraIcons[7];
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
 	Qt::KeyboardModifiers m_currentKeyboardModifiers;
@@ -140,7 +150,7 @@ private:
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
-	Camera m_camera;
+	gl::CameraType m_camera;
 	GLuint m_axeslist;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;

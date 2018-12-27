@@ -25,7 +25,7 @@
 #include "generics/ring.h"
 
 Canvas::Canvas(LDDocument* document, QWidget* parent) :
-    GLRenderer {document, parent},
+	gl::Renderer {document, parent},
     m_document {*document},
     m_currentEditMode {AbstractEditMode::createByType (this, EditModeType::Select)} {}
 
@@ -36,10 +36,10 @@ Canvas::~Canvas()
 
 void Canvas::overpaint(QPainter& painter)
 {
-	GLRenderer::overpaint(painter);
+	gl::Renderer::overpaint(painter);
 	QFontMetrics metrics {QFont {}};
 
-	if (camera() != Camera::Free)
+	if (camera() != gl::FreeCamera)
 	{
 		// Paint the coordinates onto the screen.
 		Vertex idealized = currentCamera().idealize(m_position3D);
@@ -186,7 +186,7 @@ void Canvas::drawFixedCameraBackdrop()
 	glEnd();
 	glDisable(GL_LINE_STIPPLE);
 
-	if (this->camera() < Camera::Free)
+	if (this->camera() < gl::FreeCamera)
 	{
 		GLfloat cullz = this->cullValues[static_cast<int>(this->camera())];
 		QMatrix4x4 matrix = {
@@ -213,8 +213,8 @@ void Canvas::setEditMode(EditModeType a)
 	m_currentEditMode = AbstractEditMode::createByType(this, a);
 
 	// If we cannot use the free camera, use the top one instead.
-	if (camera() == Camera::Free and not m_currentEditMode->allowFreeCamera())
-		setCamera(Camera::Top);
+	if (camera() == gl::FreeCamera and not m_currentEditMode->allowFreeCamera())
+		setCamera(gl::TopCamera);
 
 	m_window->updateEditModeActions();
 	update();
@@ -259,7 +259,7 @@ void Canvas::dropEvent(QDropEvent* /*event*/)
 void Canvas::keyReleaseEvent(QKeyEvent* event)
 {
 	m_currentEditMode->keyReleased(event);
-	GLRenderer::keyReleaseEvent(event);
+	gl::Renderer::keyReleaseEvent(event);
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent* event)
@@ -268,7 +268,7 @@ void Canvas::mouseMoveEvent(QMouseEvent* event)
 	m_position3D = currentCamera().convert2dTo3d(mousePosition(), grid());
 
 	if (not m_currentEditMode->mouseMoved(event))
-		GLRenderer::mouseMoveEvent(event);
+		gl::Renderer::mouseMoveEvent(event);
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent *event)
@@ -279,7 +279,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent *event)
 	data.keymods = keyboardModifiers();
 	data.releasedButtons = lastButtons() & ~event->buttons();
 	m_currentEditMode->mouseReleased(data);
-	GLRenderer::mouseReleaseEvent(event);
+	gl::Renderer::mouseReleaseEvent(event);
 }
 
 void Canvas::mousePressEvent(QMouseEvent *event)
@@ -287,7 +287,7 @@ void Canvas::mousePressEvent(QMouseEvent *event)
 	if (m_currentEditMode->mousePressed(event))
 		event->accept();
 
-	GLRenderer::mousePressEvent(event);
+	gl::Renderer::mousePressEvent(event);
 }
 
 const Vertex& Canvas::position3D() const
@@ -298,7 +298,7 @@ const Vertex& Canvas::position3D() const
 void Canvas::drawPoint(QPainter& painter, QPointF pos, QColor color) const
 {
 	int pointSize = 8;
-	QPen pen = thinBorderPen;
+	QPen pen = gl::thinBorderPen;
 	pen.setWidth(1);
 	painter.setPen(pen);
 	painter.setBrush(color);
@@ -318,7 +318,7 @@ void Canvas::drawBlipCoordinates(QPainter& painter, const Vertex& pos3d, QPointF
 
 QPen Canvas::linePen() const
 {
-	QPen linepen = thinBorderPen;
+	QPen linepen = gl::thinBorderPen;
 	linepen.setWidth(2);
 	linepen.setColor(luma(backgroundColor()) < 40 ? Qt::white : Qt::black);
 	return linepen;
@@ -374,20 +374,20 @@ void Canvas::dragEnterEvent(QDragEnterEvent* /*event*/)
 
 double Canvas::currentCullValue() const
 {
-	if (this->camera() < Camera::Free)
-		return far - this->cullValues[static_cast<int>(this->camera())];
+	if (this->camera() < gl::FreeCamera)
+		return gl::far - this->cullValues[static_cast<int>(this->camera())];
 	else
 		return 0.0;
 }
 
 void Canvas::setCullValue(double value)
 {
-	if (this->camera() < Camera::Free)
-		this->cullValues[static_cast<int>(this->camera())] = far - value;
+	if (this->camera() < gl::FreeCamera)
+		this->cullValues[static_cast<int>(this->camera())] = gl::far - value;
 }
 
 void Canvas::clearCurrentCullValue()
 {
-	if (this->camera() < Camera::Free)
+	if (this->camera() < gl::FreeCamera)
 		this->cullValues[static_cast<int>(this->camera())] = 0.0;
 }

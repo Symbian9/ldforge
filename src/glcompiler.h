@@ -24,16 +24,22 @@
 #include <QMap>
 #include <QSet>
 
+namespace gl
+{
+	class Compiler;
+	class Renderer;
+}
+
 /*
  * Compiles LDObjects into polygons for the GLRenderer to draw.
  */
-class GLCompiler : public QObject, public HierarchyElement, protected QOpenGLFunctions
+class gl::Compiler : public QObject, public HierarchyElement, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
 public:
-	GLCompiler (GLRenderer* renderer);
-	~GLCompiler();
+	Compiler (Renderer* renderer);
+	~Compiler();
 
 	void initialize();
 	Vertex modelCenter();
@@ -76,7 +82,7 @@ private:
 	bool m_vboChanged[NumVbos] = {true};
 	bool needBoundingBoxRebuild = true;
 	int m_vboSizes[NumVbos] = {0};
-	GLRenderer* m_renderer;
+	gl::Renderer* m_renderer;
 	QItemSelectionModel* _selectionModel = nullptr;
 	BoundingBox boundingBox;
 

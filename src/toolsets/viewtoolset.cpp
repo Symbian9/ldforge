@@ -220,7 +220,7 @@ void ViewToolset::clearDrawPlane()
 
 void ViewToolset::setCullDepth()
 {
-	if (m_window->renderer()->camera() == Camera::Free)
+	if (m_window->renderer()->camera() == gl::FreeCamera)
 		return;
 
 	bool ok;
@@ -232,8 +232,8 @@ void ViewToolset::setCullDepth()
 			m_window->renderer()->currentCamera().name()
 		),
 		m_window->renderer()->currentCullValue(),
-		-GLRenderer::far,
-		GLRenderer::far,
+		-gl::far,
+		gl::far,
 		4,
 		&ok
 	);

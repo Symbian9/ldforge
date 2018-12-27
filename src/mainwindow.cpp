@@ -491,7 +491,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
-	if (renderer()->camera() != Camera::Free)
+	if (renderer()->camera() != gl::FreeCamera)
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction(ui.actionSetDrawPlane);

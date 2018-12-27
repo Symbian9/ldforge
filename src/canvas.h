@@ -21,7 +21,7 @@
 #include "editmodes/abstractEditMode.h"
 #include "geometry/plane.h"
 
-class Canvas : public GLRenderer
+class Canvas : public gl::Renderer
 {
 public:
 	Canvas(LDDocument* document, QWidget* parent = nullptr);

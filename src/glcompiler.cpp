@@ -68,9 +68,9 @@ void checkGLError(QString file, int line)
 /*
  * Constructs a GL compiler.
  */
-GLCompiler::GLCompiler (GLRenderer* renderer) :
-	HierarchyElement (renderer),
-	m_renderer (renderer)
+gl::Compiler::Compiler(gl::Renderer* renderer) :
+	HierarchyElement(renderer),
+	m_renderer(renderer)
 {
 	connect(
 		renderer->model(),
@@ -108,7 +108,7 @@ GLCompiler::GLCompiler (GLRenderer* renderer) :
 /*
  * Initializes the VBOs after OpenGL is initialized.
  */
-void GLCompiler::initialize()
+void gl::Compiler::initialize()
 {
 	initializeOpenGLFunctions();
 	glGenBuffers(countof(m_vbo), &m_vbo[0]);
@@ -118,7 +118,7 @@ void GLCompiler::initialize()
 /*
  * Destructs the VBOs when the compiler is deleted.
  */
-GLCompiler::~GLCompiler()
+gl::Compiler::~Compiler()
 {
 	glDeleteBuffers(countof(m_vbo), &m_vbo[0]);
 	CHECK_GL_ERROR();
@@ -127,7 +127,7 @@ GLCompiler::~GLCompiler()
 /*
  * Returns an index color for the LDObject ID given. This color represents the object in the picking scene.
  */
-QColor GLCompiler::indexColorForID (qint32 id) const
+QColor gl::Compiler::indexColorForID (qint32 id) const
 {
 	// Calculate a color based from this index. This method caters for
 	// 16777216 objects. I don't think that will be exceeded anytime soon. :)
@@ -143,7 +143,7 @@ QColor GLCompiler::indexColorForID (qint32 id) const
  * - polygonOwner is the LDObject from which the polygon originated.
  * - subclass provides context for the polygon.
  */
-QColor GLCompiler::getColorForPolygon(
+QColor gl::Compiler::getColorForPolygon(
 	const LDPolygon& polygon,
 	const QModelIndex& polygonOwnerIndex,
 	VboSubclass subclass
@@ -247,7 +247,7 @@ QColor GLCompiler::getColorForPolygon(
 /*
  * Tells the compiler that a merge of VBOs is required.
  */
-void GLCompiler::needMerge()
+void gl::Compiler::needMerge()
 {
 	for (int i = 0; i < countof (m_vboChanged); ++i)
 		m_vboChanged[i] = true;
@@ -256,7 +256,7 @@ void GLCompiler::needMerge()
 /*
  * Stages the given object for compilation.
  */
-void GLCompiler::stageForCompilation(const QModelIndex& index)
+void gl::Compiler::stageForCompilation(const QModelIndex& index)
 {
 	m_staged.insert(index);
 }
@@ -264,7 +264,7 @@ void GLCompiler::stageForCompilation(const QModelIndex& index)
 /*
  * Removes an object from the set of objects to be compiled.
  */
-void GLCompiler::unstage(const QModelIndex& index)
+void gl::Compiler::unstage(const QModelIndex& index)
 {
 	m_staged.remove(index);
 }
@@ -272,7 +272,7 @@ void GLCompiler::unstage(const QModelIndex& index)
 /*
  * Compiles all staged objects.
  */
-void GLCompiler::compileStaged()
+void gl::Compiler::compileStaged()
 {
 	for (const QModelIndex& index : m_staged)
 		compileObject(index);
@@ -283,7 +283,7 @@ void GLCompiler::compileStaged()
 /*
  * Prepares a VBO for rendering. The VBO is merged if needed.
  */
-void GLCompiler::prepareVBO (int vbonum)
+void gl::Compiler::prepareVBO (int vbonum)
 {
 	// Compile anything that still awaits it
 	compileStaged();
@@ -324,7 +324,7 @@ void GLCompiler::prepareVBO (int vbonum)
 /*
  * Removes the data related to the given object.
  */
-void GLCompiler::dropObjectInfo(const QModelIndex& index)
+void gl::Compiler::dropObjectInfo(const QModelIndex& index)
 {
 	if (m_objectInfo.contains(index))
 	{
@@ -339,7 +339,7 @@ void GLCompiler::dropObjectInfo(const QModelIndex& index)
 /*
  * Makes the compiler forget about the given object completely.
  */
-void GLCompiler::forgetObject(QModelIndex index)
+void gl::Compiler::forgetObject(QModelIndex index)
 {
 	dropObjectInfo(index);
 	unstage(index);
@@ -348,7 +348,7 @@ void GLCompiler::forgetObject(QModelIndex index)
 /*
  * Compiles a single object.
  */
-void GLCompiler::compileObject(const QModelIndex& index)
+void gl::Compiler::compileObject(const QModelIndex& index)
 {
 	LDObject* object = m_renderer->model()->lookup(index);
 
@@ -390,7 +390,7 @@ void GLCompiler::compileObject(const QModelIndex& index)
 /*
  * Inserts a single polygon into VBOs.
  */
-void GLCompiler::compilePolygon(
+void gl::Compiler::compilePolygon(
 	LDPolygon& poly,
 	const QModelIndex& polygonOwnerIndex,
 	ObjectVboData& objectInfo
@@ -487,7 +487,7 @@ void GLCompiler::compilePolygon(
 /*
  * Returns the center point of the model.
  */
-Vertex GLCompiler::modelCenter()
+Vertex gl::Compiler::modelCenter()
 {
 	// If there's something still queued for compilation, we need to build those first so
 	// that they get into the bounding box.
@@ -527,24 +527,24 @@ Vertex GLCompiler::modelCenter()
 		return {};
 }
 
-int GLCompiler::vboNumber (VboClass surface, VboSubclass complement)
+int gl::Compiler::vboNumber (VboClass surface, VboSubclass complement)
 {
 	return (static_cast<int>(surface) * EnumLimits<VboSubclass>::Count) + static_cast<int>(complement);
 }
 
 
-GLuint GLCompiler::vbo (int vbonum) const
+GLuint gl::Compiler::vbo (int vbonum) const
 {
 	return m_vbo[vbonum];
 }
 
 
-int GLCompiler::vboSize (int vbonum) const
+int gl::Compiler::vboSize (int vbonum) const
 {
 	return m_vboSizes[vbonum];
 }
 
-void GLCompiler::fullUpdate()
+void gl::Compiler::fullUpdate()
 {
 	m_objectInfo.clear();
 	recompile();
@@ -553,7 +553,7 @@ void GLCompiler::fullUpdate()
 /*
  * Recompiles the entire model.
  */
-void GLCompiler::recompile()
+void gl::Compiler::recompile()
 {
 	for (QModelIndex index : m_renderer->model()->indices())
 		compileObject(index);
@@ -561,7 +561,7 @@ void GLCompiler::recompile()
 	emit sceneChanged();
 }
 
-void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
+void gl::Compiler::handleRowInsertion(const QModelIndex&, int first, int last)
 {
 	for (int row = first; row <= last; row += 1)
 		m_staged.insert(m_renderer->model()->index(row));
@@ -569,7 +569,7 @@ void GLCompiler::handleRowInsertion(const QModelIndex&, int first, int last)
 	emit sceneChanged();
 }
 
-void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
+void gl::Compiler::handleRowRemoval(const QModelIndex&, int first, int last)
 {
 	for (int row = last; row >= first; row -= 1) {
 		auto index = m_renderer->model()->index(row);
@@ -580,7 +580,7 @@ void GLCompiler::handleRowRemoval(const QModelIndex&, int first, int last)
 	emit sceneChanged();
 }
 
-void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void gl::Compiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
 	for (int row = topLeft.row(); row <= bottomRight.row(); row += 1)
 		m_staged.insert(m_renderer->model()->index(row));
@@ -589,7 +589,7 @@ void GLCompiler::handleDataChange(const QModelIndex& topLeft, const QModelIndex&
 	emit sceneChanged();
 }
 
-void GLCompiler::handleObjectHighlightingChanged(
+void gl::Compiler::handleObjectHighlightingChanged(
 	const QModelIndex& oldIndex,
 	const QModelIndex& newIndex
 ) {
@@ -598,7 +598,7 @@ void GLCompiler::handleObjectHighlightingChanged(
 	emit sceneChanged();
 }
 
-void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void gl::Compiler::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
 	for (const QModelIndex& index : selected.indexes())
 		m_staged.insert(index);
@@ -610,12 +610,12 @@ void GLCompiler::selectionChanged(const QItemSelection& selected, const QItemSel
 	emit sceneChanged();
 }
 
-QItemSelectionModel* GLCompiler::selectionModel() const
+QItemSelectionModel* gl::Compiler::selectionModel() const
 {
 	return _selectionModel;
 }
 
-void GLCompiler::setSelectionModel(QItemSelectionModel* selectionModel)
+void gl::Compiler::setSelectionModel(QItemSelectionModel* selectionModel)
 {
 	if (this->_selectionModel)
 		disconnect(this->_selectionModel, 0, 0, 0);
@@ -641,7 +641,7 @@ void GLCompiler::setSelectionModel(QItemSelectionModel* selectionModel)
 	emit sceneChanged();
 }
 
-void GLCompiler::clearSelectionModel()
+void gl::Compiler::clearSelectionModel()
 {
 	this->setSelectionModel(nullptr);
 	emit sceneChanged();
