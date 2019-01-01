@@ -107,6 +107,12 @@ inline void offset(QMatrix4x4& matrix, const QVector3D& vector)
 template<typename... Ts>
 inline void ignore(Ts&&...) {}
 
+template<typename T, typename R>
+QMapIterator<T, R> createIterator(const QMap<T, R>& map)
+{
+	return {map};
+}
+
 qreal determinant(qreal a, qreal b, qreal c, qreal d);
 qreal determinant(qreal a, qreal b, qreal c, qreal d, qreal e, qreal f, qreal g, qreal h, qreal i);
 qreal determinant(const QMatrix2x2& matrix);

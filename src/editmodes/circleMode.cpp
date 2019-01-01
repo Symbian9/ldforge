@@ -167,10 +167,6 @@ void CircleMode::endDraw()
 			v3.setCoordinate (localx, v3[localx] + c1[i].x1());
 			v3.setCoordinate (localy, v3[localy] + c1[i].y1());
 
-			// Ensure the quads always are BFC-front towards the camera
-			if (static_cast<int>(renderer()->camera()) % 3 <= 0)
-				qSwap(v1, v3);
-
 			// Project the vertices onto the draw plane.
 			for (Vertex* vertex : {&v0, &v1, &v2, &v3})
 				*vertex = projectToDrawPlane(*vertex);

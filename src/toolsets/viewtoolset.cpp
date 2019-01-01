@@ -163,6 +163,86 @@ void ViewToolset::wireframe()
 	m_window->renderer()->update();
 }
 
+void ViewToolset::newTopCamera()
+{
+	createNewCamera(gl::TopCamera);
+}
+
+void ViewToolset::newFrontCamera()
+{
+	createNewCamera(gl::FrontCamera);
+}
+
+void ViewToolset::newLeftCamera()
+{
+	createNewCamera(gl::LeftCamera);
+}
+
+void ViewToolset::newBottomCamera()
+{
+	createNewCamera(gl::BottomCamera);
+}
+
+void ViewToolset::newBackCamera()
+{
+	createNewCamera(gl::BackCamera);
+}
+
+void ViewToolset::newRightCamera()
+{
+	createNewCamera(gl::RightCamera);
+}
+
+void ViewToolset::newFreeCamera()
+{
+	createNewCamera(gl::FreeCamera);
+}
+
+void ViewToolset::selectTopCamera()
+{
+	selectCamera(gl::TopCamera);
+}
+
+void ViewToolset::selectFrontCamera()
+{
+	selectCamera(gl::FrontCamera);
+}
+
+void ViewToolset::selectLeftCamera()
+{
+	selectCamera(gl::LeftCamera);
+}
+
+void ViewToolset::selectBottomCamera()
+{
+	selectCamera(gl::BottomCamera);
+}
+
+void ViewToolset::selectBackCamera()
+{
+	selectCamera(gl::BackCamera);
+}
+
+void ViewToolset::selectRightCamera()
+{
+	selectCamera(gl::RightCamera);
+}
+
+void ViewToolset::selectFreeCamera()
+{
+	selectCamera(gl::FreeCamera);
+}
+
+void ViewToolset::createNewCamera(gl::CameraType cameraType)
+{
+	m_window->createCameraForDocument(currentDocument(), cameraType);
+}
+
+void ViewToolset::selectCamera(gl::CameraType cameraType)
+{
+	m_window->selectCameraForDocument(currentDocument(), cameraType);
+}
+
 void ViewToolset::drawAngles()
 {
 	config::toggleDrawAngles();
@@ -178,10 +258,17 @@ static Plane drawPlaneFromObject(LDObject* object)
 	switch (object->type())
 	{
 	case LDObjectType::Quadrilateral:
-		if (not static_cast<LDQuadrilateral*>(object)->isCoPlanar())
-			return {};
 	case LDObjectType::Triangle:
-		return Plane::fromPoints(object->vertex(0), object->vertex(1), object->vertex(2));
+		if (
+			object->type() == LDObjectType::Quadrilateral
+			and not static_cast<LDQuadrilateral*>(object)->isCoPlanar()
+		) {
+			return {};
+		}
+		else
+		{
+			return Plane::fromPoints(object->vertex(0), object->vertex(1), object->vertex(2));
+		}
 
 	default:
 		return {};
@@ -220,7 +307,7 @@ void ViewToolset::clearDrawPlane()
 
 void ViewToolset::setCullDepth()
 {
-	if (m_window->renderer()->camera() == gl::FreeCamera)
+	if (m_window->renderer()->currentCamera().isModelview())
 		return;
 
 	bool ok;

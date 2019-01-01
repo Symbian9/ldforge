@@ -23,8 +23,10 @@
 
 class Canvas : public gl::Renderer
 {
+	Q_OBJECT
+
 public:
-	Canvas(LDDocument* document, QWidget* parent = nullptr);
+	Canvas(LDDocument* document, gl::CameraType cameraType, QWidget* parent = nullptr);
 	~Canvas();
 
 	EditModeType currentEditModeType() const;
@@ -62,5 +64,5 @@ private:
 	AbstractEditMode* m_currentEditMode = nullptr;
 	Vertex m_position3D;
 	Plane m_drawPlane;
-	double cullValues[6] = {0};
+	double cullValue;
 };

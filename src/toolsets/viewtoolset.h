@@ -18,6 +18,7 @@
 
 #pragma once
 #include "toolset.h"
+#include "glrenderer.h"
 
 class ViewToolset : public Toolset
 {
@@ -48,4 +49,23 @@ public:
 	Q_INVOKABLE void visibilityReveal();
 	Q_INVOKABLE void visibilityToggle();
 	Q_INVOKABLE void wireframe();
+
+	Q_INVOKABLE void newTopCamera();
+	Q_INVOKABLE void newFrontCamera();
+	Q_INVOKABLE void newLeftCamera();
+	Q_INVOKABLE void newBottomCamera();
+	Q_INVOKABLE void newBackCamera();
+	Q_INVOKABLE void newRightCamera();
+	Q_INVOKABLE void newFreeCamera();
+	Q_INVOKABLE void selectTopCamera();
+	Q_INVOKABLE void selectFrontCamera();
+	Q_INVOKABLE void selectLeftCamera();
+	Q_INVOKABLE void selectBottomCamera();
+	Q_INVOKABLE void selectBackCamera();
+	Q_INVOKABLE void selectRightCamera();
+	Q_INVOKABLE void selectFreeCamera();
+
+private:
+	void createNewCamera(gl::CameraType cameraType);
+	void selectCamera(gl::CameraType cameraType);
 };

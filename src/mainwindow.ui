@@ -24,31 +24,22 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QStackedWidget" name="rendererStack">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
+      <widget class="QMdiArea" name="viewport">
+       <property name="viewMode">
+        <enum>QMdiArea::TabbedView</enum>
        </property>
       </widget>
       <widget class="QToolBox" name="toolBox">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>100</width>
-          <height>30</height>
+          <width>68</width>
+          <height>377</height>
          </rect>
         </property>
         <attribute name="label">
@@ -70,8 +61,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>926</width>
-          <height>366</height>
+          <width>88</width>
+          <height>363</height>
          </rect>
         </property>
         <attribute name="label">
@@ -101,8 +92,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>926</width>
-          <height>366</height>
+          <width>176</width>
+          <height>363</height>
          </rect>
         </property>
         <attribute name="label">
@@ -140,8 +131,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>93</width>
-          <height>93</height>
+          <width>88</width>
+          <height>363</height>
          </rect>
         </property>
         <attribute name="label">
@@ -174,7 +165,7 @@
      <x>0</x>
      <y>0</y>
      <width>1010</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -216,6 +207,34 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuCreate_View">
+     <property name="title">
+      <string>&amp;Create Camera</string>
+     </property>
+     <addaction name="actionNewTopCamera"/>
+     <addaction name="actionNewFrontCamera"/>
+     <addaction name="actionNewLeftCamera"/>
+     <addaction name="actionNewBottomCamera"/>
+     <addaction name="actionNewBackCamera"/>
+     <addaction name="actionNewRightCamera"/>
+     <addaction name="separator"/>
+     <addaction name="actionNewFreeCamera"/>
+    </widget>
+    <widget class="QMenu" name="menu_Select_Camera">
+     <property name="title">
+      <string>&amp;Select Camera</string>
+     </property>
+     <addaction name="actionSelectTopCamera"/>
+     <addaction name="actionSelectFrontCamera"/>
+     <addaction name="actionSelectLeftCamera"/>
+     <addaction name="actionSelectBottomCamera"/>
+     <addaction name="actionSelectBackCamera"/>
+     <addaction name="actionSelectRightCamera"/>
+     <addaction name="separator"/>
+     <addaction name="actionSelectFreeCamera"/>
+    </widget>
+    <addaction name="menuCreate_View"/>
+    <addaction name="menu_Select_Camera"/>
     <addaction name="actionResetView"/>
     <addaction name="actionAxes"/>
     <addaction name="actionWireframe"/>
@@ -1716,6 +1735,174 @@
     <string>Resets the drawing plane</string>
    </property>
   </action>
+  <action name="actionNewTopCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-top.png</normaloff>:/icons/camera-top.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Top Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Top Camera</string>
+   </property>
+  </action>
+  <action name="actionNewFrontCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-front.png</normaloff>:/icons/camera-front.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Front Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Front Camera</string>
+   </property>
+  </action>
+  <action name="actionNewLeftCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-left.png</normaloff>:/icons/camera-left.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Left Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Left Camera</string>
+   </property>
+  </action>
+  <action name="actionNewBottomCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-bottom.png</normaloff>:/icons/camera-bottom.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Bottom Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Bottom Camera</string>
+   </property>
+  </action>
+  <action name="actionNewBackCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-back.png</normaloff>:/icons/camera-back.png</iconset>
+   </property>
+   <property name="text">
+    <string>New B&amp;ack Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Back Camera</string>
+   </property>
+  </action>
+  <action name="actionNewRightCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-right.png</normaloff>:/icons/camera-right.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Right Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Right Camera</string>
+   </property>
+  </action>
+  <action name="actionNewFreeCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-free.png</normaloff>:/icons/camera-free.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Fr&amp;ee Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>New Free Camera</string>
+   </property>
+  </action>
+  <action name="actionSelectTopCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-top.png</normaloff>:/icons/camera-top.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select &amp;Top Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
+  </action>
+  <action name="actionSelectFrontCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-front.png</normaloff>:/icons/camera-front.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select &amp;Front Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="actionSelectLeftCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-left.png</normaloff>:/icons/camera-left.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select &amp;Left Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
+  </action>
+  <action name="actionSelectBottomCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-bottom.png</normaloff>:/icons/camera-bottom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select &amp;Bottom Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
+  </action>
+  <action name="actionSelectBackCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-back.png</normaloff>:/icons/camera-back.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select B&amp;ack Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+5</string>
+   </property>
+  </action>
+  <action name="actionSelectRightCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-right.png</normaloff>:/icons/camera-right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select &amp;Right Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+6</string>
+   </property>
+  </action>
+  <action name="actionSelectFreeCamera">
+   <property name="icon">
+    <iconset resource="../ldforge.qrc">
+     <normaloff>:/icons/camera-free.png</normaloff>:/icons/camera-free.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Fr&amp;ee Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+7</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1732,6 +1919,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../ldforge.qrc"/>
   <include location="../ldforge.qrc"/>
  </resources>
  <connections/>

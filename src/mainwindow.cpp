@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QMdiArea>
+#include <QMdiSubWindow>
 #include <QMessageBox>
 #include <QContextMenuEvent>
 #include <QToolButton>
@@ -81,12 +83,14 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) :
 	ui.verticalLayout->insertWidget (0, m_tabs);
 	ui.primitives->setModel(m_primitives);
 	createBlankDocument();
-	ui.rendererStack->setCurrentWidget(getRendererForDocument(m_currentDocument));
+	getRendererForDocument(m_currentDocument);
 
 	connect (m_tabs, SIGNAL (currentChanged(int)), this, SLOT (tabSelected()));
 	connect (m_tabs, SIGNAL (tabCloseRequested (int)), this, SLOT (closeTab (int)));
 	connect(m_documents, &DocumentManager::documentCreated, this, &MainWindow::newDocument);
 	connect(m_documents, SIGNAL(documentClosed(LDDocument*)), this, SLOT(documentClosed(LDDocument*)));
+	connect(m_documents, &DocumentManager::mainModelLoaded, this, &MainWindow::mainModelLoaded);
+	connect(ui.viewport, &QMdiArea::subWindowActivated, this, &MainWindow::canvasActivated);
 
 	updateActions();
 
@@ -360,6 +364,32 @@ void MainWindow::recentFileClicked()
 	documents()->openMainModel (qAct->text());
 }
 
+/*
+ * This slot function is called when a subwindow of the MDI area is selected.
+ */
+void MainWindow::canvasActivated(QMdiSubWindow* window)
+{
+	if (window != nullptr)
+	{
+		Q_ASSERT(window->mdiArea() == ui.viewport);
+		Canvas* const canvas = static_cast<Canvas*>(window->widget());
+		LDDocument* const document = canvas->document();
+
+		// Move the canvas to the top of its stack.
+		m_renderers[document].removeOne(canvas);
+		m_renderers[document].append(canvas);
+	}
+}
+
+void MainWindow::mainModelLoaded(LDDocument* document)
+{
+	openDocumentForEditing(document);
+	changeDocument(document);
+
+	for (Canvas* canvas : m_renderers[document])
+		canvas->fullUpdate();
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 // Returns the suggested position to place a new object at.
@@ -384,11 +414,17 @@ void MainWindow::doFullRefresh()
 
 // ---------------------------------------------------------------------------------------------------------------------
 //
-// Builds the object list and tells the GL renderer to do a soft update.
+// Updates all GL renderers.
 //
 void MainWindow::refresh()
 {
-	renderer()->update();
+	auto iterator = createIterator(m_renderers);
+
+	while (iterator.hasNext())
+	{
+		for (Canvas* canvas : iterator.next().value())
+			canvas->update();
+	}
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -491,7 +527,7 @@ void MainWindow::spawnContextMenu (const QPoint& position)
 		contextMenu->addAction (ui.actionSubfileSelection);
 	}
 
-	if (renderer()->camera() != gl::FreeCamera)
+	if (not renderer()->currentCamera().isModelview())
 	{
 		contextMenu->addSeparator();
 		contextMenu->addAction(ui.actionSetDrawPlane);
@@ -720,8 +756,13 @@ PrimitiveManager* MainWindow::primitives()
 //
 Canvas* MainWindow::renderer()
 {
-	Q_ASSERT(ui.rendererStack->count() > 0);
-	return static_cast<Canvas*>(ui.rendererStack->currentWidget());
+	QMdiSubWindow* const currentSubWindow = ui.viewport->currentSubWindow();
+	Q_ASSERT(currentSubWindow != nullptr);
+
+	if (currentSubWindow != nullptr)
+		return static_cast<Canvas*>(currentSubWindow->widget());
+	else
+		return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -788,6 +829,22 @@ void MainWindow::createBlankDocument()
 	updateActions();
 }
 
+/*
+ * Creates a new camera of the specified type for the specified document.
+ * The canvas is opened in a new MDI sub window.
+ * The created canvas is returned.
+ */
+Canvas* MainWindow::createCameraForDocument(LDDocument* document, gl::CameraType cameraType)
+{
+	Canvas* canvas = new Canvas {document, cameraType, this};
+	m_renderers[document].append(canvas);
+	QMdiSubWindow* const subWindow = ui.viewport->addSubWindow(canvas);
+	m_subWindows[canvas] = subWindow;
+	connect(canvas, &QObject::destroyed, this, &MainWindow::canvasClosed);
+	ui.viewport->setActiveSubWindow(subWindow);
+	return canvas;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 //
 void MainWindow::newDocument(LDDocument* document, bool cache)
@@ -807,6 +864,21 @@ void MainWindow::settingsChanged()
 	renderer()->setBackground();
 	doFullRefresh();
 	updateDocumentList();
+}
+
+/*
+ * When a canvas is closed, this clears any internal references to it.
+ */
+void MainWindow::canvasClosed()
+{
+	Canvas* canvas = qobject_cast<Canvas*>(sender());
+
+	if (canvas != nullptr)
+	{
+		LDDocument* const document = canvas->document();
+		m_renderers[document].removeAll(canvas);
+		m_subWindows.remove(canvas);
+	}
 }
 
 void MainWindow::openDocumentForEditing(LDDocument* document)
@@ -841,8 +913,6 @@ void MainWindow::changeDocument(LDDocument* document)
 		return;
 
 	m_currentDocument = document;
-	Canvas* renderer = getRendererForDocument(document);
-	ui.rendererStack->setCurrentWidget(renderer);
 
 	if (document)
 	{
@@ -852,13 +922,19 @@ void MainWindow::changeDocument(LDDocument* document)
 		print ("Changed document to %1", document->getDisplayName());
 		ui.objectList->setModel(document);
 		ui.header->setDocument(document);
-		renderer->fullUpdate();
-		QItemSelectionModel* selection = m_selections.value(document);
+
+		for (Canvas* canvas : m_renderers[document])
+			canvas->fullUpdate();
+
+		QItemSelectionModel* selection = m_selectionModels.value(document);
 
 		if (selection == nullptr)
 		{
-			m_selections[document] = ui.objectList->selectionModel();
-			renderer->setSelectionModel(m_selections[document]);
+			selection = new QItemSelectionModel;
+			m_selectionModels[document] = selection;
+
+			for (Canvas* canvas : m_renderers[document])
+				canvas->setSelectionModel(m_selectionModels[document]);
 		}
 		else
 		{
@@ -872,16 +948,19 @@ void MainWindow::changeDocument(LDDocument* document)
  */
 Canvas* MainWindow::getRendererForDocument(LDDocument *document)
 {
-	Canvas* renderer = m_renderers.value(document);
+	QStack<Canvas*>& renderers = m_renderers[document];
+	Canvas* canvas;
 
-	if (not renderer)
+	if (renderers.empty())
 	{
-		renderer = new Canvas {document, this};
-		m_renderers[document] = renderer;
-		ui.rendererStack->addWidget(renderer);
+		canvas = createCameraForDocument(document, gl::FreeCamera);
+	}
+	else
+	{
+		canvas = renderers.top();
 	}
 
-	return renderer;
+	return canvas;
 }
 
 void MainWindow::documentClosed(LDDocument *document)
@@ -889,19 +968,26 @@ void MainWindow::documentClosed(LDDocument *document)
 	print ("Closed %1", document->name());
 	updateDocumentList();
 
-	// If the current document just became implicit (i.e. user closed it), we need to get a new one to show.
+	// If the current document was just close, we need to get a new one to show.
 	if (currentDocument() == document)
 		currentDocumentClosed();
 
-	Canvas* renderer = m_renderers.value(document);
-
-	if (renderer)
+	for (Canvas* renderer : m_renderers.value(document))
 	{
-		ui.rendererStack->removeWidget(renderer);
+		ui.viewport->removeSubWindow(renderer);
+		m_subWindows.remove(renderer);
 		renderer->deleteLater();
 	}
 
 	m_renderers.remove(document);
+
+	auto selectionModel = m_selectionModels.find(document);
+
+	if (selectionModel != m_selectionModels.end())
+	{
+		delete *selectionModel;
+		m_selectionModels.erase(selectionModel);
+	}
 }
 
 QModelIndexList MainWindow::selectedIndexes() const
@@ -956,21 +1042,48 @@ Grid* MainWindow::grid()
 
 void MainWindow::clearSelection()
 {
-	m_selections[m_currentDocument]->clear();
+	m_selectionModels[m_currentDocument]->clear();
 }
 
 void MainWindow::select(const QModelIndex &objectIndex)
 {
 	if (objectIndex.isValid() and objectIndex.model() == m_currentDocument)
-		m_selections[m_currentDocument]->select(objectIndex, QItemSelectionModel::Select);
+		m_selectionModels[m_currentDocument]->select(objectIndex, QItemSelectionModel::Select);
+}
+
+/*
+ * Selects a camera of the specified type for the specified document.
+ * If the camera does not exist, it will be created.
+ * The selected canvas is returned.
+ */
+Canvas* MainWindow::selectCameraForDocument(LDDocument* document, gl::CameraType cameraType)
+{
+	Canvas* const currentCanvas = renderer();
+	QStack<Canvas*>& canvasStack = m_renderers[document];
+
+	if (canvasStack.empty())
+	{
+		return createCameraForDocument(document, cameraType);
+	}
+	else
+	{
+		Canvas* canvas = canvasStack.top();
+
+		if (canvas == currentCanvas)
+			canvas = canvasStack.front();
+
+		QMdiSubWindow* const subWindow = m_subWindows[canvas];
+		ui.viewport->setActiveSubWindow(subWindow);
+		return canvas;
+	}
 }
 
 QItemSelectionModel* MainWindow::currentSelectionModel()
 {
-	return m_selections[m_currentDocument];
+	return m_selectionModels[m_currentDocument];
 }
 
 void MainWindow::replaceSelection(const QItemSelection& selection)
 {
-	m_selections[m_currentDocument]->select(selection, QItemSelectionModel::ClearAndSelect);
+	m_selectionModels[m_currentDocument]->select(selection, QItemSelectionModel::ClearAndSelect);
 }

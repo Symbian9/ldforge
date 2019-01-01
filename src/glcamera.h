@@ -51,6 +51,7 @@ public:
 	Vertex realize(const Vertex& idealCoordinates) const;
 	Vertex idealize(const Vertex& realCoordinates) const;
 	double depth() const;
+	bool isModelview() const;
 	bool isAxisNegated(Axis axis) const;
 	const QString& name() const;
 	void pan(int xMove, int yMove);

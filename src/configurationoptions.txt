@@ -54,7 +54,6 @@ option MainColorAlpha = 1.0
 option SelectColorBlend = "#0080FF"
 option LineThickness = 2
 option BfcRedGreenView = false
-option Camera = 6
 option BlackEdges = false
 option DrawAxes = false
 option DrawWireframe = false

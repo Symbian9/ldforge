@@ -100,9 +100,7 @@ void DocumentManager::openMainModel (QString path)
 		return;
 	}
 
-	m_window->openDocumentForEditing(file);
-	m_window->changeDocument (file);
-	m_window->doFullRefresh();
+	emit mainModelLoaded(file);
 	addRecentFile (path);
 	m_loadingMainFile = false;
 

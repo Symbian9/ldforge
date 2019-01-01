@@ -52,6 +52,7 @@ public:
 signals:
 	void documentCreated(LDDocument* document, bool cache);
 	void documentClosed(LDDocument* document);
+	void mainModelLoaded(LDDocument* document);
 
 private:
 	Q_SLOT void printParseErrorMessage(QString message);

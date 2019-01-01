@@ -24,8 +24,8 @@
 #include "algorithms/geometry.h"
 #include "generics/ring.h"
 
-Canvas::Canvas(LDDocument* document, QWidget* parent) :
-	gl::Renderer {document, parent},
+Canvas::Canvas(LDDocument* document, gl::CameraType cameraType, QWidget* parent) :
+	gl::Renderer {document, cameraType, parent},
     m_document {*document},
     m_currentEditMode {AbstractEditMode::createByType (this, EditModeType::Select)} {}
 
@@ -39,7 +39,7 @@ void Canvas::overpaint(QPainter& painter)
 	gl::Renderer::overpaint(painter);
 	QFontMetrics metrics {QFont {}};
 
-	if (camera() != gl::FreeCamera)
+	if (not currentCamera().isModelview())
 	{
 		// Paint the coordinates onto the screen.
 		Vertex idealized = currentCamera().idealize(m_position3D);
@@ -186,10 +186,10 @@ void Canvas::drawFixedCameraBackdrop()
 	glEnd();
 	glDisable(GL_LINE_STIPPLE);
 
-	if (this->camera() < gl::FreeCamera)
+	if (not currentCamera().isModelview())
 	{
-		GLfloat cullz = this->cullValues[static_cast<int>(this->camera())];
-		QMatrix4x4 matrix = {
+		GLfloat cullz = this->cullValue;
+		QMatrix4x4 const matrix = {
 			1, 0, 0, cullz,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
@@ -211,11 +211,6 @@ void Canvas::setEditMode(EditModeType a)
 
 	delete m_currentEditMode;
 	m_currentEditMode = AbstractEditMode::createByType(this, a);
-
-	// If we cannot use the free camera, use the top one instead.
-	if (camera() == gl::FreeCamera and not m_currentEditMode->allowFreeCamera())
-		setCamera(gl::TopCamera);
-
 	m_window->updateEditModeActions();
 	update();
 }
@@ -374,20 +369,15 @@ void Canvas::dragEnterEvent(QDragEnterEvent* /*event*/)
 
 double Canvas::currentCullValue() const
 {
-	if (this->camera() < gl::FreeCamera)
-		return gl::far - this->cullValues[static_cast<int>(this->camera())];
-	else
-		return 0.0;
+	return gl::far - this->cullValue;
 }
 
 void Canvas::setCullValue(double value)
 {
-	if (this->camera() < gl::FreeCamera)
-		this->cullValues[static_cast<int>(this->camera())] = gl::far - value;
+	this->cullValue = gl::far - value;
 }
 
 void Canvas::clearCurrentCullValue()
 {
-	if (this->camera() < gl::FreeCamera)
-		this->cullValues[static_cast<int>(this->camera())] = 0.0;
+	this->cullValue = 0.0;
 }

@@ -26,6 +26,52 @@
 
 class LDObject;
 
+namespace gl
+{
+	enum CameraType
+	{
+		TopCamera,
+		FrontCamera,
+		LeftCamera,
+		BottomCamera,
+		BackCamera,
+		RightCamera,
+		FreeCamera,
+		_End
+	};
+
+	struct CameraIcon
+	{
+		QPixmap image;
+		QRect sourceRect;
+		QRect targetRect;
+		QRect hitRect;
+		CameraType camera;
+	};
+
+	class Renderer;
+	class Compiler;
+
+	static const QPen thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
+
+	// Transformation matrices for the fixed cameras.
+	static const QMatrix4x4 topCameraMatrix = {};
+	static const QMatrix4x4 frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+	static const QMatrix4x4 rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
+
+	// Conversion matrix from LDraw to OpenGL coordinates.
+	static const QMatrix4x4 ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+
+	enum { BlackRgb = 0xff000000 };
+	static constexpr GLfloat near = 1.0f;
+	static constexpr GLfloat far = 10000.0f;
+}
+
+MAKE_ITERABLE_ENUM(gl::CameraType)
+
 struct LDPolygon
 {
 	enum class Type : qint8 { InvalidPolygon, EdgeLine, Triangle, Quadrilateral, ConditionalEdge };

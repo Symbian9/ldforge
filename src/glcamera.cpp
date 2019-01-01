@@ -167,6 +167,11 @@ double GLCamera::depth() const
 	return m_depth;
 }
 
+bool GLCamera::isModelview() const
+{
+	return m_isFree;
+}
+
 /*
  * Returns the X-panning of this camera.
  */

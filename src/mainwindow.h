@@ -26,7 +26,9 @@
 #include <QMetaMethod>
 #include "linetypes/modelobject.h"
 #include "colors.h"
+#include "glShared.h"
 
+class QMdiSubWindow;
 class QToolButton;
 class Canvas;
 class Toolset;
@@ -48,6 +50,7 @@ public:
 	void changeDocument (LDDocument* f);
 	void clearSelection();
 	void createBlankDocument();
+	Canvas* createCameraForDocument(LDDocument* document, gl::CameraType cameraType);
 	LDDocument* currentDocument();
 	void currentDocumentClosed();
 	QItemSelectionModel* currentSelectionModel();
@@ -70,6 +73,7 @@ public:
 	CircularSection circleToolSection() const;
 	bool save (LDDocument* doc, bool saveAs);
 	void select(const QModelIndex& objectIndex);
+	Canvas* selectCameraForDocument(LDDocument* document, gl::CameraType cameraType);
 	QModelIndexList selectedIndexes() const;
 	QSet<LDObject*> selectedObjects() const;
 	void spawnContextMenu (const QPoint& position);
@@ -96,6 +100,7 @@ public slots:
 	void updateTitle();
 	void newDocument (LDDocument* document, bool cache = false);
 	void settingsChanged();
+	void canvasClosed();
 
 protected:
 	void closeEvent (QCloseEvent* event);
@@ -103,8 +108,8 @@ protected:
 private:
 	struct ToolInfo;
 
-	QMap<LDDocument*, Canvas*> m_renderers;
-	QMap<LDDocument*, QItemSelectionModel*> m_selections;
+	QMap<LDDocument*, QStack<Canvas*>> m_renderers;
+	QMap<LDDocument*, QItemSelectionModel*> m_selectionModels;
 	PrimitiveManager* m_primitives;
 	Grid* m_grid;
 	QVector<QToolButton*>	m_colorButtons;
@@ -118,9 +123,12 @@ private:
 	DocumentManager* m_documents;
 	LDDocument* m_currentDocument;
 	QMap<QAction*, QKeySequence> m_defaultShortcuts;
+	QMap<Canvas*, QMdiSubWindow*> m_subWindows;
 	int previousDivisions = MediumResolution;
 
 private slots:
 	void finishInitialization();
 	void recentFileClicked();
+	void canvasActivated(QMdiSubWindow* window);
+	void mainModelLoaded(LDDocument* document);
 };

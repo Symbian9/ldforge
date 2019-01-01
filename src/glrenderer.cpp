@@ -34,47 +34,34 @@
 #include "documentmanager.h"
 #include "grid.h"
 
+static GLCamera const cameraTemplates[7] = {
+	{"Top camera", {gl::topCameraMatrix, X, Z, false, false, false}},
+	{"Front camera", {gl::frontCameraMatrix, X, Y, false,  true, false}},
+	{"Left camera", {gl::leftCameraMatrix, Z, Y,  true,  true, false}},
+	{"Bottom camera", {gl::bottomCameraMatrix, X, Z, false,  true, true}},
+	{"Back camera", {gl::backCameraMatrix, X, Y,  true,  true, true}},
+	{"Right camera", {gl::rightCameraMatrix, Z, Y, false,  true, true}},
+	{"Free camera", GLCamera::FreeCamera},
+};
+
 /*
  * Constructs a GL renderer.
  */
-gl::Renderer::Renderer(const Model* model, QWidget* parent) :
+gl::Renderer::Renderer(const Model* model, CameraType cameraType, QWidget* parent) :
     QGLWidget {parent},
     HierarchyElement {parent},
     m_model {model},
-    m_cameras {
-        {"Top camera", {topCameraMatrix, X, Z, false, false, false}}, // top
-        {"Front camera", {frontCameraMatrix, X, Y, false,  true, false}}, // front
-        {"Left camera", {leftCameraMatrix, Z, Y,  true,  true, false}}, // left
-        {"Bottom camera", {bottomCameraMatrix, X, Z, false,  true, true}}, // bottom
-        {"Back camera", {backCameraMatrix, X, Y,  true,  true, true}}, // back
-        {"Right camera", {rightCameraMatrix, Z, Y, false,  true, true}}, // right
-        {"Free camera", GLCamera::FreeCamera}, // free
-    }
+	m_camera {cameraType},
+	m_cameraInfo {::cameraTemplates[cameraType]}
 {
 	Q_ASSERT(model != nullptr);
-	m_camera = (gl::CameraType) config::camera();
 	m_compiler = new gl::Compiler (this);
 	m_toolTipTimer = new QTimer (this);
 	m_toolTipTimer->setSingleShot (true);
 	setAcceptDrops (true);
 	connect (m_toolTipTimer, SIGNAL (timeout()), this, SLOT (showCameraIconTooltip()));
-	resetAllAngles();
+	resetAngles();
 	m_needZoomToFit = true;
-
-	// Init camera icons
-	for (gl::CameraType camera : iterateEnum<gl::CameraType>())
-	{
-		const char* cameraIconNames[EnumLimits<gl::CameraType>::Count] =
-		{
-		    "camera-top", "camera-front", "camera-left",
-		    "camera-bottom", "camera-back", "camera-right",
-		    "camera-free"
-		};
-
-		CameraIcon* info = &m_cameraIcons[static_cast<int>(camera)];
-		info->image = MainWindow::getIcon (cameraIconNames[static_cast<int>(camera)]);
-		info->camera = camera;
-	}
 
 	connect(
 		this->m_compiler,
@@ -82,8 +69,6 @@ gl::Renderer::Renderer(const Model* model, QWidget* parent) :
 		this,
 		qOverload<>(&gl::Renderer::update)
 	);
-
-	calcCameraIcons();
 }
 
 /*
@@ -108,45 +93,11 @@ void gl::Renderer::freeAxes()
 }
 
 /*
- * Calculates the camera icon locations.
- */
-void gl::Renderer::calcCameraIcons()
-{
-	int i = 0;
-	const int columns = 3;
-	const int firstAtLastRow = countof(m_cameras) - (countof(m_cameras) % columns);
-
-	for (CameraIcon& cameraIcon : m_cameraIcons)
-	{
-		int row = i / columns;
-		int column = i % columns;
-
-		// Do right-justifying on the last row.
-		if (i >= firstAtLastRow)
-			column += columns - (countof(m_cameras) % columns);
-
-		int x1 = width() - 48 + (column * 16) - 1;
-		int y1 = (row * 16) + 1;
-
-		cameraIcon.sourceRect = {0, 0, 16, 16};
-		cameraIcon.targetRect = {x1, y1, 16, 16};
-		cameraIcon.hitRect = {
-		    cameraIcon.targetRect.x(),
-		    cameraIcon.targetRect.y(),
-		    cameraIcon.targetRect.width() + 1,
-		    cameraIcon.targetRect.height() + 1
-		};
-
-		++i;
-	}
-}
-
-/*
  * Returns the camera currently in use.
  */
 GLCamera& gl::Renderer::currentCamera()
 {
-	return m_cameras[static_cast<int>(camera())];
+	return m_cameraInfo;
 }
 
 /*
@@ -154,7 +105,7 @@ GLCamera& gl::Renderer::currentCamera()
  */
 const GLCamera& gl::Renderer::currentCamera() const
 {
-	return m_cameras[static_cast<int>(camera())];
+	return m_cameraInfo;
 }
 
 /*
@@ -211,21 +162,6 @@ void gl::Renderer::resetAngles()
 
 // =============================================================================
 //
-void gl::Renderer::resetAllAngles()
-{
-	gl::CameraType const oldCamera = camera();
-
-	for (gl::CameraType camera : iterateEnum<gl::CameraType>())
-	{
-		setCamera(camera);
-		resetAngles();
-	}
-
-	setCamera(oldCamera);
-}
-
-// =============================================================================
-//
 void gl::Renderer::initializeGL()
 {
 	initializeOpenGLFunctions();
@@ -246,7 +182,7 @@ void gl::Renderer::initializeGL()
 	initializeLighting();
 	m_initialized = true;
 	// Now that GL is initialized, we can reset angles.
-	resetAllAngles();
+	resetAngles();
 }
 
 void gl::Renderer::initializeLighting()
@@ -332,7 +268,6 @@ QColor gl::Renderer::backgroundColor() const
 //
 void gl::Renderer::resizeGL (int width, int height)
 {
-	calcCameraIcons();
 	glViewport (0, 0, width, height);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity();
@@ -340,8 +275,7 @@ void gl::Renderer::resizeGL (int width, int height)
 	glMatrixMode (GL_MODELVIEW);
 
 	// Unfortunately Qt does not provide a resized() signal so we have to manually feed the information.
-	for (GLCamera& camera : m_cameras)
-		camera.rendererResized(width, height);
+	m_cameraInfo.rendererResized(width, height);
 }
 
 /*
@@ -378,7 +312,7 @@ void gl::Renderer::drawGLScene()
 	else
 		glDisable(GL_LIGHTING);
 
-	if (camera() != gl::FreeCamera)
+	if (not m_cameraInfo.isModelview())
 	{
 		glMatrixMode (GL_PROJECTION);
 		glPushMatrix();
@@ -563,21 +497,6 @@ void gl::Renderer::paintEvent(QPaintEvent*)
 
 void gl::Renderer::overpaint(QPainter &painter)
 {
-	// Draw a background for the selected camera
-	painter.setPen(thinBorderPen);
-	painter.setBrush(QBrush {QColor {0, 128, 160, 128}});
-	painter.drawRect(m_cameraIcons[static_cast<int>(camera())].hitRect);
-
-	// Draw the camera icons
-	for (const CameraIcon& info : m_cameraIcons)
-	{
-		// Don't draw the free camera icon when we can't use the free camera
-		if (info.camera == gl::FreeCamera and not freeCameraAllowed())
-			continue;
-
-		painter.drawPixmap(info.targetRect, info.image, info.sourceRect);
-	}
-
 	// Draw a label for the current camera in the bottom left corner
 	{
 		QFontMetrics metrics {QFont {}};
@@ -591,22 +510,8 @@ void gl::Renderer::overpaint(QPainter &painter)
 //
 void gl::Renderer::mouseReleaseEvent(QMouseEvent* event)
 {
-	bool wasLeft = (m_lastButtons & Qt::LeftButton) and not (event->buttons() & Qt::LeftButton);
+	ignore(event);
 	m_panning = false;
-
-	// Check if we selected a camera icon
-	if (wasLeft and not mouseHasMoved())
-	{
-		for (CameraIcon& info : m_cameraIcons)
-		{
-			if (info.targetRect.contains (event->pos()))
-			{
-				setCamera (info.camera);
-				break;
-			}
-		}
-	}
-
 	update();
 	m_totalMouseMove = 0;
 }
@@ -638,7 +543,7 @@ void gl::Renderer::mouseMoveEvent(QMouseEvent* event)
 		m_panning = true;
 		m_isCameraMoving = true;
 	}
-	else if (left and camera() == gl::FreeCamera and (xMove != 0 or yMove != 0))
+	else if (left and m_cameraInfo.isModelview() and (xMove != 0 or yMove != 0))
 	{
 		QQuaternion versor = QQuaternion::fromAxisAndAngle(yMove, xMove, 0, 0.6 * hypot(xMove, yMove));
 		m_rotation = versor * m_rotation;
@@ -690,18 +595,6 @@ void gl::Renderer::leaveEvent(QEvent*)
 {
 	m_toolTipTimer->stop();
 	update();
-}
-
-// =============================================================================
-//
-void gl::Renderer::setCamera(gl::CameraType camera)
-{
-	// The edit mode may forbid the free camera.
-	if (freeCameraAllowed() or camera != gl::FreeCamera)
-	{
-		m_camera = camera;
-		config::setCamera(static_cast<int>(camera));
-	}
 }
 
 /*
@@ -827,22 +720,6 @@ QImage gl::Renderer::screenCapture()
 	// Prepare the image and return it. It appears that GL and Qt formats have red and blue swapped and the Y axis flipped.
 	QImage image {pixelData.constData(), width(), height(), QImage::Format_ARGB32};
 	return image.rgbSwapped().mirrored();
-}
-
-/*
- * Show a tooltip if the cursor is currently hovering over a camera icon.
- */
-void gl::Renderer::showCameraIconTooltip()
-{
-	for (CameraIcon & icon : m_cameraIcons)
-	{
-		if (icon.targetRect.contains (m_mousePosition))
-		{
-			QToolTip::showText(m_globalpos, m_cameras[static_cast<int>(icon.camera)].name());
-			update();
-			break;
-		}
-	}
 }
 
 // =============================================================================

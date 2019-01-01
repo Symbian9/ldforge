@@ -24,59 +24,13 @@
 #include "glcamera.h"
 #include "hierarchyelement.h"
 
-namespace gl
-{
-	enum CameraType
-	{
-		TopCamera,
-		FrontCamera,
-		LeftCamera,
-		BottomCamera,
-		BackCamera,
-		RightCamera,
-		FreeCamera,
-		_End
-	};
-
-	struct CameraIcon
-	{
-		QPixmap image;
-		QRect sourceRect;
-		QRect targetRect;
-		QRect hitRect;
-		CameraType camera;
-	};
-
-	class Renderer;
-	class Compiler;
-
-	static const QPen thinBorderPen {QColor {0, 0, 0, 208}, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin};
-
-	// Transformation matrices for the fixed cameras.
-	static const QMatrix4x4 topCameraMatrix = {};
-	static const QMatrix4x4 frontCameraMatrix = {1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1};
-	static const QMatrix4x4 leftCameraMatrix = {0, -1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1};
-	static const QMatrix4x4 bottomCameraMatrix = {1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1};
-	static const QMatrix4x4 backCameraMatrix = {-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-	static const QMatrix4x4 rightCameraMatrix = {0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1};
-
-	// Conversion matrix from LDraw to OpenGL coordinates.
-	static const QMatrix4x4 ldrawToGLAdapterMatrix = {1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-
-	enum { BlackRgb = 0xff000000 };
-	static constexpr GLfloat near = 1.0f;
-	static constexpr GLfloat far = 10000.0f;
-}
-
-MAKE_ITERABLE_ENUM(gl::CameraType)
-
 // The main renderer object, draws the brick on the screen, manages the camera and selection picking.
 class gl::Renderer : public QGLWidget, protected QOpenGLFunctions, public HierarchyElement
 {
 	Q_OBJECT
 
 public:
-	Renderer(const Model* model, QWidget* parent = nullptr);
+	Renderer(const Model* model, gl::CameraType cameraType, QWidget* parent = nullptr);
 	~Renderer();
 
 	gl::CameraType camera() const;
@@ -90,11 +44,9 @@ public:
 	QPersistentModelIndex objectAtCursor() const;
 	QItemSelection pick(const QRect& range);
 	QModelIndex pick(int mouseX, int mouseY);
-	void resetAllAngles();
 	void resetAngles();
 	QImage screenCapture();
 	void setBackground();
-	void setCamera(gl::CameraType cam);
 	QPen textPen() const;
 	QItemSelectionModel* selectionModel() const;
 	void setSelectionModel(QItemSelectionModel* selectionModel);
@@ -132,14 +84,14 @@ protected:
 
 private:
 	const Model* const m_model;
+	gl::CameraType const m_camera;
 	gl::Compiler* m_compiler;
 	QPersistentModelIndex m_objectAtCursor;
-	gl::CameraIcon m_cameraIcons[7];
 	QTimer* m_toolTipTimer;
 	Qt::MouseButtons m_lastButtons;
 	Qt::KeyboardModifiers m_currentKeyboardModifiers;
 	QQuaternion m_rotation;
-	GLCamera m_cameras[7];
+	GLCamera m_cameraInfo;
 	bool m_useDarkBackground = false;
 	bool m_panning = false;
 	bool m_initialized = false;
@@ -150,7 +102,6 @@ private:
 	QPoint m_mousePosition;
 	QPoint m_globalpos;
 	QPointF m_mousePositionF;
-	gl::CameraType m_camera;
 	GLuint m_axeslist;
 	int m_totalMouseMove;
 	QColor m_backgroundColor;
@@ -167,7 +118,6 @@ private:
 	void initGLData();
 	void needZoomToFit();
 	void setPicking(bool picking);
-	Q_SLOT void showCameraIconTooltip();
 	void zoomToFit();
 	void zoomAllToFit();
 };
