@@ -77,6 +77,7 @@ gl::Renderer::Renderer(const Model* model, CameraType cameraType, QWidget* paren
 gl::Renderer::~Renderer()
 {
 	freeAxes();
+	delete m_compiler;
 }
 
 /*
@@ -921,4 +922,10 @@ void gl::Renderer::fullUpdate()
 {
 	this->m_compiler->fullUpdate();
 	update();
+}
+
+void gl::Renderer::closeEvent(QCloseEvent* event)
+{
+	emit closed();
+	return QGLWidget::closeEvent(event);
 }

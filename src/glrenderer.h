@@ -52,20 +52,22 @@ public:
 	void setSelectionModel(QItemSelectionModel* selectionModel);
 
 signals:
+	void closed();
 	void objectHighlightingChanged(const QModelIndex& oldIndex, const QModelIndex& newIndex);
 
 protected:
-	void initializeGL();
+	void closeEvent(QCloseEvent* event) override;
+	void initializeGL() override;
 	virtual void drawFixedCameraBackdrop();
-	void keyPressEvent(QKeyEvent* event);
-	void keyReleaseEvent(QKeyEvent* event);
-	void leaveEvent(QEvent* event);
-	void mousePressEvent(QMouseEvent* event);
-	void mouseMoveEvent(QMouseEvent* ev);
-	void mouseReleaseEvent(QMouseEvent* ev);
-	void paintEvent(QPaintEvent*);
-	void resizeGL(int w, int h);
-	void wheelEvent(QWheelEvent* ev);
+	void keyPressEvent(QKeyEvent* event) override;
+	void keyReleaseEvent(QKeyEvent* event) override;
+	void leaveEvent(QEvent* event) override;
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* ev) override;
+	void mouseReleaseEvent(QMouseEvent* ev) override;
+	void paintEvent(QPaintEvent*) override;
+	void resizeGL(int w, int h) override;
+	void wheelEvent(QWheelEvent* ev) override;
 
 	QColor backgroundColor() const;
 	virtual bool freeCameraAllowed() const;

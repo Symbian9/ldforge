@@ -188,6 +188,9 @@ MainWindow::~MainWindow()
 	delete m_grid;
 	delete &ui;
 
+	for (QItemSelectionModel* model : m_selectionModels)
+		delete model;
+
 	for (Toolset* toolset : m_toolsets)
 		delete toolset;
 }
@@ -840,7 +843,7 @@ Canvas* MainWindow::createCameraForDocument(LDDocument* document, gl::CameraType
 	m_renderers[document].append(canvas);
 	QMdiSubWindow* const subWindow = ui.viewport->addSubWindow(canvas);
 	m_subWindows[canvas] = subWindow;
-	connect(canvas, &QObject::destroyed, this, &MainWindow::canvasClosed);
+	connect(canvas, &gl::Renderer::closed, this, &MainWindow::canvasClosed);
 	ui.viewport->setActiveSubWindow(subWindow);
 	return canvas;
 }
@@ -873,6 +876,7 @@ void MainWindow::canvasClosed()
 {
 	Canvas* canvas = qobject_cast<Canvas*>(sender());
 
+	Q_ASSERT(canvas != nullptr);
 	if (canvas != nullptr)
 	{
 		LDDocument* const document = canvas->document();
@@ -890,6 +894,10 @@ void MainWindow::openDocumentForEditing(LDDocument* document)
 		Canvas* canvas = getRendererForDocument(document);
 		updateDocumentList();
 		connect(document, &LDDocument::windingChanged, canvas, &Canvas::fullUpdate);
+
+		QItemSelectionModel* selection = new QItemSelectionModel;
+		m_selectionModels[document] = selection;
+		canvas->setSelectionModel(selection);
 	}
 }
 
@@ -927,19 +935,8 @@ void MainWindow::changeDocument(LDDocument* document)
 			canvas->fullUpdate();
 
 		QItemSelectionModel* selection = m_selectionModels.value(document);
+		ui.objectList->setSelectionModel(selection);
 
-		if (selection == nullptr)
-		{
-			selection = new QItemSelectionModel;
-			m_selectionModels[document] = selection;
-
-			for (Canvas* canvas : m_renderers[document])
-				canvas->setSelectionModel(m_selectionModels[document]);
-		}
-		else
-		{
-			ui.objectList->setSelectionModel(selection);
-		}
 	}
 }
 
