@@ -31,4 +31,4 @@ Features:
 * Wireframe mode, axis drawing
 * Image overlays for getting part data from pictures
 
-Forum thread: http://forums.ldraw.org/read.php?24,8711
+Forum thread: https://forums.ldraw.org/thread-13858.html
